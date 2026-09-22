@@ -64,12 +64,12 @@ class SyncCoordinatorTest {
         store.save(CalendarDocument(services = listOf(localService("s1", "Sunday"))))
         val first = coordinator().sync(token, cursor = 0)
         assertEquals(1, catalogSync().push(token))
-        assertTrue("catalog:Hymnal" in relay.records)
+        assertTrue("catalog:Hymnal-cf49adf4" in relay.records)
 
         // The next round replaces the calendar: the songbook stands, and the pull that hands it
         // back (the cursor stopped before it) does not turn it into a service.
         val second = coordinator().sync(token, first.cursor)
-        assertTrue("catalog:Hymnal" in relay.records)
+        assertTrue("catalog:Hymnal-cf49adf4" in relay.records)
         assertTrue("s1" in relay.records)
         assertEquals(listOf("s1"), store.load().document.services.map { it.id })
         assertEquals(0, second.unreadableRecords)

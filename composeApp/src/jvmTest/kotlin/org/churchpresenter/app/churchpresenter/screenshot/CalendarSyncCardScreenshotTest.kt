@@ -189,7 +189,7 @@ class CalendarSyncCardScreenshotTest {
     /** The QR after Allow: the deep link as a code, with the instruction under it. */
     @Test
     fun `the enrollment QR`() = captureComponent(SECTION, "enroll_qr") {
-        Box(Modifier.size(400.dp, 460.dp)) {
+        Box(Modifier.size(400.dp, 540.dp)) {
             CalendarEnrollQrContent(
                 enrollment = CalendarEnrollment(
                     relayUrl = "https://sync.churchpresenter.org",

@@ -188,7 +188,7 @@ class CalendarSyncServiceTest {
         withTimeout(5_000) { while (relay.catalogPuts.isEmpty()) delay(10) }
         loop.cancelAndJoin()
 
-        assertEquals(listOf("catalog:Hymnal"), relay.catalogPuts)
+        assertEquals(listOf("catalog:Hymnal-cf49adf4"), relay.catalogPuts)
         // Unchanged since: nothing more to write.
         assertEquals(0, service.pushCatalog())
         assertEquals(1, relay.catalogPuts.size)

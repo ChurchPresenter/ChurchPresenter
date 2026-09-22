@@ -23,6 +23,7 @@ import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
 import java.util.UUID
@@ -134,11 +135,15 @@ class CalendarSyncService(
     suspend fun pushCatalog(): Int {
         if (!settings().enabled || !settings().isPaired) return 0
         return withContext(io) {
-            try {
-                relay.withClientKey { relay.catalog().push(relay.token) }
-            } catch (e: RelayFailure) {
-                // Reported where the calendar's own failures are; the next good round clears it.
-                _status.value = failure(e)
+            // Background work over a library this code did not write: whatever it throws is a
+            // report, never the app going down. A relay failure is shown where the calendar's own
+            // are; the next good round clears it.
+            runCatching { relay.withClientKey { relay.catalog().push(relay.token) } }.getOrElse { e ->
+                if (e is RelayFailure) {
+                    _status.value = failure(e)
+                } else {
+                    CrashReporter.reportException(e, "Pushing songbooks")
+                }
                 0
             }
         }

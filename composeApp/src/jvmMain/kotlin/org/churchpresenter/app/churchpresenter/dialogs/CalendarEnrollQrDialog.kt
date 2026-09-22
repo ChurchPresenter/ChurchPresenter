@@ -83,7 +83,7 @@ internal fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: 
                 Image(
                     bitmap = bitmap,
                     contentDescription = null,
-                    modifier = Modifier.size(QR_DP),
+                    modifier = Modifier.size(QR_DP).weight(1f, fill = false),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -141,4 +141,4 @@ private const val QR_PX = 512
 private const val QR_LIFETIME_MS = 120_000L
 private val QR_DP = 300.dp
 private val DIALOG_WIDTH = 400.dp
-private val DIALOG_HEIGHT = 460.dp
+private val DIALOG_HEIGHT = 540.dp
