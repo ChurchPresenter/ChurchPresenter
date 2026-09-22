@@ -93,6 +93,38 @@ class VideoPlayerTest {
         assertEquals(listOf(":codec=avcodec", ":avcodec-fast", ":clock-jitter=0"), options)
     }
 
+    // ── FramePingPong ────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the write target alternates between the two buffers only on completeWrite`() {
+        val pingPong = FramePingPong(width = 4, height = 4)
+
+        val first = pingPong.writeTarget
+        assertTrue(pingPong.writeTarget === first, "reading the target twice without completing must not flip it")
+
+        val completed = pingPong.completeWrite()
+        assertTrue(completed === first, "completeWrite hands back the buffer that was just written")
+        assertTrue(pingPong.writeTarget !== first, "the next target must be the other buffer")
+
+        val second = pingPong.writeTarget
+        val completedAgain = pingPong.completeWrite()
+        assertTrue(completedAgain === second)
+        assertTrue(pingPong.writeTarget === first, "a third write goes back to the first buffer")
+    }
+
+    @Test
+    fun `the two buffers are distinct instances of the requested size`() {
+        val pingPong = FramePingPong(width = 8, height = 6)
+        val a = pingPong.writeTarget
+        val b = pingPong.completeWrite().let { pingPong.writeTarget }
+
+        assertTrue(a !== b)
+        assertEquals(8, a.width)
+        assertEquals(6, a.height)
+        assertEquals(8, b.width)
+        assertEquals(6, b.height)
+    }
+
     // ── dirContainsVlcLib ──────────────────────────────────────────────────────────────────────
 
     private fun tempDir(): Path = Files.createTempDirectory("cp-vlc-test")

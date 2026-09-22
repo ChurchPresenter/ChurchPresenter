@@ -690,7 +690,7 @@ private fun ConvertFramesOffRenderThread(
  * VLC writes into next, so a buffer is never both the current write target and the current display
  * source at the same time.
  */
-private class FramePingPong(width: Int, height: Int) {
+internal class FramePingPong(width: Int, height: Int) {
     private val bufferA = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     private val bufferB = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     private var nextIsA = true
