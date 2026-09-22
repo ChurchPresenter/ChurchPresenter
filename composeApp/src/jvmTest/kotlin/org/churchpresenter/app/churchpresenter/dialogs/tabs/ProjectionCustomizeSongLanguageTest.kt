@@ -43,7 +43,7 @@ class ProjectionCustomizeSongLanguageTest {
     fun `picking a language writes the screen being customized`() {
         projectionTab(twoScreens()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            chooseSegment("Primary")
+            chooseSegment("Language 1")
 
             assertEquals(Constants.SONG_LANG_PRIMARY, get().modes()[0], "the screen whose dialog is open")
         }
@@ -53,7 +53,7 @@ class ProjectionCustomizeSongLanguageTest {
     fun `it leaves every other screen alone`() {
         projectionTab(twoScreens()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            chooseSegment("Primary")
+            chooseSegment("Language 1")
 
             assertEquals(Constants.SONG_LANG_BOTH, get().modes()[1], "the other screen is not being customized")
         }
@@ -64,7 +64,7 @@ class ProjectionCustomizeSongLanguageTest {
     fun `the title slide's copy writes the same screen`() {
         projectionTab(twoScreens()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            chooseSegment("Secondary")
+            chooseSegment("Language 2")
 
             assertEquals(Constants.SONG_LANG_SECONDARY, get().modes()[0])
             assertEquals(Constants.SONG_LANG_BOTH, get().modes()[1])

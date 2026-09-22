@@ -25,6 +25,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -1142,9 +1143,40 @@ class BibleSettingsTabTest {
         onAllNodesWithText("LOWER THIRD").onFirst()
             .assertExists("the lower-third arrangement is named")
         onAllNodesWithText("Bilingual Layout").assertCountEquals(2)
-        // Both options of both rows: the caption used to sit beside the buttons, which pushed the
-        // second option of each pair off the pane and out of the layout entirely.
-        onAllNodesWithText("Left / Right").assertCountEquals(2)
-        onAllNodesWithText("Top / Bottom").assertCountEquals(2)
+        // All seven options of both rows: the caption used to sit beside the buttons, which pushed
+        // later options off the pane, and a full-width label pushed the row to wrap and corrupted an
+        // unrelated sibling's measurement further down the rail -- see `BilingualLayoutFlowButtons`.
+        onAllNodesWithText("L / R").assertCountEquals(2)
+        onAllNodesWithText("T / B").assertCountEquals(2)
+        onAllNodesWithText("1x3").assertCountEquals(2)
+        onAllNodesWithText("3x1").assertCountEquals(2)
+        onAllNodesWithText("1x4").assertCountEquals(2)
+        onAllNodesWithText("4x1").assertCountEquals(2)
+        onAllNodesWithText("2x2").assertCountEquals(2)
+    }
+
+    @Test
+    fun `picking a grid option on the full-screen row writes it back`() = runComposeUiTest {
+        val harness = showTab()
+        waitForIdle()
+
+        onAllNodesWithText("2x2").onFirst().performClick()
+        waitForIdle()
+
+        assertEquals(Constants.BILINGUAL_GRID_2X2, harness.current.bibleSettings.bilingualLayout)
+        // The lower-third row is untouched -- the two controls are independent.
+        assertEquals(Constants.BILINGUAL_SIDE_BY_SIDE, harness.current.bibleSettings.bilingualLayoutLowerThird)
+    }
+
+    @Test
+    fun `picking a grid option on the lower-third row writes it back`() = runComposeUiTest {
+        val harness = showTab()
+        waitForIdle()
+
+        onAllNodesWithText("1x4").onLast().performClick()
+        waitForIdle()
+
+        assertEquals(Constants.BILINGUAL_GRID_1X4, harness.current.bibleSettings.bilingualLayoutLowerThird)
+        assertEquals(Constants.BILINGUAL_TOP_BOTTOM, harness.current.bibleSettings.bilingualLayout)
     }
 }

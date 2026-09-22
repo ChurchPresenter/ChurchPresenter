@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.core.models.bible.SelectedVerse
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -669,6 +670,122 @@ class BiblePresenterLayoutRenderTest {
 
         onNodeWithText("For God so loved the world", substring = true).assertExists()
         onNodeWithText("Ибо так возлюбил Бог мир", substring = true).assertExists()
+    }
+
+    // ── The lower third's own grid, past two translations ─────────────────────────────────────────
+    //
+    // Two translations keep the side-by-side/stacked band proven above, byte for byte. Three or four
+    // route through a separate grid branch (`lowerThirdMultiVisible`) instead, laid out in whatever
+    // `bilingualLayoutLowerThird` says -- these are the only tests that reach it.
+
+    @Test
+    fun `a 2x2 lower third band shows all four translations`() = runComposeUiTest {
+        val files = listOf("one.spb", "two.spb", "three.spb", "four.spb")
+        val settings = AppSettings(
+            bibleSettings = BibleSettings(bilingualLayoutLowerThird = Constants.BILINGUAL_GRID_2X2)
+                .withTranslations(files.map { BibleTranslationSettings(fileName = it) }),
+        )
+        val markers = listOf("FIRST", "SECOND", "THIRD", "FOURTH")
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = markers.mapIndexed { index, marker ->
+                        verse(marker, 16, fileName = files[index])
+                    },
+                    appSettings = settings,
+                    isLowerThird = true,
+                )
+            }
+        }
+
+        markers.forEach { marker ->
+            onNodeWithText(marker, substring = true).assertExists("$marker must reach the band")
+        }
+    }
+
+    @Test
+    fun `a 1x3 lower third band shows three translations, the odd one out on its own row`() = runComposeUiTest {
+        val files = listOf("one.spb", "two.spb", "three.spb")
+        val settings = AppSettings(
+            bibleSettings = BibleSettings(bilingualLayoutLowerThird = Constants.BILINGUAL_GRID_1X3)
+                .withTranslations(files.map { BibleTranslationSettings(fileName = it) }),
+        )
+        val markers = listOf("FIRST", "SECOND", "THIRD")
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = markers.mapIndexed { index, marker ->
+                        verse(marker, 16, fileName = files[index])
+                    },
+                    appSettings = settings,
+                    isLowerThird = true,
+                )
+            }
+        }
+
+        markers.forEach { marker ->
+            onNodeWithText(marker, substring = true).assertExists("$marker must reach the band")
+        }
+    }
+
+    @Test
+    fun `a third translation switched off for the lower third drops out of the grid`() = runComposeUiTest {
+        val files = listOf("one.spb", "two.spb", "three.spb")
+        val settings = AppSettings(
+            bibleSettings = BibleSettings(bilingualLayoutLowerThird = Constants.BILINGUAL_GRID_1X3)
+                .withTranslations(
+                    listOf(
+                        BibleTranslationSettings(fileName = "one.spb"),
+                        BibleTranslationSettings(fileName = "two.spb"),
+                        BibleTranslationSettings(fileName = "three.spb", lowerThirdEnabled = false),
+                    ),
+                ),
+        )
+        val markers = listOf("FIRST", "SECOND", "THIRD")
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = markers.mapIndexed { index, marker ->
+                        verse(marker, 16, fileName = files[index])
+                    },
+                    appSettings = settings,
+                    isLowerThird = true,
+                )
+            }
+        }
+
+        onNodeWithText("FIRST", substring = true).assertExists()
+        onNodeWithText("SECOND", substring = true).assertExists()
+        onAllNodesWithText("THIRD", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun `a vertical lower third never routes into the multi-translation grid`() = runComposeUiTest {
+        // No width to split, so even three translations with a grid layout configured fall back to
+        // the ordinary stacked band above -- which, unchanged by this grid work, only ever carries
+        // the first pair.
+        val files = listOf("one.spb", "two.spb", "three.spb")
+        val settings = AppSettings(
+            bibleSettings = BibleSettings(bilingualLayoutLowerThird = Constants.BILINGUAL_GRID_1X3)
+                .withTranslations(files.map { BibleTranslationSettings(fileName = it) }),
+        )
+        val markers = listOf("FIRST", "SECOND", "THIRD")
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = markers.mapIndexed { index, marker ->
+                        verse(marker, 16, fileName = files[index])
+                    },
+                    appSettings = settings,
+                    isLowerThird = true,
+                    isLowerThirdVertical = true,
+                )
+            }
+        }
+
+        onNodeWithText("FIRST", substring = true).assertExists("the primary must still reach the band")
+        onNodeWithText("SECOND", substring = true).assertExists("and the pair's own second translation")
+        onAllNodesWithText("THIRD", substring = true).assertCountEquals(0)
     }
 
     @Test

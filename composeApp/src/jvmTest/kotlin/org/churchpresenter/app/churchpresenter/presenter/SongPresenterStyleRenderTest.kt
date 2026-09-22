@@ -22,6 +22,7 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File
@@ -47,7 +48,7 @@ class SongPresenterStyleRenderTest {
         songNumber = number,
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines,
-        secondaryLines = secondaryLines,
+        translations = listOf(SectionTranslation(lines = secondaryLines)),
         isLastSection = isLast,
     )
 

@@ -174,16 +174,6 @@ class SettingsAccessorRoundTripTest {
     }
 
     @Test
-    fun `every lyric style field is readable and unchanged after a reload`() {
-        assertEveryAccessorSurvives(SongLyricStyle.serializer(), SongLyricStyle(), expectedAtLeast = 15)
-    }
-
-    @Test
-    fun `every secondary language field is readable and unchanged after a reload`() {
-        assertEveryAccessorSurvives(SongSecondaryLanguage.serializer(), SongSecondaryLanguage(), expectedAtLeast = 3)
-    }
-
-    @Test
     fun `every song outline is readable and unchanged after a reload`() {
         assertEveryAccessorSurvives(SongOutlines.serializer(), SongOutlines(), expectedAtLeast = 10)
     }

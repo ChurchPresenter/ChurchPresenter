@@ -79,7 +79,7 @@ class EditSongContentTest {
 
     private object Label {
         const val SAVE = "Save"
-        const val SECONDARY_PANE = "Secondary"
+        const val SECONDARY_PANE = "Language 2"
         const val CANCEL = "Cancel"
         const val ADD_NEW = "Add New..."
 

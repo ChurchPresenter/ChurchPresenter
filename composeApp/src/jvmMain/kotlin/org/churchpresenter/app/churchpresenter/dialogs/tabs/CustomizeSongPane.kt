@@ -17,8 +17,6 @@ import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.song_language_primary
-import churchpresenter.composeapp.generated.resources.song_language_secondary
 import churchpresenter.composeapp.generated.resources.song_style_language
 import org.jetbrains.compose.resources.stringResource
 
@@ -40,6 +38,8 @@ internal fun SongCustomizePane(
      * stores as a `SongSettings` difference and nothing else.
      */
     songMode: String,
+    /** The languages this screen has been told to show, which decide which of them can be styled. */
+    songTranslations: List<Int>,
     onSongModeChange: (String) -> Unit,
 ) {
     val scope = LocalOutputStyleScope.current
@@ -61,8 +61,13 @@ internal fun SongCustomizePane(
         val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
         // Only where there is a second language on this screen and an element that has a second
         // profile for it. Everywhere else the switch would offer a choice with one answer.
-        val hasSecondLanguage = songMode == Constants.SONG_LANG_BOTH && styleElement in SECOND_LANGUAGE_ELEMENTS
-        val editingLanguage = if (hasSecondLanguage) language else SongStyleLanguage.PRIMARY
+        val styleLanguages = styleLanguagesFor(songMode, songTranslations)
+        val hasSecondLanguage = styleLanguages.size > 1 && styleElement in SECOND_LANGUAGE_ELEMENTS
+        val editingLanguage = if (hasSecondLanguage && language in styleLanguages) {
+            language
+        } else {
+            styleLanguages.first()
+        }
 
         if (titleSlideView) {
             SongTitleSlideEnabledRow(settings, onSettingsChange, showVerticalAlignment = !target.isLowerThird)
@@ -91,16 +96,7 @@ internal fun SongCustomizePane(
         if (hasSecondLanguage) {
             LabeledControl(stringResource(Res.string.song_style_language)) {
                 SegmentedButton(
-                    items = listOf(
-                        SegmentedButtonItem(
-                            SongStyleLanguage.PRIMARY,
-                            stringResource(Res.string.song_language_primary),
-                        ),
-                        SegmentedButtonItem(
-                            SongStyleLanguage.SECONDARY,
-                            stringResource(Res.string.song_language_secondary),
-                        ),
-                    ),
+                    items = styleLanguages.map { SegmentedButtonItem(it, it.nameLabel()) },
                     selectedValue = editingLanguage,
                     onValueChange = { language = it },
                     buttonWidth = STYLE_LANGUAGE_BUTTON_WIDTH,

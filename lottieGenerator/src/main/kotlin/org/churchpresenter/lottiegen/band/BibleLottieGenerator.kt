@@ -58,10 +58,11 @@ object BibleLottieGenerator {
                 put(
                     METADATA_SLOTS,
                     buildJsonObject {
-                        put(BandLayerNames.TEXT_1, slots.text1.toJson())
-                        put(BandLayerNames.REFERENCE_1, slots.reference1.toJson())
-                        slots.text2?.let { put(BandLayerNames.TEXT_2, it.toJson()) }
-                        slots.reference2?.let { put(BandLayerNames.REFERENCE_2, it.toJson()) }
+                        slots.slots.forEachIndexed { i, slot ->
+                            val (textLayer, refLayer) = BandLayerNames.SLOT_LAYER_NAMES[i]
+                            put(textLayer, slot.text.toJson())
+                            put(refLayer, slot.reference.toJson())
+                        }
                     },
                 )
             },
@@ -85,22 +86,23 @@ object BibleLottieGenerator {
     const val METADATA_REFERENCE_ALIGN = "referenceAlign"
     const val METADATA_SLOTS = "slots"
 
+    /** [cfg]'s preview text and reference for slot [index] -- the fourth pair the config carries. */
+    private fun previewOf(cfg: BibleLottieGenConfig, index: Int): Pair<String, String> = when (index) {
+        0 -> cfg.previewText1 to cfg.previewReference1
+        1 -> cfg.previewText2 to cfg.previewReference2
+        2 -> cfg.previewText3 to cfg.previewReference3
+        else -> cfg.previewText4 to cfg.previewReference4
+    }
+
     private fun textSlots(cfg: BibleLottieGenConfig, slots: BandSlots): List<TextSlot> = buildList {
         val textSize = cfg.previewTextSizePx.toDouble()
-        add(TextSlot(BandLayerNames.TEXT_1, slots.text1, cfg.previewText1, textSize, cfg.previewTextColor))
-        add(
-            TextSlot(
-                BandLayerNames.REFERENCE_1, slots.reference1, cfg.previewReference1,
-                cfg.previewReferenceSizePx.toDouble(), cfg.previewReferenceColor, isReference = true,
-            ),
-        )
-        val text2 = slots.text2
-        val reference2 = slots.reference2
-        if (text2 != null && reference2 != null) {
-            add(TextSlot(BandLayerNames.TEXT_2, text2, cfg.previewText2, textSize, cfg.previewTextColor))
+        slots.slots.forEachIndexed { i, slot ->
+            val (textLayer, refLayer) = BandLayerNames.SLOT_LAYER_NAMES[i]
+            val (previewText, previewReference) = previewOf(cfg, i)
+            add(TextSlot(textLayer, slot.text, previewText, textSize, cfg.previewTextColor))
             add(
                 TextSlot(
-                    BandLayerNames.REFERENCE_2, reference2, cfg.previewReference2,
+                    refLayer, slot.reference, previewReference,
                     cfg.previewReferenceSizePx.toDouble(), cfg.previewReferenceColor, isReference = true,
                 ),
             )

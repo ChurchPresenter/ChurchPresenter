@@ -65,6 +65,44 @@ class SongSettingsTabLayoutTest {
         }
 
     @Test
+    fun `all seven grid options are offered`() = songTab(bilingual()) { _ ->
+        onNodeWithText("Left / Right").assertExists()
+        onNodeWithText("Top / Bottom").assertExists()
+        onNodeWithText("1x3").assertExists()
+        onNodeWithText("3x1").assertExists()
+        onNodeWithText("1x4").assertExists()
+        onNodeWithText("4x1").assertExists()
+        onNodeWithText("2x2").assertExists()
+    }
+
+    @Test
+    fun `picking the 2x2 grid writes it`() = songTab(bilingual()) { get ->
+        onNodeWithText("2x2").performScrollTo().performClick()
+        waitForIdle()
+        assertEquals(Constants.BILINGUAL_GRID_2X2, get().songSettings.bilingualLayout)
+    }
+
+    @Test
+    fun `picking a 1x4 or 4x1 grid writes it`() = songTab(bilingual()) { get ->
+        onNodeWithText("1x4").performScrollTo().performClick()
+        waitForIdle()
+        assertEquals(Constants.BILINGUAL_GRID_1X4, get().songSettings.bilingualLayout)
+        onNodeWithText("4x1").performScrollTo().performClick()
+        waitForIdle()
+        assertEquals(Constants.BILINGUAL_GRID_4X1, get().songSettings.bilingualLayout)
+    }
+
+    @Test
+    fun `picking a 1x3 or 3x1 grid writes it`() = songTab(bilingual()) { get ->
+        onNodeWithText("1x3").performScrollTo().performClick()
+        waitForIdle()
+        assertEquals(Constants.BILINGUAL_GRID_1X3, get().songSettings.bilingualLayout)
+        onNodeWithText("3x1").performScrollTo().performClick()
+        waitForIdle()
+        assertEquals(Constants.BILINGUAL_GRID_3X1, get().songSettings.bilingualLayout)
+    }
+
+    @Test
     fun `the layout row writes nothing else`() = songTab(bilingual()) { get ->
         val before = get().songSettings
         onNodeWithText("Left / Right").performScrollTo().performClick()

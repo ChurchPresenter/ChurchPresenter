@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.band.BandFontPicker
+import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
-import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.Strings
@@ -98,26 +98,27 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
     TextOpacityRow(viewModel, kind)
     Hairline()
     var lang by remember { mutableStateOf(0) }
-    val twoLanguages = cfg.layout != SlotLayout.SINGLE
-    if (!twoLanguages) lang = 0
+    // As many tabs as the layout has cells for -- one for [SlotLayout.SINGLE], up to four for a
+    // grid -- so a language whose tab has scrolled out of reach by a layout change is never left
+    // silently selected.
+    val slotCount = cfg.layout.cellCount
+    if (lang >= slotCount) lang = 0
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Caption(Strings.bandSampleText, Modifier.weight(1f))
         Row(
             Modifier.clip(FIELD_SHAPE).background(Tokens.FieldBg).padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            for (i in 0 until if (twoLanguages) 2 else 1) {
+            for (i in 0 until slotCount) {
                 LangTab(Strings.bandLabel("preview_text_${i + 1}", kind), selected = lang == i) { lang = i }
             }
         }
     }
-    val text = if (lang == 0) cfg.previewText1 else cfg.previewText2
-    val reference = if (lang == 0) cfg.previewReference1 else cfg.previewReference2
+    val text = previewTextOf(cfg, lang)
+    val reference = previewReferenceOf(cfg, lang)
     SettingsTextField(
         value = text,
-        onValueChange = { v ->
-            viewModel.updateConfig { if (lang == 0) it.copy(previewText1 = v) else it.copy(previewText2 = v) }
-        },
+        onValueChange = { v -> viewModel.updateConfig { it.withPreviewText(lang, v) } },
         label = Strings.bandLabel("preview_text_1", kind).substringBefore(' '),
         singleLine = false,
         fillWidth = true,
@@ -125,13 +126,51 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
     )
     SettingsTextField(
         value = reference,
-        onValueChange = { v ->
-            viewModel.updateConfig { if (lang == 0) it.copy(previewReference1 = v) else it.copy(previewReference2 = v) }
-        },
+        onValueChange = { v -> viewModel.updateConfig { it.withPreviewReference(lang, v) } },
         label = Strings.bandLabel("reference", kind),
         fillWidth = true,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
     )
+}
+
+/** [cfg]'s preview text for language [index], 0 to 3. */
+private fun previewTextOf(cfg: BibleLottieGenConfig, index: Int): String =
+    when (index) {
+        0 -> cfg.previewText1
+        1 -> cfg.previewText2
+        2 -> cfg.previewText3
+        else -> cfg.previewText4
+    }
+
+/** [cfg]'s preview reference for language [index], 0 to 3. */
+private fun previewReferenceOf(cfg: BibleLottieGenConfig, index: Int): String =
+    when (index) {
+        0 -> cfg.previewReference1
+        1 -> cfg.previewReference2
+        2 -> cfg.previewReference3
+        else -> cfg.previewReference4
+    }
+
+/** [BibleLottieGenConfig] with language [index]'s preview text replaced by [value]. */
+private fun BibleLottieGenConfig.withPreviewText(
+    index: Int,
+    value: String,
+): BibleLottieGenConfig = when (index) {
+    0 -> copy(previewText1 = value)
+    1 -> copy(previewText2 = value)
+    2 -> copy(previewText3 = value)
+    else -> copy(previewText4 = value)
+}
+
+/** [BibleLottieGenConfig] with language [index]'s preview reference replaced by [value]. */
+private fun BibleLottieGenConfig.withPreviewReference(
+    index: Int,
+    value: String,
+): BibleLottieGenConfig = when (index) {
+    0 -> copy(previewReference1 = value)
+    1 -> copy(previewReference2 = value)
+    2 -> copy(previewReference3 = value)
+    else -> copy(previewReference4 = value)
 }
 
 /**

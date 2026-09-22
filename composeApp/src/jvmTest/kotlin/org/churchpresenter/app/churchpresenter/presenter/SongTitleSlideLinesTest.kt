@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.core.models.songs.SectionTranslation
+import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
@@ -13,10 +15,12 @@ import kotlin.test.assertEquals
  */
 class SongTitleSlideLinesTest {
 
+    private fun languages(mode: String) = songLanguageSelection(mode, emptyList(), available = 2)
+
     private val section = LyricSection(
         type = Constants.SECTION_TYPE_TITLE_SLIDE,
         title = "Amazing Grace",
-        secondaryTitle = "О, благодать",
+        translations = listOf(SectionTranslation(title = "О, благодать")),
         songNumber = 427,
         author = "John Newton",
         composer = "William Walker",
@@ -30,10 +34,6 @@ class SongTitleSlideLinesTest {
     )
 
     private fun elements(lines: List<TitleSlideLine>) = lines.map { it.element }
-
-    private companion object {
-        const val BOTH = Constants.SONG_LANG_BOTH
-    }
 
     // ── Order and visibility ──────────────────────────────────────────────────
 
@@ -113,7 +113,7 @@ class SongTitleSlideLinesTest {
 
     @Test
     fun `with two titles the number joins the first only`() {
-        val lines = titleSlideLines(section, SongSettings(), Constants.SONG_LANG_BOTH)
+        val lines = titleSlideLines(section, SongSettings(), languages(Constants.SONG_LANG_BOTH))
         assertEquals("427", lines[0].number)
         assertEquals(null, lines[1].number)
         assertEquals("О, благодать", lines[1].text)
@@ -125,35 +125,47 @@ class SongTitleSlideLinesTest {
     fun `the primary output shows the primary title alone`() =
         assertEquals(
             listOf("Amazing Grace"),
-            titles(titleSlideLines(section, SongSettings(), Constants.SONG_LANG_PRIMARY)),
+            titles(titleSlideLines(section, SongSettings(), languages(Constants.SONG_LANG_PRIMARY))),
         )
 
     @Test
     fun `the secondary output shows the secondary title alone`() =
         assertEquals(
             listOf("О, благодать"),
-            titles(titleSlideLines(section, SongSettings(), Constants.SONG_LANG_SECONDARY)),
+            titles(titleSlideLines(section, SongSettings(), languages(Constants.SONG_LANG_SECONDARY))),
         )
 
     @Test
     fun `the secondary output falls back to the primary title when there is no translation`() =
         assertEquals(
             listOf("Amazing Grace"),
-            titles(titleSlideLines(section.copy(secondaryTitle = ""), SongSettings(), Constants.SONG_LANG_SECONDARY)),
+            titles(
+                titleSlideLines(
+                    section.copy(translations = listOf(SectionTranslation())),
+                    SongSettings(),
+                    languages(Constants.SONG_LANG_SECONDARY),
+                ),
+            ),
         )
 
     @Test
     fun `an output showing both languages shows both titles, the primary first`() =
         assertEquals(
             listOf("Amazing Grace", "О, благодать"),
-            titles(titleSlideLines(section, SongSettings(), Constants.SONG_LANG_BOTH)),
+            titles(titleSlideLines(section, SongSettings(), languages(Constants.SONG_LANG_BOTH))),
         )
 
     @Test
     fun `a secondary title equal to the primary is not shown twice`() =
         assertEquals(
             listOf("Amazing Grace"),
-            titles(titleSlideLines(section.copy(secondaryTitle = "Amazing Grace"), SongSettings(), BOTH)),
+            titles(
+                titleSlideLines(
+                    section.copy(translations = listOf(SectionTranslation(title = "Amazing Grace"))),
+                    SongSettings(),
+                    languages(Constants.SONG_LANG_BOTH),
+                ),
+            ),
         )
 
     private fun titles(lines: List<TitleSlideLine>) =

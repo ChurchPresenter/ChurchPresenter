@@ -227,13 +227,16 @@ private fun BandLayer(
         if (template.meta.textMotion != BandTextMotion.TICKER) {
             slots.mapValues { it.value.text }
         } else {
+            // Every text layer carries its own reference at its head and scrolls as one line; every
+            // reference layer is left empty so nothing sits still beside the motion. Read off
+            // [BibleLottieTemplate.TEXT_SLOT_LAYERS] rather than named one pair at a time, so a
+            // third and fourth slot tick the same way the first two always have.
+            val textLayers = BibleLottieTemplate.TEXT_SLOT_LAYERS.map { it.first }.toSet()
+            val referenceOf = BibleLottieTemplate.TEXT_SLOT_LAYERS.associate { (text, reference) -> text to reference }
             slots.mapValues { (name, slot) ->
-                when (name) {
-                    BibleLottieTemplate.LAYER_TEXT_1 ->
-                        tickerLine(slots[BibleLottieTemplate.LAYER_REFERENCE_1]?.text, slot.text)
-                    BibleLottieTemplate.LAYER_TEXT_2 ->
-                        tickerLine(slots[BibleLottieTemplate.LAYER_REFERENCE_2]?.text, slot.text)
-                    BibleLottieTemplate.LAYER_REFERENCE_1, BibleLottieTemplate.LAYER_REFERENCE_2 -> ""
+                when {
+                    name in textLayers -> tickerLine(slots[referenceOf.getValue(name)]?.text, slot.text)
+                    referenceOf.containsValue(name) -> ""
                     else -> slot.text
                 }
             }
