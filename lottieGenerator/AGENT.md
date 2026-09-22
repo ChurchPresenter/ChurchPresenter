@@ -114,13 +114,16 @@ Both CI steps are gated on this directory or the shared build files changing.
   drops `**/ui/**` and `**/MainKt*`, which need a display. The `spec/` and `lottie/` packages are
   where the coverage lives, and the `SpecPort*Test` suites exist so a spec style stays
   byte-comparable with the code style it replaced.
-- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin and **no baseline**,
-  and is at **one finding**, down from 382 -- every rule is clean except `LongParameterList` on
-  `LottieGenPalette`'s 51-role constructor (see **Theme** above for why those 51 exist).
-  `constructorThreshold` is 7, and satisfying it would need three levels of nesting, so that one
-  is open for a decision rather than fixed. **Do not add a baseline file, and do not add a
-  `@Suppress` without asking.** Until it is resolved the module is not in `test.yml`'s Detekt
-  step, because one finding there would fail every PR.
+- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin, **no baseline**, and
+  is clean -- gated in `test.yml`'s Detekt step alongside every other module. It went from 382
+  findings down to one lingering `LongParameterList` on `LottieGenPalette`'s 51-role constructor
+  (see **Theme** above for why those 51 exist), which `constructorThreshold: 7` kept flagging no
+  matter how the roles were grouped at one level. The fix was the three levels of nesting the
+  previous note said it would need: `LottieGenPalette` takes 3 top-level groups (`Panel`,
+  `Content`, `Interaction`), each of those holds 3-5 leaf classes of 2-6 `Color` roles apiece, and
+  every constructor in the tree stays at or under 6 parameters. The grouping is filing, not a
+  design change -- every role keeps its original name and its OKLCH comment, and `Tokens` (the
+  only thing the rest of the module reads) is unchanged at every call site.
 - Tests run with `java.awt.headless=true`; `TextMeasurer` and `FontRegistry` use AWT and must keep
   working headless.
 

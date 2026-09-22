@@ -32,4 +32,20 @@ object DevFlags {
         System.getenv("CHURCHPRESENTER_RENDER_API")?.takeIf { it.isNotBlank() }
             ?: System.getProperty("churchpresenter.renderApi")
     }
+
+    /**
+     * Diagnostic only -- not a supported feature. The software video player normally forces
+     * `:codec=avcodec` (see `VLC_OPT_SOFTWARE_CODEC` in `VideoPlayer.kt`) because Dolby Vision
+     * HEVC / 10-bit files decode through VideoToolbox into zero-copy GPU buffers the callback
+     * surface can't read otherwise. Set this to `false` (env var
+     * CHURCHPRESENTER_FORCE_AVCODEC=false, or -Dchurchpresenter.forceAvcodec=false) to skip that
+     * override and let libVLC pick its own decoder, for comparing embedded-subtitle rendering
+     * with and without it. Turning it off on a Dolby Vision/10-bit file reintroduces the black
+     * frame this exists to prevent -- test with an ordinary file.
+     */
+    val forceAvcodec: Boolean by lazy {
+        System.getenv("CHURCHPRESENTER_FORCE_AVCODEC")?.toBoolean()
+            ?: System.getProperty("churchpresenter.forceAvcodec")?.toBoolean()
+            ?: true
+    }
 }

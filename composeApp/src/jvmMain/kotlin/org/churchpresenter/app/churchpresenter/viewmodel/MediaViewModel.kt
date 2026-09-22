@@ -2,7 +2,10 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.app.churchpresenter.subtitles.SubtitleCue
+import org.churchpresenter.app.churchpresenter.subtitles.SubtitleCueParser
 import org.churchpresenter.settings.utils.Constants
+import java.io.File
 
 /** One subtitle track VLC found in the loaded media: [id] is VLC's own, [name] is what it calls it. */
 data class SubtitleTrack(val id: Int, val name: String)
@@ -144,6 +147,22 @@ class MediaViewModel {
     val selectedSubtitleTrack: Int get() = _selectedSubtitleTrack.intValue
 
     /**
+     * The cues parsed from [subtitleUrl] when it is an SRT/WebVTT file -- rendered by the app
+     * itself (`SubtitleOverlay`), styled per `MediaSettings`, rather than baked into the frame by
+     * VLC. Empty for every other case (no file, an embedded track, or a format `SubtitleCueParser`
+     * doesn't parse, e.g. `.ass`) -- that emptiness is what tells `VideoPlayer` to fall back to
+     * handing VLC the file directly, exactly as before this existed.
+     */
+    private val _subtitleCues = mutableStateOf<List<SubtitleCue>>(emptyList())
+    val subtitleCues: List<SubtitleCue> get() = _subtitleCues.value
+
+    /** The cue, if any, whose window contains the current playback position. Reads both
+     *  [subtitleCues] and [currentPosition] as Compose state, so a composable reading this
+     *  recomposes as playback advances. */
+    val activeSubtitleCue: SubtitleCue?
+        get() = SubtitleCueParser.activeCueAt(_subtitleCues.value, _currentPosition.value)
+
+    /**
      * Points the media at an external subtitle file. Blank clears it. The media has to be loaded
      * again for VLC to pick the file up, which the player does when this value changes.
      */
@@ -151,6 +170,7 @@ class MediaViewModel {
         _subtitleUrl.value = path
         _subtitleTracks.value = emptyList()
         _selectedSubtitleTrack.intValue = SUBTITLES_UNDECIDED
+        _subtitleCues.value = if (path.isBlank()) emptyList() else SubtitleCueParser.parseSubtitleFile(File(path))
     }
 
     /** Called by the player once VLC has listed the tracks; [SUBTITLES_UNDECIDED] resolves here. */

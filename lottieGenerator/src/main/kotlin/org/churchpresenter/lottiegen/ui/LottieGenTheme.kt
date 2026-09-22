@@ -52,8 +52,8 @@ fun ProvideLottieGenPalette(palette: LottieGenPalette, content: @Composable () -
             thickness = 6.dp,
             shape = RoundedCornerShape(4.dp),
             hoverDurationMillis = 150,
-            unhoverColor = palette.scrollThumb,
-            hoverColor = palette.scrollThumbHover
+            unhoverColor = palette.interaction.scrollbar.scrollThumb,
+            hoverColor = palette.interaction.scrollbar.scrollThumbHover
         )
     ) {
         content()

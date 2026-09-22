@@ -23,6 +23,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class MediaPresenterRenderTest {
@@ -108,6 +109,64 @@ class MediaPresenterRenderTest {
         assertEquals(0f, pixel.red)
         assertEquals(0f, pixel.green)
         assertEquals(0f, pixel.blue)
+    }
+
+    @Test
+    fun `an active subtitle cue draws the overlay when showSubtitles is on`() = runComposeUiTest {
+        val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
+        temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
+        val viewModel = loadedViewModel().apply { setSubtitleFile(temp.absolutePath) }
+
+        try {
+            setContent {
+                CompositionLocalProvider(LocalMediaViewModel provides viewModel) {
+                    MediaPresenter(
+                        modifier = Modifier.testTag("media").size(200.dp),
+                        isVisible = true,
+                        showSubtitles = true,
+                    )
+                }
+            }
+
+            val colors = onNodeWithTag("media").captureToImage().toPixelMap()
+            // The default MediaSettings card background is opaque, so some pixel in the frame
+            // must differ from the plain black backdrop once the overlay draws.
+            assertFalse(
+                (0 until colors.width step 4).flatMap { x -> (0 until colors.height step 4).map { y -> colors[x, y] } }
+                    .all { it == Color.Black },
+                "the subtitle card should have drawn something other than the plain black backdrop",
+            )
+        } finally {
+            temp.delete()
+        }
+    }
+
+    @Test
+    fun `an active subtitle cue draws nothing when showSubtitles is off`() = runComposeUiTest {
+        val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
+        temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
+        val viewModel = loadedViewModel().apply { setSubtitleFile(temp.absolutePath) }
+
+        try {
+            setContent {
+                CompositionLocalProvider(LocalMediaViewModel provides viewModel) {
+                    MediaPresenter(
+                        modifier = Modifier.testTag("media").size(200.dp),
+                        isVisible = true,
+                        showSubtitles = false,
+                    )
+                }
+            }
+
+            val colors = onNodeWithTag("media").captureToImage().toPixelMap()
+            assertTrue(
+                (0 until colors.width step 4).flatMap { x -> (0 until colors.height step 4).map { y -> colors[x, y] } }
+                    .all { it == Color.Black },
+                "showSubtitles = false must draw nothing but the plain black backdrop",
+            )
+        } finally {
+            temp.delete()
+        }
     }
 
     @Test

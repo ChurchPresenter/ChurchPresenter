@@ -117,6 +117,7 @@ import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.media_subtitles_files
 import churchpresenter.composeapp.generated.resources.media_subtitles_load_file
 import churchpresenter.composeapp.generated.resources.media_subtitles_off
+import churchpresenter.composeapp.generated.resources.tooltip_media_subtitle_settings
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_select_file
@@ -136,9 +137,11 @@ import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.stop
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.LocalWentLive
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
@@ -155,6 +158,7 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.dialogs.MediaSubtitleSettingsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -246,6 +250,7 @@ fun MediaTab(
     val viewModel = LocalMediaViewModel.current ?: return
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
+    var showSubtitleSettingsDialog by remember { mutableStateOf(false) }
 
     val localFileLabel = stringResource(Res.string.media_local_file)
     val networkUrlLabel = stringResource(Res.string.media_network_url)
@@ -456,6 +461,13 @@ fun MediaTab(
                         tooltipText = stringResource(Res.string.add_to_schedule)
                     )
                 }
+                ActionIconButton(
+                    onClick = { showSubtitleSettingsDialog = true },
+                    tooltipText = stringResource(Res.string.tooltip_media_subtitle_settings),
+                    icon = Icons.Default.Tune,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
                 if (presenterManager != null) {
                     GoLiveButton(
                         onClick = {
@@ -900,6 +912,14 @@ fun MediaTab(
                 }
             }
         }
+    }
+
+    if (showSubtitleSettingsDialog) {
+        MediaSubtitleSettingsDialog(
+            appSettings = appSettings,
+            onSettingsChange = onSettingsChange,
+            onDismiss = { showSubtitleSettingsDialog = false }
+        )
     }
 }
 

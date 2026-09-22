@@ -61,6 +61,13 @@ class VideoPlayerTest {
     }
 
     @Test
+    fun `forceAvcodec false drops the codec override but keeps the rest`() {
+        val options = softwarePlayOptions(audioEnabled = true, subtitleUrl = "", forceAvcodec = false).toList()
+
+        assertEquals(listOf(":avcodec-fast", ":clock-jitter=0"), options)
+    }
+
+    @Test
     fun `a silent software player turns the audio track off`() {
         val options = softwarePlayOptions(audioEnabled = false, subtitleUrl = "").toList()
 
@@ -73,6 +80,49 @@ class VideoPlayerTest {
 
         assertEquals(":sub-file=/media/en.srt", options.last())
         assertEquals(4, options.size)
+    }
+
+    @Test
+    fun `no sub-file option is sent when the app renders the cues itself`() {
+        val options = softwarePlayOptions(
+            audioEnabled = true,
+            subtitleUrl = "/media/en.srt",
+            appRendersSubtitles = true,
+        ).toList()
+
+        assertEquals(listOf(":codec=avcodec", ":avcodec-fast", ":clock-jitter=0"), options)
+    }
+
+    // ── FramePingPong ────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the write target alternates between the two buffers only on completeWrite`() {
+        val pingPong = FramePingPong(width = 4, height = 4)
+
+        val first = pingPong.writeTarget
+        assertTrue(pingPong.writeTarget === first, "reading the target twice without completing must not flip it")
+
+        val completed = pingPong.completeWrite()
+        assertTrue(completed === first, "completeWrite hands back the buffer that was just written")
+        assertTrue(pingPong.writeTarget !== first, "the next target must be the other buffer")
+
+        val second = pingPong.writeTarget
+        val completedAgain = pingPong.completeWrite()
+        assertTrue(completedAgain === second)
+        assertTrue(pingPong.writeTarget === first, "a third write goes back to the first buffer")
+    }
+
+    @Test
+    fun `the two buffers are distinct instances of the requested size`() {
+        val pingPong = FramePingPong(width = 8, height = 6)
+        val a = pingPong.writeTarget
+        val b = pingPong.completeWrite().let { pingPong.writeTarget }
+
+        assertTrue(a !== b)
+        assertEquals(8, a.width)
+        assertEquals(6, a.height)
+        assertEquals(8, b.width)
+        assertEquals(6, b.height)
     }
 
     // ── dirContainsVlcLib ──────────────────────────────────────────────────────────────────────
@@ -308,14 +358,18 @@ class VideoPlayerTest {
     // ── SharedVideoOutputDisplay ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `SharedVideoOutputDisplay renders nothing when no frame has been written`() = runComposeUiTest {
+    fun `SharedVideoOutputDisplay draws a placeholder before any frame has been written`() = runComposeUiTest {
+        // Deliberate, not an oversight: drawing something -- even a 1x1 transparent stand-in --
+        // the moment this composes is what lets an output window's graphics surface pay Skia's
+        // first-draw cost while it opens, rather than at the moment a decoder first hands it a
+        // real frame. See `emptyFramePlaceholder`'s own doc comment.
         SharedVideoOutput.frame.value = null
         setContent {
             MaterialTheme {
                 SharedVideoOutputDisplay(modifier = Modifier.testTag("shared-video"))
             }
         }
-        onNodeWithTag("shared-video").assertDoesNotExist()
+        onNodeWithTag("shared-video").assertExists()
     }
 
     @Test
