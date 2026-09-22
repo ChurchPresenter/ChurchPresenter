@@ -54,6 +54,21 @@ class WebTabEngineUnavailableTest {
     }
 
     @Test
+    fun `an unsupported Windows names Windows 10 rather than a redistributable`() = runComposeUiTest {
+        // Sentry CHURCH-PRESENTER-DESKTOP-75: Chromium no longer loads on Windows 8.1, and the generic
+        // message sent the operator after a Visual C++ runtime that could not help.
+        setContent {
+            MaterialTheme {
+                WebEngineUnavailable(macOsUnsupported = false, blockedByPolicy = false, windowsUnsupported = true)
+            }
+        }
+
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_WINDOWS_TITLE).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_WINDOWS_BODY).assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_BODY).assertDoesNotExist()
+    }
+
+    @Test
     fun `WebEngineUnavailable defaults to the real CefManager state`() = runComposeUiTest {
         setContent { MaterialTheme { WebEngineUnavailable() } }
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertExists()
