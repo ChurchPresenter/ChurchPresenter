@@ -46,6 +46,8 @@ fun PicturePresenter(
     slideOffset: Float = 1f,
     animationType: AnimationType = AnimationType.FADE,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    /** How each picture meets the output -- `PictureSettings.scaleMode`, through `contentScale`. */
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val windowInfo = LocalWindowInfo.current
@@ -64,10 +66,10 @@ fun PicturePresenter(
                 contentAlignment = Alignment.Center
             ) {
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - transitionAlpha }) {
-                    ImageContent(previousImagePath)
+                    ImageContent(previousImagePath, contentScale)
                 }
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = transitionAlpha }) {
-                    ImageContent(imagePath)
+                    ImageContent(imagePath, contentScale)
                 }
             }
         }
@@ -79,10 +81,10 @@ fun PicturePresenter(
                 contentAlignment = Alignment.Center
             ) {
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -slideOffset * screenWidthPx }) {
-                    ImageContent(previousImagePath)
+                    ImageContent(previousImagePath, contentScale)
                 }
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }) {
-                    ImageContent(imagePath)
+                    ImageContent(imagePath, contentScale)
                 }
             }
         }
@@ -94,10 +96,10 @@ fun PicturePresenter(
                 contentAlignment = Alignment.Center
             ) {
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = slideOffset * screenWidthPx }) {
-                    ImageContent(previousImagePath)
+                    ImageContent(previousImagePath, contentScale)
                 }
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }) {
-                    ImageContent(imagePath)
+                    ImageContent(imagePath, contentScale)
                 }
             }
         }
@@ -111,14 +113,14 @@ fun PicturePresenter(
                     .alpha(transitionAlpha),
                 contentAlignment = Alignment.Center
             ) {
-                ImageContent(imagePath)
+                ImageContent(imagePath, contentScale)
             }
         }
     }
 }
 
 @Composable
-private fun ImageContent(currentImagePath: String?) {
+private fun ImageContent(currentImagePath: String?, contentScale: ContentScale) {
     if (currentImagePath != null) {
         // Use actual presenter window size so image is never loaded larger than what's displayed
         val windowInfo = LocalWindowInfo.current
@@ -126,8 +128,9 @@ private fun ImageContent(currentImagePath: String?) {
         val screenWidth = containerSize.width.takeIf { it > 0 } ?: 1920
         val screenHeight = containerSize.height.takeIf { it > 0 } ?: 1080
 
-        val imageBitmap = remember(currentImagePath, screenWidth, screenHeight) {
-            loadAndDownscaleImage(currentImagePath, screenWidth, screenHeight)
+        val cover = contentScale != ContentScale.Fit
+        val imageBitmap = remember(currentImagePath, screenWidth, screenHeight, cover) {
+            loadAndDownscaleImage(currentImagePath, screenWidth, screenHeight, cover)
         }
 
         if (imageBitmap != null) {
@@ -135,7 +138,7 @@ private fun ImageContent(currentImagePath: String?) {
                 bitmap = imageBitmap,
                 contentDescription = stringResource(Res.string.presented_image),
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
+                contentScale = contentScale,
                 colorFilter = null
             )
         } else {
@@ -154,12 +157,17 @@ private fun ImageContent(currentImagePath: String?) {
     }
 }
 
-internal fun loadAndDownscaleImage(imagePath: String, maxWidth: Int = 1920, maxHeight: Int = 1080): ImageBitmap? {
+internal fun loadAndDownscaleImage(
+    imagePath: String,
+    maxWidth: Int = 1920,
+    maxHeight: Int = 1080,
+    cover: Boolean = false,
+): ImageBitmap? {
     val file = File(imagePath)
     if (!file.exists()) return null
 
     return try {
-        PictureDecoder.decodeScaled(file, maxWidth, maxHeight).toComposeImageBitmap()
+        PictureDecoder.decodeScaled(file, maxWidth, maxHeight, cover).toComposeImageBitmap()
     } catch (e: Exception) {
         CrashReporter.reportException(e, "Decoding picture for presenter")
         null

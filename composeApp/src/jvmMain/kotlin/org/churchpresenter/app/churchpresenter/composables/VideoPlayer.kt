@@ -194,13 +194,15 @@ private val emptyFramePlaceholder: ImageBitmap by lazy {
 /**
  * Lightweight Compose composable that displays the latest frame from [SharedVideoOutput].
  * Uses no VLC instance — just renders the ImageBitmap written by the master SoftwareVideoPlayer.
+ *
+ * [contentScale] is the output's scale mode -- `AppSettings.mediaScaleMode`, through `contentScale`.
  */
 @Composable
-fun SharedVideoOutputDisplay(modifier: Modifier = Modifier) {
+fun SharedVideoOutputDisplay(modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.Fit) {
     Image(
         bitmap = SharedVideoOutput.frame.value ?: emptyFramePlaceholder,
         contentDescription = null,
-        contentScale = ContentScale.Fit,
+        contentScale = contentScale,
         modifier = modifier
     )
 }

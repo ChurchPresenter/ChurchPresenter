@@ -11,6 +11,8 @@ import org.churchpresenter.app.churchpresenter.tabs.MediaLabel
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.mediaButton
 import org.churchpresenter.app.churchpresenter.tabs.mediaTab
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SubtitleTrack
@@ -40,9 +42,11 @@ class MediaTabScreenshotTest {
         width: Dp? = null,
         /** 1 to photograph an open popup, which is its own compose root. */
         rootIndex: Int = 0,
+        settings: (AppSettings) -> AppSettings = { it },
         drive: ComposeUiTest.(MediaViewModel) -> Unit = { waitForIdle() },
     ) = stackedThemes(SECTION, name) { mode, file ->
         mediaTab(
+            settings = settings,
             presenterManager = if (presenter) PresenterManager() else null,
             vlcAvailable = vlcAvailable,
             width = width,
@@ -102,6 +106,18 @@ class MediaTabScreenshotTest {
         vm.setLoopCount(LOOP_COUNT)
         waitForIdle()
     }
+
+    @Test
+    fun `scaled to fill, the button lit`() = shoot(
+        "scale_fill",
+        settings = { it.copy(mediaScaleMode = OutputScaleMode.FILL) },
+    ) { vm -> loadVideo(vm) }
+
+    @Test
+    fun `scaled to stretch`() = shoot(
+        "scale_stretch",
+        settings = { it.copy(mediaScaleMode = OutputScaleMode.STRETCH) },
+    ) { vm -> loadVideo(vm) }
 
     @Test
     fun `subtitles showing, the button lit`() = shoot("subtitles_on") { vm ->

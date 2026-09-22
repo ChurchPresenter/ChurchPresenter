@@ -123,12 +123,17 @@ object PictureDecoder {
      *
      * The downscale itself is cheap relative to [decode] — decoding the full file already paid the
      * real cost — so this exists to bound what gets *held*, not to speed up the read.
+     *
+     * [cover] scales to *cover* the box instead of fitting inside it, for a picture drawn cropped or
+     * stretched to fill the output: fitted, a 4:3 photo on a 16:9 screen would be held 25% narrower
+     * than it is drawn, and upscaled back.
      */
-    fun decodeScaled(file: File, maxWidth: Int, maxHeight: Int): Image {
+    fun decodeScaled(file: File, maxWidth: Int, maxHeight: Int, cover: Boolean = false): Image {
         val original = decode(file)
+        val widthScale = maxWidth.toFloat() / original.width
+        val heightScale = maxHeight.toFloat() / original.height
         val scale = minOf(
-            maxWidth.toFloat() / original.width,
-            maxHeight.toFloat() / original.height,
+            if (cover) maxOf(widthScale, heightScale) else minOf(widthScale, heightScale),
             1f,
         )
         if (scale >= 1f) return original

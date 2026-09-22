@@ -799,6 +799,7 @@
     <string name="loop">Loop</string>
     <string name="loop_on">Loop On</string>
     <string name="loop_off">Loop Off</string>
+    <string name="output_scale_mode">Scale: %1$s</string>
     <string name="transition_duration">Transition Duration:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
