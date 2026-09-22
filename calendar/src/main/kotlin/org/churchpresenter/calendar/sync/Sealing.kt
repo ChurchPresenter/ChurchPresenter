@@ -11,6 +11,9 @@ class Sealing(private val envelope: Envelope, private val instanceId: String) {
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        // A field that is null is left out rather than written as null: a song with no second
+        // title or no measured length carries nothing for either, across a whole library.
+        explicitNulls = false
         classDiscriminator = "type"
     }
 
@@ -42,6 +45,16 @@ class Sealing(private val envelope: Envelope, private val instanceId: String) {
         }
         if (service.id != record.id) return null
         return service.copy(updatedAt = record.updatedAt, updatedBy = record.updatedBy, rev = record.rev)
+    }
+
+    /** A catalog record, sealed under its own id, kept as far out as the relay allows and refreshed on rewrite. */
+    fun sealCatalog(recordId: String, record: CatalogRecord, today: LocalDate): SealedRecord {
+        val bytes = json.encodeToString(CatalogRecord.serializer(), record).toByteArray()
+        return SealedRecord(
+            id = recordId,
+            keepUntil = today.plusDays(WireLimits.RETENTION_DAYS + WireLimits.HORIZON_DAYS).toString(),
+            box = envelope.seal(bytes, instanceId, recordId),
+        )
     }
 
     /** A short text sealed under [recordId] — how a phone's name travels. */

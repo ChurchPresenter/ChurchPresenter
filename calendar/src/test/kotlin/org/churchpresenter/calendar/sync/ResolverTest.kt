@@ -67,6 +67,34 @@ class ResolverTest {
     }
 
     @Test
+    fun `a blank name takes the local name, and a service with no local copy a default`() {
+        val local = PlannedService(id = "svc", date = "2026-09-27", name = "Kept Name", startTime = "10:00")
+        assertEquals("Kept Name", resolver.resolve(remote().copy(name = " "), local)!!.service.name)
+        assertEquals("Service", resolver.resolve(remote().copy(name = ""), local = null)!!.service.name)
+    }
+
+    @Test
+    fun `timing is cleaned field by field`() {
+        val timing = mapOf(
+            "a" to RowTiming(startAt = "10:30", followsPrevious = true, runSeconds = -5, repeats = 3, atEnd = "next"),
+            "b" to RowTiming(startAt = "", followsPrevious = true, runSeconds = 100_000, repeats = -1, atEnd = "blank"),
+            "c" to RowTiming(startAt = "10:30", leadSeconds = 999_999, atEnd = "hold"),
+        )
+        val rows = arrayOf(
+            RemoteRow.Ministry("a", "A"), RemoteRow.Ministry("b", "B"), RemoteRow.Ministry("c", "C"),
+        )
+        val resolved = resolver.resolve(remote(*rows).copy(timing = timing), local = null)!!.service.timing
+
+        assertEquals(RowTiming(startAt = "10:30", runSeconds = 0, repeats = 3, atEnd = RowEnd.NEXT), resolved["a"])
+        val b = resolved.getValue("b")
+        assertTrue(b.followsPrevious)
+        assertEquals(WireLimits.MAX_PLANNED_SECONDS, b.runSeconds)
+        assertEquals(0, b.repeats)
+        assertEquals(RowEnd.BLANK, b.atEnd)
+        assertEquals(WireLimits.MAX_PLANNED_SECONDS, resolved.getValue("c").leadSeconds)
+    }
+
+    @Test
     fun `a reference becomes a verse row, an unreadable one a flagged placeholder`() {
         val resolved = resolver.resolve(remote(
             RemoteRow.Bible("a", "Psalms 100:1-5"),

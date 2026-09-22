@@ -101,6 +101,21 @@ class RelayClient(
         return decode(StateResponse.serializer(), reply).rev
     }
 
+    /** Writes one record of the desktop's own -- a catalog part; [ifRev] as the relay last answered, 0 for new. */
+    fun putRecord(token: String, record: SealedRecord, ifRev: Long): Long {
+        require(Sanitize.isId(record.id)) { "record id" }
+        val body = json.encodeToString(SealedRecord.serializer(), record)
+        val headers = mapOf("If-Match" to ifRev.toString())
+        val reply = call("PUT", "$base/records/${record.id}", token, body, extra = headers)
+        return decode(StateResponse.serializer(), reply).rev
+    }
+
+    fun deleteRecord(token: String, recordId: String): Long {
+        require(Sanitize.isId(recordId)) { "record id" }
+        val reply = call("DELETE", "$base/records/$recordId", token, body = null)
+        return decode(StateResponse.serializer(), reply).rev
+    }
+
     fun revokeDevice(token: String, deviceId: String) {
         require(Sanitize.isId(deviceId)) { "device id" }
         call("DELETE", "$base/devices/$deviceId", token, body = null)
@@ -132,16 +147,6 @@ class RelayClient(
         throw RelayFailure.Unreachable(e)
     }
 
-    /** What a non-2xx reply means; [registering] because 409 is "instance id taken" only on register. */
-    private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = when (reply.status) {
-        HTTP_UNAUTHORIZED ->
-            if (reply.body.contains(CLIENT_KEY_ERROR)) RelayFailure.ClientKey() else RelayFailure.Unauthorized()
-        HTTP_FORBIDDEN -> RelayFailure.Unauthorized()
-        HTTP_CONFLICT -> if (registering) RelayFailure.Taken() else RelayFailure.Conflict()
-        HTTP_PRECONDITION_FAILED -> RelayFailure.Conflict()
-        else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
-    }
-
     private fun <T> decode(serializer: KSerializer<T>, reply: RelayReply): T = try {
         json.decodeFromString(serializer, reply.body)
     } catch (e: IllegalArgumentException) {
@@ -150,13 +155,24 @@ class RelayClient(
 
     private companion object {
         val HTTP_OK_RANGE = 200..299
-        const val HTTP_UNAUTHORIZED = 401
-        const val HTTP_FORBIDDEN = 403
-        const val HTTP_CONFLICT = 409
-        const val HTTP_PRECONDITION_FAILED = 412
-        const val MAX_ERROR_CHARS = 200
-        const val CLIENT_KEY_ERROR = "\"client_key\""
     }
+}
+
+private const val HTTP_UNAUTHORIZED = 401
+private const val HTTP_FORBIDDEN = 403
+private const val HTTP_CONFLICT = 409
+private const val HTTP_PRECONDITION_FAILED = 412
+private const val MAX_ERROR_CHARS = 200
+private const val CLIENT_KEY_ERROR = "\"client_key\""
+
+/** What a non-2xx reply means; [registering] because 409 is "instance id taken" only on register. */
+private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = when (reply.status) {
+    HTTP_UNAUTHORIZED ->
+        if (reply.body.contains(CLIENT_KEY_ERROR)) RelayFailure.ClientKey() else RelayFailure.Unauthorized()
+    HTTP_FORBIDDEN -> RelayFailure.Unauthorized()
+    HTTP_CONFLICT -> if (registering) RelayFailure.Taken() else RelayFailure.Conflict()
+    HTTP_PRECONDITION_FAILED -> RelayFailure.Conflict()
+    else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
 }
 
 /** `GET` of the website's relay-config: the client key the relay currently expects. */

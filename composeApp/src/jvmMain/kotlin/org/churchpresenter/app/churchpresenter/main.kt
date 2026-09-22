@@ -446,6 +446,16 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     val presenterManager = remember {
         PresenterManager(showPresenterWindowInitially = !appSettings.projectionSettings.startOutputsHidden)
     }
+    // How long each thing actually stays on screen, kept beside the calendar it informs.
+    val liveDurationLog = remember {
+        LiveDurationLog(File(AppDataDir.resolve(), "durations.json")).also { log ->
+            // A reading is written when it closes -- the next row going live, or the outputs
+            // clearing -- so the last song of a session had been dying with the process. The
+            // app exits by System.exit from two menus and a window close, and a hook covers all
+            // three (and a kill) without each of them having to remember.
+            Runtime.getRuntime().addShutdownHook(Thread { log.wentBlank() })
+        }
+    }
     // The desktop's end of calendar sync with phones. Made here, beside the settings it writes
     // back to, so the startup round and the Settings card talk to the same object.
     val calendarSync = remember(appSettings.calendarStorageDirectory, appSettings.songSettings.storageDirectory) {
@@ -457,6 +467,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 appSettings = appSettings.copy(calendarSync = sync)
                 settingsManager.saveSettings(appSettings)
             },
+            typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
         )
     }
     LaunchedEffect(appSettings.atemSettings) {
@@ -846,16 +857,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     // clicked, a song sent from the Songs tab -- a due cue is skipped rather than fired over the
     // operator. See CueRunner.operatorLive and LiveDurationLog.showing.
     var engineLiveItem by remember { mutableStateOf<ScheduleItem?>(null) }
-    // How long each thing actually stays on screen, kept beside the calendar it informs.
-    val liveDurationLog = remember {
-        LiveDurationLog(File(AppDataDir.resolve(), "durations.json")).also { log ->
-            // A reading is written when it closes -- the next row going live, or the outputs
-            // clearing -- so the last song of a session had been dying with the process. The
-            // app exits by System.exit from two menus and a window close, and a hook covers all
-            // three (and a kill) without each of them having to remember.
-            Runtime.getRuntime().addShutdownHook(Thread { log.wentBlank() })
-        }
-    }
     // A phone planning a service asks how long each song usually runs here; the log is the answer.
     LaunchedEffect(liveDurationLog) {
         companionServer.typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) }

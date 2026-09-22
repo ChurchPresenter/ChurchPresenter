@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.PresetStore
+import org.churchpresenter.calendar.sync.CatalogSync
+import org.churchpresenter.calendar.sync.CatalogSyncStore
 import org.churchpresenter.calendar.sync.Envelope
 import org.churchpresenter.calendar.sync.RelayClient
 import org.churchpresenter.calendar.sync.RelayFailure
@@ -29,6 +31,8 @@ internal class CalendarRelayAccess(
     private val saveSettings: (CalendarSyncSettings) -> Unit,
     private val transport: RelayTransport,
     private val onSaved: () -> Unit,
+    /** How long a song usually runs here, for the catalog the phones plan with; null when never measured. */
+    private val typicalSeconds: (SongItem) -> Int? = { null },
 ) {
     /** Runs [block] with a client key, fetching one first if none is cached and once more if the relay refuses it. */
     fun <T> withClientKey(block: () -> T): T {
@@ -88,6 +92,7 @@ internal class CalendarRelayAccess(
         installId = installId(),
         songs = ::songs,
         onSaved = onSaved,
+        catalog = CatalogSync(CatalogSyncStore(folder), client(), sealing(), ::songs, typicalSeconds),
     )
 
     fun sealing(): Sealing {

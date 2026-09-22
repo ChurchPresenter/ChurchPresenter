@@ -85,6 +85,7 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `sync/Resolver.kt`, `sync/Sanitize.kt` | Wire → desktop: rows rebuilt against the library, presets and the local copy; strings cleaned and capped |
 | `sync/RelayClient.kt` | The HTTPS calls, over a `RelayTransport` taken as a parameter |
 | `sync/SyncCoordinator.kt` | One round: pull → open → resolve → `mergedWith` → save → push authoritative |
+| `sync/CatalogSync.kt` | The songbooks kept on the relay for the phones (`catalog:<songbook>` records, `CatalogRecord`), pushed only when a book's bytes changed; `catalog-sync.json` remembers what was pushed |
 
 ## Rules
 

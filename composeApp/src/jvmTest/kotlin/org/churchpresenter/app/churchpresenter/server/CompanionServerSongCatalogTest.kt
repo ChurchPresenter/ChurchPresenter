@@ -11,14 +11,18 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.testPort
+import org.churchpresenter.calendar.sync.CatalogRecord
+import org.churchpresenter.calendar.sync.CatalogSong
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-class CompanionServerSongDurationsTest {
+class CompanionServerSongCatalogTest {
 
     private lateinit var server: CompanionServer
     private lateinit var client: HttpClient
@@ -47,16 +51,21 @@ class CompanionServerSongDurationsTest {
     private fun song(number: String, title: String, songbook: String = "Hymnal") =
         SongItem(number = number, title = title, songbook = songbook)
 
-    private suspend fun durations(apiKey: String? = null) = client.get(
-        "http://127.0.0.1:$port${Constants.ENDPOINT_SONG_DURATIONS}",
+    private suspend fun catalog(apiKey: String? = null) = client.get(
+        "http://127.0.0.1:$port${Constants.ENDPOINT_SONG_CATALOG}",
     ) {
         if (apiKey != null) header(Constants.HEADER_API_KEY, apiKey)
     }
 
     @Test
-    fun `only measured songs are listed, keyed the way the desktop keys them`() = runBlocking<Unit> {
+    fun `every songbook is listed with its songs and their measured lengths`() = runBlocking<Unit> {
         server.updateSongs(
-            listOf(song("42", "Here I Am to Worship"), song("7", "Never Sung"), song("", "Untitled Chorus")),
+            listOf(
+                song("42", "Here I Am to Worship").copy(secondaryTitle = "Вот я, Господь"),
+                song("7", "Never Sung"),
+                song("", "Untitled Chorus"),
+                song("1", "Shout", songbook = "Praise"),
+            ),
         )
         server.typicalSeconds = { s ->
             when (s.title) {
@@ -66,34 +75,43 @@ class CompanionServerSongDurationsTest {
             }
         }
 
-        val response = durations()
+        val response = catalog()
         assertEquals(HttpStatusCode.OK, response.status)
-        val listed = json.decodeFromString(SongDurationsResponse.serializer(), response.bodyAsText()).durations
+        val text = response.bodyAsText()
+        // A song with no second title and no measured length carries neither, not a null for each.
+        assertFalse("null" in text, text)
+        assertTrue(""""t2":"Вот я, Господь"""" in text, text)
+        val books = json.decodeFromString(SongCatalogRecordsResponse.serializer(), text).books
 
         assertEquals(
             listOf(
-                SongDurationDto("Hymnal", "Hymnal::42", "Here I Am to Worship", 270),
-                SongDurationDto("Hymnal", "Hymnal::Untitled Chorus", "Untitled Chorus", 95),
+                CatalogRecord(
+                    "Hymnal",
+                    songs = listOf(
+                        CatalogSong("7", "Never Sung"),
+                        CatalogSong("42", "Here I Am to Worship", 270, t2 = "Вот я, Господь"),
+                        CatalogSong("", "Untitled Chorus", 95),
+                    ),
+                ),
+                CatalogRecord("Praise", songs = listOf(CatalogSong("1", "Shout"))),
             ),
-            listed,
+            books,
         )
     }
 
     @Test
-    fun `nothing measured means an empty list, not an error`() = runBlocking<Unit> {
-        server.updateSongs(listOf(song("1", "Amazing Grace")))
-
-        val response = durations()
+    fun `no songs means no books, not an error`() = runBlocking<Unit> {
+        val response = catalog()
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals("""{"durations":[]}""", response.bodyAsText())
+        assertEquals("""{"books":[]}""", response.bodyAsText())
     }
 
     @Test
     fun `the api key gate applies`() = runBlocking<Unit> {
         server.updateApiKey(enabled = true, key = "secret")
 
-        assertEquals(HttpStatusCode.Unauthorized, durations().status)
-        assertEquals(HttpStatusCode.OK, durations(apiKey = "secret").status)
+        assertEquals(HttpStatusCode.Unauthorized, catalog().status)
+        assertEquals(HttpStatusCode.OK, catalog(apiKey = "secret").status)
     }
 }

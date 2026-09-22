@@ -4,6 +4,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import org.churchpresenter.calendar.sync.CatalogRecord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
@@ -27,7 +28,9 @@ data class SongDto(
     val number: String,
     val title: String,
     val tune: String = "",
-    val author: String = ""
+    val author: String = "",
+    /** The title in the second language of a bilingual song; empty otherwise. */
+    val secondaryTitle: String = "",
 )
 
 /** One songbook entry — contains its songs inline. */
@@ -55,16 +58,12 @@ data class SongCatalogResponse(
 )
 
 /**
- * How long a song typically runs on screen here, measured over past services -- what a phone
- * plans a service with. Only songs that have been measured are listed. [songId] is the desktop's
- * own key, `songbook::number`, the one a calendar row names a song by.
+ * Response for GET /api/song-catalog: every songbook as a phone plans a service with it -- number,
+ * title and the song's usual length here. The same records the desktop keeps on the calendar
+ * relay, so a phone reads one shape whichever way the list reaches it.
  */
 @Serializable
-data class SongDurationDto(val songbook: String, val songId: String, val title: String, val seconds: Int)
-
-/** Response for GET /api/song-durations. */
-@Serializable
-data class SongDurationsResponse(val durations: List<SongDurationDto>)
+data class SongCatalogRecordsResponse(val books: List<CatalogRecord>)
 
 @Serializable
 data class SongSectionDto(

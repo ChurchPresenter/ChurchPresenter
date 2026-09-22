@@ -89,8 +89,9 @@ class FakeRelay(
                 RelayReply(412, """{"error":"precondition_failed"}""")
             path == "state" && method == "PUT" -> {
                 val state = json.decodeFromString(StateRequest.serializer(), body!!)
-                records.clear()
-                tombstones.clear()
+                // The songbooks stand; a state push replaces the calendar only.
+                records.keys.filterNot { it.startsWith(CATALOG_PREFIX) }.forEach(records::remove)
+                tombstones.keys.filterNot { it.startsWith(CATALOG_PREFIX) }.forEach(tombstones::remove)
                 state.records.forEach { r ->
                     rev += 1
                     records[r.id] = r.copy(updatedAt = "2026-09-30T00:00:00Z", updatedBy = "desktop", rev = rev)
@@ -99,6 +100,20 @@ class FakeRelay(
                 rev += 1
                 presetsBox = state.presetsBox
                 lastDesktopInstall = headers["X-Install"].orEmpty()
+                RelayReply(200, """{"rev":$rev}""")
+            }
+            path.startsWith("records/") && method == "PUT" -> {
+                val record = json.decodeFromString(SealedRecord.serializer(), body!!)
+                rev += 1
+                tombstones.remove(record.id)
+                records[record.id] = record.copy(updatedAt = "2026-09-30T00:00:00Z", updatedBy = "desktop", rev = rev)
+                RelayReply(200, """{"rev":$rev}""")
+            }
+            path.startsWith("records/") && method == "DELETE" -> {
+                val id = path.removePrefix("records/")
+                rev += 1
+                records.remove(id)
+                tombstones[id] = RemoteTombstone(id, "2026-09-30T00:00:00Z")
                 RelayReply(200, """{"rev":$rev}""")
             }
             path.startsWith("devices/") && method == "PUT" -> {

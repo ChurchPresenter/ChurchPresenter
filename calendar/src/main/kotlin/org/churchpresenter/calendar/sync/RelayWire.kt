@@ -165,6 +165,23 @@ data class StateRequest(
 /** The record id the preset index is sealed under. */
 const val PRESETS_RECORD = "presets"
 
+/** The prefix of a song catalog record: `catalog:<songbook>` or `catalog:<songbook>:<part>`. */
+const val CATALOG_PREFIX = "catalog:"
+
+/**
+ * One song as the catalog carries it: number, title, its usual length in seconds if measured, and
+ * for a bilingual song the title in the second language.
+ */
+@Serializable
+data class CatalogSong(val n: String, val t: String, val s: Int? = null, val t2: String? = null)
+
+/**
+ * One songbook (or one part of a large one) as the desktop keeps it on the relay, so a phone can
+ * plan with the real song list and lengths without ever having been on the church network.
+ */
+@Serializable
+data class CatalogRecord(val songbook: String, val part: Int = 0, val songs: List<CatalogSong> = emptyList())
+
 @Serializable
 data class StateResponse(val rev: Long)
 
@@ -175,6 +192,9 @@ object WireLimits {
     const val DETAIL_CHARS = 200
     const val ROWS_PER_SERVICE = 200
     const val SERVICES_PER_PUSH = 500
+    /** Songs per catalog record; a bigger book is split into parts so each box stays under the relay's cap. */
+    const val CATALOG_PART_SONGS = 2_000
+    const val CATALOG_SONGS_MAX = 20_000
     const val MAX_PLANNED_SECONDS = 24 * 60 * 60
     const val MAX_REPEATS = 99
     /** Services older than this are neither pushed nor kept by the relay. */

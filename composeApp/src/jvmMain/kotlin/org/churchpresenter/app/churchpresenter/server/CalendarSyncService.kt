@@ -22,6 +22,7 @@ import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
 import java.time.Instant
@@ -66,6 +67,8 @@ class CalendarSyncService(
     private val saveSettings: (CalendarSyncSettings) -> Unit,
     private val transport: RelayTransport = HttpRelayTransport(),
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** How long a song usually runs here -- the app's duration log -- for the catalog the phones plan with. */
+    private val typicalSeconds: (SongItem) -> Int? = { null },
 ) {
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
@@ -75,7 +78,8 @@ class CalendarSyncService(
 
     private val watcher = CalendarFileWatcher(folder, io)
     private val lock = Mutex()
-    private val relay = CalendarRelayAccess(folder, songFolder, settings, saveSettings, transport, watcher::savedHere)
+    private val relay =
+        CalendarRelayAccess(folder, songFolder, settings, saveSettings, transport, watcher::savedHere, typicalSeconds)
 
     /** The startup round — pull, merge, push — within [timeoutMs]. Returns whether it completed. */
     suspend fun syncOnStartup(timeoutMs: Long = STARTUP_TIMEOUT_MS): Boolean {

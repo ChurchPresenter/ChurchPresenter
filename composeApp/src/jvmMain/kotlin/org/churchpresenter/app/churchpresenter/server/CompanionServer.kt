@@ -59,6 +59,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.toDto
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.calendar.sync.Projection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AtemSettings
@@ -306,12 +307,9 @@ class CompanionServer {
      */
     @Volatile var typicalSeconds: (SongItem) -> Int? = { null }
 
-    /** Every song that has a measured length, for a phone planning a service. */
-    fun songDurations(): SongDurationsResponse = SongDurationsResponse(
-        _songs.mapNotNull { song ->
-            typicalSeconds(song)?.let { SongDurationDto(song.songbook, song.songId, song.title, it) }
-        },
-    )
+    /** The library as songbook records, with each song's usual length, for a phone planning a service. */
+    fun songCatalog(): SongCatalogRecordsResponse =
+        SongCatalogRecordsResponse(Projection.catalog(_songs, typicalSeconds).values.toList())
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */

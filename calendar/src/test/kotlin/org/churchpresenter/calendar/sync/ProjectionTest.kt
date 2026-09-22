@@ -33,6 +33,26 @@ class ProjectionTest {
     )
 
     @Test
+    fun `every kind of row has a wire kind, so a phone can draw an icon for anything`() {
+        val kinds: List<Pair<ScheduleItem, String>> = listOf(
+            ScheduleItem.LabelItem("a", "Worship", "#FFF", "#000") to RemoteKind.SECTION,
+            ScheduleItem.SongItem("b", 1, "Song", "Book") to RemoteKind.SONG,
+            ScheduleItem.BibleVerseItem("c", "John", 3, 16, "") to RemoteKind.BIBLE,
+            ScheduleItem.MinistryItem("d", "Offering") to RemoteKind.MINISTRY,
+            ScheduleItem.PictureItem("e", "/p", "Pics", 3) to RemoteKind.PICTURES,
+            ScheduleItem.PresentationItem("f", "/deck.pptx", "Deck", 5, "pptx") to RemoteKind.PRESENTATION,
+            ScheduleItem.MediaItem("g", "/clip.mp4", "Clip", "local") to RemoteKind.MEDIA,
+            ScheduleItem.LowerThirdItem("h", "lt", "Name", false, 0L) to RemoteKind.LOWER_THIRD,
+            ScheduleItem.AnnouncementItem("i", "5:00", isTimer = true) to RemoteKind.TIMER,
+            ScheduleItem.AnnouncementItem("j", "Welcome") to RemoteKind.ANNOUNCEMENT,
+            ScheduleItem.WebsiteItem("k", "https://x", "Site") to RemoteKind.WEBSITE,
+            ScheduleItem.SceneItem("l", "scene-1", "Scene") to RemoteKind.SCENE,
+            ScheduleItem.CueItem("m", action = "blank") to RemoteKind.CUE,
+        )
+        for ((item, kind) in kinds) assertEquals(kind, Projection.kindOf(item), item.toString())
+    }
+
+    @Test
     fun `phone kinds keep their content, everything else becomes a ref`() {
         val rows = Projection.service(service).rows
 
