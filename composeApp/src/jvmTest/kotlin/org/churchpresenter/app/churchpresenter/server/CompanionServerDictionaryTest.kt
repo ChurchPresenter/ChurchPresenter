@@ -142,4 +142,39 @@ class CompanionServerDictionaryTest {
         assertTrue(first["bookName"]?.jsonPrimitive?.content?.isNotBlank() == true)
         assertTrue(first["reference"]?.jsonPrimitive?.content?.isNotBlank() == true)
     }
+
+    @Test
+    fun `a blank number is a bad request on both the entry and its verses`() = runBlocking {
+        assertEquals(HttpStatusCode.BadRequest, client.get(url("/api/dictionary/%20")).status)
+        assertEquals(HttpStatusCode.BadRequest, client.get(url("/api/dictionary/%20/verses")).status)
+    }
+
+    // ── GET /api/bible, by book name ───────────────────────────────────────────
+
+    @Test
+    fun `a book asked for by name with a chapter comes back with only that chapter`() = runBlocking {
+        server.updateBible(SpbFixture.loadedBible(Files.createTempDirectory("cp-bible-route").toFile()), "KJV")
+
+        val response = client.get(url("${Constants.ENDPOINT_BIBLE}?book=genesis&chapter=2"))
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val books = body["books"]!!.jsonArray
+        assertEquals(1, books.size, "the name matches one book, whatever its case")
+        val chapters = books[0].jsonObject["chapters"]!!.jsonArray
+        assertEquals(listOf(2), chapters.map { it.jsonObject["chapter"]!!.jsonPrimitive.int })
+        assertEquals(1, body["verse-total"]?.jsonPrimitive?.int, "Genesis 2 has one verse in the fixture")
+    }
+
+    @Test
+    fun `a book the Bible does not have comes back as no books rather than an error`() = runBlocking {
+        server.updateBible(SpbFixture.loadedBible(Files.createTempDirectory("cp-bible-route-none").toFile()), "KJV")
+
+        val response = client.get(url("${Constants.ENDPOINT_BIBLE}?book=Tobit"))
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = json.parseToJsonElement(response.bodyAsText()).jsonObject
+        assertEquals(0, body["book-total"]?.jsonPrimitive?.int)
+        assertEquals(0, body["books"]!!.jsonArray.size)
+    }
 }

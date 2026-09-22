@@ -27,6 +27,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -200,6 +201,63 @@ class RemoteCommandEffectsTest {
 
         assertNull(presenter.selectedSlide.value)
         assertEquals(Presenting.NONE, presenter.presentingMode.value)
+    }
+
+    @Test
+    fun `selecting a slide stages it, its successor and its notes, and takes the deck live`() = runComposeUiTest {
+        presentations.slideFiles.addAll(images("s1.png", "s2.png", "s3.png"))
+        val flows = Flows()
+        effects(flows)
+
+        emit(flows.selectSlide, "deck" to 1)
+        // The slides are decoded off the main thread, then staged, then the deck goes live -- that
+        // last step is the signal the whole selection has landed.
+        waitUntil("the deck went live") { presenter.presentingMode.value == Presenting.PRESENTATION }
+
+        assertEquals(1, presentations.selectedSlideIndex)
+        assertNotNull(presenter.nextSlide.value, "and the one after it is staged for the stage monitor")
+        assertEquals("", presenter.presenterNotes.value, "a deck with no notes has none to show")
+        assertEquals(Presenting.PRESENTATION, presenter.presentingMode.value)
+        assertTrue(presenter.showPresenterWindow.value)
+    }
+
+    @Test
+    fun `selecting the last slide stages nothing after it`() = runComposeUiTest {
+        presentations.slideFiles.addAll(images("s1.png", "s2.png"))
+        val flows = Flows()
+        effects(flows)
+
+        emit(flows.selectSlide, "deck" to 1)
+        waitUntil("the slide decoded") { presenter.selectedSlide.value != null }
+
+        assertNull(presenter.nextSlide.value)
+    }
+
+    @Test
+    fun `selecting a slide while the deck is already live leaves the output where it is`() = runComposeUiTest {
+        presentations.slideFiles.addAll(images("s1.png", "s2.png"))
+        presenter.setPresentingMode(Presenting.PRESENTATION)
+        presenter.setShowPresenterWindow(false)
+        val flows = Flows()
+        effects(flows)
+
+        emit(flows.selectSlide, "deck" to 0)
+        waitUntil("the slide decoded") { presenter.selectedSlide.value != null }
+
+        assertEquals(0, presentations.selectedSlideIndex)
+        assertEquals(Presenting.PRESENTATION, presenter.presentingMode.value)
+        assertFalse(presenter.showPresenterWindow.value, "an already-live deck is not re-opened on screen")
+    }
+
+    @Test
+    fun `a goto for a slide the deck has selects it`() = runComposeUiTest {
+        presentations.slideFiles.addAll(images("s1.png", "s2.png"))
+        val flows = Flows()
+        effects(flows)
+
+        emit(flows.goto, 1)
+
+        assertEquals(1, presentations.selectedSlideIndex)
     }
 
     @Test
