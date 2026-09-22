@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Праслаўленне адбываецца спераду, а не на экране — задайце працягласць у радку; аўтаматызаваць няма чаго</string>
     <string name="calendar_ministry_what">Што адбываецца</string>
     <string name="calendar_ministry_who">Хто або нататка</string>
+    <string name="calendar_cloud_sync">Сінхранізаваць з воблакам і мабільнымі прыладамі</string>
+    <string name="calendar_cloud_sync_sub">Трымае гэты каляндар узгодненым з тэлефонамі праз рэтранслятар. Калі выключана, нішто не пакідае гэты камп’ютар</string>
 </resources>

@@ -16,6 +16,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_auto_load
 import org.churchpresenter.calendar.generated.resources.calendar_auto_load_lead
 import org.churchpresenter.calendar.generated.resources.calendar_auto_load_lead_sub
 import org.churchpresenter.calendar.generated.resources.calendar_auto_load_sub
+import org.churchpresenter.calendar.generated.resources.calendar_cloud_sync
+import org.churchpresenter.calendar.generated.resources.calendar_cloud_sync_sub
 import org.churchpresenter.calendar.generated.resources.calendar_default_item
 import org.churchpresenter.calendar.generated.resources.calendar_default_item_sub
 import org.churchpresenter.calendar.generated.resources.calendar_default_sermon
@@ -26,6 +28,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_time_12h
 import org.churchpresenter.calendar.generated.resources.calendar_time_24h
 import org.churchpresenter.calendar.generated.resources.calendar_time_format
 import org.churchpresenter.calendar.generated.resources.calendar_time_format_sub
+import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.model.AUTO_LOAD_LEAD_MAX
 import org.churchpresenter.calendar.model.AUTO_LOAD_LEAD_MIN
 import org.churchpresenter.calendar.model.CalendarPreferences
@@ -45,9 +48,16 @@ private val FORMAT_SELECTOR = 150.dp
 private const val MORNING_EXAMPLE = "10:00"
 private const val EVENING_EXAMPLE = "18:30"
 
-/** The settings dialog's `Defaults` tab: the clock format, the default times and lengths, and auto-load. */
+/**
+ * The settings dialog's `Defaults` tab: the clock format, the default times and lengths, auto-load,
+ * and -- when the app offers it -- the cloud sync switch.
+ */
 @Composable
-internal fun DefaultsTab(preferences: CalendarPreferences, onChange: (CalendarPreferences) -> Unit) {
+internal fun DefaultsTab(
+    preferences: CalendarPreferences,
+    onChange: (CalendarPreferences) -> Unit,
+    cloudSync: CalendarCloudSync? = null,
+) {
     val use24Hour = preferences.use24HourClock
     SettingCard {
         CardText(
@@ -114,6 +124,15 @@ internal fun DefaultsTab(preferences: CalendarPreferences, onChange: (CalendarPr
                 parseLeadMinutes(text)?.let { onChange(preferences.copy(autoLoadLeadMinutes = it)) }
             },
         )
+    }
+    if (cloudSync != null) {
+        SettingCard {
+            CardText(
+                title = stringResource(Res.string.calendar_cloud_sync),
+                subtitle = stringResource(Res.string.calendar_cloud_sync_sub),
+            )
+            Switch(checked = cloudSync.enabled(), onCheckedChange = cloudSync.setEnabled)
+        }
     }
 }
 

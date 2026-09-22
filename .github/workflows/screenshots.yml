@@ -25,7 +25,8 @@ name: Screenshots
 #
 # To update the website's screenshots, download the `screenshots` artifact from a run on `main`
 # rather than recording locally — those are the Linux renders, and they are consistent with each
-# other.
+# other. The website's homepage also wants a retina render of the same handful of surfaces, which
+# is what the `screenshots-2x` artifact below is for — see the 2x steps for which classes and why.
 #
 # Images are matched between the two sides by their path **relative to `image-directory-path`**, so
 # a capture written outside that root is not reported as changed — it silently stops being compared.
@@ -97,6 +98,48 @@ jobs:
           path: composeApp/screenshots
           retention-days: 30
           if-no-files-found: error
+
+      # Retina renders for the website's homepage only — the wiki and blog take the 1x capture
+      # above regardless of screen density (see import-screenshots.mjs in ChurchPresenter-Website).
+      # Limited to the classes behind the seven homepage images so this doesn't re-run the other
+      # ~20 AppPreview* tests a second time for output nothing reads. -PpreviewDensity=2 writes to
+      # the SAME filenames under composeApp/screenshots (roborazzi.outputDir has no density-aware
+      # naming), so this overwrites just those files in the working copy with the 2x version.
+      - name: Render homepage screenshots at 2x
+        timeout-minutes: 10
+        run: |
+          ./gradlew :composeApp:recordRoborazziJvm -PpreviewDensity=2 \
+            --tests '*AppPreviewBibleScreenshotTest' \
+            --tests '*AppPreviewSongsScreenshotTest' \
+            --tests '*AppPreviewCanvasScreenshotTest' \
+            --tests '*AppPreviewQAScreenshotTest' \
+            --tests '*AppPreviewPresentationScreenshotTest' \
+            --tests '*AppPreviewMediaScreenshotTest' \
+            --tests '*ScheduleTabScreenshotTest'
+
+      # Uploads the whole tree, same as the 1x artifact above — simpler than teasing out just the
+      # seven changed files, and the website's importer only ever reads specific paths from this by
+      # name, so the untouched (still-1x) files alongside them are inert.
+      - name: Upload the 2x screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-2x
+          path: composeApp/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
+      # Puts the working copy back to the 1x renders the step above overwrote, so reg-actions below
+      # compares against the same density the committed baseline and the `screenshots` artifact use.
+      - name: Restore homepage screenshots to 1x
+        run: |
+          ./gradlew :composeApp:recordRoborazziJvm \
+            --tests '*AppPreviewBibleScreenshotTest' \
+            --tests '*AppPreviewSongsScreenshotTest' \
+            --tests '*AppPreviewCanvasScreenshotTest' \
+            --tests '*AppPreviewQAScreenshotTest' \
+            --tests '*AppPreviewPresentationScreenshotTest' \
+            --tests '*AppPreviewMediaScreenshotTest' \
+            --tests '*ScheduleTabScreenshotTest'
 
       - name: Compare with the base branch
         uses: reg-viz/reg-actions@v3

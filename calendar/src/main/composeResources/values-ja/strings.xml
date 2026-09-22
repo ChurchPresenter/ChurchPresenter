@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">奉仕は前で行われ、画面には出ません — 行で長さを指定してください。自動化するものはありません</string>
     <string name="calendar_ministry_what">何をするか</string>
     <string name="calendar_ministry_who">誰が、またはメモ</string>
+    <string name="calendar_cloud_sync">クラウドとモバイル端末と同期する</string>
+    <string name="calendar_cloud_sync_sub">リレーを通じてこのカレンダーを電話と同期させます。オフの場合、何もこのコンピューターから出ません</string>
 </resources>

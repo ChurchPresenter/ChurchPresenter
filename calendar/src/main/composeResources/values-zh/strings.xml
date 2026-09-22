@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">事奉在台前进行，不在屏幕上 — 在该行为它设定时长；没有可自动化的内容</string>
     <string name="calendar_ministry_what">发生什么</string>
     <string name="calendar_ministry_who">谁，或备注</string>
+    <string name="calendar_cloud_sync">与云端和移动设备同步</string>
+    <string name="calendar_cloud_sync_sub">通过中继使此日历与手机保持一致。关闭后，任何内容都不会离开这台电脑</string>
 </resources>

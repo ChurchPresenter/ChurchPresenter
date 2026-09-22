@@ -62,6 +62,8 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.theme.semantic
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll
+import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll_detail
 import churchpresenter.composeapp.generated.resources.allow
 import churchpresenter.composeapp.generated.resources.allow_for_session
 import churchpresenter.composeapp.generated.resources.allow_permanently
@@ -111,6 +113,8 @@ enum class RemoteEventType {
     REMOVE_FROM_SCHEDULE,
     PROJECT,
     PRESENTATION_CONNECT,
+    /** A phone asking to plan the calendar through the relay. */
+    CALENDAR_ENROLL,
     PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
     UPLOAD,     // instant: presentation or picture upload
     CLEAR,      // instant: POST /api/clear
@@ -159,6 +163,7 @@ internal fun resolveRemoteEventPresentation(
         RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_api_remove_from_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_api_project)
         RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_api_presentation_connect)
+        RemoteEventType.CALENDAR_ENROLL -> stringResource(Res.string.remote_api_calendar_enroll)
         RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_api_qa_add)
         RemoteEventType.QA_EDIT         -> stringResource(Res.string.remote_api_qa_edit)
         RemoteEventType.QA_DELETE       -> stringResource(Res.string.remote_api_qa_delete)
@@ -175,6 +180,7 @@ internal fun resolveRemoteEventPresentation(
         RemoteEventType.REMOVE_FROM_SCHEDULE -> Icons.Filled.EventBusy
         RemoteEventType.PROJECT         -> Icons.Filled.Cast
         RemoteEventType.PRESENTATION_CONNECT,
+        RemoteEventType.CALENDAR_ENROLL,
         RemoteEventType.QA_ADMIN_CONNECT -> Icons.Filled.Smartphone
         RemoteEventType.QA_ADD,
         RemoteEventType.QA_EDIT,
@@ -195,6 +201,7 @@ internal fun resolveRemoteEventPresentation(
     val bodyTitle = event.title.ifBlank {
         when (event.type) {
             RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_api_presentation_connect_detail)
+            RemoteEventType.CALENDAR_ENROLL -> stringResource(Res.string.remote_api_calendar_enroll_detail)
             RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_api_qa_admin_connect_detail)
             else -> ""
         }
