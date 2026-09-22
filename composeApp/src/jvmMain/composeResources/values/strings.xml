@@ -2072,6 +2072,13 @@
     <string name="tab_label_style_text">Text only</string>
     <string name="tab_label_style_icons_and_text">Icons and text</string>
     <string name="tab_label_style_icons">Icons only</string>
+    <string name="tab_label_style_button_hint">Tab labels: text, icons, or both. Click to change.</string>
+    <string name="tab_label_margin_hint">Tab spacing: how much room each tab gets. Click to change.</string>
+    <string name="tab_label_margin_small">Small</string>
+    <string name="tab_label_margin_small_normal">Medium-small</string>
+    <string name="tab_label_margin_normal">Normal</string>
+    <string name="tab_label_margin_normal_large">Medium-large</string>
+    <string name="tab_label_margin_large">Large</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>

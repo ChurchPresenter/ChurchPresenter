@@ -10,7 +10,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
@@ -172,16 +171,15 @@ class SystemSettingsTabTest {
             }
         }
 
+        // One press of the style button moves to the next style.
         onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
-        waitForIdle()
-        onNode(hasTextExactly("Icons and text") and hasClickAction()).performClick()
         waitForIdle()
 
         assertEquals(TabLabelStyle.ICONS_AND_TEXT, applied?.tabLabelStyle)
     }
 
     @Test
-    fun `the tab label dropdown shows the stored style`() = runComposeUiTest {
+    fun `the tab label button shows the stored style`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(settings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS))

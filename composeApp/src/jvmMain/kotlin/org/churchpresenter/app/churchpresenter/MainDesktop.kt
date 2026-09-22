@@ -1494,6 +1494,7 @@ fun MainDesktop(
                             visibleTabs = visibleTabs,
                             selectedTabIndex = effectiveTabIndex,
                             labelStyle = appSettings.tabLabelStyle,
+                            labelMargin = appSettings.tabLabelMargin,
                             onTabSelected = { selectedTabIndex = it }
                         )
                         // Tab visibility dropdown button

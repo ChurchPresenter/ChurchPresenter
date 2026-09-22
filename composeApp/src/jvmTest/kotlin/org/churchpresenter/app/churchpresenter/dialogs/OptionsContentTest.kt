@@ -162,9 +162,10 @@ class OptionsContentTest {
 
     @Test
     fun `picking a label style on the System tab restyles the dialog's own tabs before Apply`() = dialog { result ->
+        // The style button steps Text only -> Icons and text -> Icons only, one press at a time.
         onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
         waitForIdle()
-        onNode(hasTextExactly("Icons only") and hasClickAction()).performClick()
+        onNode(hasTextExactly("Icons and text") and hasClickAction()).performClick()
         waitForIdle()
 
         iconTab("Bible").assertExists()
