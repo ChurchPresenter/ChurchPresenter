@@ -48,44 +48,32 @@ class SyncCoordinatorTest {
         onSaved = { saves++ },
     )
 
-    private fun withCatalog(installId: String = "install-A") = SyncCoordinator(
-        store = store,
-        presetStore = presetStore,
-        client = RelayClient("https://relay.example", "inst", installId, relay),
-        sealing = sealing,
-        installId = installId,
-        songs = { songs },
-        today = { today },
-        now = { Instant.parse("2026-09-20T12:00:00Z") },
-        onSaved = { saves++ },
-        catalog = CatalogSync(
-            CatalogSyncStore(folder),
-            RelayClient("https://relay.example", "inst", installId, relay),
-            sealing,
-            { songs },
-            { 270 },
-            { today },
-            { Instant.parse("2026-09-20T12:00:00Z") },
-        ),
+    private fun catalogSync() = CatalogSync(
+        CatalogSyncStore(folder),
+        RelayClient("https://relay.example", "inst", "install-A", relay),
+        sealing,
+        { songs },
+        { 270 },
+        { today },
+        { Instant.parse("2026-09-20T12:00:00Z") },
     )
 
     @Test
-    fun `the songbooks ride along after the calendar, survive the next push, and are skipped coming back`() {
+    fun `the songbooks survive a calendar push and are passed over when a pull hands them back`() {
         val token = registered()
         store.save(CalendarDocument(services = listOf(localService("s1", "Sunday"))))
+        val first = coordinator().sync(token, cursor = 0)
+        assertEquals(1, catalogSync().push(token))
+        assertTrue("catalog:Hymnal" in relay.records)
 
-        val first = withCatalog().sync(token, cursor = 0)
-        assertEquals(1, first.catalogParts)
+        // The next round replaces the calendar: the songbook stands, and the pull that hands it
+        // back (the cursor stopped before it) does not turn it into a service.
+        val second = coordinator().sync(token, first.cursor)
         assertTrue("catalog:Hymnal" in relay.records)
         assertTrue("s1" in relay.records)
-
-        // The next round: the calendar is replaced, the songbook stands, and the pull that hands
-        // the songbook back (the cursor stopped before it) does not turn it into a service.
-        val second = withCatalog().sync(token, first.cursor)
-        assertEquals(0, second.catalogParts)
-        assertTrue("catalog:Hymnal" in relay.records)
         assertEquals(listOf("s1"), store.load().document.services.map { it.id })
         assertEquals(0, second.unreadableRecords)
+        assertEquals(0, catalogSync().push(token))
     }
 
     private fun localService(id: String, name: String, updatedAt: String = "2026-09-19T00:00:00Z") = PlannedService(

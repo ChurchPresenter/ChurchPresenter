@@ -24,8 +24,6 @@ class SyncOutcome(
     val devices: List<PairedDevice> = emptyList(),
     /** Records that did not open under this instance's key. */
     val unreadableRecords: Int = 0,
-    /** Songbook parts written to or deleted from the relay on this round; see [CatalogSync]. */
-    val catalogParts: Int = 0,
 )
 
 /** A paired phone as the settings card lists it. */
@@ -48,8 +46,6 @@ class SyncCoordinator(
     private val today: () -> LocalDate = LocalDate::now,
     private val now: () -> Instant = Instant::now,
     private val onSaved: () -> Unit = {},
-    /** The songbooks kept on the relay for the phones; null when the app offers none. */
-    private val catalog: CatalogSync? = null,
 ) {
 
     /** Pull, merge, save and push. Retries the push when the relay moved on mid-round. */
@@ -65,7 +61,7 @@ class SyncCoordinator(
             }
             try {
                 val rev = push(token, changes.rev, merged.document)
-                return merged.outcome(rev, devices, catalogParts = pushCatalog(token))
+                return merged.outcome(rev, devices)
             } catch (_: RelayFailure.Conflict) {
                 since = changes.rev
             }
@@ -88,17 +84,6 @@ class SyncCoordinator(
             pages++
         }
         return changes to merged
-    }
-
-    /**
-     * The songbooks after the calendar, and never in its way: a catalog failure is this round's
-     * loss, not the calendar's. The cursor is left where the calendar push put it -- a phone may
-     * write between the two, and skipping past the parts would skip past that -- so the next pull
-     * hands the parts back once, and `absorb` passes over them by their prefix.
-     */
-    private fun pushCatalog(token: String): Int {
-        val sync = catalog ?: return 0
-        return runCatching { sync.push(token) }.getOrDefault(0)
     }
 
     /** Pushes the local file as it stands; a phone edit in the meantime turns this into a full [sync]. */
@@ -132,7 +117,8 @@ class SyncCoordinator(
         var dropped = 0
         var unreadable = 0
         val services = changes.records.mapNotNull { record ->
-            // The songbooks are ours; they come back only because a pull is everything since the cursor.
+            // The songbooks are ours (see CatalogSync); they come back only because a pull is
+            // everything since the cursor, and the cursor is never moved past them on purpose.
             if (record.id.startsWith(CATALOG_PREFIX)) return@mapNotNull null
             val remote = sealing.open(record)
             if (remote == null) {
@@ -167,8 +153,8 @@ class SyncCoordinator(
         val dropped: Int,
         val unreadable: Int,
     ) {
-        fun outcome(cursor: Long, devices: List<PairedDevice>, otherDesktop: String = "", catalogParts: Int = 0) =
-            SyncOutcome(cursor, phoneChanges, unresolved, dropped, otherDesktop, devices, unreadable, catalogParts)
+        fun outcome(cursor: Long, devices: List<PairedDevice>, otherDesktop: String = "") =
+            SyncOutcome(cursor, phoneChanges, unresolved, dropped, otherDesktop, devices, unreadable)
 
         /** This page's counts added to the earlier ones; the document is the later, fuller merge. */
         fun plus(next: Absorbed) = Absorbed(

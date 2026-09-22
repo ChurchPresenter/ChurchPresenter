@@ -92,8 +92,10 @@ internal class CalendarRelayAccess(
         installId = installId(),
         songs = ::songs,
         onSaved = onSaved,
-        catalog = CatalogSync(CatalogSyncStore(folder), client(), sealing(), ::songs, typicalSeconds),
     )
+
+    /** The songbooks kept on the relay for the phones -- pushed on its own, after a round. */
+    fun catalog(): CatalogSync = CatalogSync(CatalogSyncStore(folder), client(), sealing(), ::songs, typicalSeconds)
 
     fun sealing(): Sealing {
         val current = settings()
@@ -109,8 +111,8 @@ internal class CalendarRelayAccess(
         return fresh
     }
 
-    fun token(): String = settings().desktopToken
-    fun cursor(): Long = settings().cursor
+    val token: String get() = settings().desktopToken
+    val cursor: Long get() = settings().cursor
 
     @Volatile
     private var songCache: List<SongItem>? = null

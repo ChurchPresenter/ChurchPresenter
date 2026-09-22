@@ -96,22 +96,43 @@ class CalendarSyncService(
     }
 
     /**
-     * Keeps syncing until cancelled: pushes every local save, and pulls on a timer while the app is
-     * open. The timer also registers a desktop that could not be registered when sync was switched
-     * on -- the relay unreachable for that first second -- so a bad moment is not permanent.
+     * Keeps syncing until cancelled: pushes every local save, pulls on a timer while the app is
+     * open, and keeps the songbooks on the relay current. The timer also registers a desktop that
+     * could not be registered when sync was switched on -- the relay unreachable for that first
+     * second -- so a bad moment is not permanent.
      */
     suspend fun run(pullIntervalMs: Long = PULL_INTERVAL_MS) = coroutineScope {
         if (!settings().enabled) return@coroutineScope
-        launch { watcher.run(onChanged = { round { it.pushLocal(relay.token(), relay.cursor()) } }) }
+        launch { watcher.run(onChanged = { round { it.pushLocal(relay.token, relay.cursor) } }) }
         launch {
+            // The songbooks straight away -- the startup round did not wait for them -- then with
+            // every pull; a library that has not changed costs a hash and nothing else.
+            pushCatalog()
             while (coroutineContext.isActive) {
                 delay(pullIntervalMs)
-                if (registerIfNeeded()) syncNow()
+                if (registerIfNeeded()) {
+                    syncNow()
+                    pushCatalog()
+                }
             }
         }
     }
 
-    suspend fun syncNow(): Boolean = round { it.sync(relay.token(), relay.cursor()) }
+    /** The songbooks the phones plan with, written only where they changed; never in a round's way. */
+    suspend fun pushCatalog(): Int {
+        if (!settings().enabled || !settings().isPaired) return 0
+        return withContext(io) {
+            try {
+                relay.withClientKey { relay.catalog().push(relay.token) }
+            } catch (e: RelayFailure) {
+                // Reported where the calendar's own failures are; the next good round clears it.
+                _status.value = failure(e)
+                0
+            }
+        }
+    }
+
+    suspend fun syncNow(): Boolean = round { it.sync(relay.token, relay.cursor) }
 
     /** Enrolls a phone the operator has just approved, returning what the desktop shows as a QR. */
     suspend fun enroll(deviceId: String, deviceName: String): CalendarEnrollment? = lock.withLock {
@@ -158,7 +179,7 @@ class CalendarSyncService(
     suspend fun revokeDevice(deviceId: String) = lock.withLock {
         if (!settings().enabled) return@withLock
         withContext(io) {
-            runCatching { relay.client().revokeDevice(relay.token(), deviceId) }
+            runCatching { relay.client().revokeDevice(relay.token, deviceId) }
                 .onSuccess { _devices.value = _devices.value.filterNot { it.id == deviceId } }
                 .onFailure { if (it is RelayFailure) _status.value = failure(it) }
         }

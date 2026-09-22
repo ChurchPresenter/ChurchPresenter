@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -11,6 +12,8 @@ import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.sync.Envelope
 import org.churchpresenter.calendar.sync.RelayReply
 import org.churchpresenter.calendar.sync.RelayTransport
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
 import java.io.IOException
@@ -40,6 +43,7 @@ class CalendarSyncServiceTest {
         var clientKey = "key-1"
         var refuseKeyOnce = false
         var relayDown = false
+        val catalogPuts = mutableListOf<String>()
         var otherInstall = ""
         var slowMs = 0L
 
@@ -75,6 +79,11 @@ class CalendarSyncServiceTest {
                     enrolled[path.removePrefix("devices/")] = body.orEmpty()
                     RelayReply(200, "{}")
                 }
+                path.startsWith("records/") && method == "PUT" -> {
+                    catalogPuts += path.removePrefix("records/")
+                    rev += 1
+                    RelayReply(200, """{"rev":$rev}""")
+                }
                 path.startsWith("devices/") && method == "DELETE" -> {
                     enrolled.remove(path.removePrefix("devices/"))
                     RelayReply(200, "{}")
@@ -86,13 +95,29 @@ class CalendarSyncServiceTest {
 
     private val relay = Relay()
 
-    private fun service() = CalendarSyncService(
+    private fun service(songFolder: File? = null) = CalendarSyncService(
         folder = folder,
-        songFolder = null,
+        songFolder = songFolder,
         settings = { settings },
         saveSettings = { settings = it; saved += it },
         transport = relay,
+        typicalSeconds = { 270 },
     )
+
+    /** A library of one songbook with one song, in the file form the desktop reads. */
+    private fun songFolder(): File {
+        val root = File(folder, "songs").also { File(it, "Hymnal").mkdirs() }
+        SongFileParser().writeSongFile(
+            SongItem(
+                number = "42",
+                title = "Here I Am to Worship",
+                songbook = "Hymnal",
+                lyrics = listOf("Light of the world"),
+            ),
+            File(root, "Hymnal/0042 - Here I Am to Worship.song").path,
+        )
+        return root
+    }
 
     @AfterTest
     fun cleanUp() {
@@ -151,6 +176,37 @@ class CalendarSyncServiceTest {
             assertTrue(settings.isPaired)
             assertTrue(relay.calls.any { it.contains("/register") })
         }
+
+    @Test
+    fun `the songbooks go after the startup round, in the loop, and not inside its budget`() = runBlocking<Unit> {
+        val service = service(songFolder = songFolder())
+
+        assertTrue(service.syncOnStartup())
+        assertTrue(relay.catalogPuts.isEmpty(), "the startup round does not carry the songbooks")
+
+        val loop = launch { service.run(pullIntervalMs = 60_000) }
+        withTimeout(5_000) { while (relay.catalogPuts.isEmpty()) delay(10) }
+        loop.cancelAndJoin()
+
+        assertEquals(listOf("catalog:Hymnal"), relay.catalogPuts)
+        // Unchanged since: nothing more to write.
+        assertEquals(0, service.pushCatalog())
+        assertEquals(1, relay.catalogPuts.size)
+    }
+
+    @Test
+    fun `the songbooks are not pushed while sync is off or the desktop is unpaired`() = runBlocking<Unit> {
+        val service = service(songFolder = songFolder())
+        assertEquals(0, service.pushCatalog())
+        settings = settings.copy(
+            enabled = false,
+            instanceId = "inst",
+            desktopToken = "tok",
+            instanceKey = "k".repeat(43),
+        )
+        assertEquals(0, service.pushCatalog())
+        assertTrue(relay.calls.isEmpty())
+    }
 
     @Test
     fun `a taken instance id is retried with a fresh one`() = runBlocking<Unit> {

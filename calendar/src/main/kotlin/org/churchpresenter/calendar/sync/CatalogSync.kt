@@ -40,9 +40,14 @@ class CatalogSyncStore(private val folder: File) {
 
 /**
  * Keeps the desktop's songbooks on the relay -- see `CatalogRecord`. A part is written only when
- * its bytes changed since the last push, and no more than once a week, so a library that never
- * changes is pushed once and then never again and one edited daily goes weekly; a part whose
- * `keepUntil` is running out is rewritten to keep it; a songbook that is gone has its parts deleted.
+ * its bytes changed since the last push, and no more than once a day, so a library that never
+ * changes is pushed once and then never again; a part whose `keepUntil` is running out is
+ * rewritten to keep it; a songbook that is gone has its parts deleted.
+ *
+ * Runs on its own, after a calendar round and never inside one: the startup round has a budget
+ * the auto-loader depends on, and a first push of a large library must not spend it. The cursor
+ * is left where the calendar push put it -- a phone may write between the two -- so the next pull
+ * hands the parts back once and `SyncCoordinator` passes over them by their prefix.
  */
 class CatalogSync(
     private val store: CatalogSyncStore,
@@ -84,7 +89,7 @@ class CatalogSync(
 
     /**
      * Whether a part goes this round: never pushed, its bytes changed, or its keep-until is running
-     * out -- but a book that changed goes once a week, not once a keystroke.
+     * out -- but a book that changed goes once a day, not once a keystroke.
      */
     private fun due(before: PushedCatalogPart?, hash: String, at: Instant): Boolean {
         if (before == null) return true
@@ -98,7 +103,7 @@ class CatalogSync(
         MessageDigest.getInstance("SHA-256").digest(text.toByteArray()).joinToString("") { "%02x".format(it) }
 
     private companion object {
-        const val MIN_INTERVAL_MS = 7L * 24L * 60L * 60L * 1_000L
+        const val MIN_INTERVAL_MS = 24L * 60L * 60L * 1_000L
         const val REFRESH_BEFORE_DAYS = 180L
     }
 }

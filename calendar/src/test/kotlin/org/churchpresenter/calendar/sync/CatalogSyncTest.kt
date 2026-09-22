@@ -66,15 +66,15 @@ class CatalogSyncTest {
     }
 
     @Test
-    fun `a changed book is written again, but not within a week of its last push`() {
+    fun `a changed book is written again, but not within a day of its last push`() {
         sync().push("desk-token")
         songs = songs + SongItem(number = "43", title = "How Great Thou Art", songbook = "Hymnal")
 
-        now = now.plusSeconds(3 * 24 * 3_600)
+        now = now.plusSeconds(6 * 3_600)
         assertEquals(0, sync().push("desk-token"))
         assertEquals(2, opened("catalog:Hymnal").songs.size)
 
-        now = now.plusSeconds(5 * 24 * 3_600)
+        now = now.plusSeconds(19 * 3_600)
         assertEquals(1, sync().push("desk-token"))
         assertEquals(3, opened("catalog:Hymnal").songs.size)
     }
@@ -83,7 +83,7 @@ class CatalogSyncTest {
     fun `a book that is gone is deleted from the relay, and a big one is split into parts`() {
         sync().push("desk-token")
         songs = List(4_500) { SongItem(number = "${it + 1}", title = "Song ${it + 1}", songbook = "Big") }
-        now = now.plusSeconds(8 * 24 * 3_600)
+        now = now.plusSeconds(2 * 24 * 3_600)
 
         val changed = sync().push("desk-token")
 
