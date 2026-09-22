@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -93,10 +94,15 @@ class SystemSettingsTabScreenshotTest {
 
     // ── Tab labels ──────────────────────────────────────────────────────────────────────────────
 
-    /** The dropdown showing a non-default style; the open list is `settingsFields/`' business. */
+    /** The style button showing a non-default style. */
     @Test
     fun `with the tabs set to icons only`() =
         shoot("tab_labels_icons", settings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS))
+
+    /** The spacing button showing the longest of its names, which sets the pair's width. */
+    @Test
+    fun `with the tab spacing set to medium-large`() =
+        shoot("tab_spacing_medium_large", settings = AppSettings(tabLabelMargin = TabLabelMargin.NORMAL_LARGE))
 
     // ── Folder states ───────────────────────────────────────────────────────────────────────────
 

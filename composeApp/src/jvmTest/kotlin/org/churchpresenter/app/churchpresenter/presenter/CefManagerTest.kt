@@ -52,6 +52,20 @@ class CefManagerTest {
     }
 
     @Test
+    fun `the web engine is refused on every Windows older than 10`() {
+        listOf("Windows 7", "Windows 8", "Windows 8.1", "Windows Server 2012 R2").forEach {
+            assertTrue(isUnsupportedWindowsForJcef(osName = it), it)
+        }
+    }
+
+    @Test
+    fun `the web engine is allowed on Windows 10 and later, and on every other OS`() {
+        listOf("Windows 10", "Windows 11", "Windows Server 2019", "Mac OS X", "Linux", "").forEach {
+            assertFalse(isUnsupportedWindowsForJcef(osName = it), it)
+        }
+    }
+
+    @Test
     fun `isUnsupportedMacOS is false when the version cannot be parsed`() {
         assertFalse(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = ""))
         assertFalse(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = "unknown"))

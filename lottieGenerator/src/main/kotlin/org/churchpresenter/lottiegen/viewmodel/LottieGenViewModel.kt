@@ -22,6 +22,7 @@ import org.churchpresenter.lottiegen.persistence.ColorThemeStorage
 import org.churchpresenter.lottiegen.persistence.LogoStorage
 import org.churchpresenter.lottiegen.persistence.PresetStorage
 import java.io.File
+import java.io.IOException
 import java.time.Instant
 
 /**
@@ -341,7 +342,15 @@ class LottieGenViewModel(
             num++
         } while (file.exists())
 
-        file.writeText(jsonStr)
+        // A folder that exists can still refuse the write -- the lower-thirds folder under
+        // `C:\Program Files` did, on the Save button's click, and the uncaught exception closed the
+        // app (Sentry CHURCH-PRESENTER-DESKTOP-7V). Say so on the status line instead.
+        try {
+            file.writeText(jsonStr)
+        } catch (e: IOException) {
+            statusText = "Error: ${e.message}"
+            return null
+        }
         statusText = "Saved: ${file.name}"
         onFileSaved?.invoke()
         return file

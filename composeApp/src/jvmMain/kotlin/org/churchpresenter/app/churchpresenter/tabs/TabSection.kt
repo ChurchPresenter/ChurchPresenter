@@ -46,6 +46,7 @@ import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.jetbrains.compose.resources.stringResource
 
@@ -55,6 +56,7 @@ fun TabSection(
     visibleTabs: List<Tabs> = Tabs.entries,
     selectedTabIndex: Int = 0,
     labelStyle: TabLabelStyle = TabLabelStyle.TEXT,
+    labelMargin: TabLabelMargin = TabLabelMargin.NORMAL,
     onTabSelected: (Int) -> Unit,
 ) {
     val scrollState = remember { ScrollState(0) }
@@ -72,7 +74,7 @@ fun TabSection(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             edgePadding = 0.dp,
-            minTabWidth = labeledTabMinWidth(labelStyle),
+            minTabWidth = labeledTabMinWidth(labelStyle, labelMargin),
             indicator = { LabeledTabIndicator(selectedTabIndex) },
             divider = {},
         ) {
@@ -83,6 +85,7 @@ fun TabSection(
                     icon = tabIcon(tab),
                     selected = selected,
                     labelStyle = labelStyle,
+                    labelMargin = labelMargin,
                     onClick = { onTabSelected.invoke(index) },
                     textStyle = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal

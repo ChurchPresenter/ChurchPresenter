@@ -11,6 +11,7 @@ import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SettingsManager
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -100,8 +101,8 @@ class AppPreviewSettingsScreenshotTest {
     fun `companion satellite`() = settingsTab("companion_satellite", 9)
 
     // The dialog's own tab row follows the General → Tab labels setting, so it is shot in the two
-    // styles the System tab does not open with, on the System tab where the dropdown that picks
-    // them is in the same picture.
+    // styles the System tab does not open with, and at the widest spacing, on the System tab where
+    // the buttons that pick them are in the same picture.
 
     @Test
     fun `tabs as icons and text`() =
@@ -109,5 +110,9 @@ class AppPreviewSettingsScreenshotTest {
 
     @Test
     fun `tabs as icons`() = settingsTab("tabs_icons", 0, library().copy(tabLabelStyle = TabLabelStyle.ICONS))
+
+    @Test
+    fun `tabs with large spacing`() =
+        settingsTab("tabs_spacing_large", 0, library().copy(tabLabelMargin = TabLabelMargin.LARGE))
 
 }

@@ -157,7 +157,7 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
         stream.beginText()
         stream.setFont(font, size)
         stream.newLineAtOffset(x, y)
-        stream.showText(if (faces.embedded) value else value.toWinAnsiSafe())
+        stream.showText(value.encodableIn(font))
         stream.endText()
     }
 
@@ -170,14 +170,22 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
 }
 
 /**
- * [value] with every character the built-in Helvetica cannot encode replaced by `?`.
+ * [this] with every character [font] cannot encode replaced by `?`.
  *
- * Only reached when no TrueType font was supplied. PDFBox throws `IllegalArgumentException` from
- * `showText` on the first unencodable character, which would abandon the export part-written — so
- * the substitution happens here, where it costs a legible placeholder instead of a failure.
+ * PDFBox throws `IllegalArgumentException` from `showText` on the first character the font has no
+ * glyph for, which would abandon the export part-written. That is not only the built-in Helvetica
+ * fallback: the embedded TrueType face has gaps too -- OpenSans has no Tamil, and a Tamil item title
+ * failed the whole export (Sentry CHURCH-PRESENTER-DESKTOP-7K). So each character is asked of the
+ * font actually in use, and one it cannot draw costs a legible placeholder instead of the sheet.
  */
-private fun String.toWinAnsiSafe(): String =
-    map { if (it.code in WIN_ANSI_RANGE || it in WIN_ANSI_EXTRA) it else '?' }.joinToString("")
-
-private val WIN_ANSI_RANGE = 0x20..0xFF
-private val WIN_ANSI_EXTRA = charArrayOf('‘', '’', '“', '”', '–', '—', '•')
+private fun String.encodableIn(font: PDFont): String {
+    val out = StringBuilder(length)
+    var i = 0
+    while (i < length) {
+        val codePoint = codePointAt(i)
+        val glyph = String(Character.toChars(codePoint))
+        out.append(if (runCatching { font.encode(glyph) }.isSuccess) glyph else "?")
+        i += Character.charCount(codePoint)
+    }
+    return out.toString()
+}
