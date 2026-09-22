@@ -12,6 +12,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
 import org.churchpresenter.settings.AppSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,9 +35,10 @@ import kotlin.test.assertTrue
  * order and starts describing the viewport. `runComposeUiTest`'s default surface is smaller than
  * this rail and `Modifier.size` on the content cannot grow it, so the surface itself is set instead.
  * The Bible rail outgrew the default when its Miscellaneous section gained the split-threshold
- * slider; the height here is given room rather than trimmed to the current content.
+ * slider, and again when its two bilingual-layout switches grew from two values to eight and each
+ * wrapped to a second row; the height here is given room rather than trimmed to the current content.
  */
-private val RAIL_SURFACE = Size(1400f, 1800f)
+private val RAIL_SURFACE = Size(1400f, 1950f)
 
 /**
  * The band height, in the two tabs it moved to.
@@ -138,6 +141,14 @@ class LowerThirdHeightFieldTest {
     fun `the bible tab puts it above its text margins`() =
         runSkikoComposeUiTest(size = RAIL_SURFACE, density = Density(1f)) {
             bibleTab()
+            // Unlike the song rail, the Bible rail scans its Bible folder on `Dispatchers.IO` before
+            // its layout settles -- see `BibleSettingsTabTest.awaitFolderScan`. Reading bounds before
+            // that scan lands raced the rail's own reflow and could measure a node mid-resize; it
+            // only surfaced once the bilingual-layout switch grew enough to wrap to a second row and
+            // change which frame the race landed on.
+            waitUntil {
+                onAllNodesWithTag(SCANNING_ROW_TAG).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+            }
 
             assertAboveTextMargins("Bible")
         }

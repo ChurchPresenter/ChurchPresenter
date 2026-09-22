@@ -166,8 +166,26 @@ enum class TextAnimation {
     val isRuntimeDriven: Boolean get() = this == TYPEWRITER || this == TYPEWRITER_WORDS || this == TICKER
 }
 
-/** How many translations the band has room for, and how they share it. */
-enum class SlotLayout { SINGLE, SIDE_BY_SIDE, STACKED }
+/**
+ * How many translations the band has room for, and how they share it -- a grid of [rows] × [cols],
+ * one to four cells. [SINGLE] is 1×1; [SIDE_BY_SIDE] and [STACKED] keep their original names and
+ * shapes (1×2 and 2×1) rather than being renamed to match the newer `GRID_*` entries, so a template
+ * already carrying one of those two values in its own state keeps meaning what it always meant.
+ */
+enum class SlotLayout(val rows: Int, val cols: Int) {
+    SINGLE(1, 1),
+    SIDE_BY_SIDE(1, 2),
+    STACKED(2, 1),
+    GRID_1X3(1, 3),
+    GRID_3X1(3, 1),
+    GRID_1X4(1, 4),
+    GRID_4X1(4, 1),
+    GRID_2X2(2, 2),
+    ;
+
+    /** How many text/reference slot pairs this layout has room for. */
+    val cellCount: Int get() = rows * cols
+}
 
 enum class ReferencePlacement { ABOVE, BELOW }
 
@@ -309,6 +327,10 @@ data class BibleLottieGenConfig(
     val previewReference1: String = "John 3:16 (KJV)",
     val previewText2: String = DEFAULT_PREVIEW_TEXT_2,
     val previewReference2: String = "Juan 3:16 (RVR)",
+    val previewText3: String = DEFAULT_PREVIEW_TEXT_3,
+    val previewReference3: String = "Jean 3:16 (LSG)",
+    val previewText4: String = DEFAULT_PREVIEW_TEXT_4,
+    val previewReference4: String = "Yohane 3:16 (BSY)",
 ) {
     /** Whether the background role is a picture, which then replaces any gradient style's fill. */
     val hasBackgroundImage: Boolean get() = images.containsKey(BandColorRole.BACKGROUND)
@@ -339,5 +361,11 @@ data class BibleLottieGenConfig(
         const val DEFAULT_PREVIEW_TEXT_2 =
             "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que " +
                 "todo aquel que en él cree, no se pierda, mas tenga vida eterna."
+        const val DEFAULT_PREVIEW_TEXT_3 =
+            "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque " +
+                "croit en lui ne périsse point, mais qu'il ait la vie éternelle."
+        const val DEFAULT_PREVIEW_TEXT_4 =
+            "Pakisa Nyasaye nohero piny mane ochiwo Wuode ma nyathine achiel kende, mondo ng'ato " +
+                "ang'ata moyie kuome kik lal, to obed gi ngima mochwere."
     }
 }

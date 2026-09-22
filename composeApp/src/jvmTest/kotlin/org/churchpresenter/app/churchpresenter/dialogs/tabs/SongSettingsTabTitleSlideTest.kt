@@ -139,7 +139,7 @@ class SongSettingsTabTitleSlideTest {
 
         pick(SongStyleElement.TITLE)
         onNodeWithText("Lang").assertExists()
-        onNodeWithText("Secondary").performClick()
+        onNodeWithText("Language 2").performClick()
         waitForIdle()
 
         assertEquals(Constants.SONG_LANG_SECONDARY, get().songLanguageFor(SongStyleTarget.FULL_SCREEN))

@@ -103,6 +103,46 @@ class BibleLottieTemplateTest {
         assertEquals(declared.h, recovered.h, 0.01f)
     }
 
+    // ── textSlotCount, past the original two ────────────────────────────────────────────────────
+
+    @Test
+    fun `a two-slot template reports two, counting up from Text1`() {
+        assertEquals(2, template.textSlotCount)
+    }
+
+    @Test
+    fun `a 2x2 grid template reports all four slots`() {
+        val json = LottieBandTestSupport.templateJson(cfg.copy(layout = SlotLayout.GRID_2X2))
+        val grid = assertNotNull(parseBibleLottieTemplate(json))
+        assertEquals(4, grid.textSlotCount)
+        assertEquals(
+            setOf("Text1", "Reference1", "Text2", "Reference2", "Text3", "Reference3", "Text4", "Reference4"),
+            grid.slots.keys,
+        )
+        assertTrue(grid.hasLayer("Text3") && grid.hasLayer("Text4"))
+    }
+
+    @Test
+    fun `a single layout template reports one slot`() {
+        val json = LottieBandTestSupport.templateJson(cfg.copy(layout = SlotLayout.SINGLE))
+        val single = assertNotNull(parseBibleLottieTemplate(json))
+        assertEquals(1, single.textSlotCount)
+        assertTrue(!single.hasLayer("Text2"))
+    }
+
+    @Test
+    fun `a gap in the layers is not reached past`() {
+        // Not something the generator can produce, but a hand-edited file could: Text1/Text2/Text4
+        // with no Text3 must count 2, the run from Text1, rather than 4.
+        val json = LottieBandTestSupport.templateJson(cfg.copy(layout = SlotLayout.GRID_2X2))
+        val obj = Json.parseToJsonElement(json).jsonObject
+        val layers = obj["layers"]!!.jsonArray.filterNot { it.jsonObject["nm"]?.jsonPrimitive?.content == "Text3" }
+        val newLayers = kotlinx.serialization.json.JsonArray(layers)
+        val gapped = JsonObject(obj.toMutableMap().apply { put("layers", newLayers) })
+        val t = assertNotNull(parseBibleLottieTemplate(gapped.toString()))
+        assertEquals(2, t.textSlotCount)
+    }
+
     @Test
     fun `files that are not templates are null`() {
         assertNull(parseBibleLottieTemplate("not json"))

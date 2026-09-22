@@ -391,6 +391,7 @@ private fun CustomizePaneContent(
                 settings = draft,
                 onSettingsChange = onSettingsChange,
                 songMode = assignment.songMode,
+                songTranslations = assignment.songTranslations,
                 onSongModeChange = { onAssignmentChange(assignment.copy(songMode = it)) },
             )
             CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)

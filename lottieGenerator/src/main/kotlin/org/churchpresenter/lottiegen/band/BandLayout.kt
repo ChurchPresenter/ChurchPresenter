@@ -10,14 +10,16 @@ data class SlotBox(val x: Double, val y: Double, val w: Double, val h: Double) {
     fun inset(px: Double): SlotBox = SlotBox(x + px, y + px, w - 2 * px, h - 2 * px)
 }
 
-/** The band's rectangle and the text boxes inside it; the second pair is null for [SlotLayout.SINGLE]. */
-data class BandSlots(
-    val band: SlotBox,
-    val text1: SlotBox,
-    val reference1: SlotBox,
-    val text2: SlotBox?,
-    val reference2: SlotBox?,
-)
+/** One cell's text box and its reference box. */
+data class TextRefSlot(val text: SlotBox, val reference: SlotBox)
+
+/**
+ * The band's rectangle and its text/reference cells, one to four of them -- as many as
+ * [BibleLottieGenConfig.layout] has room for.
+ */
+data class BandSlots(val band: SlotBox, val slots: List<TextRefSlot>) {
+    val count: Int get() = slots.size
+}
 
 /** The layer names the player addresses. Songs will reuse them: text is text whatever it says. */
 object BandLayerNames {
@@ -27,11 +29,23 @@ object BandLayerNames {
     const val WASH_SUFFIX = "Wash"
     const val TEXT_1 = "Text1"
     const val TEXT_2 = "Text2"
+    const val TEXT_3 = "Text3"
+    const val TEXT_4 = "Text4"
     const val REFERENCE_1 = "Reference1"
     const val REFERENCE_2 = "Reference2"
+    const val REFERENCE_3 = "Reference3"
+    const val REFERENCE_4 = "Reference4"
     const val SHADOW_SUFFIX = "Shadow"
     const val MATTE_SUFFIX = "Matte"
     const val BAND_PREFIX = "Band"
+
+    /** [TEXT_1]/[REFERENCE_1] through the fourth, in slot order -- the pairing [computeSlots] fills. */
+    val SLOT_LAYER_NAMES = listOf(
+        TEXT_1 to REFERENCE_1,
+        TEXT_2 to REFERENCE_2,
+        TEXT_3 to REFERENCE_3,
+        TEXT_4 to REFERENCE_4,
+    )
 }
 
 /**
@@ -177,7 +191,12 @@ internal fun BandStyle.textInsets(): StyleInsets = with(BandGeometry) {
     }
 }
 
-/** Where everything goes, from the canvas, the inset, the style's blocks, the padding and the slot layout. */
+/**
+ * Where everything goes, from the canvas, the inset, the style's blocks, the padding and the slot
+ * layout's rows × cols grid -- [SlotLayout.rows] equal rows of [SlotLayout.cols] equal columns, in
+ * reading order, each split into its own text and reference box the same way a single cell always
+ * has been.
+ */
 fun computeSlots(cfg: BibleLottieGenConfig): BandSlots {
     val inset = cfg.insetPx.toDouble()
     val band = SlotBox(inset, inset, cfg.canvasW - 2 * inset, cfg.canvasH - 2 * inset)
@@ -190,28 +209,20 @@ fun computeSlots(cfg: BibleLottieGenConfig): BandSlots {
     )
     val inner = clear.inset(cfg.paddingPx.toDouble()).trimmed(cfg, within = band)
     val gap = cfg.paddingPx.toDouble()
-    return when (cfg.layout) {
-        SlotLayout.SINGLE -> {
-            val (text, ref) = splitReference(inner, cfg)
-            BandSlots(band, text, ref, null, null)
-        }
-        SlotLayout.SIDE_BY_SIDE -> {
-            val colW = (inner.w - gap) / 2
-            val left = SlotBox(inner.x, inner.y, colW, inner.h)
-            val right = SlotBox(inner.x + colW + gap, inner.y, colW, inner.h)
-            val (t1, r1) = splitReference(left, cfg)
-            val (t2, r2) = splitReference(right, cfg)
-            BandSlots(band, t1, r1, t2, r2)
-        }
-        SlotLayout.STACKED -> {
-            val rowH = (inner.h - gap) / 2
-            val top = SlotBox(inner.x, inner.y, inner.w, rowH)
-            val bottom = SlotBox(inner.x, inner.y + rowH + gap, inner.w, rowH)
-            val (t1, r1) = splitReference(top, cfg)
-            val (t2, r2) = splitReference(bottom, cfg)
-            BandSlots(band, t1, r1, t2, r2)
+    val layout = cfg.layout
+    val colW = (inner.w - gap * (layout.cols - 1)) / layout.cols
+    val rowH = (inner.h - gap * (layout.rows - 1)) / layout.rows
+    val cells = (0 until layout.rows).flatMap { row ->
+        (0 until layout.cols).map { col ->
+            SlotBox(
+                inner.x + col * (colW + gap),
+                inner.y + row * (rowH + gap),
+                colW,
+                rowH,
+            )
         }
     }
+    return BandSlots(band, cells.map { cell -> splitReference(cell, cfg).let { (t, r) -> TextRefSlot(t, r) } })
 }
 
 /**

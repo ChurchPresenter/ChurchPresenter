@@ -29,7 +29,7 @@ internal fun isDualLanguagePresentation(song: SongItem, outputs: List<ScreenAssi
     if (song.secondaryLyrics.isEmpty()) return false
     return outputs.any {
         it.isLiveOutput() &&
-            (it.songMode == Constants.SONG_LANG_BOTH || it.songMode == Constants.SONG_LANG_SECONDARY)
+            it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY
     }
 }
 

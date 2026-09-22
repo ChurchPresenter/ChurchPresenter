@@ -89,17 +89,16 @@ class OutputSettingsResolutionTest {
         // What a screen customized before a setting existed carries: no key for it at all.
         val override = JsonObject(emptyMap())
         val global = SongSettings(
-            secondaryLanguage = SongSecondaryLanguage(
-                enabled = true,
-                fullScreen = SongLyricStyle(color = "#2B14CC"),
+            translations = listOf(
+                SongTranslationSettings(overrideStyle = true, lyrics = SongTextStyle(color = "#2B14CC")),
             ),
         )
         val resolved = withSparseOverride(global, override, SongSettings.serializer())
 
-        assertTrue(resolved.secondaryLanguage.enabled)
+        assertTrue(resolved.translationSettings(0).overrideStyle)
         assertEquals(
             "#2B14CC",
-            resolved.secondaryLanguage.fullScreen.color,
+            resolved.translationSettings(0).lyrics.color,
             "this is the whole point: a snapshot pinned it to the class default and the global did nothing",
         )
     }

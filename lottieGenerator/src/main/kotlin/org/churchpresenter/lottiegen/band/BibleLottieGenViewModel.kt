@@ -68,7 +68,7 @@ class BibleLottieGenViewModel(
         get() {
             if (!showSlotGuides) return emptyList()
             val slots = computeSlots(config)
-            return listOfNotNull(slots.text1, slots.reference1, slots.text2, slots.reference2)
+            return slots.slots.flatMap { listOf(it.text, it.reference) }
                 .map { it.toGuide(config.canvasW, config.canvasH) }
         }
 

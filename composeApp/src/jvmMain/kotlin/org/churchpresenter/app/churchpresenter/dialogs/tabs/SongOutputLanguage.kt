@@ -6,7 +6,9 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_language_both
 import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_fourth
 import churchpresenter.composeapp.generated.resources.song_language_secondary
+import churchpresenter.composeapp.generated.resources.song_language_third
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.AppSettings
@@ -64,7 +66,7 @@ internal fun AppSettings.withSongLanguage(target: SongStyleTarget, language: Str
 /** True when any output that is showing songs is showing two languages. */
 internal val AppSettings.songIsBilingual: Boolean
     get() = projectionSettings.screenAssignments.any {
-        it.songMode == Constants.SONG_LANG_BOTH || it.songMode == Constants.SONG_LANG_SECONDARY
+        it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY
     }
 
 /**
@@ -92,10 +94,10 @@ private fun AppSettings.mapSongModes(
     ),
 )
 
-/** Wide enough for "Secondary" without an ellipsis. */
-private val LANGUAGE_BUTTON_WIDTH = 82.dp
+/** Wide enough for "Language 2" without an ellipsis. */
+private val LANGUAGE_BUTTON_WIDTH = 88.dp
 
-/** The Both / Primary / Secondary switch for [target]'s output, shared by both views of the tab. */
+/** The All / Language 1-4 switch for [target]'s output, shared by both views of the tab. */
 @Composable
 internal fun SongLanguageScopeButtons(
     settings: AppSettings,
@@ -120,6 +122,8 @@ internal fun SongLanguageScopeButtons(
             SegmentedButtonItem(Constants.SONG_LANG_BOTH, stringResource(Res.string.song_language_both)),
             SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, stringResource(Res.string.song_language_primary)),
             SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, stringResource(Res.string.song_language_secondary)),
+            SegmentedButtonItem(Constants.SONG_LANG_THIRD, stringResource(Res.string.song_language_third)),
+            SegmentedButtonItem(Constants.SONG_LANG_FOURTH, stringResource(Res.string.song_language_fourth)),
         ),
         selectedValue = outputMode ?: settings.songLanguageFor(target),
         onValueChange = { lang ->

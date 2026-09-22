@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.core.models.songs.SectionTranslation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -572,7 +573,7 @@ class PresenterPortraitLowerThirdScreenshotTest {
         songNumber = 42,
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines,
-        secondaryLines = secondary,
+        translations = if (secondary.isEmpty()) emptyList() else listOf(SectionTranslation(lines = secondary)),
         chordLines = chords,
     )
 

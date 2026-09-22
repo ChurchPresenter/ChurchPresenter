@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.core.models.songs.SectionTranslation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,7 @@ class SongPresenterTitleSlideRenderTest {
     ) = LyricSection(
         type = Constants.SECTION_TYPE_TITLE_SLIDE,
         title = "Amazing Grace",
-        secondaryTitle = secondaryTitle,
+        translations = listOf(SectionTranslation(title = secondaryTitle)),
         songNumber = 427,
         author = author,
         composer = composer,
