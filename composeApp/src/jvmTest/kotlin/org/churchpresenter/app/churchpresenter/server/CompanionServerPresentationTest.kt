@@ -30,6 +30,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.testPort
 
@@ -233,6 +234,31 @@ class CompanionServerPresentationTest {
             "must be saved under the isolated user.home, not the real one",
         )
         assertEquals(pdfBytes.toList(), saved.readBytes().toList())
+    }
+
+    @Test
+    fun `a second upload of the same name is stored under its own name and replaces the first in the list`() {
+        val uploaded = mutableListOf<File>()
+        collecting(server.onPresentationUploaded) { uploaded.add(it) }
+        fun dataUri(text: String) =
+            "data:application/pdf;base64," + Base64.getEncoder().encodeToString(text.toByteArray())
+
+        post("${Constants.ENDPOINT_PRESENTATIONS}/upload", """{"name":"sermon.pdf","data":"${dataUri("first")}"}""")
+        awaitUntil("the first upload") { uploaded.size == 1 }
+        val response = post(
+            "${Constants.ENDPOINT_PRESENTATIONS}/upload",
+            """{"name":"sermon.pdf","data":"${dataUri("second")}"}""",
+        )
+        awaitUntil("the second upload") { uploaded.size == 2 }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val (first, second) = uploaded
+        assertTrue(second.name.startsWith("sermon_") && second.name.endsWith(".pdf"), "got ${second.name}")
+        assertEquals("second", second.readText(), "the new bytes land in the new file")
+        assertEquals("first", first.readText(), "and the old file is not written over")
+        val listed = server.presentations._presentationFilePaths.values
+        assertTrue(second.absolutePath in listed)
+        assertFalse(first.absolutePath in listed, "a device's previous upload is no longer offered")
     }
 
     @Test

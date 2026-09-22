@@ -32,6 +32,7 @@ import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_FORWA
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
@@ -45,6 +46,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class OptionsContentTest {
 
@@ -162,9 +164,10 @@ class OptionsContentTest {
 
     @Test
     fun `picking a label style on the System tab restyles the dialog's own tabs before Apply`() = dialog { result ->
+        // The style button steps Text only -> Icons and text -> Icons only, one press at a time.
         onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
         waitForIdle()
-        onNode(hasTextExactly("Icons only") and hasClickAction()).performClick()
+        onNode(hasTextExactly("Icons and text") and hasClickAction()).performClick()
         waitForIdle()
 
         iconTab("Bible").assertExists()
@@ -173,6 +176,19 @@ class OptionsContentTest {
 
         onNodeWithText("Apply").performClick()
         assertEquals(TabLabelStyle.ICONS, result.saved?.tabLabelStyle)
+    }
+
+    @Test
+    fun `pressing the spacing button widens the dialog's own tabs before Apply`() = dialog { result ->
+        val before = tab("Bible").fetchSemanticsNode().boundsInRoot.width
+
+        onNodeWithTag("tab_spacing_button").performScrollTo().performClick()
+        waitForIdle()
+
+        assertTrue(tab("Bible").fetchSemanticsNode().boundsInRoot.width > before, "Normal -> Medium-large is roomier")
+        assertNull(result.saved, "the dialog previews the spacing; only Apply or OK stores it")
+        onNodeWithText("Apply").performClick()
+        assertEquals(TabLabelMargin.NORMAL_LARGE, result.saved?.tabLabelMargin)
     }
 
     @Test

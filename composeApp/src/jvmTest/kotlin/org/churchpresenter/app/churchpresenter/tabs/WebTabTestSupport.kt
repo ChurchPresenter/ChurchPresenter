@@ -152,6 +152,10 @@ internal object WebLabel {
     const val ENGINE_UNAVAILABLE_MACOS_BODY =
             "ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 " +
                 "(Monterey) or later to use the Web tab and browser sources."
+    const val ENGINE_UNAVAILABLE_WINDOWS_TITLE = "Web browser requires Windows 10 or later"
+    const val ENGINE_UNAVAILABLE_WINDOWS_BODY =
+            "ChurchPresenter's browser engine no longer supports this version of Windows. Update to Windows 10 " +
+                "or later to use the Web tab and browser sources."
     const val ENGINE_UNAVAILABLE_POLICY_TITLE = "Web browser blocked by a policy on this computer"
     const val ENGINE_UNAVAILABLE_POLICY_BODY =
             "A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask " +

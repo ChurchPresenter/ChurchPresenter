@@ -414,6 +414,15 @@ class PlatformFileChooserTest {
     }
 
     @Test
+    fun `an approved single choice with nothing selected comes back empty rather than crashing`() {
+        // The Windows look-and-feel can approve with no file selected (Sentry CHURCH-PRESENTER-DESKTOP-7S).
+        val chooser = chooser()
+
+        assertEquals(emptyList(), openResult(JFileChooser.APPROVE_OPTION, chooser, multiple = false))
+        assertNull(saveResult(JFileChooser.APPROVE_OPTION, chooser))
+    }
+
+    @Test
     fun `a cancelled open dialog returns nothing`() {
         val chooser = chooser().apply { selectedFile = File(dir, "song.sps") }
 

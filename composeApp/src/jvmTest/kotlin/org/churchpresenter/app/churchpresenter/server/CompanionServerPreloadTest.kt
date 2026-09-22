@@ -251,6 +251,32 @@ class CompanionServerPreloadTest {
     }
 
     @Test
+    fun `a bible file deleted after it was loaded is a not-found that says so`() {
+        val (dir, name) = bibleFolder()
+        val file = File(dir, name)
+        server.updateBible(SpbFixture.loadedBible(dir), "KJV", file.absolutePath)
+        file.delete()
+
+        val response = get(Constants.ENDPOINT_BIBLE_FILE)
+
+        assertEquals(HttpStatusCode.NotFound, response.status)
+        assertEquals("Bible file not found on disk", response.text(), "not the 'no bible loaded' answer")
+    }
+
+    @Test
+    fun `a secondary bible file deleted after it was chosen is a not-found that says so`() {
+        val (dir, name) = bibleFolder()
+        val file = File(dir, name)
+        server.updateSecondaryBibleFilePath(file.absolutePath)
+        file.delete()
+
+        val response = get("${Constants.ENDPOINT_BIBLE_FILE}/secondary")
+
+        assertEquals(HttpStatusCode.NotFound, response.status)
+        assertEquals("Secondary bible file not found on disk", response.text())
+    }
+
+    @Test
     fun `no secondary bible configured is a not-found`() {
         server.updateSecondaryBibleFilePath("")
 

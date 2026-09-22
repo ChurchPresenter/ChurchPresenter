@@ -28,4 +28,11 @@ class TabLabelStyleTest {
         assertEquals(TabLabelStyle.ICONS_AND_TEXT, json.decodeFromString<AppSettings>(encoded).tabLabelStyle)
         assert(encoded.contains("\"tabLabelStyle\":\"ICONS_AND_TEXT\""))
     }
+
+    @Test
+    fun `one press steps through every style and then wraps round`() {
+        assertEquals(TabLabelStyle.ICONS_AND_TEXT, TabLabelStyle.TEXT.next())
+        assertEquals(TabLabelStyle.ICONS, TabLabelStyle.ICONS_AND_TEXT.next())
+        assertEquals(TabLabelStyle.TEXT, TabLabelStyle.ICONS.next())
+    }
 }

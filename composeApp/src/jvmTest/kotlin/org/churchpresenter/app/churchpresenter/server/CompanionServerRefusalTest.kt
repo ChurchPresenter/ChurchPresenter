@@ -121,6 +121,43 @@ class CompanionServerRefusalTest {
         assertTrue(response.text().contains("Invalid API key"), "the client must be told why")
     }
 
+    /**
+     * Every route that reads or drives the app checks the key before anything else -- including the
+     * ones whose own guards (a missing id, an unconfigured ATEM, no Bible loaded) would otherwise
+     * answer first and tell an unauthorized caller something about the machine.
+     *
+     * A new route that forgets `checkApiKey` is exactly the remote-write hole the class comment
+     * describes, and nothing else would notice: the happy-path suites run with the key off. The
+     * placeholders are arbitrary -- the key check comes before any of them is looked up.
+     */
+    @Test
+    fun `every guarded route refuses a caller without the key`() {
+        server.updateApiKey(enabled = true, key = KEY)
+        val gets = listOf(
+            "/api/bible", "/api/dictionary", "/api/dictionary/H1", "/api/dictionary/H1/verses",
+            "/api/info", "/api/status", "/api/song-catalog", "/api/songs", "/api/songs/1",
+            "/api/lowerthirds", "/api/lowerthirds/x/json",
+            "/api/pictures", "/api/pictures/x", "/api/pictures/x/images/0", "/api/media/stream/x",
+            "/api/bible/file", "/api/bible/file/secondary", "/api/bible/file/translations",
+            "/api/bible/file/translation/0", "/api/backgrounds", "/api/backgrounds/asset/x",
+            "/api/presentations", "/api/presentations/x", "/api/presentations/x/slides/0",
+            "/api/schedule",
+        )
+        val posts = listOf(
+            "/api/bible/select", "/api/calendar/enroll", "/api/songs/1/select",
+            "/api/lowerthirds/x/run", "/api/lowerthirds/x/show", "/api/lowerthirds/hide",
+            "/api/atem/clip/x", "/api/atem/still/x", "/api/atem/key/on", "/api/atem/key/off",
+            "/api/pictures/select", "/api/pictures/upload",
+            "/api/presentations/x/select", "/api/presentations/upload", "/api/media/upload",
+            "/api/schedule/add", "/api/schedule/add-batch", "/api/project", "/api/clear",
+        )
+
+        val answered = gets.map { "GET $it" to getting(it).status } + posts.map { "POST $it" to posting(it).status }
+
+        val served = answered.filter { (_, status) -> status != HttpStatusCode.Unauthorized }
+        assertEquals(emptyList(), served, "every one of these must refuse a caller with no key")
+    }
+
     @Test
     fun `a missing key is rejected once one is required`() {
         server.updateApiKey(enabled = true, key = KEY)

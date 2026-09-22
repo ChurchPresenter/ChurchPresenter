@@ -25,24 +25,48 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 
 private val TAB_ICON_SIZE = 20.dp
 
 val LABELED_TAB_MIN_WIDTH = 100.dp
+private val LABELED_TAB_MIN_WIDTH_SMALL = 64.dp
+private val LABELED_TAB_MIN_WIDTH_SMALL_NORMAL = 82.dp
+private val LABELED_TAB_MIN_WIDTH_NORMAL_LARGE = 114.dp
+private val LABELED_TAB_MIN_WIDTH_LARGE = 128.dp
 
 /**
- * The narrowest a tab in a row of [style] may be.
+ * The narrowest a tab in a row of [style] may be, at [margin].
  *
  * Only the icon-only tabs need a floor, to stay a comfortable target. A named tab is as wide as its
  * name asks: a floor there padded short names like Bible and Songs out to the width of the longest,
  * which is what pushed the last tabs of the strip behind the scroll arrow.
  */
-fun labeledTabMinWidth(style: TabLabelStyle): Dp =
-    if (style == TabLabelStyle.ICONS) LABELED_TAB_MIN_WIDTH else 0.dp
+fun labeledTabMinWidth(style: TabLabelStyle, margin: TabLabelMargin = TabLabelMargin.NORMAL): Dp =
+    if (style != TabLabelStyle.ICONS) 0.dp
+    else when (margin) {
+        TabLabelMargin.SMALL -> LABELED_TAB_MIN_WIDTH_SMALL
+        TabLabelMargin.SMALL_NORMAL -> LABELED_TAB_MIN_WIDTH_SMALL_NORMAL
+        TabLabelMargin.NORMAL -> LABELED_TAB_MIN_WIDTH
+        TabLabelMargin.NORMAL_LARGE -> LABELED_TAB_MIN_WIDTH_NORMAL_LARGE
+        TabLabelMargin.LARGE -> LABELED_TAB_MIN_WIDTH_LARGE
+    }
 
 /** Space either side of a named tab's content: Material pads 16dp, too much for a strip of a dozen. */
 private val NAMED_TAB_HORIZONTAL_PADDING = 6.dp
+private val NAMED_TAB_HORIZONTAL_PADDING_SMALL = 2.dp
+private val NAMED_TAB_HORIZONTAL_PADDING_SMALL_NORMAL = 4.dp
+private val NAMED_TAB_HORIZONTAL_PADDING_NORMAL_LARGE = 9.dp
+private val NAMED_TAB_HORIZONTAL_PADDING_LARGE = 12.dp
+
+private fun namedTabHorizontalPadding(margin: TabLabelMargin): Dp = when (margin) {
+    TabLabelMargin.SMALL -> NAMED_TAB_HORIZONTAL_PADDING_SMALL
+    TabLabelMargin.SMALL_NORMAL -> NAMED_TAB_HORIZONTAL_PADDING_SMALL_NORMAL
+    TabLabelMargin.NORMAL -> NAMED_TAB_HORIZONTAL_PADDING
+    TabLabelMargin.NORMAL_LARGE -> NAMED_TAB_HORIZONTAL_PADDING_NORMAL_LARGE
+    TabLabelMargin.LARGE -> NAMED_TAB_HORIZONTAL_PADDING_LARGE
+}
 private val NAMED_TAB_HEIGHT = 48.dp
 
 @Composable
@@ -59,10 +83,11 @@ fun LabeledTab(
     onClick: () -> Unit,
     textStyle: TextStyle? = null,
     color: Color = Color.Unspecified,
+    labelMargin: TabLabelMargin = TabLabelMargin.NORMAL,
 ) {
     when (labelStyle) {
-        TabLabelStyle.TEXT -> NamedTab(selected, onClick) { TabName(name, textStyle, color) }
-        TabLabelStyle.ICONS_AND_TEXT -> NamedTab(selected, onClick) {
+        TabLabelStyle.TEXT -> NamedTab(selected, onClick, labelMargin) { TabName(name, textStyle, color) }
+        TabLabelStyle.ICONS_AND_TEXT -> NamedTab(selected, onClick, labelMargin) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -75,7 +100,7 @@ fun LabeledTab(
             Tab(
                 selected = selected,
                 onClick = onClick,
-                modifier = Modifier.widthIn(min = LABELED_TAB_MIN_WIDTH),
+                modifier = Modifier.widthIn(min = labeledTabMinWidth(labelStyle, labelMargin)),
                 icon = { TabIcon(icon, color, contentDescription = name) },
             )
         }
@@ -83,14 +108,19 @@ fun LabeledTab(
 }
 
 @Composable
-private fun NamedTab(selected: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun NamedTab(
+    selected: Boolean,
+    onClick: () -> Unit,
+    margin: TabLabelMargin,
+    content: @Composable () -> Unit,
+) {
     Tab(
         selected = selected,
         onClick = onClick,
         modifier = Modifier.height(NAMED_TAB_HEIGHT),
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = NAMED_TAB_HORIZONTAL_PADDING),
+            modifier = Modifier.padding(horizontal = namedTabHorizontalPadding(margin)),
             contentAlignment = Alignment.Center,
         ) { content() }
     }

@@ -67,6 +67,7 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_settin
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
@@ -211,6 +212,7 @@ internal fun OptionsDialogContent(
                     selectedIndex = safeTabIndex,
                     scrollState = tabScrollState,
                     labelStyle = currentSettings.tabLabelStyle,
+                    labelMargin = currentSettings.tabLabelMargin,
                     hasObs = obsManager != null,
                     companionSatelliteTabIndex = companionSatelliteTabIndex,
                     onSelect = { selectedTabIndex = it },
@@ -267,6 +269,7 @@ private fun SettingsTabStrip(
     selectedIndex: Int,
     scrollState: ScrollState,
     labelStyle: TabLabelStyle,
+    labelMargin: TabLabelMargin,
     hasObs: Boolean,
     companionSatelliteTabIndex: Int,
     onSelect: (Int) -> Unit,
@@ -285,85 +288,29 @@ private fun SettingsTabStrip(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             edgePadding = 0.dp,
-            minTabWidth = labeledTabMinWidth(labelStyle),
+            minTabWidth = labeledTabMinWidth(labelStyle, labelMargin),
             indicator = { LabeledTabIndicator(selectedIndex) },
         ) {
-            SettingsTab(
-                0,
-                stringResource(Res.string.appearance),
-                Icons.Filled.Palette,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            SettingsTab(1, stringResource(Res.string.bible), Icons.Filled.MenuBook, selectedIndex, labelStyle, onSelect)
-            SettingsTab(2, stringResource(Res.string.song), Icons.Filled.MusicNote, selectedIndex, labelStyle, onSelect)
-            SettingsTab(
-                TAB_BACKGROUND,
-                stringResource(Res.string.background),
-                Icons.Filled.Wallpaper,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            SettingsTab(
-                TAB_PROJECTION,
-                stringResource(Res.string.projection),
-                Icons.Filled.DesktopWindows,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            SettingsTab(
-                TAB_SERVER,
-                stringResource(Res.string.server_settings),
-                Icons.Filled.Dns,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            SettingsTab(
-                TAB_STAGE_MONITOR,
-                stringResource(Res.string.stage_monitor),
-                Icons.Filled.Tv,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            SettingsTab(
-                TAB_ATEM,
-                stringResource(Res.string.atem_settings),
-                Icons.Filled.SwitchVideo,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            SettingsTab(
-                TAB_DICTIONARY,
-                stringResource(Res.string.tab_dictionary),
-                Icons.Filled.Book,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
-            if (hasObs) {
-                SettingsTab(
-                    TAB_INTEGRATIONS,
-                    stringResource(Res.string.obs_settings),
-                    Icons.Filled.Videocam,
-                    selectedIndex,
-                    labelStyle,
-                    onSelect,
-                )
+            listOfNotNull(
+                StripTab(0, stringResource(Res.string.appearance), Icons.Filled.Palette),
+                StripTab(1, stringResource(Res.string.bible), Icons.Filled.MenuBook),
+                StripTab(2, stringResource(Res.string.song), Icons.Filled.MusicNote),
+                StripTab(TAB_BACKGROUND, stringResource(Res.string.background), Icons.Filled.Wallpaper),
+                StripTab(TAB_PROJECTION, stringResource(Res.string.projection), Icons.Filled.DesktopWindows),
+                StripTab(TAB_SERVER, stringResource(Res.string.server_settings), Icons.Filled.Dns),
+                StripTab(TAB_STAGE_MONITOR, stringResource(Res.string.stage_monitor), Icons.Filled.Tv),
+                StripTab(TAB_ATEM, stringResource(Res.string.atem_settings), Icons.Filled.SwitchVideo),
+                StripTab(TAB_DICTIONARY, stringResource(Res.string.tab_dictionary), Icons.Filled.Book),
+                StripTab(TAB_INTEGRATIONS, stringResource(Res.string.obs_settings), Icons.Filled.Videocam)
+                    .takeIf { hasObs },
+                StripTab(
+                    companionSatelliteTabIndex,
+                    stringResource(Res.string.companion_satellite_settings),
+                    Icons.Filled.SettingsRemote,
+                ),
+            ).forEach { tab ->
+                SettingsTab(tab.index, tab.name, tab.icon, selectedIndex, labelStyle, labelMargin, onSelect)
             }
-            SettingsTab(
-                companionSatelliteTabIndex,
-                stringResource(Res.string.companion_satellite_settings),
-                Icons.Filled.SettingsRemote,
-                selectedIndex,
-                labelStyle,
-                onSelect,
-            )
         }
         TabStripForwardArrow(scrollState)
     }
@@ -499,6 +446,9 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
     }
 }
 
+/** One tab of [SettingsTabStrip]: where it leads, and what it is called and drawn with. */
+private class StripTab(val index: Int, val name: String, val icon: ImageVector)
+
 @Composable
 private fun SettingsTab(
     index: Int,
@@ -506,6 +456,7 @@ private fun SettingsTab(
     icon: ImageVector,
     selectedIndex: Int,
     labelStyle: TabLabelStyle,
+    labelMargin: TabLabelMargin,
     onSelect: (Int) -> Unit,
 ) {
     LabeledTab(
@@ -513,6 +464,7 @@ private fun SettingsTab(
         icon = icon,
         selected = selectedIndex == index,
         labelStyle = labelStyle,
+        labelMargin = labelMargin,
         onClick = { onSelect(index) },
     )
 }

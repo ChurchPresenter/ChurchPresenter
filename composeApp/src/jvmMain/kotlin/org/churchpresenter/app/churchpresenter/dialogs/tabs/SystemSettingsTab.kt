@@ -27,8 +27,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -56,11 +56,6 @@ import churchpresenter.composeapp.generated.resources.settings_import_failed
 import churchpresenter.composeapp.generated.resources.start_outputs_hidden
 import churchpresenter.composeapp.generated.resources.start_outputs_hidden_hint
 import churchpresenter.composeapp.generated.resources.system_manage_settings
-import churchpresenter.composeapp.generated.resources.tab_label_style
-import churchpresenter.composeapp.generated.resources.tab_label_style_hint
-import churchpresenter.composeapp.generated.resources.tab_label_style_icons
-import churchpresenter.composeapp.generated.resources.tab_label_style_icons_and_text
-import churchpresenter.composeapp.generated.resources.tab_label_style_text
 import churchpresenter.composeapp.generated.resources.test_event_dev_only
 import churchpresenter.composeapp.generated.resources.test_event_failed
 import churchpresenter.composeapp.generated.resources.test_event_sent
@@ -70,16 +65,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.rememberDropdownWidthFor
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.TabLabelStyle
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.JOptionPane
 
@@ -191,43 +183,6 @@ private fun GeneralToggleRow(
 }
 
 @Composable
-private fun tabLabelStyleName(style: TabLabelStyle): String = when (style) {
-    TabLabelStyle.TEXT -> stringResource(Res.string.tab_label_style_text)
-    TabLabelStyle.ICONS_AND_TEXT -> stringResource(Res.string.tab_label_style_icons_and_text)
-    TabLabelStyle.ICONS -> stringResource(Res.string.tab_label_style_icons)
-}
-
-@Composable
-private fun TabLabelStyleRow(value: TabLabelStyle, onValueChange: (TabLabelStyle) -> Unit) {
-    val names = TabLabelStyle.entries.associateWith { tabLabelStyleName(it) }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 11.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(Res.string.tab_label_style),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = stringResource(Res.string.tab_label_style_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-        }
-        DropdownSettingsField(
-            value = names.getValue(value),
-            options = names.values.toList(),
-            onValueChange = { picked -> names.entries.first { it.value == picked }.key.let(onValueChange) },
-            width = rememberDropdownWidthFor(names.values.toList()),
-        )
-    }
-}
-
-@Composable
 private fun GeneralCard(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
@@ -259,9 +214,11 @@ private fun GeneralCard(
                 }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            TabLabelStyleRow(
-                value = settings.tabLabelStyle,
-                onValueChange = { style -> onSettingsChange { s -> s.copy(tabLabelStyle = style) } }
+            TabLabelsRow(
+                style = settings.tabLabelStyle,
+                margin = settings.tabLabelMargin,
+                onStyleChange = { style -> onSettingsChange { s -> s.copy(tabLabelStyle = style) } },
+                onMarginChange = { margin -> onSettingsChange { s -> s.copy(tabLabelMargin = margin) } },
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
