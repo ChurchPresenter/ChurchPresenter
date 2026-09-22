@@ -118,21 +118,24 @@ object SwingFileChooser : FileChooser() {
         chooser.applyFilters(filters)
     }
 
-    /** Reads the open dialog's outcome; anything but approval means the operator cancelled. */
+    /**
+     * Reads the open dialog's outcome; anything but approval means the operator cancelled.
+     *
+     * Approval is not a promise of a selection: the Windows look-and-feel can approve a single choice
+     * with no file selected at all (Sentry CHURCH-PRESENTER-DESKTOP-7S). That comes back empty, the
+     * same as an approved multiple choice with nothing in it, rather than being dereferenced.
+     */
     internal fun openResult(returnCode: Int, chooser: JFileChooser, multiple: Boolean): List<Path>? =
         if (returnCode == JFileChooser.APPROVE_OPTION) {
-            if (multiple) chooser.selectedFiles.map { it.toPath() } else listOf(chooser.selectedFile.toPath())
+            val chosen = if (multiple) chooser.selectedFiles.orEmpty().toList() else listOfNotNull(chooser.selectedFile)
+            chosen.map { it.toPath() }
         } else {
             null
         }
 
-    /** Reads the save dialog's outcome; anything but approval means the operator cancelled. */
+    /** Reads the save dialog's outcome; anything but approval, or an approval naming nothing, is a cancel. */
     internal fun saveResult(returnCode: Int, chooser: JFileChooser): Path? =
-        if (returnCode == JFileChooser.APPROVE_OPTION) {
-            chooser.selectedFile.toPath()
-        } else {
-            null
-        }
+        if (returnCode == JFileChooser.APPROVE_OPTION) chooser.selectedFile?.toPath() else null
 
     /**
      * Runs [block] on the event dispatch thread and hands back what it returned.

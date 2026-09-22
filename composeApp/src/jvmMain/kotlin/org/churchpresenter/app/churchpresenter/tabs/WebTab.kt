@@ -77,6 +77,8 @@ import churchpresenter.composeapp.generated.resources.web_engine_unavailable_pol
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_body
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_title
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_windows_body
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_windows_title
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
 import androidx.compose.material.icons.Icons
@@ -897,6 +899,7 @@ internal fun WebEngineUnavailable(
     // A managed Windows build can block the downloaded engine outright, and telling someone in that
     // position to install a redistributable sends them after something that will not help.
     blockedByPolicy: Boolean = CefManager.blockedByPolicy,
+    windowsUnsupported: Boolean = CefManager.windowsUnsupported,
 ) {
     Column(
         modifier = modifier
@@ -917,6 +920,7 @@ internal fun WebEngineUnavailable(
             text = stringResource(
                 when {
                     macOsUnsupported -> Res.string.web_engine_unavailable_macos_title
+                    windowsUnsupported -> Res.string.web_engine_unavailable_windows_title
                     blockedByPolicy -> Res.string.web_engine_unavailable_policy_title
                     else -> Res.string.web_engine_unavailable_title
                 }
@@ -930,6 +934,7 @@ internal fun WebEngineUnavailable(
             text = stringResource(
                 when {
                     macOsUnsupported -> Res.string.web_engine_unavailable_macos_body
+                    windowsUnsupported -> Res.string.web_engine_unavailable_windows_body
                     blockedByPolicy -> Res.string.web_engine_unavailable_policy_body
                     else -> Res.string.web_engine_unavailable_body
                 }
