@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.settings.SettingsManager
 import java.awt.Window
 import javax.swing.JOptionPane
@@ -29,7 +30,9 @@ internal suspend fun exportSettings(title: String, exportedMsg: String, failedMs
         filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json"))
     ) ?: return
     try {
-        val currentSettings = SettingsManager().loadSettings()
+        // The calendar relay's key and tokens are this church's credentials, not preferences: an export
+        // gets emailed and shared, so they never go into one.
+        val currentSettings = SettingsManager().loadSettings().copy(calendarSync = CalendarSyncSettings())
         val json = exportJsonFormat.encodeToString(AppSettings.serializer(), currentSettings)
         if (file.extension != "json") {
             file = file.resolveSibling("${file.nameWithoutExtension}.json")
@@ -61,7 +64,10 @@ internal suspend fun importSettings(
         val settingsManager = SettingsManager()
         // Migrate on import, not just on startup — an export taken from an older build is in an
         // older schema, and decoding it directly would drop every field a migration converts.
-        settingsManager.saveSettings(settingsManager.migrateAndDecode(file.readText()))
+        // Keep this machine's own relay pairing: an older export may still carry another machine's key
+        // and tokens, and adopting them would make two desktops answer as one.
+        val imported = settingsManager.migrateAndDecode(file.readText())
+        settingsManager.saveSettings(imported.copy(calendarSync = settingsManager.loadSettings().calendarSync))
         restartApp(companionServer)
     } catch (_: Exception) {
         JOptionPane.showMessageDialog(activeWindow(), failedMsg, title, JOptionPane.ERROR_MESSAGE)

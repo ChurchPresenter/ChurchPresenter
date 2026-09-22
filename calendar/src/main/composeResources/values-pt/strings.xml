@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Uma participação acontece à frente, não na tela — dê a ela uma duração na linha; não há nada a automatizar</string>
     <string name="calendar_ministry_what">O que acontece</string>
     <string name="calendar_ministry_who">Quem, ou uma nota</string>
+    <string name="calendar_cloud_sync">Sincronizar com a nuvem e os dispositivos móveis</string>
+    <string name="calendar_cloud_sync_sub">Mantém este calendário a par dos telemóveis através do relay. Desligado, nada sai deste computador</string>
 </resources>

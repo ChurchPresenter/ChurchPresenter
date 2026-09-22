@@ -4,6 +4,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import org.churchpresenter.calendar.sync.CatalogRecord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
@@ -27,7 +28,9 @@ data class SongDto(
     val number: String,
     val title: String,
     val tune: String = "",
-    val author: String = ""
+    val author: String = "",
+    /** The title in the second language of a bilingual song; empty otherwise. */
+    val secondaryTitle: String = "",
 )
 
 /** One songbook entry — contains its songs inline. */
@@ -53,6 +56,14 @@ data class SongCatalogResponse(
     @kotlinx.serialization.SerialName("songBooks") val songBooks: Int,
     val total: Int
 )
+
+/**
+ * Response for GET /api/song-catalog: every songbook as a phone plans a service with it -- number,
+ * title and the song's usual length here. The same records the desktop keeps on the calendar
+ * relay, so a phone reads one shape whichever way the list reaches it.
+ */
+@Serializable
+data class SongCatalogRecordsResponse(val books: List<CatalogRecord>)
 
 @Serializable
 data class SongSectionDto(

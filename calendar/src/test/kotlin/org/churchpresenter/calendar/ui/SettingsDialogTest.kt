@@ -10,7 +10,9 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -20,6 +22,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
+import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
@@ -36,6 +39,7 @@ class SettingsDialogTest {
 
     private class Heard {
         var preferences: CalendarPreferences? = null
+        var cloudSync: Boolean? = null
         var added: Pair<String, String>? = null
         var colored: Pair<String, String>? = null
         var inserted: SectionStyle? = null
@@ -45,6 +49,7 @@ class SettingsDialogTest {
         initialTab: SettingsTab = SettingsTab.SECTIONS,
         canInsert: Boolean = false,
         colorPicker: (@Composable (ColorPickerRequest) -> Unit)? = null,
+        cloudSync: Boolean? = null,
         body: ComposeUiTest.(Heard) -> Unit,
     ) {
         val heard = Heard()
@@ -67,6 +72,9 @@ class SettingsDialogTest {
                         onRemoveTemplate = {},
                         onRemovePreset = {},
                         onDismiss = {},
+                        cloudSync = cloudSync?.let { on ->
+                            CalendarCloudSync(enabled = { on }, setEnabled = { heard.cloudSync = it })
+                        },
                     )
                 }
             }
@@ -187,4 +195,22 @@ class SettingsDialogTest {
         assertNull(heard.preferences)
         assertFalse(onAllNodesWithText("soon").fetchSemanticsNodes().isNotEmpty())
     }
+
+    @Test
+    fun `without cloud sync on offer the defaults tab has no switch for it`() = withDialog(SettingsTab.DEFAULTS) {
+        assertTrue(onAllNodesWithText("Sync with the cloud and mobile devices").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun `the cloud sync switch shows what the app says and hands a flip back`() =
+        withDialog(SettingsTab.DEFAULTS, cloudSync = false) { heard ->
+            onNodeWithText("Sync with the cloud and mobile devices").performScrollTo().assertExists()
+            val switches = onAllNodes(isToggleable())
+            val cloud = switches[switches.fetchSemanticsNodes().size - 1]
+            cloud.assertIsOff()
+            cloud.performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(true, heard.cloudSync)
+        }
 }

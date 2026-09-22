@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">Posługa dzieje się z przodu, nie na ekranie — nadaj jej długość w wierszu; nie ma czego automatyzować</string>
     <string name="calendar_ministry_what">Co się dzieje</string>
     <string name="calendar_ministry_who">Kto lub notatka</string>
+    <string name="calendar_cloud_sync">Synchronizuj z chmurą i urządzeniami mobilnymi</string>
+    <string name="calendar_cloud_sync_sub">Utrzymuje ten kalendarz w zgodzie z telefonami przez przekaźnik. Gdy wyłączone, nic nie opuszcza tego komputera</string>
 </resources>

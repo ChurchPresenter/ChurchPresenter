@@ -328,4 +328,6 @@
     <string name="calendar_ministry_no_timing">خدمت جلو انجام می‌شود، نه روی صفحه — در ردیف مدتی به آن بدهید؛ چیزی برای خودکارسازی نیست</string>
     <string name="calendar_ministry_what">چه اتفاقی می‌افتد</string>
     <string name="calendar_ministry_who">چه کسی، یا یادداشت</string>
+    <string name="calendar_cloud_sync">همگام‌سازی با ابر و دستگاه‌های موبایل</string>
+    <string name="calendar_cloud_sync_sub">این تقویم را از طریق رله با تلفن‌ها هماهنگ نگه می‌دارد. در حالت خاموش هیچ‌چیز از این رایانه خارج نمی‌شود</string>
 </resources>
