@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Kdo nebo poznámka</string>
     <string name="calendar_cloud_sync">Synchronizovat s cloudem a mobilními zařízeními</string>
     <string name="calendar_cloud_sync_sub">Udržuje tento kalendář v souladu s telefony přes relé. Vypnuto: nic z něj tento počítač neopustí</string>
+    <string name="calendar_settings_export">Export</string>
+    <string name="calendar_export_note">Záhlaví, kterým začíná každé exportované PDF. Pole, které nechcete uvádět, nechte prázdné.</string>
+    <string name="calendar_export_logo">Logo sboru</string>
+    <string name="calendar_export_logo_sub">PNG nebo JPEG, vystředěné nahoře na stránce</string>
+    <string name="calendar_export_logo_none">Není vybráno žádné logo</string>
+    <string name="calendar_export_logo_choose">Vybrat…</string>
+    <string name="calendar_export_logo_remove">Odebrat logo</string>
+    <string name="calendar_export_church_name">Název sboru</string>
+    <string name="calendar_export_church_address">Adresa sboru</string>
+    <string name="calendar_export_public_heading">Sekce jen pro tým</string>
+    <string name="calendar_export_public_note">Veřejná kopie ukazuje jen čas začátku — bez časů řádků a délek — a vynechává značky i každou sekci zapnutou níže. Kopie pro tým obsahuje vše.</string>
+    <string name="calendar_export_sections_empty">Zatím nejsou definovány žádné sekce.</string>
+    <string name="calendar_export_public">Veřejná</string>
+    <string name="calendar_export_public_sub">Pořad bohoslužby pro shromáždění — jen čas začátku, bez časů řádků, délek, značek a sekcí jen pro tým</string>
+    <string name="calendar_export_staff">Tým sboru</string>
+    <string name="calendar_export_staff_sub">Úplný průběh bohoslužby s časy řádků, délkami, značkami a body před bohoslužbou i po ní</string>
+    <string name="calendar_export_choose">Vyberte, kterou kopii exportovat</string>
 </resources>

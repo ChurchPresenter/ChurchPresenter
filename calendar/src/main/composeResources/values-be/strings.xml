@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Хто або нататка</string>
     <string name="calendar_cloud_sync">Сінхранізаваць з воблакам і мабільнымі прыладамі</string>
     <string name="calendar_cloud_sync_sub">Трымае гэты каляндар узгодненым з тэлефонамі праз рэтранслятар. Калі выключана, нішто не пакідае гэты камп’ютар</string>
+    <string name="calendar_settings_export">Экспарт</string>
+    <string name="calendar_export_note">Шапка, з якой пачынаецца кожны экспартаваны PDF. Пакіньце поле пустым, каб не ўключаць яго.</string>
+    <string name="calendar_export_logo">Лагатып царквы</string>
+    <string name="calendar_export_logo_sub">PNG або JPEG, па цэнтры ўверсе старонкі</string>
+    <string name="calendar_export_logo_none">Лагатып не выбраны</string>
+    <string name="calendar_export_logo_choose">Выбраць…</string>
+    <string name="calendar_export_logo_remove">Выдаліць лагатып</string>
+    <string name="calendar_export_church_name">Назва царквы</string>
+    <string name="calendar_export_church_address">Адрас царквы</string>
+    <string name="calendar_export_public_heading">Раздзелы толькі для служыцеляў</string>
+    <string name="calendar_export_public_note">Публічная копія паказвае толькі час пачатку — без часу радкоў і працягласцей — і не ўключае метак і ўсіх раздзелаў, адзначаных ніжэй. У копіі для служыцеляў ёсць усё.</string>
+    <string name="calendar_export_sections_empty">Раздзелы пакуль не зададзены.</string>
+    <string name="calendar_export_public">Публічная</string>
+    <string name="calendar_export_public_sub">Парадак служэння для збору — толькі час пачатку, без часу радкоў, працягласцей, метак і раздзелаў толькі для служыцеляў</string>
+    <string name="calendar_export_staff">Служыцелі царквы</string>
+    <string name="calendar_export_staff_sub">Поўны парадак служэння з часам радкоў, працягласцямі, меткамі і пунктамі да і пасля служэння</string>
+    <string name="calendar_export_choose">Выберыце, якую копію экспартаваць</string>
 </resources>

@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">ใคร หรือหมายเหตุ</string>
     <string name="calendar_cloud_sync">ซิงค์กับคลาวด์และอุปกรณ์มือถือ</string>
     <string name="calendar_cloud_sync_sub">ทำให้ปฏิทินนี้ตรงกับโทรศัพท์ผ่านรีเลย์ เมื่อปิด จะไม่มีสิ่งใดออกจากคอมพิวเตอร์เครื่องนี้</string>
+    <string name="calendar_settings_export">ส่งออก</string>
+    <string name="calendar_export_note">หัวกระดาษที่อยู่ต้น PDF ทุกไฟล์ที่ส่งออก เว้นช่องใดว่างไว้หากไม่ต้องการแสดง</string>
+    <string name="calendar_export_logo">โลโก้คริสตจักร</string>
+    <string name="calendar_export_logo_sub">PNG หรือ JPEG จัดกึ่งกลางที่ด้านบนของหน้า</string>
+    <string name="calendar_export_logo_none">ยังไม่ได้เลือกโลโก้</string>
+    <string name="calendar_export_logo_choose">เลือก…</string>
+    <string name="calendar_export_logo_remove">ลบโลโก้</string>
+    <string name="calendar_export_church_name">ชื่อคริสตจักร</string>
+    <string name="calendar_export_church_address">ที่อยู่คริสตจักร</string>
+    <string name="calendar_export_public_heading">หัวข้อสำหรับทีมงานเท่านั้น</string>
+    <string name="calendar_export_public_note">ฉบับสาธารณะแสดงเฉพาะเวลาเริ่ม — ไม่มีเวลาของแต่ละแถวหรือความยาว — และตัดเครื่องหมายกับทุกหัวข้อที่เปิดไว้ด้านล่างออก ฉบับทีมงานมีครบทุกอย่าง</string>
+    <string name="calendar_export_sections_empty">ยังไม่ได้กำหนดหัวข้อ</string>
+    <string name="calendar_export_public">สาธารณะ</string>
+    <string name="calendar_export_public_sub">ลำดับนมัสการสำหรับสมาชิก — เฉพาะเวลาเริ่ม ไม่มีเวลาของแต่ละแถว ความยาว เครื่องหมาย หรือหัวข้อสำหรับทีมงานเท่านั้น</string>
+    <string name="calendar_export_staff">ทีมงานคริสตจักร</string>
+    <string name="calendar_export_staff_sub">ลำดับรายการฉบับเต็ม พร้อมเวลาของแต่ละแถว ความยาว เครื่องหมาย และรายการก่อนและหลังนมัสการ</string>
+    <string name="calendar_export_choose">เลือกฉบับที่จะส่งออก</string>
 </resources>

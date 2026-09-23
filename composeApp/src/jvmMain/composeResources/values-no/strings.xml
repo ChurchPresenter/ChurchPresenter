@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Hjørneradius</string>
     <string name="open_calendar_manager">Kalenderbehandler</string>
     <string name="calendar_locate_file_title">Finn %1$s</string>
+    <string name="calendar_choose_logo_title">Velg menighetens logo</string>
+    <string name="calendar_export_title">Eksporter kjøreplan</string>
     <string name="calendar_locate_folder_title">Finn mappen %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Videobakgrunner ble slått av etter %1$d krasj på rad.</string>

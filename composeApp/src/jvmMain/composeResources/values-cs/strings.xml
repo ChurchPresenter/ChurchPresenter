@@ -2671,6 +2671,8 @@
     <string name="backdrop_border_radius">Poloměr rohů</string>
     <string name="open_calendar_manager">Správce kalendáře</string>
     <string name="calendar_locate_file_title">Najít %1$s</string>
+    <string name="calendar_choose_logo_title">Vyberte logo sboru</string>
+    <string name="calendar_export_title">Export průběhu bohoslužby</string>
     <string name="calendar_locate_folder_title">Najít složku %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Videopozadí byla vypnuta po %1$d pádech za sebou.</string>

@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Radius ng sulok</string>
     <string name="open_calendar_manager">Tagapamahala ng Kalendaryo</string>
     <string name="calendar_locate_file_title">Hanapin ang %1$s</string>
+    <string name="calendar_choose_logo_title">Pumili ng logo ng iglesya</string>
+    <string name="calendar_export_title">I-export ang takbo ng programa</string>
     <string name="calendar_locate_folder_title">Hanapin ang folder na %1$s</string>
     <string name="background_camera_option">Camera</string>
     <string name="crash_video_bg_banner">Na-off ang mga video background matapos mag-crash nang %1$d beses na magkakasunod.</string>

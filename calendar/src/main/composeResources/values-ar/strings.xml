@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">مَن، أو ملاحظة</string>
     <string name="calendar_cloud_sync">المزامنة مع السحابة والأجهزة المحمولة</string>
     <string name="calendar_cloud_sync_sub">يبقي هذا التقويم متوافقًا مع الهواتف عبر المُرحِّل. عند الإيقاف لا يغادر شيء منه هذا الحاسوب</string>
+    <string name="calendar_settings_export">التصدير</string>
+    <string name="calendar_export_note">الترويسة التي يبدأ بها كل ملف PDF مُصدَّر. اترك الحقل فارغًا لحذفه منها.</string>
+    <string name="calendar_export_logo">شعار الكنيسة</string>
+    <string name="calendar_export_logo_sub">PNG أو JPEG، في منتصف أعلى الصفحة</string>
+    <string name="calendar_export_logo_none">لم يُختر شعار</string>
+    <string name="calendar_export_logo_choose">اختيار…</string>
+    <string name="calendar_export_logo_remove">إزالة الشعار</string>
+    <string name="calendar_export_church_name">اسم الكنيسة</string>
+    <string name="calendar_export_church_address">عنوان الكنيسة</string>
+    <string name="calendar_export_public_heading">أقسام للفريق فقط</string>
+    <string name="calendar_export_public_note">تعرض النسخة العامة وقت البدء فقط — دون أوقات الصفوف أو المدد — وتستبعد العلامات وكل قسم مفعّل أدناه. أما نسخة الفريق فتتضمن كل شيء.</string>
+    <string name="calendar_export_sections_empty">لم تُحدَّد أقسام بعد.</string>
+    <string name="calendar_export_public">عامة</string>
+    <string name="calendar_export_public_sub">ترتيب الاجتماع للجماعة — وقت البدء فقط، دون أوقات الصفوف أو المدد أو العلامات أو الأقسام الخاصة بالفريق</string>
+    <string name="calendar_export_staff">فريق الكنيسة</string>
+    <string name="calendar_export_staff_sub">ترتيب الاجتماع كاملًا مع أوقات الصفوف والمدد والعلامات والبنود التي تسبق الاجتماع وتليه</string>
+    <string name="calendar_export_choose">اختر النسخة التي تريد تصديرها</string>
 </resources>

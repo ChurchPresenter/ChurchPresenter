@@ -2707,6 +2707,8 @@
     <string name="backdrop_border_radius">角の丸み</string>
     <string name="open_calendar_manager">カレンダーマネージャー</string>
     <string name="calendar_locate_file_title">%1$s を探す</string>
+    <string name="calendar_choose_logo_title">教会のロゴを選択</string>
+    <string name="calendar_export_title">進行表を書き出す</string>
     <string name="calendar_locate_folder_title">フォルダー %1$s を探す</string>
     <string name="background_camera_option">カメラ</string>
     <string name="crash_video_bg_banner">%1$d 回連続でクラッシュしたため、動画背景をオフにしました。</string>

@@ -23,6 +23,7 @@ import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.ItemPreset
+import org.churchpresenter.calendar.model.PdfExportSettings
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.PresetDocument
 import org.churchpresenter.calendar.model.SavedTemplate
@@ -36,11 +37,14 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
 import org.churchpresenter.theme.ChurchPresenterTheme
+import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalDate
 import java.time.LocalTime
+import javax.imageio.ImageIO
 import kotlin.test.Test
+import java.awt.Color as AwtColor
 
 /**
  * The Calendar Manager window, state by state, in both themes.
@@ -230,6 +234,18 @@ class CalendarScreenshotTest {
     fun `settings, on the presets the tabs have saved`() = shoot("settings_presets", rootIndex = 1, trim = true) {
         openSettings()
         clickLast("Presets")
+    }
+
+    @Test
+    fun `settings, on the pdf export`() = shoot("settings_export", rootIndex = 1, trim = true) {
+        openSettings()
+        clickLast("Export")
+    }
+
+    /** The header's Export split open, on the choice between the two copies. */
+    @Test
+    fun `the export menu`() = shoot("export_menu", rootIndex = 1, trim = true) {
+        clickIcon("Choose which copy to export")
     }
 
     /** Auto-load on, and scrolled to it, so the lead-time row it reveals is in the shot. */
@@ -425,7 +441,19 @@ class CalendarScreenshotTest {
                 File(root, "decks/sermon.pptx").writeText("pptx")
                 File(root, "clips").mkdirs()
                 File(root, "clips/testimony.mp4").writeText("mp4")
+                ImageIO.write(logoImage(), "png", File(root, "logo.png"))
             }
+        }
+
+        /** A plain drawn mark, so the Export tab's logo preview has a real picture to show. */
+        private fun logoImage(): BufferedImage = BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB).also { image ->
+            val graphics = image.createGraphics()
+            graphics.color = AwtColor(0x5B, 0x9D, 0xF5)
+            graphics.fillOval(8, 8, 80, 80)
+            graphics.color = AwtColor.WHITE
+            graphics.fillRect(42, 20, 12, 56)
+            graphics.fillRect(26, 36, 44, 12)
+            graphics.dispose()
         }
 
         /** [sunday] with every file gone and a verse the Bible does not have: the pre-flight marks. */
@@ -540,8 +568,17 @@ class CalendarScreenshotTest {
                     kind = ServiceKind.SPECIAL.id, items = listOf(song("t-s", 3, "Silent Night")),
                 ),
             ),
-            // On, so the Defaults tab is shot with the lead-time row the switch reveals.
-            preferences = CalendarPreferences(autoLoadService = true, autoLoadLeadMinutes = 10),
+            // On, so the Defaults tab is shot with the lead-time row the switch reveals; and a
+            // letterhead filled in, so the Export tab is shot the way a church leaves it.
+            preferences = CalendarPreferences(
+                autoLoadService = true,
+                autoLoadLeadMinutes = 10,
+                pdfExport = PdfExportSettings(
+                    logoPath = File(ASSETS, "logo.png").absolutePath,
+                    churchName = "Grace Community Church",
+                    churchAddress = "120 Main Street, Springfield",
+                ),
+            ),
         )
 
         val STOCK_PRESETS = listOf(

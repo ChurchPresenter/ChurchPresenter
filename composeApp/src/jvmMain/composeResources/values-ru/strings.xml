@@ -2664,6 +2664,8 @@
     <string name="backdrop_border_radius">Радиус углов</string>
     <string name="open_calendar_manager">Менеджер календаря</string>
     <string name="calendar_locate_file_title">Найти %1$s</string>
+    <string name="calendar_choose_logo_title">Выберите логотип церкви</string>
+    <string name="calendar_export_title">Экспорт порядка служения</string>
     <string name="calendar_locate_folder_title">Найти папку %1$s</string>
     <string name="background_camera_option">Камера</string>
     <string name="crash_video_bg_banner">Видеофоны отключены после %1$d сбоев подряд.</string>

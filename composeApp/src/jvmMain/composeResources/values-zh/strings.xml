@@ -2707,6 +2707,8 @@
     <string name="backdrop_border_radius">圆角半径</string>
     <string name="open_calendar_manager">日历管理器</string>
     <string name="calendar_locate_file_title">查找 %1$s</string>
+    <string name="calendar_choose_logo_title">选择教会标志</string>
+    <string name="calendar_export_title">导出聚会流程</string>
     <string name="calendar_locate_folder_title">查找文件夹 %1$s</string>
     <string name="background_camera_option">摄像头</string>
     <string name="crash_video_bg_banner">连续崩溃 %1$d 次后，视频背景已关闭。</string>

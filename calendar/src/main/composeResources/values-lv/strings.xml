@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Kurš vai piezīme</string>
     <string name="calendar_cloud_sync">Sinhronizēt ar mākoni un mobilajām ierīcēm</string>
     <string name="calendar_cloud_sync_sub">Uztur šo kalendāru saskaņā ar tālruņiem caur releju. Izslēgts — nekas no tā nepamet šo datoru</string>
+    <string name="calendar_settings_export">Eksports</string>
+    <string name="calendar_export_note">Veidlapas galvene, ar ko sākas katrs eksportētais PDF. Atstājiet lauku tukšu, lai to izlaistu.</string>
+    <string name="calendar_export_logo">Draudzes logotips</string>
+    <string name="calendar_export_logo_sub">PNG vai JPEG, centrēts lapas augšā</string>
+    <string name="calendar_export_logo_none">Logotips nav izvēlēts</string>
+    <string name="calendar_export_logo_choose">Izvēlēties…</string>
+    <string name="calendar_export_logo_remove">Noņemt logotipu</string>
+    <string name="calendar_export_church_name">Draudzes nosaukums</string>
+    <string name="calendar_export_church_address">Draudzes adrese</string>
+    <string name="calendar_export_public_heading">Sadaļas tikai komandai</string>
+    <string name="calendar_export_public_note">Publiskajā kopijā redzams tikai sākuma laiks — bez rindu laikiem un ilgumiem — un tajā nav atzīmju un nevienas zemāk ieslēgtās sadaļas. Komandas kopijā ir viss.</string>
+    <string name="calendar_export_sections_empty">Sadaļas vēl nav definētas.</string>
+    <string name="calendar_export_public">Publiskā</string>
+    <string name="calendar_export_public_sub">Dievkalpojuma kārtība draudzei — tikai sākuma laiks, bez rindu laikiem, ilgumiem, atzīmēm un sadaļām tikai komandai</string>
+    <string name="calendar_export_staff">Draudzes komanda</string>
+    <string name="calendar_export_staff_sub">Pilna norises kārtība ar rindu laikiem, ilgumiem, atzīmēm un punktiem pirms un pēc dievkalpojuma</string>
+    <string name="calendar_export_choose">Izvēlieties, kuru kopiju eksportēt</string>
 </resources>

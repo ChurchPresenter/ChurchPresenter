@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">कुनाको गोलाइ</string>
     <string name="open_calendar_manager">क्यालेन्डर व्यवस्थापक</string>
     <string name="calendar_locate_file_title">%1$s खोज्नुहोस्</string>
+    <string name="calendar_choose_logo_title">मण्डलीको लोगो छान्नुहोस्</string>
+    <string name="calendar_export_title">सभाको क्रम निर्यात गर्नुहोस्</string>
     <string name="calendar_locate_folder_title">फोल्डर %1$s खोज्नुहोस्</string>
     <string name="background_camera_option">क्यामेरा</string>
     <string name="crash_video_bg_banner">लगातार %1$d पटक क्र्यास भएपछि भिडियो पृष्ठभूमिहरू बन्द गरियो।</string>

@@ -2711,6 +2711,8 @@
     <string name="backdrop_border_radius">மூலை வளைவு</string>
     <string name="open_calendar_manager">நாட்காட்டி மேலாளர்</string>
     <string name="calendar_locate_file_title">%1$s ஐக் கண்டறி</string>
+    <string name="calendar_choose_logo_title">சபையின் லோகோவைத் தேர்ந்தெடு</string>
+    <string name="calendar_export_title">ஆராதனை வரிசையை ஏற்றுமதி செய்</string>
     <string name="calendar_locate_folder_title">%1$s கோப்புறையைக் கண்டறி</string>
     <string name="background_camera_option">கேமரா</string>
     <string name="crash_video_bg_banner">தொடர்ந்து %1$d முறை செயலிழந்ததால் வீடியோப் பின்னணிகள் அணைக்கப்பட்டன.</string>

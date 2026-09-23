@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Хто або примітка</string>
     <string name="calendar_cloud_sync">Синхронізувати з хмарою та мобільними пристроями</string>
     <string name="calendar_cloud_sync_sub">Тримає цей календар узгодженим із телефонами через ретранслятор. Якщо вимкнено, нічого не залишає цей комп’ютер</string>
+    <string name="calendar_settings_export">Експорт</string>
+    <string name="calendar_export_note">Шапка, з якої починається кожен експортований PDF. Залиште поле порожнім, щоб не включати його.</string>
+    <string name="calendar_export_logo">Логотип церкви</string>
+    <string name="calendar_export_logo_sub">PNG або JPEG, по центру вгорі сторінки</string>
+    <string name="calendar_export_logo_none">Логотип не вибрано</string>
+    <string name="calendar_export_logo_choose">Вибрати…</string>
+    <string name="calendar_export_logo_remove">Видалити логотип</string>
+    <string name="calendar_export_church_name">Назва церкви</string>
+    <string name="calendar_export_church_address">Адреса церкви</string>
+    <string name="calendar_export_public_heading">Розділи лише для служителів</string>
+    <string name="calendar_export_public_note">Публічна копія показує лише час початку — без часу рядків і тривалостей — і не містить міток та всіх розділів, позначених нижче. У копії для служителів є все.</string>
+    <string name="calendar_export_sections_empty">Розділів ще не задано.</string>
+    <string name="calendar_export_public">Публічна</string>
+    <string name="calendar_export_public_sub">Порядок служіння для громади — лише час початку, без часу рядків, тривалостей, міток і розділів лише для служителів</string>
+    <string name="calendar_export_staff">Служителі церкви</string>
+    <string name="calendar_export_staff_sub">Повний порядок служіння з часом рядків, тривалостями, мітками та пунктами до і після служіння</string>
+    <string name="calendar_export_choose">Виберіть, яку копію експортувати</string>
 </resources>

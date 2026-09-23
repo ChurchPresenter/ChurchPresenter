@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Qui, ou une note</string>
     <string name="calendar_cloud_sync">Synchroniser avec le cloud et les appareils mobiles</string>
     <string name="calendar_cloud_sync_sub">Garde ce calendrier à jour avec les téléphones via le relais. Désactivé, rien ne quitte cet ordinateur</string>
+    <string name="calendar_settings_export">Export</string>
+    <string name="calendar_export_note">L'en-tête par lequel commence chaque PDF exporté. Laissez un champ vide pour l'omettre.</string>
+    <string name="calendar_export_logo">Logo de l'église</string>
+    <string name="calendar_export_logo_sub">PNG ou JPEG, centré en haut de la page</string>
+    <string name="calendar_export_logo_none">Aucun logo choisi</string>
+    <string name="calendar_export_logo_choose">Choisir…</string>
+    <string name="calendar_export_logo_remove">Retirer le logo</string>
+    <string name="calendar_export_church_name">Nom de l'église</string>
+    <string name="calendar_export_church_address">Adresse de l'église</string>
+    <string name="calendar_export_public_heading">Sections réservées à l'équipe</string>
+    <string name="calendar_export_public_note">La copie publique n'affiche que l'heure de début — sans heures de ligne ni durées — et omet les repères ainsi que chaque section activée ci-dessous. La copie de l'équipe contient tout.</string>
+    <string name="calendar_export_sections_empty">Aucune section définie pour l'instant.</string>
+    <string name="calendar_export_public">Publique</string>
+    <string name="calendar_export_public_sub">Ordre du culte pour l'assemblée — l'heure de début seulement, sans heures de ligne, durées, repères ni sections réservées à l'équipe</string>
+    <string name="calendar_export_staff">Équipe de l'église</string>
+    <string name="calendar_export_staff_sub">Le déroulé complet avec les heures de ligne, les durées, les repères et les éléments d'avant et d'après le culte</string>
+    <string name="calendar_export_choose">Choisissez la copie à exporter</string>
 </resources>

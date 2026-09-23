@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Kulmien säde</string>
     <string name="open_calendar_manager">Kalenterin hallinta</string>
     <string name="calendar_locate_file_title">Etsi %1$s</string>
+    <string name="calendar_choose_logo_title">Valitse seurakunnan logo</string>
+    <string name="calendar_export_title">Vie kulkusuunnitelma</string>
     <string name="calendar_locate_folder_title">Etsi kansio %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Videotaustat poistettiin käytöstä %1$d peräkkäisen kaatumisen jälkeen.</string>

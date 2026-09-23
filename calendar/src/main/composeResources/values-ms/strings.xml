@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Siapa, atau nota</string>
     <string name="calendar_cloud_sync">Segerakkan dengan awan dan peranti mudah alih</string>
     <string name="calendar_cloud_sync_sub">Mengekalkan kalendar ini selaras dengan telefon melalui relai. Apabila dimatikan, tiada apa-apa yang keluar dari komputer ini</string>
+    <string name="calendar_settings_export">Eksport</string>
+    <string name="calendar_export_note">Kepala surat yang memulakan setiap PDF yang dieksport. Biarkan medan kosong untuk tidak menyertakannya.</string>
+    <string name="calendar_export_logo">Logo gereja</string>
+    <string name="calendar_export_logo_sub">PNG atau JPEG, di tengah bahagian atas halaman</string>
+    <string name="calendar_export_logo_none">Tiada logo dipilih</string>
+    <string name="calendar_export_logo_choose">Pilih…</string>
+    <string name="calendar_export_logo_remove">Buang logo</string>
+    <string name="calendar_export_church_name">Nama gereja</string>
+    <string name="calendar_export_church_address">Alamat gereja</string>
+    <string name="calendar_export_public_heading">Bahagian khas untuk pasukan</string>
+    <string name="calendar_export_public_note">Salinan awam hanya menunjukkan masa mula — tanpa masa baris atau tempoh — dan tidak menyertakan penanda serta setiap bahagian yang dihidupkan di bawah. Salinan pasukan mengandungi semuanya.</string>
+    <string name="calendar_export_sections_empty">Belum ada bahagian ditetapkan.</string>
+    <string name="calendar_export_public">Awam</string>
+    <string name="calendar_export_public_sub">Aturan ibadah untuk jemaah — masa mula sahaja, tanpa masa baris, tempoh, penanda atau bahagian khas untuk pasukan</string>
+    <string name="calendar_export_staff">Pasukan gereja</string>
+    <string name="calendar_export_staff_sub">Aturcara penuh dengan masa baris, tempoh, penanda serta item sebelum dan selepas ibadah</string>
+    <string name="calendar_export_choose">Pilih salinan yang hendak dieksport</string>
 </resources>
