@@ -30,6 +30,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 
 
@@ -213,7 +214,8 @@ internal fun OffscreenOutputContent(
                                     previousImagePath = presenterManager.previousDisplayedImagePath.value,
                                     transitionAlpha = presenterManager.pictureTransitionAlpha.value,
                                     slideOffset = presenterManager.pictureSlideOffset.value,
-                                    animationType = presenterManager.animationType.value
+                                    animationType = presenterManager.animationType.value,
+                                    contentScale = appSettings.pictureSettings.scaleMode.contentScale,
                                 )
                                 Presenting.ANNOUNCEMENTS -> AnnouncementsPresenter(
                                     text = presenterManager.displayedAnnouncementText.value,
@@ -258,6 +260,7 @@ internal fun OffscreenOutputContent(
                                             outputRole = outputRole,
                                             showSubtitles = profile.showSubtitles,
                                             mediaSettings = appSettings.mediaSettings,
+                                            contentScale = appSettings.mediaScaleMode.contentScale,
                                         )
                                     }
                                 }

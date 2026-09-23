@@ -3,6 +3,10 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.onNodeWithText
+import kotlin.test.assertNotNull
+import kotlin.test.assertEquals
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onAllNodesWithText
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -106,6 +110,26 @@ class LowerThirdFolderTest {
             onNodeWithText("Speaker").assertExists()
             onNodeWithText("settings").assertDoesNotExist()
             onNodeWithText("notes").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `the generator opens on this folder, and a file it saves joins the list`() {
+        val dir = lottieFolder("Welcome")
+        var openedOn: String? = null
+        var onSaved: (() -> Unit)? = null
+
+        lowerThirdTab(folder = dir, onOpenLottieGen = { folder, saved -> openedOn = folder; onSaved = saved }) { _ ->
+            onNodeWithText("Generate").performClick()
+            waitForIdle()
+            assertEquals(dir.absolutePath, openedOn, "the generator saves where this tab reads")
+
+            File(dir, "Pastor.json").writeText(LOWER_THIRD_LOTTIE)
+            assertNotNull(onSaved, "the tab must ask to hear about a save").invoke()
+
+            // The rescan reads the folder off the main thread; the new preset appearing is the signal.
+            waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Pastor").fetchSemanticsNodes().isNotEmpty() }
+            onNodeWithText("Welcome").assertExists()
         }
     }
 }

@@ -63,6 +63,7 @@ import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.atem_settings
 import churchpresenter.composeapp.generated.resources.companion_satellite_settings
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
@@ -203,6 +204,7 @@ internal fun OptionsDialogContent(
                     selectedIndex = safeTabIndex,
                     scrollState = tabScrollState,
                     labelStyle = currentSettings.tabLabelStyle,
+                    labelMargin = currentSettings.tabLabelMargin,
                     hasObs = obsManager != null,
                     companionSatelliteTabIndex = companionSatelliteTabIndex,
                     onSelect = { selectedTabIndex = it },
@@ -258,6 +260,7 @@ private fun SettingsTabStrip(
     selectedIndex: Int,
     scrollState: ScrollState,
     labelStyle: TabLabelStyle,
+    labelMargin: TabLabelMargin,
     hasObs: Boolean,
     companionSatelliteTabIndex: Int,
     onSelect: (Int) -> Unit,
@@ -269,25 +272,6 @@ private fun SettingsTabStrip(
         verticalAlignment = Alignment.CenterVertically
     ) {
         TabStripBackArrow(scrollState)
-        val tabs = buildList {
-            add(Triple(0, stringResource(Res.string.appearance), Icons.Filled.Palette))
-            add(Triple(1, stringResource(Res.string.bible), Icons.Filled.MenuBook))
-            add(Triple(TAB_BACKGROUND, stringResource(Res.string.background), Icons.Filled.Wallpaper))
-            add(Triple(TAB_PROFILES, stringResource(Res.string.output_profiles_tab), Icons.Filled.Tune))
-            add(Triple(TAB_PROJECTION, stringResource(Res.string.projection), Icons.Filled.DesktopWindows))
-            add(Triple(TAB_SERVER, stringResource(Res.string.server_settings), Icons.Filled.Dns))
-            add(Triple(TAB_ATEM, stringResource(Res.string.atem_settings), Icons.Filled.SwitchVideo))
-            if (hasObs) {
-                add(Triple(TAB_INTEGRATIONS, stringResource(Res.string.obs_settings), Icons.Filled.Videocam))
-            }
-            add(
-                Triple(
-                    companionSatelliteTabIndex,
-                    stringResource(Res.string.companion_satellite_settings),
-                    Icons.Filled.SettingsRemote,
-                ),
-            )
-        }
         PrimaryScrollableTabRow(
             selectedTabIndex = selectedIndex,
             modifier = Modifier.weight(1f),
@@ -295,11 +279,29 @@ private fun SettingsTabStrip(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             edgePadding = 0.dp,
-            minTabWidth = labeledTabMinWidth(labelStyle),
+            minTabWidth = labeledTabMinWidth(labelStyle, labelMargin),
             indicator = { LabeledTabIndicator(selectedIndex) },
         ) {
-            tabs.forEach { (index, label, icon) ->
-                SettingsTab(index, label, icon, selectedIndex, labelStyle, onSelect)
+            // No Song, Stage Monitor or Dictionary tab: the first two are per-profile now and are
+            // edited on the Profiles tab, and the dictionary's look is one setting per install,
+            // reached from the gear on the Dictionary tab itself.
+            listOfNotNull(
+                StripTab(0, stringResource(Res.string.appearance), Icons.Filled.Palette),
+                StripTab(1, stringResource(Res.string.bible), Icons.Filled.MenuBook),
+                StripTab(TAB_BACKGROUND, stringResource(Res.string.background), Icons.Filled.Wallpaper),
+                StripTab(TAB_PROFILES, stringResource(Res.string.output_profiles_tab), Icons.Filled.Tune),
+                StripTab(TAB_PROJECTION, stringResource(Res.string.projection), Icons.Filled.DesktopWindows),
+                StripTab(TAB_SERVER, stringResource(Res.string.server_settings), Icons.Filled.Dns),
+                StripTab(TAB_ATEM, stringResource(Res.string.atem_settings), Icons.Filled.SwitchVideo),
+                StripTab(TAB_INTEGRATIONS, stringResource(Res.string.obs_settings), Icons.Filled.Videocam)
+                    .takeIf { hasObs },
+                StripTab(
+                    companionSatelliteTabIndex,
+                    stringResource(Res.string.companion_satellite_settings),
+                    Icons.Filled.SettingsRemote,
+                ),
+            ).forEach { tab ->
+                SettingsTab(tab.index, tab.name, tab.icon, selectedIndex, labelStyle, labelMargin, onSelect)
             }
         }
         TabStripForwardArrow(scrollState)
@@ -429,6 +431,9 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
     }
 }
 
+/** One tab of [SettingsTabStrip]: where it leads, and what it is called and drawn with. */
+private class StripTab(val index: Int, val name: String, val icon: ImageVector)
+
 @Composable
 private fun SettingsTab(
     index: Int,
@@ -436,6 +441,7 @@ private fun SettingsTab(
     icon: ImageVector,
     selectedIndex: Int,
     labelStyle: TabLabelStyle,
+    labelMargin: TabLabelMargin,
     onSelect: (Int) -> Unit,
 ) {
     LabeledTab(
@@ -443,6 +449,7 @@ private fun SettingsTab(
         icon = icon,
         selected = selectedIndex == index,
         labelStyle = labelStyle,
+        labelMargin = labelMargin,
         onClick = { onSelect(index) },
     )
 }

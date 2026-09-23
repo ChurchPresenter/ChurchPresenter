@@ -10,11 +10,11 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performMouseInput
@@ -30,6 +30,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
@@ -172,16 +173,15 @@ class SystemSettingsTabTest {
             }
         }
 
+        // One press of the style button moves to the next style.
         onNode(hasText("Text only") and hasClickAction()).performScrollTo().performClick()
-        waitForIdle()
-        onNode(hasTextExactly("Icons and text") and hasClickAction()).performClick()
         waitForIdle()
 
         assertEquals(TabLabelStyle.ICONS_AND_TEXT, applied?.tabLabelStyle)
     }
 
     @Test
-    fun `the tab label dropdown shows the stored style`() = runComposeUiTest {
+    fun `the tab label button shows the stored style`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(settings = AppSettings(tabLabelStyle = TabLabelStyle.ICONS))
@@ -190,6 +190,50 @@ class SystemSettingsTabTest {
 
         onNode(hasText("Icons only") and hasClickAction()).assertExists()
         onNode(hasText("Text only") and hasClickAction()).assertDoesNotExist()
+    }
+
+    /** The System tab over settings it really keeps, so a press is seen by the next one. */
+    private fun ComposeUiTest.statefulSystemTab(initial: AppSettings): () -> AppSettings {
+        var settings by mutableStateOf(initial)
+        setContent {
+            MaterialTheme {
+                SystemSettingsTab(
+                    settings = settings,
+                    onSettingsChange = { transform -> settings = transform(settings) },
+                )
+            }
+        }
+        return { settings }
+    }
+
+    @Test
+    fun `the style button wraps from icons only back to text only`() = runComposeUiTest {
+        val settings = statefulSystemTab(AppSettings(tabLabelStyle = TabLabelStyle.ICONS))
+
+        onNodeWithTag("tab_label_style_button").performScrollTo().performClick()
+        waitForIdle()
+
+        assertEquals(TabLabelStyle.TEXT, settings().tabLabelStyle)
+        onNode(hasText("Text only") and hasClickAction()).assertExists()
+    }
+
+    @Test
+    fun `the spacing button walks every spacing in order, naming each, and wraps round`() = runComposeUiTest {
+        val settings = statefulSystemTab(AppSettings(tabLabelMargin = TabLabelMargin.SMALL))
+        val names = listOf("Medium-small", "Normal", "Medium-large", "Large", "Small")
+        val expected = listOf(
+            TabLabelMargin.SMALL_NORMAL, TabLabelMargin.NORMAL, TabLabelMargin.NORMAL_LARGE,
+            TabLabelMargin.LARGE, TabLabelMargin.SMALL,
+        )
+
+        onNode(hasText("Small") and hasClickAction()).assertExists()
+        expected.zip(names).forEach { (margin, name) ->
+            onNodeWithTag("tab_spacing_button").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(margin, settings().tabLabelMargin)
+            onNode(hasText(name) and hasClickAction()).assertExists()
+        }
+        assertEquals(TabLabelStyle.TEXT, settings().tabLabelStyle, "spacing leaves the label style alone")
     }
 
     // ── Switches ──────────────────────────────────────────────────────────────
@@ -1225,6 +1269,10 @@ class SystemSettingsTabTest {
         setContent { MaterialTheme { SystemSettingsTab() } }
 
         waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 6 }
+        // The calendar's folder is checked off the UI thread, so the count is 0 until that lands --
+        // wait for the number itself, as the two counting tests above do, rather than for the six
+        // rows that are "Not set" the instant they compose.
+        waitUntil { onAllNodesWithText("1 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("1 linked").onFirst()
             .assertExists("only the calendar, at its default, is linked before anything is chosen")
     }

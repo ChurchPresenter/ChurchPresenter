@@ -89,6 +89,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.output_scale_mode
 import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
@@ -139,8 +140,11 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.app.churchpresenter.utils.icon
+import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.pairLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -562,6 +566,51 @@ fun PicturesTab(
                     // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
                     // semantics, so without this the button has no name at all.
                     Icon(painterResource(Res.drawable.ic_refresh), contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), modifier = Modifier.size(16.dp))
+                }
+            }
+
+            // Scale button: each click moves Fit → Fill → Stretch, lit whenever it is not Fit
+            val scaleMode = appSettings?.pictureSettings?.scaleMode ?: OutputScaleMode.FIT
+            val scaled = scaleMode != OutputScaleMode.FIT
+            val scaleName = stringResource(scaleMode.label)
+            val scaleLabel = stringResource(Res.string.output_scale_mode, scaleName)
+            TooltipArea(
+                tooltip = {
+                    Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) {
+                        Text(
+                            scaleLabel,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+            ) {
+                IconButton(
+                    onClick = {
+                        onSettingsChange { s ->
+                            s.copy(pictureSettings = s.pictureSettings.copy(scaleMode = scaleMode.next()))
+                        }
+                    },
+                    modifier = Modifier.size(28.dp),
+                    colors = if (scaled) IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) else IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Icon(
+                        scaleMode.icon,
+                        contentDescription = scaleLabel,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 

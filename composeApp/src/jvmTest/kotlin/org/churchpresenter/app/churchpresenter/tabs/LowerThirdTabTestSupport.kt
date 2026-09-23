@@ -79,6 +79,8 @@ internal class LowerThirdReports {
     /** The json handed to the output for the most recent go-live. */
     var liveJson: String? = null
     var settingsChanges = 0
+    /** The settings as they stood after the most recent change the tab asked for. */
+    var settings: AppSettings? = null
 }
 
 /**
@@ -135,6 +137,8 @@ internal fun lowerThirdTab(
     width: Dp? = null,
     /** Non-null renders through the real app theme, which is what the screenshot suite shoots. */
     themeMode: ThemeMode? = null,
+    /** Stands in for opening the Lottie generator window, which is a real window of its own. */
+    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     block: ComposeUiTest.(reports: LowerThirdReports) -> Unit,
 ) {
     val reports = LowerThirdReports()
@@ -170,6 +174,7 @@ internal fun lowerThirdTab(
                             onSettingsChange = { transform ->
                                 appSettings = transform(appSettings)
                                 reports.settingsChanges++
+                                reports.settings = appSettings
                             },
                             onAddToSchedule = { id, label, pause, pauseMs ->
                                 reports.scheduled += listOf(id, label, pause, pauseMs)
@@ -181,6 +186,7 @@ internal fun lowerThirdTab(
                             selectedLowerThirdItem = selectedLowerThirdItem,
                             queryAtemState = queryAtemState,
                             probeAtemReachable = { _, _ -> atemReachable },
+                            onOpenLottieGen = onOpenLottieGen,
                         )
                     }
                 }

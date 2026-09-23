@@ -35,6 +35,8 @@ data class AppSettings(
     val keyboardShortcutSettings: KeyboardShortcutSettings = KeyboardShortcutSettings(),
     val presentationStorageDirectory: String = "",
     val mediaStorageDirectory: String = "",
+    /** How video meets the output -- the Media tab's scale button. */
+    val mediaScaleMode: OutputScaleMode = OutputScaleMode.FIT,
     /**
      * Where `calendar.json` and `presets.json` are kept. Blank means the app data folder, which is
      * where they have always been; a path is what makes two computers share one calendar -- point
@@ -74,6 +76,7 @@ data class AppSettings(
     val windowY: Int = -1,
     val hiddenTabs: Set<String> = setOf("QA", "STT"),
     val tabLabelStyle: TabLabelStyle = TabLabelStyle.TEXT,
+    val tabLabelMargin: TabLabelMargin = TabLabelMargin.NORMAL,
     val crosswordUnlockedLevel: Int = 0,
     val crosswordProgress: Map<Int, String> = emptyMap(),
     val obsSettings: OBSSettings = OBSSettings(),

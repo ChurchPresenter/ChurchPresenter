@@ -215,6 +215,26 @@ class PictureDecoderTest {
     }
 
     @Test
+    fun `cover scales to the larger side, so a cropped or stretched picture is never upscaled back`() {
+        // 12x9 into 6x6: fitting takes the width's 0.5 and holds 6x4, which FILL would then blow up
+        // by half again to reach the 6-pixel height. Covering takes the height's 2/3 instead.
+        val scaled = PictureDecoder.decodeScaled(write("cover.png", "png"), maxWidth = 6, maxHeight = 6, cover = true)
+
+        assertEquals(8, scaled.width, "12 scaled by the height's 2/3, overhanging the box to be cropped")
+        assertEquals(6, scaled.height)
+    }
+
+    @Test
+    fun `cover still never upscales a picture smaller than the box`() {
+        val scaled = PictureDecoder.decodeScaled(
+            write("small.png", "png"), maxWidth = 1920, maxHeight = 1080, cover = true,
+        )
+
+        assertEquals(12, scaled.width)
+        assertEquals(9, scaled.height)
+    }
+
+    @Test
     fun `decodeScaledOrNull returns null for a file no decoder can read`() {
         val broken = File(folder, "truncated.jpeg").also { it.writeText("this is not a JPEG") }
 

@@ -366,6 +366,24 @@ class LottieGenViewModelTest {
     }
 
     @Test
+    fun `a folder that refuses the write is reported instead of crashing`() {
+        // A lower-thirds folder under C:\Program Files threw on the Save click and closed the app
+        // (Sentry CHURCH-PRESENTER-DESKTOP-7V).
+        val dir = outDir("locked")
+        val vm = viewModel()
+        dir.setWritable(false)
+        try {
+            // Where the OS ignores the flag (Windows, or running as root) there is nothing to reproduce.
+            if (File(dir, "probe").let { runCatching { it.createNewFile() }.getOrDefault(false) }) return
+
+            assertNull(vm.downloadJson(dir))
+            assertTrue(vm.statusText.startsWith("Error:"), "the operator is told it failed: ${vm.statusText}")
+        } finally {
+            dir.setWritable(true)
+        }
+    }
+
+    @Test
     fun `a second download of the same name gets its own number`() {
         val dir = outDir()
         val vm = viewModel()

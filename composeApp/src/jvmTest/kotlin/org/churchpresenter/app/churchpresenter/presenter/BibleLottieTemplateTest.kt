@@ -184,4 +184,106 @@ class BibleLottieTemplateTest {
         assertEquals("A-BoldItalic", BandFontKey("A", bold = true, italic = true).lottieName)
         assertEquals("Regular", BandFontKey("A", bold = false, italic = false).styleName)
     }
+
+    @Test
+    fun `a file with no fonts block of its own is given one`() {
+        val bare = """{"layers":[{"nm":"Text1","t":{"d":{"k":[{"s":{"f":"Arial-Regular"}}]}}}]}"""
+
+        val rewritten = Json.parseToJsonElement(
+            rewriteTemplateFonts(bare, mapOf("Text1" to BandFontKey("Georgia", bold = false, italic = false))),
+        ).jsonObject
+
+        val list = rewritten["fonts"]!!.jsonObject["list"]!!.jsonArray.map { it.jsonObject }
+        assertEquals(listOf("Georgia-Regular"), list.map { it["fName"]!!.jsonPrimitive.content })
+    }
+
+    @Test
+    fun `a layer the rewrite cannot reach into is left exactly as it was`() {
+        // Each of these is missing one step of the path to a text document: no `t`, no `d`, no `k`,
+        // a keyframe that is not an object, and a keyframe with no `s`. None may be rewritten, and
+        // none may be dropped either -- a band draws whatever layers the file has.
+        val layers = listOf(
+            """{"nm":"Text1"}""",
+            """{"nm":"Text1","t":{}}""",
+            """{"nm":"Text1","t":{"d":{}}}""",
+            """{"nm":"Text1","t":{"d":{"k":["not an object"]}}}""",
+            """{"nm":"Text1","t":{"d":{"k":[{"noS":1}]}}}""",
+            """"a layer that is not an object at all"""",
+            """{"noName":1}""",
+        )
+        val faces = mapOf("Text1" to BandFontKey("Georgia", bold = false, italic = false))
+
+        layers.forEach { layer ->
+            val json = """{"layers":[$layer]}"""
+            val rewritten = Json.parseToJsonElement(rewriteTemplateFonts(json, faces)).jsonObject
+            assertEquals(
+                Json.parseToJsonElement(json).jsonObject["layers"],
+                rewritten["layers"],
+                "an unreachable layer is carried through untouched",
+            )
+        }
+    }
+
+    // ── What a file leaves out, or gets wrong ───────────────────────────────────
+
+    /** The smallest playable Lottie, with [extra] spliced into its top-level object. */
+    private fun minimal(extra: String = "") = """{"fr":30,"op":90,"w":1920,"h":1080$extra}"""
+
+    @Test
+    fun `a file missing its frame rate, end frame or canvas is not a template`() {
+        assertNull(parseBibleLottieTemplate("""{"op":90,"w":1920,"h":1080}"""), "no frame rate")
+        assertNull(parseBibleLottieTemplate("""{"fr":"fast","op":90,"w":1920,"h":1080}"""), "a frame rate in words")
+        assertNull(parseBibleLottieTemplate("""{"fr":30,"w":1920,"h":1080}"""), "no end frame")
+        assertNull(parseBibleLottieTemplate("""{"fr":30,"op":90,"h":1080}"""), "no width")
+        assertNull(parseBibleLottieTemplate("""{"fr":30,"op":90,"w":1920}"""), "no height")
+        assertNull(parseBibleLottieTemplate("""[1, 2, 3]"""), "not an object at all")
+        assertNull(parseBibleLottieTemplate("""{"fr":30,"op":"""), "cut off mid-file")
+    }
+
+    @Test
+    fun `a file with no in point starts at frame zero`() {
+        assertEquals(90f, assertNotNull(parseBibleLottieTemplate(minimal())).totalFrames)
+        assertEquals(60f, assertNotNull(parseBibleLottieTemplate(minimal(""","ip":30"""))).totalFrames)
+    }
+
+    @Test
+    fun `markers missing a name or a time are passed over, and one missing a duration lasts no time`() {
+        val markers = ""","markers":[
+            1,
+            {"tm":0,"dr":10},
+            {"cm":"bg_in"},
+            {"cm":"bg_in","tm":0,"dr":18},
+            {"cm":"text_in","tm":18,"dr":18},
+            {"cm":"hold","tm":36},
+            {"cm":"text_out","tm":54,"dr":18},
+            {"cm":"bg_out","tm":72,"dr":18}
+        ]"""
+        val t = assertNotNull(parseBibleLottieTemplate(minimal(markers)))
+
+        assertEquals(LottieSegment(0f, 18f), t.segments[BibleLottieTemplate.SEGMENT_BG_IN])
+        assertEquals(LottieSegment(36f, 0f), t.segments[BibleLottieTemplate.SEGMENT_HOLD])
+        assertEquals(5, t.segments.size, "the nameless and timeless markers add nothing")
+    }
+
+    @Test
+    fun `an incomplete set of markers falls back to fifths rather than playing half a band`() {
+        val t = assertNotNull(parseBibleLottieTemplate(minimal(""","markers":[{"cm":"bg_in","tm":0,"dr":5}]""")))
+
+        assertEquals(LottieSegment(0f, 18f), t.segments[BibleLottieTemplate.SEGMENT_BG_IN])
+        assertEquals(LottieSegment(72f, 18f), t.segments[BibleLottieTemplate.SEGMENT_BG_OUT])
+    }
+
+    @Test
+    fun `every alignment and text motion the generator writes is read back`() {
+        fun meta(json: String) = assertNotNull(parseBibleLottieTemplate(minimal(""","cp":$json"""))).meta
+
+        assertEquals(BandTextAlign.CENTER, meta("""{"textAlign":"CENTER"}""").textAlign)
+        assertEquals(BandTextAlign.RIGHT, meta("""{"referenceAlign":"RIGHT"}""").referenceAlign)
+        assertNull(meta("""{"textAlign":"JUSTIFY"}""").textAlign, "an alignment the player has not got is left to it")
+        assertEquals(BandTextMotion.TYPEWRITER_WORDS, meta("""{"textAnimation":"TYPEWRITER_WORDS"}""").textMotion)
+        assertEquals(BandTextMotion.TICKER, meta("""{"textAnimation":"TICKER","tickerPxPerSecond":240}""").textMotion)
+        assertEquals(240f, meta("""{"textAnimation":"TICKER","tickerPxPerSecond":240}""").tickerPxPerSecond)
+        assertEquals(BandTextMotion.NONE, meta("""{"textAnimation":"SPIN"}""").textMotion)
+        assertEquals(750L, meta("""{"swapMs":750}""").swapMs)
+    }
 }

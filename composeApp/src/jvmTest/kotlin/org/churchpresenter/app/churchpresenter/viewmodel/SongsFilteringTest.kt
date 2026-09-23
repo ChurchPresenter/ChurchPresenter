@@ -88,6 +88,25 @@ class SongsFilteringTest {
     }
 
     @Test
+    fun `choosing the root lists only the songs filed under no songbook`() {
+        val vm = vmWith("" to listOf("1" to "Loose Song"), *defaultCatalog)
+
+        vm.updateSelectedSongbook("/")
+
+        assertEquals(listOf("Loose Song"), vm.titles)
+    }
+
+    @Test
+    fun `a search mode the list does not know leaves the list unfiltered rather than empty`() {
+        val vm = vmWith(*defaultCatalog)
+
+        vm.updateFilterType("fuzzy")
+        vm.updateSearchQuery("nothing matches this")
+
+        assertEquals(5, vm.titles.size)
+    }
+
+    @Test
     fun `a nested songbook contributes each of its parent folders`() {
         val vm = vmWith("Kids/AM/Preschool" to listOf("1" to "Jesus Loves Me"))
 

@@ -4,12 +4,15 @@ import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.text.PDFTextStripper
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /** The PDF a run of show is handed out on, and the re-keying every copy of one goes through. */
@@ -67,6 +70,22 @@ class ExportAndIdentityTest {
 
         assertTrue(target.isFile)
         assertTrue(target.length() > 0)
+    }
+
+    @Test
+    fun `a character the embedded font has no glyph for is replaced rather than failing the export`() {
+        // OpenSans, the face the app embeds, has no Tamil -- the export died on the first Tamil
+        // title (Sentry CHURCH-PRESENTER-DESKTOP-7K).
+        val openSans = assertNotNull(javaClass.getResourceAsStream("/fonts/OpenSans-Regular.ttf"))
+            .use { it.readBytes() }
+        val target = File(folder, "tamil.pdf")
+        val tamil = service(items = listOf(song("a", "\u0BAA\u0BBE\u0B9F\u0BB2\u0BCD Grace"))).copy(name = "Sunday")
+
+        exportRunOfShowPdf(tamil, target, dateLabel = "Sunday", font = { openSans })
+
+        val text = PDDocument.load(target).use { PDFTextStripper().getText(it) }
+        assertTrue("Grace" in text, "what the font can draw is still drawn")
+        assertTrue("?" in text, "what it cannot is marked, not dropped")
     }
 
     @Test

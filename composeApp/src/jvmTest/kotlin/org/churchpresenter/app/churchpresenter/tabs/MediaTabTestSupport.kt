@@ -48,6 +48,9 @@ internal class MediaReports {
 
     /** The subtitle file each of those schedule calls carried, in the same order. */
     val scheduledSubtitles = mutableListOf<String>()
+
+    /** The settings the tab's last write would produce, applied to the ones it was composed with. */
+    var settingsAfterChange: AppSettings? = null
 }
 
 @OptIn(ExperimentalTestApi::class)
@@ -92,6 +95,7 @@ internal fun mediaTab(
                     vlcLoadFailed = vlcLoadFailed,
                     instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
                     onInstanceLinkSendProject = onInstanceLinkSendProject,
+                    onSettingsChange = { transform -> reports.settingsAfterChange = transform(appSettings) },
                 )
                 }
                 }

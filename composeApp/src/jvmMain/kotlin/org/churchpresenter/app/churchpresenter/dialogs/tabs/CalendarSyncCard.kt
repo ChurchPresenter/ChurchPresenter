@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +19,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -32,6 +35,7 @@ import churchpresenter.composeapp.generated.resources.calendar_sync_devices_hint
 import churchpresenter.composeapp.generated.resources.calendar_sync_enroll_hint
 import churchpresenter.composeapp.generated.resources.calendar_sync_enable
 import churchpresenter.composeapp.generated.resources.calendar_sync_instance
+import churchpresenter.composeapp.generated.resources.calendar_sync_invite
 import churchpresenter.composeapp.generated.resources.calendar_sync_no_devices
 import churchpresenter.composeapp.generated.resources.calendar_sync_relay_url
 import churchpresenter.composeapp.generated.resources.calendar_sync_revoke
@@ -50,6 +54,9 @@ import churchpresenter.composeapp.generated.resources.calendar_sync_title
 import churchpresenter.composeapp.generated.resources.calendar_sync_unpair
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
+import org.churchpresenter.app.churchpresenter.server.CalendarInvite
+import org.churchpresenter.app.churchpresenter.server.asInvite
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.calendar.sync.PairedDevice
@@ -73,6 +80,8 @@ internal fun CalendarSyncCard(
     val scope = rememberCoroutineScope()
     val status by sync.status.collectAsState()
     val devices by sync.devices.collectAsState()
+    // The invite QR this card opens; the card owns it so the Server tab needs no plumbing for it.
+    var invite by remember { mutableStateOf<CalendarInvite?>(null) }
     CalendarSyncCardContent(
         settings = settings,
         onSettingsChange = onSettingsChange,
@@ -82,7 +91,9 @@ internal fun CalendarSyncCard(
         onSyncNow = { scope.launch { sync.syncNow() } },
         onUnpair = sync::unpair,
         onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
+        onInvite = { scope.launch { invite = sync.invitePhone().asInvite(sync) } },
     )
+    invite?.let { CalendarEnrollQrDialog(invite = it, onDismiss = { invite = null }) }
 }
 
 /**
@@ -100,6 +111,7 @@ internal fun CalendarSyncCardContent(
     onSyncNow: () -> Unit,
     onUnpair: () -> Unit,
     onRevoke: (String) -> Unit,
+    onInvite: () -> Unit = {},
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
 ) {
@@ -138,6 +150,16 @@ internal fun CalendarSyncCardContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Button(
+                        shape = RoundedCornerShape(6.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        onClick = onInvite,
+                    ) {
+                        Text(
+                            stringResource(Res.string.calendar_sync_invite),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                     OutlinedButton(
                         shape = RoundedCornerShape(6.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -172,20 +194,29 @@ internal fun CalendarSyncCardContent(
     }
 }
 
+/** The sync status in words, as the card and the invite dialog both say it. */
+@Composable
+internal fun calendarSyncStatusText(status: CalendarSyncStatus, clock: LocalTimeText = LocalTimeText.system()): String =
+    when (status) {
+        CalendarSyncStatus.Off -> stringResource(Res.string.calendar_sync_status_off)
+        CalendarSyncStatus.Unpaired -> stringResource(Res.string.calendar_sync_status_unpaired)
+        CalendarSyncStatus.Syncing -> stringResource(Res.string.calendar_sync_status_syncing)
+        is CalendarSyncStatus.Synced -> syncedText(status, clock)
+        is CalendarSyncStatus.Failed -> stringResource(Res.string.calendar_sync_status_failed, status.message)
+        CalendarSyncStatus.TimedOut -> stringResource(Res.string.calendar_sync_status_timed_out)
+        CalendarSyncStatus.Unauthorized -> stringResource(Res.string.calendar_sync_status_unauthorized)
+        is CalendarSyncStatus.OtherDesktop -> stringResource(Res.string.calendar_sync_status_other_desktop)
+    }
+
 @Composable
 private fun StatusLine(status: CalendarSyncStatus, clock: LocalTimeText) {
-    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
-    val error = MaterialTheme.colorScheme.error
-    val (text, color) = when (status) {
-        CalendarSyncStatus.Off -> stringResource(Res.string.calendar_sync_status_off) to quiet
-        CalendarSyncStatus.Unpaired -> stringResource(Res.string.calendar_sync_status_unpaired) to quiet
-        CalendarSyncStatus.Syncing -> stringResource(Res.string.calendar_sync_status_syncing) to quiet
-        is CalendarSyncStatus.Synced -> syncedText(status, clock) to MaterialTheme.colorScheme.primary
-        is CalendarSyncStatus.Failed -> stringResource(Res.string.calendar_sync_status_failed, status.message) to error
-        CalendarSyncStatus.TimedOut -> stringResource(Res.string.calendar_sync_status_timed_out) to error
-        CalendarSyncStatus.Unauthorized -> stringResource(Res.string.calendar_sync_status_unauthorized) to error
-        is CalendarSyncStatus.OtherDesktop -> stringResource(Res.string.calendar_sync_status_other_desktop) to error
+    val color = when (status) {
+        is CalendarSyncStatus.Synced -> MaterialTheme.colorScheme.primary
+        CalendarSyncStatus.Off, CalendarSyncStatus.Unpaired, CalendarSyncStatus.Syncing ->
+            MaterialTheme.colorScheme.onSurfaceVariant
+        else -> MaterialTheme.colorScheme.error
     }
+    val text = calendarSyncStatusText(status, clock)
     Text(text = text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = color)
     if (status is CalendarSyncStatus.Synced && status.outcome.unresolvedRows > 0) {
         Text(
@@ -258,8 +289,12 @@ private fun DevicesList(
 }
 
 /** An ISO instant as a short local time, or the text itself when it is not one. */
-private class LocalTimeText(private val zone: ZoneId, locale: Locale) {
+internal class LocalTimeText(private val zone: ZoneId, locale: Locale) {
     private val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
+
+    companion object {
+        fun system(): LocalTimeText = LocalTimeText(ZoneId.systemDefault(), Locale.getDefault())
+    }
 
     fun format(iso: String): String =
         runCatching { formatter.format(Instant.parse(iso).atZone(zone)) }.getOrDefault(iso)

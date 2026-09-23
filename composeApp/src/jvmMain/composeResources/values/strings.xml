@@ -801,6 +801,7 @@
     <string name="loop">Loop</string>
     <string name="loop_on">Loop On</string>
     <string name="loop_off">Loop Off</string>
+    <string name="output_scale_mode">Scale: %1$s</string>
     <string name="transition_duration">Transition Duration:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -1491,6 +1492,8 @@
     <string name="web_engine_unavailable_policy_body">A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask whoever manages the computer to allow ChurchPresenter, or use a computer without that restriction — the Web tab and browser sources need it.</string>
     <string name="web_engine_unavailable_macos_title">Web browser requires a newer macOS</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources.</string>
+    <string name="web_engine_unavailable_windows_title">Web browser requires Windows 10 or later</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenter's browser engine no longer supports this version of Windows. Update to Windows 10 or later to use the Web tab and browser sources.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Type to page</string>
     <string name="web_type_to_page_placeholder">Click an input on the live page first</string>
@@ -1870,7 +1873,8 @@
     <string name="remote_api_calendar_enroll">Plan the calendar from this device</string>
     <string name="remote_api_calendar_enroll_code">Code %1$s — allow only if the phone shows the same code</string>
     <string name="calendar_enroll_qr_title">Scan with the phone</string>
-    <string name="calendar_enroll_qr_body">Scan this code with the phone you just allowed to finish.</string>
+    <string name="calendar_enroll_invite_failed">Could not create an invite — this computer could not reach the relay.</string>
+    <string name="calendar_enroll_qr_body">Scan this code with the ChurchPresenter app to enroll the phone. It works for 15 minutes, from anywhere.</string>
     <string name="remote_api_calendar_enroll_detail">A phone or tablet wants to plan services in the calendar from anywhere.</string>
     <string name="remote_api_qa_add">Q&amp;A: Add Question</string>
     <string name="remote_api_qa_edit">Q&amp;A: Edit Question</string>
@@ -2097,6 +2101,13 @@
     <string name="tab_label_style_text">Text only</string>
     <string name="tab_label_style_icons_and_text">Icons and text</string>
     <string name="tab_label_style_icons">Icons only</string>
+    <string name="tab_label_style_button_hint">Tab labels: text, icons, or both. Click to change.</string>
+    <string name="tab_label_margin_hint">Tab spacing: how much room each tab gets. Click to change.</string>
+    <string name="tab_label_margin_small">Small</string>
+    <string name="tab_label_margin_small_normal">Medium-small</string>
+    <string name="tab_label_margin_normal">Normal</string>
+    <string name="tab_label_margin_normal_large">Medium-large</string>
+    <string name="tab_label_margin_large">Large</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number before title</string>
@@ -2998,7 +3009,8 @@
     <string name="calendar_sync_status_timed_out">The relay did not answer in time at startup; this week’s changes from phones may be missing</string>
     <string name="calendar_sync_status_unauthorized">The relay no longer accepts this computer. Pair again to continue.</string>
     <string name="calendar_sync_status_other_desktop">Another computer is syncing this calendar. This one has stopped pushing until you unpair one of them.</string>
-    <string name="calendar_sync_enroll_hint">To add a phone: connect it to this computer as usual (Server settings → QR code), then open Calendar in the app and tap Enroll. You will be asked to allow it here.</string>
+    <string name="calendar_sync_enroll_hint">To add a phone, press Invite a phone and let its owner scan the code — no need to be at church. A phone on this network can also ask from its Calendar screen; you will be asked to allow it here.</string>
+    <string name="calendar_sync_invite">Invite a phone…</string>
     <string name="calendar_sync_sync_now">Sync now</string>
     <string name="calendar_sync_unpair">Start over with a new key</string>
     <string name="calendar_sync_devices">Enrolled phones</string>

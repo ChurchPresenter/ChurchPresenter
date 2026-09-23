@@ -23,22 +23,35 @@ import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
+import java.util.UUID
 import java.time.Instant
 import kotlin.coroutines.coroutineContext
 
-/** What a newly enrolled phone is handed, as the QR the desktop shows after the operator approved it. */
+/** What a newly enrolled phone is handed, as the QR the desktop shows -- after an approval, or as an invite. */
 data class CalendarEnrollment(
     val relayUrl: String,
     val instanceId: String,
+    val deviceId: String,
     val deviceToken: String,
     val instanceKey: String,
 ) {
     val qrContent: String
         get() = "churchpresenter://calendar-enroll?relay=${relayUrl.trimEnd('/')}" +
-            "&instance=$instanceId&token=$deviceToken&key=$instanceKey"
+            "&instance=$instanceId&device=$deviceId&token=$deviceToken&key=$instanceKey"
 }
+
+/** What an invite came to: the QR to scan, or why there is none. */
+sealed class CalendarInvite {
+    data class Ready(val enrollment: CalendarEnrollment) : CalendarInvite()
+    data class Failed(val status: CalendarSyncStatus) : CalendarInvite()
+}
+
+/** An enrollment as an invite, or -- when there is none -- the service's status as the reason. */
+fun CalendarEnrollment?.asInvite(sync: CalendarSyncService): CalendarInvite =
+    if (this != null) CalendarInvite.Ready(this) else CalendarInvite.Failed(sync.status.value)
 
 /** Where the desktop stands with the relay, for the settings card and the calendar window's banner. */
 sealed class CalendarSyncStatus {
@@ -122,11 +135,15 @@ class CalendarSyncService(
     suspend fun pushCatalog(): Int {
         if (!settings().enabled || !settings().isPaired) return 0
         return withContext(io) {
-            try {
-                relay.withClientKey { relay.catalog().push(relay.token) }
-            } catch (e: RelayFailure) {
-                // Reported where the calendar's own failures are; the next good round clears it.
-                _status.value = failure(e)
+            // Background work over a library this code did not write: whatever it throws is a
+            // report, never the app going down. A relay failure is shown where the calendar's own
+            // are; the next good round clears it.
+            runCatching { relay.withClientKey { relay.catalog().push(relay.token) } }.getOrElse { e ->
+                if (e is RelayFailure) {
+                    _status.value = failure(e)
+                } else {
+                    CrashReporter.reportException(e, "Pushing songbooks")
+                }
                 0
             }
         }
@@ -151,6 +168,7 @@ class CalendarSyncService(
                 CalendarEnrollment(
                     relayUrl = current.relayUrl,
                     instanceId = current.instanceId,
+                    deviceId = deviceId,
                     deviceToken = deviceToken,
                     instanceKey = current.instanceKey,
                 )
@@ -160,6 +178,13 @@ class CalendarSyncService(
             }
         }
     }
+
+    /**
+     * An invite: a fresh device, enrolled now with no name, as a QR anyone may scan wherever they
+     * are. The relay forgets a device that never checks in within its first minutes, so a code that
+     * was photographed or never scanned dies by itself; the phone that does scan it names itself.
+     */
+    suspend fun invitePhone(): CalendarEnrollment? = enroll(UUID.randomUUID().toString(), deviceName = "")
 
     /** Registers with the relay when sync is on and this desktop never has; nothing to do otherwise. */
     suspend fun registerIfNeeded(): Boolean = lock.withLock {
@@ -222,14 +247,15 @@ class CalendarSyncService(
         }
     }
 
-    private fun failure(e: RelayFailure): CalendarSyncStatus = when (e) {
-        is RelayFailure.Unauthorized -> CalendarSyncStatus.Unauthorized
-        else -> CalendarSyncStatus.Failed(e.message.orEmpty())
-    }
-
     private companion object {
         const val NAME_CHARS = 120
         const val STARTUP_TIMEOUT_MS = 5_000L
         const val PULL_INTERVAL_MS = 5 * 60 * 1_000L
     }
+}
+
+/** The status a relay failure reads as: the token refused is its own state, anything else a message. */
+private fun failure(e: RelayFailure): CalendarSyncStatus = when (e) {
+    is RelayFailure.Unauthorized -> CalendarSyncStatus.Unauthorized
+    else -> CalendarSyncStatus.Failed(e.message.orEmpty())
 }

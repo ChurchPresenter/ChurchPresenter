@@ -265,6 +265,10 @@ object CefManager {
     var macOsUnsupported = false
         private set
 
+    /** True when [init] was skipped because this Windows predates Windows 10 -- see [isUnsupportedWindowsForJcef]. */
+    var windowsUnsupported = false
+        private set
+
     /**
      * The root the browser engine actually installed into, once it has.
      *
@@ -391,6 +395,10 @@ object CefManager {
         if (initialized) return
         if (isUnsupportedMacOS()) {
             macOsUnsupported = true
+            return
+        }
+        if (isUnsupportedWindowsForJcef()) {
+            windowsUnsupported = true
             return
         }
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
