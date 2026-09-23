@@ -186,4 +186,63 @@ class ProfileTranslationPickerTest {
             )
         }
     }
+
+    // ── The song-language picker, which writes the same way ─────────────────────────────────────
+
+    private fun SkikoComposeUiTest.openSongPicker() {
+        onNodeWithTag(TranslationPickerTags.SONG.trigger).performClick()
+        waitForIdle()
+    }
+
+    private fun SkikoComposeUiTest.toggleLanguage(index: Int) {
+        onNodeWithTag(TranslationPickerTags.SONG.row(index)).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `unticking a language narrows the profile's song selection`() {
+        profilesTab(threeTranslations()) { get ->
+            openSongPicker()
+            assertEquals(emptyList(), get().profile().songTranslations, "empty means all of them")
+
+            toggleLanguage(0)
+
+            assertEquals(
+                listOf(1, 2, 3),
+                get().profile().songTranslations,
+                "the unticked language is gone from the selection",
+            )
+        }
+    }
+
+    @Test
+    fun `unticking every language switches songs off`() {
+        profilesTab(threeTranslations()) { get ->
+            openSongPicker()
+            repeat(MAX_SONG_LANGUAGES) { toggleLanguage(it) }
+
+            // The same normalisation the Bible picker uses: showing none of them is a mode, not an
+            // empty selection, because an empty selection reads back as "all".
+            assertEquals(Constants.SONG_LANG_OFF, get().profile().songMode)
+        }
+    }
+
+    @Test
+    fun `ticking one back on switches songs on with just that one`() {
+        profilesTab(threeTranslations()) { get ->
+            openSongPicker()
+            repeat(MAX_SONG_LANGUAGES) { toggleLanguage(it) }
+            assertEquals(Constants.SONG_LANG_OFF, get().profile().songMode)
+
+            toggleLanguage(2)
+
+            assertEquals(Constants.SONG_LANG_BOTH, get().profile().songMode, "songs come back on")
+            assertEquals(listOf(2), get().profile().songTranslations, "with only the one ticked")
+        }
+    }
+
+    private companion object {
+        /** The four language slots a song can carry, which the picker always lists. */
+        const val MAX_SONG_LANGUAGES = 4
+    }
 }

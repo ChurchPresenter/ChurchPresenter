@@ -168,4 +168,22 @@ class ProfilesRailTest {
             onNodeWithText("Used by 2 output(s)").assertExists()
         }
     }
+
+    /**
+     * The empty state's own button, which names the profile it makes.
+     *
+     * Distinct from "New Profile", which leaves the name blank for the operator to fill in: this is
+     * the one-click way out of an empty document, so the profile it makes arrives usable.
+     */
+    @Test
+    fun `Create Default Profile makes a named one`() {
+        profilesTab(docWith()) { get ->
+            onNodeWithText("Create Default Profile").performClick()
+            waitForIdle()
+
+            val profiles = get().projectionSettings.outputProfiles
+            assertEquals(1, profiles.size)
+            assertEquals("New Profile", profiles[0].name, "it arrives named rather than blank")
+        }
+    }
 }
