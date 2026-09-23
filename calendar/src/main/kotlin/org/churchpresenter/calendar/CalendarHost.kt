@@ -96,6 +96,9 @@ data class CalendarHost(
      */
     val chooseExportFile: suspend (suggestedName: String) -> File? = { null },
 
+    /** An image for the PDF letterhead's logo, or null if the user cancelled. */
+    val chooseImageFile: suspend () -> File? = { null },
+
     /**
      * Where a row's file has gone, or null if the user gave up looking. The pre-flight check's
      * one-click fix for a clip or a deck that was moved: [missing] is the path the row still

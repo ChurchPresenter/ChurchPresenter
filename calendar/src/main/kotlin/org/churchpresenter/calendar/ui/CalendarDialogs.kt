@@ -49,6 +49,7 @@ internal fun CalendarDialogs(
     onLoaded: () -> Unit,
 ) {
     val openService = state.selectedService
+    val scope = rememberCoroutineScope()
     if (dialogs.settingsOpen) {
         CalendarSettingsDialog(
             preferences = state.document.preferences,
@@ -70,6 +71,15 @@ internal fun CalendarDialogs(
             cloudSync = host.cloudSync,
             onRemoveTemplate = state::deleteTemplate,
             onRemovePreset = state::deletePreset,
+            onChooseLogo = {
+                scope.launch {
+                    val logo = host.chooseImageFile() ?: return@launch
+                    val preferences = state.document.preferences
+                    state.updatePreferences(
+                        preferences.copy(pdfExport = preferences.pdfExport.copy(logoPath = logo.absolutePath)),
+                    )
+                }
+            },
             onDismiss = { dialogs.settingsOpen = false },
         )
     }

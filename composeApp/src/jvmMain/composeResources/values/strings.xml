@@ -225,6 +225,8 @@
     <string name="open_song_library">Song Library Manager</string>
     <string name="open_calendar_manager">Calendar Manager</string>
     <string name="calendar_locate_file_title">Find %1$s</string>
+    <string name="calendar_choose_logo_title">Choose a church logo</string>
+    <string name="calendar_export_title">Export Run of Show</string>
     <string name="calendar_locate_folder_title">Find the folder %1$s</string>
     <string name="report_bug">Report a Bug</string>
     <string name="submit_feature_request">Feature Request</string>

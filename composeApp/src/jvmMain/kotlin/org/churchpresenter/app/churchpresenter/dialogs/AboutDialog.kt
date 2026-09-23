@@ -38,6 +38,11 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.calendar_choose_logo_title
+import churchpresenter.composeapp.generated.resources.calendar_export_title
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.OwnedFileDialog
+import org.churchpresenter.app.churchpresenter.utils.isMacOs
+import org.jetbrains.compose.resources.getString
 import churchpresenter.composeapp.generated.resources.about_copyright
 import churchpresenter.composeapp.generated.resources.ndi_trademark
 import churchpresenter.composeapp.generated.resources.about_title
@@ -400,11 +405,30 @@ fun CalendarWindow(
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1280.dp, height = 860.dp)
     ) {
+        // On macOS the export and logo dialogs are owned by this window -- see OwnedFileDialog.
+        val ownedHost = remember(host, window) {
+            if (!isMacOs(System.getProperty("os.name", ""))) {
+                host
+            } else {
+                host.copy(
+                    chooseExportFile = { suggested ->
+                        OwnedFileDialog.save(window, getString(Res.string.calendar_export_title), suggested)
+                    },
+                    chooseImageFile = {
+                        OwnedFileDialog.open(
+                            window,
+                            getString(Res.string.calendar_choose_logo_title),
+                            setOf("png", "jpg", "jpeg"),
+                        )
+                    },
+                )
+            }
+        }
         AppWindowRoot(theme = theme) {
             CalendarApp(
                 storeFolder = appDataDirectory,
                 songFolder = File(songStorageDirectory).takeIf { it.isDirectory },
-                host = host,
+                host = ownedHost,
                 // The app's own picker, so a section's color is chosen exactly the way every other
                 // color in the app is — one control, not a second one living in :calendar.
                 colorPicker = { request ->

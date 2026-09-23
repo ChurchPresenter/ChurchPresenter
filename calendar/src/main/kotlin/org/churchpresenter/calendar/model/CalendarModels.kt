@@ -378,6 +378,7 @@ data class CalendarPreferences(
      * is used -- a file is hand-editable and a lead of 0 or 10,000 is not a setting anybody meant.
      */
     val autoLoadLeadMinutes: Int = AUTO_LOAD_LEAD_MINUTES,
+    val pdfExport: PdfExportSettings = PdfExportSettings(),
 ) {
     /** The lead as the loader uses it, whatever the file says. */
     fun autoLoadLead(): Int = autoLoadLeadMinutes.coerceIn(AUTO_LOAD_LEAD_MIN, AUTO_LOAD_LEAD_MAX)

@@ -7,6 +7,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.awt.Font
 import java.awt.Shape
@@ -39,11 +40,19 @@ private const val QUAD_TO_CUBIC = 2f / 3f
 private const val SEGMENT_COORDS = 6
 private const val FONT_UNITS = 1000f
 
+private const val LOGO_MAX_HEIGHT = 56f
+private const val LOGO_MAX_WIDTH = 220f
+private const val LOGO_GAP = 8f
+private const val CHURCH_SIZE = 13f
+private const val ADDRESS_SIZE = 9f
+private const val LETTERHEAD_LINE_GAP = 3f
+private const val LETTERHEAD_GAP = 18f
+
 /**
  * The run of show as a one-page-per-however-many-rows PDF, for the band and the booth.
  *
- * Deliberately plain: a heading, then one line per row with its clock time, its title and its
- * planned length, with section names as rules between them. It is a sheet somebody holds, not a
+ * Deliberately plain: a heading with the start time, then one line per row with its clock time,
+ * its title and its planned length, with section names as rules between them. It is a sheet somebody holds, not a
  * reproduction of the screen.
  *
  * [font] supplies the embedded TrueType face — see [org.churchpresenter.calendar.CalendarHost.pdfFont].
@@ -52,6 +61,10 @@ private const val FONT_UNITS = 1000f
  * font instead; see [SheetPage.text].
  *
  * [use24Hour] is the calendar's clock format, so the sheet reads the way the window does.
+ *
+ * [settings] supplies the letterhead above the service -- logo, church name, address -- and
+ * [audience] what is shown: the public copy has only the start time -- no row times or lengths --
+ * and no cues or staff-only sections.
  */
 fun exportRunOfShowPdf(
     service: PlannedService,
@@ -59,36 +72,72 @@ fun exportRunOfShowPdf(
     dateLabel: String,
     font: (bold: Boolean) -> ByteArray?,
     use24Hour: Boolean = true,
+    settings: PdfExportSettings = PdfExportSettings(),
+    audience: PdfAudience = PdfAudience.STAFF,
 ) {
     PDDocument().use { document ->
         val faces = Faces(
             regular = loadFont(document, font(false)) { PDType1Font.HELVETICA },
             bold = loadFont(document, font(true)) { PDType1Font.HELVETICA_BOLD },
         )
-        drawSheet(document, faces, service, headingMeta(service, dateLabel, use24Hour), use24Hour)
+        val staff = audience == PdfAudience.STAFF
+        val letterhead = Letterhead(
+            logo = loadLogo(document, settings.logoPath),
+            name = settings.churchName.trim(),
+            address = settings.churchAddress.lines().map { it.trim() }.filter { it.isNotEmpty() },
+        )
+        val sheet = Sheet(
+            service = service,
+            rows = settings.rowsFor(service.items, audience),
+            meta = headingMeta(service, dateLabel, use24Hour, withTotal = staff),
+            showTimings = staff,
+        )
+        drawSheet(document, faces, letterhead, sheet, use24Hour)
         document.save(target)
     }
+}
+
+private class Letterhead(val logo: PDImageXObject?, val name: String, val address: List<String>)
+
+private class Sheet(
+    val service: PlannedService,
+    val rows: List<ScheduleItem>,
+    val meta: String,
+    /** Each row's clock time and planned length -- the staff copy. The public one has only the start time. */
+    val showTimings: Boolean,
+)
+
+/** The logo at [path], or null when there is none or it cannot be read -- a missing logo never fails the export. */
+private fun loadLogo(document: PDDocument, path: String): PDImageXObject? {
+    val file = File(path).takeIf { path.isNotBlank() && it.isFile } ?: return null
+    return runCatching { PDImageXObject.createFromFileByContent(file, document) }.getOrNull()
 }
 
 private fun drawSheet(
     document: PDDocument,
     faces: Faces,
-    service: PlannedService,
-    meta: String,
+    letterhead: Letterhead,
+    sheet: Sheet,
     use24Hour: Boolean,
 ) {
+    val service = sheet.service
     val clocks = runClocks(service).mapValues { (_, clock) -> clockText(clock.time, use24Hour) }
     var page = SheetPage(document, faces)
     try {
-        page.heading(service.name, meta)
-        for (item in service.items) {
+        page.letterhead(letterhead)
+        page.heading(service.name, sheet.meta)
+        for (item in sheet.rows) {
             if (!page.hasRoomForRow) {
                 page.close()
                 page = SheetPage(document, faces)
             }
             when (item) {
                 is ScheduleItem.LabelItem -> page.section(item)
-                else -> page.row(item, clocks[item.id].orEmpty(), service.plannedSeconds[item.id])
+                else -> page.row(
+                    item,
+                    clocks[item.id].orEmpty().takeIf { sheet.showTimings },
+                    service.plannedSeconds[item.id]?.takeIf { sheet.showTimings },
+                )
             }
         }
     } finally {
@@ -109,12 +158,17 @@ private fun loadFont(document: PDDocument, bytes: ByteArray?, fallback: () -> PD
         ?: fallback()
 
 /** The line under the title: the date, the start time and, once anything is estimated, the planned length. */
-private fun headingMeta(service: PlannedService, dateLabel: String, use24Hour: Boolean): String = buildString {
+private fun headingMeta(
+    service: PlannedService,
+    dateLabel: String,
+    use24Hour: Boolean,
+    withTotal: Boolean,
+): String = buildString {
     append(dateLabel)
     append(" · ")
     append(clockText(service.startTime, use24Hour))
     val total = service.plannedTotalSeconds()
-    if (total > 0) {
+    if (withTotal && total > 0) {
         append(" · ")
         append(formatDuration(total))
     }
@@ -134,6 +188,32 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
 
     val hasRoomForRow: Boolean get() = y >= MARGIN + ROW_HEIGHT
 
+    /** The logo, church name and address, centered above everything else. Nothing when all are empty. */
+    fun letterhead(head: Letterhead) {
+        val logo = head.logo
+        if (logo == null && head.name.isEmpty() && head.address.isEmpty()) return
+        if (logo != null) {
+            val scale = minOf(LOGO_MAX_HEIGHT / logo.height, LOGO_MAX_WIDTH / logo.width, 1f)
+            val width = logo.width * scale
+            val height = logo.height * scale
+            stream.drawImage(logo, (page.mediaBox.width - width) / 2, y - height, width, height)
+            y -= height + LOGO_GAP
+        }
+        if (head.name.isNotEmpty()) {
+            y -= CHURCH_SIZE
+            centered(head.name, faces.bold, CHURCH_SIZE)
+            y -= LETTERHEAD_LINE_GAP
+        }
+        head.address.forEach { line ->
+            y -= ADDRESS_SIZE
+            centered(line, faces.regular, ADDRESS_SIZE)
+            y -= LETTERHEAD_LINE_GAP
+        }
+        y -= LETTERHEAD_GAP
+        // The heading below draws on its own baseline, a title's height under the cursor.
+        y -= TITLE_SIZE
+    }
+
     fun heading(title: String, meta: String) {
         text(title, MARGIN, faces.bold, TITLE_SIZE)
         y -= TITLE_SIZE + TITLE_GAP
@@ -150,9 +230,9 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
         y -= ROW_HEIGHT
     }
 
-    fun row(item: ScheduleItem, clock: String, plannedSeconds: Int?) {
-        text(clock, MARGIN, faces.regular, META_SIZE)
-        text(item.displayText, MARGIN + TIME_COLUMN, faces.regular, ROW_SIZE)
+    fun row(item: ScheduleItem, clock: String?, plannedSeconds: Int?) {
+        if (clock != null) text(clock, MARGIN, faces.regular, META_SIZE)
+        text(item.displayText, if (clock != null) MARGIN + TIME_COLUMN else MARGIN, faces.regular, ROW_SIZE)
         if (plannedSeconds != null) {
             text(formatDuration(plannedSeconds), right - DURATION_COLUMN, faces.regular, META_SIZE)
         }
@@ -160,6 +240,15 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
     }
 
     override fun close() = stream.close()
+
+    private fun centered(value: String, font: PDFont, size: Float) {
+        val width = value.runsBy { font.canEncode(it) }.sumOf { (run, encodable) ->
+            val outline = if (encodable) null else outlineLayout(run, font, size)?.advance
+            val drawn = if (encodable) run else run.placeholders()
+            (outline ?: (font.getStringWidth(drawn) / FONT_UNITS * size)).toDouble()
+        }.toFloat()
+        text(value, (page.mediaBox.width - width) / 2, font, size)
+    }
 
     /**
      * One line of text at the cursor.
@@ -189,49 +278,17 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
         return font.getStringWidth(value) / FONT_UNITS * size
     }
 
-    private fun showOutline(value: String, x: Float, font: PDFont, size: Float): Float? {
+    private fun outlineLayout(value: String, font: PDFont, size: Float): TextLayout? {
         val style = if (font === faces.bold) Font.BOLD else Font.PLAIN
         val awtFont = Font(Font.SANS_SERIF, style, 1).deriveFont(size)
         if (awtFont.canDisplayUpTo(value) != -1) return null
-        val layout = TextLayout(value, awtFont, FontRenderContext(null, true, true))
-        fillOutline(layout.getOutline(null), x, y)
-        return layout.advance
+        return TextLayout(value, awtFont, FontRenderContext(null, true, true))
     }
 
-    private fun fillOutline(shape: Shape, x: Float, baseline: Float) {
-        // Flipped into PDF space, where y runs up from the page's foot.
-        val path = shape.getPathIterator(AffineTransform(1f, 0f, 0f, -1f, x, baseline))
-        val coords = FloatArray(SEGMENT_COORDS)
-        var last = Point2D.Float()
-        var drawn = false
-        while (!path.isDone) {
-            val type = path.currentSegment(coords)
-            val points = coords.toList().chunked(2) { Point2D.Float(it[0], it[1]) }
-            when (type) {
-                PathIterator.SEG_MOVETO -> stream.moveTo(points[0].x, points[0].y)
-                PathIterator.SEG_LINETO -> stream.lineTo(points[0].x, points[0].y)
-                PathIterator.SEG_QUADTO -> stream.curveTo(
-                    last.x + QUAD_TO_CUBIC * (points[0].x - last.x), last.y + QUAD_TO_CUBIC * (points[0].y - last.y),
-                    points[1].x + QUAD_TO_CUBIC * (points[0].x - points[1].x),
-                    points[1].y + QUAD_TO_CUBIC * (points[0].y - points[1].y),
-                    points[1].x, points[1].y,
-                )
-                PathIterator.SEG_CUBICTO -> stream.curveTo(
-                    points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y,
-                )
-                PathIterator.SEG_CLOSE -> stream.closePath()
-            }
-            last = when (type) {
-                PathIterator.SEG_QUADTO -> points[1]
-                PathIterator.SEG_CUBICTO -> points[2]
-                PathIterator.SEG_CLOSE -> last
-                else -> points[0]
-            }
-            drawn = true
-            path.next()
-        }
-        if (!drawn) return
-        if (path.windingRule == PathIterator.WIND_EVEN_ODD) stream.fillEvenOdd() else stream.fill()
+    private fun showOutline(value: String, x: Float, font: PDFont, size: Float): Float? {
+        val layout = outlineLayout(value, font, size) ?: return null
+        stream.fillOutline(layout.getOutline(null), x, y)
+        return layout.advance
     }
 
     private fun rule(at: Float) {
@@ -240,6 +297,42 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
         stream.lineTo(right, at)
         stream.stroke()
     }
+}
+
+private fun PDPageContentStream.fillOutline(shape: Shape, x: Float, baseline: Float) {
+    // Flipped into PDF space, where y runs up from the page's foot.
+    val path = shape.getPathIterator(AffineTransform(1f, 0f, 0f, -1f, x, baseline))
+    val coords = FloatArray(SEGMENT_COORDS)
+    var last = Point2D.Float()
+    var drawn = false
+    while (!path.isDone) {
+        val type = path.currentSegment(coords)
+        val points = coords.toList().chunked(2) { Point2D.Float(it[0], it[1]) }
+        when (type) {
+            PathIterator.SEG_MOVETO -> moveTo(points[0].x, points[0].y)
+            PathIterator.SEG_LINETO -> lineTo(points[0].x, points[0].y)
+            PathIterator.SEG_QUADTO -> curveTo(
+                last.x + QUAD_TO_CUBIC * (points[0].x - last.x), last.y + QUAD_TO_CUBIC * (points[0].y - last.y),
+                points[1].x + QUAD_TO_CUBIC * (points[0].x - points[1].x),
+                points[1].y + QUAD_TO_CUBIC * (points[0].y - points[1].y),
+                points[1].x, points[1].y,
+            )
+            PathIterator.SEG_CUBICTO -> curveTo(
+                points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y,
+            )
+            PathIterator.SEG_CLOSE -> closePath()
+        }
+        last = when (type) {
+            PathIterator.SEG_QUADTO -> points[1]
+            PathIterator.SEG_CUBICTO -> points[2]
+            PathIterator.SEG_CLOSE -> last
+            else -> points[0]
+        }
+        drawn = true
+        path.next()
+    }
+    if (!drawn) return
+    if (path.windingRule == PathIterator.WIND_EVEN_ODD) fillEvenOdd() else fill()
 }
 
 private fun PDFont.canEncode(glyph: String): Boolean = runCatching { encode(glyph) }.isSuccess

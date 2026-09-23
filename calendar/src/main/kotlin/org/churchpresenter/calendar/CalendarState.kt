@@ -597,7 +597,8 @@ class CalendarState(
         if (trimmed.isEmpty() || existing.any { it.name.equals(trimmed, ignoreCase = true) && it.name != from }) return
         updatePreferences(
             document.preferences.copy(
-                sections = existing.map { if (it.name == from) it.copy(name = trimmed) else it }
+                sections = existing.map { if (it.name == from) it.copy(name = trimmed) else it },
+                pdfExport = document.preferences.pdfExport.withSectionRenamed(from, trimmed),
             )
         )
     }

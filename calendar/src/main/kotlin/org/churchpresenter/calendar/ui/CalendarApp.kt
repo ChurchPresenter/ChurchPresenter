@@ -76,11 +76,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_recovered_body
 import org.churchpresenter.calendar.generated.resources.calendar_recovered_title
 import org.churchpresenter.calendar.generated.resources.calendar_title
 import org.churchpresenter.calendar.generated.resources.calendar_today
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Settings
-import org.churchpresenter.calendar.generated.resources.calendar_export_pdf
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
+import org.churchpresenter.calendar.model.PdfAudience
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.countImages
 import org.churchpresenter.calendar.model.relocatedTo
@@ -221,6 +220,7 @@ fun CalendarApp(
                     clock = clock,
                     today = today,
                     onExport = exportAction(state, host, io, scope),
+                    exportAudience = state.document.preferences.pdfExport.lastAudience,
                     onClose = onClose,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -252,7 +252,8 @@ private fun CalendarBody(
     dialogs: CalendarDialogState,
     clock: RunClockState,
     today: LocalDate,
-    onExport: (() -> Unit)?,
+    onExport: ((PdfAudience) -> Unit)?,
+    exportAudience: PdfAudience,
     onClose: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -262,6 +263,7 @@ private fun CalendarBody(
             plannedThisMonth = state.servicesInVisibleMonth().size,
             onToday = state::goToToday,
             onExport = onExport,
+            exportAudience = exportAudience,
             onSettings = dialogs::openSettings,
         )
         HorizontalDivider()
@@ -395,14 +397,9 @@ private suspend fun relocate(item: ScheduleItem, fix: ProblemFix, host: Calendar
 }
 
 /**
- * Writes [service]'s run of show to wherever the host's file chooser points.
- *
- * Nothing happens when the chooser is cancelled, which is the common case for a misclick. A failure
- * to write is reported through the host rather than crashing the window — the export is a
- * convenience, and the plan it was made from is still on screen.
- */
-/**
- * The header's Export action, or null when no service is open.
+ * The header's Export action, or null when no service is open. It writes the chosen copy of the
+ * run of show wherever the host's file chooser points; a cancelled chooser does nothing, and a
+ * failure to write is reported through the host rather than crashing the window.
  *
  * Built here rather than inline because a `let` whose last expression is a lambda reads as a
  * trailing-lambda call to the compiler, not as the value it returns.
@@ -413,25 +410,33 @@ private fun exportAction(
     host: CalendarHost,
     io: CoroutineDispatcher,
     scope: CoroutineScope,
-): (() -> Unit)? {
+): ((PdfAudience) -> Unit)? {
     val service = state.selectedService ?: return null
     val label = shortDate(state.selectedDate)
-    val use24Hour = state.document.preferences.use24HourClock
-    return { scope.launch { exportRunOfShow(service, label, host, io, use24Hour) } }
-}
-
-private suspend fun exportRunOfShow(
-    service: PlannedService,
-    dateLabel: String,
-    host: CalendarHost,
-    io: CoroutineDispatcher,
-    use24Hour: Boolean,
-) {
-    val target = host.chooseExportFile("${service.name} - ${service.date}.pdf") ?: return
-    // Off the composing thread: this embeds a font and writes a file.
-    withContext(io) {
-        runCatching { exportRunOfShowPdf(service, target, dateLabel, host.pdfFont, use24Hour) }
-            .onFailure { host.reportError("Calendar run-of-show PDF export", it) }
+    val preferences = state.document.preferences
+    return { audience ->
+        if (audience != preferences.pdfExport.lastAudience) {
+            state.updatePreferences(
+                preferences.copy(pdfExport = preferences.pdfExport.copy(lastAudience = audience)),
+            )
+        }
+        scope.launch {
+            val target = host.chooseExportFile("${service.name} - ${service.date}.pdf") ?: return@launch
+            // Off the composing thread: this embeds a font and writes a file.
+            withContext(io) {
+                runCatching {
+                    exportRunOfShowPdf(
+                        service = service,
+                        target = target,
+                        dateLabel = label,
+                        font = host.pdfFont,
+                        use24Hour = preferences.use24HourClock,
+                        settings = preferences.pdfExport,
+                        audience = audience,
+                    )
+                }.onFailure { host.reportError("Calendar run-of-show PDF export", it) }
+            }
+        }
     }
 }
 
@@ -448,7 +453,8 @@ private fun Header(
     monthLabel: String,
     plannedThisMonth: Int,
     onToday: () -> Unit,
-    onExport: (() -> Unit)?,
+    onExport: ((PdfAudience) -> Unit)?,
+    exportAudience: PdfAudience,
     onSettings: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -509,11 +515,7 @@ private fun Header(
             overflow = TextOverflow.Ellipsis,
         )
         if (onExport != null) {
-            HeaderButton(
-                label = stringResource(Res.string.calendar_export_pdf),
-                icon = Icons.Filled.PictureAsPdf,
-                onClick = onExport,
-            )
+            ExportSplitButton(audience = exportAudience, height = HEADER_BUTTON, onExport = onExport)
         }
         HeaderButton(
             label = stringResource(Res.string.calendar_settings_open),
