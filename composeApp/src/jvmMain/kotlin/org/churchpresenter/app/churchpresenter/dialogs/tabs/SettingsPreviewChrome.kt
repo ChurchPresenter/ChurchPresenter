@@ -54,8 +54,6 @@ private const val BADGE_TEXT_ALPHA = 0.75f
  * preview need roughly 250dp of it. Left to fill the pane's width the preview would take more than
  * the whole remainder, so it is capped here and centred in the space instead.
  */
-internal val SETTINGS_PREVIEW_MAX_HEIGHT = 260.dp
-
 /**
  * Marks the scaled presenter subtree, which is measured at the output's size and drawn at a
  * fraction of it.

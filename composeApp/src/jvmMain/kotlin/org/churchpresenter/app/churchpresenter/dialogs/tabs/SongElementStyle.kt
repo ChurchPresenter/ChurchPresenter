@@ -61,15 +61,6 @@ internal val TITLE_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
     SongStyleElement.TEMPO,
 )
 
-/** The elements the lyric slides draw, which is what the tab offers outside the title-slide view. */
-internal val LYRIC_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
-    SongStyleElement.NUMBER,
-    SongStyleElement.TITLE,
-    SongStyleElement.LYRICS,
-    SongStyleElement.LOOK_AHEAD,
-    SongStyleElement.NEXT_SECTION,
-)
-
 internal val SongStyleElement.onTitleSlide: Boolean get() = this in TITLE_SLIDE_ELEMENTS
 
 /**

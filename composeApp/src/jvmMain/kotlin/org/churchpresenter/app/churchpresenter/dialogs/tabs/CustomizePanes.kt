@@ -33,7 +33,6 @@ import churchpresenter.composeapp.generated.resources.top
 internal val BAND_RANGE = 5..100
 internal val BLUR_RANGE = 0..100
 internal val SOURCE_FIELD_WIDTH = 260.dp
-internal val SHADOW_RANGE = 0..400
 internal val PERCENT_RANGE = 0..100
 internal val DURATION_RANGE = 0..5000
 internal const val SPACING_RANGE_MIN = -20
@@ -61,6 +60,3 @@ internal fun PaneScaffold(content: @Composable ColumnScope.() -> Unit) {
 
 internal val FONT_SIZE_RANGE = 8..150
 internal val MARGIN_RANGE = 0..500
-internal const val REFERENCE_ABOVE = "Above"
-internal const val REFERENCE_BELOW = "Below"
-internal const val SHADOW_GLYPH = "S"
