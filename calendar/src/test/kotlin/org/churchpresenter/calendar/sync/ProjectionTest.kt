@@ -108,9 +108,11 @@ class ProjectionTest {
     }
 
     @Test
-    fun `an ascii songbook keeps the record id it always had`() {
-        assertEquals("catalog:Songs_of_Praise", Projection.catalogRecordId("Songs of Praise", 0))
-        assertEquals("catalog:Songs_of_Praise:2", Projection.catalogRecordId("Songs of Praise", 2))
+    fun `an ascii songbook keeps a readable slug, and a part number after it`() {
+        val first = Projection.catalogRecordId("Songs of Praise", 0)
+
+        assertTrue(first.startsWith("catalog:Songs_of_Praise-"), first)
+        assertEquals("$first:2", Projection.catalogRecordId("Songs of Praise", 2))
     }
 
     @Test
