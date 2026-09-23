@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">யார், அல்லது குறிப்பு</string>
     <string name="calendar_cloud_sync">மேகம் மற்றும் மொபைல் சாதனங்களுடன் ஒத்திசை</string>
     <string name="calendar_cloud_sync_sub">ரிலே வழியாக இந்த நாட்காட்டியைத் தொலைபேசிகளுடன் ஒத்திசைவில் வைக்கிறது. அணைத்தால் இதிலிருந்து எதுவும் இந்தக் கணினியை விட்டு வெளியேறாது</string>
+    <string name="calendar_settings_export">ஏற்றுமதி</string>
+    <string name="calendar_export_note">ஏற்றுமதி செய்யப்படும் ஒவ்வொரு PDF-உம் தொடங்கும் தலைப்புப் பகுதி. ஒரு புலத்தைச் சேர்க்க வேண்டாமெனில் அதைக் காலியாக விடவும்.</string>
+    <string name="calendar_export_logo">சபையின் லோகோ</string>
+    <string name="calendar_export_logo_sub">PNG அல்லது JPEG, பக்கத்தின் மேலே நடுவில்</string>
+    <string name="calendar_export_logo_none">லோகோ எதுவும் தேர்ந்தெடுக்கப்படவில்லை</string>
+    <string name="calendar_export_logo_choose">தேர்ந்தெடு…</string>
+    <string name="calendar_export_logo_remove">லோகோவை அகற்று</string>
+    <string name="calendar_export_church_name">சபையின் பெயர்</string>
+    <string name="calendar_export_church_address">சபையின் முகவரி</string>
+    <string name="calendar_export_public_heading">குழுவுக்கு மட்டுமான பிரிவுகள்</string>
+    <string name="calendar_export_public_note">பொது நகல் தொடக்க நேரத்தை மட்டுமே காட்டும் — வரிசை நேரங்களோ கால அளவுகளோ இல்லை — மேலும் குறிகளையும் கீழே இயக்கப்பட்ட ஒவ்வொரு பிரிவையும் விட்டுவிடும். குழுவின் நகலில் எல்லாம் இருக்கும்.</string>
+    <string name="calendar_export_sections_empty">இன்னும் பிரிவுகள் எதுவும் வரையறுக்கப்படவில்லை.</string>
+    <string name="calendar_export_public">பொது</string>
+    <string name="calendar_export_public_sub">சபையாருக்கான ஆராதனை ஒழுங்கு — தொடக்க நேரம் மட்டும்; வரிசை நேரங்கள், கால அளவுகள், குறிகள் அல்லது குழுவுக்கு மட்டுமான பிரிவுகள் இல்லாமல்</string>
+    <string name="calendar_export_staff">சபைக் குழு</string>
+    <string name="calendar_export_staff_sub">வரிசை நேரங்கள், கால அளவுகள், குறிகள் மற்றும் ஆராதனைக்கு முன்னும் பின்னும் உள்ள உருப்படிகளுடன் முழு ஆராதனை வரிசை</string>
+    <string name="calendar_export_choose">எந்த நகலை ஏற்றுமதி செய்வது எனத் தேர்ந்தெடுக்கவும்</string>
 </resources>

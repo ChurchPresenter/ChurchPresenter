@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">ໃຜ ຫຼື ໝາຍເຫດ</string>
     <string name="calendar_cloud_sync">ຊິງຄ໌ກັບຄລາວ ແລະ ອຸປະກອນມືຖື</string>
     <string name="calendar_cloud_sync_sub">ຮັກສາປະຕິທິນນີ້ໃຫ້ກົງກັບໂທລະສັບຜ່ານຣີເລ. ເມື່ອປິດ ຈະບໍ່ມີສິ່ງໃດອອກຈາກຄອມພິວເຕີເຄື່ອງນີ້</string>
+    <string name="calendar_settings_export">ສົ່ງອອກ</string>
+    <string name="calendar_export_note">ຫົວເຈ້ຍທີ່ຢູ່ຕົ້ນ PDF ທຸກໄຟລ໌ທີ່ສົ່ງອອກ ປ່ອຍຊ່ອງໃດຫວ່າງໄວ້ຖ້າບໍ່ຕ້ອງການສະແດງ</string>
+    <string name="calendar_export_logo">ໂລໂກ້ຄຣິດຕະຈັກ</string>
+    <string name="calendar_export_logo_sub">PNG ຫຼື JPEG ຢູ່ກາງດ້ານເທິງຂອງໜ້າ</string>
+    <string name="calendar_export_logo_none">ຍັງບໍ່ໄດ້ເລືອກໂລໂກ້</string>
+    <string name="calendar_export_logo_choose">ເລືອກ…</string>
+    <string name="calendar_export_logo_remove">ລຶບໂລໂກ້</string>
+    <string name="calendar_export_church_name">ຊື່ຄຣິດຕະຈັກ</string>
+    <string name="calendar_export_church_address">ທີ່ຢູ່ຄຣິດຕະຈັກ</string>
+    <string name="calendar_export_public_heading">ຫົວຂໍ້ສຳລັບທີມງານເທົ່ານັ້ນ</string>
+    <string name="calendar_export_public_note">ສະບັບສາທາລະນະສະແດງສະເພາະເວລາເລີ່ມ — ບໍ່ມີເວລາຂອງແຕ່ລະແຖວ ຫຼື ຄວາມຍາວ — ແລະ ຕັດເຄື່ອງໝາຍກັບທຸກຫົວຂໍ້ທີ່ເປີດໄວ້ດ້ານລຸ່ມອອກ ສະບັບທີມງານມີຄົບທຸກຢ່າງ</string>
+    <string name="calendar_export_sections_empty">ຍັງບໍ່ໄດ້ກຳນົດຫົວຂໍ້</string>
+    <string name="calendar_export_public">ສາທາລະນະ</string>
+    <string name="calendar_export_public_sub">ລຳດັບການນະມັດສະການສຳລັບສະມາຊິກ — ສະເພາະເວລາເລີ່ມ ບໍ່ມີເວລາຂອງແຕ່ລະແຖວ ຄວາມຍາວ ເຄື່ອງໝາຍ ຫຼື ຫົວຂໍ້ສຳລັບທີມງານເທົ່ານັ້ນ</string>
+    <string name="calendar_export_staff">ທີມງານຄຣິດຕະຈັກ</string>
+    <string name="calendar_export_staff_sub">ລຳດັບລາຍການສະບັບເຕັມ ພ້ອມເວລາຂອງແຕ່ລະແຖວ ຄວາມຍາວ ເຄື່ອງໝາຍ ແລະ ລາຍການກ່ອນ ແລະ ຫຼັງການນະມັດສະການ</string>
+    <string name="calendar_export_choose">ເລືອກສະບັບທີ່ຈະສົ່ງອອກ</string>
 </resources>

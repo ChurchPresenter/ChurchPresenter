@@ -2694,6 +2694,8 @@
     <string name="backdrop_border_radius">Nurkade raadius</string>
     <string name="open_calendar_manager">Kalendrihaldur</string>
     <string name="calendar_locate_file_title">Leia %1$s</string>
+    <string name="calendar_choose_logo_title">Vali koguduse logo</string>
+    <string name="calendar_export_title">Ekspordi kava</string>
     <string name="calendar_locate_folder_title">Leia kaust %1$s</string>
     <string name="background_camera_option">Kaamera</string>
     <string name="crash_video_bg_banner">Videotaustad lülitati välja pärast %1$d järjestikust krahhi.</string>

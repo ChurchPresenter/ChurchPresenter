@@ -2691,6 +2691,8 @@
     <string name="backdrop_border_radius">Polomer rohov</string>
     <string name="open_calendar_manager">Správca kalendára</string>
     <string name="calendar_locate_file_title">Nájsť %1$s</string>
+    <string name="calendar_choose_logo_title">Vyberte logo zboru</string>
+    <string name="calendar_export_title">Export priebehu bohoslužby</string>
     <string name="calendar_locate_folder_title">Nájsť priečinok %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Videopozadia boli vypnuté po %1$d pádoch za sebou.</string>

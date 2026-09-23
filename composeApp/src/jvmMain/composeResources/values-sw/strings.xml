@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Mviringo wa pembe</string>
     <string name="open_calendar_manager">Msimamizi wa Kalenda</string>
     <string name="calendar_locate_file_title">Tafuta %1$s</string>
+    <string name="calendar_choose_logo_title">Chagua nembo ya kanisa</string>
+    <string name="calendar_export_title">Hamisha mtiririko wa ibada</string>
     <string name="calendar_locate_folder_title">Tafuta folda %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Mandhari ya video yamezimwa baada ya kuanguka mara %1$d mfululizo.</string>

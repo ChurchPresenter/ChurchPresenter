@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Jejari bucu</string>
     <string name="open_calendar_manager">Pengurus Kalendar</string>
     <string name="calendar_locate_file_title">Cari %1$s</string>
+    <string name="calendar_choose_logo_title">Pilih logo gereja</string>
+    <string name="calendar_export_title">Eksport aturcara</string>
     <string name="calendar_locate_folder_title">Cari folder %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Latar belakang video dimatikan selepas %1$d kali ranap berturut-turut.</string>

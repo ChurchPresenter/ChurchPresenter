@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">誰が、またはメモ</string>
     <string name="calendar_cloud_sync">クラウドとモバイル端末と同期する</string>
     <string name="calendar_cloud_sync_sub">リレーを通じてこのカレンダーを電話と同期させます。オフの場合、何もこのコンピューターから出ません</string>
+    <string name="calendar_settings_export">書き出し</string>
+    <string name="calendar_export_note">書き出すすべての PDF の冒頭に入るレターヘッドです。空欄の項目は省略されます。</string>
+    <string name="calendar_export_logo">教会のロゴ</string>
+    <string name="calendar_export_logo_sub">PNG または JPEG。ページ上部の中央に配置</string>
+    <string name="calendar_export_logo_none">ロゴが選択されていません</string>
+    <string name="calendar_export_logo_choose">選択…</string>
+    <string name="calendar_export_logo_remove">ロゴを削除</string>
+    <string name="calendar_export_church_name">教会名</string>
+    <string name="calendar_export_church_address">教会の住所</string>
+    <string name="calendar_export_public_heading">スタッフ専用の区切り</string>
+    <string name="calendar_export_public_note">一般向け版には開始時刻だけを載せ — 各行の時刻や長さは載せず — キューと、下でオンにした区切りもすべて省きます。スタッフ向け版にはすべてが載ります。</string>
+    <string name="calendar_export_sections_empty">区切りはまだ定義されていません。</string>
+    <string name="calendar_export_public">一般向け</string>
+    <string name="calendar_export_public_sub">会衆向けの式次第 — 開始時刻のみで、各行の時刻、長さ、キュー、スタッフ専用の区切りは含みません</string>
+    <string name="calendar_export_staff">教会スタッフ</string>
+    <string name="calendar_export_staff_sub">各行の時刻、長さ、キュー、礼拝前後の項目を含む完全な進行表</string>
+    <string name="calendar_export_choose">書き出す版を選んでください</string>
 </resources>

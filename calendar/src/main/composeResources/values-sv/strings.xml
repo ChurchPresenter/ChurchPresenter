@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Vem, eller en notering</string>
     <string name="calendar_cloud_sync">Synkronisera med molnet och mobila enheter</string>
     <string name="calendar_cloud_sync_sub">Håller den här kalendern i takt med telefoner via reläet. Av: inget lämnar den här datorn</string>
+    <string name="calendar_settings_export">Export</string>
+    <string name="calendar_export_note">Brevhuvudet som varje exporterad PDF börjar med. Lämna ett fält tomt för att utelämna det.</string>
+    <string name="calendar_export_logo">Församlingens logotyp</string>
+    <string name="calendar_export_logo_sub">PNG eller JPEG, centrerad överst på sidan</string>
+    <string name="calendar_export_logo_none">Ingen logotyp vald</string>
+    <string name="calendar_export_logo_choose">Välj…</string>
+    <string name="calendar_export_logo_remove">Ta bort logotyp</string>
+    <string name="calendar_export_church_name">Församlingens namn</string>
+    <string name="calendar_export_church_address">Församlingens adress</string>
+    <string name="calendar_export_public_heading">Avsnitt endast för medarbetare</string>
+    <string name="calendar_export_public_note">Den offentliga kopian visar bara starttiden — inga radtider eller längder — och utelämnar markeringar och varje avsnitt som är påslaget nedan. Medarbetarkopian har allt.</string>
+    <string name="calendar_export_sections_empty">Inga avsnitt har definierats än.</string>
+    <string name="calendar_export_public">Offentlig</string>
+    <string name="calendar_export_public_sub">Gudstjänstordning för församlingen — bara starttiden, utan radtider, längder, markeringar eller avsnitt endast för medarbetare</string>
+    <string name="calendar_export_staff">Medarbetare</string>
+    <string name="calendar_export_staff_sub">Hela körschemat med radtider, längder, markeringar och punkter före och efter gudstjänsten</string>
+    <string name="calendar_export_choose">Välj vilken kopia som ska exporteras</string>
 </resources>

@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">چه کسی، یا یادداشت</string>
     <string name="calendar_cloud_sync">همگام‌سازی با ابر و دستگاه‌های موبایل</string>
     <string name="calendar_cloud_sync_sub">این تقویم را از طریق رله با تلفن‌ها هماهنگ نگه می‌دارد. در حالت خاموش هیچ‌چیز از این رایانه خارج نمی‌شود</string>
+    <string name="calendar_settings_export">خروجی</string>
+    <string name="calendar_export_note">سربرگی که هر PDF خروجی با آن آغاز می‌شود. برای حذف یک فیلد، آن را خالی بگذارید.</string>
+    <string name="calendar_export_logo">لوگوی کلیسا</string>
+    <string name="calendar_export_logo_sub">PNG یا JPEG، در وسط بالای صفحه</string>
+    <string name="calendar_export_logo_none">لوگویی انتخاب نشده</string>
+    <string name="calendar_export_logo_choose">انتخاب…</string>
+    <string name="calendar_export_logo_remove">حذف لوگو</string>
+    <string name="calendar_export_church_name">نام کلیسا</string>
+    <string name="calendar_export_church_address">نشانی کلیسا</string>
+    <string name="calendar_export_public_heading">بخش‌های مخصوص تیم</string>
+    <string name="calendar_export_public_note">نسخه عمومی فقط زمان شروع را نشان می‌دهد — بدون زمان ردیف‌ها یا مدت‌ها — و نشانه‌ها و هر بخشی را که در زیر روشن شده کنار می‌گذارد. نسخه تیم همه‌چیز را دارد.</string>
+    <string name="calendar_export_sections_empty">هنوز بخشی تعریف نشده است.</string>
+    <string name="calendar_export_public">عمومی</string>
+    <string name="calendar_export_public_sub">ترتیب مراسم برای جماعت — فقط زمان شروع، بدون زمان ردیف‌ها، مدت‌ها، نشانه‌ها یا بخش‌های مخصوص تیم</string>
+    <string name="calendar_export_staff">تیم کلیسا</string>
+    <string name="calendar_export_staff_sub">ترتیب برنامه کامل با زمان ردیف‌ها، مدت‌ها، نشانه‌ها و موارد پیش و پس از مراسم</string>
+    <string name="calendar_export_choose">انتخاب کنید کدام نسخه خروجی گرفته شود</string>
 </resources>

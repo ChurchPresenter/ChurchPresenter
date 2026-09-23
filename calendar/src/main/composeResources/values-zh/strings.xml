@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">谁，或备注</string>
     <string name="calendar_cloud_sync">与云端和移动设备同步</string>
     <string name="calendar_cloud_sync_sub">通过中继使此日历与手机保持一致。关闭后，任何内容都不会离开这台电脑</string>
+    <string name="calendar_settings_export">导出</string>
+    <string name="calendar_export_note">每份导出的 PDF 开头的信头。某项留空即不显示。</string>
+    <string name="calendar_export_logo">教会标志</string>
+    <string name="calendar_export_logo_sub">PNG 或 JPEG，居中显示在页面顶部</string>
+    <string name="calendar_export_logo_none">未选择标志</string>
+    <string name="calendar_export_logo_choose">选择…</string>
+    <string name="calendar_export_logo_remove">移除标志</string>
+    <string name="calendar_export_church_name">教会名称</string>
+    <string name="calendar_export_church_address">教会地址</string>
+    <string name="calendar_export_public_heading">仅同工可见的分段</string>
+    <string name="calendar_export_public_note">公开版只显示开始时间 — 不含各行时间和时长 — 并省略标记以及下方开启的每个分段。同工版包含全部内容。</string>
+    <string name="calendar_export_sections_empty">尚未定义分段。</string>
+    <string name="calendar_export_public">公开版</string>
+    <string name="calendar_export_public_sub">给会众的聚会程序 — 只有开始时间，不含各行时间、时长、标记或仅同工可见的分段</string>
+    <string name="calendar_export_staff">教会同工</string>
+    <string name="calendar_export_staff_sub">完整的聚会流程，包含各行时间、时长、标记以及聚会前后的项目</string>
+    <string name="calendar_export_choose">选择要导出的版本</string>
 </resources>

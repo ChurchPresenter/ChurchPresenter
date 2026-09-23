@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">ความมนของมุม</string>
     <string name="open_calendar_manager">ตัวจัดการปฏิทิน</string>
     <string name="calendar_locate_file_title">ค้นหา %1$s</string>
+    <string name="calendar_choose_logo_title">เลือกโลโก้คริสตจักร</string>
+    <string name="calendar_export_title">ส่งออกลำดับรายการ</string>
     <string name="calendar_locate_folder_title">ค้นหาโฟลเดอร์ %1$s</string>
     <string name="background_camera_option">กล้อง</string>
     <string name="crash_video_bg_banner">ปิดพื้นหลังวิดีโอแล้ว หลังจากโปรแกรมขัดข้องติดต่อกัน %1$d ครั้ง</string>

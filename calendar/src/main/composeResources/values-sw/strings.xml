@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Nani, au maelezo</string>
     <string name="calendar_cloud_sync">Sawazisha na wingu na vifaa vya mkononi</string>
     <string name="calendar_cloud_sync_sub">Huweka kalenda hii sawa na simu kupitia relei. Ikizimwa, hakuna kinachotoka kwenye kompyuta hii</string>
+    <string name="calendar_settings_export">Hamisha</string>
+    <string name="calendar_export_note">Kichwa cha barua ambacho kila PDF inayohamishwa huanza nacho. Acha kisanduku kitupu ili kukiacha nje.</string>
+    <string name="calendar_export_logo">Nembo ya kanisa</string>
+    <string name="calendar_export_logo_sub">PNG au JPEG, katikati juu ya ukurasa</string>
+    <string name="calendar_export_logo_none">Hakuna nembo iliyochaguliwa</string>
+    <string name="calendar_export_logo_choose">Chagua…</string>
+    <string name="calendar_export_logo_remove">Ondoa nembo</string>
+    <string name="calendar_export_church_name">Jina la kanisa</string>
+    <string name="calendar_export_church_address">Anwani ya kanisa</string>
+    <string name="calendar_export_public_heading">Sehemu za wahudumu pekee</string>
+    <string name="calendar_export_public_note">Nakala ya umma inaonyesha muda wa kuanza pekee — bila muda wa safu wala urefu wa muda — na inaacha alama na kila sehemu iliyowashwa hapa chini. Nakala ya wahudumu ina kila kitu.</string>
+    <string name="calendar_export_sections_empty">Bado hakuna sehemu zilizowekwa.</string>
+    <string name="calendar_export_public">Umma</string>
+    <string name="calendar_export_public_sub">Mpangilio wa ibada kwa waumini — muda wa kuanza pekee, bila muda wa safu, urefu wa muda, alama wala sehemu za wahudumu pekee</string>
+    <string name="calendar_export_staff">Wahudumu wa kanisa</string>
+    <string name="calendar_export_staff_sub">Mtiririko kamili wa ibada wenye muda wa safu, urefu wa muda, alama na vipengele vya kabla na baada ya ibada</string>
+    <string name="calendar_export_choose">Chagua nakala ya kuhamisha</string>
 </resources>

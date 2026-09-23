@@ -2691,6 +2691,8 @@
     <string name="backdrop_border_radius">Raza colțurilor</string>
     <string name="open_calendar_manager">Manager calendar</string>
     <string name="calendar_locate_file_title">Găsește %1$s</string>
+    <string name="calendar_choose_logo_title">Alegeți logoul bisericii</string>
+    <string name="calendar_export_title">Exportă desfășurarea</string>
     <string name="calendar_locate_folder_title">Găsește dosarul %1$s</string>
     <string name="background_camera_option">Cameră</string>
     <string name="crash_video_bg_banner">Fundalurile video au fost dezactivate după %1$d blocări la rând.</string>

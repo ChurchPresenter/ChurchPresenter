@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Wer, oder eine Notiz</string>
     <string name="calendar_cloud_sync">Mit der Cloud und Mobilgeräten synchronisieren</string>
     <string name="calendar_cloud_sync_sub">Hält diesen Kalender über das Relay mit Telefonen auf dem gleichen Stand. Ausgeschaltet verlässt nichts davon diesen Computer</string>
+    <string name="calendar_settings_export">Export</string>
+    <string name="calendar_export_note">Der Briefkopf, mit dem jedes exportierte PDF beginnt. Leere Felder werden weggelassen.</string>
+    <string name="calendar_export_logo">Gemeindelogo</string>
+    <string name="calendar_export_logo_sub">PNG oder JPEG, oben auf der Seite zentriert</string>
+    <string name="calendar_export_logo_none">Kein Logo ausgewählt</string>
+    <string name="calendar_export_logo_choose">Auswählen…</string>
+    <string name="calendar_export_logo_remove">Logo entfernen</string>
+    <string name="calendar_export_church_name">Name der Gemeinde</string>
+    <string name="calendar_export_church_address">Adresse der Gemeinde</string>
+    <string name="calendar_export_public_heading">Abschnitte nur für Mitarbeitende</string>
+    <string name="calendar_export_public_note">Die öffentliche Fassung zeigt nur die Anfangszeit — keine Zeilenzeiten oder Dauern — und lässt Marker sowie jeden unten eingeschalteten Abschnitt weg. Die Fassung für Mitarbeitende enthält alles.</string>
+    <string name="calendar_export_sections_empty">Noch keine Abschnitte festgelegt.</string>
+    <string name="calendar_export_public">Öffentlich</string>
+    <string name="calendar_export_public_sub">Gottesdienstablauf für die Gemeinde — nur die Anfangszeit, ohne Zeilenzeiten, Dauern, Marker oder Abschnitte nur für Mitarbeitende</string>
+    <string name="calendar_export_staff">Mitarbeitende</string>
+    <string name="calendar_export_staff_sub">Der vollständige Ablauf mit Zeilenzeiten, Dauern, Markern sowie Punkten vor und nach dem Gottesdienst</string>
+    <string name="calendar_export_choose">Wähle, welche Fassung exportiert werden soll</string>
 </resources>

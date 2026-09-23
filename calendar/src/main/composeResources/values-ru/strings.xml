@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Кто или заметка</string>
     <string name="calendar_cloud_sync">Синхронизировать с облаком и мобильными устройствами</string>
     <string name="calendar_cloud_sync_sub">Держит этот календарь согласованным с телефонами через ретранслятор. Если выключено, ничего не покидает этот компьютер</string>
+    <string name="calendar_settings_export">Экспорт</string>
+    <string name="calendar_export_note">Шапка, с которой начинается каждый экспортированный PDF. Оставьте поле пустым, чтобы не включать его.</string>
+    <string name="calendar_export_logo">Логотип церкви</string>
+    <string name="calendar_export_logo_sub">PNG или JPEG, по центру вверху страницы</string>
+    <string name="calendar_export_logo_none">Логотип не выбран</string>
+    <string name="calendar_export_logo_choose">Выбрать…</string>
+    <string name="calendar_export_logo_remove">Удалить логотип</string>
+    <string name="calendar_export_church_name">Название церкви</string>
+    <string name="calendar_export_church_address">Адрес церкви</string>
+    <string name="calendar_export_public_heading">Разделы только для служителей</string>
+    <string name="calendar_export_public_note">Публичная копия показывает только время начала — без времени строк и длительностей — и не включает метки и все разделы, отмеченные ниже. В копии для служителей есть всё.</string>
+    <string name="calendar_export_sections_empty">Разделы пока не заданы.</string>
+    <string name="calendar_export_public">Публичная</string>
+    <string name="calendar_export_public_sub">Порядок служения для собрания — только время начала, без времени строк, длительностей, меток и разделов только для служителей</string>
+    <string name="calendar_export_staff">Служители церкви</string>
+    <string name="calendar_export_staff_sub">Полный порядок служения со временем строк, длительностями, метками и пунктами до и после служения</string>
+    <string name="calendar_export_choose">Выберите, какую копию экспортировать</string>
 </resources>

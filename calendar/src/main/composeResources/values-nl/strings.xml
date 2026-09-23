@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Wie, of een notitie</string>
     <string name="calendar_cloud_sync">Synchroniseren met de cloud en mobiele apparaten</string>
     <string name="calendar_cloud_sync_sub">Houdt deze kalender via de relay gelijk met telefoons. Uit: niets ervan verlaat deze computer</string>
+    <string name="calendar_settings_export">Exporteren</string>
+    <string name="calendar_export_note">Het briefhoofd waarmee elke geëxporteerde PDF begint. Laat een veld leeg om het weg te laten.</string>
+    <string name="calendar_export_logo">Kerklogo</string>
+    <string name="calendar_export_logo_sub">PNG of JPEG, gecentreerd boven aan de pagina</string>
+    <string name="calendar_export_logo_none">Geen logo gekozen</string>
+    <string name="calendar_export_logo_choose">Kiezen…</string>
+    <string name="calendar_export_logo_remove">Logo verwijderen</string>
+    <string name="calendar_export_church_name">Naam van de kerk</string>
+    <string name="calendar_export_church_address">Adres van de kerk</string>
+    <string name="calendar_export_public_heading">Secties alleen voor medewerkers</string>
+    <string name="calendar_export_public_note">De openbare versie toont alleen de begintijd — geen rijtijden of duur — en laat markeringen en elke hieronder ingeschakelde sectie weg. De medewerkersversie bevat alles.</string>
+    <string name="calendar_export_sections_empty">Nog geen secties gedefinieerd.</string>
+    <string name="calendar_export_public">Openbaar</string>
+    <string name="calendar_export_public_sub">Liturgie voor de gemeente — alleen de begintijd, zonder rijtijden, duur, markeringen of secties alleen voor medewerkers</string>
+    <string name="calendar_export_staff">Kerkmedewerkers</string>
+    <string name="calendar_export_staff_sub">Het volledige draaiboek met rijtijden, duur, markeringen en onderdelen voor en na de dienst</string>
+    <string name="calendar_export_choose">Kies welke versie je wilt exporteren</string>
 </resources>
