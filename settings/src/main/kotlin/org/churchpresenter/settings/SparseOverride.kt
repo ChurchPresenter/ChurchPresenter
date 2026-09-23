@@ -57,6 +57,21 @@ fun <T> withSparseOverride(global: T, override: JsonObject?, serializer: KSerial
 }
 
 /**
+ * [full] encoded whole, with [ignoredKeys] dropped -- a **keep-list projection**, not a diff.
+ *
+ * Where [sparseOverrideOf] asks "what did [full] change from some other object," this asks nothing
+ * about any other object at all: every field of [full] outside [ignoredKeys] is kept, whether or
+ * not it happens to equal a class default. Feeding the result into [withSparseOverride] is what
+ * lets an [OutputProfile] carry a *full* settings object as its styling while the fields that must
+ * stay one per install -- a library folder, a file list, column widths -- still come from whichever
+ * object [withSparseOverride] is applied to.
+ */
+fun <T> styleTreeOf(full: T, serializer: KSerializer<T>, ignoredKeys: Set<String>): JsonObject {
+    val tree = overrideJson.encodeToJsonElement(serializer, full) as JsonObject
+    return JsonObject(tree.filterKeys { it !in ignoredKeys })
+}
+
+/**
  * The entries of [customized] that differ from [global].
  *
  * Nested objects are descended into, so changing one corner of a backdrop stores that corner rather

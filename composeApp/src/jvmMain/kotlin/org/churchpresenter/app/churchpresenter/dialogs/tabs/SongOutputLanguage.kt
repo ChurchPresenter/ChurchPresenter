@@ -12,7 +12,7 @@ import churchpresenter.composeapp.generated.resources.song_language_third
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -23,72 +23,72 @@ import org.jetbrains.compose.resources.stringResource
  * `fullscreenLanguageDisplay`, `lowerThirdLanguageDisplay` and the two look-ahead variants, but
  * nothing live reads any of them: every real call site of `SongPresenter` --
  * `PresenterModeContent`, `LivePreviewPanel`, `OffscreenOutputContent` -- passes that output's
- * [ScreenAssignment.songMode] as `languageOverride`, which wins whenever it is set, and it is
- * always set. So a control writing the song-level fields restricts nothing.
+ * assigned profile's [OutputProfile.songMode] as `languageOverride`, which wins whenever it is set,
+ * and it is always set. So a control writing the song-level fields restricts nothing.
  *
- * These accessors read and write [ScreenAssignment.songMode] instead, which is the setting that
- * reaches the screen.
+ * These accessors read and write [OutputProfile.songMode] instead, which is the setting that
+ * reaches the screen. [SongLanguageScopeButtons]'s `outputMode`/`onOutputModeChange` parameters --
+ * used when editing one profile on the Profiles tab -- take precedence over these when given; the
+ * `AppSettings`-wide accessors below speak for *every saved profile* of the matching shape, for
+ * whatever global "every profile" control still wants that.
  */
 
-/** The outputs a given target stands for: the full-screen ones, or the lower-third ones. */
-private fun AppSettings.outputsFor(target: SongStyleTarget): List<ScreenAssignment> =
-    projectionSettings.screenAssignments.filter {
+/** The profiles a given target stands for: the full-screen ones, or the lower-third ones. */
+private fun AppSettings.profilesFor(target: SongStyleTarget): List<OutputProfile> =
+    projectionSettings.outputProfiles.filter {
         if (target.isLowerThird) it.isLowerThird else it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN
     }
 
 /**
- * What [target]'s outputs are set to show.
+ * What [target]'s profiles are set to show.
  *
- * The first output of that kind that is showing songs at all speaks for the group -- an output
+ * The first profile of that kind that is showing songs at all speaks for the group -- a profile
  * switched off contributes nothing to what is on screen, and reporting its "off" as the answer
  * would show the control a value it does not offer.
  */
 internal fun AppSettings.songLanguageFor(target: SongStyleTarget): String =
-    outputsFor(target).firstOrNull { it.songMode != Constants.SONG_LANG_OFF }?.songMode
+    profilesFor(target).firstOrNull { it.songMode != Constants.SONG_LANG_OFF }?.songMode
         ?: Constants.SONG_LANG_BOTH
 
 /**
- * [target]'s outputs set to show [language].
+ * [target]'s profiles set to show [language].
  *
- * An output switched off is left off: "off" means songs do not go to that screen at all, which is a
+ * A profile switched off is left off: "off" means songs do not go to that screen at all, which is a
  * different question from which language they are in, and turning it back on from here would put a
  * song on a screen the operator deliberately kept clear.
  */
 internal fun AppSettings.withSongLanguage(target: SongStyleTarget, language: String): AppSettings =
-    mapSongModes(language) { assignment ->
-        if (target.isLowerThird) {
-            assignment.isLowerThird
-        } else {
-            assignment.displayMode == Constants.DISPLAY_MODE_FULLSCREEN
-        }
+    mapSongModes(language) { profile ->
+        if (target.isLowerThird) profile.isLowerThird else profile.displayMode == Constants.DISPLAY_MODE_FULLSCREEN
     }
 
-/** True when any output that is showing songs is showing two languages. */
+/** True when any profile that is showing songs is showing two languages. */
 internal val AppSettings.songIsBilingual: Boolean
-    get() = projectionSettings.screenAssignments.any {
+    get() = projectionSettings.outputProfiles.any {
         it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY
     }
 
 /**
- * Every output set to one language or two -- the coarse switch in the rail.
+ * Every profile set to one language or two -- the coarse switch in the rail.
  *
- * Bilingual restores "both" rather than any previous per-output choice, and Single writes "primary"
- * over a "secondary" output as well: this is the control that says how many languages the church is
- * presenting in, and the per-target one on the element row is where a finer answer is given.
+ * Bilingual restores "both" rather than any previous per-profile choice, and Single writes
+ * "primary" over a "secondary" profile as well: this is the control that says how many languages
+ * the church is presenting in, and the per-target one on the element row is where a finer answer
+ * is given.
  */
 internal fun AppSettings.withSongBilingual(bilingual: Boolean): AppSettings =
     mapSongModes(if (bilingual) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_PRIMARY) { true }
 
 private fun AppSettings.mapSongModes(
     language: String,
-    matches: (ScreenAssignment) -> Boolean,
+    matches: (OutputProfile) -> Boolean,
 ): AppSettings = copy(
     projectionSettings = projectionSettings.copy(
-        screenAssignments = projectionSettings.screenAssignments.map { assignment ->
-            if (assignment.songMode != Constants.SONG_LANG_OFF && matches(assignment)) {
-                assignment.copy(songMode = language)
+        outputProfiles = projectionSettings.outputProfiles.map { profile ->
+            if (profile.songMode != Constants.SONG_LANG_OFF && matches(profile)) {
+                profile.copy(songMode = language)
             } else {
-                assignment
+                profile
             }
         },
     ),

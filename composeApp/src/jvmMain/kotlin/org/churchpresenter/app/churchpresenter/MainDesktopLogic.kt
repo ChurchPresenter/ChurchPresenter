@@ -12,7 +12,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -315,8 +316,10 @@ internal fun sttUrlToPersist(settings: AppSettings, sttConnected: Boolean): Stri
 internal fun withSttLastConnectedUrl(settings: AppSettings, url: String): AppSettings =
     settings.copy(sttSettings = settings.sttSettings.copy(lastConnectedUrl = url))
 
-internal fun stageMonitorScreenIndices(screenAssignments: List<ScreenAssignment>): List<Int> =
-    screenAssignments.indices.filter { screenAssignments[it].displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR }
+internal fun stageMonitorScreenIndices(proj: ProjectionSettings): List<Int> =
+    proj.screenAssignments.indices.filter {
+        proj.profileFor(proj.screenAssignments[it])?.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+    }
 
 internal fun resolveSelectedConnectionId(currentId: String?, connections: List<CompanionSatelliteSettings>): String? =
     if (connections.any { it.id == currentId }) currentId else connections.firstOrNull()?.id

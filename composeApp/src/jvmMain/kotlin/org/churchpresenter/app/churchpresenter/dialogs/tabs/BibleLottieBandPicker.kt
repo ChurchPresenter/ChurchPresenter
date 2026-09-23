@@ -23,21 +23,15 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_lottie_gen_window_title
-import churchpresenter.composeapp.generated.resources.bible_lottie_unsupported_note
-import churchpresenter.composeapp.generated.resources.song_lottie_unsupported_note
 import churchpresenter.composeapp.generated.resources.bible_font
 import churchpresenter.composeapp.generated.resources.image_files_filter
-import churchpresenter.composeapp.generated.resources.lower_third_animation
 import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.lower_third_animation_generate
 import churchpresenter.composeapp.generated.resources.lower_third_animation_none
-import churchpresenter.composeapp.generated.resources.lower_third_animation_use_lottie
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
@@ -113,77 +107,6 @@ internal fun LottieBandPickerRow(
                 )
             }
         }
-    }
-}
-
-/**
- * A content tab's own doorway to the same setting the Background tab's lower-third surface edits:
- * the switch turns the band's type to Lottie and back, the row picks the file, and the generator
- * writes a new one straight into it. [scope] says whose band — the Bible's or the songs'.
- */
-@Composable
-internal fun LowerThirdAnimationSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    generatorDir: File?,
-    scope: BackgroundScope = BackgroundScope.BIBLE_LOWER_THIRD,
-) {
-    val config = settings.backgroundSettings.configFor(scope)
-    val usesLottie = config.backgroundType == Constants.BACKGROUND_LOTTIE
-    fun update(transform: (BackgroundConfig) -> BackgroundConfig) = onSettingsChange { s ->
-        val backgrounds = s.backgroundSettings
-        s.copy(backgroundSettings = backgrounds.withConfigFor(scope, transform(backgrounds.configFor(scope))))
-    }
-    var showGenerator by remember { mutableStateOf(false) }
-    SettingsSection(title = stringResource(Res.string.lower_third_animation)) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            LabeledSwitch(
-                checked = usesLottie,
-                onCheckedChange = { on ->
-                    val type = if (on) Constants.BACKGROUND_LOTTIE else Constants.BACKGROUND_DEFAULT
-                    update { it.copy(backgroundType = type) }
-                },
-                label = stringResource(Res.string.lower_third_animation_use_lottie),
-                controlAtEnd = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (usesLottie) {
-                Text(
-                    stringResource(Res.string.lower_third_animation_file),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                LottieBandPickerRow(
-                    path = config.backgroundLottie,
-                    onPathChange = { path -> update { it.copy(backgroundLottie = path) } },
-                    templatesDir = generatorDir,
-                    onGenerate = if (generatorDir != null) ({ showGenerator = true }) else null,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    stringResource(
-                        if (scope == BackgroundScope.SONG_LOWER_THIRD) Res.string.song_lottie_unsupported_note
-                        else Res.string.bible_lottie_unsupported_note,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-    if (showGenerator && generatorDir != null) {
-        BibleLottieGeneratorWindow(
-            outputDir = generatorDir,
-            seed = lottieBandSeed(settings, scope),
-            onSaved = { file ->
-                update { it.copy(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.absolutePath) }
-                // The generator saves over the path it loaded from, so nothing below this
-                // would notice the file changed on its own.
-                invalidateBibleLottieTemplates()
-                showGenerator = false
-            },
-            onClose = { showGenerator = false },
-        )
     }
 }
 

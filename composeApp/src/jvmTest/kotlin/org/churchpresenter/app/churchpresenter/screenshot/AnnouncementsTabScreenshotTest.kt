@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementLabel
@@ -412,9 +413,13 @@ class AnnouncementsTabScreenshotTest {
                 "served in the lounge afterwards"
 
         val STAGE_MONITOR_SETUP = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "main", displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+                OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+            ),
             screenAssignments = listOf(
-                ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
-                ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+                ScreenAssignment(activeProfileId = "main"),
+                ScreenAssignment(activeProfileId = "stage"),
             ),
         )
     }

@@ -12,7 +12,6 @@ import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.horizontalOverflow
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -52,8 +51,8 @@ class SettingsTabWidthTest {
     @BeforeTest
     fun isolateHome() {
         // As in OptionsContentTest: pin the JVM-wide log path before swapping user.home, because
-        // PresenterManager and CompanionServer log through InstanceLinkLogger, which keeps whatever
-        // user.home pointed at the first time anything logged.
+        // CompanionServer logs through InstanceLinkLogger, which keeps whatever user.home pointed at
+        // the first time anything logged.
         TestSingletons.latchToTestHome()
         realHome = System.getProperty("user.home")
         home = Files.createTempDirectory("cp-tab-width-test").toFile()
@@ -71,7 +70,6 @@ class SettingsTabWidthTest {
     private val settingsManager by lazy { SettingsManager() }
     private val companionServer by lazy { CompanionServer() }
     private val remoteClientManager by lazy { RemoteClientManager() }
-    private val presenterManager by lazy { PresenterManager() }
 
     private fun overflowOfTab(tab: Int): Float {
         var overflow = 0f
@@ -84,7 +82,6 @@ class SettingsTabWidthTest {
                         settingsManager = settingsManager,
                         companionServer = companionServer,
                         remoteClientManager = remoteClientManager,
-                        presenterManager = presenterManager,
                         onDismiss = {},
                         initialTab = tab,
                         detectScreens = { emptyList() },
@@ -114,20 +111,16 @@ class SettingsTabWidthTest {
 
     @Test fun `the Bible tab fits a narrowed dialog`() = assertTabFits(1, "Bible")
 
-    @Test fun `the Song tab fits a narrowed dialog`() = assertTabFits(2, "Song")
+    @Test fun `the Background tab fits a narrowed dialog`() = assertTabFits(2, "Background")
 
-    @Test fun `the Background tab fits a narrowed dialog`() = assertTabFits(3, "Background")
+    @Test fun `the Profiles tab fits a narrowed dialog`() = assertTabFits(3, "Profiles")
 
     @Test fun `the Projection tab fits a narrowed dialog`() = assertTabFits(4, "Projection")
 
     @Test fun `the Server tab fits a narrowed dialog`() = assertTabFits(5, "Server")
 
-    @Test fun `the Stage Monitor tab fits a narrowed dialog`() = assertTabFits(6, "Stage Monitor")
-
-    @Test fun `the ATEM tab fits a narrowed dialog`() = assertTabFits(7, "ATEM")
-
-    @Test fun `the Dictionary tab fits a narrowed dialog`() = assertTabFits(8, "Dictionary")
+    @Test fun `the ATEM tab fits a narrowed dialog`() = assertTabFits(6, "ATEM")
 
     @Test
-    fun `the Companion Satellite tab fits a narrowed dialog`() = assertTabFits(9, "Companion Satellite")
+    fun `the Companion Satellite tab fits a narrowed dialog`() = assertTabFits(7, "Companion Satellite")
 }

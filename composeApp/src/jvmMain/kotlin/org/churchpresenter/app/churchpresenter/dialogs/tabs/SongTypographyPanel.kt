@@ -31,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.bible_letter_spacing
 import churchpresenter.composeapp.generated.resources.bible_reset_element
 import churchpresenter.composeapp.generated.resources.bible_size
 import churchpresenter.composeapp.generated.resources.bible_text_transform
+import churchpresenter.composeapp.generated.resources.song_chord_color
 import churchpresenter.composeapp.generated.resources.bible_text_transform_capitalize
 import churchpresenter.composeapp.generated.resources.bible_text_transform_lowercase
 import churchpresenter.composeapp.generated.resources.bible_text_transform_uppercase
@@ -145,6 +146,19 @@ internal fun SongTypographyPanel(
             // Alignment sits here rather than beside Size: with the Auto box in that row as well,
             // the four cells came to more than the pane and it was clipped off the end.
             SongAlignmentControl(style, onStyleChange)
+            // Chords are drawn over the lyrics and nowhere else, so only the lyrics carry one. The
+            // field and both writers have always been here; this is the control that was missing,
+            // which left the colour settable by nothing and stuck at its default.
+            if (element.hasChordColor) {
+                ControlColumn(stringResource(Res.string.song_chord_color), labelInsideControl = true) {
+                    ColorPickerField(
+                        label = stringResource(Res.string.song_chord_color),
+                        color = style.chordColor,
+                        onColorChange = { onStyleChange(style.copy(chordColor = it)) },
+                        modifier = Modifier.width(COLOR_SWATCH_WIDTH),
+                    )
+                }
+            }
             // A cornered number is drawn over the slide and never in the row this control places.
             val cornered = element == SongStyleElement.NUMBER && numberInCorner
             if (element.hasPosition && !onTitleSlide && !cornered) {

@@ -22,14 +22,12 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -50,7 +48,7 @@ internal fun CustomizeStagePanel(
     pane: CustomizePane,
     element: CustomizeElement?,
     settings: AppSettings,
-    assignment: ScreenAssignment,
+    profile: OutputProfile,
     /** This output's own size -- see the caller's note on why it must not be re-derived here. */
     output: PreviewOutputSize,
     slot: PreviewSampleSlot,
@@ -64,8 +62,7 @@ internal fun CustomizeStagePanel(
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
             CustomizePane.BIBLE -> BibleStage(settings, output, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, assignment, output, lowerThird, slot, element)
-            CustomizePane.DICTIONARY -> DictionaryStage(settings, output)
+            CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
             // The stage monitor's own tab already draws its zone layout at full size; a second,
             // smaller copy of it beside the controls would say nothing the tab does not.
@@ -106,7 +103,7 @@ private fun BibleStage(settings: AppSettings, output: PreviewOutputSize, lowerTh
 @Composable
 private fun SongStage(
     settings: AppSettings,
-    assignment: ScreenAssignment,
+    profile: OutputProfile,
     output: PreviewOutputSize,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
@@ -118,10 +115,10 @@ private fun SongStage(
         settings = settings,
         target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
         output = output,
-        // Taken from this output's own assignment rather than from a switch above the preview: the
+        // Taken from this output's own profile rather than from a switch above the preview: the
         // global tab asks "what should this picture contain", but here the screen has already
         // answered whether it carries a look-ahead line. A title slide has none.
-        showLookAhead = assignment.songLookAhead && !titleSlide,
+        showLookAhead = profile.songLookAhead && !titleSlide,
         // Never a chord chart. The chart is for whoever is playing, so it is drawn on the stage
         // monitor and nowhere the congregation can see -- `ProjectionSettingsTab` shows the Show
         // Chords column only for a stage monitor, and `PresenterOutputContent` passes `showChords`
@@ -138,20 +135,6 @@ private fun SongStage(
         titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
     )
-}
-
-/** A Strong's card, drawn by [DictionaryPresenter] at the output's own size. */
-@Composable
-private fun DictionaryStage(settings: AppSettings, output: PreviewOutputSize) {
-    StageFrame(output) {
-        ScaledPresenterBox(output) {
-            DictionaryPresenter(
-                entry = DICTIONARY_SAMPLE_ENTRY,
-                dictionarySettings = settings.dictionarySettings,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-    }
 }
 
 /**
@@ -244,23 +227,6 @@ private const val NO_STAGE_ALPHA = 0.45f
 
 /** 16:9, so the empty plate is the shape a stage would have been. */
 private const val NO_STAGE_RATIO = 16f / 9f
-
-/**
- * The entry the dictionary stage quotes.
- *
- * `agape` rather than a random number: it is the word most likely to be on screen when someone is
- * setting up a dictionary card, and it exercises every one of the five styled fields — the original
- * word in Greek script, the transliteration, the reference, a definition long enough to wrap, and a
- * KJV usage list.
- */
-private val DICTIONARY_SAMPLE_ENTRY = StrongsEntry(
-    number = "G26",
-    word = "ἀγάπη",
-    transliteration = "agapē",
-    pronunciation = "ag-ah'-pay",
-    definition = "love, i.e. affection or benevolence; specially (plural) a love-feast.",
-    kjvUsage = "(feast of) charity, dear, love.",
-)
 
 /** Test handle for the preview stage. */
 internal const val CUSTOMIZE_STAGE_TAG = "customize_stage"

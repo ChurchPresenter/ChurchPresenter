@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
@@ -61,6 +62,12 @@ class LivePreviewPanelTest {
     /** The caret's content descriptions — the only handle the header row exposes. */
     private val HIDE = "Hide this preview"
     private val SHOW = "Show this preview"
+
+    /** Projection settings with one screen assigned a profile in [mode]. */
+    private fun projectionInMode(mode: String) = ProjectionSettings(
+        outputProfiles = listOf(OutputProfile(id = "under-test", displayMode = mode)),
+        screenAssignments = listOf(ScreenAssignment(activeProfileId = "under-test")),
+    )
 
     // ── Display counting / dev-fallback ───────────────────────────────────────────────────────
 
@@ -184,26 +191,29 @@ class LivePreviewPanelTest {
     @Test
     fun `each presenting mode's Live badge is gated by its own show flag`() = runComposeUiTest {
         val offCases = listOf(
-            Presenting.BIBLE to ScreenAssignment(bibleMode = Constants.SONG_LANG_OFF),
-            Presenting.LYRICS to ScreenAssignment(songMode = Constants.SONG_LANG_OFF),
-            Presenting.PICTURES to ScreenAssignment(showPictures = false),
-            Presenting.PRESENTATION to ScreenAssignment(showPictures = false),
-            Presenting.MEDIA to ScreenAssignment(showMedia = false),
-            Presenting.LOWER_THIRD to ScreenAssignment(showStreaming = false),
-            Presenting.ANNOUNCEMENTS to ScreenAssignment(showAnnouncements = false),
-            Presenting.WEBSITE to ScreenAssignment(showWebsite = false),
-            Presenting.CANVAS to ScreenAssignment(showCanvas = false),
-            Presenting.QA to ScreenAssignment(showQA = false),
-            Presenting.STT to ScreenAssignment(showSTT = false),
-            Presenting.DICTIONARY to ScreenAssignment(showDictionary = false),
+            Presenting.BIBLE to OutputProfile(bibleMode = Constants.SONG_LANG_OFF),
+            Presenting.LYRICS to OutputProfile(songMode = Constants.SONG_LANG_OFF),
+            Presenting.PICTURES to OutputProfile(showPictures = false),
+            Presenting.PRESENTATION to OutputProfile(showPictures = false),
+            Presenting.MEDIA to OutputProfile(showMedia = false),
+            Presenting.LOWER_THIRD to OutputProfile(showStreaming = false),
+            Presenting.ANNOUNCEMENTS to OutputProfile(showAnnouncements = false),
+            Presenting.WEBSITE to OutputProfile(showWebsite = false),
+            Presenting.CANVAS to OutputProfile(showCanvas = false),
+            Presenting.QA to OutputProfile(showQA = false),
+            Presenting.STT to OutputProfile(showSTT = false),
+            Presenting.DICTIONARY to OutputProfile(showDictionary = false),
         )
-        for ((mode, offAssignment) in offCases) {
+        for ((mode, offProfile) in offCases) {
             setContent {
                 MaterialTheme {
                     LivePreviewPanel(
                         presenterManager = PresenterManager().apply { setPresentingMode(mode) },
                         appSettings = AppSettings(
-                            projectionSettings = ProjectionSettings(screenAssignments = listOf(offAssignment))
+                            projectionSettings = ProjectionSettings(
+                                outputProfiles = listOf(offProfile.copy(id = "off")),
+                                screenAssignments = listOf(ScreenAssignment(activeProfileId = "off")),
+                            ),
                         ),
                     )
                 }
@@ -414,9 +424,7 @@ class LivePreviewPanelTest {
         val pm = PresenterManager()
         pm.setScreenLock(0, Presenting.BIBLE)
         val settings = AppSettings(
-            projectionSettings = ProjectionSettings(
-                screenAssignments = listOf(ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR))
-            )
+            projectionSettings = projectionInMode(Constants.DISPLAY_MODE_STAGE_MONITOR),
         )
         setContent {
             MaterialTheme {
@@ -442,10 +450,7 @@ class LivePreviewPanelTest {
             Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL to "Lower Third",
         )
         for ((mode, label) in cases) {
-            val settings = AppSettings(
-                projectionSettings =
-                    ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode)))
-            )
+            val settings = AppSettings(projectionSettings = projectionInMode(mode))
             setContent {
                 MaterialTheme {
                     LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)

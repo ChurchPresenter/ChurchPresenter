@@ -43,16 +43,30 @@ class LottieBandBackgroundTest {
     }
 
     @Test
-    fun `a per-output override carries its own template`() {
-        val override = BackgroundSettings(
-            songLowerThirdBackground = BackgroundConfig(Constants.BACKGROUND_LOTTIE, backgroundLottie = "/mine.json"),
+    fun `a profile carries its own template once it owns that surface`() {
+        val ownTemplate = BackgroundSettings(
+            songLowerThirdBackground = BackgroundConfig(
+                Constants.BACKGROUND_LOTTIE,
+                backgroundLottie = "/mine.json",
+            ),
         )
-        val assignment = ScreenAssignment(
-            backgroundOverride = backgroundOverrideOf(BackgroundSettings(), override),
+        val owner = OutputProfile(
+            backgroundSettings = ownTemplate,
+            backgroundOverrides = setOf(BackgroundSurface.SONG_LOWER_THIRD.name),
         )
-        val resolved = AppSettings().resolvedFor(assignment)
+        val resolved = AppSettings().resolvedFor(owner)
         assertEquals("/mine.json", resolved.backgroundSettings.songLowerThirdBackground.backgroundLottie)
-        val plain = AppSettings().resolvedFor(ScreenAssignment()).backgroundSettings
+
+        // The same profile without the claim follows the Background tab instead -- which is the
+        // default, so a profile nobody has pointed at a template shows the house background.
+        val follower = owner.copy(backgroundOverrides = emptySet())
+        assertEquals(
+            "",
+            AppSettings().resolvedFor(follower).backgroundSettings.songLowerThirdBackground.backgroundLottie,
+            "a followed surface comes from the global document, whatever the profile happens to store",
+        )
+
+        val plain = AppSettings().resolvedFor(OutputProfile()).backgroundSettings
         assertEquals("", plain.songLowerThirdBackground.backgroundLottie)
     }
 

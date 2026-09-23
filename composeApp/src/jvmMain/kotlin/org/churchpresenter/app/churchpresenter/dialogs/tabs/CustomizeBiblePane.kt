@@ -5,7 +5,9 @@ import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputStyleScope
+import org.churchpresenter.settings.utils.Constants
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
 import org.jetbrains.compose.resources.stringResource
@@ -30,6 +32,8 @@ internal fun BibleCustomizePane(
     /** Which entry of the ordered stack is being styled -- see [CustomizeTranslationChips]. */
     translationIndex: Int,
     settings: AppSettings,
+    /** This profile's own Bible selection, which decides whether an arrangement control applies. */
+    profile: OutputProfile,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     val scope = LocalOutputStyleScope.current
@@ -89,6 +93,29 @@ internal fun BibleCustomizePane(
                 selected = bs.verticalAlignment,
                 onSelect = { v -> updateBible { it.copy(verticalAlignment = v) } },
             )
+            // How parallel translations are arranged against each other -- the same kind of control
+            // as the one above it: one value for the whole Bible rather than for this translation,
+            // so it is written with `updateBible` and drawn on the verse text, which is the block it
+            // arranges. The two shapes keep separate values: a full screen stacks by default and a
+            // band splits by default, which is what they have always drawn, so one shared field
+            // could not have preserved both.
+            //
+            // Two translations have to reach this output before the arrangement means anything.
+            // `bibleTranslations` empty means "all of them", which is the usual case.
+            val parallel = profile.bibleMode != Constants.SONG_LANG_OFF &&
+                (profile.bibleTranslations.size > 1 || profile.bibleTranslations.isEmpty()) &&
+                stack.size > 1
+            if (parallel) {
+                BilingualLayoutRow(
+                    selected = if (lowerThird) bs.bilingualLayoutLowerThird else bs.bilingualLayout,
+                    onSelect = { v ->
+                        updateBible {
+                            if (lowerThird) it.copy(bilingualLayoutLowerThird = v)
+                            else it.copy(bilingualLayout = v)
+                        }
+                    },
+                )
+            }
         }
         // Whether the reference names its translation by abbreviation. One flag, not a pair: the
         // reference names a translation, and a translation is abbreviated the same way whichever

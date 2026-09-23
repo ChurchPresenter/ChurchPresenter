@@ -12,18 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
@@ -47,24 +43,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.output_resolution
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.browser_source_website_snapshot_tooltip
-import churchpresenter.composeapp.generated.resources.content_bible
-import churchpresenter.composeapp.generated.resources.content_outputs
-import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
-import churchpresenter.composeapp.generated.resources.content_outputs_for
-import churchpresenter.composeapp.generated.resources.content_songs
 import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.dev_window_label
-import churchpresenter.composeapp.generated.resources.display_fullscreen
-import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.key_output
 import churchpresenter.composeapp.generated.resources.key_output_none
+import churchpresenter.composeapp.generated.resources.output_profile_picker_tooltip
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_decklink_io_conflict_tooltip
 import churchpresenter.composeapp.generated.resources.projection_simulate_outputs
 import churchpresenter.composeapp.generated.resources.projection_target_display
-import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
@@ -73,8 +61,6 @@ import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextFie
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene
@@ -104,17 +90,8 @@ internal fun ScreenAssignmentCard(
     screenAssignments: List<ScreenAssignment>,
     displayOptions: List<DisplayOption>,
     noneLabel: String,
-    contentGroup: List<ContentCol>,
-    backgroundGroup: List<ContentCol>,
-    displayModes: List<Pair<String, String>>,
-    songLanguageChoices: List<TranslationChoiceDisplay>,
-    translationDisplays: List<TranslationChoiceDisplay>,
-    translationNames: List<String>,
 ) {
     val proj = settings.projectionSettings
-    val bibleLabel = stringResource(Res.string.content_bible)
-    val songsLabel = stringResource(Res.string.content_songs)
-    val fullScreenLabel = stringResource(Res.string.display_fullscreen)
     val langDropdownWidth = 95.dp
     val contentLabelHeight = 32.dp
 
@@ -170,7 +147,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     val displayDropdownWidth = 100.dp
     val resolutionCellWidth = 108.dp
 
-    // Header row: Screen label + Display + Key Output + Display Mode + Content Outputs.
+    // Header row: Screen label + Display + Key Output + Output profile.
     // Every label sits in a fixed-height, bottom-aligned Box so all labels' bottoms line up
     // right above the divider.
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -195,7 +172,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
         }
         Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
             Text(
-                text = stringResource(Res.string.display_mode),
+                text = stringResource(Res.string.output_profile_picker_tooltip),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
@@ -218,14 +195,6 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Box(modifier = Modifier.weight(1f).height(contentLabelHeight), contentAlignment = Alignment.BottomStart) {
-            Text(
-                text = stringResource(Res.string.content_outputs),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
         }
     }
 
@@ -551,49 +520,22 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 }
             }
 
-            // Display mode dropdown (fixed column)
-            val screenLabel = proj.screenLabelOr(
-                assignment,
-                if (devWindowedFallback && i == 0) stringResource(Res.string.dev_window_label)
-                else stringResource(Res.string.screen_col_label, i + 1),
-            )
-            @OptIn(ExperimentalMaterial3Api::class)
-            Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
-                var displayModeExpanded by remember { mutableStateOf(false) }
-                OutlinedButton(
-                    shape = RoundedCornerShape(6.dp),
-                    onClick = { displayModeExpanded = true },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = displayModes.find { it.second == shownDisplayMode(assignment.displayMode) }?.first
-                                ?: fullScreenLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                DropdownMenu(
-                    expanded = displayModeExpanded,
-                    onDismissRequest = { displayModeExpanded = false }
-                ) {
-                    displayModes.forEach { (label, modeValue) ->
-                        DropdownMenuItem(
-                            text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                            onClick = {
-                                displayModeExpanded = false
-                                val updated = assignment.copy(
-                                    displayMode = pickedDisplayMode(modeValue, assignment.displayMode),
-                                )
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                                }
-                            }
+            // Profile dropdown (fixed column) — the only thing left to choose per output: which
+            // profile it follows. Everything about how it looks and what it shows lives there now.
+            OutputProfilePicker(
+                profiles = proj.outputProfiles,
+                activeProfileId = assignment.activeProfileId,
+                modifier = Modifier.width(langDropdownWidth),
+                onPick = { pickedId ->
+                    onSettingsChange { s ->
+                        s.copy(
+                            projectionSettings = s.projectionSettings.withAssignment(
+                                i, assignment.copy(activeProfileId = pickedId),
+                            ),
                         )
                     }
-                }
-            }
+                },
+            )
 
             // Dev fallback only — see the header comment. Written to the slot's own
             // devWindowWidth/Height, which is what outputSizeOf falls back to when a slot has no
@@ -619,68 +561,6 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             }
 
             Spacer(modifier = Modifier.width(8.dp))
-
-            // Content Outputs — opens a modal listing every content type + background.
-            // Replaces the old horizontally-scrolling checkbox grid.
-            var showContentDialog by remember { mutableStateOf(false) }
-            val enabledCount = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
-            val totalCount = contentOutputsTotalCount(assignment, contentGroup, backgroundGroup)
-            // Customize sits beside it rather than at the row's right edge: the two are the row's
-            // pair of "open a dialog about this output" buttons, and separating them would read as
-            // Customize belonging to whatever column it drifted next to.
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                OutlinedButton(
-                    shape = RoundedCornerShape(6.dp),
-                    onClick = { showContentDialog = true },
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-                CustomizeOutputCell(
-                    assignment = assignment,
-                    outputKind = OutputKind.SCREEN,
-                    screenLabel = screenLabel,
-                    settings = settings,
-                    onApply = { updated ->
-                        onSettingsChange { s ->
-                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                        }
-                    },
-                )
-            }
-            if (showContentDialog) {
-                ContentOutputsDialog(
-                    title = stringResource(Res.string.content_outputs_for, screenLabel),
-                    screenLabel = screenLabel,
-                    assignment = assignment,
-                    outputSize = outputSizeOf(assignment, OutputKind.SCREEN),
-                    contentGroup = contentGroup,
-                    backgroundGroup = backgroundGroup,
-                    bibleLabel = bibleLabel,
-                    songsLabel = songsLabel,
-                    translationNames = translationNames,
-                    translationDisplays = translationDisplays,
-                    songLanguageChoices = songLanguageChoices,
-                    webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
-                    webSnapshotTooltip = stringResource(Res.string.browser_source_website_snapshot_tooltip),
-                    isBrowserSource = false,
-                    onApply = { updated ->
-                        onSettingsChange { s ->
-                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                        }
-                    },
-                    onDismiss = { showContentDialog = false }
-                )
-            }
 
         } // end data Row
 

@@ -64,22 +64,17 @@ class BibleBilingualLayoutTest {
     }
 
     @Test
-    fun `an output override carries its own arrangement`() {
+    fun `a profile carries its own arrangement`() {
         val global = AppSettings(bibleSettings = BibleSettings())
-        val assignment = ScreenAssignment(
-            bibleOverride = bibleOverrideOf(
-                BibleSettings(),
-                BibleSettings(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE),
-            ),
-        )
+        val profile = OutputProfile(bibleSettings = BibleSettings(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE))
         assertEquals(
             Constants.BILINGUAL_SIDE_BY_SIDE,
-            global.resolvedFor(assignment).bibleSettings.bilingualLayout,
+            global.resolvedFor(profile).bibleSettings.bilingualLayout,
         )
         assertEquals(
             Constants.BILINGUAL_TOP_BOTTOM,
             global.bibleSettings.bilingualLayout,
-            "the global document is untouched by one screen's choice",
+            "the global document is untouched by one profile's choice",
         )
     }
 }

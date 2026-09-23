@@ -8,7 +8,9 @@ data class ProjectionSettings(
     val windowLeft: Int = 32,
     val windowRight: Int = 32,
     val windowBottom: Int = 32,
-    val screenAssignments: List<ScreenAssignment> = listOf(ScreenAssignment()),
+    val screenAssignments: List<ScreenAssignment> = listOf(
+        ScreenAssignment(activeProfileId = DEFAULT_OUTPUT_PROFILE_ID),
+    ),
     val audioOutputDeviceId: String = "", // empty = system default
     val vlcPath: String = "", // custom VLC installation directory (empty = auto-detect)
     // Browser Source outputs are virtual (no physical display/DeckLink device), so unlike
@@ -72,6 +74,14 @@ data class ProjectionSettings(
     // Launch with the output windows hidden; the operator reveals them with the toolbar's display
     // toggle when ready to present.
     val startOutputsHidden: Boolean = false,
+    /**
+     * Named, reusable [OutputProfile]s, any of which an output can follow via
+     * [ScreenAssignment.activeProfileId] -- see `AppSettings.resolvedFor(profile)`
+     * (`OutputProfileResolution.kt`). A fresh install starts with exactly one, factory-default
+     * profile -- see [DEFAULT_OUTPUT_PROFILE_ID] -- so every output has something to point at
+     * before the operator has made anything of their own.
+     */
+    val outputProfiles: List<OutputProfile> = listOf(OutputProfile(id = DEFAULT_OUTPUT_PROFILE_ID, name = "Default")),
 ) {
     /** [key]'s name as the operator typed it, or blank for a monitor never renamed. */
     fun screenName(key: String): String = screenNames[key]?.trim().orEmpty()
@@ -104,12 +114,20 @@ data class ProjectionSettings(
             .ifBlank { assignment.screenName.trim() }
             .ifBlank { default }
 
+    /**
+     * A newly appearing slot's starting profile: the first one that exists, so a monitor plugged in
+     * after a migrated install (which seeds its own profiles rather than one literally named
+     * [DEFAULT_OUTPUT_PROFILE_ID]) still gets a real profile rather than a dangling reference.
+     */
+    internal val fallbackProfileId: String
+        get() = outputProfiles.firstOrNull()?.id ?: DEFAULT_OUTPUT_PROFILE_ID
+
     fun getAssignment(index: Int): ScreenAssignment =
-        screenAssignments.getOrElse(index) { ScreenAssignment() }
+        screenAssignments.getOrElse(index) { ScreenAssignment(activeProfileId = fallbackProfileId) }
 
     fun withAssignment(index: Int, assignment: ScreenAssignment): ProjectionSettings {
         val mutable = screenAssignments.toMutableList()
-        while (mutable.size <= index) mutable.add(ScreenAssignment())
+        while (mutable.size <= index) mutable.add(ScreenAssignment(activeProfileId = fallbackProfileId))
         mutable[index] = assignment
         return copy(screenAssignments = mutable)
     }

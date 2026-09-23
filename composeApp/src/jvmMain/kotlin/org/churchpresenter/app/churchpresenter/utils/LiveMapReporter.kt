@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.app.churchpresenter.hasNoPrimaryTarget
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.churchpresenter.settings.utils.Constants
@@ -141,13 +142,14 @@ object LiveMapReporter {
     ): SetupFacts {
         // Outputs with no display chosen are configuration the operator has switched off. Reading
         // their display mode would report a lower third or a stage monitor nobody is projecting.
-        val activeOutputs = settings.projectionSettings.screenAssignments.filterNot(::hasNoPrimaryTarget)
+        val proj = settings.projectionSettings
+        val activeProfiles = proj.screenAssignments.filterNot(::hasNoPrimaryTarget).mapNotNull { proj.profileFor(it) }
         return SetupFacts(
             language = settings.language,
             screens = screenCount,
             bibles = settings.bibleSettings.translationList().size,
-            stageMonitor = activeOutputs.any { it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR },
-            lowerThird = activeOutputs.any { it.isLowerThird },
+            stageMonitor = activeProfiles.any { it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR },
+            lowerThird = activeProfiles.any { it.isLowerThird },
             songbooks = songCounts.first,
             songs = songCounts.second,
             sessionMinutes = sessionMinutes,

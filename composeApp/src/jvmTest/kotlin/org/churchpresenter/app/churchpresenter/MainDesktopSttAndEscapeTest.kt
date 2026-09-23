@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -65,47 +66,52 @@ class MainDesktopSttAndEscapeTest {
 
     // ── stageMonitorScreenIndices ────────────────────────────────────────────────
 
+    /** One profile per [modes] entry, and one screen assignment pointing at each in order. */
+    private fun projectionOf(vararg modes: String): ProjectionSettings {
+        val profiles = modes.mapIndexed { index, mode -> OutputProfile(id = "p$index", displayMode = mode) }
+        return ProjectionSettings(
+            outputProfiles = profiles,
+            screenAssignments = profiles.map { ScreenAssignment(activeProfileId = it.id) },
+        )
+    }
+
     @Test
     fun `no screens configured releases nothing`() {
-        assertEquals(emptyList(), stageMonitorScreenIndices(emptyList()))
+        val empty = ProjectionSettings(outputProfiles = emptyList(), screenAssignments = emptyList())
+        assertEquals(emptyList(), stageMonitorScreenIndices(empty))
     }
 
     @Test
     fun `no screen in stage-monitor mode releases nothing`() {
-        val screens = listOf(
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
-        )
-        assertEquals(emptyList(), stageMonitorScreenIndices(screens))
+        val proj = projectionOf(Constants.DISPLAY_MODE_FULLSCREEN, Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
+        assertEquals(emptyList(), stageMonitorScreenIndices(proj))
     }
 
     @Test
     fun `only the screens actually in stage-monitor mode are returned, by their own index`() {
-        val screens = listOf(
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL),
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+        val proj = projectionOf(
+            Constants.DISPLAY_MODE_FULLSCREEN,
+            Constants.DISPLAY_MODE_STAGE_MONITOR,
+            Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL,
+            Constants.DISPLAY_MODE_STAGE_MONITOR,
         )
-        assertEquals(listOf(1, 3), stageMonitorScreenIndices(screens))
+        assertEquals(listOf(1, 3), stageMonitorScreenIndices(proj))
     }
 
     @Test
     fun `every screen in stage-monitor mode is released`() {
-        val screens = List(3) { ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR) }
-        assertEquals(listOf(0, 1, 2), stageMonitorScreenIndices(screens))
+        val proj = projectionOf(*Array(3) { Constants.DISPLAY_MODE_STAGE_MONITOR })
+        assertEquals(listOf(0, 1, 2), stageMonitorScreenIndices(proj))
     }
 
     @Test
     fun `the indices resolve against the real projection settings shape used by MainDesktop`() {
         val settings = AppSettings(
-            projectionSettings = ProjectionSettings(
-                screenAssignments = listOf(
-                    ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
-                    ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
-                ),
+            projectionSettings = projectionOf(
+                Constants.DISPLAY_MODE_STAGE_MONITOR,
+                Constants.DISPLAY_MODE_FULLSCREEN,
             ),
         )
-        assertEquals(listOf(0), stageMonitorScreenIndices(settings.projectionSettings.screenAssignments))
+        assertEquals(listOf(0), stageMonitorScreenIndices(settings.projectionSettings))
     }
 }

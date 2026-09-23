@@ -79,7 +79,9 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.isMultiTranslationPresentation
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenBible
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
@@ -400,7 +402,8 @@ fun BibleTab(
 
         if (primaryVerse != null) {
             val translationCount = appSettings.bibleSettings.translationList().size
-            val outputs = appSettings.projectionSettings.screenAssignments
+            val proj = appSettings.projectionSettings
+            val outputs = proj.screenAssignments.filter { it.isLiveOutput() }.mapNotNull { proj.profileFor(it) }
             if (isMultiTranslationPresentation(translationCount, outputs)) {
                 UsageEvents.record(UsageEvent.BIBLE_MULTI_TRANSLATION)
             }

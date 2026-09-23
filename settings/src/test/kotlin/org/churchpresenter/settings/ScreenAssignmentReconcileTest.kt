@@ -137,13 +137,13 @@ class ScreenAssignmentReconcileTest {
 
     @Test
     fun `other fields of an assignment survive the resolve`() {
-        val saved = listOf(auto().copy(targetType = "decklink", keyTargetDisplay = 3, bibleTranslations = listOf(0, 2)))
+        val saved = listOf(auto().copy(targetType = "decklink", keyTargetDisplay = 3, activeProfileId = "choir"))
 
         val result = assertNotNull(reconcileScreenAssignments(saved, listOf(display(1)), 0)).single()
 
         assertEquals("decklink", result.targetType)
         assertEquals(3, result.keyTargetDisplay)
-        assertEquals(listOf(0, 2), result.bibleTranslations)
+        assertEquals("choir", result.activeProfileId)
     }
 
     // ── Slots already sufficient ────────────────────────────────────────────────

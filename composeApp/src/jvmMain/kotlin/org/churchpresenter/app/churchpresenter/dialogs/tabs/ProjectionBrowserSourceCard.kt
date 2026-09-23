@@ -10,11 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,7 +19,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
@@ -57,28 +53,18 @@ import churchpresenter.composeapp.generated.resources.browser_source_outputs_hel
 import churchpresenter.composeapp.generated.resources.browser_source_require_api_key
 import churchpresenter.composeapp.generated.resources.browser_source_resolution
 import churchpresenter.composeapp.generated.resources.browser_source_uses_server_api_key
-import churchpresenter.composeapp.generated.resources.browser_source_website_snapshot_tooltip
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
-import churchpresenter.composeapp.generated.resources.content_bible
-import churchpresenter.composeapp.generated.resources.content_outputs
-import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
-import churchpresenter.composeapp.generated.resources.content_outputs_for
-import churchpresenter.composeapp.generated.resources.content_songs
 import churchpresenter.composeapp.generated.resources.copy_url_black_bg
 import churchpresenter.composeapp.generated.resources.copy_url_transparent
-import churchpresenter.composeapp.generated.resources.display_fullscreen
-import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
-import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
+import churchpresenter.composeapp.generated.resources.output_profile_picker_tooltip
 import churchpresenter.composeapp.generated.resources.remove
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.addBrowserSourceOutput
 import org.churchpresenter.settings.removeBrowserSourceOutput
@@ -105,17 +91,8 @@ internal fun BrowserSourceOutputsCard(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     companionServer: CompanionServer,
     onIdentifyBrowserSource: (Int) -> Unit,
-    contentGroup: List<ContentCol>,
-    backgroundGroup: List<ContentCol>,
-    displayModes: List<Pair<String, String>>,
-    songLanguageChoices: List<TranslationChoiceDisplay>,
-    translationDisplays: List<TranslationChoiceDisplay>,
-    translationNames: List<String>,
 ) {
     val proj = settings.projectionSettings
-    val bibleLabel = stringResource(Res.string.content_bible)
-    val songsLabel = stringResource(Res.string.content_songs)
-    val fullScreenLabel = stringResource(Res.string.display_fullscreen)
     val langDropdownWidth = 95.dp
     val cellWidth = 82.dp
     val contentLabelHeight = 32.dp
@@ -286,47 +263,26 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                     Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                             Text(
-                                text = stringResource(Res.string.display_mode),
+                                text = stringResource(Res.string.output_profile_picker_tooltip),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
-                        var displayModeExpanded by remember { mutableStateOf(false) }
-                        OutlinedButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { displayModeExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = displayModes.find { it.second == shownDisplayMode(output.displayMode) }?.first
-                                ?: fullScreenLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = displayModeExpanded,
-                            onDismissRequest = { displayModeExpanded = false }
-                        ) {
-                            displayModes.forEach { (label, modeValue) ->
-                                DropdownMenuItem(
-                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                                    onClick = {
-                                        displayModeExpanded = false
-                                        val updated = output.copy(
-                                    displayMode = pickedDisplayMode(modeValue, output.displayMode),
-                                )
-                                        onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                        }
-                                    }
-                                )
-                            }
-                        }
+                        OutputProfilePicker(
+                            profiles = proj.outputProfiles,
+                            activeProfileId = output.activeProfileId,
+                            onPick = { pickedId ->
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        projectionSettings = s.projectionSettings.withBrowserSourceOutput(
+                                            i, output.copy(activeProfileId = pickedId),
+                                        ),
+                                    )
+                                }
+                            },
+                        )
                     }
                     ResolutionPicker(
                         label = stringResource(Res.string.browser_source_resolution),
@@ -407,76 +363,6 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                         s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
                                     }
                                 }
-                            )
-                        }
-                    }
-                    // Content Outputs — opens a modal listing every content type + background.
-                    Column(modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomStart) {
-                            Text(
-                                text = stringResource(Res.string.content_outputs),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        var showContentDialog by remember { mutableStateOf(false) }
-                        val enabledCount = contentOutputsEnabledCount(output, contentGroup, backgroundGroup)
-                        val totalCount = contentOutputsTotalCount(output, contentGroup, backgroundGroup)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            OutlinedButton(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { showContentDialog = true },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = stringResource(
-                                        Res.string.content_outputs_enabled_short, enabledCount, totalCount,
-                                    ),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                            CustomizeOutputCell(
-                                assignment = output,
-                                outputKind = OutputKind.BROWSER_SOURCE,
-                                screenLabel = outputLabel,
-                                settings = settings,
-                                onApply = { updated ->
-                                    onSettingsChange { s ->
-                                        s.copy(
-                                            projectionSettings =
-                                                s.projectionSettings.withBrowserSourceOutput(i, updated),
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                        if (showContentDialog) {
-                            ContentOutputsDialog(
-                                title = stringResource(Res.string.content_outputs_for, outputLabel),
-                                screenLabel = outputLabel,
-                                assignment = output,
-                                outputSize = outputSizeOf(output, OutputKind.BROWSER_SOURCE),
-                                contentGroup = contentGroup,
-                                backgroundGroup = backgroundGroup,
-                                bibleLabel = bibleLabel,
-                                songsLabel = songsLabel,
-                                translationNames = translationNames,
-                                translationDisplays = translationDisplays,
-                                songLanguageChoices = songLanguageChoices,
-                                webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
-                                webSnapshotTooltip = stringResource(Res.string.browser_source_website_snapshot_tooltip),
-                                isBrowserSource = true,
-                                onApply = { updated ->
-                                    onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                    }
-                                },
-                                onDismiss = { showContentDialog = false }
                             )
                         }
                     }

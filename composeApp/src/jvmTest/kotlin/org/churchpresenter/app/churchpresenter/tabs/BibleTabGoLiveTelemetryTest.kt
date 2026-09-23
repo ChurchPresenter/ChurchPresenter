@@ -9,6 +9,7 @@ import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import java.io.File
 import java.nio.file.Files
@@ -139,9 +140,13 @@ class BibleTabGoLiveTelemetryTest {
                         twoTranslations(listOf("test.spb", SECOND_MODULE)),
                     ),
                     projectionSettings = ProjectionSettings(
+                        outputProfiles = listOf(
+                            OutputProfile(id = "p0", bibleTranslations = listOf(0)),
+                            OutputProfile(id = "p1", bibleTranslations = listOf(1)),
+                        ),
                         screenAssignments = listOf(
-                            ScreenAssignment(targetDisplay = 0, bibleTranslations = listOf(0)),
-                            ScreenAssignment(targetDisplay = 1, bibleTranslations = listOf(1)),
+                            ScreenAssignment(targetDisplay = 0, activeProfileId = "p0"),
+                            ScreenAssignment(targetDisplay = 1, activeProfileId = "p1"),
                         ),
                     ),
                 )

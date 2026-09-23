@@ -28,6 +28,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.withZoneWidth
@@ -283,9 +284,12 @@ class StageMonitorSettingsTabScreenshotTest {
     /** The tab as it opens, with the stage monitor going out on a [width] by [height] screen. */
     private fun output(width: Int, height: Int) = AppSettings(
         projectionSettings = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "under-test", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+            ),
             screenAssignments = listOf(
                 ScreenAssignment(
-                    displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR,
+                    activeProfileId = "under-test",
                     targetBoundsW = width,
                     targetBoundsH = height,
                 ),

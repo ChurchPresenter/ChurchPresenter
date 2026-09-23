@@ -25,6 +25,7 @@ import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.WindowLayoutSettings
 import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -542,8 +543,11 @@ class MainDesktopComposeTest {
     fun `a configured stage monitor is accounted for`() = root(
         withOneSong().copy(
             projectionSettings = withOneSong().projectionSettings.copy(
+                outputProfiles = listOf(
+                    OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+                ),
                 screenAssignments = listOf(
-                    ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+                    ScreenAssignment(activeProfileId = "stage"),
                 ),
             ),
         )

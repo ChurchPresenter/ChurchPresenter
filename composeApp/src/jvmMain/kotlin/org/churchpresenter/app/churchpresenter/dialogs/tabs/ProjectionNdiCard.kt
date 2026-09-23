@@ -10,18 +10,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
@@ -61,13 +57,7 @@ import churchpresenter.composeapp.generated.resources.add_ndi_output
 import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
-import churchpresenter.composeapp.generated.resources.content_bible
-import churchpresenter.composeapp.generated.resources.content_outputs
-import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
-import churchpresenter.composeapp.generated.resources.content_outputs_for
-import churchpresenter.composeapp.generated.resources.content_songs
-import churchpresenter.composeapp.generated.resources.display_fullscreen
-import churchpresenter.composeapp.generated.resources.display_mode
+import churchpresenter.composeapp.generated.resources.output_profile_picker_tooltip
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.ndi_confirm_remove_message
 import churchpresenter.composeapp.generated.resources.ndi_enabled
@@ -97,12 +87,10 @@ import churchpresenter.composeapp.generated.resources.ndi_runtime_path_help
 import churchpresenter.composeapp.generated.resources.ndi_runtime_ready
 import churchpresenter.composeapp.generated.resources.ndi_runtime_unsupported_cpu
 import churchpresenter.composeapp.generated.resources.ndi_trademark
-import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
 import churchpresenter.composeapp.generated.resources.remove
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.addNdiOutput
 import org.churchpresenter.settings.removeNdiOutput
@@ -149,12 +137,6 @@ internal const val NDI_RUNTIME_URL = "https://ndi.video/download-ndi-sdk/"
 internal fun NdiOutputsCard(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    contentGroup: List<ContentCol>,
-    backgroundGroup: List<ContentCol>,
-    displayModes: List<Pair<String, String>>,
-    songLanguageChoices: List<TranslationChoiceDisplay>,
-    translationDisplays: List<TranslationChoiceDisplay>,
-    translationNames: List<String>,
     onIdentifyNdi: (Int) -> Unit = {},
     /**
      * What the app found when it looked for a runtime.
@@ -206,12 +188,7 @@ internal fun NdiOutputsCard(
                     receiverCount = receiverCount,
                     onIdentifyNdi = onIdentifyNdi,
                     onSettingsChange = onSettingsChange,
-                    contentGroup = contentGroup,
-                    backgroundGroup = backgroundGroup,
-                    displayModes = displayModes,
-                    songLanguageChoices = songLanguageChoices,
-                    translationDisplays = translationDisplays,
-                    translationNames = translationNames,
+                    outputProfiles = proj.outputProfiles,
                 )
             }
             Button(
@@ -371,16 +348,10 @@ private fun NdiOutputRow(
     receiverCount: (Int) -> Int,
     onIdentifyNdi: (Int) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    contentGroup: List<ContentCol>,
-    backgroundGroup: List<ContentCol>,
-    displayModes: List<Pair<String, String>>,
-    songLanguageChoices: List<TranslationChoiceDisplay>,
-    translationDisplays: List<TranslationChoiceDisplay>,
-    translationNames: List<String>,
+    outputProfiles: List<OutputProfile>,
 ) {
     val defaultLabel = stringResource(Res.string.ndi_output_numbered, index + 1)
     val outputLabel = output.ndiLabelOr(defaultLabel)
-    val fullScreenLabel = stringResource(Res.string.display_fullscreen)
     val cellWidth = 95.dp
     val labelHeight = 32.dp
     var showRemoveConfirm by remember { mutableStateOf(false) }
@@ -544,13 +515,23 @@ private fun NdiOutputRow(
                 ) {
                     update(output.copy(ndiMode = it))
                 }
-                NdiDropdownCell(
-                    label = stringResource(Res.string.display_mode),
-                    value = displayModes.find { it.second == output.displayMode }?.first ?: fullScreenLabel,
-                    options = displayModes.map { it.first to it.second },
-                    cellWidth = cellWidth,
-                    labelHeight = labelHeight,
-                ) { update(output.copy(displayMode = it)) }
+                Column(modifier = Modifier.width(cellWidth)) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(labelHeight),
+                        contentAlignment = Alignment.BottomStart,
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.output_profile_picker_tooltip),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    OutputProfilePicker(
+                        profiles = outputProfiles,
+                        activeProfileId = output.activeProfileId,
+                        onPick = { pickedId -> update(output.copy(activeProfileId = pickedId)) },
+                    )
+                }
                 ResolutionPicker(
                     label = stringResource(Res.string.ndi_resolution),
                     width = output.ndiWidth,
@@ -566,54 +547,6 @@ private fun NdiOutputRow(
                     cellWidth = cellWidth,
                     labelHeight = labelHeight,
                 ) { update(output.copy(ndiFps = it.toInt())) }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(labelHeight),
-                        contentAlignment = Alignment.BottomStart,
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.content_outputs),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    var showContentDialog by remember { mutableStateOf(false) }
-                    val enabledCount = contentOutputsEnabledCount(output, contentGroup, backgroundGroup)
-                    val totalCount = contentOutputsTotalCount(output, contentGroup, backgroundGroup)
-                    OutlinedButton(
-                        shape = RoundedCornerShape(6.dp),
-                        onClick = { showContentDialog = true },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                    ) {
-                        Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                    if (showContentDialog) {
-                        ContentOutputsDialog(
-                            title = stringResource(Res.string.content_outputs_for, outputLabel),
-                            screenLabel = outputLabel,
-                            assignment = output,
-                            outputSize = outputSizeOf(output, OutputKind.NDI),
-                            contentGroup = contentGroup,
-                            backgroundGroup = backgroundGroup,
-                            bibleLabel = stringResource(Res.string.content_bible),
-                            songsLabel = stringResource(Res.string.content_songs),
-                            translationNames = translationNames,
-                            translationDisplays = translationDisplays,
-                            songLanguageChoices = songLanguageChoices,
-                            webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
-                            webSnapshotTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
-                            isBrowserSource = true,
-                            onApply = { updated -> update(updated) },
-                            onDismiss = { showContentDialog = false },
-                        )
-                    }
-                }
             }
         }
     }

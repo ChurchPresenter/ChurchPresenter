@@ -100,7 +100,7 @@ internal fun previewOutputSize(settings: AppSettings): PreviewOutputSize {
  */
 internal fun stageMonitorPreviewOutputSize(settings: AppSettings): PreviewOutputSize {
     val assignments = settings.projectionSettings.screenAssignments
-    val stage = stageMonitorScreenIndices(assignments)
+    val stage = stageMonitorScreenIndices(settings.projectionSettings)
         .mapNotNull(assignments::getOrNull)
         .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
     return stage?.let { OutputSize(it.targetBoundsW, it.targetBoundsH) } ?: FallbackOutputSize

@@ -7,6 +7,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.UpdateCheckInterval
@@ -116,14 +117,22 @@ class LiveMapReporterTest {
 
     private fun settings(
         bibles: List<String> = emptyList(),
-        outputs: List<ScreenAssignment> = emptyList(),
+        outputs: List<Pair<ScreenAssignment, OutputProfile>> = emptyList(),
     ) = AppSettings(
         bibleSettings = BibleSettings(translations = bibles.map { BibleTranslationSettings(fileName = it) }),
-        projectionSettings = ProjectionSettings(screenAssignments = outputs),
+        projectionSettings = ProjectionSettings(
+            outputProfiles = outputs.map { it.second },
+            screenAssignments = outputs.map { it.first },
+        ),
     )
 
-    private fun output(displayMode: String, targetDisplay: Int = 0) =
-        ScreenAssignment(targetDisplay = targetDisplay, displayMode = displayMode)
+    private var nextProfileId = 0
+
+    private fun output(displayMode: String, targetDisplay: Int = 0): Pair<ScreenAssignment, OutputProfile> {
+        val id = "profile-${nextProfileId++}"
+        return ScreenAssignment(targetDisplay = targetDisplay, activeProfileId = id) to
+            OutputProfile(id = id, displayMode = displayMode)
+    }
 
     @Test
     fun `setup facts count the attached screens and the configured translation stack`() {
