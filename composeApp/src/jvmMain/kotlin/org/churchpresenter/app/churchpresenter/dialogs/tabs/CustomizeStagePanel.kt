@@ -28,6 +28,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.bibleTranslationPositions
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -61,7 +62,7 @@ internal fun CustomizeStagePanel(
     // shaped like the screen it is previewing.
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleStage(settings, output, lowerThird, slot)
+            CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot)
             CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
             // The stage monitor's own tab already draws its zone layout at full size; a second,
@@ -71,14 +72,25 @@ internal fun CustomizeStagePanel(
     }
 }
 
-/** The sample verse, in every translation the stack carries, at [slot]'s length. */
+/** The sample verse, in the translations *this profile* draws, at [slot]'s length. */
 @Composable
-private fun BibleStage(settings: AppSettings, output: PreviewOutputSize, lowerThird: Boolean, slot: PreviewSampleSlot) {
+private fun BibleStage(
+    settings: AppSettings,
+    profile: OutputProfile,
+    output: PreviewOutputSize,
+    lowerThird: Boolean,
+    slot: PreviewSampleSlot,
+) {
+    // The profile's own subset, not the whole stack -- see [bibleTranslationPositions]. Narrowing
+    // an output to one translation used to leave the preview drawing all of them, so the picture
+    // beside the controls disagreed with the screen it stood for.
+    val stack = settings.bibleSettings.translationList()
+    val chosen = profile.bibleTranslationPositions(stack.size).mapNotNull(stack::getOrNull)
     // A shelf with no translations configured yet still has a Bible *style*, so the preview draws
     // the sample against stock settings rather than reporting "no translations" — the operator is
-    // here to see type, and the type is set whether or not a module is installed.
-    val translations = settings.bibleSettings.translationList()
-        .ifEmpty { listOf(BibleTranslationSettings()) }
+    // here to see type, and the type is set whether or not a module is installed. The same applies
+    // to a selection that has gone stale: something has to carry the type.
+    val translations = chosen.ifEmpty { listOf(BibleTranslationSettings()) }
     BiblePreviewPanel(
         settings = settings,
         target = if (lowerThird) BibleStyleTarget.LOWER_THIRD else BibleStyleTarget.FULL_SCREEN,
@@ -132,6 +144,14 @@ private fun SongStage(
         } else {
             lyricSections
         },
+        // The languages this profile shows, decided exactly as the screen decides them. Without
+        // these the preview fell back to the song-level setting and drew every language the sample
+        // carries, so narrowing an output to one changed the screen and not the picture of it.
+        //
+        // A profile with songs switched off keeps the song-level fallback rather than previewing
+        // nothing: the pane is still where its type is set, and type cannot be judged on a blank.
+        languageOverride = profile.songMode.takeIf { it != Constants.SONG_LANG_OFF },
+        languageSelection = profile.songTranslations,
         titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
     )

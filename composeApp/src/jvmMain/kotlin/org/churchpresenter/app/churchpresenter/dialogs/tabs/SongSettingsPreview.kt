@@ -63,6 +63,16 @@ internal fun SongPreviewPanel(
     modifier: Modifier = Modifier,
     /** The first of [sections] is the title slide, and the badge says so. */
     titleSlide: Boolean = false,
+    /**
+     * Which languages this picture stands for, as the output would decide them: the profile's own
+     * song mode, and its subset of the song's languages.
+     *
+     * Null defers to the song-level setting, which is what a preview with no output behind it
+     * wants. A profile passes its own, because a screen narrowed to one language drawing two in
+     * the preview is a picture of a screen that does not exist.
+     */
+    languageOverride: String? = null,
+    languageSelection: List<Int> = emptyList(),
 ) {
     val song = settings.songSettings
     val vertical = settings.projectionSettings.outputProfiles.any { it.isLowerThirdVertical }
@@ -91,7 +101,8 @@ internal fun SongPreviewPanel(
                 // output's own song mode overrides the song-level language setting wherever it is
                 // set -- and it always is -- so without this the preview showed a language the
                 // screen would not.
-                languageOverride = settings.songLanguageFor(target),
+                languageOverride = languageOverride ?: settings.songLanguageFor(target),
+                languageSelection = languageSelection,
             )
         }
         MarginGuide(

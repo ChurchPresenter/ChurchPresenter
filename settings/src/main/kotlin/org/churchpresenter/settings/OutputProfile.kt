@@ -110,3 +110,18 @@ data class OutputProfile(
      */
     val isLowerThirdVertical: Boolean get() = isLowerThird && previewHeight > previewWidth
 }
+
+/**
+ * Which of [count] stacked translations this profile actually draws, as positions in the stack.
+ *
+ * [bibleTranslations] is a list of positions where **empty means all of them**, including any added
+ * later, so an untouched profile follows the stack rather than freezing it. Positions past the end
+ * are ignored rather than counted: a settings file can outlive the translations it names.
+ *
+ * One definition because the preview and the screen must not disagree about it -- the Profiles
+ * tab's preview drew the whole stack whatever the picker said, so an operator narrowing an output
+ * to one translation watched all four keep appearing while the output itself was already correct.
+ */
+fun OutputProfile.bibleTranslationPositions(count: Int): List<Int> =
+    if (bibleTranslations.isEmpty()) (0 until count).toList()
+    else bibleTranslations.filter { it in 0 until count }

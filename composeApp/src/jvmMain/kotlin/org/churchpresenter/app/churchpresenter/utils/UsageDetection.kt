@@ -4,6 +4,7 @@ import org.churchpresenter.songchords.ChordTransposer
 
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.bibleTranslationPositions
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
@@ -47,10 +48,7 @@ internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List
     if (translationCount < 2) return false
     return outputs.any { profile ->
         if (!profile.showBible) return@any false
-        val shown =
-            if (profile.bibleTranslations.isEmpty()) translationCount
-            else profile.bibleTranslations.count { it in 0 until translationCount }
-        shown >= 2
+        profile.bibleTranslationPositions(translationCount).size >= 2
     }
 }
 
@@ -77,10 +75,7 @@ internal fun isSplitScreenBible(translationCount: Int, outputs: List<OutputProfi
     val selections = outputs
         .filter { it.showBible }
         .map { profile ->
-            val chosen =
-                if (profile.bibleTranslations.isEmpty()) (0 until translationCount).toList()
-                else profile.bibleTranslations.filter { it in 0 until translationCount }
-            chosen.toSet()
+            profile.bibleTranslationPositions(translationCount).toSet()
         }
         .filter { it.isNotEmpty() }
     return selections.distinct().size >= 2
