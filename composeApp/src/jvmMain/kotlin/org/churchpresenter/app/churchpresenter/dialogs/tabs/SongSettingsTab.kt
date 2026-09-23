@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -46,81 +45,27 @@ import org.churchpresenter.settings.SongNumberOffset
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
-/** How a row reads while the title slide is off: present, but plainly not in charge of anything. */
-private val ELEMENT_TAB_WIDTH = 104.dp
 private val SCOPE_BUTTON_WIDTH = 82.dp
 
 /** Wide enough for "Bottom Right" and the chevron, so no corner reads ellipsized. */
 private val CORNER_DROPDOWN_WIDTH = 118.dp
 private val NUMBER_OFFSET_FIELD_WIDTH = 56.dp
 
-/** Five tabs are wider than a narrowed dialog's styling pane, so past that they fold onto two rows. */
-private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
-
 /**
  * The Song tab of the settings dialog was retired once every control it held moved to the Profiles
  * tab -- a song slide's number/title/lyrics/look-ahead/next-section appearance is entirely styling,
  * and [org.churchpresenter.settings.SongSettings] has no content-only field of the kind
  * [org.churchpresenter.settings.BibleSettings]'s translation stack is for the Bible tab. What
- * remains in this file is shared with the Profiles tab's own Song pane: [SongElementRow]/
- * [SongElementOptions] and their helpers, kept here because that is where they have always lived.
+ * remains in this file is what the Profiles tab's own Song pane draws: [SongElementOptions] and
+ * its helpers, kept here because that is where they have always lived. The chip strip that used to
+ * sit above them went with the tab -- the pane has one of its own.
  */
-
-/** The element tabs, and the two things the lyrics carry that the other elements do not. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun SongElementRow(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    element: SongStyleElement,
-    onElementChange: (SongStyleElement) -> Unit,
-    target: SongStyleTarget,
-    /** Which language is being styled; the second is the lyrics and nothing else. */
-    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
-    /**
-     * The title slide's elements rather than the lyric slides'. What sits under the tabs changes
-     * with it: the title slide has no chunk, no language scope and no first-page/every-page
-     * question, only whether each element is on it at all.
-     */
-    titleSlideView: Boolean = false,
-) {
-    val song = settings.songSettings
-    // The lyrics and the title are the two things a bilingual song carries twice, so those are the
-    // tabs the second language offers -- and on the title slide, which has no lyrics, just the
-    // title. Kept rather than hidden: the row is where the panel says what it is pointed at, and a
-    // strip that vanished on one switch and came back on the other reads as a glitch.
-    val elements = when {
-        language.isTranslation && titleSlideView -> listOf(SongStyleElement.TITLE)
-        language.isTranslation -> SECOND_LANGUAGE_ELEMENTS
-        titleSlideView -> TITLE_SLIDE_ELEMENTS
-        else -> LYRIC_SLIDE_ELEMENTS
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        SegmentedButton(
-            items = elements.map { SegmentedButtonItem(it, it.label()) },
-            selectedValue = element,
-            onValueChange = onElementChange,
-            buttonWidth = ELEMENT_TAB_WIDTH,
-            buttonHeight = 34.dp,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            compactColumns = ELEMENT_TAB_COMPACT_COLUMNS,
-        )
-        Spacer(Modifier.weight(1f))
-    }
-    SongElementOptions(settings, onSettingsChange, element, target, language, titleSlideView)
-}
 
 /**
  * Everything under the element chips that belongs to the selected element -- what a slide holds,
  * which languages it shows, when the number and the title appear and where the number sits.
  *
- * Split from [SongElementRow] so the per-output Customize dialog can draw the same controls without
- * the chip strip, which it has one of its own. Two surfaces, one definition: a control added here
- * appears in both, which is the only way they stay in step.
+ * Split out so the Profiles tab's Song pane can draw these controls under its own chip strip.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
