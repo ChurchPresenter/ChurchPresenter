@@ -171,4 +171,58 @@ class ProfileHeaderTest {
             assertEquals(!before, get().profile().showSubtitles)
         }
     }
+
+    /**
+     * Every content switch, driven.
+     *
+     * Rendering a switch proves nothing about the lambda behind it -- JaCoCo scores each one as its
+     * own method, and a switch never clicked leaves its write uncovered and its wiring unproven. A
+     * row wired to the flag beside its own is exactly the mistake this catches, and reading the
+     * list does not.
+     *
+     * "Lower Third" is the streaming switch's caption, not the display mode's: the display mode is
+     * a segment rather than a toggle, so the two are told apart by role.
+     */
+    @Test
+    fun `every content switch flips its own flag`() {
+        val switches: List<Pair<String, (OutputProfile) -> Boolean>> = listOf(
+            "Pictures/Presentation" to { p -> p.showPictures },
+            "Media" to { p -> p.showMedia },
+            "Subtitles" to { p -> p.showSubtitles },
+            "Lower Third" to { p -> p.showStreaming },
+            "Announcements" to { p -> p.showAnnouncements },
+            "Web" to { p -> p.showWebsite },
+            "Canvas" to { p -> p.showCanvas },
+            "Q&A" to { p -> p.showQA },
+            "STT" to { p -> p.showSTT },
+            "Dictionary" to { p -> p.showDictionary },
+            "Background" to { p -> p.showFullscreenBackground },
+            "Lower Third Background" to { p -> p.showLowerThirdBackground },
+            "Bible Background" to { p -> p.showBibleBackground },
+            "Songs Background" to { p -> p.showSongsBackground },
+            "Song LA" to { p -> p.songLookAhead },
+        )
+        for ((label, read) in switches) {
+            profilesTab(doc()) { get ->
+                val before = read(get().profile())
+                contentSwitch(label).performClick()
+                waitForIdle()
+
+                assertEquals(!before, read(get().profile()), "$label must flip its own flag")
+            }
+        }
+    }
+
+    @Test
+    fun `flipping one switch leaves every other alone`() {
+        profilesTab(doc()) { get ->
+            val before = get().profile()
+            contentSwitch("Media").performClick()
+            waitForIdle()
+
+            val after = get().profile()
+            assertEquals(!before.showMedia, after.showMedia)
+            assertEquals(before.copy(showMedia = after.showMedia), after, "nothing else moved")
+        }
+    }
 }
