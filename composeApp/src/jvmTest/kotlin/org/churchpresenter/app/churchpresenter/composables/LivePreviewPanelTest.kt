@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
@@ -61,6 +62,12 @@ class LivePreviewPanelTest {
     /** The caret's content descriptions — the only handle the header row exposes. */
     private val HIDE = "Hide this preview"
     private val SHOW = "Show this preview"
+
+    /** Projection settings with one screen assigned a profile in [mode]. */
+    private fun projectionInMode(mode: String) = ProjectionSettings(
+        outputProfiles = listOf(OutputProfile(id = "under-test", displayMode = mode)),
+        screenAssignments = listOf(ScreenAssignment(activeProfileId = "under-test")),
+    )
 
     // ── Display counting / dev-fallback ───────────────────────────────────────────────────────
 
@@ -184,26 +191,29 @@ class LivePreviewPanelTest {
     @Test
     fun `each presenting mode's Live badge is gated by its own show flag`() = runComposeUiTest {
         val offCases = listOf(
-            Presenting.BIBLE to ScreenAssignment(bibleMode = Constants.SONG_LANG_OFF),
-            Presenting.LYRICS to ScreenAssignment(songMode = Constants.SONG_LANG_OFF),
-            Presenting.PICTURES to ScreenAssignment(showPictures = false),
-            Presenting.PRESENTATION to ScreenAssignment(showPictures = false),
-            Presenting.MEDIA to ScreenAssignment(showMedia = false),
-            Presenting.LOWER_THIRD to ScreenAssignment(showStreaming = false),
-            Presenting.ANNOUNCEMENTS to ScreenAssignment(showAnnouncements = false),
-            Presenting.WEBSITE to ScreenAssignment(showWebsite = false),
-            Presenting.CANVAS to ScreenAssignment(showCanvas = false),
-            Presenting.QA to ScreenAssignment(showQA = false),
-            Presenting.STT to ScreenAssignment(showSTT = false),
-            Presenting.DICTIONARY to ScreenAssignment(showDictionary = false),
+            Presenting.BIBLE to OutputProfile(bibleMode = Constants.SONG_LANG_OFF),
+            Presenting.LYRICS to OutputProfile(songMode = Constants.SONG_LANG_OFF),
+            Presenting.PICTURES to OutputProfile(showPictures = false),
+            Presenting.PRESENTATION to OutputProfile(showPictures = false),
+            Presenting.MEDIA to OutputProfile(showMedia = false),
+            Presenting.LOWER_THIRD to OutputProfile(showStreaming = false),
+            Presenting.ANNOUNCEMENTS to OutputProfile(showAnnouncements = false),
+            Presenting.WEBSITE to OutputProfile(showWebsite = false),
+            Presenting.CANVAS to OutputProfile(showCanvas = false),
+            Presenting.QA to OutputProfile(showQA = false),
+            Presenting.STT to OutputProfile(showSTT = false),
+            Presenting.DICTIONARY to OutputProfile(showDictionary = false),
         )
-        for ((mode, offAssignment) in offCases) {
+        for ((mode, offProfile) in offCases) {
             setContent {
                 MaterialTheme {
                     LivePreviewPanel(
                         presenterManager = PresenterManager().apply { setPresentingMode(mode) },
                         appSettings = AppSettings(
-                            projectionSettings = ProjectionSettings(screenAssignments = listOf(offAssignment))
+                            projectionSettings = ProjectionSettings(
+                                outputProfiles = listOf(offProfile.copy(id = "off")),
+                                screenAssignments = listOf(ScreenAssignment(activeProfileId = "off")),
+                            ),
                         ),
                     )
                 }
@@ -414,9 +424,7 @@ class LivePreviewPanelTest {
         val pm = PresenterManager()
         pm.setScreenLock(0, Presenting.BIBLE)
         val settings = AppSettings(
-            projectionSettings = ProjectionSettings(
-                screenAssignments = listOf(ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR))
-            )
+            projectionSettings = projectionInMode(Constants.DISPLAY_MODE_STAGE_MONITOR),
         )
         setContent {
             MaterialTheme {
@@ -442,10 +450,7 @@ class LivePreviewPanelTest {
             Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL to "Lower Third",
         )
         for ((mode, label) in cases) {
-            val settings = AppSettings(
-                projectionSettings =
-                    ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode)))
-            )
+            val settings = AppSettings(projectionSettings = projectionInMode(mode))
             setContent {
                 MaterialTheme {
                     LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
@@ -754,5 +759,167 @@ class LivePreviewPanelTest {
         // alongside the panel's own always-present content and Live badge.
         onNodeWithText("Screen 1").assertExists()
         onNodeWithText("Live").assertExists()
+    }
+
+    // ── The profile swap menu ──────────────────────────────────────────────────────────────────
+
+    private val SWAP = "Swap output profile"
+
+    /** Two named profiles, and one screen following the first. */
+    private fun twoProfiles(activeId: String? = "main") = AppSettings(
+        projectionSettings = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "main", name = "Auditorium"),
+                OutputProfile(
+                    id = "band",
+                    name = "Stream band",
+                    displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                ),
+            ),
+            screenAssignments = listOf(ScreenAssignment(activeProfileId = activeId)),
+        ),
+    )
+
+    /**
+     * The swap is offered from the preview tile itself, which is where the operator is watching.
+     *
+     * The point of putting it here rather than only in settings is that the swap happens mid-
+     * service -- between the congregational song and the choir item -- and opening a settings
+     * dialog to do it means the booth stops watching the output at exactly the moment it changes.
+     */
+    @Test
+    fun `an open preview offers the swap menu once a profile exists`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertExists()
+    }
+
+    @Test
+    fun `a document with no profiles at all draws no swap menu`() = runComposeUiTest {
+        // An empty menu on every tile would be clutter on the one panel that is on screen all
+        // service, so the control appears only once there is something to swap to. A fresh install
+        // always has the Default profile, so this is a document whose profiles were all deleted.
+        val empty = AppSettings(projectionSettings = ProjectionSettings(outputProfiles = emptyList()))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = empty)
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the menu lists every profile, plus a way back to none`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+
+        onNodeWithText("Auditorium").assertExists()
+        onNodeWithText("Stream band").assertExists()
+        onNodeWithText("None").assertExists()
+    }
+
+    @Test
+    fun `picking a profile points that output at it`() = runComposeUiTest {
+        var doc = twoProfiles()
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+        onNodeWithText("Stream band").performClick()
+        waitForIdle()
+
+        assertEquals("band", doc.projectionSettings.screenAssignments[0].activeProfileId)
+    }
+
+    @Test
+    fun `picking None clears the output's profile rather than leaving the old one`() = runComposeUiTest {
+        var doc = twoProfiles()
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+        onNodeWithText("None").performClick()
+        waitForIdle()
+
+        assertNull(doc.projectionSettings.screenAssignments[0].activeProfileId)
+    }
+
+    @Test
+    fun `a browser source output swaps its own profile and leaves the screen alone`() = runComposeUiTest {
+        // The three kinds of output are stored in three separate lists and the menu writes into
+        // whichever one this tile came from. Writing into the wrong list would repoint a monitor
+        // from a control that named a stream.
+        var doc = AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(
+                    OutputProfile(id = "main", name = "Auditorium"),
+                    OutputProfile(id = "band", name = "Stream band"),
+                ),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "main")),
+                browserSourceOutputs = listOf(ScreenAssignment(activeProfileId = "main")),
+            ),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        // The browser source tile is the second, so its menu is the last one in the tree.
+        onAllNodesWithContentDescription(SWAP).onLast().performClick()
+        waitForIdle()
+        onAllNodesWithText("Stream band").onLast().performClick()
+        waitForIdle()
+
+        assertEquals("band", doc.projectionSettings.browserSourceOutputs[0].activeProfileId)
+        assertEquals("main", doc.projectionSettings.screenAssignments[0].activeProfileId, "the screen is untouched")
+    }
+
+    @Test
+    fun `a collapsed preview hides the swap menu`() = runComposeUiTest {
+        // The collapsed row is one line, reserved for the output's name -- which is the only thing
+        // telling a stack of folded tiles apart.
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertExists()
+        onNodeWithContentDescription(HIDE).performClick()
+        waitForIdle()
+
+        onNodeWithContentDescription(SWAP).assertDoesNotExist()
     }
 }

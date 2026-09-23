@@ -110,6 +110,19 @@ internal fun ComposeUiTest.autoFitButtons(): SemanticsNodeInteractionCollection 
 // ── Actions ─────────────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Clicks the checkbox captioned [label] -- the `ToggleControl` the panes and the strip are built from.
+ *
+ * [scroll] off for a control on the strip under the preview: only the control column scrolls, and
+ * `performScrollTo` fails outright on a node with no scrollable ancestor rather than doing nothing.
+ */
+internal fun ComposeUiTest.toggleCheckbox(label: String, scroll: Boolean = true) {
+    val node = onNode(isToggleable() and hasText(label))
+    if (scroll) node.performScrollTo()
+    node.performClick()
+    waitForIdle()
+}
+
+/**
  * Retypes the number field currently displaying [showing], and asserts the field then displays what
  * was typed. That holds even for a value the field rejects: `NumberSettingsTextField` always shows
  * what you typed and only withholds the `onValueChange` callback when the value is out of range, so

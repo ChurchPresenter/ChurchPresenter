@@ -106,9 +106,13 @@ import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.search_clear
+import churchpresenter.composeapp.generated.resources.tooltip_dictionary_settings
 import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Cursor
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.dialogs.DictionarySettingsDialog
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.theme.components.DropdownSelector
@@ -145,6 +149,13 @@ fun DictionaryTab(
     var listWidthPx by remember(initialWidth) {
         mutableStateOf(with(density) { initialWidth.dp.toPx() })
     }
+
+    // How the dictionary looks on screen is one setting per install rather than something an output
+    // can differ on, so it is reached from the tab that shows the thing being styled -- the gear
+    // sits in the detail pane's action row beside Go Live, the way STTTab's does. Offered only
+    // where there is a document to edit: the tab is also composed with no settings at all in
+    // previews and tests.
+    var showDictionarySettings by remember { mutableStateOf(false) }
 
     Row(modifier = modifier) {
         DictionaryListPane(
@@ -202,6 +213,15 @@ fun DictionaryTab(
             getEntry = { number -> entryIndex[number] },
             onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
             onGoLive = onGoLive,
+            onOpenSettings = appSettings?.let { { showDictionarySettings = true } },
+        )
+    }
+
+    appSettings?.takeIf { showDictionarySettings }?.let { settings ->
+        DictionarySettingsDialog(
+            appSettings = settings,
+            onSettingsChange = { transform -> onSettingsChangeState.value(transform) },
+            onDismiss = { showDictionarySettings = false },
         )
     }
 }
@@ -477,6 +497,102 @@ private fun DictionaryDetailPane(
     getEntry: ((strongsNumber: String) -> StrongsEntry?)? = null,
     onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
+    /** Opens how the dictionary looks on screen. Absent where there is no document to edit. */
+    onOpenSettings: (() -> Unit)? = null,
+) {
+    Column(modifier = modifier) {
+        DictionaryDetailActionRow(
+            entry = entry,
+            canGoBack = canGoBack,
+            canGoForward = canGoForward,
+            onGoBack = onGoBack,
+            onGoForward = onGoForward,
+            dictLanguage = dictLanguage,
+            onToggleDictLanguage = onToggleDictLanguage,
+            onAddToSchedule = onAddToSchedule,
+            onGoLive = onGoLive,
+            onOpenSettings = onOpenSettings,
+        )
+
+        HorizontalDivider()
+
+        if (entry == null) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(Res.string.dictionary_select_entry),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(32.dp),
+                )
+            }
+        } else {
+            // The scrolling scaffold stays here rather than travelling with either section:
+            // `scrollState` is the only thing the column and the scrollbar share, so keeping both
+            // in one place leaves the two extracted sections sharing no state at all.
+            val scrollState = rememberScrollState()
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    StrongsEntrySummary(entry = entry, onStrongsClick = onWordClick)
+                    InScriptureSection(
+                        highlightedNumber = entry.number,
+                        interlinearVerses = interlinearVerses,
+                        totalInterlinearCount = totalInterlinearCount,
+                        isInterlinearLoading = isInterlinearLoading,
+                        interlinearDisplayLimit = interlinearDisplayLimit,
+                        onShowMore = onShowMore,
+                        cardBookFilter = cardBookFilter,
+                        cardChapterFilter = cardChapterFilter,
+                        cardAvailableBooks = cardAvailableBooks,
+                        cardAvailableChapters = cardAvailableChapters,
+                        onFilterCardsByBook = onFilterCardsByBook,
+                        onFilterCardsByChapter = onFilterCardsByChapter,
+                        getVerseText = getVerseText,
+                        getBookName = getBookName,
+                        onWordClick = onWordClick,
+                        onVerseClick = onVerseClick,
+                        getEntry = getEntry,
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(scrollState),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The detail pane's toolbar: history, the dictionary's own language, and the two live actions.
+ *
+ * Its own composable because the pane it sits in is long enough to be over detekt's `LongMethod`
+ * threshold with it inline, and because the gear below belongs beside Go Live rather than in a
+ * toolbar of its own -- an earlier attempt floated it over the pane's top-right corner, where its
+ * bounds covered Go Live and swallowed clicks meant for it.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun DictionaryDetailActionRow(
+    entry: StrongsEntry?,
+    canGoBack: Boolean,
+    canGoForward: Boolean,
+    onGoBack: () -> Unit,
+    onGoForward: () -> Unit,
+    dictLanguage: String,
+    onToggleDictLanguage: () -> Unit,
+    onAddToSchedule: ((StrongsEntry) -> Unit)?,
+    onGoLive: ((StrongsEntry) -> Unit)?,
+    onOpenSettings: (() -> Unit)?,
 ) {
     val addScheduleStr = stringResource(Res.string.add_to_schedule)
     val goLiveStr = stringResource(Res.string.go_live)
@@ -484,17 +600,14 @@ private fun DictionaryDetailPane(
     val forwardStr = stringResource(Res.string.dictionary_forward)
     val switchLangStr = stringResource(Res.string.dictionary_switch_language)
 
-    Column(modifier = modifier) {
-        // Action toolbar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Back / Forward history buttons
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             ActionIconButton(
                 onClick = onGoBack,
                 enabled = canGoBack,
@@ -546,6 +659,17 @@ private fun DictionaryDetailPane(
                     tooltipText = addScheduleStr
                 )
             }
+            if (onOpenSettings != null) {
+                ActionIconButton(
+                    onClick = onOpenSettings,
+                    tooltipText = stringResource(Res.string.tooltip_dictionary_settings),
+                    icon = Icons.Default.Tune,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+            // Go Live stays last, as it does on every other tab: it is the button the operator
+            // reaches for under pressure, so it keeps the same end of the row everywhere.
             if (onGoLive != null) {
                 GoLiveButton(
                     onClick = { entry?.let { onGoLive(it) } },
@@ -553,202 +677,201 @@ private fun DictionaryDetailPane(
                     tooltipText = goLiveStr
                 )
             }
-            } // end right-side Row
         }
+    }
+}
 
-        HorizontalDivider()
+/** The entry itself: its number and language, the original word, and what it means. */
+@Composable
+private fun StrongsEntrySummary(
+    entry: StrongsEntry,
+    onStrongsClick: ((String) -> Unit)?,
+) {
+    val numberColor = if (entry.isHebrew) MaterialTheme.semantic.hebrew else MaterialTheme.semantic.greek
+    val languageLabel = if (entry.isHebrew)
+        stringResource(Res.string.dictionary_filter_hebrew).uppercase()
+    else
+        stringResource(Res.string.dictionary_filter_greek).uppercase()
 
-        if (entry == null) {
-            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(Res.string.dictionary_select_entry),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(32.dp),
-                )
-            }
-        } else {
-        val numberColor = if (entry.isHebrew) MaterialTheme.semantic.hebrew else MaterialTheme.semantic.greek
-        val languageLabel = if (entry.isHebrew)
-            stringResource(Res.string.dictionary_filter_hebrew).uppercase()
-        else
-            stringResource(Res.string.dictionary_filter_greek).uppercase()
-
-        val scrollState = rememberScrollState()
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                // Header: number + language badge
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Text(
-                        text = entry.number,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = numberColor,
-                    )
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = numberColor.copy(alpha = 0.12f),
-                    ) {
-                        Text(
-                            text = languageLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = numberColor,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        )
-                    }
-                }
-
-                HorizontalDivider()
-
-                // Original word — large display
-                Text(
-                    text = entry.word,
-                    fontSize = 52.sp,
-                    fontWeight = FontWeight.Light,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 60.sp,
-                )
-
-                // Transliteration + pronunciation
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    DetailRow(
-                        label = stringResource(Res.string.dictionary_transliteration),
-                        value = entry.transliteration,
-                    )
-                    DetailRow(
-                        label = stringResource(Res.string.dictionary_pronunciation),
-                        value = entry.pronunciation,
-                    )
-                }
-
-                HorizontalDivider()
-
-                // Definition
-                DetailSection(
-                    label = stringResource(Res.string.dictionary_definition),
-                    body = entry.definition,
-                    onStrongsClick = onWordClick,
-                )
-
-                // KJV Usage (only if present)
-                if (entry.kjvUsage.isNotBlank()) {
-                    DetailSection(
-                        label = stringResource(Res.string.dictionary_kjv_usage),
-                        body = entry.kjvUsage,
-                        onStrongsClick = onWordClick,
-                    )
-                }
-
-                // In Scripture section
-                HorizontalDivider()
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.dictionary_in_scripture_header),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (!isInterlinearLoading && cardAvailableBooks.size > 1) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            InScriptureBookDropdown(
-                                allBooksLabel = stringResource(Res.string.dictionary_filter_all),
-                                selectedBookId = cardBookFilter,
-                                availableBooks = cardAvailableBooks,
-                                getBookName = getBookName,
-                                onSelect = onFilterCardsByBook,
-                            )
-                            if (cardBookFilter != null && cardAvailableChapters.size > 1) {
-                                InScriptureChapterDropdown(
-                                    allChaptersLabel = stringResource(Res.string.dictionary_filter_all),
-                                    selectedChapter = cardChapterFilter,
-                                    availableChapters = cardAvailableChapters,
-                                    onSelect = onFilterCardsByChapter,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (isInterlinearLoading) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                        )
-                        Text(
-                            text = stringResource(Res.string.dictionary_in_scripture_loading),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                } else if (interlinearVerses.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.dictionary_in_scripture_none),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else {
-                    Text(
-                        text = stringResource(Res.string.dictionary_in_scripture_count, totalInterlinearCount),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        interlinearVerses.take(interlinearDisplayLimit).forEach { verse ->
-                            InterlinearVerseRow(
-                                interlinearVerse = verse,
-                                highlightedNumber = entry.number,
-                                getVerseText = getVerseText,
-                                getBookName = getBookName,
-                                onWordClick = onWordClick,
-                                onVerseClick = onVerseClick,
-                                getEntry = getEntry,
-                            )
-                        }
-                    }
-                    if (interlinearVerses.size > interlinearDisplayLimit) {
-                        val remaining = interlinearVerses.size - interlinearDisplayLimit
-                        TextButton(shape = RoundedCornerShape(6.dp), onClick = onShowMore) {
-                            Text(
-                                text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            VerticalScrollbar(
-                adapter = rememberScrollbarAdapter(scrollState),
-                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+    // Header: number + language badge
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = entry.number,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = numberColor,
+        )
+        Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = numberColor.copy(alpha = 0.12f),
+        ) {
+            Text(
+                text = languageLabel,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = numberColor,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }
-        } // end else (entry != null)
+    }
+
+    HorizontalDivider()
+
+    // Original word — large display
+    Text(
+        text = entry.word,
+        fontSize = 52.sp,
+        fontWeight = FontWeight.Light,
+        color = MaterialTheme.colorScheme.onSurface,
+        lineHeight = 60.sp,
+    )
+
+    // Transliteration + pronunciation
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        DetailRow(
+            label = stringResource(Res.string.dictionary_transliteration),
+            value = entry.transliteration,
+        )
+        DetailRow(
+            label = stringResource(Res.string.dictionary_pronunciation),
+            value = entry.pronunciation,
+        )
+    }
+
+    HorizontalDivider()
+
+    DetailSection(
+        label = stringResource(Res.string.dictionary_definition),
+        body = entry.definition,
+        onStrongsClick = onStrongsClick,
+    )
+
+    // KJV Usage (only if present)
+    if (entry.kjvUsage.isNotBlank()) {
+        DetailSection(
+            label = stringResource(Res.string.dictionary_kjv_usage),
+            body = entry.kjvUsage,
+            onStrongsClick = onStrongsClick,
+        )
+    }
+}
+
+/**
+ * Where this entry's word appears in scripture, with the book and chapter filters over that list.
+ *
+ * Takes [highlightedNumber] rather than the entry: the number is all the verse rows need, and
+ * passing it keeps this section independent of the entry it was opened from.
+ */
+@Composable
+private fun InScriptureSection(
+    highlightedNumber: String,
+    interlinearVerses: List<InterlinearVerse>,
+    totalInterlinearCount: Int,
+    isInterlinearLoading: Boolean,
+    interlinearDisplayLimit: Int,
+    onShowMore: () -> Unit,
+    cardBookFilter: Int?,
+    cardChapterFilter: Int?,
+    cardAvailableBooks: List<Int>,
+    cardAvailableChapters: List<Int>,
+    onFilterCardsByBook: (Int?) -> Unit,
+    onFilterCardsByChapter: (Int?) -> Unit,
+    getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)?,
+    getBookName: ((bookId: Int) -> String?)?,
+    onWordClick: ((String) -> Unit)?,
+    onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)?,
+    getEntry: ((strongsNumber: String) -> StrongsEntry?)?,
+) {
+    HorizontalDivider()
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = stringResource(Res.string.dictionary_in_scripture_header),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (!isInterlinearLoading && cardAvailableBooks.size > 1) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                InScriptureBookDropdown(
+                    allBooksLabel = stringResource(Res.string.dictionary_filter_all),
+                    selectedBookId = cardBookFilter,
+                    availableBooks = cardAvailableBooks,
+                    getBookName = getBookName,
+                    onSelect = onFilterCardsByBook,
+                )
+                if (cardBookFilter != null && cardAvailableChapters.size > 1) {
+                    InScriptureChapterDropdown(
+                        allChaptersLabel = stringResource(Res.string.dictionary_filter_all),
+                        selectedChapter = cardChapterFilter,
+                        availableChapters = cardAvailableChapters,
+                        onSelect = onFilterCardsByChapter,
+                    )
+                }
+            }
+        }
+    }
+
+    if (isInterlinearLoading) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Text(
+                text = stringResource(Res.string.dictionary_in_scripture_loading),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    } else if (interlinearVerses.isEmpty()) {
+        Text(
+            text = stringResource(Res.string.dictionary_in_scripture_none),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    } else {
+        Text(
+            text = stringResource(Res.string.dictionary_in_scripture_count, totalInterlinearCount),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            interlinearVerses.take(interlinearDisplayLimit).forEach { verse ->
+                InterlinearVerseRow(
+                    interlinearVerse = verse,
+                    highlightedNumber = highlightedNumber,
+                    getVerseText = getVerseText,
+                    getBookName = getBookName,
+                    onWordClick = onWordClick,
+                    onVerseClick = onVerseClick,
+                    getEntry = getEntry,
+                )
+            }
+        }
+        if (interlinearVerses.size > interlinearDisplayLimit) {
+            val remaining = interlinearVerses.size - interlinearDisplayLimit
+            TextButton(shape = RoundedCornerShape(6.dp), onClick = onShowMore) {
+                Text(
+                    text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
     }
 }
 

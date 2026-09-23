@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.BibleSettings
@@ -53,6 +54,34 @@ class OffscreenOutputContentRenderTest {
      * and a quarter of the pixels.
      */
     private val screen = Modifier.size(960.dp, 540.dp)
+
+    /**
+     * An assignment pointing at a profile in [mode], folded into [settings]'s output profiles.
+     *
+     * The profile carries [settings]'s own `bibleSettings`/`songSettings` as its styling -- the
+     * band height is a style field, not one of the content fields resolution keeps from the global
+     * document, so a profile with no styling of its own would resolve to the default percent
+     * regardless of what the caller configured.
+     */
+    private fun assignmentInMode(
+        mode: String,
+        settings: AppSettings = AppSettings(),
+    ): Pair<ScreenAssignment, AppSettings> {
+        val assignment = ScreenAssignment(activeProfileId = "under-test")
+        val withProfile = settings.copy(
+            projectionSettings = settings.projectionSettings.copy(
+                outputProfiles = listOf(
+                    OutputProfile(
+                        id = "under-test",
+                        displayMode = mode,
+                        bibleSettings = settings.bibleSettings,
+                        songSettings = settings.songSettings,
+                    ),
+                ),
+            ),
+        )
+        return assignment to withProfile
+    }
 
     private fun verse(text: String) = SelectedVerse(
         translationFileName = "",
@@ -202,9 +231,11 @@ class OffscreenOutputContentRenderTest {
             onNodeWithText("That whosoever believeth in him", substring = true).assertDoesNotExist()
         }
 
+        val (stageAssignment, stageSettings) = assignmentInMode(Constants.DISPLAY_MODE_STAGE_MONITOR)
         render(
             mode = Presenting.BIBLE,
-            assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+            assignment = stageAssignment,
+            settings = stageSettings,
             seed = seed,
         ) {
             onNodeWithText("That whosoever believeth in him", substring = true)
@@ -292,10 +323,14 @@ class OffscreenOutputContentRenderTest {
     /** Where the verse block starts on [kind]'s output, with [percent] configured for the Bible. */
     private fun bibleTextTop(kind: OffscreenOutputKind, percent: Int): Float {
         var top = 0f
+        val (assignment, settings) = assignmentInMode(
+            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+            AppSettings(bibleSettings = BibleSettings(lowerThirdHeightPercent = percent)),
+        )
         render(
             mode = Presenting.BIBLE,
-            assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
-            settings = AppSettings(bibleSettings = BibleSettings(lowerThirdHeightPercent = percent)),
+            assignment = assignment,
+            settings = settings,
             kind = kind,
             seed = { setDisplayedVerses(listOf(verse("$longVerse $longVerse $longVerse"))) },
         ) {
@@ -308,16 +343,20 @@ class OffscreenOutputContentRenderTest {
     /** The same for lyrics, whose lower third defaults to one line at a time — so verse mode. */
     private fun songTextTop(kind: OffscreenOutputKind, percent: Int, biblePercent: Int = 33): Float {
         var top = 0f
-        render(
-            mode = Presenting.LYRICS,
-            assignment = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
-            settings = AppSettings(
+        val (assignment, settings) = assignmentInMode(
+            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+            AppSettings(
                 bibleSettings = BibleSettings(lowerThirdHeightPercent = biblePercent),
                 songSettings = SongSettings(
                     lowerThirdHeightPercent = percent,
                     lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE,
                 ),
             ),
+        )
+        render(
+            mode = Presenting.LYRICS,
+            assignment = assignment,
+            settings = settings,
             kind = kind,
             seed = { setDisplayedLyricSection(LyricSection(type = "verse", lines = sixLines)) },
         ) {

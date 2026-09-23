@@ -14,12 +14,14 @@ import org.churchpresenter.settings.utils.Constants
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -27,7 +29,6 @@ import kotlinx.serialization.json.jsonPrimitive
 private const val LOWER_THIRD_HEIGHT_KEY = "lowerThirdHeightPercent"
 
 private const val VERSION_HIDDEN_TABS = 5
-private const val VERSION_SCREEN_ASSIGNMENTS = 6
 
 /** The Schedule toolbar gained a Calendar button that starts hidden. */
 private const val VERSION_CALENDAR_BUTTON = 11
@@ -105,7 +106,33 @@ class SettingsManager {
         8 to ::migrateLowerThirdHeight,
         9 to ::migrateSongNumberCorner,
         10 to ::migrateSparseOutputOverrides,
+        12 to ::migrateOutputProfiles,
+        13 to ::migrateDictionaryToGlobal,
     )
+
+    /**
+     * Lifts a profile's own dictionary styling back onto the document, which now owns it alone.
+     *
+     * The dictionary's look moved out of [OutputProfile] and off the settings dialog entirely: it
+     * is edited from the gear on the Dictionary tab now, the way the STT tab has always styled
+     * itself, and there is one of it per install rather than one per output. A document written
+     * while profiles still carried their own would otherwise lose that styling silently on the next
+     * load -- the field is gone from the type, so the decoder simply drops the key.
+     *
+     * The first profile that differs from the document wins. There is no merging to be done between
+     * several: they are alternatives, and the document's own copy is what every output that never
+     * customized it was already showing.
+     */
+    private fun migrateDictionaryToGlobal(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val profiles = root["projectionSettings"]?.jsonObject?.get("outputProfiles")?.jsonArray ?: return raw
+        val documentCopy = root["dictionarySettings"]?.jsonObject
+        val lifted = profiles
+            .mapNotNull { (it as? JsonObject)?.get("dictionarySettings") as? JsonObject }
+            .firstOrNull { it != documentCopy }
+            ?: return raw
+        return JsonObject(root + ("dictionarySettings" to lifted)).toString()
+    }
 
     fun loadSettings(): AppSettings {
         cachedSettings?.let { return it }
@@ -173,27 +200,12 @@ class SettingsManager {
             // a button nobody asked for.
             settings = settings.copy(hiddenScheduleButtons = settings.hiddenScheduleButtons + "CALENDAR")
         }
-        if (fromVersion < VERSION_SCREEN_ASSIGNMENTS) {
-            // The primary/secondary bible pair became an ordered list of any length. Typed rather
-            // than raw, because the conversion is a field-by-field restructure the data class
-            // already knows how to do. The old fields are left in the document on purpose so a
-            // downgrade still finds a configured bible.
-            //
-            // Only the *output* half of that conversion belongs behind this version gate. The stack
-            // itself is repaired by `repaired()` on every load, whatever the version says.
-            settings = settings.copy(
-                projectionSettings = settings.projectionSettings.copy(
-                    screenAssignments = settings.projectionSettings.screenAssignments
-                        .map(::migrateOutputTranslations),
-                    // Browser sources are the same ScreenAssignment shape driven by the same UI, so
-                    // they carry the same legacy mode and need the same conversion. Left out, a
-                    // stream feed set to one language kept a mode the new code cannot read and
-                    // silently started showing every translation stacked.
-                    browserSourceOutputs = settings.projectionSettings.browserSourceOutputs
-                        .map(::migrateOutputTranslations),
-                ),
-            )
-        }
+        // The primary/secondary-bible output shorthand ("primary"/"secondary" bibleMode, converted
+        // to a position in the stack) used to be migrated here as a typed, per-[ScreenAssignment]
+        // step gated on `fromVersion < 6`. An output no longer carries `bibleMode` at all -- that
+        // field now lives only on [OutputProfile] -- so the conversion moved into
+        // [migrateOutputProfiles] (raw-JSON, version 12) itself, which runs before typed decode and
+        // so is the last point anything can still read the field off an assignment's own JSON.
         return settings.copy(settingsVersion = CURRENT_SETTINGS_VERSION).repaired()
     }
 
@@ -218,21 +230,6 @@ class SettingsManager {
             bibleSettings = bibleSettings.migrateTranslations(),
             songSettings = songSettings.migrateSongNumberStyle().migrateElementPositions(),
         )
-
-    /**
-     * An output used to name which of two bibles it showed. With a stack of any length it names
-     * positions instead, so "primary" becomes position 0 and "secondary" position 1. Everything else
-     * — "off", and "both" meaning all of them — is already expressed by an empty list plus the
-     * unchanged on/off flag.
-     */
-    private fun migrateOutputTranslations(assignment: ScreenAssignment): ScreenAssignment =
-        when (assignment.bibleMode) {
-            Constants.SONG_LANG_PRIMARY ->
-                assignment.copy(bibleMode = Constants.SONG_LANG_BOTH, bibleTranslations = listOf(0))
-            Constants.SONG_LANG_SECONDARY ->
-                assignment.copy(bibleMode = Constants.SONG_LANG_BOTH, bibleTranslations = listOf(1))
-            else -> assignment
-        }
 
     /** Reads the document's schema version without decoding it; absent or unparseable means 0
      * (pre-versioning), which runs the full migration chain — the pre-versioning behaviour. */
@@ -636,6 +633,161 @@ class SettingsManager {
                         if (key != "screenAssignments") put(key, value)
                     }
                     put("screenAssignments", JsonArray(assignments.map { slimmed(it.jsonObject) }))
+                },
+            )
+        }.toString()
+    }
+
+    /**
+     * Schema version 12. An output no longer carries its own display mode, content selection or
+     * style overrides at all -- it only ever *assigns* an [OutputProfile]. This creates one profile
+     * per existing output (screen, Browser Source, NDI), seeded from exactly what that output drew
+     * before this version -- its own former `displayMode`/`bibleMode`/`songMode`/`show*` fields, and
+     * its former sparse override (already normalized to the post-[migrateSparseOutputOverrides]
+     * shape) merged onto the global document -- and points that output at its new profile. Nothing
+     * any existing output shows changes across this migration; consolidating near-identical profiles
+     * afterward is left to the operator, not attempted here, because collapsing two outputs into one
+     * profile is only safe when every one of their fields agrees, and getting that wrong would be a
+     * silent visual change on upgrade.
+     *
+     * A brand-new install never runs this -- it has no `settings.json` to migrate -- and instead
+     * gets its one factory profile from [ProjectionSettings]'s own default.
+     */
+    /** Each override key and the global section it is a difference from. */
+    private val outputProfileOverrideCategories = listOf(
+        "songOverride" to "songSettings",
+        "bibleOverride" to "bibleSettings",
+        "backgroundOverride" to "backgroundSettings",
+        "stageMonitorOverride" to "stageMonitorSettings",
+        // No `dictionaryOverride`: a profile has no dictionary styling to carry any more, so an old
+        // per-output dictionary customization has nowhere to land. The document's own copy is what
+        // every output that never customized it already showed, and is now what all of them show.
+    )
+
+    /** What used to live directly on an assignment and now lives on its profile instead. */
+    private val outputProfileOwnKeys = setOf(
+        "displayMode", "bibleMode", "bibleTranslations", "songMode", "songTranslations",
+        "showPictures", "showMedia", "showSubtitles", "showStreaming", "showAnnouncements",
+        "showWebsite", "songLookAhead", "showChords", "showQA", "showSTT", "showDictionary",
+        "showCanvas", "showFullscreenBackground", "showLowerThirdBackground",
+        "showBibleBackground", "showSongsBackground",
+    )
+
+    /**
+     * A document old enough to still carry the pre-stack "primary"/"secondary" `bibleMode`
+     * shorthand is normalized here rather than relying on the old (now-removed) typed step that
+     * used to run after decode: by then an assignment's `bibleMode` field is gone from the type
+     * entirely, so this raw step is the last point anything can still read it. See
+     * [Constants.SONG_LANG_PRIMARY]/[Constants.SONG_LANG_SECONDARY].
+     */
+    private fun legacyBibleModeFields(assignment: JsonObject): Map<String, JsonElement> =
+        when ((assignment["bibleMode"] as? JsonPrimitive)?.contentOrNull) {
+            Constants.SONG_LANG_PRIMARY -> mapOf(
+                "bibleMode" to JsonPrimitive(Constants.SONG_LANG_BOTH),
+                "bibleTranslations" to JsonArray(listOf(JsonPrimitive(0))),
+            )
+            Constants.SONG_LANG_SECONDARY -> mapOf(
+                "bibleMode" to JsonPrimitive(Constants.SONG_LANG_BOTH),
+                "bibleTranslations" to JsonArray(listOf(JsonPrimitive(1))),
+            )
+            else -> emptyMap()
+        }
+
+    /** [assignment]'s resolved styling and behavior, as a new profile named [label]. */
+    private fun migratedOutputProfile(assignment: JsonObject, id: String, label: String, root: JsonObject): JsonObject {
+        val normalizedBibleFields = legacyBibleModeFields(assignment)
+        fun globalTree(name: String): JsonObject = root[name]?.jsonObject ?: JsonObject(emptyMap())
+        return buildJsonObject {
+            put("id", JsonPrimitive(id))
+            put("name", JsonPrimitive("Migrated — $label"))
+            outputProfileOwnKeys.forEach { key ->
+                (normalizedBibleFields[key] ?: assignment[key])?.let { put(key, it) }
+            }
+            outputProfileOverrideCategories.forEach { (overrideKey, globalKey) ->
+                val override = assignment[overrideKey] as? JsonObject
+                val global = globalTree(globalKey)
+                val resolved = if (override != null && override.isNotEmpty()) mergeObjects(global, override) else global
+                put(globalKey, resolved)
+            }
+        }
+    }
+
+    /** [assignment] with its behavioral fields dropped and [profileId] assigned in their place. */
+    private fun slimmedToProfileReference(assignment: JsonObject, profileId: String): JsonObject = buildJsonObject {
+        assignment.forEach { (key, value) ->
+            if (key !in outputProfileOwnKeys && outputProfileOverrideCategories.none { it.first == key }) {
+                put(key, value)
+            }
+        }
+        put("activeProfileId", JsonPrimitive(profileId))
+    }
+
+    /**
+     * Schema version 12. An output no longer carries its own display mode, content selection or
+     * style overrides at all -- it only ever *assigns* an [OutputProfile]. This creates one profile
+     * per existing output (screen, Browser Source, NDI), seeded from exactly what that output drew
+     * before this version -- its own former `displayMode`/`bibleMode`/`songMode`/`show*` fields, and
+     * its former sparse override (already normalized to the post-[migrateSparseOutputOverrides]
+     * shape) merged onto the global document -- and points that output at its new profile. Nothing
+     * any existing output shows changes across this migration; consolidating near-identical profiles
+     * afterward is left to the operator, not attempted here, because collapsing two outputs into one
+     * profile is only safe when every one of their fields agrees, and getting that wrong would be a
+     * silent visual change on upgrade.
+     *
+     * A brand-new install never runs this -- it has no `settings.json` to migrate -- and instead
+     * gets its one factory profile from [ProjectionSettings]'s own default.
+     */
+    private fun migrateOutputProfiles(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"]?.jsonObject ?: return raw
+        if ("outputProfiles" in projection) return raw
+
+        var profileCounter = 0
+        val newProfiles = mutableListOf<JsonObject>()
+
+        fun migrateList(assignments: JsonArray, kindLabel: String, nameKey: String): JsonArray {
+            val migrated = assignments.mapIndexed { index, element ->
+                val assignment = element.jsonObject
+                profileCounter++
+                val profileId = "profile$profileCounter"
+                val ownName = (assignment[nameKey] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }
+                val label = ownName ?: "$kindLabel ${index + 1}"
+
+                newProfiles.add(migratedOutputProfile(assignment, profileId, label, root))
+                slimmedToProfileReference(assignment, profileId)
+            }
+            return JsonArray(migrated)
+        }
+
+        val migratedScreens = migrateList(
+            (projection["screenAssignments"] as? JsonArray) ?: JsonArray(emptyList()), "Screen", "screenName",
+        )
+        val migratedBrowser = migrateList(
+            (projection["browserSourceOutputs"] as? JsonArray) ?: JsonArray(emptyList()),
+            "Browser Source",
+            "browserSourceName",
+        )
+        val migratedNdi = migrateList(
+            (projection["ndiOutputs"] as? JsonArray) ?: JsonArray(emptyList()), "NDI Output", "ndiName",
+        )
+
+        return buildJsonObject {
+            root.forEach { (key, value) -> if (key != "projectionSettings") put(key, value) }
+            put(
+                "projectionSettings",
+                buildJsonObject {
+                    projection.forEach { (key, value) ->
+                        when (key) {
+                            "screenAssignments" -> put(key, migratedScreens)
+                            "browserSourceOutputs" -> put(key, migratedBrowser)
+                            "ndiOutputs" -> put(key, migratedNdi)
+                            else -> put(key, value)
+                        }
+                    }
+                    if ("screenAssignments" !in projection) put("screenAssignments", migratedScreens)
+                    if ("browserSourceOutputs" !in projection) put("browserSourceOutputs", migratedBrowser)
+                    if ("ndiOutputs" !in projection) put("ndiOutputs", migratedNdi)
+                    put("outputProfiles", JsonArray(newProfiles))
                 },
             )
         }.toString()

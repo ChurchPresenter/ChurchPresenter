@@ -3,17 +3,14 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,39 +26,33 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_screen_geometry
-import churchpresenter.composeapp.generated.resources.customize_screen_geometry_unknown
-import churchpresenter.composeapp.generated.resources.customize_screen_heading
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
-import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The Customize dialog's left rail: the category list, and the card naming the screen it edits.
+ * The Profiles tab's left rail: the category list.
  *
  * Split out of `ProjectionCustomizeDialog.kt` when the dialog grew its third column — the rail, the
  * body and the shell are three separate pictures, and one file holding all of them was past
- * detekt's `TooManyFunctions` threshold as well as past what is comfortable to read.
+ * detekt's `TooManyFunctions` threshold as well as past what is comfortable to read. It used to
+ * also carry a card naming the profile and its display mode, at the foot of the rail -- dropped as
+ * a duplicate of what `ProfileHeader` already states at the top of the tab.
  */
 
 private val RAIL_WIDTH = 176.dp
-
-private val OVERRIDDEN_DOT = 6.dp
 
 private val CAPTION_SIZE = 10.sp
 
 private val CAPTION_TRACKING = 0.9.sp
 
-/** The left rail: one row per category, dotted where this output has settings of its own. */
+/** The left rail: one row per category. */
 @Composable
 internal fun CustomizeRail(
     panes: List<CustomizePane>,
     selected: CustomizePane,
-    assignment: ScreenAssignment,
-    screenLabel: String,
     onSelect: (CustomizePane) -> Unit,
 ) {
     Column(
@@ -76,12 +67,9 @@ internal fun CustomizeRail(
             CustomizeRailRow(
                 pane = pane,
                 selected = pane == selected,
-                overridden = pane.isOverridden(assignment),
                 onSelect = { onSelect(pane) },
             )
         }
-        Spacer(modifier = Modifier.weight(1f))
-        CustomizeScreenCard(assignment, screenLabel)
     }
 }
 
@@ -89,7 +77,6 @@ internal fun CustomizeRail(
 private fun CustomizeRailRow(
     pane: CustomizePane,
     selected: Boolean,
-    overridden: Boolean,
     onSelect: () -> Unit,
 ) {
     val ink = if (selected) MaterialTheme.colorScheme.onSurface
@@ -115,63 +102,6 @@ private fun CustomizeRailRow(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
-        )
-        // A screen with settings of its own for this category is worth seeing without opening it,
-        // which is what the dot is.
-        if (overridden) {
-            Box(
-                modifier = Modifier
-                    .size(OVERRIDDEN_DOT)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape),
-            )
-        }
-    }
-}
-
-/**
- * Which screen this dialog is editing, at the foot of the rail.
- *
- * The header already carries the name, but the header is a long way from the controls and reads as
- * the dialog's title rather than as a fact about the output. The geometry and the display mode are
- * the two things that decide what the controls above even mean — a lower third has a band, a full
- * screen does not — so they are worth stating where they can be glanced at.
- */
-@Composable
-private fun CustomizeScreenCard(assignment: ScreenAssignment, screenLabel: String) {
-    val mode = displayModeLabel(assignment.displayMode)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(9.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        CustomizeCaption(stringResource(Res.string.customize_screen_heading))
-        Text(
-            text = screenLabel,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            // A DeckLink device and an unassigned slot report no bounds, so they name the mode
-            // alone rather than claiming a 0 × 0 screen.
-            text = if (assignment.targetBoundsW > 0 && assignment.targetBoundsH > 0) {
-                stringResource(
-                    Res.string.customize_screen_geometry,
-                    assignment.targetBoundsW,
-                    assignment.targetBoundsH,
-                    mode,
-                )
-            } else {
-                stringResource(Res.string.customize_screen_geometry_unknown, mode)
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
         )
     }
 }

@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
@@ -33,7 +33,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 
 /**
  * Draws whatever [mode] means for one output: the dispatch from [Presenting] to the matching
- * presenter, with [screenAssignment] deciding visibility, layout and language for that output.
+ * presenter, with [profile] deciding visibility, layout and language for that output.
  *
  * Shared by every output — the per-screen windows, the DeckLink fill and key surfaces and the
  * browser-source overlays — which each supply their own Window/Crossfade wrapper and differ only
@@ -45,7 +45,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 @Composable
 internal fun PresenterModeContent(
     mode: Presenting,
-    screenAssignment: ScreenAssignment,
+    profile: OutputProfile,
     presenterManager: PresenterManager,
     appSettings: AppSettings,
     mediaViewModel: MediaViewModel,
@@ -104,52 +104,52 @@ internal fun PresenterModeContent(
     ) {
     when (mode) {
         Presenting.BIBLE ->
-            if (screenAssignment.showBible) {
+            if (profile.showBible) {
                 BiblePresenter(
-                    modifier = if (screenAssignment.isLowerThird) {
+                    modifier = if (profile.isLowerThird) {
                         Modifier
                     } else {
                         Modifier.contentRegion(appSettings.bibleSettings.contentRegion)
                     },
                     selectedVerses = displayedVerses,
                     appSettings = appSettings,
-                    isLowerThird = screenAssignment.isLowerThird,
-                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
+                    isLowerThird = profile.isLowerThird,
+                    isLowerThirdVertical = profile.isLowerThirdVertical,
                     outputRole = outputRole,
                     transitionAlpha = bibleTransitionAlpha,
-                    showBackground = showBackgroundOverride ?: (showBg && screenAssignment.showBibleBackground),
+                    showBackground = showBackgroundOverride ?: (showBg && profile.showBibleBackground),
                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                    bibleTranslations = screenAssignment.bibleTranslations,
+                    bibleTranslations = profile.bibleTranslations,
                 )
             }
 
         Presenting.LYRICS ->
-            if (screenAssignment.showSongs) {
+            if (profile.showSongs) {
                 SongPresenter(
-                    modifier = if (screenAssignment.isLowerThird) {
+                    modifier = if (profile.isLowerThird) {
                         Modifier
                     } else {
                         Modifier.contentRegion(appSettings.songSettings.layoutExtras.contentRegion)
                     },
                     lyricSection = displayedLyricSection,
                     appSettings = appSettings,
-                    isLowerThird = screenAssignment.isLowerThird,
-                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
+                    isLowerThird = profile.isLowerThird,
+                    isLowerThirdVertical = profile.isLowerThirdVertical,
                     outputRole = outputRole,
                     transitionAlpha = songTransitionAlpha,
                     displayLineIndex = songDisplayLineIndex,
-                    lookAheadEnabled = screenAssignment.songLookAhead,
+                    lookAheadEnabled = profile.songLookAhead,
                     allLyricSections = allLyricSections,
                     displaySectionIndex = songDisplaySectionIndex,
-                    showBackground = showBackgroundOverride ?: (showBg && screenAssignment.showSongsBackground),
+                    showBackground = showBackgroundOverride ?: (showBg && profile.showSongsBackground),
                     crossfadeEnabled = appSettings.songSettings.crossfade,
-                    languageOverride = screenAssignment.songMode,
-                    languageSelection = screenAssignment.songTranslations,
+                    languageOverride = profile.songMode,
+                    languageSelection = profile.songTranslations,
                 )
             }
 
         Presenting.PICTURES ->
-            if (screenAssignment.showPictures)
+            if (profile.showPictures)
                 PicturePresenter(
                     imagePath = displayedImagePath,
                     previousImagePath = previousDisplayedImagePath,
@@ -160,7 +160,7 @@ internal fun PresenterModeContent(
                 )
 
         Presenting.PRESENTATION ->
-            if (screenAssignment.showPictures)
+            if (profile.showPictures)
                 PresentationPresenter(
                     frame = presentationFrame,
                     slide = displayedSlide,
@@ -172,7 +172,7 @@ internal fun PresenterModeContent(
                 )
 
         Presenting.MEDIA ->
-            if (screenAssignment.showMedia) {
+            if (profile.showMedia) {
                 if (mediaViewModel.isAudioFile) {
                     // Audio: playback handled by hidden VideoPlayer in MainDesktop
                     // Projection shows background only
@@ -181,7 +181,7 @@ internal fun PresenterModeContent(
                         modifier = Modifier.fillMaxSize(),
                         transitionAlpha = mediaTransitionAlpha,
                         outputRole = outputRole,
-                        showSubtitles = screenAssignment.showSubtitles,
+                        showSubtitles = profile.showSubtitles,
                         mediaSettings = appSettings.mediaSettings,
                         contentScale = appSettings.mediaScaleMode.contentScale,
                     )
@@ -189,7 +189,7 @@ internal fun PresenterModeContent(
             }
 
         Presenting.LOWER_THIRD ->
-            if (screenAssignment.showStreaming)
+            if (profile.showStreaming)
                 LowerThirdPresenter(
                     composition = lottieComposition,
                     progress = { presenterManager.lottieProgress.value },
@@ -197,7 +197,7 @@ internal fun PresenterModeContent(
                 )
 
         Presenting.ANNOUNCEMENTS ->
-            if (screenAssignment.showAnnouncements)
+            if (profile.showAnnouncements)
                 AnnouncementsPresenter(
                     text = displayedAnnouncementText,
                     appSettings = appSettings,
@@ -208,7 +208,7 @@ internal fun PresenterModeContent(
                 )
 
         Presenting.WEBSITE ->
-            if (screenAssignment.showWebsite) WebsitePresenter(
+            if (profile.showWebsite) WebsitePresenter(
                 url = websiteUrl,
                 modifier = Modifier.fillMaxSize(),
                 onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
@@ -218,10 +218,10 @@ internal fun PresenterModeContent(
                 audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
             )
 
-        Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
+        Presenting.CANVAS -> { if (profile.showCanvas) ScenePresenter(scene = activeScene) }
 
         Presenting.QA ->
-            if (screenAssignment.showQA) {
+            if (profile.showQA) {
                 if (showQRCodeOnDisplay) {
                     QAQRCodePresenter(
                         url = qaQrCodeUrl(qaDisplayUrl, serverUrl),
@@ -238,7 +238,7 @@ internal fun PresenterModeContent(
             }
 
         Presenting.STT ->
-            if (screenAssignment.showSTT) {
+            if (profile.showSTT) {
                 STTPresenter(
                     segments = sttManager.segments,
                     inProgressText = sttManager.inProgressText.value,
@@ -249,7 +249,7 @@ internal fun PresenterModeContent(
                 )
             }
         Presenting.DICTIONARY ->
-            if (screenAssignment.showDictionary)
+            if (profile.showDictionary)
                 DictionaryPresenter(
                     dictionarySettings = appSettings.dictionarySettings,
                     entry = displayedDictionaryEntry,

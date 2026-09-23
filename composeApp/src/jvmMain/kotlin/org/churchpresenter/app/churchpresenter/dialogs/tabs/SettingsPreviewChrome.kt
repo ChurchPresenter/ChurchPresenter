@@ -54,8 +54,6 @@ private const val BADGE_TEXT_ALPHA = 0.75f
  * preview need roughly 250dp of it. Left to fill the pane's width the preview would take more than
  * the whole remainder, so it is capped here and centred in the space instead.
  */
-internal val SETTINGS_PREVIEW_MAX_HEIGHT = 260.dp
-
 /**
  * Marks the scaled presenter subtree, which is measured at the output's size and drawn at a
  * fraction of it.
@@ -100,7 +98,7 @@ internal fun previewOutputSize(settings: AppSettings): PreviewOutputSize {
  */
 internal fun stageMonitorPreviewOutputSize(settings: AppSettings): PreviewOutputSize {
     val assignments = settings.projectionSettings.screenAssignments
-    val stage = stageMonitorScreenIndices(assignments)
+    val stage = stageMonitorScreenIndices(settings.projectionSettings)
         .mapNotNull(assignments::getOrNull)
         .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
     return stage?.let { OutputSize(it.targetBoundsW, it.targetBoundsH) } ?: FallbackOutputSize

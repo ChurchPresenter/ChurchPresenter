@@ -4,7 +4,8 @@ import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.resolvedFor
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.QuickBackground
@@ -380,7 +381,7 @@ internal fun usesBibleLottieBand(config: BackgroundConfig): Boolean =
 
 /**
  * The Lottie band template the clear and text-change choreography for [mode] is timed against:
- * that content's global lower third, or failing that the first per-output override's. Null means
+ * that content's global lower third, or failing that the first assigned profile's. Null means
  * no output uses one and the classic fade applies — and always null for content with no band.
  */
 internal fun lottieBandPath(settings: AppSettings, mode: Presenting): String? {
@@ -389,12 +390,13 @@ internal fun lottieBandPath(settings: AppSettings, mode: Presenting): String? {
         Presenting.LYRICS -> songLowerThirdBackground
         else -> null
     }
-    // Resolved rather than read straight off the assignment: an override is a sparse tree of what
-    // that screen changed, so the band it actually draws is the document's with that tree over it.
+    // Through each screen's assigned profile, so a screen following a profile with its own
+    // background is seen here exactly as it renders.
+    val proj = settings.projectionSettings
     val candidates = listOfNotNull(settings.backgroundSettings.bandFor()) +
-        settings.projectionSettings.screenAssignments
-            .filter { it.backgroundOverride != null }
-            .mapNotNull { settings.resolvedFor(it).backgroundSettings.bandFor() }
+        proj.screenAssignments
+            .mapNotNull { proj.profileFor(it) }
+            .mapNotNull { it.backgroundSettings.bandFor() }
     return candidates.firstOrNull { usesBibleLottieBand(it) }?.backgroundLottie
 }
 
@@ -557,9 +559,9 @@ internal fun isInstanceLinkActive(status: InstanceLinkStatus): Boolean =
     status != InstanceLinkStatus.DISCONNECTED
 
 /** Whether this output draws the configured background, which is a separate switch per layout. */
-internal fun showsOutputBackground(assignment: ScreenAssignment): Boolean =
-    if (assignment.isLowerThird) assignment.showLowerThirdBackground
-    else assignment.showFullscreenBackground
+internal fun showsOutputBackground(profile: OutputProfile): Boolean =
+    if (profile.isLowerThird) profile.showLowerThirdBackground
+    else profile.showFullscreenBackground
 
 /** What an output is showing: its own lock when it has one, otherwise whatever is live. */
 internal fun effectiveOutputMode(

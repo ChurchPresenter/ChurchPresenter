@@ -2,11 +2,6 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
@@ -15,38 +10,34 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.withBrowserSourceOutput
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
- * Drives the Browser Source Outputs table — the virtual outputs served as a web page for OBS to
+ * Drives the Browser Source Outputs table -- the virtual outputs served as a web page for OBS to
  * pull in.
  *
  * Unlike the screen assignments above it, these are not tied to detected hardware: they are added
  * and removed freely, so a row's controls shift position as soon as another row appears. They are
  * therefore addressed by what they display rather than by ordinal. The enabled switch and the API
- * key checkbox publish real toggle state, so those are asserted directly; the three dropdowns
- * display their stored value, so a display assertion after a pick also proves the round trip.
+ * key checkbox publish real toggle state, so those are asserted directly; the dropdowns display
+ * their stored value, so a display assertion after a pick also proves the round trip.
+ *
+ * Ported from `ProjectionSettingsTabBrowserSourceTest`. What each output *shows* is a profile now,
+ * so the row's content-outputs button is a profile picker.
  */
 class ProjectionSettingsTabBrowserSourceTest {
 
     /** A tab that already has [count] browser-source outputs, so rows can be driven straight away. */
-    private fun withOutputs(count: Int): AppSettings = AppSettings().let {
+    private fun withOutputs(count: Int): AppSettings = withProfiles().let {
         it.copy(
             projectionSettings = it.projectionSettings.copy(
                 browserSourceOutputs = List(count) { ScreenAssignment() },
@@ -60,7 +51,7 @@ class ProjectionSettingsTabBrowserSourceTest {
     private fun ComposeUiTest.apiKeyCheckbox(): SemanticsNodeInteraction =
         onNode(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox))
 
-    /** The browser-source row's dropdown showing [current] — the last one, below the screen grid. */
+    /** The browser-source row's dropdown showing [current] -- the last one, below the screen grid. */
     private fun ComposeUiTest.rowDropdown(current: String): SemanticsNodeInteraction =
         onAllNodesWithText(current).onLast()
 
@@ -106,22 +97,6 @@ class ProjectionSettingsTabBrowserSourceTest {
 
             assertEquals("Choir", output(get).browserSourceName, "the typed name must be stored")
             onNodeWithText("Choir").assertExists("and shown on the row")
-        }
-    }
-
-    @Test
-    fun `a named output is called by its name everywhere the row names it`() {
-        projectionTab(initial = withOutputs(1).let {
-            it.copy(projectionSettings = it.projectionSettings.withBrowserSourceOutput(
-                0, ScreenAssignment(browserSourceName = "Stage"),
-            ))
-        }) { _ ->
-            onNodeWithText("Browser Source 1").assertDoesNotExist()
-
-            onAllNodesWithText("15 of 16 enabled").onLast().performScrollTo().performClick()
-            waitForIdle()
-            onNodeWithText("Content Outputs — Stage")
-                .assertExists("the content dialog must name the output the operator named")
         }
     }
 
@@ -179,14 +154,14 @@ class ProjectionSettingsTabBrowserSourceTest {
 
             rowDropdown("1920×1080").performScrollTo().performClick()
             waitForIdle()
-            // Menu rows read "1920×1080  16:9" — the shape is spelled out beside the numbers, so
+            // Menu rows read "1920×1080  16:9" -- the shape is spelled out beside the numbers, so
             // these are substring matches. The row button itself still reads the numbers alone,
             // which is why 1920×1080 is found twice: once on the row, once in the open menu.
             for (preset in listOf("1280×720", "1920×1080", "2560×1440", "3840×2160")) {
                 onAllNodesWithText(preset, substring = true)
                     .assertCountEquals(if (preset == "1920×1080") 2 else 1)
             }
-            // A 4:3 and an ultrawide are on offer too — the list used to be 16:9 only, so an
+            // A 4:3 and an ultrawide are on offer too -- the list used to be 16:9 only, so an
             // operator could not stand a Browser Source in for the shape it was feeding.
             onAllNodesWithText("1024×768", substring = true).assertCountEquals(1)
             onAllNodesWithText("2560×1080", substring = true).assertCountEquals(1)
@@ -231,187 +206,50 @@ class ProjectionSettingsTabBrowserSourceTest {
         }
     }
 
-    // ── Display mode ────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a browser source has its own display mode`() {
-        projectionTab(initial = withOutputs(1)) { get ->
-            assertEquals(
-                Constants.DISPLAY_MODE_FULLSCREEN,
-                output(get).displayMode,
-                "a new output is full screen",
-            )
-            // Three dropdowns read "Full Screen": the two screen rows, then this one.
-            rowDropdown("Full Screen").performScrollTo().performClick()
-            waitForIdle()
-            onAllNodesWithText("Lower Third").onLast().performClick()
-            waitForIdle()
-
-            assertEquals(
-                Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-                output(get).displayMode,
-                "the picked mode must be stored",
-            )
-            assertTrue(output(get).isLowerThird, "and reported as a lower third")
-            assertEquals(
-                Constants.DISPLAY_MODE_FULLSCREEN,
-                get().projectionSettings.screenAssignments[0].displayMode,
-                "the physical screens must be untouched",
-            )
-        }
-    }
-
-    // ── Content outputs ─────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a browser source has its own content outputs`() {
-        projectionTab(initial = withOutputs(1)) { get ->
-            // Three summary buttons read the same; the browser source's is the last.
-            onAllNodesWithText("15 of 16 enabled").onLast().performScrollTo().performClick()
-            waitForIdle()
-            onNodeWithText("Content Outputs — Browser Source 1")
-                .assertExists("the dialog must name the browser source")
-
-            onNode(hasClickAction() and hasTextExactly("Media")).performClick()
-            waitForIdle()
-            assertEquals(false, output(get).showMedia, "the toggle must store against the browser source")
-            assertEquals(
-                true,
-                get().projectionSettings.screenAssignments[0].showMedia,
-                "and leave the physical screens alone",
-            )
-
-            onNodeWithText("Done").performClick()
-            waitForIdle()
-            onAllNodesWithText("14 of 16 enabled").assertCountEquals(1)
-        }
-    }
-
-    /**
-     * When an output is protected and the server has a key configured, the overlay URL the operator
-     * copies carries that key — otherwise a Browser Source pointed at it would be refused.
-     */
-    @Test
-    fun `a protected output with a server key renders its row`() {
-        val protectedOutput = AppSettings().let {
-            it.copy(
-                projectionSettings = it.projectionSettings.copy(
-                    browserSourceOutputs = listOf(ScreenAssignment(browserSourceApiKeyRequired = true)),
-                ),
-                serverSettings = it.serverSettings.copy(apiKey = "s3cret"),
-            )
-        }
-        projectionTab(initial = protectedOutput) { get ->
-            apiKeyCheckbox().assertIsOn() // the stored protection is shown
-            assertEquals(true, output(get).browserSourceApiKeyRequired)
-            assertEquals("s3cret", get().serverSettings.apiKey, "and the server key is what gets attached")
-            onNodeWithText("Browser Source 1").assertExists()
-        }
-    }
-
-    /** The same output with no server key configured: nothing to attach, row still renders. */
-    @Test
-    fun `a protected output without a server key still renders`() {
-        val noKey = AppSettings().let {
-            it.copy(
-                projectionSettings = it.projectionSettings.copy(
-                    browserSourceOutputs = listOf(ScreenAssignment(browserSourceApiKeyRequired = true)),
-                ),
-            )
-        }
-        projectionTab(initial = noKey) { get ->
-            apiKeyCheckbox().assertIsOn()
-            assertEquals("", get().serverSettings.apiKey, "no key configured on the server")
-            onNodeWithText("Browser Source 1").assertExists()
-        }
-    }
-
     // ── Removing ────────────────────────────────────────────────────────────────────────────────
 
+    /** Remove asks first: an output is a thing an operator has wired OBS up to. */
     @Test
-    fun `Remove asks before deleting an output`() {
-        projectionTab(initial = withOutputs(1)) { get ->
-            onNodeWithText("Remove").performScrollTo().performClick()
+    fun `Remove asks before taking an output away`() {
+        projectionTab(initial = withOutputs(2)) { get ->
+            onAllNodesWithText("Remove")[0].performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(2, get().projectionSettings.browserSourceOutputs.size, "nothing yet")
+
+            // Two "Remove" nodes are on screen now -- the rows' buttons and the dialog's. The
+            // dialog's is the last, being drawn in a popup above them.
+            onAllNodesWithText("Remove").onLast().performClick()
             waitForIdle()
 
-            onNodeWithText("Are you sure you want to remove Browser Source 1?")
-                .assertExists("the confirmation must name what is being removed")
-            assertEquals(1, get().projectionSettings.browserSourceOutputs.size, "nothing removed yet")
+            assertEquals(1, get().projectionSettings.browserSourceOutputs.size)
+            // The rows renumber, so the second one is gone by name as well as by count.
+            onNodeWithText("Browser Source 2").assertDoesNotExist()
         }
     }
 
     @Test
-    fun `cancelling the confirmation keeps the output`() {
-        projectionTab(initial = withOutputs(1)) { get ->
-            onNodeWithText("Remove").performScrollTo().performClick()
+    fun `Remove can be backed out of`() {
+        projectionTab(initial = withOutputs(2)) { get ->
+            onAllNodesWithText("Remove")[0].performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Cancel").performClick()
             waitForIdle()
 
-            assertEquals(1, get().projectionSettings.browserSourceOutputs.size, "Cancel must keep it")
-            onNodeWithText("Browser Source 1").assertExists()
-            onAllNodesWithText("Are you sure you want to remove Browser Source 1?").assertCountEquals(0)
+            assertEquals(2, get().projectionSettings.browserSourceOutputs.size, "both are still there")
         }
     }
 
+    // ── What an output shows, which is a profile now ────────────────────────────────────────────
+
     @Test
-    fun `confirming the removal deletes the output`() {
-        projectionTab(initial = withOutputs(2)) { get ->
-            onAllNodesWithText("Remove")[0].performScrollTo().performClick()
+    fun `a browser source takes a profile like any other output`() {
+        projectionTab(initial = withOutputs(1)) { get ->
+            onAllNodesWithText("None").onLast().performScrollTo().performClick()
             waitForIdle()
-            // The dialog's own Remove is the one added last.
-            onAllNodesWithText("Remove").onLast().performClick()
+            onNodeWithText("Foyer").performClick()
             waitForIdle()
 
-            assertEquals(1, get().projectionSettings.browserSourceOutputs.size, "one must be gone")
-            onAllNodesWithText("Browser Source 2").assertCountEquals(0)
-            onNodeWithText("Browser Source 1").assertExists("and the remaining one renumbers")
-        }
-    }
-
-    // ── Identify ────────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `Identify reports which browser source to flash`() = runComposeUiTest {
-        var identified = mutableListOf<Int>()
-        setContent {
-            MaterialTheme {
-                var state by remember { mutableStateOf(AppSettings().let {
-                    it.copy(projectionSettings = it.projectionSettings.copy(
-                        browserSourceOutputs = listOf(ScreenAssignment(), ScreenAssignment()),
-                    ))
-                }) }
-                ProjectionSettingsTab(
-                    settings = state,
-                    onSettingsChange = { transform -> state = transform(state) },
-                    companionServer = CompanionServer(),
-                    onIdentifyBrowserSource = { identified.add(it) },
-                    detectScreens = { twoExternalScreens() },
-                )
-            }
-        }
-        // The screen grid's Identify comes first; the two browser-source ones follow.
-        onAllNodesWithText("Identify")[1].performScrollTo().performClick()
-        waitForIdle()
-        onAllNodesWithText("Identify")[2].performScrollTo().performClick()
-        waitForIdle()
-
-        assertEquals(listOf(0, 1), identified, "each button must identify its own output")
-    }
-
-    @Test
-    fun `a disabled output still renders its controls`() {
-        val disabled = AppSettings().let {
-            it.copy(
-                projectionSettings = it.projectionSettings.copy(
-                    browserSourceOutputs = listOf(ScreenAssignment(browserSourceEnabled = false)),
-                ),
-            )
-        }
-        projectionTab(initial = disabled) { _ ->
-            enabledSwitch().assertIsOff() // the stored state must be shown
-            onNodeWithText("Remove").assertExists("and the row stays configurable")
-            rowDropdown("1920×1080").assertExists()
+            assertEquals("p1", output(get).activeProfileId)
         }
     }
 }

@@ -50,6 +50,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -132,6 +134,10 @@ internal fun PresenterWindows(
         val isFallback = isFallbackWindowSlot(devWindowedFallback, i, windowCount)
         val slotIndex = if (isFallback) fallbackSlotIndex(i, windowCount) else i
         val screenAssignment = proj.getAssignment(slotIndex)
+        // The profile this output is assigned to -- everything about how it looks and what it
+        // shows, used below wherever this file itself (not `PresenterOutputContent`, which
+        // resolves its own) needs to know the output's display mode or background switches.
+        val profile = proj.profileFor(screenAssignment) ?: OutputProfile()
         val effectiveMode = effectiveOutputMode(screenLocks, slotIndex, presentingMode)
 
         when {
@@ -173,7 +179,7 @@ internal fun PresenterWindows(
                         outputRole = deckLinkRole,
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
-                        isLowerThird = screenAssignment.isLowerThird,
+                        isLowerThird = profile.isLowerThird,
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
@@ -186,7 +192,7 @@ internal fun PresenterWindows(
                         ) { mode ->
                         PresenterModeContent(
                             mode = mode,
-                            screenAssignment = screenAssignment,
+                            profile = profile,
                             presenterManager = presenterManager,
                             appSettings = appSettings,
                             mediaViewModel = mediaViewModel,
@@ -196,7 +202,7 @@ internal fun PresenterWindows(
                             lottieComposition = lottieComposition,
                             clearAnnouncementOnFinish = clearAnnouncementOnFinish,
                             outputRole = deckLinkRole,
-                            showBg = showsOutputBackground(screenAssignment),
+                            showBg = showsOutputBackground(profile),
                             showBackgroundOverride = true,
                         )
                         }
@@ -209,7 +215,7 @@ internal fun PresenterWindows(
                         outputRole = Constants.OUTPUT_ROLE_KEY,
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
-                        isLowerThird = screenAssignment.isLowerThird,
+                        isLowerThird = profile.isLowerThird,
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
@@ -219,7 +225,7 @@ internal fun PresenterWindows(
                         Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                         PresenterModeContent(
                             mode = mode,
-                            screenAssignment = screenAssignment,
+                            profile = profile,
                             presenterManager = presenterManager,
                             appSettings = appSettings,
                             mediaViewModel = mediaViewModel,
@@ -229,7 +235,7 @@ internal fun PresenterWindows(
                             lottieComposition = lottieComposition,
                             clearAnnouncementOnFinish = clearAnnouncementOnFinish,
                             outputRole = Constants.OUTPUT_ROLE_KEY,
-                            showBg = showsOutputBackground(screenAssignment),
+                            showBg = showsOutputBackground(profile),
                             showBackgroundOverride = true,
                         )
                         }
@@ -284,7 +290,7 @@ internal fun PresenterWindows(
                                         Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                         PresenterModeContent(
                             mode = mode,
-                            screenAssignment = screenAssignment,
+                            profile = profile,
                             presenterManager = presenterManager,
                             appSettings = appSettings,
                             mediaViewModel = mediaViewModel,
@@ -294,7 +300,7 @@ internal fun PresenterWindows(
                             lottieComposition = lottieComposition,
                             clearAnnouncementOnFinish = clearAnnouncementOnFinish,
                             outputRole = Constants.OUTPUT_ROLE_KEY,
-                            showBg = showsOutputBackground(screenAssignment),
+                            showBg = showsOutputBackground(profile),
                             showBackgroundOverride = true,
                         )
                                         }
@@ -324,7 +330,7 @@ internal fun PresenterWindows(
 
             if (targetScreenIndex == null || !isScreenIndexValid(targetScreenIndex, screens.size)) continue
 
-            val showBg = showsOutputBackground(screenAssignment)
+            val showBg = showsOutputBackground(profile)
 
             val primaryRole = screenAssignment.primaryOutputRole
 
@@ -417,7 +423,7 @@ internal fun PresenterWindows(
                                     Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                         PresenterModeContent(
                             mode = mode,
-                            screenAssignment = screenAssignment,
+                            profile = profile,
                             presenterManager = presenterManager,
                             appSettings = appSettings,
                             mediaViewModel = mediaViewModel,
@@ -445,7 +451,7 @@ internal fun PresenterWindows(
                         outputRole = Constants.OUTPUT_ROLE_KEY,
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
-                        isLowerThird = screenAssignment.isLowerThird,
+                        isLowerThird = profile.isLowerThird,
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
@@ -455,7 +461,7 @@ internal fun PresenterWindows(
                         Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                         PresenterModeContent(
                             mode = mode,
-                            screenAssignment = screenAssignment,
+                            profile = profile,
                             presenterManager = presenterManager,
                             appSettings = appSettings,
                             mediaViewModel = mediaViewModel,

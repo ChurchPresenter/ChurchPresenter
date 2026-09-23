@@ -413,6 +413,24 @@ fun bilingualGrid(value: String): Pair<Int, Int> = when (value) {
     else -> BILINGUAL_ROWS_1 to BILINGUAL_COLS_2
 }
 
+/**
+ * How many columns [layout] lays [count] parallel parts out in.
+ *
+ * The two original arrangements are counts, not fixed grids: side by side is one row however many
+ * parts there are, and top/bottom one column. Every named grid means exactly what it says, and the
+ * rows follow from how many parts there are to place.
+ *
+ * One definition because the full screen and the band both lay parallel translations out and must
+ * not disagree about what an arrangement means -- the full screen read the setting as a
+ * side-by-side boolean and ignored every grid, while the band read the grid and quietly dropped any
+ * translation past its cell count.
+ */
+fun bilingualColumns(layout: String, count: Int): Int = when (layout) {
+    Constants.BILINGUAL_SIDE_BY_SIDE -> count.coerceAtLeast(1)
+    Constants.BILINGUAL_TOP_BOTTOM -> 1
+    else -> bilingualGrid(layout).second.coerceAtLeast(1)
+}
+
 // Named rather than left as literals: `bilingualGrid`'s own `when` tripped detekt's MagicNumber
 // rule on the ones past 2, which it leaves alone by default.
 private const val BILINGUAL_ROWS_1 = 1

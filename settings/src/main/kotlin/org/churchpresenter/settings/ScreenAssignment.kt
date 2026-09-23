@@ -1,7 +1,6 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -21,6 +20,15 @@ fun screenKey(boundsX: Int, boundsY: Int, boundsW: Int, boundsH: Int): String {
     return if (hasSize && hasOrigin) "${boundsW}x$boundsH@$boundsX,$boundsY" else ""
 }
 
+/**
+ * One output's own identity and physical wiring: which monitor or DeckLink device it drives, its
+ * key output, its Browser Source/NDI network settings, and what the operator calls it.
+ *
+ * **Never carries any behavioral or style state of its own.** How this output looks and what it
+ * shows is entirely [activeProfileId]'s -- an [OutputProfile], which every field of that shape used
+ * to live on this class directly. Two outputs that should behave identically are kept that way by
+ * pointing both at the same profile, not by copying settings between two `ScreenAssignment`s.
+ */
 @Serializable
 data class ScreenAssignment(
     val targetDisplay: Int = -1,  // -1 = auto (resolved at runtime), -2 = none, 0+ = specific display (legacy)
@@ -35,51 +43,6 @@ data class ScreenAssignment(
     val keyTargetBoundsY: Int = Int.MIN_VALUE,
     val keyTargetBoundsW: Int = 0,
     val keyTargetBoundsH: Int = 0,
-    /** Whether this output shows the Bible at all: "off" or "both". It no longer says *which*
-     *  translations — see [bibleTranslations]. Songs still use the full primary/secondary vocabulary
-     *  in [songMode], which is unrelated. */
-    val bibleMode: String = Constants.SONG_LANG_BOTH,
-    /**
-     * Which translations this output shows, by position in the stack.
-     *
-     * Empty means all of them, including any added later — the behaviour "both" used to have. A
-     * non-empty list is an explicit choice and is left alone when the stack grows.
-     */
-    val bibleTranslations: List<Int> = emptyList(),
-    val songMode: String = Constants.SONG_LANG_BOTH,   // "off" | "primary" | "secondary" | "both"
-    /**
-     * Which of a song's languages this output shows, by position — `0` being the primary.
-     *
-     * Empty means "whatever [songMode] says", which is what every output written before songs had
-     * more than two languages holds, and what a new one holds until someone picks. That is the only
-     * reason [songMode] is still read: the two are not kept in step, the list simply wins when it
-     * has anything in it. [songLanguages] is the one place that resolves the pair, and nothing
-     * should be deciding it a second time.
-     *
-     * Shaped after [bibleTranslations] deliberately — the same question, the same answer.
-     */
-    val songTranslations: List<Int> = emptyList(),
-    val showPictures: Boolean = true,
-    val showMedia: Boolean = true,
-    /** Whether this output draws the app-rendered subtitle overlay for the loaded clip's SRT/VTT
-     *  file. Basic on/off only -- a per-output *track* choice belongs to #475, not this. */
-    val showSubtitles: Boolean = true,
-    val showStreaming: Boolean = true,
-    val showAnnouncements: Boolean = true,
-    val showWebsite: Boolean = true,
-    val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
-    val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
-    // Whether a chorded song is drawn as a chart on this output, rather than the words alone.
-    val showChords: Boolean = true,
-    val showQA: Boolean = true,
-    val showSTT: Boolean = true,
-    val showDictionary: Boolean = true,
-    val showCanvas: Boolean = true,
-    val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
-    val showLowerThirdBackground: Boolean = true, // show configured background in lower third mode
-    // Both are an additional layer on top of showFullscreenBackground/showLowerThirdBackground.
-    val showBibleBackground: Boolean = true,
-    val showSongsBackground: Boolean = true,
     /**
      * What the operator calls this Browser Source output — "Stage", "Choir", "Chords".
      *
@@ -100,31 +63,6 @@ data class ScreenAssignment(
      * Read through [ProjectionSettings.screenLabelOr], which prefers the monitor's name.
      */
     val screenName: String = "",
-    /**
-     * What this output changes about the Stage Monitor, or null to follow the global settings.
-     *
-     * **Sparse: only the settings the operator actually changed on this screen** -- see
-     * [sparseOverrideOf], which also says why a whole snapshot was the wrong shape. Null is not "no
-     * stage monitor", it is "the same one everybody else uses", and a key absent from the tree means
-     * the same thing for that one setting. Read it through `AppSettings.resolvedFor`.
-     */
-    val stageMonitorOverride: JsonObject? = null,
-    /** What this output changes about the Bible's appearance. Sparse, like [stageMonitorOverride];
-     *  the library folder and the translation stack stay the global document's. */
-    val bibleOverride: JsonObject? = null,
-    /** What this output changes about songs' appearance. Sparse, like [stageMonitorOverride]; the
-     *  song folder and the list columns stay the global document's. */
-    val songOverride: JsonObject? = null,
-    /** What this output changes about the Strong's dictionary. Sparse, like [stageMonitorOverride]. */
-    val dictionaryOverride: JsonObject? = null,
-    /**
-     * What this output changes about its backgrounds. Sparse, like [stageMonitorOverride].
-     *
-     * Note these win over the backgrounds an Instance Link follower mirrors from its primary -- a
-     * background chosen for *this* screen is a local decision, and the mirror is the fallback for
-     * screens that have not made one.
-     */
-    val backgroundOverride: JsonObject? = null,
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
@@ -163,49 +101,24 @@ data class ScreenAssignment(
      * Only used by ProjectionSettings.ndiOutputs entries.
      */
     val ndiMode: String = Constants.NDI_MODE_ALPHA,
+    /**
+     * The [OutputProfile] this output follows -- every behavioral and style decision this output
+     * draws with comes from there; see `AppSettings.resolvedFor(profile)`
+     * (`OutputProfileResolution.kt`) and [ProjectionSettings.profileFor].
+     *
+     * Nullable only for decode safety against a document written before profiles existed, or one
+     * hand-edited into an inconsistent state -- never a real "no profile" choice an operator makes.
+     * `SettingsManager`'s migration and every fresh install both guarantee a real profile id here.
+     */
+    val activeProfileId: String? = null,
 ) {
     /** The key of the monitor this output drives, or blank when it drives none. */
     val targetScreenKey: String
         get() = if (targetType != "screen") ""
         else screenKey(targetBoundsX, targetBoundsY, targetBoundsW, targetBoundsH)
 
-    val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
-    val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
-
-    /**
-     * The languages this output draws, in order, for a song carrying [available] of them.
-     *
-     * Positions the song does not have are dropped rather than drawn blank — an output configured
-     * for languages 1 and 3 shows one language when handed a monolingual song, not one language and
-     * two empty columns.
-     *
-     * Falls back to [songMode] while [songTranslations] is empty, which is what keeps every existing
-     * output presenting exactly as it did: "primary" is the first language, "secondary" the second,
-     * "both" everything the song has. Note "both" reaching past two is deliberate — an output left
-     * on the default should show a four-language song's four languages, not silently drop two.
-     */
-    fun songLanguages(available: Int): List<Int> =
-        songLanguageSelection(songMode, songTranslations, available)
-
-    /** True if [displayMode] is either lower-third band orientation (horizontal or vertical). */
-    val isLowerThird: Boolean
-        get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL ||
-            displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
-    val isLowerThirdVertical: Boolean get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
-
     /** Whether a key output target is configured */
     val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0
-
-    /**
-     * True once this output has appearance of its own rather than the global settings.
-     *
-     * What the Customize button reads to show that a row has been customized, and what
-     * `AppSettings.resolvedFor` short-circuits on so an untouched output renders from the very
-     * same settings instance it always did.
-     */
-    val isCustomized: Boolean
-        get() = stageMonitorOverride != null || bibleOverride != null || songOverride != null ||
-            dictionaryOverride != null || backgroundOverride != null
 
     /** Primary window role: "fill" if key output is configured, "normal" otherwise */
     val primaryOutputRole: String get() = if (hasKeyOutput) Constants.OUTPUT_ROLE_FILL else Constants.OUTPUT_ROLE_NORMAL
@@ -232,14 +145,15 @@ data class ScreenAssignment(
 }
 
 /**
- * Which of a song's [available] languages to draw, given a [songMode] and a [songTranslations] list.
+ * Which of a song's [available] languages to draw, given a profile's [songMode] and
+ * [songTranslations].
  *
  * Free-standing because `SongPresenter` resolves the same question from what it was handed rather
- * than from a [ScreenAssignment] — the preview and the offscreen outputs pass the two values
+ * than from an [OutputProfile] -- the preview and the offscreen outputs pass the two values
  * straight in. One implementation, so an output and its preview can never disagree.
  *
  * [songTranslations] wins whenever it has anything in it; [songMode] is the fallback that keeps
- * every output written before songs had more than two languages presenting exactly as it did.
+ * every profile written before songs had more than two languages presenting exactly as it did.
  */
 fun songLanguageSelection(songMode: String, songTranslations: List<Int>, available: Int): List<Int> {
     if (songMode == Constants.SONG_LANG_OFF || available <= 0) return emptyList()

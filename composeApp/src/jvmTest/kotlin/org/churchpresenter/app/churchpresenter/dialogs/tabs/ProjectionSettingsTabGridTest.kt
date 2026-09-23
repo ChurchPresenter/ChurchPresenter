@@ -2,353 +2,154 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.runComposeUiTest
-import kotlinx.serialization.json.Json
-import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Drives the assignment grid's dropdowns, the numeric fields below it, and the two buttons that
- * report outwards — asserting the [ProjectionSettings] each writes and the change it makes on screen.
+ * The assignment grid: one row per output, what each row's controls write, and the two layouts the
+ * tab falls into depending on what displays the machine has.
  *
- * Every dropdown here displays its value straight from the settings passed in, so a display
- * assertion after a pick also proves the value round-tripped.
+ * Ported from the `ProjectionSettingsTab*` suites. A row is three controls now -- target display,
+ * key output, profile -- because the display mode and the content selection moved onto the profile
+ * the third of those picks.
  */
 class ProjectionSettingsTabGridTest {
 
-    private fun settingsWith(change: ProjectionSettings.() -> ProjectionSettings): AppSettings =
-        AppSettings().let { it.copy(projectionSettings = it.projectionSettings.change()) }
+    private fun assignments(n: Int) = withProfiles().copy(
+        projectionSettings = ProjectionSettings(
+            outputProfiles = withProfiles().projectionSettings.outputProfiles,
+            screenAssignments = List(n) { ScreenAssignment() },
+        ),
+    )
 
-    // ── Target display ──────────────────────────────────────────────────────────────────────────
+    private fun getAssignments(s: org.churchpresenter.settings.AppSettings) =
+        s.projectionSettings.screenAssignments
+
+    // ── Layout ──────────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the target display dropdown moves an output to another display`() = projectionTab { get ->
-        gridButton(Grid.targetDisplay(row = 0)).assertTextEquals("D1 (1280x720)")
-
-        // Row 1 already shows D2, so pick by the full label the menu uses instead.
-        gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
-        waitForIdle()
-        onNodeWithText("Display 2 (3840x2160 @ 3200,0)").performClick()
-        waitForIdle()
-
-        val assignment = get().projectionSettings.screenAssignments[0]
-        assertEquals(2, assignment.targetDisplay, "the picked display index must be stored")
-        assertEquals(3840, assignment.targetBoundsW, "along with that display's bounds")
-        assertEquals(3200, assignment.targetBoundsX)
-        gridButton(Grid.targetDisplay(row = 0)).assertTextEquals("D2 (3840x2160)")
+    fun `two external displays give a row each`() {
+        // Two externals beside the primary, so two assignment rows -- the primary is the operator's
+        // own screen and never gets one.
+        projectionTab(screens = twoExternalScreens()) { _ ->
+            gridButtons().assertCountEquals(Grid.gridButtonCount(rows = 2) + trailingButtons())
+        }
     }
 
     @Test
-    fun `the target display dropdown can detach an output`() {
-        // Both key-output dropdowns read "None" out of the box, which would be indistinguishable
-        // from the menu item; give the one row's key output a display so "None" is unique.
-        val keyed = settingsWith {
-            copy(
-                screenAssignments = listOf(
-                    ScreenAssignment(
-                        targetDisplay = 1, targetBoundsX = 1920, targetBoundsW = 1280, targetBoundsH = 720,
-                        keyTargetDisplay = 1, keyTargetBoundsX = 1920, keyTargetBoundsW = 1280, keyTargetBoundsH = 720,
-                    ),
-                ),
+    fun `one external display gives one row`() {
+        projectionTab(screens = oneExternalScreen()) { _ ->
+            gridButtons().assertCountEquals(Grid.gridButtonCount(rows = 1) + trailingButtons())
+        }
+    }
+
+    @Test
+    fun `a machine with no external display falls back to a dev window`() {
+        projectionTab(screens = noExternalScreens()) { _ ->
+            onNodeWithText("Dev Window", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `each external display names itself and its resolution in the target dropdown`() {
+        projectionTab(screens = twoExternalScreens()) { _ ->
+            onNodeWithText("D1 (1280x720)").assertExists()
+        }
+    }
+
+    // ── What the row's controls write ───────────────────────────────────────────────────────────
+
+    @Test
+    fun `picking a profile writes it onto the assignment`() {
+        projectionTab(assignments(1), screens = oneExternalScreen()) { get ->
+            chooseFromDropdown(Grid.profile(0), "Foyer")
+
+            assertEquals("p1", getAssignments(get())[0].activeProfileId)
+        }
+    }
+
+    @Test
+    fun `a second row takes its own profile`() {
+        projectionTab(assignments(2)) { get ->
+            chooseFromDropdown(Grid.profile(0), "Main")
+            chooseFromDropdown(Grid.profile(1), "Foyer")
+
+            assertEquals("p0", getAssignments(get())[0].activeProfileId)
+            assertEquals("p1", getAssignments(get())[1].activeProfileId, "one row must not write another")
+        }
+    }
+
+    @Test
+    fun `an assignment starts on no profile at all`() {
+        projectionTab(assignments(1), screens = oneExternalScreen()) { get ->
+            assertNull(
+                getAssignments(get())[0].activeProfileId,
+                "an unassigned output points at nothing until one is picked",
             )
-        }
-        projectionTab(initial = keyed, screens = oneExternalScreen()) { get ->
-            chooseFromDropdown(Grid.targetDisplay(row = 0), "None")
-            assertEquals(
-                Constants.KEY_TARGET_NONE,
-                get().projectionSettings.screenAssignments[0].targetDisplay,
-                "picking None must store the none marker",
-            )
-            gridButton(Grid.targetDisplay(row = 0)).assertTextEquals("None")
-        }
-    }
-
-    @Test
-    fun `a display that has since been unplugged is reset rather than kept stale`() {
-        // Saved back when a second monitor drove this slot. That monitor is gone by the time this
-        // composes (noExternalScreens), so the row now stands in as the dev fallback window --
-        // and outputSizeOf prefers non-zero targetBoundsW/H over devWindowWidth/Height, so a stale
-        // record here silently overrides whatever resolution the operator picks for that window.
-        val stale = settingsWith {
-            copy(
-                screenAssignments = listOf(
-                    ScreenAssignment(
-                        targetDisplay = 1, targetBoundsX = 1920, targetBoundsY = 0,
-                        targetBoundsW = 1920, targetBoundsH = 1080,
-                        devWindowWidth = 1280, devWindowHeight = 720,
-                    ),
-                ),
-            )
-        }
-        projectionTab(initial = stale, screens = noExternalScreens()) { get ->
-            val assignment = get().projectionSettings.screenAssignments[0]
-            assertEquals(
-                Constants.KEY_TARGET_NONE, assignment.targetDisplay,
-                "the disconnected display must not be kept",
-            )
-            assertEquals(0, assignment.targetBoundsW, "nor its stale width")
-            assertEquals(0, assignment.targetBoundsH, "nor its stale height")
-        }
-    }
-
-    // ── Key output ──────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `the key output dropdown assigns a fill and key pair`() = projectionTab { get ->
-        assertEquals(
-            Constants.KEY_TARGET_NONE,
-            get().projectionSettings.screenAssignments[0].keyTargetDisplay,
-            "no key output out of the box",
-        )
-        gridButton(Grid.keyOutput(row = 0)).performScrollTo().performClick()
-        waitForIdle()
-        onNodeWithText("Display 2 (3840x2160 @ 3200,0)").performClick()
-        waitForIdle()
-
-        val assignment = get().projectionSettings.screenAssignments[0]
-        assertEquals(2, assignment.keyTargetDisplay, "the key target must be stored")
-        assertEquals(3840, assignment.keyTargetBoundsW, "with its bounds")
-        assertTrue(assignment.hasKeyOutput, "the row must now report a key output")
-        assertEquals(
-            Constants.OUTPUT_ROLE_FILL,
-            assignment.primaryOutputRole,
-            "and the primary window becomes the fill",
-        )
-        gridButton(Grid.keyOutput(row = 0)).assertTextEquals("D2 (3840x2160)")
-    }
-
-    @Test
-    fun `the key output dropdown leaves the other row alone`() = projectionTab { get ->
-        gridButton(Grid.keyOutput(row = 1)).performScrollTo().performClick()
-        waitForIdle()
-        onNodeWithText("Display 1 (1280x720 @ 1920,0)").performClick()
-        waitForIdle()
-
-        assertEquals(1, get().projectionSettings.screenAssignments[1].keyTargetDisplay)
-        assertEquals(
-            Constants.KEY_TARGET_NONE,
-            get().projectionSettings.screenAssignments[0].keyTargetDisplay,
-            "row 0's key output must be untouched",
-        )
-    }
-
-    // ── Display mode ────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `the display mode dropdown stores each mode`() = projectionTab { get ->
-        // One Lower Third entry, not two: the orientation moved into the Customize dialog.
-        val modes = listOf(
-            "Lower Third" to Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-            "Stage Monitor" to Constants.DISPLAY_MODE_STAGE_MONITOR,
-            "Full Screen" to Constants.DISPLAY_MODE_FULLSCREEN,
-        )
-        for ((label, stored) in modes) {
-            gridButton(Grid.displayMode(row = 0)).performScrollTo().performClick()
-            waitForIdle()
-            onAllNodesWithText(label).onLast().performClick()
-            waitForIdle()
-            assertEquals(
-                stored,
-                get().projectionSettings.screenAssignments[0].displayMode,
-                "picking $label must be stored",
-            )
-            gridButton(Grid.displayMode(row = 0)).assertTextEquals(label)
-        }
-    }
-
-    @Test
-    fun `a lower-third display mode is reported as such`() = projectionTab { get ->
-        gridButton(Grid.displayMode(row = 0)).performScrollTo().performClick()
-        waitForIdle()
-        onAllNodesWithText("Lower Third").onLast().performClick()
-        waitForIdle()
-
-        val assignment = get().projectionSettings.screenAssignments[0]
-        assertTrue(assignment.isLowerThird, "the row must count as a lower third")
-        assertEquals(
-            Constants.DISPLAY_MODE_FULLSCREEN,
-            get().projectionSettings.screenAssignments[1].displayMode,
-            "the other row must be untouched",
-        )
-    }
-
-    @Test
-    fun `a vertical output still reads as Lower Third and keeps its orientation`() {
-        val vertical = ProjectionSettings(
-            screenAssignments = listOf(
-                ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL),
-                ScreenAssignment(),
-            ),
-        )
-        projectionTab(AppSettings(projectionSettings = vertical)) { get ->
-            // The dropdown offers one Lower Third entry, so a vertical output has to resolve to it
-            // rather than falling through to the Full Screen label.
-            gridButton(Grid.displayMode(row = 0)).performScrollTo().assertTextEquals("Lower Third")
-
-            gridButton(Grid.displayMode(row = 0)).performClick()
-            waitForIdle()
-            onAllNodesWithText("Lower Third").onLast().performClick()
-            waitForIdle()
-
-            val assignment = get().projectionSettings.screenAssignments[0]
-            assertTrue(assignment.isLowerThirdVertical, "re-picking Lower Third must not flip it")
-        }
-    }
-
-    // ── Numeric fields ──────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `each window position field stores its own offset`() {
-        // The four offsets share a default, so give each one a value only it holds.
-        val distinct = settingsWith { copy(windowTop = 41, windowLeft = 42, windowRight = 43, windowBottom = 44) }
-        projectionTab(initial = distinct) { get ->
-            retypeNumberField(showing = 41, to = 51)
-            assertEquals(51, get().projectionSettings.windowTop, "the top offset must be stored")
-
-            retypeNumberField(showing = 42, to = 52)
-            assertEquals(52, get().projectionSettings.windowLeft, "the left offset must be stored")
-
-            retypeNumberField(showing = 43, to = 53)
-            assertEquals(53, get().projectionSettings.windowRight, "the right offset must be stored")
-
-            retypeNumberField(showing = 44, to = 54)
-            assertEquals(54, get().projectionSettings.windowBottom, "the bottom offset must be stored")
-
-            assertEquals(51, get().projectionSettings.windowTop, "and none of them disturbed the others")
-        }
-    }
-
-    /** The simulate stepper only exists in the dev fallback, and it adds assignment rows. */
-    @Test
-    fun `the simulate outputs stepper adds presenter windows`() {
-        projectionTab(screens = noExternalScreens()) { get ->
-            onNodeWithText("Presenter windows: 1").assertExists()
-            retypeNumberField(showing = 1, to = 3)
-
-            assertEquals(3, get().projectionSettings.devWindowCount, "the count must be stored")
-            onNodeWithText("Presenter windows: 3").assertExists("and the tab must report three windows")
-            gridButtons().assertCountEquals(Grid.gridButtonCount(rows = 3, devFallback = true) + Grid.trailing)
-            assertEquals(3, get().projectionSettings.screenAssignments.size, "with an assignment each")
         }
     }
 
     /**
-     * `NumberSettingsTextField` copies what you type into its own state, so the field reading back
-     * the new number right after typing would look right even if nothing were stored. This closes
-     * that loop the only way that means anything: type in one composition, then render a fresh tab
-     * from the settings that came out and assert the field shows the value there.
+     * The grid itself has no add button: its rows come from the displays the machine reports. The
+     * "Add Output" below it belongs to the Browser Source card, which does add one.
      */
     @Test
-    fun `a typed number is what a fresh render of the saved settings shows`() {
-        // The four offsets share a default, so give the top one a value only it holds.
-        var saved = settingsWith { copy(windowTop = 41) }
-        projectionTab(initial = saved) { get ->
-            retypeNumberField(showing = 41, to = 47)
-            saved = get()
-        }
-        assertEquals(47, saved.projectionSettings.windowTop, "the value must have been stored")
-        projectionTab(initial = saved) { _ ->
-            // Re-rendered from settings alone: the field can only be showing what was stored.
-            assertNumberFieldShows(47, "the window offset")
-        }
-    }
-
-    /** The mirror image: a rejected value is echoed on screen but never reaches the settings. */
-    @Test
-    fun `a rejected number never reaches a fresh render`() {
-        // The offsets run 0..10000, so 20001 is out of range the way 90 was for the band height this
-        // pair used to exercise, before that moved to the Bible and Song tabs.
-        var saved = settingsWith { copy(windowTop = 41) }
-        projectionTab(initial = saved) { get ->
-            retypeNumberField(showing = 41, to = 20001)
-            saved = get()
-        }
-        assertEquals(41, saved.projectionSettings.windowTop, "20001 is out of range")
-        projectionTab(initial = saved) { _ ->
-            assertNumberFieldShows(41, "the window offset")
-        }
-    }
-
-    // ── Buttons that report outwards ────────────────────────────────────────────────────────────
-
-    @Test
-    fun `the Identify button asks the app to flash the screens`() = runComposeUiTest {
-        var identified = 0
-        setContent {
-            MaterialTheme {
-                var state by remember { mutableStateOf(AppSettings()) }
-                ProjectionSettingsTab(
-                    settings = state,
-                    onSettingsChange = { transform -> state = transform(state) },
-                    companionServer = CompanionServer(),
-                    onIdentifyScreen = { identified++ },
-                    detectScreens = { twoExternalScreens() },
-                )
-            }
-        }
-        gridButton(Grid.IDENTIFY).performScrollTo().performClick()
-        waitForIdle()
-        assertEquals(1, identified, "clicking Identify must ask the app to flash the screens")
-    }
-
-    @Test
-    fun `Add Output creates a browser source`() = projectionTab { get ->
-        assertEquals(0, get().projectionSettings.browserSourceOutputs.size, "none out of the box")
-
-        onNodeWithText("Add Output").performScrollTo().performClick()
-        waitForIdle()
-
-        assertEquals(1, get().projectionSettings.browserSourceOutputs.size, "the button must add one")
-        onNodeWithText("Browser Source 1").assertExists("and the new output must appear in the table")
-    }
-
-    @Test
-    fun `Add Output can create several browser sources`() = projectionTab { get ->
-        // Addressed by label rather than ordinal: each added row shifts the buttons after it.
-        repeat(3) {
-            onNodeWithText("Add Output").performScrollTo().performClick()
+    fun `Add Output adds a browser source, not an assignment row`() {
+        projectionTab(assignments(1), screens = oneExternalScreen()) { get ->
+            val rows = getAssignments(get()).size
+            gridButton(Grid.addBrowserSourceOutput(rows)).performScrollTo().performClick()
             waitForIdle()
+
+            assertEquals(1, get().projectionSettings.browserSourceOutputs.size)
+            assertEquals(rows, getAssignments(get()).size, "the assignment grid is untouched")
         }
-        assertEquals(3, get().projectionSettings.browserSourceOutputs.size)
-        for (n in 1..3) onNodeWithText("Browser Source $n").assertExists()
     }
 
-    // ── Persistence ─────────────────────────────────────────────────────────────────────────────
+    @Test
+    fun `the tab offers an Identify button`() {
+        projectionTab { _ ->
+            gridButton(Grid.IDENTIFY).assertExists()
+        }
+    }
 
     @Test
-    fun `the values the controls write survive a settings json round trip`() = projectionTab { get ->
-        gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
-        waitForIdle()
-        onNodeWithText("Display 2 (3840x2160 @ 3200,0)").performClick()
-        waitForIdle()
-        retypeNumberField(showing = 32, to = 40)
+    fun `every profile in the document is offered to every output`() {
+        projectionTab(assignments(1), screens = oneExternalScreen()) { _ ->
+            gridButton(Grid.profile(0)).performScrollTo().performClick()
+            waitForIdle()
 
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-        val restored = json.decodeFromString<AppSettings>(json.encodeToString(get()))
+            onNodeWithText("Main").assertExists()
+            onNodeWithText("Foyer").assertExists()
+        }
+    }
 
-        assertEquals(
-            2,
-            restored.projectionSettings.screenAssignments[0].targetDisplay,
-            "the reassigned output must survive",
-        )
-        assertEquals(40, restored.projectionSettings.windowTop, "the window offset must survive")
+    /**
+     * How many labelled buttons follow the grid: Add Output, the NDI card's three with no runtime
+     * installed, the VLC Browse button, and the Camera Capture card's two. The audio-device
+     * dropdown between them is only composed where VLC is present, which is a property of the
+     * machine running the suite rather than of anything under test.
+     */
+    private fun trailingButtons(): Int {
+        val vlc = if (org.churchpresenter.app.churchpresenter.composables.isVlcAvailable) 1 else 0
+        return 1 + 3 + 1 + 2 + vlc
+    }
+
+    @Test
+    fun `the grid's ordinals are where Grid says they are`() {
+        // Pins the arithmetic the rest of this file addresses controls by: if a row gains or loses
+        // a control, this fails first and names the reason rather than every test failing obscurely.
+        projectionTab(assignments(2)) { _ ->
+            assertTrue(Grid.targetDisplay(1) == Grid.targetDisplay(0) + Grid.CONTROLS_PER_ROW)
+            assertEquals(Grid.keyOutput(0), Grid.targetDisplay(0) + 1)
+            assertEquals(Grid.profile(0), Grid.targetDisplay(0) + 2)
+        }
     }
 }

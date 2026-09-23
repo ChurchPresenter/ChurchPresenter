@@ -15,7 +15,6 @@ import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -44,7 +43,6 @@ class AppPreviewSettingsScreenshotTest {
                         settingsManager = SettingsManager(),
                         companionServer = CompanionServer(),
                         remoteClientManager = RemoteClientManager(),
-                        presenterManager = PresenterManager(),
                         onDismiss = {},
                         initialTab = tab,
                         initialSettings = appSettings,
@@ -77,10 +75,7 @@ class AppPreviewSettingsScreenshotTest {
     fun bible() = settingsTab("bible", 1)
 
     @Test
-    fun song() = settingsTab("song", 2)
-
-    @Test
-    fun background() = settingsTab("background", 3)
+    fun background() = settingsTab("background", 2)
 
     @Test
     fun projection() = settingsTab("projection", 4)
@@ -89,16 +84,10 @@ class AppPreviewSettingsScreenshotTest {
     fun server() = settingsTab("server", 5)
 
     @Test
-    fun `stage monitor`() = settingsTab("stage_monitor", 6)
+    fun atem() = settingsTab("atem", 6)
 
     @Test
-    fun atem() = settingsTab("atem", 7)
-
-    @Test
-    fun dictionary() = settingsTab("dictionary", 8)
-
-    @Test
-    fun `companion satellite`() = settingsTab("companion_satellite", 9)
+    fun `companion satellite`() = settingsTab("companion_satellite", 7)
 
     // The dialog's own tab row follows the General → Tab labels setting, so it is shot in the two
     // styles the System tab does not open with, and at the widest spacing, on the System tab where

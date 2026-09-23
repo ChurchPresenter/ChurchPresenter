@@ -66,9 +66,6 @@ internal fun styleLanguagesFor(songMode: String, selection: List<Int>): List<Son
         .mapNotNull { index -> SongStyleLanguage.entries.firstOrNull { it.translation == index } }
         .ifEmpty { listOf(SongStyleLanguage.PRIMARY) }
 
-/** Every language the global tab can style -- it speaks for all outputs, so it offers them all. */
-internal fun songStyleLanguages(): List<SongStyleLanguage> = SongStyleLanguage.entries
-
 /**
  * [element] on [target] as the panel should show it for [language].
  *

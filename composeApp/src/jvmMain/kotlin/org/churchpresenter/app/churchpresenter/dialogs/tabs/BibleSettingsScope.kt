@@ -1,21 +1,16 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_scope_full_screen
-import churchpresenter.composeapp.generated.resources.bible_scope_lower_third
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The basis a stored font size is expressed against.
@@ -27,23 +22,6 @@ import org.jetbrains.compose.resources.stringResource
 internal const val STYLING_BASIS_WIDTH = 1920
 internal const val STYLING_BASIS_HEIGHT = 1080
 
-/** The lower third's height is stored as a whole percentage of the output. */
-private const val PERCENT = 100
-
-/** What the output being styled actually is, in its own pixels. */
-@Composable
-internal fun scopeNote(settings: AppSettings, target: BibleStyleTarget): String {
-    val size = previewOutputSize(settings)
-    return if (target.isLowerThird) {
-        stringResource(
-            Res.string.bible_scope_lower_third,
-            size.width,
-            size.height * settings.bibleSettings.lowerThirdHeightPercent / PERCENT,
-        )
-    } else {
-        stringResource(Res.string.bible_scope_full_screen, size.width, size.height)
-    }
-}
 
 /**
  * The largest size at which [verse] still fits the output it is being styled for.

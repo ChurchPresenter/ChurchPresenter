@@ -3,8 +3,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,37 +10,40 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_hint_off
-import churchpresenter.composeapp.generated.resources.customize_hint_on
-import churchpresenter.composeapp.generated.resources.customize_hint_stage_off
-import churchpresenter.composeapp.generated.resources.customize_hint_stage_on
+import churchpresenter.composeapp.generated.resources.output_profile_preview_resolution_tooltip
 import churchpresenter.composeapp.generated.resources.preview
+import churchpresenter.composeapp.generated.resources.preview_sample_long
+import churchpresenter.composeapp.generated.resources.preview_sample_medium
+import churchpresenter.composeapp.generated.resources.preview_sample_short
+import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
+import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.ceil
 
@@ -68,77 +69,76 @@ private val PREVIEW_WIDTH = 426.dp
 /** How tall the picture may grow, leaving the rest of the column to the settings beneath it. */
 private val STAGE_MAX_HEIGHT = 230.dp
 
-private const val FOLLOWING_GLOBAL_ALPHA = 0.45f
+/** The preview-shape picker in the header row: a compact button, not a full-width field. */
+private val PREVIEW_RESOLUTION_WIDTH = 92.dp
 
 /**
- * The two right-hand columns: the element controls, and the picture they change.
+ * The element controls -- the left of the two panes [CustomizeBody] used to draw as one Row.
  *
  * The stage monitor takes the whole width instead. Its pane is a zone layout picker and a per-zone
- * style list — it has no elements to chip and draws its own preview inside itself, so splitting the
- * space would leave one half empty and squeeze the half that is used.
+ * style list — it has no elements to chip and draws its own preview inside itself, and it has no
+ * preview column beside it either, which is what tells [ProfileEditor] not to show one.
  */
 @Composable
-internal fun CustomizeBody(
+internal fun CustomizeControls(
     pane: CustomizePane,
     element: CustomizeElement?,
     elements: List<CustomizeElement>,
-    live: Boolean,
     draft: AppSettings,
-    assignment: ScreenAssignment,
-    outputKind: OutputKind,
+    profile: OutputProfile,
     translationIndex: Int,
     onTranslationChange: (Int) -> Unit,
     onElementChange: (CustomizeElement) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    /** A change to the screen itself rather than to its styling -- see [SongCustomizePane]. */
-    onAssignmentChange: (ScreenAssignment) -> Unit,
+    /** A change to the profile's content selection rather than to its styling -- see [SongCustomizePane]. */
+    onProfileFieldChange: (OutputProfile) -> Unit,
 ) {
     if (pane == CustomizePane.STAGE_MONITOR) {
-        DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
-            StageMonitorSettingsTab(settings = draft, onSettingsChange = onSettingsChange)
-        }
+        StageMonitorSettingsTab(settings = draft, onSettingsChange = onSettingsChange)
         return
     }
-    Row(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-            // Bible only, and only with a stack worth choosing from: every other category has one
-            // set of settings, so a selector above it would name a choice that does not exist.
-            if (pane == CustomizePane.BIBLE) {
-                CustomizeTranslationChips(
-                    translations = draft.bibleSettings.translationList(),
-                    selected = translationIndex,
-                    onSelect = onTranslationChange,
-                )
-            }
-            CustomizeElementChips(elements, element, onElementChange)
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
-                CustomizePaneContent(
-                    pane = pane,
-                    element = element,
-                    translationIndex = translationIndex,
-                    draft = draft,
-                    assignment = assignment,
-                    onSettingsChange = onSettingsChange,
-                    onAssignmentChange = onAssignmentChange,
-                )
-            }
+    Column(modifier = Modifier.fillMaxHeight()) {
+        // Bible only, and only with a stack worth choosing from: every other category has one
+        // set of settings, so a selector above it would name a choice that does not exist.
+        if (pane == CustomizePane.BIBLE) {
+            CustomizeTranslationChips(
+                translations = draft.bibleSettings.translationList(),
+                selected = translationIndex,
+                onSelect = onTranslationChange,
+            )
         }
-        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        CustomizePreviewColumn(pane, element, live, draft, assignment, outputKind, onSettingsChange)
+        CustomizeElementChips(elements, element, onElementChange)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        CustomizePaneContent(
+            pane = pane,
+            element = element,
+            translationIndex = translationIndex,
+            draft = draft,
+            profile = profile,
+            onSettingsChange = onSettingsChange,
+            onProfileFieldChange = onProfileFieldChange,
+        )
     }
 }
 
-/** The picture, its caption, and the settings that belong to it rather than to one element. */
+/**
+ * The picture, its caption, and the settings that belong to it rather than to one element.
+ *
+ * A sibling of the rest of [ProfileEditor]'s content rather than nested inside it, so its top edge
+ * lines up with the Profiles tab's own rail rather than starting further down, under the name/
+ * display-mode header.
+ */
 @Composable
-private fun CustomizePreviewColumn(
+internal fun CustomizePreviewColumn(
     pane: CustomizePane,
     element: CustomizeElement?,
-    live: Boolean,
     draft: AppSettings,
-    assignment: ScreenAssignment,
-    outputKind: OutputKind,
+    profile: OutputProfile,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onProfileFieldChange: (OutputProfile) -> Unit,
+    onNavigate: (CustomizePane, CustomizeElement) -> Unit,
+    slot: PreviewSampleSlot,
+    onSlotChange: (PreviewSampleSlot) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -158,10 +158,50 @@ private fun CustomizePreviewColumn(
         ) {
             CustomizeCaption(stringResource(Res.string.preview))
             Spacer(modifier = Modifier.weight(1f))
+            // A profile is not tied to one output's real size -- it can be assigned to outputs of
+            // different shapes -- so the operator picks a representative shape to preview it at,
+            // stored on the profile itself rather than guessed at. The tooltip says so, because the
+            // control sits right beside the real target-display resolution pickers on the
+            // Projection tab and reads exactly like one of them otherwise.
+            @OptIn(ExperimentalMaterial3Api::class)
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = {
+                    PlainTooltip { Text(stringResource(Res.string.output_profile_preview_resolution_tooltip)) }
+                },
+                state = rememberTooltipState(),
+            ) {
+                ResolutionPicker(
+                    label = "",
+                    width = profile.previewWidth,
+                    height = profile.previewHeight,
+                    cellWidth = PREVIEW_RESOLUTION_WIDTH,
+                    labelHeight = 0.dp,
+                    onChange = { w, h -> onProfileFieldChange(profile.copy(previewWidth = w, previewHeight = h)) },
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = displayModeLabel(assignment.displayMode),
+                text = displayModeLabel(profile.displayMode),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        // How much text the picture stands in for. A layout that reads perfectly against one verse
+        // can overflow against a long one, and this is the only way to check that without putting
+        // the real thing live -- the samples themselves never went anywhere, but the selector that
+        // reached them did, leaving every preview stuck on MEDIUM.
+        Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)) {
+            ChoiceControl(
+                options = listOf(
+                    PreviewSampleSlot.SHORT.name to stringResource(Res.string.preview_sample_short),
+                    PreviewSampleSlot.MEDIUM.name to stringResource(Res.string.preview_sample_medium),
+                    PreviewSampleSlot.LONG.name to stringResource(Res.string.preview_sample_long),
+                ),
+                selected = slot.name,
+                onSelect = { picked -> onSlotChange(PreviewSampleSlot.valueOf(picked)) },
             )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -173,20 +213,14 @@ private fun CustomizePreviewColumn(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
-            // Width only: the stage's own `aspectRatio` sets the height from it.
-            // This output's own size, not "whichever output happens to be first" -- the whole
-            // point of a per-output override is that this screen can be a different shape from the
-            // others, and previewing it at another one's aspect ratio defeats that (issue: the
-            // Customize dialog for a second, differently-shaped output showed the first output's
-            // picture).
-            val output = outputSizeOf(assignment, outputKind)
+            val output = OutputSize(profile.previewWidth, profile.previewHeight)
             CustomizeStagePanel(
                 pane = pane,
                 element = element,
                 settings = draft,
-                assignment = assignment,
+                profile = profile,
                 output = output,
-                slot = PreviewSampleSlot.MEDIUM,
+                slot = slot,
                 modifier = Modifier.width(minOf(maxWidth, STAGE_MAX_HEIGHT * output.aspectRatio)),
             )
         }
@@ -199,16 +233,14 @@ private fun CustomizePreviewColumn(
         // rows continue below the fold, and an operator has no reason to look for them.
         val stripScroll = rememberScrollState()
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            DimmedWhenFollowing(live, Modifier.fillMaxSize()) {
-                CustomizeCategoryStrip(
-                    pane = pane,
-                    element = element,
-                    settings = draft,
-                    assignment = assignment,
-                    onSettingsChange = onSettingsChange,
-                    modifier = Modifier.verticalScroll(stripScroll),
-                )
-            }
+            CustomizeCategoryStrip(
+                pane = pane,
+                element = element,
+                settings = draft,
+                onSettingsChange = onSettingsChange,
+                onNavigate = onNavigate,
+                modifier = Modifier.verticalScroll(stripScroll),
+            )
             SettingsScrollbar(stripScroll)
         }
     }
@@ -330,42 +362,6 @@ private val SELECTOR_ROW_GAP = 4.dp
 
 private const val SELECTOR_MAX_LINES = 2
 
-/**
- * [content], dimmed and swallowing input while this category is following the global settings.
- *
- * Swallows clicks rather than disabling each control: the panes are whole settings forms, and there
- * is no `enabled` to thread through a hundred of them. What is on screen stays true — those are the
- * global values, which is what the output draws — without inviting an edit that would silently
- * switch the category on.
- */
-@Composable
-private fun DimmedWhenFollowing(live: Boolean, modifier: Modifier, content: @Composable () -> Unit) {
-    Box(modifier = modifier) {
-        Box(modifier = Modifier.alpha(if (live) 1f else FOLLOWING_GLOBAL_ALPHA)) { content() }
-        if (!live) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {},
-                    ),
-            )
-        }
-    }
-}
-
-@Composable
-internal fun paneHint(pane: CustomizePane, overridden: Boolean): String =
-    if (pane == CustomizePane.STAGE_MONITOR) {
-        if (overridden) stringResource(Res.string.customize_hint_stage_on)
-        else stringResource(Res.string.customize_hint_stage_off)
-    } else {
-        if (overridden) stringResource(Res.string.customize_hint_on)
-        else stringResource(Res.string.customize_hint_off)
-    }
-
 /** The pane that edits this category, showing [element]. */
 @Composable
 private fun CustomizePaneContent(
@@ -373,9 +369,9 @@ private fun CustomizePaneContent(
     element: CustomizeElement?,
     translationIndex: Int,
     draft: AppSettings,
-    assignment: ScreenAssignment,
+    profile: OutputProfile,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onAssignmentChange: (ScreenAssignment) -> Unit,
+    onProfileFieldChange: (OutputProfile) -> Unit,
 ) {
     val shown = element ?: return
     // Keyed on what the column is pointed at. One set of controls stands for many stored profiles,
@@ -385,17 +381,28 @@ private fun CustomizePaneContent(
     // own panel for exactly this reason.
     key(pane, shown, translationIndex) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleCustomizePane(shown, translationIndex, draft, onSettingsChange)
+            CustomizePane.BIBLE -> BibleCustomizePane(
+                element = shown,
+                translationIndex = translationIndex,
+                settings = draft,
+                profile = profile,
+                onSettingsChange = onSettingsChange,
+            )
             CustomizePane.SONGS -> SongCustomizePane(
                 element = shown,
                 settings = draft,
                 onSettingsChange = onSettingsChange,
-                songMode = assignment.songMode,
-                songTranslations = assignment.songTranslations,
-                onSongModeChange = { onAssignmentChange(assignment.copy(songMode = it)) },
+                songMode = profile.songMode,
+                songTranslations = profile.songTranslations,
+                onSongModeChange = { onProfileFieldChange(profile.copy(songMode = it)) },
             )
-            CustomizePane.BACKGROUND -> BackgroundCustomizePane(shown, draft, onSettingsChange)
-            CustomizePane.DICTIONARY -> DictionaryCustomizePane(shown, draft, onSettingsChange)
+            CustomizePane.BACKGROUND -> BackgroundCustomizePane(
+                element = shown,
+                settings = draft,
+                profile = profile,
+                onSettingsChange = onSettingsChange,
+                onProfileFieldChange = onProfileFieldChange,
+            )
             // Handled by CustomizeBody, which gives it the whole width instead of this column.
             CustomizePane.STAGE_MONITOR -> Unit
         }

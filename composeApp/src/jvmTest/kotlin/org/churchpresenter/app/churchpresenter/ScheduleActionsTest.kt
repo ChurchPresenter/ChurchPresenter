@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -208,5 +209,142 @@ class ScheduleActionsTest {
 
         assertTrue(first == second, "identical lambda references make two instances equal")
         assertTrue(first != third, "two separately-created lambdas are never equal, even if both are no-ops")
+    }
+
+    // ── The calendar's own callbacks ────────────────────────────────────────────────────────────
+
+    private val label = ScheduleItem.LabelItem(
+        id = "l1",
+        text = "Worship",
+        textColor = "#FFFFFF",
+        backgroundColor = "#000000",
+    )
+
+    /**
+     * The nine added for the Calendar Manager, all defaulted and all reachable from a background
+     * thread.
+     *
+     * Same reasoning as the no-op test above and worth repeating for these in particular: the
+     * automation engine calls [ScheduleActions.currentTiming] every tick and the rest on whichever
+     * tick a cue fires, with nowhere to report an exception. A default that threw would take the
+     * tick down rather than doing nothing visible.
+     */
+    @Test
+    fun `every calendar default is a safe no-op too`() {
+        val actions = ScheduleActions()
+
+        actions.addCue(ScheduleItem.CueItem(id = "c1", action = "show"))
+        actions.addRow(label, null)
+        actions.setServiceStart("10:30")
+        actions.setServiceStart(null)
+        actions.addLabel("Worship", "#FFFFFF", "#000000")
+        actions.addLowerThird("preset-1", "Welcome", true, 2_000)
+        actions.presentScene("scene-1")
+        actions.playSlideshow(label, 1)
+        actions.selectItem("row-1")
+    }
+
+    @Test
+    fun `currentTiming reports an empty map rather than null`() {
+        // The engine indexes into this by row id every tick, so a null would be a crash per tick
+        // rather than a schedule that simply runs nothing.
+        assertEquals(emptyMap<String, RowTiming>(), ScheduleActions().currentTiming())
+    }
+
+    @Test
+    fun `addRow passes the item and its timing through together`() {
+        // They travel as a pair on purpose: a planned row's timing was set on that very row, and
+        // adding the item first and its timing afterwards is how the two came apart before.
+        var received: Pair<ScheduleItem, RowTiming?>? = null
+        val timing = RowTiming()
+        val actions = ScheduleActions(addRow = { item, t -> received = item to t })
+
+        actions.addRow(label, timing)
+
+        assertEquals(label to timing, received)
+    }
+
+    @Test
+    fun `addCue passes the whole cue through untouched`() {
+        var received: ScheduleItem.CueItem? = null
+        val actions = ScheduleActions(addCue = { received = it })
+        val cue = ScheduleItem.CueItem(id = "c1", action = "show", absoluteTime = "09:45", payload = label)
+
+        actions.addCue(cue)
+
+        assertEquals(cue, received, "its payload and its time ride along with it")
+    }
+
+    @Test
+    fun `setServiceStart passes a null through rather than dropping the call`() {
+        // Null means "forget the start time", which is a real instruction and not an absent one.
+        val received = mutableListOf<String?>()
+        val actions = ScheduleActions(setServiceStart = { received += it })
+
+        actions.setServiceStart("10:30")
+        actions.setServiceStart(null)
+
+        assertEquals(listOf("10:30", null), received)
+    }
+
+    @Test
+    fun `addLabel passes text and both colours in order`() {
+        var received: List<Any>? = null
+        val actions = ScheduleActions(addLabel = { text, fg, bg -> received = listOf(text, fg, bg) })
+
+        actions.addLabel("Worship", "#FFFFFF", "#101010")
+
+        assertEquals(listOf("Worship", "#FFFFFF", "#101010"), received)
+    }
+
+    @Test
+    fun `addLowerThird passes the preset, its label and both pause arguments in order`() {
+        var received: List<Any>? = null
+        val actions = ScheduleActions(
+            addLowerThird = { id, label, pause, ms -> received = listOf(id, label, pause, ms) },
+        )
+
+        actions.addLowerThird("preset-1", "Welcome", true, 2_000)
+
+        assertEquals(listOf("preset-1", "Welcome", true, 2_000L), received)
+    }
+
+    @Test
+    fun `presentScene and selectItem each pass their own id`() {
+        val received = mutableListOf<String>()
+        val actions = ScheduleActions(
+            presentScene = { received += "scene:$it" },
+            selectItem = { received += "row:$it" },
+        )
+
+        actions.presentScene("scene-1")
+        actions.selectItem("row-7")
+
+        assertEquals(listOf("scene:scene-1", "row:row-7"), received)
+    }
+
+    @Test
+    fun `playSlideshow passes the item and how many times it plays`() {
+        var received: Pair<ScheduleItem, Int>? = null
+        val actions = ScheduleActions(playSlideshow = { item, plays -> received = item to plays })
+
+        // 0 is "until something else goes live", which is a distinct instruction from 1 and the
+        // one most likely to be lost to a coerceAtLeast somewhere on the way.
+        actions.playSlideshow(label, 0)
+
+        assertEquals(label to 0, received)
+    }
+
+    @Test
+    fun `a bundle with one calendar action wired leaves the rest at their defaults`() {
+        // How it is really built: each site wires the few it owns and passes the rest through.
+        var selected: String? = null
+        val actions = ScheduleActions(selectItem = { selected = it })
+
+        actions.selectItem("row-7")
+        actions.presentScene("scene-1")
+
+        assertEquals("row-7", selected)
+        assertEquals(emptyMap(), actions.currentTiming(), "the ones it did not name are still the defaults")
     }
 }

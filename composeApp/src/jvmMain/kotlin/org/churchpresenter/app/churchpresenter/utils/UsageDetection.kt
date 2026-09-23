@@ -3,6 +3,8 @@ package org.churchpresenter.app.churchpresenter.utils
 import org.churchpresenter.songchords.ChordTransposer
 
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.bibleTranslationPositions
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
@@ -14,55 +16,48 @@ import org.churchpresenter.settings.utils.Constants
  * set to show everything is not bilingual when the content only ever had one language.
  *
  * Outputs with no display chosen are skipped throughout, for the same reason they are in
- * [LiveMapReporter.setupFacts] — the operator has switched them off.
+ * [LiveMapReporter.setupFacts] — the operator has switched them off. Callers filter to
+ * [isLiveOutput] assignments and resolve each to its [OutputProfile] before calling any function
+ * below -- content and layout live on the profile, not the assignment, once one is picked.
  */
 internal fun ScreenAssignment.isLiveOutput(): Boolean = targetDisplay != Constants.KEY_TARGET_NONE
 
 /**
- * True when [song] carries a second language and some live output is set to show it.
+ * True when [song] carries a second language and some live output's profile is set to show it.
  *
- * Each output's `songMode` is the whole answer rather than one input to it: every real call site
+ * Each profile's `songMode` is the whole answer rather than one input to it: every real call site
  * passes it to `SongPresenter` as `languageOverride`, which takes precedence over the global
  * fullscreen/lower-third language setting whenever it is set, and it always is.
  */
-internal fun isDualLanguagePresentation(song: SongItem, outputs: List<ScreenAssignment>): Boolean {
+internal fun isDualLanguagePresentation(song: SongItem, outputs: List<OutputProfile>): Boolean {
     if (song.secondaryLyrics.isEmpty()) return false
-    return outputs.any {
-        it.isLiveOutput() &&
-            it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY
-    }
+    return outputs.any { it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY }
 }
 
 /**
- * True when the Bible stack holds at least two translations and some live output shows two or more
- * of them at once.
+ * True when the Bible stack holds at least two translations and some live output's profile shows
+ * two or more of them at once.
  *
- * An output's `bibleTranslations` is a list of positions in the stack; empty means "all of them,
+ * A profile's `bibleTranslations` is a list of positions in the stack; empty means "all of them,
  * including any added later", so an empty list shows the whole stack. Positions past the end of the
  * stack are ignored rather than counted — a settings file can outlive the translations it names.
  *
  * @param translationCount size of `BibleSettings.translationList()`.
  */
-internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List<ScreenAssignment>): Boolean {
+internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List<OutputProfile>): Boolean {
     if (translationCount < 2) return false
-    return outputs.any { output ->
-        if (!output.isLiveOutput() || !output.showBible) return@any false
-        val shown =
-            if (output.bibleTranslations.isEmpty()) translationCount
-            else output.bibleTranslations.count { it in 0 until translationCount }
-        shown >= 2
+    return outputs.any { profile ->
+        if (!profile.showBible) return@any false
+        profile.bibleTranslationPositions(translationCount).size >= 2
     }
 }
 
 /**
- * True when [song] carries chords and some live output is set to draw them.
+ * True when [song] carries chords and some live output's profile is set to draw them.
  */
-internal fun isChordChartPresentation(
-    song: SongItem,
-    outputs: List<ScreenAssignment>,
-): Boolean {
+internal fun isChordChartPresentation(song: SongItem, outputs: List<OutputProfile>): Boolean {
     if (song.lyrics.none { ChordTransposer.hasChords(it) }) return false
-    return outputs.any { it.isLiveOutput() && it.showChords }
+    return outputs.any { it.showChords }
 }
 
 /**
@@ -71,19 +66,16 @@ internal fun isChordChartPresentation(
  * every screen carrying the same thing.
  *
  * Measured as "the live outputs do not all agree": two or more distinct selections among the
- * outputs that are showing this content type at all. An output switched off, or one showing nothing
- * of this type, is not a disagreement — it is an absence, and would otherwise report every ordinary
- * single-screen setup that happens to have a spare output configured.
+ * outputs that are showing this content type at all. An output showing nothing of this type is not
+ * a disagreement — it is an absence, and would otherwise report every ordinary single-screen setup
+ * that happens to have a spare output configured.
  */
-internal fun isSplitScreenBible(translationCount: Int, outputs: List<ScreenAssignment>): Boolean {
+internal fun isSplitScreenBible(translationCount: Int, outputs: List<OutputProfile>): Boolean {
     if (translationCount < 2) return false
     val selections = outputs
-        .filter { it.isLiveOutput() && it.showBible }
-        .map { output ->
-            val chosen =
-                if (output.bibleTranslations.isEmpty()) (0 until translationCount).toList()
-                else output.bibleTranslations.filter { it in 0 until translationCount }
-            chosen.toSet()
+        .filter { it.showBible }
+        .map { profile ->
+            profile.bibleTranslationPositions(translationCount).toSet()
         }
         .filter { it.isNotEmpty() }
     return selections.distinct().size >= 2
@@ -91,13 +83,11 @@ internal fun isSplitScreenBible(translationCount: Int, outputs: List<ScreenAssig
 
 /**
  * True when the live outputs disagree about which song language they show — the same split-screen
- * setup as [isSplitScreenBible], for songs. `songMode` is per output and is what actually reaches
- * `SongPresenter`, so two outputs with different modes are showing two different things.
+ * setup as [isSplitScreenBible], for songs. A profile's `songMode` is what actually reaches
+ * `SongPresenter`, so two profiles with different modes are showing two different things.
  */
-internal fun isSplitScreenSong(outputs: List<ScreenAssignment>): Boolean =
-    outputs.filter { it.isLiveOutput() && it.showSongs }
-        .map { it.songMode }
-        .distinct().size >= 2
+internal fun isSplitScreenSong(outputs: List<OutputProfile>): Boolean =
+    outputs.filter { it.showSongs }.map { it.songMode }.distinct().size >= 2
 
 /**
  * Whether this install has somewhere real to put content in front of an audience.

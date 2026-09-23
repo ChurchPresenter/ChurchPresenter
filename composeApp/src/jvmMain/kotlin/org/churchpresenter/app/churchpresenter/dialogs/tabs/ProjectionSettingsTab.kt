@@ -42,43 +42,15 @@ import churchpresenter.composeapp.generated.resources.audio_output
 import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
 import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.content_announcements
-import churchpresenter.composeapp.generated.resources.tab_canvas
-import churchpresenter.composeapp.generated.resources.tab_qa
-import churchpresenter.composeapp.generated.resources.tab_stt
-import churchpresenter.composeapp.generated.resources.tab_dictionary
-import churchpresenter.composeapp.generated.resources.content_bible_background
-import churchpresenter.composeapp.generated.resources.content_background_layered_tooltip
-import churchpresenter.composeapp.generated.resources.content_media
-import churchpresenter.composeapp.generated.resources.content_pictures
-import churchpresenter.composeapp.generated.resources.content_songs_background
-import churchpresenter.composeapp.generated.resources.content_streaming
-import churchpresenter.composeapp.generated.resources.content_bible_translation_portion_ot_nt
-import churchpresenter.composeapp.generated.resources.content_bible_translation_portion_nt
-import churchpresenter.composeapp.generated.resources.content_bible_translation_portion_ot
-import churchpresenter.composeapp.generated.resources.display_fullscreen
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.key_output_none
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.loading
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.media_vlc_required
-import churchpresenter.composeapp.generated.resources.projection_content_background
-import churchpresenter.composeapp.generated.resources.projection_content_chords_tooltip
-import churchpresenter.composeapp.generated.resources.projection_content_lt_background
-import churchpresenter.composeapp.generated.resources.projection_content_song_la
-import churchpresenter.composeapp.generated.resources.projection_content_web
-import churchpresenter.composeapp.generated.resources.projection_content_song_la_tooltip
-import churchpresenter.composeapp.generated.resources.projection_content_stt_tooltip
 import churchpresenter.composeapp.generated.resources.projection_position_help
-import churchpresenter.composeapp.generated.resources.stage_monitor_show_chords
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
-import churchpresenter.composeapp.generated.resources.screen_lang_language_n
-import churchpresenter.composeapp.generated.resources.screen_lang_language_1
-import churchpresenter.composeapp.generated.resources.screen_lang_language_2
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
@@ -88,7 +60,6 @@ import churchpresenter.composeapp.generated.resources.window_position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.ndi.NdiRuntimeStatus
@@ -108,9 +79,7 @@ import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -142,28 +111,6 @@ data class DetectedScreen(
     /** What a name typed for this monitor is stored against — see [ProjectionSettings.screenNames]. */
     val key: String get() = screenKey(boundsX, boundsY, boundsW, boundsH)
 }
-
-/**
- * One row of the Bible Translations picker: [code] is the file stem (also the selection key,
- * matching [BibleSettings.translationList] order), [title] and [portion] come from
- * [Bible.readTranslationSummary]'s cheap header-only read and fall back to [code] / blank when a
- * file can't be read.
- */
-/**
- * One pickable language in a per-output content cell.
- *
- * Shared by Bible translations and song languages: both are "an ordered stack, pick which of them
- * this output shows", and `ContentTranslationCell` draws either from these three fields. It was
- * `BibleTranslationDisplay` while the Bible was the only thing with a stack.
- *
- * [code] is the short badge on the collapsed trigger — a Bible's abbreviation, a song language's
- * position. [portion] is the grey detail line, which songs leave blank.
- */
-data class TranslationChoiceDisplay(
-    val code: String,
-    val title: String,
-    val portion: String,
-)
 
 /**
  * The real display list, read from AWT.
@@ -385,146 +332,6 @@ fun ProjectionSettingsTab(
         options.toList()
     }
 
-    // Content-type columns — shared by the per-hardware Screen Assignment grid (Card 1)
-    // and the per-output Browser Source checkboxes (Card 1.5).
-    val picturesLabel = stringResource(Res.string.content_pictures)
-    val mediaLabel = stringResource(Res.string.content_media)
-    val streamingLabel = stringResource(Res.string.content_streaming)
-    val announcementsLabel = stringResource(Res.string.content_announcements)
-    val dictionaryLabel = stringResource(Res.string.tab_dictionary)
-    val canvasLabel = stringResource(Res.string.tab_canvas)
-    val webLabel = stringResource(Res.string.projection_content_web)
-    val qaLabel = stringResource(Res.string.tab_qa)
-    val sttLabel = stringResource(Res.string.tab_stt)
-    val sttTooltip = stringResource(Res.string.projection_content_stt_tooltip)
-    val songLaLabel = stringResource(Res.string.projection_content_song_la)
-    val backgroundLabel = stringResource(Res.string.projection_content_background)
-    val ltBackgroundLabel = stringResource(Res.string.projection_content_lt_background)
-    val bibleBackgroundLabel = stringResource(Res.string.content_bible_background)
-    val songsBackgroundLabel = stringResource(Res.string.content_songs_background)
-    val backgroundLayeredTooltip = stringResource(Res.string.content_background_layered_tooltip)
-
-    val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
-    val chordsLabel = stringResource(Res.string.stage_monitor_show_chords)
-    val chordsTooltip = stringResource(Res.string.projection_content_chords_tooltip)
-    val contentCols = listOf(
-        ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
-            if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
-            else a.copy(songLookAhead = false)
-        }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
-        // Stage monitor only. The chart is for whoever is playing, so it is drawn on the
-        // confidence screen and nowhere the congregation can see -- a full screen or a lower
-        // third never draws one, and offering them the toggle offers a control that does nothing.
-        ContentCol(
-            chordsLabel,
-            { it.showChords },
-            { a, v -> a.copy(showChords = v) },
-            visible = { it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR },
-            tooltip = chordsTooltip,
-        ),
-        ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
-        ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
-        ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
-        ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
-        ContentCol(webLabel, { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }, isWeb = true),
-        ContentCol(canvasLabel, { it.showCanvas }, { a, v -> a.copy(showCanvas = v) }),
-        ContentCol(qaLabel, { it.showQA }, { a, v -> a.copy(showQA = v) }),
-        ContentCol(sttLabel, { it.showSTT }, { a, v -> a.copy(showSTT = v) }, tooltip = sttTooltip),
-        ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
-        ContentCol(backgroundLabel, { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
-        ContentCol(ltBackgroundLabel, { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
-        ContentCol(bibleBackgroundLabel, { it.showBibleBackground }, { a, v -> a.copy(showBibleBackground = v) }, tooltip = backgroundLayeredTooltip),
-        ContentCol(songsBackgroundLabel, { it.showSongsBackground }, { a, v -> a.copy(showSongsBackground = v) }, tooltip = backgroundLayeredTooltip),
-    )
-    // Split for the Content Outputs dialog: the last four toggles are the layered backgrounds,
-    // everything before them is regular content. Bible/Songs language modes are handled
-    // separately (dropdowns, not booleans).
-    val backgroundGroup = contentCols.takeLast(4)
-    val contentGroup = contentCols.dropLast(4)
-
-    val fullScreenLabel = stringResource(Res.string.display_fullscreen)
-    val lowerThirdLabel = stringResource(Res.string.display_lower_third)
-    val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
-    // One Lower Third entry, not two. Horizontal band and vertical strip are the same mode wearing
-    // the same style profile -- only the band's geometry differs -- so the orientation is a
-    // property of the lower third rather than a mode of its own, and it is set in Customize.
-    // `shownDisplayMode`/`pickedDisplayMode` are what keep a vertical output reading "Lower Third"
-    // here instead of falling through to the Full Screen label.
-    val displayModes = listOf(
-        fullScreenLabel to Constants.DISPLAY_MODE_FULLSCREEN,
-        lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-        stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
-    )
-
-    // What the first two song languages are called on this tab when nobody has named them. Used by
-    // the Screen Assignment table (Card 1) and the Browser Source Outputs table (Card 1.5).
-    val lang1Label = stringResource(Res.string.screen_lang_language_1)
-    val lang2Label = stringResource(Res.string.screen_lang_language_2)
-    // translationNames stays the plain file-stem list: it's what every count/index computation
-    // below keys off (selection indices, "N of M" summaries) and must line up 1:1 with
-    // translationList()'s order regardless of whether a title could be read.
-    val translationNames = settings.bibleSettings.translationList()
-        .map { it.fileName.substringBeforeLast('.') }
-    // Richer per-row display info for the Bible Translations picker only. Reads just the header
-    // block of each .spb (title + which book IDs are present) via Bible.readTranslationSummary --
-    // not the full verse parse -- so this stays cheap even with many translations installed.
-    val otNtPortionLabel = stringResource(Res.string.content_bible_translation_portion_ot_nt)
-    val ntPortionLabel = stringResource(Res.string.content_bible_translation_portion_nt)
-    val otPortionLabel = stringResource(Res.string.content_bible_translation_portion_ot)
-    val translationStack = settings.bibleSettings.translations
-    val storageDirectory = settings.bibleSettings.storageDirectory
-    // What the picker shows until the headers have been read: one row per configured translation,
-    // each named by its file stem. Same shape and length as the finished list, so the picker's row
-    // count and the positions a selection stores are right from the first frame.
-    val unreadTranslationDisplays = remember(translationStack, storageDirectory) {
-        translationNames.map { TranslationChoiceDisplay(code = it, title = it, portion = "") }
-    }
-    // Reading a header is file I/O and has no business happening during composition. Kept null while
-    // in flight -- and reset to null whenever the stack changes -- so a list read for the previous
-    // stack is never shown against the current one, which would put the wrong number of rows in the
-    // picker and misalign the positions a selection is stored as.
-    val readTranslationDisplays by produceState<List<TranslationChoiceDisplay>?>(
-        initialValue = null,
-        translationStack, storageDirectory, otNtPortionLabel, ntPortionLabel, otPortionLabel,
-    ) {
-        value = null
-        value = withContext(Dispatchers.IO) {
-            settings.bibleSettings.translationList().map { t ->
-                val code = t.fileName.substringBeforeLast('.')
-                val path = if (storageDirectory.isNotEmpty()) File(storageDirectory, t.fileName).absolutePath else t.fileName
-                val summary = Bible.readTranslationSummary(path)
-                val portion = when {
-                    summary?.hasOldTestament == true && summary.hasNewTestament -> otNtPortionLabel
-                    summary?.hasNewTestament == true -> ntPortionLabel
-                    summary?.hasOldTestament == true -> otPortionLabel
-                    else -> ""
-                }
-                TranslationChoiceDisplay(
-                    code = code,
-                    title = summary?.title?.takeIf { it.isNotBlank() } ?: code,
-                    portion = portion,
-                )
-            }
-        }
-    }
-    val translationDisplays = readTranslationDisplays ?: unreadTranslationDisplays
-    // The song's languages as pickable choices, in the order a song carries them. Named from the
-    // Song settings tab where the operator has given one a name, and positionally otherwise --
-    // "Language 1"/"Language 2" are the names these two have always had on this tab.
-    val songLanguageChoices = List(MAX_SONG_TRANSLATIONS) { position ->
-        val configured = settings.songSettings.translations.getOrNull(position - 1)?.label.orEmpty()
-        val fallback = when (position) {
-            0 -> lang1Label
-            1 -> lang2Label
-            else -> stringResource(Res.string.screen_lang_language_n, position + 1)
-        }
-        TranslationChoiceDisplay(
-            code = (position + 1).toString(),
-            title = configured.ifBlank { fallback },
-            portion = "",
-        )
-    }
-
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
     // Reserves 2 lines of bodySmall (16.sp line height) so single-line labels (Bible, display
@@ -559,12 +366,6 @@ fun ProjectionSettingsTab(
         screenAssignments = screenAssignments,
         displayOptions = displayOptions,
         noneLabel = noneLabel,
-        contentGroup = contentGroup,
-        backgroundGroup = backgroundGroup,
-        displayModes = displayModes,
-        songLanguageChoices = songLanguageChoices,
-        translationDisplays = translationDisplays,
-        translationNames = translationNames,
     )
 
     BrowserSourceOutputsCard(
@@ -572,12 +373,6 @@ fun ProjectionSettingsTab(
         onSettingsChange = onSettingsChange,
         companionServer = companionServer,
         onIdentifyBrowserSource = onIdentifyBrowserSource,
-        contentGroup = contentGroup,
-        backgroundGroup = backgroundGroup,
-        displayModes = displayModes,
-        songLanguageChoices = songLanguageChoices,
-        translationDisplays = translationDisplays,
-        translationNames = translationNames,
     )
 
     NdiOutputsCard(
@@ -586,12 +381,6 @@ fun ProjectionSettingsTab(
         receiverCount = ndiReceiverCount,
         settings = settings,
         onSettingsChange = onSettingsChange,
-        contentGroup = contentGroup,
-        backgroundGroup = backgroundGroup,
-        displayModes = displayModes,
-        songLanguageChoices = songLanguageChoices,
-        translationDisplays = translationDisplays,
-        translationNames = translationNames,
     )
 
     // ── Card 2: Audio Output ─────────────────────────────────────────────────
@@ -851,24 +640,3 @@ fun ProjectionSettingsTab(
     SettingsScrollbar(scrollState)
     }
 }
-
-/**
- * One toggleable content type shown in the Content Outputs dialog. Getter/setter operate on a
- * [ScreenAssignment] (a physical screen assignment or a browser-source output — both share the type).
- */
-data class ContentCol(
-    val label: String,
-    val getter: (ScreenAssignment) -> Boolean,
-    val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
-    val enabled: (ScreenAssignment) -> Boolean = { true },
-    /**
-     * Whether this output is offered the toggle at all, as against [enabled], which greys one it is
-     * still offered. A column an output cannot obey is left out of the dialog, out of Select All /
-     * Clear All, and out of the "N of M enabled" count -- counting a toggle nobody is shown makes
-     * the denominator disagree with what is on screen.
-     */
-    val visible: (ScreenAssignment) -> Boolean = { true },
-    val tooltip: String? = null,
-    /** Marks the Web column — its label is localized, so it can't be identified by text. */
-    val isWeb: Boolean = false
-)

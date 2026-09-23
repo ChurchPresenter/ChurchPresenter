@@ -17,15 +17,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.SwitchVideo
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,12 +58,10 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.server_settings
-import churchpresenter.composeapp.generated.resources.song
+import churchpresenter.composeapp.generated.resources.output_profiles_tab
 import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.atem_settings
 import churchpresenter.composeapp.generated.resources.companion_satellite_settings
-import churchpresenter.composeapp.generated.resources.stage_monitor
-import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
@@ -82,12 +78,10 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilesSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
@@ -96,16 +90,17 @@ import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
-private const val TAB_BACKGROUND = 3
+// Values must equal each tab's own position in SettingsTabStrip's row: PrimaryScrollableTabRow's
+// selectedTabIndex/tabIndicatorOffset key off *position*, so a value that outruns its row slot
+// draws the selection indicator over a different tab than the one whose content is showing.
+private const val TAB_BACKGROUND = 2
+private const val TAB_PROFILES = 3
 private const val TAB_PROJECTION = 4
 private const val TAB_SERVER = 5
-private const val TAB_STAGE_MONITOR = 6
-private const val TAB_ATEM = 7
-private const val TAB_DICTIONARY = 8
-private const val TAB_INTEGRATIONS = 9
+private const val TAB_ATEM = 6
+private const val TAB_INTEGRATIONS = 7
 
 @Composable
 fun OptionsDialog(
@@ -114,7 +109,6 @@ fun OptionsDialog(
     settingsManager: SettingsManager,
     companionServer: CompanionServer,
     remoteClientManager: RemoteClientManager,
-    presenterManager: PresenterManager,
     onDismiss: () -> Unit,
     calendarSync: CalendarSyncService? = null,
     onSave: (AppSettings) -> Unit = {},
@@ -153,7 +147,6 @@ fun OptionsDialog(
             settingsManager = settingsManager,
             companionServer = companionServer,
             remoteClientManager = remoteClientManager,
-            presenterManager = presenterManager,
             calendarSync = calendarSync,
             onDismiss = onDismiss,
             onSave = onSave,
@@ -175,7 +168,6 @@ internal fun OptionsDialogContent(
     settingsManager: SettingsManager,
     companionServer: CompanionServer,
     remoteClientManager: RemoteClientManager,
-    presenterManager: PresenterManager,
     onDismiss: () -> Unit,
     calendarSync: CalendarSyncService? = null,
     onSave: (AppSettings) -> Unit = {},
@@ -190,7 +182,7 @@ internal fun OptionsDialogContent(
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt
 ) {
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
-    val companionSatelliteTabIndex = if (obsManager != null) 10 else 9
+    val companionSatelliteTabIndex = if (obsManager != null) 8 else 7
     val tabCount = companionSatelliteTabIndex + 1
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
@@ -233,7 +225,6 @@ internal fun OptionsDialogContent(
                             settingsManager = settingsManager,
                             companionServer = companionServer,
                             remoteClientManager = remoteClientManager,
-                            presenterManager = presenterManager,
                             calendarSync = calendarSync,
                             onIdentifyScreen = onIdentifyScreen,
                             onIdentifyBrowserSource = onIdentifyBrowserSource,
@@ -291,16 +282,17 @@ private fun SettingsTabStrip(
             minTabWidth = labeledTabMinWidth(labelStyle, labelMargin),
             indicator = { LabeledTabIndicator(selectedIndex) },
         ) {
+            // No Song, Stage Monitor or Dictionary tab: the first two are per-profile now and are
+            // edited on the Profiles tab, and the dictionary's look is one setting per install,
+            // reached from the gear on the Dictionary tab itself.
             listOfNotNull(
                 StripTab(0, stringResource(Res.string.appearance), Icons.Filled.Palette),
                 StripTab(1, stringResource(Res.string.bible), Icons.Filled.MenuBook),
-                StripTab(2, stringResource(Res.string.song), Icons.Filled.MusicNote),
                 StripTab(TAB_BACKGROUND, stringResource(Res.string.background), Icons.Filled.Wallpaper),
+                StripTab(TAB_PROFILES, stringResource(Res.string.output_profiles_tab), Icons.Filled.Tune),
                 StripTab(TAB_PROJECTION, stringResource(Res.string.projection), Icons.Filled.DesktopWindows),
                 StripTab(TAB_SERVER, stringResource(Res.string.server_settings), Icons.Filled.Dns),
-                StripTab(TAB_STAGE_MONITOR, stringResource(Res.string.stage_monitor), Icons.Filled.Tv),
                 StripTab(TAB_ATEM, stringResource(Res.string.atem_settings), Icons.Filled.SwitchVideo),
-                StripTab(TAB_DICTIONARY, stringResource(Res.string.tab_dictionary), Icons.Filled.Book),
                 StripTab(TAB_INTEGRATIONS, stringResource(Res.string.obs_settings), Icons.Filled.Videocam)
                     .takeIf { hasObs },
                 StripTab(
@@ -324,7 +316,6 @@ private fun SettingsTabContent(
     settingsManager: SettingsManager,
     companionServer: CompanionServer,
     remoteClientManager: RemoteClientManager,
-    presenterManager: PresenterManager,
     calendarSync: CalendarSyncService?,
     onIdentifyScreen: () -> Unit,
     onIdentifyBrowserSource: (Int) -> Unit,
@@ -344,14 +335,10 @@ private fun SettingsTabContent(
         1 -> BibleSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,
-            presenterManager = presenterManager,
-            bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
         )
-        2 -> SongSettingsTab(
+        TAB_PROFILES -> ProfilesSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,
-            presenterManager = presenterManager,
-            bibleLowerThirdsDir = settingsManager.bibleLowerThirdsDir,
         )
         TAB_BACKGROUND -> BackgroundSettingsTab(
             settings = settings,
@@ -375,9 +362,7 @@ private fun SettingsTabContent(
             remoteClientManager = remoteClientManager,
             calendarSync = calendarSync,
         )
-        TAB_STAGE_MONITOR -> StageMonitorSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
         TAB_ATEM -> AtemSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
-        TAB_DICTIONARY -> DictionarySettingsTab(settings = settings, onSettingsChange = onSettingsChange)
         TAB_INTEGRATIONS -> if (obsManager != null) {
             OBSSettingsTab(settings = settings, onSettingsChange = onSettingsChange, obsManager = obsManager)
         } else {

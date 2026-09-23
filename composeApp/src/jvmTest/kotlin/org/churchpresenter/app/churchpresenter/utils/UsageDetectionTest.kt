@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -24,10 +25,8 @@ class UsageDetectionTest {
         bibleMode: String = Constants.SONG_LANG_BOTH,
         bibleTranslations: List<Int> = emptyList(),
         displayMode: String = Constants.DISPLAY_MODE_FULLSCREEN,
-        targetDisplay: Int = 0,
         showChords: Boolean = true,
-    ) = ScreenAssignment(
-        targetDisplay = targetDisplay,
+    ) = OutputProfile(
         songMode = songMode,
         bibleMode = bibleMode,
         bibleTranslations = bibleTranslations,
@@ -66,9 +65,8 @@ class UsageDetectionTest {
                 listOf(out(songMode = Constants.SONG_LANG_PRIMARY), out(songMode = Constants.SONG_LANG_BOTH)),
             )
         )
-        assertFalse(
-            isDualLanguagePresentation(song(), listOf(out(targetDisplay = Constants.KEY_TARGET_NONE)))
-        )
+        // A switched-off output is filtered out by the caller before it ever reaches here -- an
+        // empty list is what that looks like once the identity filtering has happened.
         assertFalse(isDualLanguagePresentation(song(), emptyList()))
     }
 
@@ -99,7 +97,7 @@ class UsageDetectionTest {
     @Test
     fun `an output not showing the bible at all is not multi translation`() {
         assertFalse(isMultiTranslationPresentation(2, listOf(out(bibleMode = Constants.SONG_LANG_OFF))))
-        assertFalse(isMultiTranslationPresentation(2, listOf(out(targetDisplay = Constants.KEY_TARGET_NONE))))
+        assertFalse(isMultiTranslationPresentation(2, emptyList()))
     }
 
     // ── Split screen ────────────────────────────────────────────────────────────
@@ -133,9 +131,7 @@ class UsageDetectionTest {
     @Test
     fun `an output with the bible switched off is an absence, not a disagreement`() {
         assertFalse(isSplitScreenBible(2, listOf(out(), out(bibleMode = Constants.SONG_LANG_OFF))))
-        assertFalse(
-            isSplitScreenBible(2, listOf(out(), out(targetDisplay = Constants.KEY_TARGET_NONE)))
-        )
+        assertFalse(isSplitScreenBible(2, listOf(out())))
     }
 
     @Test
@@ -247,33 +243,29 @@ class UsageDetectionTest {
 
     @Test
     fun `an output that is not live has nowhere to draw a chord chart`() {
-        assertFalse(
-            isChordChartPresentation(
-                song(lyrics = withChords),
-                outputs = listOf(
-                    out(
-                        displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR,
-                        targetDisplay = Constants.KEY_TARGET_NONE,
-                    )
-                ),
-            )
-        )
+        // A switched-off output is filtered before it ever reaches this function -- an empty list
+        // is what that looks like once the identity filtering has happened.
+        assertFalse(isChordChartPresentation(song(lyrics = withChords), outputs = emptyList()))
     }
 
     // ── Audience output ─────────────────────────────────────────────────────────
 
+    /** Identity-only fixture for [hasAudienceOutput], which reads [ScreenAssignment] directly. */
+    private fun screen(targetDisplay: Int = 0, targetType: String = Constants.TARGET_TYPE_SCREEN) =
+        ScreenAssignment(targetDisplay = targetDisplay, targetType = targetType)
+
     @Test
     fun `a second display is what makes an output an audience output`() {
-        assertTrue(hasAudienceOutput(listOf(out()), screenCount = 2, deckLinkDeviceCount = 0))
+        assertTrue(hasAudienceOutput(listOf(screen()), screenCount = 2, deckLinkDeviceCount = 0))
         assertFalse(
-            hasAudienceOutput(listOf(out()), screenCount = 1, deckLinkDeviceCount = 0),
+            hasAudienceOutput(listOf(screen()), screenCount = 1, deckLinkDeviceCount = 0),
             "one screen is the operator's own — nothing the congregation can see",
         )
     }
 
     @Test
     fun `a decklink output counts when a device is fitted, and not when none is`() {
-        val decklink = ScreenAssignment(targetDisplay = 0, targetType = Constants.TARGET_TYPE_DECKLINK)
+        val decklink = screen(targetType = Constants.TARGET_TYPE_DECKLINK)
         assertTrue(hasAudienceOutput(listOf(decklink), screenCount = 1, deckLinkDeviceCount = 1))
         assertFalse(hasAudienceOutput(listOf(decklink), screenCount = 1, deckLinkDeviceCount = 0))
     }
@@ -282,7 +274,7 @@ class UsageDetectionTest {
     fun `an output switched off is not an audience output, however much hardware is attached`() {
         assertFalse(
             hasAudienceOutput(
-                listOf(out(targetDisplay = Constants.KEY_TARGET_NONE)),
+                listOf(screen(targetDisplay = Constants.KEY_TARGET_NONE)),
                 screenCount = 3,
                 deckLinkDeviceCount = 2,
             )

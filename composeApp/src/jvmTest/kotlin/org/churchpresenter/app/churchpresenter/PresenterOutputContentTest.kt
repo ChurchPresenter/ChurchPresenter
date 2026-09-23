@@ -5,6 +5,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -25,17 +27,24 @@ class PresenterOutputContentTest {
 
     private val section = LyricSection(type = "verse", lines = listOf("Amazing grace how sweet"))
 
+    private val underTestAssignment = ScreenAssignment(activeProfileId = "under-test")
+
+    /** Settings pointing [underTestAssignment] at a profile carrying [profile]'s content fields. */
+    private fun settingsFor(profile: OutputProfile) = AppSettings(
+        projectionSettings = ProjectionSettings(outputProfiles = listOf(profile.copy(id = "under-test"))),
+    )
+
     private fun ComposeContent(
         mode: Presenting,
-        assignment: ScreenAssignment,
+        profile: OutputProfile,
         manager: PresenterManager,
     ): @androidx.compose.runtime.Composable () -> Unit = {
         PresenterOutputContent(
-            screenAssignment = assignment,
+            screenAssignment = underTestAssignment,
             effectiveMode = mode,
             screenNumber = 1,
             presenterManager = manager,
-            appSettings = AppSettings(),
+            appSettings = settingsFor(profile),
             mediaViewModel = MediaViewModel(),
             sttManager = STTManager(),
             serverUrl = "",
@@ -49,28 +58,28 @@ class PresenterOutputContentTest {
     @Test
     fun `bible mode draws the verse on an output that shows bible`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
-        setContent(ComposeContent(Presenting.BIBLE, ScreenAssignment(bibleMode = Constants.SONG_LANG_BOTH), manager))
+        setContent(ComposeContent(Presenting.BIBLE, OutputProfile(bibleMode = Constants.SONG_LANG_BOTH), manager))
         onNodeWithText("For God so loved the world", substring = true).assertIsDisplayed()
     }
 
     @Test
     fun `an output with bible switched off draws nothing in bible mode`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
-        setContent(ComposeContent(Presenting.BIBLE, ScreenAssignment(bibleMode = Constants.SONG_LANG_OFF), manager))
+        setContent(ComposeContent(Presenting.BIBLE, OutputProfile(bibleMode = Constants.SONG_LANG_OFF), manager))
         onNodeWithText("For God so loved the world", substring = true).assertDoesNotExist()
     }
 
     @Test
     fun `lyrics mode draws the section on an output that shows songs`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedLyricSection(section) }
-        setContent(ComposeContent(Presenting.LYRICS, ScreenAssignment(songMode = Constants.SONG_LANG_BOTH), manager))
+        setContent(ComposeContent(Presenting.LYRICS, OutputProfile(songMode = Constants.SONG_LANG_BOTH), manager))
         onNodeWithText("Amazing grace how sweet", substring = true).assertIsDisplayed()
     }
 
     @Test
     fun `an output with songs switched off draws nothing in lyrics mode`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedLyricSection(section) }
-        setContent(ComposeContent(Presenting.LYRICS, ScreenAssignment(songMode = Constants.SONG_LANG_OFF), manager))
+        setContent(ComposeContent(Presenting.LYRICS, OutputProfile(songMode = Constants.SONG_LANG_OFF), manager))
         onNodeWithText("Amazing grace how sweet", substring = true).assertDoesNotExist()
     }
 
@@ -82,7 +91,7 @@ class PresenterOutputContentTest {
         }
         setContent(ComposeContent(
             Presenting.NONE,
-            ScreenAssignment(bibleMode = Constants.SONG_LANG_BOTH, songMode = Constants.SONG_LANG_BOTH),
+            OutputProfile(bibleMode = Constants.SONG_LANG_BOTH, songMode = Constants.SONG_LANG_BOTH),
             manager,
         ))
         onNodeWithText("For God so loved the world", substring = true).assertDoesNotExist()
@@ -94,67 +103,67 @@ class PresenterOutputContentTest {
         // The same live verse, two outputs: one configured for bible, one not. This is the
         // per-output visibility contract the whole screenAssignment mechanism exists for.
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
-        setContent(ComposeContent(Presenting.BIBLE, ScreenAssignment(bibleMode = Constants.SONG_LANG_BOTH), manager))
+        setContent(ComposeContent(Presenting.BIBLE, OutputProfile(bibleMode = Constants.SONG_LANG_BOTH), manager))
         onNodeWithText("For God so loved the world", substring = true).assertIsDisplayed()
     }
 
     @Test
     fun `pictures mode runs the picture output`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedImagePath("/tmp/none.jpg") }
-        setContent(ComposeContent(Presenting.PICTURES, ScreenAssignment(showPictures = true), manager))
+        setContent(ComposeContent(Presenting.PICTURES, OutputProfile(showPictures = true), manager))
     }
 
     @Test
     fun `an output with pictures switched off skips both picture and slide output`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedImagePath("/tmp/none.jpg") }
-        setContent(ComposeContent(Presenting.PICTURES, ScreenAssignment(showPictures = false), manager))
-        setContent(ComposeContent(Presenting.PRESENTATION, ScreenAssignment(showPictures = false), manager))
+        setContent(ComposeContent(Presenting.PICTURES, OutputProfile(showPictures = false), manager))
+        setContent(ComposeContent(Presenting.PRESENTATION, OutputProfile(showPictures = false), manager))
     }
 
     @Test
     fun `presentation mode runs the slide output`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.PRESENTATION, ScreenAssignment(showPictures = true), PresenterManager()))
+        setContent(ComposeContent(Presenting.PRESENTATION, OutputProfile(showPictures = true), PresenterManager()))
     }
 
     @Test
     fun `announcement mode draws the announcement text`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedAnnouncementText("Service starts at 10") }
-        setContent(ComposeContent(Presenting.ANNOUNCEMENTS, ScreenAssignment(), manager))
+        setContent(ComposeContent(Presenting.ANNOUNCEMENTS, OutputProfile(), manager))
         // The announcement animates in from off-screen, so it is composed before it is on it.
         onNodeWithText("Service starts at 10", substring = true).assertExists()
     }
 
     @Test
     fun `dictionary mode runs the dictionary output`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.DICTIONARY, ScreenAssignment(), PresenterManager()))
+        setContent(ComposeContent(Presenting.DICTIONARY, OutputProfile(), PresenterManager()))
     }
 
     @Test
     fun `q and a mode runs the question output`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.QA, ScreenAssignment(), PresenterManager()))
+        setContent(ComposeContent(Presenting.QA, OutputProfile(), PresenterManager()))
     }
 
     @Test
     fun `captions mode runs the stt output`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.STT, ScreenAssignment(), PresenterManager()))
+        setContent(ComposeContent(Presenting.STT, OutputProfile(), PresenterManager()))
     }
 
     @Test
     fun `lower third mode runs without a composition loaded`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.LOWER_THIRD, ScreenAssignment(), PresenterManager()))
+        setContent(ComposeContent(Presenting.LOWER_THIRD, OutputProfile(), PresenterManager()))
     }
 
     @Test
     fun `a stage monitor output draws the confidence layout instead of the presenters`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
-        val stage = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+        val stage = OutputProfile(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
         setContent(ComposeContent(Presenting.BIBLE, stage, manager))
     }
 
     @Test
     fun `a lower third output lays the verse out as a band`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
-        val band = ScreenAssignment(
+        val band = OutputProfile(
             bibleMode = Constants.SONG_LANG_BOTH,
             displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
         )
@@ -166,11 +175,11 @@ class PresenterOutputContentTest {
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
         setContent {
             PresenterOutputContent(
-                screenAssignment = ScreenAssignment(bibleMode = Constants.SONG_LANG_BOTH),
+                screenAssignment = underTestAssignment,
                 effectiveMode = Presenting.BIBLE,
                 screenNumber = 2,
                 presenterManager = manager,
-                appSettings = AppSettings(),
+                appSettings = settingsFor(OutputProfile(bibleMode = Constants.SONG_LANG_BOTH)),
                 mediaViewModel = MediaViewModel(),
                 sttManager = STTManager(),
                 serverUrl = "",
@@ -188,11 +197,11 @@ class PresenterOutputContentTest {
         val manager = PresenterManager().apply { setShowQRCodeOnDisplay(true) }
         setContent {
             PresenterOutputContent(
-                screenAssignment = ScreenAssignment(),
+                screenAssignment = underTestAssignment,
                 effectiveMode = Presenting.QA,
                 screenNumber = null,
                 presenterManager = manager,
-                appSettings = AppSettings(),
+                appSettings = settingsFor(OutputProfile()),
                 mediaViewModel = MediaViewModel(),
                 sttManager = STTManager(),
                 serverUrl = "http://192.168.1.5:8080",
@@ -206,13 +215,13 @@ class PresenterOutputContentTest {
 
     @Test
     fun `canvas mode runs the scene output with no scene selected`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.CANVAS, ScreenAssignment(showCanvas = true), PresenterManager()))
+        setContent(ComposeContent(Presenting.CANVAS, OutputProfile(showCanvas = true), PresenterManager()))
     }
 
     @Test
     fun `an output with canvas and website switched off draws neither`() = runComposeUiTest {
         val manager = PresenterManager().apply { setWebsiteUrl("https://example.org") }
-        val off = ScreenAssignment(showCanvas = false, showWebsite = false, showMedia = false)
+        val off = OutputProfile(showCanvas = false, showWebsite = false, showMedia = false)
         setContent(ComposeContent(Presenting.CANVAS, off, manager))
         setContent(ComposeContent(Presenting.WEBSITE, off, manager))
         setContent(ComposeContent(Presenting.MEDIA, off, manager))

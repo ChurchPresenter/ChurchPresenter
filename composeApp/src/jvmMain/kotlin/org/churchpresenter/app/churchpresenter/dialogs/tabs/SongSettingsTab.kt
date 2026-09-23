@@ -1,40 +1,23 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.enabled
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.number_before_title
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.show_number
@@ -46,470 +29,43 @@ import churchpresenter.composeapp.generated.resources.song_chunk
 import churchpresenter.composeapp.generated.resources.song_chunk_line
 import churchpresenter.composeapp.generated.resources.song_chunk_verse
 import churchpresenter.composeapp.generated.resources.song_show_on_title_slide
-import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import churchpresenter.composeapp.generated.resources.song_language_scope
 import churchpresenter.composeapp.generated.resources.song_number_corner
+import churchpresenter.composeapp.generated.resources.song_number_offset_needs_corner
 import churchpresenter.composeapp.generated.resources.song_number_offset_x
 import churchpresenter.composeapp.generated.resources.song_number_offset_y
-import churchpresenter.composeapp.generated.resources.song_preview_label
-import churchpresenter.composeapp.generated.resources.song_preview_look_ahead
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.LabeledControl
-import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SliderNumberField
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongNumberOffset
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 
-/** The positions of the switch above the preview: the title slide, or one of the two outputs. */
-private enum class StyleSwitch { TITLE_SLIDE, FULL_SCREEN, LOWER_THIRD }
-
-/** The rail is a fixed column of cards; the styling side takes whatever is left. */
-private val RAIL_MIN_WIDTH = 260.dp
-private val RAIL_MAX_WIDTH = 360.dp
-
-private val TARGET_BUTTON_WIDTH = 110.dp
-
-/** Narrower than the output switch: two words, and the row already carries three controls. */
-private val LANGUAGE_BUTTON_WIDTH = 92.dp
-/** How a row reads while the title slide is off: present, but plainly not in charge of anything. */
-private val ELEMENT_TAB_WIDTH = 104.dp
 private val SCOPE_BUTTON_WIDTH = 82.dp
 
 /** Wide enough for "Bottom Right" and the chevron, so no corner reads ellipsized. */
 private val CORNER_DROPDOWN_WIDTH = 118.dp
 private val NUMBER_OFFSET_FIELD_WIDTH = 56.dp
 
-/** Five tabs are wider than a narrowed dialog's styling pane, so past that they fold onto two rows. */
-private const val ELEMENT_TAB_COMPACT_COLUMNS = 3
-
 /**
- * The Song tab of the settings dialog.
- *
- * A song slide draws five things -- its number, its title, the lyrics, the look-ahead line and the
- * next-section marker -- and each carries a full appearance profile on each of the two outputs. Ten
- * profiles laid out as columns of controls is more scrolling than anyone can hold in their head, so
- * the tab keeps one set of controls and two selectors above them -- which element, which output --
- * and shows what the current selection actually looks like in the preview between them.
- *
- * The rail on the left holds what belongs to the slide as a whole rather than to any one element:
- * whether there is a title slide, how the lyrics are laid out, how the slide arrives and leaves,
- * and the margins it sits inside.
+ * The Song tab of the settings dialog was retired once every control it held moved to the Profiles
+ * tab -- a song slide's number/title/lyrics/look-ahead/next-section appearance is entirely styling,
+ * and [org.churchpresenter.settings.SongSettings] has no content-only field of the kind
+ * [org.churchpresenter.settings.BibleSettings]'s translation stack is for the Bible tab. What
+ * remains in this file is what the Profiles tab's own Song pane draws: [SongElementOptions] and
+ * its helpers, kept here because that is where they have always lived. The chip strip that used to
+ * sit above them went with the tab -- the pane has one of its own.
  */
-@Composable
-fun SongSettingsTab(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    presenterManager: PresenterManager? = null,
-    /** Where the band generator saves; null hides its button and leaves the picker. */
-    bibleLowerThirdsDir: File? = null,
-) {
-    val availableFonts = rememberSystemFonts()
-    var target by remember { mutableStateOf(SongStyleTarget.FULL_SCREEN) }
-    var element by remember { mutableStateOf(SongStyleElement.LYRICS) }
-    // Which language of a bilingual song is being styled. Only the lyrics have two, so picking the
-    // second narrows the element strip to them -- see `SongElementRow`.
-    var language by remember { mutableStateOf(SongStyleLanguage.PRIMARY) }
-    var showLookAhead by remember { mutableStateOf(false) }
-    // Styling the title slide rather than the lyric slides -- for whichever output `target` names.
-    // A view over the same two outputs, not a third one: the title slide is drawn on the band as
-    // well as on the screen, with its own profiles for each. Only offered while there is a title
-    // slide at all, so switching it off in the rail drops the tab back onto the lyric slides.
-    var titleSlideView by remember { mutableStateOf(false) }
-    val onTitleSlide = titleSlideView && settings.songSettings.titleSlideEnabled
-    // A song with one language on screen has no second profile to style, so that drops the switch
-    // and the panel back onto the first. The title slide keeps it: it draws *both* titles when the
-    // output shows both languages, and each has a profile of its own.
-    val bilingual = settings.songIsBilingual
-    val styleLanguages = songStyleLanguages()
-    val editingLanguage = if (bilingual && language in styleLanguages) language else SongStyleLanguage.PRIMARY
-
-    // The rail scrolls on its own rather than the tab scrolling as a whole: four cards do not fit
-    // the dialog's height on a small laptop, and when the whole Row scrolled they took the preview
-    // and the controls it illustrates down below the fold with them.
-    val scrollState = rememberScrollState()
-    // The Bible and Song tabs fill the selected segment with the accent, matching the song
-    // editor's pane tabs. The provider covers the whole tab, so the rail, the typography panels
-    // and the shared preview rows all agree without threading a colour through any of them.
-    CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp),
-        ) {
-            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.widthIn(min = RAIL_MIN_WIDTH, max = RAIL_MAX_WIDTH).fillMaxHeight()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .verticalScroll(scrollState)
-                            .padding(end = SettingsScrollbarGutter),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        SongTitleSlideSection(settings, onSettingsChange)
-                        SongLyricsLayoutSection(settings, onSettingsChange)
-                        SongTransitionSection(settings, onSettingsChange)
-                        LowerThirdHeightSection(
-                            percent = settings.songSettings.lowerThirdHeightPercent,
-                            onPercentChange = { percent ->
-                                onSettingsChange { s ->
-                                    s.copy(songSettings = s.songSettings.copy(lowerThirdHeightPercent = percent))
-                                }
-                            },
-                        )
-                        LowerThirdAnimationSection(
-                            settings, onSettingsChange, bibleLowerThirdsDir, scope = BackgroundScope.SONG_LOWER_THIRD,
-                        )
-                        SongMarginsSection(settings, onSettingsChange)
-                        ContentRegionSection(
-                            region = settings.songSettings.layoutExtras.contentRegion,
-                            onRegionChange = { region ->
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        songSettings = s.songSettings.copy(
-                                            layoutExtras = s.songSettings.layoutExtras.copy(contentRegion = region),
-                                        ),
-                                    )
-                                }
-                            },
-                        )
-                        SongSectionLabelSection(settings, onSettingsChange)
-                    }
-                    SettingsScrollbar(scrollState)
-                }
-                SongStylePane(
-                    settings = settings,
-                    onSettingsChange = onSettingsChange,
-                    target = target,
-                    onTargetChange = {
-                        target = it
-                        titleSlideView = false
-                        // A credit has no lyric-slide profile to fall back to.
-                        if (element.isCredit) element = SongStyleElement.LYRICS
-                    },
-                    element = element,
-                    onElementChange = { element = it },
-                    language = editingLanguage,
-                    onLanguageChange = { picked ->
-                        language = picked
-                        // The second language is the lyrics and the title and nothing else; landing
-                        // on it while the Number tab was selected would show a strip with nowhere to
-                        // be. The title slide has no lyrics, so there it is the title.
-                        if (picked.isTranslation) {
-                            // The title slide has no lyrics, so there the second language is the
-                            // title alone.
-                            val offered = if (onTitleSlide) {
-                                listOf(SongStyleElement.TITLE)
-                            } else {
-                                SECOND_LANGUAGE_ELEMENTS
-                            }
-                            if (element !in offered) element = offered.first()
-                        }
-                    },
-                    bilingual = bilingual,
-                    titleSlideView = onTitleSlide,
-                    onTitleSlideView = {
-                        titleSlideView = true
-                        if (!element.onTitleSlide) element = SongStyleElement.TITLE
-                    },
-                    showLookAhead = showLookAhead,
-                    onShowLookAheadChange = { showLookAhead = it },
-                    availableFonts = availableFonts,
-                    presenterManager = presenterManager,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
-            }
-        }
-    }
-}
-
-/** The output switch, the preview, the element tabs and the controls under them. */
-@Composable
-private fun SongStylePane(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    target: SongStyleTarget,
-    onTargetChange: (SongStyleTarget) -> Unit,
-    element: SongStyleElement,
-    onElementChange: (SongStyleElement) -> Unit,
-    language: SongStyleLanguage,
-    onLanguageChange: (SongStyleLanguage) -> Unit,
-    bilingual: Boolean,
-    titleSlideView: Boolean,
-    onTitleSlideView: () -> Unit,
-    showLookAhead: Boolean,
-    onShowLookAheadChange: (Boolean) -> Unit,
-    availableFonts: List<String>,
-    presenterManager: PresenterManager?,
-    modifier: Modifier = Modifier,
-) {
-    var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
-    var previewOnScreen by remember { mutableStateOf(false) }
-    val lyricSections = songSampleSections(sampleSlot)
-    // The look-ahead and next-section elements only appear on a look-ahead slide, so selecting one
-    // turns the preview's look-ahead on whatever the checkbox says. Editing a control whose effect
-    // is not on screen is the thing this tab exists to stop. A title slide has no look-ahead.
-    val previewLookAhead = !titleSlideView && (
-        showLookAhead ||
-            element == SongStyleElement.LOOK_AHEAD ||
-            element == SongStyleElement.NEXT_SECTION
-        )
-    // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
-    // one to whichever the tab is styling for its duration, so a hall with a single full-screen
-    // projector can still be shown what its lower third would look like. `hasAnyOpenOutput` counts a
-    // single-monitor dev machine's dev-fallback window too -- see its own doc comment.
-    val hasOutputForTarget = hasAnyOpenOutput(settings)
-    // What the preview is handed, which is not quite what is stored: an element switched off is
-    // turned on while its own tab is selected, so styling it is never styling something invisible.
-    // See `shownForPreview`. Everything below still reads `settings` -- this copy is for the
-    // picture only, exactly as `previewLookAhead` is.
-    val previewSettings = remember(settings, element, target, titleSlideView) {
-        val song = if (titleSlideView) {
-            settings.songSettings.shownOnTitleSlideForPreview(element)
-        } else {
-            settings.songSettings.shownForPreview(element, target)
-        }
-        settings.copy(songSettings = song)
-    }
-    // The title slide in front of the lyric sections, exactly as the songs tab sends a song out --
-    // built from the preview's own copy of the settings so the element being styled is on it.
-    val sampleSections = if (titleSlideView) {
-        listOf(titleSlideSample(previewSettings.songSettings, sampleSlot)) + lyricSections
-    } else {
-        lyricSections
-    }
-    OnScreenPreviewEffect(
-        active = previewOnScreen,
-        settings = previewSettings,
-        presenterManager = presenterManager,
-        outputs = PreviewOutputState(
-            lowerThird = target.isLowerThird,
-            songLookAhead = previewLookAhead,
-            // No chart: only a stage monitor draws one, and this preview is a projection output.
-            showChords = false,
-        ),
-        contentKey = sampleSections,
-    ) { manager ->
-        manager.setAllLyricSections(sampleSections)
-        manager.setSongDisplaySectionIndex(0)
-        manager.setSongDisplayLineIndex(-1)
-        manager.setLyricSection(sampleSections.first())
-        manager.setDisplayedLyricSection(sampleSections.first())
-        manager.setPresentingMode(Presenting.LYRICS)
-    }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SongTargetSwitchRow(
-            settings = settings,
-            target = target,
-            onTargetChange = onTargetChange,
-            language = language,
-            onLanguageChange = onLanguageChange,
-            bilingual = bilingual,
-            titleSlideView = titleSlideView,
-            onTitleSlideView = onTitleSlideView,
-            showLookAhead = previewLookAhead,
-            onShowLookAheadChange = onShowLookAheadChange,
-            lookAheadForced = previewLookAhead && !showLookAhead,
-        )
-        SongPreviewWithOutputPicker(
-            settings = settings,
-            onSettingsChange = onSettingsChange,
-            target = target,
-            bilingual = bilingual,
-            previewSettings = previewSettings,
-            previewLookAhead = previewLookAhead,
-            sampleSections = sampleSections,
-            titleSlideView = titleSlideView,
-        )
-        SettingsPreviewSampleRow(
-            slot = sampleSlot,
-            onSlotChange = { sampleSlot = it },
-            onScreen = previewOnScreen,
-            onScreenChange = { previewOnScreen = it },
-            onScreenEnabled = presenterManager != null && hasOutputForTarget,
-        )
-        SongEditingCard(
-            settings = settings,
-            onSettingsChange = onSettingsChange,
-            element = element,
-            onElementChange = onElementChange,
-            target = target,
-            language = language,
-            availableFonts = availableFonts,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            titleSlideView = titleSlideView,
-        )
-    }
-}
-
-/** Which output is being styled, what the preview draws, and the output's own size. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun SongTargetSwitchRow(
-    settings: AppSettings,
-    target: SongStyleTarget,
-    onTargetChange: (SongStyleTarget) -> Unit,
-    language: SongStyleLanguage,
-    onLanguageChange: (SongStyleLanguage) -> Unit,
-    bilingual: Boolean,
-    titleSlideView: Boolean,
-    onTitleSlideView: () -> Unit,
-    showLookAhead: Boolean,
-    onShowLookAheadChange: (Boolean) -> Unit,
-    /** On because the selected element needs it, so the box is shown ticked and left alone. */
-    lookAheadForced: Boolean,
-) {
-    // Flowing rather than a hard row: four language buttons beside the output switch and the preview
-    // controls are wider than a narrow pane, and a Row clips what does not fit.
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        itemVerticalAlignment = Alignment.CenterVertically,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        // The title slide, when there is one, ahead of the two outputs: a view of the output that
-        // is selected on the right, not a third output, which the divider is there to say. While
-        // it is the view, neither output reads as selected -- the scope note at the end of the row
-        // names which one the slide is being styled for.
-        // One switch of three: the title slide, when there is one, ahead of the two outputs. The
-        // slide is a view of the output selected beside it, not a third output -- while it is the
-        // view neither output reads as selected, and the scope note at the end of the row names
-        // which one the slide is being styled for.
-        SegmentedButton(
-            items = listOfNotNull(
-                SegmentedButtonItem(StyleSwitch.TITLE_SLIDE, stringResource(Res.string.song_target_title_slide))
-                    .takeIf { settings.songSettings.titleSlideEnabled },
-                SegmentedButtonItem(StyleSwitch.FULL_SCREEN, stringResource(Res.string.full_screen)),
-                SegmentedButtonItem(StyleSwitch.LOWER_THIRD, stringResource(Res.string.lower_third_size)),
-            ),
-            selectedValue = when {
-                titleSlideView -> StyleSwitch.TITLE_SLIDE
-                target.isLowerThird -> StyleSwitch.LOWER_THIRD
-                else -> StyleSwitch.FULL_SCREEN
-            },
-            onValueChange = { picked ->
-                when (picked) {
-                    StyleSwitch.TITLE_SLIDE -> onTitleSlideView()
-                    StyleSwitch.FULL_SCREEN -> onTargetChange(SongStyleTarget.FULL_SCREEN)
-                    StyleSwitch.LOWER_THIRD -> onTargetChange(SongStyleTarget.LOWER_THIRD)
-                }
-            },
-            buttonWidth = TARGET_BUTTON_WIDTH,
-            buttonHeight = 34.dp,
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            modifier = Modifier.testTag("song_style_switch"),
-        )
-        // Which language is being styled, in the place the Bible tab puts its translation chips and
-        // for the same reason: a second profile needs somewhere to be selected before it can be
-        // edited. Only with two languages on screen -- with one, there is no second profile to
-        // reach, and a title slide draws one title whatever the lyrics do.
-        //
-        // "1st / 2nd" rather than "Primary / Secondary", which is what the Lang row below the
-        // element tabs already says. That row picks the languages the *output shows*; this one picks
-        // whose *look* is being edited, and sharing a word left the tab with two controls reading
-        // "Secondary" that answer different questions.
-        if (bilingual && !titleSlideView) {
-            SegmentedButton(
-                items = songStyleLanguages().map { SegmentedButtonItem(it, it.ordinalLabel()) },
-                selectedValue = language,
-                onValueChange = onLanguageChange,
-                buttonWidth = LANGUAGE_BUTTON_WIDTH,
-                buttonHeight = 34.dp,
-                fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                modifier = Modifier.testTag("song_language_switch"),
-            )
-        }
-        // For the picture only. Not stored: it decides what this preview draws, not what the output
-        // shows, which is settled per slide by the song and the schedule. A title slide has no
-        // look-ahead, so the switch goes with it.
-        if (!titleSlideView) {
-            Text(
-                text = stringResource(Res.string.song_preview_label),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            LabeledCheckbox(
-                checked = showLookAhead,
-                onCheckedChange = onShowLookAheadChange,
-                enabled = !lookAheadForced,
-                label = stringResource(Res.string.song_preview_look_ahead),
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = songScopeNote(settings, target, titleSlideView),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-        )
-    }
-}
-
-/** The element tabs, and the two things the lyrics carry that the other elements do not. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun SongElementRow(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    element: SongStyleElement,
-    onElementChange: (SongStyleElement) -> Unit,
-    target: SongStyleTarget,
-    /** Which language is being styled; the second is the lyrics and nothing else. */
-    language: SongStyleLanguage = SongStyleLanguage.PRIMARY,
-    /**
-     * The title slide's elements rather than the lyric slides'. What sits under the tabs changes
-     * with it: the title slide has no chunk, no language scope and no first-page/every-page
-     * question, only whether each element is on it at all.
-     */
-    titleSlideView: Boolean = false,
-) {
-    val song = settings.songSettings
-    // The lyrics and the title are the two things a bilingual song carries twice, so those are the
-    // tabs the second language offers -- and on the title slide, which has no lyrics, just the
-    // title. Kept rather than hidden: the row is where the panel says what it is pointed at, and a
-    // strip that vanished on one switch and came back on the other reads as a glitch.
-    val elements = when {
-        language.isTranslation && titleSlideView -> listOf(SongStyleElement.TITLE)
-        language.isTranslation -> SECOND_LANGUAGE_ELEMENTS
-        titleSlideView -> TITLE_SLIDE_ELEMENTS
-        else -> LYRIC_SLIDE_ELEMENTS
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        SegmentedButton(
-            items = elements.map { SegmentedButtonItem(it, it.label()) },
-            selectedValue = element,
-            onValueChange = onElementChange,
-            buttonWidth = ELEMENT_TAB_WIDTH,
-            buttonHeight = 34.dp,
-            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            compactColumns = ELEMENT_TAB_COMPACT_COLUMNS,
-        )
-        Spacer(Modifier.weight(1f))
-    }
-    SongElementOptions(settings, onSettingsChange, element, target, language, titleSlideView)
-}
 
 /**
  * Everything under the element chips that belongs to the selected element -- what a slide holds,
  * which languages it shows, when the number and the title appear and where the number sits.
  *
- * Split from [SongElementRow] so the per-output Customize dialog can draw the same controls without
- * the chip strip, which it has one of its own. Two surfaces, one definition: a control added here
- * appears in both, which is the only way they stay in step.
+ * Split out so the Profiles tab's Song pane can draw these controls under its own chip strip.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -728,7 +284,18 @@ private fun SongNumberOffsetControls(
     target: SongStyleTarget,
 ) {
     val corner = settings.songSettings.numberCorner(target.isLowerThird)
-    if (corner == Constants.NONE) return
+    // The offset nudges a *cornered* number -- `songNumberCornerOffset` in `SongPresenter` is the
+    // only reader -- so with no corner there is nothing for it to move. Said out loud rather than
+    // simply not drawn: the schema-9 migration pins every upgraded document's corner to None, so on
+    // any existing install these fields are missing with nothing on screen to explain why.
+    if (corner == Constants.NONE) {
+        Text(
+            text = stringResource(Res.string.song_number_offset_needs_corner),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
     val offset = settings.songSettings.numberOffset(target.isLowerThird)
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         ControlColumn(stringResource(Res.string.song_number_offset_x), Modifier.weight(1f)) {

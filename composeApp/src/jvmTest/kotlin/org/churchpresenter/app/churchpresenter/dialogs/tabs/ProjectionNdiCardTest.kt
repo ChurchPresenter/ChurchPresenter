@@ -71,12 +71,6 @@ class ProjectionNdiCardTest {
                             state = transform(state)
                             current = state
                         },
-                        contentGroup = emptyList(),
-                        backgroundGroup = emptyList(),
-                        displayModes = listOf("Full screen" to Constants.DISPLAY_MODE_FULLSCREEN),
-                        songLanguageChoices = emptyList(),
-                        translationDisplays = emptyList(),
-                        translationNames = emptyList(),
                         status = status,
                         receiverCount = { receivers },
                         onIdentifyNdi = { identified += it },
@@ -384,12 +378,6 @@ class ProjectionNdiCardTest {
                         NdiOutputsCard(
                             settings = settings,
                             onSettingsChange = {},
-                            contentGroup = emptyList(),
-                            backgroundGroup = emptyList(),
-                            displayModes = listOf("Full screen" to Constants.DISPLAY_MODE_FULLSCREEN),
-                            songLanguageChoices = emptyList(),
-                            translationDisplays = emptyList(),
-                            translationNames = emptyList(),
                             status = READY,
                             receiverCount = { live },
                         )

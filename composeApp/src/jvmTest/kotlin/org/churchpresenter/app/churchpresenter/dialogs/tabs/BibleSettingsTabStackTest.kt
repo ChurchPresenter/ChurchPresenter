@@ -6,14 +6,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
@@ -28,6 +28,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * Swapping, clearing and promoting slots in the Bible tab's translation stack.
+ *
+ * ## Reduced when styling moved to the Profiles tab
+ *
+ * This suite used to also cover a per-translation styling panel pointed by a chip below the
+ * stack -- font size, renaming, the abbreviation field. That panel moved to the Profiles tab
+ * entirely and no longer exists here, so those tests were deleted along with it. What survives is
+ * the stack mutation itself: picking another bible into a slot, and setting a slot to none.
+ */
 @OptIn(ExperimentalTestApi::class)
 class BibleSettingsTabStackTest {
 
@@ -80,9 +90,9 @@ class BibleSettingsTabStackTest {
     /**
      * Opens slot [index] and picks [label] out of the menu it drops.
      *
-     * Which node that is cannot be "the first one reading [label]": the typography panel carries a
-     * text-transform option reading "None", which is on screen before the menu opens and traverses
-     * ahead of it. So the nodes are counted first and the one the click *added* is the one taken.
+     * Which node that is cannot be "the first one reading [label]": another node elsewhere on the
+     * tab can already read the same text before the menu opens. So the nodes are counted first and
+     * the one the click *added* is the one taken.
      */
     private fun ComposeUiTest.openSlotAndChoose(index: Int, label: String) {
         val before = onAllNodesWithText(label)
@@ -91,12 +101,6 @@ class BibleSettingsTabStackTest {
         val opened = onAllNodesWithText(label).fetchSemanticsNodes().indexOfFirst { it.id !in before }
         assertTrue(opened >= 0, "opening slot $index must offer \"$label\"")
         onAllNodesWithText(label)[opened].performClick()
-        waitForIdle()
-    }
-
-    /** Points the styling panel at translation [index] of the stack, one-based, via its chip. */
-    private fun ComposeUiTest.selectTranslation(index: Int) {
-        onAllNodesWithText("$index · ", substring = true).onFirst().performClick()
         waitForIdle()
     }
 
@@ -142,203 +146,157 @@ class BibleSettingsTabStackTest {
         assertEquals(listOf("syn.spb"), files(harness))
     }
 
+    // ── Adding, reordering and removing ─────────────────────────────────────────────────────────
+
+    /**
+     * The picker below the stack, which appends rather than repointing a slot.
+     *
+     * It is the only control that grows the stack, and it is deliberately absent in two states
+     * -- nothing left in the folder to add, and the stack already at its cap -- because
+     * `addTranslation` refuses past the cap and a picker that answers a choice by doing nothing is
+     * worse than no picker at all.
+     */
     @Test
-    fun `only the selected translation's styling is on screen`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
-        showTab(
-            AppSettings(
-                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
-                    listOf(
-                        BibleTranslationSettings(fileName = "kjv.spb", textFontSize = 41),
-                        BibleTranslationSettings(fileName = "syn.spb", textFontSize = 52),
-                    ),
-                ),
-            ),
-        )
-
-        assertEquals(
-            1,
-            onAllNodesWithText("41").fetchSemanticsNodes(atLeastOneRootRequired = false).size,
-            "the first translation is selected on arrival, so its font size is the one shown",
-        )
-        assertEquals(
-            0,
-            onAllNodesWithText("52").fetchSemanticsNodes(atLeastOneRootRequired = false).size,
-            "one set of controls stands for whichever translation is selected, so the other's is absent",
-        )
-    }
-
-    @Test
-    fun `picking a later translation points the panel at it`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
-        showTab(
-            AppSettings(
-                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
-                    listOf(
-                        BibleTranslationSettings(fileName = "kjv.spb", textFontSize = 41),
-                        BibleTranslationSettings(fileName = "syn.spb", textFontSize = 52),
-                    ),
-                ),
-            ),
-        )
-
-        selectTranslation(2)
-
-        assertEquals(
-            1,
-            onAllNodesWithText("52").fetchSemanticsNodes(atLeastOneRootRequired = false).size,
-        )
-        assertEquals(
-            0,
-            onAllNodesWithText("41").fetchSemanticsNodes(atLeastOneRootRequired = false).size,
-        )
-    }
-
-    @Test
-    fun `editing the second translation writes the second one, not the first`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
-        val harness = showTab(
-            AppSettings(
-                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
-                    listOf(
-                        BibleTranslationSettings(fileName = "kjv.spb", textFontSize = 41),
-                        BibleTranslationSettings(fileName = "syn.spb", textFontSize = 52),
-                    ),
-                ),
-            ),
-        )
-
-        selectTranslation(2)
-
-        onNodeWithText("52").performTextReplacement("63")
-        waitForIdle()
-
-        val stack = harness.current.bibleSettings.translationList()
-        assertEquals(63, stack[1].textFontSize, "the panel was pointed at the second translation")
-        assertEquals(41, stack[0].textFontSize, "and the first must be untouched")
-    }
-
-    @Test
-    fun `editing the first translation leaves the second alone`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
-        val harness = showTab(
-            AppSettings(
-                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
-                    listOf(
-                        BibleTranslationSettings(fileName = "kjv.spb", textFontSize = 41),
-                        BibleTranslationSettings(fileName = "syn.spb", textFontSize = 52),
-                    ),
-                ),
-            ),
-        )
-
-        onNodeWithText("41").performTextReplacement("38")
-        waitForIdle()
-
-        val stack = harness.current.bibleSettings.translationList()
-        assertEquals(38, stack[0].textFontSize)
-        assertEquals(52, stack[1].textFontSize)
-    }
-
-    // ── Renaming ────────────────────────────────────────────────────────────────────────────────
-
-    /** The rename box standing empty, found by the module value it is showing as its placeholder. */
-    private fun ComposeUiTest.emptyFieldOffering(placeholder: String) =
-        onNode(hasSetTextAction() and hasText(placeholder))
-
-    /** The abbreviation box, which carries no placeholder for a test to find an empty one by. */
-    private fun ComposeUiTest.abbreviationField() =
-        onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(BIBLE_ABBREVIATION_FIELD_TAG)))
-
-    @Test
-    fun `the name boxes start empty, offering what the module calls itself`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James Version")
+    fun `the Add translation picker appends to the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "niv.spb" to "New International")
         val harness = showTab(stackOf(dir, "kjv.spb"))
 
-        // Blank means "use what the module says", so both boxes show that as a placeholder rather
-        // than typing it in -- including the abbreviation, which is derived and written nowhere.
-        emptyFieldOffering("King James Version").assertExists()
-        emptyFieldOffering("KJV").assertExists()
-        val translation = harness.current.bibleSettings.translationList().single()
-        assertEquals("" to "", translation.customName to translation.customAbbreviation)
+        chooseFromMenu("Add translation", "New International")
+
+        assertEquals(listOf("kjv.spb", "niv.spb"), files(harness), "it adds a slot rather than repointing one")
     }
 
     @Test
-    fun `typing a name renames that translation`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James Version")
-        val harness = showTab(stackOf(dir, "kjv.spb"))
+    fun `there is nothing to add once the folder is exhausted`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James")
+        showTab(stackOf(dir, "kjv.spb"))
 
-        emptyFieldOffering("King James Version").performTextReplacement("Authorised Version")
-        waitForIdle()
-
-        assertEquals("Authorised Version", harness.current.bibleSettings.translationList().single().customName)
+        onAllNodesWithText("Add translation").assertCountEquals(0)
     }
 
     @Test
-    fun `a name keeps the spaces it was typed with`() = runComposeUiTest {
-        // Trimming on the way in deleted the space as it was pressed: "King James" stuck at "King".
-        val dir = bibleFolder("kjv.spb" to "King James Version")
-        val harness = showTab(stackOf(dir, "kjv.spb"))
-
-        emptyFieldOffering("King James Version").performTextReplacement("King ")
-        waitForIdle()
-
-        assertEquals("King ", harness.current.bibleSettings.translationList().single().customName)
-    }
-
-    @Test
-    fun `typing an abbreviation renames only the abbreviation`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James Version")
-        val harness = showTab(stackOf(dir, "kjv.spb"))
-
-        abbreviationField().performTextReplacement("AV")
-        waitForIdle()
-
-        val translation = harness.current.bibleSettings.translationList().single()
-        assertEquals("AV" to "", translation.customAbbreviation to translation.customName)
-    }
-
-    @Test
-    fun `renaming the second translation writes the second one`() = runComposeUiTest {
+    fun `a translation can be moved up the stack`() = runComposeUiTest {
         val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
         val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
 
-        selectTranslation(2)
-        emptyFieldOffering("Synodal").performTextReplacement("Pew Bible")
+        // The first row has no "up", so the one button carrying that description is the second
+        // row's -- which is the one that moves Synodal above King James.
+        onNodeWithContentDescription("Move translation up").performClick()
+        waitForIdle()
+
+        assertEquals(listOf("syn.spb", "kjv.spb"), files(harness))
+    }
+
+    @Test
+    fun `a translation can be moved down the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
+
+        // Likewise the last row has no "down", so this is the first row's.
+        onNodeWithContentDescription("Move translation down").performClick()
+        waitForIdle()
+
+        assertEquals(listOf("syn.spb", "kjv.spb"), files(harness))
+    }
+
+    @Test
+    fun `a single translation is offered neither reorder button`() {
+        // Nothing to swap with, and a button that cannot do anything reads as one that is broken.
+        runComposeUiTest {
+            val dir = bibleFolder("kjv.spb" to "King James")
+            showTab(stackOf(dir, "kjv.spb"))
+
+            onAllNodesWithContentDescription("Move translation up").assertCountEquals(0)
+            onAllNodesWithContentDescription("Move translation down").assertCountEquals(0)
+        }
+    }
+
+    @Test
+    fun `Remove takes a translation out of the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
+
+        onAllNodesWithContentDescription("Remove")[1].performClick()
+        waitForIdle()
+
+        assertEquals(listOf("kjv.spb"), files(harness))
+    }
+
+    // ── What this church calls a translation ────────────────────────────────────────────────────
+
+    /**
+     * The name and abbreviation a church overrides its modules' own with.
+     *
+     * Both are per translation and both default to blank, which means "use what the module says" --
+     * so a blank field is not an empty setting, it is the fallback still being in force. The two are
+     * stored apart because a church can want one without the other: "Synodal" relabelled for the
+     * congregation while the abbreviation beside each verse stays the module's.
+     */
+    @Test
+    fun `a custom name is stored against its own translation`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(named(dir))
+
+        // The fields carry no label semantics of their own -- the caption above each is a separate
+        // Text node -- so each is addressed by the value it is showing, which is why the fixture
+        // seeds four distinct ones.
+        editableShowing("seed-name-2").performTextReplacement("Синодальный")
         waitForIdle()
 
         val stack = harness.current.bibleSettings.translationList()
-        assertEquals("Pew Bible", stack[1].customName)
-        assertEquals("", stack[0].customName)
+        assertEquals("Синодальный", stack[1].customName)
+        assertEquals("seed-name-1", stack[0].customName, "the translation above it must not have been renamed")
     }
 
     @Test
-    fun `a renamed translation is offered under its new name in the picker`() = runComposeUiTest {
-        val dir = bibleFolder("kjv.spb" to "King James Version", "syn.spb" to "Synodal")
-        showTab(
-            AppSettings(
-                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
-                    listOf(BibleTranslationSettings(fileName = "kjv.spb", customName = "Authorised")),
-                ),
-            ),
-        )
+    fun `an abbreviation is stored apart from the name`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(named(dir))
 
-        onNode(hasText("TRANSLATION 1") and hasText("Authorised")).assertExists()
-    }
-
-    @Test
-    fun `the show-abbreviation switch appears only on the Reference tab`() = runComposeUiTest {
-        // The header it lives in is shared by both element tabs, but the label only ever lands on
-        // the reference -- so on Verse Text the box was present and completely ineffective.
-        val dir = bibleFolder("kjv.spb" to "King James Version")
-        val harness = showTab(stackOf(dir, "kjv.spb"))
-
-        onNodeWithText("Show Bible abbreviation").assertDoesNotExist()
-
-        onNodeWithText("Reference").performClick()
-        onNodeWithText("Show Bible abbreviation").performClick()
+        editableShowing("seed-abbr-1").performTextReplacement("AV")
         waitForIdle()
 
-        assertEquals(true, harness.current.bibleSettings.translationList().single().showAbbreviation)
+        val first = harness.current.bibleSettings.translationList()[0]
+        assertEquals("AV", first.customAbbreviation)
+        assertEquals("seed-name-1", first.customName, "the name beside it is a separate choice")
+    }
+
+    /**
+     * The one editable field showing [text].
+     *
+     * The slot dropdown above each row displays the same custom name, so plain text alone matches
+     * two nodes -- the read-only button and the field.
+     */
+    private fun ComposeUiTest.editableShowing(text: String) =
+        onNode(hasSetTextAction() and hasText(text))
+
+    /** Two translations whose four identity fields each show a value of their own. */
+    private fun named(dir: File) = AppSettings(
+        bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
+            listOf(
+                BibleTranslationSettings(
+                    fileName = "kjv.spb",
+                    customName = "seed-name-1",
+                    customAbbreviation = "seed-abbr-1",
+                ),
+                BibleTranslationSettings(
+                    fileName = "syn.spb",
+                    customName = "seed-name-2",
+                    customAbbreviation = "seed-abbr-2",
+                ),
+            ),
+        ),
+    )
+
+    /** Opens the dropdown labelled [control] and picks [option] out of the menu it drops. */
+    private fun ComposeUiTest.chooseFromMenu(control: String, option: String) {
+        val before = onAllNodesWithText(option)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false).map { it.id }.toSet()
+        onAllNodesWithText(control).onFirst().performClick()
+        waitForIdle()
+        val opened = onAllNodesWithText(option).fetchSemanticsNodes().indexOfFirst { it.id !in before }
+        assertTrue(opened >= 0, "\"$control\" must offer \"$option\"")
+        onAllNodesWithText(option)[opened].performClick()
+        waitForIdle()
     }
 }

@@ -22,14 +22,13 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputStyleScope
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.bibleTranslationPositions
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -50,7 +49,7 @@ internal fun CustomizeStagePanel(
     pane: CustomizePane,
     element: CustomizeElement?,
     settings: AppSettings,
-    assignment: ScreenAssignment,
+    profile: OutputProfile,
     /** This output's own size -- see the caller's note on why it must not be re-derived here. */
     output: PreviewOutputSize,
     slot: PreviewSampleSlot,
@@ -63,9 +62,8 @@ internal fun CustomizeStagePanel(
     // shaped like the screen it is previewing.
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleStage(settings, output, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, assignment, output, lowerThird, slot, element)
-            CustomizePane.DICTIONARY -> DictionaryStage(settings, output)
+            CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot)
+            CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
             // The stage monitor's own tab already draws its zone layout at full size; a second,
             // smaller copy of it beside the controls would say nothing the tab does not.
@@ -74,14 +72,25 @@ internal fun CustomizeStagePanel(
     }
 }
 
-/** The sample verse, in every translation the stack carries, at [slot]'s length. */
+/** The sample verse, in the translations *this profile* draws, at [slot]'s length. */
 @Composable
-private fun BibleStage(settings: AppSettings, output: PreviewOutputSize, lowerThird: Boolean, slot: PreviewSampleSlot) {
+private fun BibleStage(
+    settings: AppSettings,
+    profile: OutputProfile,
+    output: PreviewOutputSize,
+    lowerThird: Boolean,
+    slot: PreviewSampleSlot,
+) {
+    // The profile's own subset, not the whole stack -- see [bibleTranslationPositions]. Narrowing
+    // an output to one translation used to leave the preview drawing all of them, so the picture
+    // beside the controls disagreed with the screen it stood for.
+    val stack = settings.bibleSettings.translationList()
+    val chosen = profile.bibleTranslationPositions(stack.size).mapNotNull(stack::getOrNull)
     // A shelf with no translations configured yet still has a Bible *style*, so the preview draws
     // the sample against stock settings rather than reporting "no translations" — the operator is
-    // here to see type, and the type is set whether or not a module is installed.
-    val translations = settings.bibleSettings.translationList()
-        .ifEmpty { listOf(BibleTranslationSettings()) }
+    // here to see type, and the type is set whether or not a module is installed. The same applies
+    // to a selection that has gone stale: something has to carry the type.
+    val translations = chosen.ifEmpty { listOf(BibleTranslationSettings()) }
     BiblePreviewPanel(
         settings = settings,
         target = if (lowerThird) BibleStyleTarget.LOWER_THIRD else BibleStyleTarget.FULL_SCREEN,
@@ -95,6 +104,8 @@ private fun BibleStage(settings: AppSettings, output: PreviewOutputSize, lowerTh
             slot = slot,
             moduleTitles = emptyMap(),
         ),
+        // This profile's own shape, not whether some other output happens to be portrait.
+        vertical = profile.isLowerThirdVertical,
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -106,7 +117,7 @@ private fun BibleStage(settings: AppSettings, output: PreviewOutputSize, lowerTh
 @Composable
 private fun SongStage(
     settings: AppSettings,
-    assignment: ScreenAssignment,
+    profile: OutputProfile,
     output: PreviewOutputSize,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
@@ -118,10 +129,10 @@ private fun SongStage(
         settings = settings,
         target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN,
         output = output,
-        // Taken from this output's own assignment rather than from a switch above the preview: the
+        // Taken from this output's own profile rather than from a switch above the preview: the
         // global tab asks "what should this picture contain", but here the screen has already
         // answered whether it carries a look-ahead line. A title slide has none.
-        showLookAhead = assignment.songLookAhead && !titleSlide,
+        showLookAhead = profile.songLookAhead && !titleSlide,
         // Never a chord chart. The chart is for whoever is playing, so it is drawn on the stage
         // monitor and nowhere the congregation can see -- `ProjectionSettingsTab` shows the Show
         // Chords column only for a stage monitor, and `PresenterOutputContent` passes `showChords`
@@ -135,23 +146,19 @@ private fun SongStage(
         } else {
             lyricSections
         },
+        // The languages this profile shows, decided exactly as the screen decides them. Without
+        // these the preview fell back to the song-level setting and drew every language the sample
+        // carries, so narrowing an output to one changed the screen and not the picture of it.
+        //
+        // A profile with songs switched off keeps the song-level fallback rather than previewing
+        // nothing: the pane is still where its type is set, and type cannot be judged on a blank.
+        languageOverride = profile.songMode.takeIf { it != Constants.SONG_LANG_OFF },
+        languageSelection = profile.songTranslations,
+        // This profile's own shape, not whether some other output happens to be portrait.
+        vertical = profile.isLowerThirdVertical,
         titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
     )
-}
-
-/** A Strong's card, drawn by [DictionaryPresenter] at the output's own size. */
-@Composable
-private fun DictionaryStage(settings: AppSettings, output: PreviewOutputSize) {
-    StageFrame(output) {
-        ScaledPresenterBox(output) {
-            DictionaryPresenter(
-                entry = DICTIONARY_SAMPLE_ENTRY,
-                dictionarySettings = settings.dictionarySettings,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-    }
 }
 
 /**
@@ -244,23 +251,6 @@ private const val NO_STAGE_ALPHA = 0.45f
 
 /** 16:9, so the empty plate is the shape a stage would have been. */
 private const val NO_STAGE_RATIO = 16f / 9f
-
-/**
- * The entry the dictionary stage quotes.
- *
- * `agape` rather than a random number: it is the word most likely to be on screen when someone is
- * setting up a dictionary card, and it exercises every one of the five styled fields — the original
- * word in Greek script, the transliteration, the reference, a definition long enough to wrap, and a
- * KJV usage list.
- */
-private val DICTIONARY_SAMPLE_ENTRY = StrongsEntry(
-    number = "G26",
-    word = "ἀγάπη",
-    transliteration = "agapē",
-    pronunciation = "ag-ah'-pay",
-    definition = "love, i.e. affection or benevolence; specially (plural) a love-feast.",
-    kjvUsage = "(feast of) charity, dear, love.",
-)
 
 /** Test handle for the preview stage. */
 internal const val CUSTOMIZE_STAGE_TAG = "customize_stage"

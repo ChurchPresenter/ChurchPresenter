@@ -48,6 +48,10 @@ class SettingsManagerTest {
         settingsFile.writeText(json)
     }
 
+    /** The profile a migrated assignment now points at -- everything it used to carry directly. */
+    private fun AppSettings.profileOf(assignment: ScreenAssignment): OutputProfile =
+        projectionSettings.profileFor(assignment) ?: error("no profile for $assignment")
+
     private fun backupFiles() = appDir.listFiles()?.filter { it.name.startsWith("settings.json.") }.orEmpty()
 
     // ── Fresh install ───────────────────────────────────────────────────────────
@@ -119,10 +123,11 @@ class SettingsManagerTest {
             """{"projectionSettings":{"screenAssignments":[
                {"targetDisplay":0,"showBible":false,"showSongs":false},{"targetDisplay":1}]}}""",
         )
-        val assignments = SettingsManager().loadSettings().projectionSettings.screenAssignments
-        assertEquals("off", assignments[0].bibleMode)
-        assertEquals("off", assignments[0].songMode)
-        assertEquals("both", assignments[1].bibleMode, "an untouched output keeps the default")
+        val settings = SettingsManager().loadSettings()
+        val assignments = settings.projectionSettings.screenAssignments
+        assertEquals("off", settings.profileOf(assignments[0]).bibleMode)
+        assertEquals("off", settings.profileOf(assignments[0]).songMode)
+        assertEquals("both", settings.profileOf(assignments[1]).bibleMode, "an untouched output keeps the default")
     }
 
     @Test
@@ -213,7 +218,7 @@ class SettingsManagerTest {
 
         assertEquals(
             "both",
-            settings.projectionSettings.screenAssignments.single().bibleMode,
+            settings.profileOf(settings.projectionSettings.screenAssignments.single()).bibleMode,
             "version 1 is marked as already applied to this document; migration 1 must not run a second time",
         )
     }
@@ -375,7 +380,7 @@ class SettingsManagerTest {
                 {"targetDisplay":2,"bibleMode":"both"},
                 {"targetDisplay":3,"bibleMode":"off"}]}}""".trimIndent().replace("\n", ""),
         )
-        val outputs = migrated.projectionSettings.screenAssignments
+        val outputs = migrated.projectionSettings.screenAssignments.map { migrated.profileOf(it) }
 
         assertEquals(listOf(0), outputs[0].bibleTranslations)
         assertEquals(listOf(1), outputs[1].bibleTranslations)
@@ -509,16 +514,19 @@ class SettingsManagerTest {
                "browserSourceOutputs":[{"targetDisplay":0,"bibleMode":"secondary"}]}}""",
         )
 
-        val projection = SettingsManager().loadSettings().projectionSettings
+        val settings = SettingsManager().loadSettings()
+        val projection = settings.projectionSettings
+        val screenProfile = settings.profileOf(projection.screenAssignments.single())
+        val browserProfile = settings.profileOf(projection.browserSourceOutputs.single())
 
-        assertEquals("both", projection.screenAssignments.single().bibleMode)
-        assertEquals(listOf(0), projection.screenAssignments.single().bibleTranslations)
+        assertEquals("both", screenProfile.bibleMode)
+        assertEquals(listOf(0), screenProfile.bibleTranslations)
         assertEquals(
-            "both", projection.browserSourceOutputs.single().bibleMode,
+            "both", browserProfile.bibleMode,
             "a browser source must not keep a mode the new code no longer understands",
         )
         assertEquals(
-            listOf(1), projection.browserSourceOutputs.single().bibleTranslations,
+            listOf(1), browserProfile.bibleTranslations,
             "\"secondary\" names position 1, on a browser source exactly as on a screen",
         )
     }
@@ -534,14 +542,15 @@ class SettingsManagerTest {
                "browserSourceOutputs":[{"targetDisplay":0}]}}""",
         )
 
-        val projection = SettingsManager().loadSettings().projectionSettings
+        val settings = SettingsManager().loadSettings()
+        val projection = settings.projectionSettings
 
         assertTrue(
-            projection.screenAssignments.none { it.showChords },
+            projection.screenAssignments.none { settings.profileOf(it).showChords },
             "the one switch the operator turned off has to survive becoming a per-output one",
         )
         assertFalse(
-            projection.browserSourceOutputs.single().showChords,
+            settings.profileOf(projection.browserSourceOutputs.single()).showChords,
             "a browser source can be a stage monitor too, so it carries the same field",
         )
     }
@@ -553,7 +562,8 @@ class SettingsManagerTest {
                "projectionSettings":{"screenAssignments":[{"targetDisplay":0}]}}""",
         )
 
-        assertTrue(SettingsManager().loadSettings().projectionSettings.screenAssignments.single().showChords)
+        val settings = SettingsManager().loadSettings()
+        assertTrue(settings.profileOf(settings.projectionSettings.screenAssignments.single()).showChords)
     }
 
     @Test
@@ -566,10 +576,14 @@ class SettingsManagerTest {
                {"targetDisplay":0,"showChords":true},{"targetDisplay":1}]}}""",
         )
 
-        val assignments = SettingsManager().loadSettings().projectionSettings.screenAssignments
+        val settings = SettingsManager().loadSettings()
+        val assignments = settings.projectionSettings.screenAssignments
 
-        assertTrue(assignments[0].showChords, "an explicit per-output value wins over the old global")
-        assertFalse(assignments[1].showChords)
+        assertTrue(
+            settings.profileOf(assignments[0]).showChords,
+            "an explicit per-output value wins over the old global",
+        )
+        assertFalse(settings.profileOf(assignments[1]).showChords)
     }
 
     // ── Version 7: the stage monitor's zone names became layout slots ───────────
@@ -626,7 +640,7 @@ class SettingsManagerTest {
 
         val settings = SettingsManager().loadSettings()
 
-        assertFalse(settings.projectionSettings.screenAssignments.single().showChords)
+        assertFalse(settings.profileOf(settings.projectionSettings.screenAssignments.single()).showChords)
         assertEquals(StageMonitorZone.B, settings.stageMonitorSettings.zoneFor(StageMonitorContentType.BIBLE))
     }
 

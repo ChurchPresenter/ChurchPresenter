@@ -3,11 +3,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,16 +14,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.preview_output_single_language_warning
 import churchpresenter.composeapp.generated.resources.song_preview_full_screen
 import churchpresenter.composeapp.generated.resources.song_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import churchpresenter.composeapp.generated.resources.song_preview_title_slide
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputWarning
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.core.models.songs.LyricSection
@@ -36,60 +29,10 @@ import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.withSecondaryLines
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /** The song number the sample slide carries, chosen to be three digits like a real songbook. */
 private const val SAMPLE_SONG_NUMBER = 427
-
-/**
- * Which output the Song preview stands for, and the preview itself.
- *
- * Split out of `SongStylePane` to keep it under the method-length gate: a rig can carry several
- * differently-shaped outputs at once, so the operator says which; the picker draws nothing until
- * there is more than one to choose between.
- *
- * A second warning, below the picker's own, covers a narrower case than "are songs on at all": the
- * preview is styling both languages (`bilingual`), but the selected output's own `songMode` may
- * restrict it to one -- `SongOutputLanguage.kt`'s own doc comment is why that per-output field, not
- * the tab's switches, is what a real screen actually obeys.
- */
-@Composable
-internal fun SongPreviewWithOutputPicker(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    target: SongStyleTarget,
-    bilingual: Boolean,
-    previewSettings: AppSettings,
-    previewLookAhead: Boolean,
-    sampleSections: List<LyricSection>,
-    titleSlideView: Boolean,
-) {
-    val previewOutput = rememberPreviewOutput(settings, Constants.PREVIEW_TAB_SONGS, Presenting.LYRICS)
-    PreviewOutputPicker(
-        settings = settings,
-        tabId = Constants.PREVIEW_TAB_SONGS,
-        mode = Presenting.LYRICS,
-        onSettingsChange = onSettingsChange,
-    )
-    if (bilingual && previewOutput.showsMode && previewOutput.assignment.songMode != Constants.SONG_LANG_BOTH) {
-        PreviewOutputWarning(stringResource(Res.string.preview_output_single_language_warning))
-    }
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        SongPreviewPanel(
-            settings = previewSettings,
-            target = target,
-            output = previewOutput.size,
-            showLookAhead = previewLookAhead,
-            showChords = false,
-            sections = sampleSections,
-            titleSlide = titleSlideView,
-            modifier = Modifier.width(
-                minOf(maxWidth, SETTINGS_PREVIEW_MAX_HEIGHT * previewOutput.size.aspectRatio),
-            ),
-        )
-    }
-}
 
 /**
  * What the configured styling puts on screen -- drawn by [SongPresenter] itself.
@@ -108,9 +51,8 @@ internal fun SongPreviewPanel(
     target: SongStyleTarget,
     /**
      * The output this preview stands for, in its own pixels -- the caller's decision, not this
-     * panel's: the global Songs tab asks the operator which output to preview (see
-     * `rememberPreviewOutput`/`PreviewOutputPicker`), while a per-output Customize dialog already
-     * knows exactly which one it is editing and must not guess a different one.
+     * panel's. The Profiles tab's stage panel picks a fixed representative size; it is not tied to
+     * one output's real size.
      */
     output: PreviewOutputSize,
     /** The look-ahead is shown on demand: a preview switch, not a setting. */
@@ -122,9 +64,26 @@ internal fun SongPreviewPanel(
     modifier: Modifier = Modifier,
     /** The first of [sections] is the title slide, and the badge says so. */
     titleSlide: Boolean = false,
+    /**
+     * Which languages this picture stands for, as the output would decide them: the profile's own
+     * song mode, and its subset of the song's languages.
+     *
+     * Null defers to the song-level setting, which is what a preview with no output behind it
+     * wants. A profile passes its own, because a screen narrowed to one language drawing two in
+     * the preview is a picture of a screen that does not exist.
+     */
+    languageOverride: String? = null,
+    languageSelection: List<Int> = emptyList(),
+    /**
+     * Whether this band stacks its two languages rather than setting them side by side.
+     *
+     * The caller's profile answers it, not the document: read as "does *any* output happen to be
+     * portrait" a landscape band previewed as a stacked one because some unrelated screen was
+     * portrait, which is a picture of an output that does not exist.
+     */
+    vertical: Boolean = false,
 ) {
     val song = settings.songSettings
-    val vertical = settings.projectionSettings.screenAssignments.any { it.isLowerThirdVertical }
 
     Box(
         modifier = modifier
@@ -135,6 +94,14 @@ internal fun SongPreviewPanel(
     ) {
         ScaledPresenterBox(output) {
             SongPresenter(
+                // The region the output confines its text to, applied exactly as
+                // `PresenterModeContent` applies it. Left off, the CONTENT REGION controls moved
+                // the screen and not the picture of it.
+                modifier = if (target.isLowerThird) {
+                    Modifier
+                } else {
+                    Modifier.contentRegion(song.layoutExtras.contentRegion)
+                },
                 lyricSection = sections.first(),
                 appSettings = settings,
                 isLowerThird = target.isLowerThird,
@@ -150,7 +117,8 @@ internal fun SongPreviewPanel(
                 // output's own song mode overrides the song-level language setting wherever it is
                 // set -- and it always is -- so without this the preview showed a language the
                 // screen would not.
-                languageOverride = settings.songLanguageFor(target),
+                languageOverride = languageOverride ?: settings.songLanguageFor(target),
+                languageSelection = languageSelection,
             )
         }
         MarginGuide(

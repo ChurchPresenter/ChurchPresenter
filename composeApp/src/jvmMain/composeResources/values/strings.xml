@@ -43,6 +43,7 @@
     <string name="service_schedule">Service Schedule:</string>
     <string name="songs">Songs</string>
     <string name="song">Song</string>
+    <string name="output_profiles_tab">Profiles</string>
     <string name="bible">Bible</string>
     <string name="pictures">Pictures</string>
     <string name="presentation">Presentation</string>
@@ -745,6 +746,7 @@
     <string name="tooltip_presentation_remote">Open Remote Control</string>
     <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
     <string name="tooltip_stt_settings">STT Display Settings</string>
+    <string name="tooltip_dictionary_settings">Dictionary Display Settings</string>
     <string name="tooltip_media_subtitle_settings">Subtitle Display Settings</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
@@ -1065,6 +1067,26 @@
     <string name="customize_marker">Marker</string>
     <string name="customize_bilingual">Bilingual</string>
     <string name="customize_no_preview">No preview for this section</string>
+
+    <!-- Output Profiles -->
+    <string name="output_profile_none">None</string>
+    <string name="output_profile_new">New Profile</string>
+    <string name="output_profile_create_default">Create Default Profile</string>
+    <string name="output_profile_create_default_tooltip">Add a fresh profile with the app's factory-default styling, as a backup to fall back to</string>
+    <string name="output_profile_duplicate">Duplicate</string>
+    <string name="output_profile_rename">Rename</string>
+    <string name="output_profile_delete">Delete</string>
+    <string name="output_profile_delete_confirm">Delete "%1$s"? This can't be undone.</string>
+    <string name="output_profile_delete_blocked">Can't delete "%1$s" — it's still used by: %2$s</string>
+    <string name="output_profile_usage_count">Used by %1$d output(s)</string>
+    <string name="output_profile_name_hint">Profile name</string>
+    <string name="output_profile_picker_tooltip">Output profile</string>
+    <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
+    <string name="output_profile_new_name_default">New Profile</string>
+    <string name="output_profile_display_mode">Display Mode</string>
+    <string name="output_profile_content">Content</string>
+    <string name="output_profile_empty_state">Create a profile to start styling it</string>
+    <string name="output_profile_preview_resolution_tooltip">Preview shape only — does not set the output's actual resolution</string>
     <string name="customize_bible">Bible</string>
     <string name="customize_songs">Songs</string>
     <string name="customize_lower_third_orientation">Orientation</string>
@@ -1080,6 +1102,9 @@
     <string name="customize_group_card">Card</string>
     <string name="customize_group_background">Screen background</string>
     <string name="customize_group_background_lower_third">Lower third background</string>
+    <string name="customize_background_source">Background</string>
+    <string name="customize_background_follow">Follow Background tab</string>
+    <string name="customize_background_own">Custom</string>
     <string name="customize_background_type">Type</string>
     <string name="customize_background_image">Image</string>
     <string name="customize_background_video">Video</string>
@@ -2090,6 +2115,7 @@
     <string name="number_before_title">Number before title</string>
     <string name="song_number_corner">Corner</string>
     <string name="song_number_corner_off">Off</string>
+    <string name="song_number_offset_needs_corner">Pick a corner above to position the number freely</string>
     <string name="song_number_offset_x">Offset X %</string>
     <string name="song_number_offset_y">Offset Y %</string>
     <string name="song_section_label">Section Label</string>
@@ -2347,6 +2373,7 @@
     <string name="stt_opacity">Opacity:</string>
     <string name="stt_position">Position</string>
     <string name="stt_settings_dialog_title">STT Display Settings</string>
+    <string name="dictionary_settings_dialog_title">Dictionary Display Settings</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI Report</string>

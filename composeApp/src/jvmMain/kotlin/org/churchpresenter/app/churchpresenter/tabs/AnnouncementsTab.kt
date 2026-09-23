@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
@@ -220,9 +221,7 @@ fun AnnouncementsTab(
     // locked out, so the button instead behaves as a plain Go Live (global presenting mode, no
     // per-screen lock) — same visible result, without blocking Bible/Songs from ever showing.
     val stageMonitorScreenIndices = remember(appSettings.projectionSettings) {
-        appSettings.projectionSettings.screenAssignments.indices.filter {
-            appSettings.projectionSettings.screenAssignments[it].displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-        }
+        stageMonitorScreenIndices(appSettings.projectionSettings)
     }
     val hasSeparateMainScreen = stageMonitorScreenIndices.size < appSettings.projectionSettings.screenAssignments.size
     val canSendToStageMonitor = stageMonitorScreenIndices.isNotEmpty()

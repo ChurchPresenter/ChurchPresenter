@@ -30,7 +30,9 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.screen_number
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
@@ -69,15 +71,16 @@ internal fun PresenterOutputContent(
     clearAnnouncementOnFinish: () -> Unit,
 ) {
     val presentingMode by presenterManager.presentingMode
-    // What THIS output renders with: the global document unless the operator has customized this
-    // screen, in which case its own Stage Monitor / Bible / Song appearance replaces the global
-    // one. Resolved here rather than at the caller so no output path can forget to do it, and
-    // identical to [appSettings] for an output that has never been customized.
-    // Remembered: an override is a sparse tree merged into the document and decoded, which is
-    // real work to repeat on every recomposition. Keyed on both sides, so it is redone exactly
-    // when one of them changes and not otherwise.
-    val outputSettings = remember(appSettings, screenAssignment) {
-        appSettings.resolvedFor(screenAssignment)
+    // The profile this output is assigned to -- everything about how it looks and what it shows.
+    // A default, empty profile stands in for a dangling/missing reference rather than crashing;
+    // see [OutputProfile]'s own note that this should not happen once migration has run.
+    val profile = appSettings.projectionSettings.profileFor(screenAssignment) ?: OutputProfile()
+    // What THIS output renders with: the global document's content, this profile's styling.
+    // Resolved here rather than at the caller so no output path can forget to do it.
+    // Remembered: a profile is merged into the document and decoded, which is real work to repeat
+    // on every recomposition. Keyed on both sides, so it is redone exactly when one changes.
+    val outputSettings = remember(appSettings, profile) {
+        appSettings.resolvedFor(profile)
     }
     val modeCrossfadeDuration = modeCrossfadeDuration(outputSettings.bibleSettings, outputSettings.songSettings)
     val displayedVerses by presenterManager.displayedVerses
@@ -95,14 +98,14 @@ internal fun PresenterOutputContent(
     val presenterNotes by presenterManager.presenterNotes
 
         val primaryRole = screenAssignment.primaryOutputRole
-        val showBg = showsOutputBackground(screenAssignment)
+        val showBg = showsOutputBackground(profile)
         CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-            if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+            if (profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
                 // Stage monitor: dedicated presenter-confidence layout
                 StageMonitorScreen(
                     sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
-                    showChords = screenAssignment.showChords,
+                    showChords = profile.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
@@ -125,7 +128,7 @@ internal fun PresenterOutputContent(
                     modifier = Modifier.fillMaxSize(),
                     appSettings = outputSettings,
                     outputRole = primaryRole,
-                    isLowerThird = screenAssignment.isLowerThird,
+                    isLowerThird = profile.isLowerThird,
                     showBackground = showBg
                 ) {
                     Box(
@@ -147,7 +150,7 @@ internal fun PresenterOutputContent(
                         Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                             PresenterModeContent(
                                 mode = mode,
-                                screenAssignment = screenAssignment,
+                                profile = profile,
                                 presenterManager = presenterManager,
                                 appSettings = outputSettings,
                                 mediaViewModel = mediaViewModel,

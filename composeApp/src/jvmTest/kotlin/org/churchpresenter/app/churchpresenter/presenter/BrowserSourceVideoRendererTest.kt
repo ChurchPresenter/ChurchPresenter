@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -331,7 +332,7 @@ class BrowserSourceVideoRendererTest {
 
     @Test
     fun `showsContentFor maps every content type to its own screen assignment flag`() {
-        val allOn = ScreenAssignment()
+        val allOn = OutputProfile()
         assertTrue(showsContentFor(Presenting.BIBLE, allOn))
         assertTrue(showsContentFor(Presenting.LYRICS, allOn))
         assertTrue(showsContentFor(Presenting.PICTURES, allOn))
@@ -348,7 +349,7 @@ class BrowserSourceVideoRendererTest {
 
     @Test
     fun `showsContentFor is false when the matching flag is off`() {
-        val allOff = ScreenAssignment(
+        val allOff = OutputProfile(
             bibleMode = Constants.SONG_LANG_OFF,
             songMode = Constants.SONG_LANG_OFF,
             showPictures = false,
@@ -377,7 +378,7 @@ class BrowserSourceVideoRendererTest {
 
     @Test
     fun `showsContentFor is false for NONE regardless of screen assignment`() {
-        assertFalse(showsContentFor(Presenting.NONE, ScreenAssignment()))
+        assertFalse(showsContentFor(Presenting.NONE, OutputProfile()))
     }
 
     @Test

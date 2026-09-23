@@ -20,11 +20,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.theme.components.DropdownSelector
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
@@ -64,8 +62,6 @@ private const val CHOICE_CHAR_WIDTH = 7f
 
 private const val CHOICE_PADDING = 16f
 
-/** A dropdown carries a chevron and its own padding, so it needs more than a segment does. */
-private const val DROPDOWN_PADDING = 40f
 
 private val CHOICE_MIN_WIDTH = 44.dp
 
@@ -193,18 +189,6 @@ internal fun NumberControl(
     }
 }
 
-/** Left / center / right, drawn with the icon buttons every other settings tab uses. */
-@Composable
-internal fun HorizontalAlignControl(selected: String, onSelect: (String) -> Unit) {
-    HorizontalAlignmentButtons(
-        selectedAlignment = selected,
-        onAlignmentChange = onSelect,
-        leftValue = Constants.LEFT,
-        centerValue = Constants.CENTER,
-        rightValue = Constants.RIGHT,
-    )
-}
-
 /** Top / middle / bottom, the vertical twin of [HorizontalAlignControl]. */
 @Composable
 internal fun VerticalAlignControl(selected: String, onSelect: (String) -> Unit) {
@@ -269,32 +253,6 @@ internal fun SliderControl(
         valueRange = range.first.toFloat()..range.last.toFloat(),
         modifier = Modifier.width(SLIDER_WIDTH),
         trailingLabel = "$value$suffix",
-    )
-}
-
-/**
- * One choice out of a list, as the dropdown the rest of the app picks a stored value with.
- *
- * A dropdown rather than a [ChoiceControl] where the options are too many to sit in a row without
- * pushing the pane past its width — five corners across a segmented button is wider than the pane.
- */
-@Composable
-internal fun DropdownControl(
-    value: String,
-    options: List<Pair<String, String>>,
-    onValueChange: (String) -> Unit,
-) {
-    // Sized to the longest label the same way [ChoiceControl] is, so the field neither clips its
-    // value nor stretches to whatever the flow happens to give it.
-    val width = (options.maxOf { it.second.length } * CHOICE_CHAR_WIDTH + DROPDOWN_PADDING)
-        .coerceAtLeast(CHOICE_MIN_WIDTH.value).dp
-    DropdownSelector(
-        label = "",
-        value = value,
-        options = options,
-        onValueChange = onValueChange,
-        compact = true,
-        modifier = Modifier.width(width),
     )
 }
 

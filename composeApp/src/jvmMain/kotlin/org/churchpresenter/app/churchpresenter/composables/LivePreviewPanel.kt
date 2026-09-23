@@ -34,6 +34,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -56,11 +59,14 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.output_profile_none
+import churchpresenter.composeapp.generated.resources.output_profile_swap_menu_tooltip
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
@@ -83,8 +89,14 @@ import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.getBrowserSourceOutput
+import org.churchpresenter.settings.getNdiOutput
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
+import org.churchpresenter.settings.withBrowserSourceOutput
+import org.churchpresenter.settings.withNdiOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
@@ -138,6 +150,7 @@ fun LivePreviewPanel(
     serverUrl: String = "",
     qaDisplayUrl: String = "",
     sttManager: STTManager? = null,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
@@ -156,7 +169,7 @@ fun LivePreviewPanel(
     ) {
         val entries = previewEntries(
             proj, displayCount, realWindowCount, devWindowedFallback,
-            presenterManager, appSettings, serverUrl, qaDisplayUrl, sttManager,
+            presenterManager, appSettings, serverUrl, qaDisplayUrl, sttManager, onSettingsChange,
         )
 
         // With no group the panel lists every output, one per row. Once groups exist they are the
@@ -206,6 +219,7 @@ private fun previewEntries(
     serverUrl: String,
     qaDisplayUrl: String,
     sttManager: STTManager?,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ): List<PreviewEntry> {
     val showLabels = proj.showOutputLabels
     return buildList {
@@ -240,6 +254,7 @@ private fun previewEntries(
                         showLabel = showLabels,
                         showMode = proj.showOutputModes,
                             collapsible = !grouped,
+                            onSettingsChange = onSettingsChange,
                     )
                 }
             )
@@ -268,6 +283,7 @@ private fun previewEntries(
                         showLabel = showLabels,
                         showMode = proj.showOutputModes,
                             collapsible = !grouped,
+                            onSettingsChange = onSettingsChange,
                     )
                 }
             )
@@ -299,6 +315,7 @@ private fun previewEntries(
                         showLabel = showLabels,
                         showMode = proj.showOutputModes,
                             collapsible = !grouped,
+                            onSettingsChange = onSettingsChange,
                     )
                 }
             )
@@ -326,14 +343,22 @@ private fun SingleDisplayPreview(
     showLabel: Boolean = true,
     showMode: Boolean = true,
     collapsible: Boolean = true,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
 ) {
-    // This preview must show what the real output shows, so it resolves the same per-output
-    // override the presenter window does. Identical to [appSettings] when uncustomized.
-    // Remembered: an override is a sparse tree merged into the document and decoded, which is
-    // real work to repeat on every recomposition. Keyed on both sides, so it is redone exactly
-    // when one of them changes and not otherwise.
-    val outputSettings = remember(appSettings, screenAssignment) {
-        appSettings.resolvedFor(screenAssignment)
+    // The raw assignment, kept for physical fields (key output, size) and for the profile swap
+    // menu below (it reads/writes `activeProfileId` itself). Everything content-shaped resolves
+    // through the assigned profile instead -- this tile must show what the output actually
+    // draws, not fields a bare assignment no longer carries.
+    val rawAssignment = screenAssignment
+    val profile = remember(appSettings.projectionSettings, rawAssignment) {
+        appSettings.projectionSettings.profileFor(rawAssignment) ?: OutputProfile()
+    }
+    // This preview must show what the real output shows, so it resolves the same per-profile
+    // styling the presenter window does. Remembered: resolution merges a sparse tree into the
+    // document and decodes it, which is real work to repeat on every recomposition. Keyed on
+    // both sides, so it is redone exactly when one of them changes and not otherwise.
+    val outputSettings = remember(appSettings, profile) {
+        appSettings.resolvedFor(profile)
     }
     val presentingMode by presenterManager.presentingMode
     val effectiveMode = locks[screenIndex] ?: presentingMode
@@ -375,22 +400,22 @@ private fun SingleDisplayPreview(
     val presenterNotes by presenterManager.presenterNotes
     val mediaViewModel = LocalMediaViewModel.current
 
-    val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
-    val isLowerThird = screenAssignment.isLowerThird
+    val isLowerThirdVertical = profile.isLowerThirdVertical
+    val isLowerThird = profile.isLowerThird
 
     // The same background switches every real output obeys — this layout's own
     // (Projection settings' Fullscreen/Lower Third Background columns) and the per-content-type
     // one beside it. Without them the preview draws a background the output is suppressing, and
     // the two disagree on screen for the rest of the service.
-    val showsBackground = showsOutputBackground(screenAssignment)
+    val showsBackground = showsOutputBackground(profile)
 
     // Determine if this screen shows the current content
-    val showsContent = showsContentFor(effectiveMode, screenAssignment)
+    val showsContent = showsContentFor(effectiveMode, profile)
 
     // This output's own size. Every preview used to take the first non-primary monitor's shape, so
     // a booth running a 4:3 foyer TV beside a 16:9 projector -- or any Browser Source or NDI output
     // configured to something else -- saw N previews that were all the wrong one of them.
-    val outputSize = outputSizeOf(screenAssignment, outputKind)
+    val outputSize = outputSizeOf(rawAssignment, outputKind)
 
     val isLive = effectiveMode != Presenting.NONE && showsContent
     val borderColor by animateColorAsState(
@@ -400,8 +425,8 @@ private fun SingleDisplayPreview(
         label = "border_color"
     )
 
-    val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-    val displayModeChipLabel = when (screenAssignment.displayMode) {
+    val isStageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+    val displayModeChipLabel = when (profile.displayMode) {
         Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
         // One label for both stored modes. Vertical is an orientation the app works out from the
         // output's own shape, not a mode the operator picks -- the Display Mode dropdown offers a
@@ -428,6 +453,25 @@ private fun SingleDisplayPreview(
             expanded = expanded || !collapsible,
             collapsible = collapsible,
             onToggle = { expanded = !expanded },
+            profiles = appSettings.projectionSettings.outputProfiles,
+            activeProfileId = rawAssignment.activeProfileId,
+            onPickProfile = { pickedId ->
+                onSettingsChange { s ->
+                    val proj = s.projectionSettings
+                    val updatedProj = when (outputKind) {
+                        OutputKind.SCREEN -> proj.withAssignment(
+                            screenIndex, proj.getAssignment(screenIndex).copy(activeProfileId = pickedId),
+                        )
+                        OutputKind.BROWSER_SOURCE -> proj.withBrowserSourceOutput(
+                            screenIndex, proj.getBrowserSourceOutput(screenIndex).copy(activeProfileId = pickedId),
+                        )
+                        OutputKind.NDI -> proj.withNdiOutput(
+                            screenIndex, proj.getNdiOutput(screenIndex).copy(activeProfileId = pickedId),
+                        )
+                    }
+                    s.copy(projectionSettings = updatedProj)
+                }
+            },
         )
 
         if (expanded || !collapsible) {
@@ -438,15 +482,15 @@ private fun SingleDisplayPreview(
                 .clip(RoundedCornerShape(6.dp))
                 .border(1.dp, borderColor, RoundedCornerShape(6.dp))
         ) {
-        val primaryRole = screenAssignment.primaryOutputRole
+        val primaryRole = rawAssignment.primaryOutputRole
 
         // ── Stage Monitor: dedicated presenter-confidence layout, not the normal presenter ──
-        if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+        if (profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
             ScaledPresenterContent(output = outputSize) {
                 StageMonitorScreen(
                     sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
-                    showChords = screenAssignment.showChords,
+                    showChords = profile.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
@@ -501,9 +545,9 @@ private fun SingleDisplayPreview(
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
                                     transitionAlpha = bibleTransitionAlpha,
-                                    showBackground = showsBackground && screenAssignment.showBibleBackground,
+                                    showBackground = showsBackground && profile.showBibleBackground,
                                     crossfadeEnabled = outputSettings.bibleSettings.crossfade,
-                                    bibleTranslations = screenAssignment.bibleTranslations,
+                                    bibleTranslations = profile.bibleTranslations,
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
@@ -514,13 +558,13 @@ private fun SingleDisplayPreview(
                                     outputRole = primaryRole,
                                     transitionAlpha = songTransitionAlpha,
                                     displayLineIndex = songDisplayLineIndex,
-                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                    lookAheadEnabled = profile.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
-                                    showBackground = showsBackground && screenAssignment.showSongsBackground,
+                                    showBackground = showsBackground && profile.showSongsBackground,
                                     crossfadeEnabled = outputSettings.songSettings.crossfade,
-                                    languageOverride = screenAssignment.songMode,
-                                    languageSelection = screenAssignment.songTranslations,
+                                    languageOverride = profile.songMode,
+                                    languageSelection = profile.songTranslations,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(
@@ -608,7 +652,7 @@ private fun SingleDisplayPreview(
         // A second JFXPanel instance can't be scaled/clipped by Compose.
         // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
         // so this panel shows a pixel-accurate mirror including scroll position.
-        if (screenAssignment.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
+        if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
             val snapshot = webSnapshot
             if (snapshot != null) {
                 Image(
@@ -639,7 +683,7 @@ private fun SingleDisplayPreview(
         }
 
         // FILL badge when key output is configured
-        if (screenAssignment.hasKeyOutput) {
+        if (rawAssignment.hasKeyOutput) {
             Text(
                 text = stringResource(Res.string.fill_badge),
                 color = Color.White,
@@ -663,7 +707,7 @@ private fun SingleDisplayPreview(
                     fontSize = 9.sp,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = 4.dp, bottom = if (screenAssignment.hasKeyOutput) 24.dp else 4.dp)
+                        .padding(start = 4.dp, bottom = if (rawAssignment.hasKeyOutput) 24.dp else 4.dp)
                         .background(Color(LOCK_BADGE_COLOR), RoundedCornerShape(3.dp))
                         .padding(horizontal = 5.dp, vertical = 2.dp)
                 )
@@ -748,6 +792,9 @@ private fun PreviewHeader(
     expanded: Boolean,
     collapsible: Boolean,
     onToggle: () -> Unit,
+    profiles: List<OutputProfile> = emptyList(),
+    activeProfileId: String? = null,
+    onPickProfile: (String?) -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -770,6 +817,13 @@ private fun PreviewHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 9.sp,
         )
+        // Quick-swap: which Output Profile this output follows, right where the operator is
+        // already watching it live. Only shown once a profile exists to swap to -- an empty menu
+        // would just be clutter on every tile -- and only while the tile is open, where there is
+        // room for it; the collapsed row is one line reserved for the label below.
+        if (expanded && profiles.isNotEmpty()) {
+            OutputProfileSwapMenu(profiles = profiles, activeProfileId = activeProfileId, onPick = onPickProfile)
+        }
         if (!expanded) {
             Spacer(Modifier.weight(1f))
             Text(
@@ -779,6 +833,50 @@ private fun PreviewHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+    }
+}
+
+/** The header's profile picker: an icon button that opens a menu of every saved [OutputProfile]. */
+@Composable
+private fun OutputProfileSwapMenu(
+    profiles: List<OutputProfile>,
+    activeProfileId: String?,
+    onPick: (String?) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(
+            onClick = { expanded = true },
+            modifier = Modifier.size(18.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.SwapHoriz,
+                contentDescription = stringResource(Res.string.output_profile_swap_menu_tooltip),
+                modifier = Modifier.size(14.dp),
+                tint = if (activeProfileId != null) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = {
+                    Text(stringResource(Res.string.output_profile_none), style = MaterialTheme.typography.bodySmall)
+                },
+                onClick = { expanded = false; onPick(null) },
+            )
+            profiles.forEach { profile ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            profile.name.ifBlank { profile.id },
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = if (profile.id == activeProfileId) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    onClick = { expanded = false; onPick(profile.id) },
+                )
+            }
         }
     }
 }

@@ -99,6 +99,7 @@ import churchpresenter.composeapp.generated.resources.web_snapshot_screen_record
 import churchpresenter.composeapp.generated.resources.web_snapshot_waiting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
@@ -285,7 +286,9 @@ fun WebTab(
         val hasWebCapableOutput = remember(appSettings.projectionSettings) {
             val proj = appSettings.projectionSettings
             val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
-            assignments.any { it.targetType != "decklink" && it.targetDisplay >= 0 && it.showWebsite }
+            assignments.any {
+                it.targetType != "decklink" && it.targetDisplay >= 0 && (proj.profileFor(it)?.showWebsite ?: false)
+            }
         }
 
         // Shared composables for URL bar and action buttons

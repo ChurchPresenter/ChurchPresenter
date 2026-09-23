@@ -30,7 +30,9 @@ import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
 import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -91,32 +93,35 @@ fun outputsShowing(
         val assignment = proj.getAssignment(index)
         val isDevFallbackSlot = devWindowedFallback && index >= realWindowCount
         if (!isDevFallbackSlot && assignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+        val profile = proj.profileFor(assignment) ?: OutputProfile()
         outputs += PreviewOutput(
             key = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, index),
             label = proj.screenLabelOr(assignment, stringResource(Res.string.screen_number, index + 1)),
             size = outputSizeOf(assignment, OutputKind.SCREEN),
-            showsMode = mode == null || showsContentFor(mode, assignment),
+            showsMode = mode == null || showsContentFor(mode, profile),
             assignment = assignment,
         )
     }
     proj.browserSourceOutputs.forEachIndexed { index, output ->
+        val profile = proj.profileFor(output) ?: OutputProfile()
         outputs += PreviewOutput(
             key = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, index),
             label = output.browserSourceLabelOr(
                 stringResource(Res.string.browser_source_output_label, index + 1)
             ),
             size = outputSizeOf(output, OutputKind.BROWSER_SOURCE),
-            showsMode = mode == null || showsContentFor(mode, output),
+            showsMode = mode == null || showsContentFor(mode, profile),
             assignment = output,
         )
     }
     proj.ndiOutputs.forEachIndexed { index, output ->
         if (!output.ndiEnabled) return@forEachIndexed
+        val profile = proj.profileFor(output) ?: OutputProfile()
         outputs += PreviewOutput(
             key = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, index),
             label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, index + 1)),
             size = outputSizeOf(output, OutputKind.NDI),
-            showsMode = mode == null || showsContentFor(mode, output),
+            showsMode = mode == null || showsContentFor(mode, profile),
             assignment = output,
         )
     }

@@ -938,7 +938,7 @@ fun MainDesktop(
                             instanceLinkSendClear?.invoke()
                             // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
                             // so the stage monitor goes back to following the main presenting mode.
-                            stageMonitorScreenIndices(appSettings.projectionSettings.screenAssignments)
+                            stageMonitorScreenIndices(appSettings.projectionSettings)
                                 .forEach { presenterManager.setScreenLock(it, null) }
                             true
                         }
@@ -2045,6 +2045,7 @@ private fun PreviewSidebar(
                 serverUrl = serverUrl,
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
+                onSettingsChange = onSettingsChange,
             )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,
