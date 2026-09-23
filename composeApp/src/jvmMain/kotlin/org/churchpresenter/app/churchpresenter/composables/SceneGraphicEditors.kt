@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -425,7 +424,7 @@ private fun ClockTimerTransport(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Button(
+        RaisedButton(
             onClick = { TimerStateManager.setRunning(sourceId, seedSeconds, !isRunning, countUp) },
             enabled = canStart || isRunning,
             modifier = Modifier.weight(1f).height(32.dp),
@@ -434,7 +433,7 @@ private fun ClockTimerTransport(
         ) {
             Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
         }
-        Button(
+        RaisedButton(
             onClick = { TimerStateManager.reset(sourceId, seedSeconds) },
             modifier = Modifier.weight(1f).height(32.dp),
             shape = RoundedCornerShape(8.dp),

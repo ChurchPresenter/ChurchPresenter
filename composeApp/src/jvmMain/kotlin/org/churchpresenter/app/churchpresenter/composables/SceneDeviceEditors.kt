@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -123,7 +122,7 @@ internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource
         looking = false
     }
 
-    Button(
+    RaisedButton(
         onClick = { looks++ },
         // Looks are serialised on the one finder, so a second press only queues another second of
         // waiting behind the first, with nothing on screen to say anything happened.
@@ -234,7 +233,7 @@ internal fun CameraProperties(
         if (supplied == null) CameraDeviceCatalog.refresh(deckLinkDeviceFormat)
     }
 
-    Button(
+    RaisedButton(
         onClick = { scope.launch { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) } },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
@@ -437,7 +436,7 @@ internal fun CameraPrivacyHint(
     openUri: (String) -> Unit = { UrlOpener.open(it) },
 ) {
     val uri = cameraPrivacyUri(osName) ?: return
-    Button(onClick = { openUri(uri) }, modifier = Modifier.fillMaxWidth()) {
+    RaisedButton(onClick = { openUri(uri) }, modifier = Modifier.fillMaxWidth()) {
         Text(stringResource(Res.string.canvas_camera_open_privacy_settings), fontSize = 12.sp)
     }
 }
@@ -465,7 +464,7 @@ internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, on
         var windows by remember { mutableStateOf(listOpenWindows()) }
         val windowTitles = windows.map { it.title }
 
-        Button(
+        RaisedButton(
             onClick = { windows = listOpenWindows() },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp)

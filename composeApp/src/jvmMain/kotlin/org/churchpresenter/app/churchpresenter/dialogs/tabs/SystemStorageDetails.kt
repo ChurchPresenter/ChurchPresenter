@@ -20,7 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -321,9 +321,9 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
         if (converting) {
             CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
         } else {
-            Button(
+            RaisedButton(
                 onClick = {
-                    if (!prompts.confirmOverwrite(directory, fileName)) return@Button
+                    if (!prompts.confirmOverwrite(directory, fileName)) return@RaisedButton
                     converting = true
                     scope.launch {
                         val result = withContext(Dispatchers.IO) {

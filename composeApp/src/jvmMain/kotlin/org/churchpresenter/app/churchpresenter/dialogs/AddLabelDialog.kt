@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -230,7 +230,7 @@ internal fun AddLabelDialogContent(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = {
                         if (labelText.isNotBlank()) {

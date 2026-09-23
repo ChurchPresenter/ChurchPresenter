@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -445,10 +445,10 @@ internal fun InstanceLinkDialogContent(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
-                            if (portText.toIntOrNull() == null) return@Button
+                            if (portText.toIntOrNull() == null) return@RaisedButton
                             onConnect(edited())
                             onDismiss()
                         },

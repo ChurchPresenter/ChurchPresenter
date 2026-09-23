@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -202,11 +202,11 @@ private fun CompanionConnectionCard(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (state.status == CompanionConnectionStatus.CONNECTED || state.status == CompanionConnectionStatus.CONNECTING) {
-                            OutlinedButton(onClick = { viewModel.disconnectAll(connection) }) {
+                            KeyButton(onClick = { viewModel.disconnectAll(connection) }) {
                                 Text(stringResource(Res.string.companion_satellite_disconnect))
                             }
                         } else {
-                            Button(
+                            RaisedButton(
                                 onClick = {
                                     // Companion requires a non-empty DEVICEID ("Missing DEVICEID"
                                     // otherwise) — generate one on the fly if the field was cleared,

@@ -19,12 +19,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -480,7 +480,7 @@ internal fun KeyboardShortcutsDialogContent(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = { editOverrides { emptyMap() }; recording = null },
                     modifier = Modifier.testTag(SHORTCUT_RESET_ALL_TAG)
@@ -508,14 +508,14 @@ internal fun KeyboardShortcutsDialogContent(
                 // simply never fire, and which one is an accident of registry order. The toolbar's
                 // count is the way back to the rows that have to be settled first.
                 val savable = conflicts.isEmpty()
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = savable,
                     onClick = { onSave(currentSettings) },
                 ) {
                     Text(stringResource(Res.string.apply))
                 }
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = savable,
                     onClick = { onSave(currentSettings); onDismiss() }

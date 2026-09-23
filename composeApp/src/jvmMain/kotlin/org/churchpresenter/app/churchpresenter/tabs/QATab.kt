@@ -34,7 +34,7 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -42,7 +42,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -269,7 +269,7 @@ fun QATab(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                     } else if (sessionActive) {
-                        Button(
+                        RaisedButton(
                             onClick = {
                                 qaManager.toggleSession()
                                 presenterManager.setDisplayedQuestion(null)
@@ -287,7 +287,7 @@ fun QATab(
                             Text(stringResource(Res.string.qa_stop_session))
                         }
                     } else {
-                        Button(
+                        RaisedButton(
                             onClick = { qaManager.toggleSession() },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.inverseSurface,
@@ -300,7 +300,7 @@ fun QATab(
                             Text(stringResource(Res.string.qa_new_session))
                         }
                         if (qaManager.history.isNotEmpty()) {
-                            OutlinedButton(onClick = { qaManager.restoreFromHistory() },
+                            KeyButton(onClick = { qaManager.restoreFromHistory() },
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -356,7 +356,7 @@ fun QATab(
 
                 // Clear all questions
                 if (questions.isNotEmpty()) {
-                    OutlinedButton(
+                    KeyButton(
                         onClick = { showClearConfirm = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                         shape = RoundedCornerShape(8.dp)
@@ -402,7 +402,7 @@ fun QATab(
                 Spacer(Modifier.weight(1f))
 
                 // History button
-                OutlinedButton(
+                KeyButton(
                     onClick = { selectedFilter = 6 },
                     modifier = Modifier.height(42.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding,
@@ -452,7 +452,7 @@ fun QATab(
                             }
                         }
                     }
-                    Button(
+                    RaisedButton(
                         onClick = {
                             qaManager.addQuestion(addQuestionText)
                             addQuestionText = ""
@@ -482,7 +482,7 @@ fun QATab(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    OutlinedButton(
+                    KeyButton(
                         onClick = {
                             qaManager.clearDisplay()
                             presenterManager.setDisplayedQuestion(null)
@@ -520,7 +520,7 @@ fun QATab(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedButton(onClick = {
+                        KeyButton(onClick = {
                             coroutineScope.launch {
                                 val path = FileChooser.platformInstance.save(
                                     location = null,
@@ -547,7 +547,7 @@ fun QATab(
                         ) {
                             Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)
                         }
-                        OutlinedButton(onClick = {
+                        KeyButton(onClick = {
                             coroutineScope.launch {
                                 val path = FileChooser.platformInstance.chooseSingle(
                                     path = null,
@@ -573,7 +573,7 @@ fun QATab(
                         ) {
                             Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)
                         }
-                        OutlinedButton(
+                        KeyButton(
                             onClick = { qaManager.clearHistory() },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                             shape = RoundedCornerShape(8.dp)

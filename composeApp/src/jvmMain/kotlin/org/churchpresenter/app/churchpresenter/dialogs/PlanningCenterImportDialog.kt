@@ -35,14 +35,14 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Slideshow
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -314,7 +314,7 @@ internal fun PlanningCenterConnectDialogContent(
                 TextButton(onClick = onDismiss, modifier = Modifier.padding(end = 8.dp)) {
                     Text(stringResource(Res.string.cancel))
                 }
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = !isConnecting,
                     onClick = onConnectClick
@@ -395,7 +395,7 @@ internal fun PlanningCenterImportDialogContent(
                     color = MaterialTheme.semantic.success
                 )
                 Spacer(Modifier.width(10.dp))
-                OutlinedButton(
+                KeyButton(
                     onClick = onDisconnect,
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
@@ -490,7 +490,7 @@ internal fun PlanningCenterImportDialogContent(
                                             } else if (isFetchingArrangement == pco.id) {
                                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                                             } else {
-                                                Button(
+                                                RaisedButton(
                                                     shape = RoundedCornerShape(8.dp),
                                                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
                                                     modifier = Modifier.height(32.dp),
@@ -663,7 +663,7 @@ internal fun PlanningCenterImportDialogContent(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                KeyButton(
                     onClick = onDismiss,
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
@@ -673,7 +673,7 @@ internal fun PlanningCenterImportDialogContent(
                 }
                 var isImporting by remember { mutableStateOf(false) }
                 val planId = viewModel.selectedPlanId
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = !isImporting && planId != null && viewModel.planItems.any { entry ->
                         val pco = entry.pco
@@ -692,7 +692,7 @@ internal fun PlanningCenterImportDialogContent(
                         }
                     },
                     onClick = {
-                        if (planId == null) return@Button
+                        if (planId == null) return@RaisedButton
                         UsageEvents.record(UsageEvent.PLANNING_CENTER_IMPORT)
                         isImporting = true
                         scope.launch {

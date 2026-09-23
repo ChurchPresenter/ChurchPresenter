@@ -39,7 +39,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -386,7 +386,7 @@ fun CanvasTab(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Button(
+                RaisedButton(
                     onClick = { sceneViewModel.addScene() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -910,7 +910,7 @@ fun CanvasTab(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
-                        Button(
+                        RaisedButton(
                             onClick = {
                                 sceneViewModel.updateCanvasSize(displayW, displayH)
                             },
@@ -965,7 +965,7 @@ fun CanvasTab(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
-                        Button(onClick = { sceneViewModel.addScene() }, shape = RoundedCornerShape(8.dp)) {
+                        RaisedButton(onClick = { sceneViewModel.addScene() }, shape = RoundedCornerShape(8.dp)) {
                             Text(stringResource(Res.string.canvas_create_scene))
                         }
                     }

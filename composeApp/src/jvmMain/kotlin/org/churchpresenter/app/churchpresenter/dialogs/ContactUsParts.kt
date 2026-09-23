@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,7 +74,7 @@ internal fun ContactUsActions(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             enabled = canSend,
             onClick = onSend,

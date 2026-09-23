@@ -1,8 +1,6 @@
 package org.churchpresenter.theme.components
 
 import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +40,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 @Composable
 fun DropdownSelector(
@@ -59,8 +59,7 @@ fun DropdownSelector(
 
     Box(
         modifier = sizeModifier
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 expanded = true
             }
@@ -171,8 +170,7 @@ fun DropdownSelector(
         Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                .sunken(RoundedCornerShape(8.dp), elevationPalette())
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                     expanded.value = true
                 }

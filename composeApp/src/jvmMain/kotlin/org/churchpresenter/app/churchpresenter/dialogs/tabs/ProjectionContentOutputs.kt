@@ -24,12 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -367,7 +367,7 @@ internal fun ContentOutputsDialog(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ContentOutputsSectionHeader(stringResource(Res.string.content_outputs_quick_select))
                     Spacer(modifier = Modifier.weight(1f))
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             var a = assignment
@@ -385,7 +385,7 @@ internal fun ContentOutputsDialog(
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) { Text(stringResource(Res.string.content_outputs_select_all), style = MaterialTheme.typography.labelSmall) }
                     Spacer(modifier = Modifier.width(8.dp))
-                    OutlinedButton(
+                    KeyButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             var a = assignment
@@ -504,7 +504,7 @@ internal fun ContentOutputsDialog(
           }
         },
         confirmButton = {
-            Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.content_outputs_done), style = MaterialTheme.typography.labelSmall)
             }
         }

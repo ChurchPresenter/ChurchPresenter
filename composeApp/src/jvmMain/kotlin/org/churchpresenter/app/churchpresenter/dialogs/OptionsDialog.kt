@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -420,7 +420,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onApply,
             colors = ButtonDefaults.buttonColors(
@@ -433,7 +433,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onOk,
             colors = ButtonDefaults.buttonColors(

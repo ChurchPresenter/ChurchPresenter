@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 @Composable
 fun StyledTextField(
@@ -48,8 +48,7 @@ fun StyledTextField(
     }
     Row(
         modifier = rowModifier
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
         verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
     ) {
         Column(

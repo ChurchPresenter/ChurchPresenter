@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -347,7 +347,7 @@ fun MediaTab(
 
             when (selectedSourceType) {
                 Constants.MEDIA_TYPE_LOCAL -> {
-                    Button(
+                    RaisedButton(
                         onClick = {
                             scope.launch {
                                 val f = FileChooser.platformInstance.chooseSingle(
@@ -415,7 +415,7 @@ fun MediaTab(
                             )
                         }
                     }
-                    Button(
+                    RaisedButton(
                         onClick = {
                             if (urlInput.isNotBlank()) {
                                 if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()

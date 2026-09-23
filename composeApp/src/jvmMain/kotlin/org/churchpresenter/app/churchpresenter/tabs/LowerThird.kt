@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -757,7 +757,7 @@ fun LowerThirdTab(
                 }
             },
             confirmButton = {
-                Button(
+                RaisedButton(
                     onClick = {
                         startAtemUpload(atemVariant(atemIsClip), atemSlot, closeDialogOnSuccess = true)
                     },
@@ -876,7 +876,7 @@ fun LowerThirdTab(
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Button(
+            RaisedButton(
                 onClick = {
                     onOpenLottieGen(appSettings.streamingSettings.lowerThirdFolder) {
                         scope.launch { refreshKey++ }

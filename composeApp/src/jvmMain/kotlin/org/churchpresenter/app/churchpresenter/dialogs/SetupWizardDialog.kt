@@ -41,11 +41,11 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -864,7 +864,7 @@ private fun ConverterCallout(onOpenConverter: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        Button(shape = RoundedCornerShape(8.dp), onClick = onOpenConverter) {
+        RaisedButton(shape = RoundedCornerShape(8.dp), onClick = onOpenConverter) {
             Text(stringResource(Res.string.setup_songs_converter_button))
         }
     }
@@ -1083,7 +1083,7 @@ internal fun VlcStep(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(8.dp),
                     onClick = { onOpenDownloadPage(downloadUrl) }
                 ) {
@@ -1097,7 +1097,7 @@ internal fun VlcStep(
                         )
                     )
                 }
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(8.dp),
                     onClick = {
                         scope.launch {
@@ -1293,7 +1293,7 @@ internal fun withoutLeadingNumber(text: String): String = text.replace(LEADING_N
 
 @Composable
 private fun OpenSettingsButton(onOpenSettings: () -> Unit) {
-    OutlinedButton(shape = RoundedCornerShape(8.dp), onClick = onOpenSettings) {
+    KeyButton(shape = RoundedCornerShape(8.dp), onClick = onOpenSettings) {
         Image(
             painter = painterResource(Res.drawable.ic_settings),
             contentDescription = null,

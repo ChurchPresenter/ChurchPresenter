@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -88,7 +87,7 @@ fun FocusLostBanner(state: FocusLostRescueState, text: String, modifier: Modifie
  */
 @Composable
 fun FocusHintBanner(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
+    RaisedButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()

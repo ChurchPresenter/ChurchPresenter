@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -174,10 +173,10 @@ internal fun BibleProperties(
                 )
             }
 
-            Button(
+            RaisedButton(
                 onClick = {
                     val bookName = books.getOrElse(selectedBookIndex) { "" }
-                    val bookId = bible?.getBookId(selectedBookIndex) ?: return@Button
+                    val bookId = bible?.getBookId(selectedBookIndex) ?: return@RaisedButton
                     val verseTexts = (startVerse..endVerse).mapNotNull { vNum ->
                         bible.getVerseDetails(bookId, selectedChapter, vNum)?.second
                     }

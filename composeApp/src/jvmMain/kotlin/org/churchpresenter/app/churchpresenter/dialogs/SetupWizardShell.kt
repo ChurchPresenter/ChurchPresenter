@@ -20,10 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -344,7 +344,7 @@ internal fun WizardPanelFooter(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (canGoBack) {
-            OutlinedButton(shape = RoundedCornerShape(8.dp), onClick = onBack) {
+            KeyButton(shape = RoundedCornerShape(8.dp), onClick = onBack) {
                 Text(stringResource(Res.string.setup_wizard_back))
             }
         }
@@ -357,7 +357,7 @@ internal fun WizardPanelFooter(
                 modifier = Modifier.padding(end = 14.dp),
             )
         }
-        Button(shape = RoundedCornerShape(8.dp), onClick = onContinue) {
+        RaisedButton(shape = RoundedCornerShape(8.dp), onClick = onContinue) {
             Text(
                 text = if (isLastStep) continueLabel else stringResource(Res.string.setup_wizard_next),
                 fontWeight = FontWeight.SemiBold,

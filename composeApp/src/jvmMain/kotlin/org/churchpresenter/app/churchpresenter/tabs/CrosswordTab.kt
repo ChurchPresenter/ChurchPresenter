@@ -20,7 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -329,7 +329,7 @@ fun CrosswordTab(
                     )
 
                     if (!allCompleted || currentLevelIdx < puzzles.size - 1) {
-                        Button(
+                        RaisedButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 if (checkAnswers(puzzle, userInput)) {

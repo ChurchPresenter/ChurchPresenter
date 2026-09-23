@@ -20,7 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -259,7 +259,7 @@ private fun RemoteActivityToast(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onBlockForSession) {
+                KeyButton(shape = RoundedCornerShape(6.dp), onClick = onBlockForSession) {
                     Icon(
                         Icons.Filled.RemoveCircle,
                         contentDescription = stringResource(Res.string.block_for_session),

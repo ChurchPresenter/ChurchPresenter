@@ -19,12 +19,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.app.churchpresenter.composables.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -178,7 +178,7 @@ private fun GeneralToggleRow(
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        RaisedSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -263,7 +263,7 @@ private fun TestEventRow(scope: CoroutineScope) {
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
-        Button(
+        RaisedButton(
             onClick = {
                 scope.launch {
                     val ok = withContext(Dispatchers.IO) { CrashReporter.sendTestEvent() }
@@ -332,7 +332,7 @@ private fun ManageSettingsCard(companionServer: CompanionServer?) {
 
 @Composable
 private fun ManageButton(text: String, danger: Boolean = false, onClick: () -> Unit) {
-    OutlinedButton(
+    KeyButton(
         onClick = onClick,
         modifier = Modifier.height(34.dp),
         shape = RoundedCornerShape(8.dp),

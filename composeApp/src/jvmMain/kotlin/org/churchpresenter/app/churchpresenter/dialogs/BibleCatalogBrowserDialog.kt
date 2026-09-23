@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -260,7 +260,7 @@ internal fun BibleCatalogBrowserDialogContent(
                 )
                 Spacer(Modifier.width(12.dp))
 
-                Button(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
+                RaisedButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
                     Text(stringResource(Res.string.bible_catalog_done))
                 }
             }

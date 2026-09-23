@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +15,7 @@ fun ErrorButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    Button(
+    RaisedButton(
         shape = RoundedCornerShape(6.dp),
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(

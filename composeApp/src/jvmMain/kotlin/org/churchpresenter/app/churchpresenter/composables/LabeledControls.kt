@@ -8,7 +8,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -140,9 +139,9 @@ fun LabeledSwitch(
     ) {
         if (controlAtEnd) {
             LabelText(label, supporting, style, color, Modifier.weight(1f))
-            Switch(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
+            RaisedSwitch(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
         } else {
-            Switch(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
+            RaisedSwitch(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
             LabelText(label, supporting, style, color)
         }
     }

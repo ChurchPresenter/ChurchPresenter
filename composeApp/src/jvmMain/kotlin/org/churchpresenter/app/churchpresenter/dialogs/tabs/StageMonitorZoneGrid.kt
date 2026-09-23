@@ -65,7 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.draggable
@@ -382,7 +382,7 @@ private fun SelectedZoneField(label: String, value: String, modifier: Modifier =
 /** One of the two evening-out shortcuts: this row, or the whole grid. */
 @Composable
 private fun EvenOutButton(label: String, onClick: () -> Unit) {
-    OutlinedButton(
+    KeyButton(
         onClick = onClick,
         shape = RoundedCornerShape(6.dp),
         modifier = Modifier.height(26.dp),

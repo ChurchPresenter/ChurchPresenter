@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +24,8 @@ import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.search_clear
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /**
  * The app's standard search box: leading magnifier, inline placeholder, trailing clear button.
@@ -53,8 +53,7 @@ fun SearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

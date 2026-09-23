@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
@@ -197,7 +197,7 @@ private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) 
             Text(stringResource(Res.string.cancel))
         }
         Spacer(Modifier.width(8.dp))
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onSave,
             modifier = Modifier.testTag(SONG_BACKGROUND_SAVE_TAG),

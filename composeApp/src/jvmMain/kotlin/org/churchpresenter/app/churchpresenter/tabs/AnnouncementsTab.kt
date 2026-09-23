@@ -69,12 +69,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.KeyButton
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.Text
@@ -521,7 +521,13 @@ fun AnnouncementsTab(
                         } else {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                 ColorPickerField(label = stringResource(Res.string.announcement_background_color_label), color = viewModel.backgroundColor, onColorChange = { viewModel.setBackgroundColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.weight(1f))
-                                OutlinedButton(onClick = { viewModel.setBackgroundColor("transparent"); viewModel.saveToSettings(onSettingsChange) }, shape = RoundedCornerShape(8.dp)) {
+                                KeyButton(
+                                    onClick = {
+                                        viewModel.setBackgroundColor("transparent")
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
                                     Text(stringResource(Res.string.transparent_default), style = MaterialTheme.typography.labelMedium)
                                 }
                             }
@@ -1239,7 +1245,7 @@ private fun TimerColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Button(
+        RaisedButton(
             onClick = onIncrement,
             modifier = Modifier.height(28.dp).widthIn(min = 48.dp),
             shape = buttonShape,
@@ -1268,7 +1274,7 @@ private fun TimerColumn(
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { inner() }
             }
         )
-        Button(
+        RaisedButton(
             onClick = onDecrement,
             modifier = Modifier.height(28.dp).widthIn(min = 48.dp),
             shape = buttonShape,

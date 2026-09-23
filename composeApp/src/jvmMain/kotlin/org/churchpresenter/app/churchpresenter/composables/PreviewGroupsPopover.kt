@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -140,7 +139,7 @@ fun PreviewGroupsPopover(
 private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
+        RaisedSwitch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
     }
 }
 
@@ -161,7 +160,7 @@ private fun GroupEditor(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(end = 6.dp),
             )
-            Switch(
+            RaisedSwitch(
                 checked = group.hidden,
                 onCheckedChange = { hide -> onChange(proj.updatePreviewGroup(group.id) { it.copy(hidden = hide) }) },
                 modifier = Modifier.scale(HIDE_SWITCH_SCALE).testTag(hideGroupTag(group.id)),

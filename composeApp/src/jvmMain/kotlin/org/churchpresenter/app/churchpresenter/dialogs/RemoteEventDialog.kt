@@ -29,7 +29,7 @@ import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
@@ -353,7 +353,7 @@ internal fun RemoteEventDialogContent(
                         Spacer(Modifier.width(8.dp))
                     }
                     // Prominent one-tap allow (mirrors the ✓ button below)
-                    Button(
+                    RaisedButton(
                         onClick = onAllow,
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(

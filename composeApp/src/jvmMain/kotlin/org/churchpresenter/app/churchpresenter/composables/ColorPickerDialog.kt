@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -242,7 +241,7 @@ fun ColorPickerDialog(
                 ) {
                     TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
                     Spacer(Modifier.width(8.dp))
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val hex = cpColorToHex(currentColor)

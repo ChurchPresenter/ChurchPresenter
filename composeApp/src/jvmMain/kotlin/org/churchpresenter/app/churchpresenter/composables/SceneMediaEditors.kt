@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -125,7 +124,7 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
         PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
-        Button(
+        RaisedButton(
             onClick = {
                 scope.launch {
                     val imageFilter = FileNameExtensionFilter(
@@ -222,7 +221,7 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        Button(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
+                        RaisedButton(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
                             Text(stringResource(Res.string.close))
                         }
                     }
@@ -383,7 +382,7 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
         PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
-        Button(
+        RaisedButton(
             onClick = {
                 scope.launch {
                     val videoFilter = FileNameExtensionFilter(

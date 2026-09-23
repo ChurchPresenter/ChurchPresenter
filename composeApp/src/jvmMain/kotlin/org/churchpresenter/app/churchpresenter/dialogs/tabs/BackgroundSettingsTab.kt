@@ -39,7 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
+import org.churchpresenter.app.churchpresenter.composables.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
@@ -1251,7 +1251,7 @@ private fun QuickBackgroundPanelFooter(onCancel: () -> Unit, onConfirm: () -> Un
             Text(stringResource(Res.string.cancel))
         }
         Spacer(Modifier.width(8.dp))
-        Button(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+        RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
             Text(stringResource(Res.string.ok))
         }
     }
