@@ -81,8 +81,9 @@ fun KeyIconButton(
 }
 
 /**
- * `FilledIconButton` / `OutlinedIconButton` in the elevated look: always a raised key -- in the
- * container color when there is one, the neutral key when it is transparent.
+ * `FilledIconButton` / `OutlinedIconButton` in the elevated look: a raised key in the container
+ * color when there is one, the neutral key when it is transparent but outlined, and a flat
+ * [KeyIconButton] when it is neither.
  */
 @Composable
 fun RaisedIconButton(
@@ -95,6 +96,12 @@ fun RaisedIconButton(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit,
 ) {
+    // A transparent button with no outline was flat to begin with -- a clear-field ✕, say -- so it
+    // behaves as a toolbar icon rather than growing a key it never had.
+    if (colors.containerColor.alpha == 0f && border == null) {
+        KeyIconButton(onClick, modifier, enabled, shape, colors, interactionSource, content)
+        return
+    }
     val palette = elevationPalette()
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()

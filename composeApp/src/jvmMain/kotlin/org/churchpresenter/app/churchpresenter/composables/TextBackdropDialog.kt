@@ -58,6 +58,8 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.elevationPalette
 
 private val DIALOG_WIDTH = 320.dp
 private val OPACITY_FIELD_WIDTH = 104.dp
@@ -76,7 +78,6 @@ private val SECTION_PADDING = 12.dp
  *  the dialog and hard to hit. */
 private val CLOSE_BUTTON_SIZE = 28.dp
 private val CLOSE_ICON_SIZE = 14.dp
-private const val SELECTED_FILL_ALPHA = 0.18f
 
 /**
  * Everything that goes behind and around a piece of text, in one dialog.
@@ -179,15 +180,12 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
                     // 44dp the chip and its caption came to within a hair of the height, so the
                     // swatch's own border sat on the button's top edge and read as one line.
                     .heightIn(min = MODE_BUTTON_HEIGHT)
-                    .background(
-                        if (selected) {
-                            accent.copy(alpha = SELECTED_FILL_ALPHA)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        },
+                    .raised(
                         shape,
+                        if (selected) elevationPalette().selected else elevationPalette().key,
+                        elevationPalette(),
                     )
-                    .border(1.dp, if (selected) accent else outline, shape)
+                    .then(if (selected) Modifier.border(1.dp, accent, shape) else Modifier)
                     .clickable { onModeChange(mode) }
                     .padding(vertical = MODE_BUTTON_PADDING),
                 verticalArrangement = Arrangement.Center,
@@ -256,8 +254,7 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(PRESET_HEIGHT)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(7.dp))
-                            .border(1.dp, outline, RoundedCornerShape(7.dp))
+                            .raised(RoundedCornerShape(7.dp), elevationPalette().key, elevationPalette(), lift = 2.dp)
                             .clickable { onPick(choice.apply(current)) }
                             .padding(3.dp),
                     ) {

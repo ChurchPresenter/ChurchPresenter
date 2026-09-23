@@ -79,11 +79,14 @@ fun elevationPalette(): ElevationPalette {
             wellBottom = lerp(surface, Color.Black, fraction = 0.22f),
             wellBorder = lerp(surface, Color.Black, fraction = 0.42f),
             wellShadow = Color.Black.copy(alpha = 0.5f),
+            // Lifted from the lightest container rather than the base surface: settings panels and
+            // cards sit on the container shades, and a key lightened from `surface` came out level
+            // with them.
             key = RaisedFill(
-                top = lerp(surface, Color.White, fraction = 0.13f),
-                bottom = lerp(surface, Color.White, fraction = 0.07f),
+                top = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.14f),
+                bottom = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.06f),
                 ink = scheme.onSurface,
-                highlight = Color.White.copy(alpha = 0.08f),
+                highlight = Color.White.copy(alpha = 0.14f),
                 glow = Color.Black,
             ),
             selected = RaisedFill(
@@ -100,7 +103,7 @@ fun elevationPalette(): ElevationPalette {
                 highlight = Color.White.copy(alpha = 0.5f),
                 glow = scheme.primary,
             ),
-            keyEdge = Color.Transparent,
+            keyEdge = Color.White.copy(alpha = 0.07f),
             dropShadow = Color.Black,
             disabledFill = lerp(surface, Color.White, fraction = 0.04f),
             disabledInk = scheme.onSurface.copy(alpha = 0.38f),

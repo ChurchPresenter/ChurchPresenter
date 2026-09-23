@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,6 +57,7 @@ enum class ToolbarKeyStyle {
  * One toolbar icon with a hover tooltip, drawn in [style]. [open] only matters to
  * [ToolbarKeyStyle.PANEL_TOGGLE]. Disabled, the icon dims and the key lies flat.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ToolbarKey(
     painter: Painter,
@@ -90,12 +92,14 @@ fun ToolbarKey(
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
         val pressed by interaction.collectIsPressedAsState()
+        val hoverTint = MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_TINT_ALPHA)
+        val raisedToggle = style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed)
         val surface = when {
             !enabled -> Modifier.clip(shape)
-            style == ToolbarKeyStyle.RAISED -> Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)
-            style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed) ->
-                Modifier.raised(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
-            hovered -> Modifier.clip(shape).background(MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_TINT_ALPHA))
+            style == ToolbarKeyStyle.RAISED ->
+                Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)
+            raisedToggle -> Modifier.raised(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
+            hovered -> Modifier.clip(shape).background(hoverTint)
             else -> Modifier.clip(shape)
         }
         Box(

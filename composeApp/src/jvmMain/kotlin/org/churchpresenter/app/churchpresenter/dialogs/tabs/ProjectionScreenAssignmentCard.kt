@@ -81,6 +81,8 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
+private val CELL_KEY_INSET = 3.dp
+
 /**
  * The "Screen assignment" card of the Projection settings tab: which physical display or DeckLink
  * device each output drives, and the per-output content toggles.
@@ -564,7 +566,8 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     shape = RoundedCornerShape(6.dp),
                     onClick = { displayModeExpanded = true },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    // Inset in its cell so it does not butt against the raised key beside it.
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = CELL_KEY_INSET)
                 ) {
                     Text(
                         text = displayModes.find { it.second == shownDisplayMode(assignment.displayMode) }?.first

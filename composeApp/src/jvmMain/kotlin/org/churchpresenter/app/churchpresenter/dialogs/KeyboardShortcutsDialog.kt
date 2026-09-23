@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -92,6 +91,8 @@ import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.searchText
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /** Test tag for the reset-everything button, which several tests need to locate. */
 internal const val SHORTCUT_RESET_ALL_TAG = "shortcut_reset_all"
@@ -308,8 +309,11 @@ internal fun KeyboardShortcutsDialogContent(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                            .sunken(
+                                RoundedCornerShape(8.dp),
+                                elevationPalette(),
+                                rim = MaterialTheme.colorScheme.primary,
+                            )
                             .focusRequester(pressFocus)
                             .focusable()
                             .onPreviewKeyEvent { event ->

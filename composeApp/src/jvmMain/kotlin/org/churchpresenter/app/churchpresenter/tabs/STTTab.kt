@@ -116,7 +116,12 @@ fun STTTab(
                 enabled = !connected && !connecting,
                 trailingIcon = {
                     if (!connected && !connecting && urlInput.isNotEmpty()) {
-                        KeyIconButton(onClick = { urlInput = "" }, colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        KeyIconButton(
+                            onClick = { urlInput = "" },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(Res.string.clear),

@@ -98,6 +98,7 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.font.FontWeight
 
 private const val TAB_BACKGROUND = 3
 private const val TAB_PROJECTION = 4
@@ -466,5 +467,9 @@ private fun SettingsTab(
         labelStyle = labelStyle,
         labelMargin = labelMargin,
         onClick = { onSelect(index) },
+        // The main window's tab labels, so the two tab rows read as one family.
+        textStyle = MaterialTheme.typography.titleSmall.copy(
+            fontWeight = if (selectedIndex == index) FontWeight.SemiBold else FontWeight.Normal
+        ),
     )
 }

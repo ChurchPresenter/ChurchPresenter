@@ -42,8 +42,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -171,6 +169,12 @@ import org.churchpresenter.theme.semantic
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.sunken
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 
 private const val ATEM_REACHABLE_POLL_MS = 30_000L
 private const val ATEM_UNREACHABLE_POLL_MS = 10_000L
@@ -181,7 +185,9 @@ private const val MILLIS_PER_SECOND_F = 1000f
 private const val PREVIEW_SETTLE_MS = 800L
 private const val ASPECT_EPSILON = 0.01f
 private const val MAX_FIT_SCALE = 1.01f
-private const val SELECTION_BAR_WIDTH = 4f
+private val SELECTION_BAR_WIDTH = 3.dp
+private val SELECTION_BAR_HEIGHT = 22.dp
+private val LIST_ROW_HEIGHT = 38.dp
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -790,10 +796,20 @@ fun LowerThirdTab(
         ) {
             val listState = rememberLazyListState()
             val accentColor = MaterialTheme.colorScheme.primary
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            val palette = elevationPalette()
+            // The list sits in a sunken panel; the chosen file is a raised row inside it.
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .sunken(RoundedCornerShape(12.dp), palette)
+            ) {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize().padding(end = 8.dp)
+                    modifier = Modifier.fillMaxSize().padding(end = 8.dp),
+                    contentPadding = PaddingValues(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     if (lottieFiles.isEmpty()) {
                         item {
@@ -824,27 +840,51 @@ fun LowerThirdTab(
                             val isSelected = selectedFile?.absolutePath == file.absolutePath
                             val confirmTitle = stringResource(Res.string.confirm_delete)
                             val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
+                            val rowShape = RoundedCornerShape(9.dp)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(36.dp)
-                                    .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                                    .drawBehind {
-                                        if (isSelected) drawRect(color = accentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
-                                    }
+                                    .height(LIST_ROW_HEIGHT)
+                                    .then(
+                                        if (isSelected) {
+                                            Modifier.raised(rowShape, palette.key, palette, lift = 2.dp)
+                                        } else {
+                                            Modifier.clip(rowShape)
+                                        }
+                                    )
                                     .finalPassClickable { selectedFile = file; isPlaying = false }
-                                    .padding(start = 12.dp, end = 4.dp),
+                                    .padding(start = 6.dp, end = 4.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = file.nameWithoutExtension,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        Modifier
+                                            .width(SELECTION_BAR_WIDTH)
+                                            .height(SELECTION_BAR_HEIGHT)
+                                            .clip(CircleShape)
+                                            .background(if (isSelected) accentColor else Color.Transparent)
                                     )
+                                    // The full name on hover: a long one is ellipsized in the row.
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        Tooltip(file.nameWithoutExtension) {
+                                            Text(
+                                                text = file.nameWithoutExtension,
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                                ),
+                                                color = if (isSelected) {
+                                                    MaterialTheme.colorScheme.onSurface
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                                },
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
                                     Icon(
                                         painter = painterResource(Res.drawable.ic_close),
                                         contentDescription = stringResource(Res.string.tooltip_remove),
@@ -1018,13 +1058,35 @@ fun LowerThirdTab(
 
                         val quickStillLabel = if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
                         Tooltip(quickStillLabel) {
-                            RaisedIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
+                            RaisedIconButton(
+                                onClick = {
+                                    startAtemUpload(
+                                        atemVariant(isClip = false, useDetectedFps = false),
+                                        stillSlot,
+                                        closeDialogOnSuccess = false
+                                    )
+                                },
+                                enabled = quickEnabled,
+                                modifier = Modifier.size(34.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = atemButtonColors
+                            ) {
                                 Icon(Icons.Filled.Image, contentDescription = quickStillLabel, modifier = Modifier.size(16.dp))
                             }
                         }
                         val quickClipLabel = when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }
                         Tooltip(quickClipLabel) {
-                            RaisedIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
+                            RaisedIconButton(
+                                onClick = {
+                                    quickClipVariant?.let { variant ->
+                                        startAtemUpload(variant, clipSlot, closeDialogOnSuccess = false)
+                                    }
+                                },
+                                enabled = quickEnabled && !quickClipTooLong,
+                                modifier = Modifier.size(34.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = atemButtonColors
+                            ) {
                                 Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))
                             }
                         }

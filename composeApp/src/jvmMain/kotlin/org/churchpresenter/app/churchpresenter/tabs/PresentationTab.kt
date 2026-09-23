@@ -87,8 +87,6 @@ import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_stop
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.tooltip_presentation_remote
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
@@ -107,8 +105,6 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.loading_slides
 import churchpresenter.composeapp.generated.resources.loop_off
 import churchpresenter.composeapp.generated.resources.loop_on
@@ -189,6 +185,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.RecentChip
+import org.churchpresenter.theme.raised
 
 private const val MILLIS_PER_SECOND = 1000
 private const val MAX_AUTO_SCROLL_SECONDS = 30
@@ -652,41 +652,19 @@ fun PresentationTab(
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPresentationFiles.pinned
                         val isActive = viewModel.selectedPresentationDisplayPath == path
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .height(26.dp)
-                                    .background(
-                                        if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .border(1.dp, if (isActive) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
-                                    .clickable {
-                                        val f = File(path)
-                                        if (f.exists()) {
-                                            viewModel.addPresentation(f)
-                                            RecentPresentationFiles.add(path)
-                                        }
-                                    }
-                                    .padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = File(path).name,
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                    color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                                    maxLines = 1
-                                )
-                            }
-                            KeyIconButton(onClick = { RecentPresentationFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(
-                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                                    contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
-                                    modifier = Modifier.size(12.dp),
-                                    tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                                )
-                            }
-                        }
+                        RecentChip(
+                            name = File(path).name,
+                            isActive = isActive,
+                            isPinned = isPinned,
+                            onOpen = {
+                                val f = File(path)
+                                if (f.exists()) {
+                                    viewModel.addPresentation(f)
+                                    RecentPresentationFiles.add(path)
+                                }
+                            },
+                            onTogglePin = { RecentPresentationFiles.togglePin(path) },
+                        )
                     }
                 }
             }
@@ -820,8 +798,7 @@ fun PresentationTab(
                 modifier = Modifier
                     .height(42.dp)
                     .width(170.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .clickable { editingInterval = true }
                     .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.Center
@@ -853,9 +830,35 @@ fun PresentationTab(
                 AlertDialog(
                     onDismissRequest = { editingInterval = false },
                     title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                    text = { SunkenOutlinedTextField(value = intervalInput, onValueChange = { intervalInput = it }, suffix = { Text(stringResource(Res.string.unit_s)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { GhostButton(shape = RoundedCornerShape(6.dp), onClick = { intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v -> viewModel.autoScrollInterval = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat())) } }; editingInterval = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) } }
+                    text = {
+                        SunkenOutlinedTextField(
+                            value = intervalInput,
+                            onValueChange = { intervalInput = it },
+                            suffix = { Text(stringResource(Res.string.unit_s)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    },
+                    confirmButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                            intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
+                                viewModel.autoScrollInterval = v.toFloat()
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        presentationSettings = s.presentationSettings.copy(
+                                            autoScrollInterval = v.toFloat()
+                                        )
+                                    )
+                                }
+                            }
+                            editingInterval = false
+                        }) { Text(stringResource(Res.string.ok)) }
+                    },
+                    dismissButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                            Text(stringResource(Res.string.cancel))
+                        }
+                    }
                 )
             }
 
@@ -863,8 +866,7 @@ fun PresentationTab(
                 modifier = Modifier
                     .height(42.dp)
                     .width(170.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .clickable { editingTransition = true }
                     .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.Center
@@ -896,9 +898,35 @@ fun PresentationTab(
                 AlertDialog(
                     onDismissRequest = { editingTransition = false },
                     title = { Text(stringResource(Res.string.transition_duration)) },
-                    text = { SunkenOutlinedTextField(value = transitionInput, onValueChange = { transitionInput = it }, suffix = { Text(stringResource(Res.string.unit_ms)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { GhostButton(shape = RoundedCornerShape(6.dp), onClick = { transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v -> viewModel.transitionDuration = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat())) } }; editingTransition = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) } }
+                    text = {
+                        SunkenOutlinedTextField(
+                            value = transitionInput,
+                            onValueChange = { transitionInput = it },
+                            suffix = { Text(stringResource(Res.string.unit_ms)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    },
+                    confirmButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                            transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v ->
+                                viewModel.transitionDuration = v.toFloat()
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        presentationSettings = s.presentationSettings.copy(
+                                            transitionDuration = v.toFloat()
+                                        )
+                                    )
+                                }
+                            }
+                            editingTransition = false
+                        }) { Text(stringResource(Res.string.ok)) }
+                    },
+                    dismissButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                            Text(stringResource(Res.string.cancel))
+                        }
+                    }
                 )
             }
 
@@ -1135,20 +1163,22 @@ fun PresentationTab(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         viewModel.presentations.forEach { f ->
+                            val palette = elevationPalette()
+                            val openFill = if (viewModel.selectedPresentation == f) palette.selected else palette.key
                             Row(
                                 modifier = Modifier
-                                    .background(
-                                        if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.surfaceVariant
-                                        else Color.Transparent,
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .border(1.dp, if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                                    .raised(RoundedCornerShape(8.dp), openFill, palette, lift = 2.dp)
                                     .clickable { viewModel.selectPresentation(f) }
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(f.nameWithoutExtension, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+                                Text(
+                                    f.nameWithoutExtension,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = openFill.ink,
+                                    maxLines = 1
+                                )
                                 KeyIconButton(onClick = {
                                     val inRecents = f.absolutePath in RecentPresentationFiles.files
                                     val inPinned = f.absolutePath in RecentPresentationFiles.pinned

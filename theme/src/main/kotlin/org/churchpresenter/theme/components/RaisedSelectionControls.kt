@@ -328,6 +328,8 @@ fun SegmentTrackItem(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        CompositionLocalProvider(LocalContentColor provides ink, content = content)
+        CompositionLocalProvider(LocalContentColor provides ink) {
+            ProvideTextStyle(MaterialTheme.typography.labelLarge, content)
+        }
     }
 }

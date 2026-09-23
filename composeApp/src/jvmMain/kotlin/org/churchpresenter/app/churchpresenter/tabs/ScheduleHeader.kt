@@ -162,7 +162,7 @@ internal fun ScheduleHeader(
                     maxLines = 1,
                     modifier = Modifier
                         .sunken(CircleShape, elevationPalette())
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -185,7 +185,9 @@ internal fun ScheduleHeader(
             itemVerticalAlignment = Alignment.CenterVertically
         ) {
             PillGroup {
-                ScheduleFileButtons(hiddenButtons, onNewSchedule, onOpenSchedule, onSaveSchedule, onClearSchedule, canClear)
+                ScheduleFileButtons(
+                    hiddenButtons, onNewSchedule, onOpenSchedule, onSaveSchedule, onClearSchedule, canClear,
+                )
                 if (scheduleToolbarDividerVisible(0, hiddenButtons)) PillDivider()
                 ScheduleHistoryButtons(hiddenButtons, canUndo, canRedo, onUndo, onRedo)
                 if (scheduleToolbarDividerVisible(1, hiddenButtons)) PillDivider()
@@ -221,7 +223,7 @@ private fun ScheduleOptionsButton(
             modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
             style = ToolbarKeyStyle.PANEL_TOGGLE,
             open = expanded,
-            buttonSize = 40.dp,
+            buttonSize = 36.dp,
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
@@ -296,8 +298,8 @@ internal fun PillGroup(content: @Composable () -> Unit) {
     val palette = elevationPalette()
     FlowRow(
         modifier = Modifier
-            .raised(RoundedCornerShape(10.dp), palette.key, palette, lift = 2.dp)
-            .padding(3.dp),
+            .raised(RoundedCornerShape(8.dp), palette.key, palette, lift = 2.dp)
+            .padding(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp)
@@ -307,7 +309,7 @@ internal fun PillGroup(content: @Composable () -> Unit) {
 @Composable
 internal fun PillDivider() {
     VerticalDivider(
-        modifier = Modifier.height(18.dp).padding(horizontal = 3.dp),
+        modifier = Modifier.height(14.dp).padding(horizontal = 2.dp),
         color = MaterialTheme.colorScheme.outlineVariant,
         thickness = 1.dp
     )

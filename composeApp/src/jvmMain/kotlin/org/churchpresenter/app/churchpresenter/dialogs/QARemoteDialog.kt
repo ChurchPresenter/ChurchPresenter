@@ -3,8 +3,6 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
@@ -110,8 +107,10 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 
-private const val POSITION_GRID_COLUMNS = 3
 
 @Composable
 fun QARemoteDialog(
@@ -463,8 +462,7 @@ internal fun QARemoteContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(42.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                                .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -526,23 +524,13 @@ internal fun QARemoteContent(
                             Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
                             Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
                         )
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
-                            positions.chunked(POSITION_GRID_COLUMNS).forEach { rowItems ->
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    rowItems.forEach { (posConst, posLabel) ->
-                                        val isSelected = qaSettings.position == posConst
-                                        Box(
-                                            modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
-                                                .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                                                .clickable { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) } },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        ScreenPositionPicker(
+                            positions = positions,
+                            selected = qaSettings.position,
+                            onSelect = { posConst ->
+                                onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) }
+                            },
+                        )
                     }
 
                     // ── Right: Text & Background ─────────────────────

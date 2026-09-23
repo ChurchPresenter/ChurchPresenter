@@ -5,7 +5,6 @@ import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -143,6 +142,8 @@ import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 private const val SORT_BY_VOTES = 3
 private const val DISPLAY_PREVIEW_CHARS = 50
@@ -426,8 +427,7 @@ fun QATab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -447,7 +447,15 @@ fun QATab(
                             )
                         }
                         if (addQuestionText.isNotEmpty()) {
-                            RaisedIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            RaisedIconButton(
+                                onClick = { addQuestionText = "" },
+                                modifier = Modifier.size(30.dp),
+                                shape = RoundedCornerShape(5.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
                                 Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))
                             }
                         }
@@ -681,7 +689,9 @@ fun QATab(
                                 }
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) {
+                            Text(stringResource(Res.string.cancel))
+                        }
                     }
                 }
             )
@@ -965,8 +975,7 @@ private fun QuestionRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 50.dp, top = 4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 BasicTextField(

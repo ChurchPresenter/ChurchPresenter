@@ -146,6 +146,8 @@ import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
 
 private const val BPM_MAX_DIGITS = 3
 private const val MAX_BPM = 300
@@ -985,13 +987,13 @@ private fun HoverLabel(text: String, content: @Composable () -> Unit) {
 /** A section marker offered for insertion. */
 @Composable
 private fun InsertChip(label: String, onClick: () -> Unit) {
+    val palette = elevationPalette()
     Text(
         text = label,
         fontSize = 11.sp,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = palette.key.ink,
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .raised(RoundedCornerShape(6.dp), palette.key, palette, lift = 2.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 9.dp, vertical = 4.dp),
     )

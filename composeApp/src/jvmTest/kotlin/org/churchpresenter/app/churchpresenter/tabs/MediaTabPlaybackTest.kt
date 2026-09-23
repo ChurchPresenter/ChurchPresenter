@@ -20,7 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Playback: the transport controls, the volume popup, Go Live (including Instance Link), and what
+ * Playback: the transport controls, mute, Go Live (including Instance Link), and what
  * the preview area shows before/while/after something is loaded and live.
  *
  * None of this needs VLC — it drives the view model directly, the same as `MediaTabTest`. See
@@ -45,7 +45,7 @@ class MediaTabPlaybackTest {
         mediaButton(MediaLabel.STOP).assertIsNotEnabled()
         mediaButton(MediaLabel.SEEK_BACKWARD).assertIsNotEnabled()
         mediaButton(MediaLabel.SEEK_FORWARD).assertIsNotEnabled()
-        mediaButton(MediaLabel.VOLUME).assertIsNotEnabled()
+        mediaButton(MediaLabel.MUTE).assertIsNotEnabled()
         mediaButton(MediaLabel.LOOP_OFF).assertIsNotEnabled()
     }
 
@@ -95,18 +95,11 @@ class MediaTabPlaybackTest {
         assertEquals(0L, vm.currentPosition)
     }
 
-    // ── Volume popup ────────────────────────────────────────────────────────────
+    // ── Volume ──────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the volume popup opens on demand and can mute`() = mediaTab { vm, _ ->
+    fun `the mute key in the bar mutes`() = mediaTab { vm, _ ->
         loadUrl()
-        assertFalse(hasMediaButton(MediaLabel.MUTE), "the popup is closed to begin with")
-
-        mediaButton(MediaLabel.VOLUME).performClick()
-        waitForIdle()
-
-        assertTrue(hasMediaButton(MediaLabel.MUTE), "the popup's own mute toggle appears")
-
         mediaButton(MediaLabel.MUTE).performClick()
         waitForIdle()
 

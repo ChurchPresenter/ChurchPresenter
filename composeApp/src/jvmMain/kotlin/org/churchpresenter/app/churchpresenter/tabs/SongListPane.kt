@@ -7,7 +7,6 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.horizontalScroll
@@ -135,6 +134,9 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raised
 
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
@@ -278,8 +280,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     .weight(1f)
                     .widthIn(min = 120.dp)
                     .height(42.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -362,7 +363,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(42.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                    .raised(RoundedCornerShape(8.dp), elevationPalette().accent, elevationPalette())
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                         val now = System.currentTimeMillis()
                         if (now - rebuildClickTime > REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0

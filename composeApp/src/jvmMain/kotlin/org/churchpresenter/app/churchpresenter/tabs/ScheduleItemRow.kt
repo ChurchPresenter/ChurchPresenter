@@ -82,6 +82,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemPaletteIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 private const val PALETTE_SIZE = 4
 private const val GRADIENT_MIDPOINT = 0.35f
 
@@ -585,12 +587,10 @@ private fun ScheduleRowNoteEditor(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(7.dp))
-            .border(
-                width = 1.dp,
-                color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(7.dp)
+            .sunken(
+                RoundedCornerShape(7.dp),
+                elevationPalette(),
+                rim = if (noteFieldFocused) MaterialTheme.colorScheme.primary else Color.Unspecified
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {

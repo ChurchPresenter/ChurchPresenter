@@ -121,6 +121,8 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
 import kotlinx.coroutines.delay
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 private const val MOUSE_MOVE_THROTTLE_MS = 50
 private const val SNAPSHOT_RETRY_DELAY_MS = 7000L
@@ -295,8 +297,7 @@ fun WebTab(
                     .weight(1f)
                     .widthIn(min = minUrlWidth)
                     .height(42.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -564,8 +565,7 @@ fun WebTab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {

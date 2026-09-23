@@ -82,7 +82,7 @@ internal fun ScheduleZoomPill(
             text = stringResource(Res.string.tooltip_schedule_zoom_out),
             onClick = onZoomOut,
             enabled = canZoomOut,
-            buttonSize = 28.dp,
+            buttonSize = 24.dp,
             iconSize = 13.dp,
             style = ToolbarKeyStyle.RAISED,
             tint = MaterialTheme.colorScheme.onSurface,
@@ -97,7 +97,7 @@ internal fun ScheduleZoomPill(
             ScheduleDensity.DETAILED, ScheduleDensity.EXTRA_DETAILED -> detailedName
         }
         Box(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             // The three names are laid out invisibly so the pill keeps one width whichever is shown.
@@ -125,7 +125,7 @@ internal fun ScheduleZoomPill(
             text = stringResource(Res.string.tooltip_schedule_zoom_in),
             onClick = onZoomIn,
             enabled = canZoomIn,
-            buttonSize = 28.dp,
+            buttonSize = 24.dp,
             iconSize = 13.dp,
             style = ToolbarKeyStyle.RAISED,
             tint = MaterialTheme.colorScheme.onSurface,
@@ -242,8 +242,8 @@ private fun ToolbarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    buttonSize: Dp = 30.dp,
-    iconSize: Dp = 15.dp,
+    buttonSize: Dp = 26.dp,
+    iconSize: Dp = 14.dp,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     style: ToolbarKeyStyle = ToolbarKeyStyle.FLAT,
 ) {

@@ -100,8 +100,6 @@ import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ok
@@ -124,8 +122,6 @@ import churchpresenter.composeapp.generated.resources.no_folder_selected
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
@@ -157,23 +153,18 @@ import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.semantic
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
 private const val MILLIS_PER_SECOND = 1000
 private const val CAPTION_FONT_SP = 12.5f
 private const val SMALL_LABEL_FONT_SP = 11.5f
 private const val MAX_AUTO_SCROLL_SECONDS = 30
 private const val HINT_DIVIDER_ALPHA = 0.5f
-private val RECENT_BAR_HEIGHT = 48.dp
+private val RECENT_BAR_HEIGHT = 40.dp
 private val TRANSPORT_KEY_SIZE = 36.dp
 private val PLAY_KEY_SIZE = 52.dp
 private val LOOP_KEY_SIZE = 38.dp
-private val RECENT_CHIP_HEIGHT = 34.dp
 private const val MIN_TRANSITION_MS = 100
 private const val MAX_TRANSITION_MS = 2000
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -423,7 +414,7 @@ fun PicturesTab(
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPictureFolders.pinned
                         val isActive = viewModel.selectedFolderDisplayPath == path
-                        RecentFolderChip(
+                        RecentChip(
                             name = File(path).name,
                             isActive = isActive,
                             isPinned = isPinned,
@@ -664,7 +655,9 @@ fun PicturesTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) }
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
                         }
                     )
                 }
@@ -729,7 +722,9 @@ fun PicturesTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) }
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
                         }
                     )
                 }
@@ -1054,50 +1049,3 @@ fun PicturesTab(
     }
 }
 
-/**
- * One recent folder: a raised chip, lit in the selected fill while it is the open folder, with its
- * pin star inside -- gold when pinned.
- */
-@Composable
-private fun RecentFolderChip(
-    name: String,
-    isActive: Boolean,
-    isPinned: Boolean,
-    onOpen: () -> Unit,
-    onTogglePin: () -> Unit,
-) {
-    val palette = elevationPalette()
-    val fill = if (isActive) palette.selected else palette.key
-    val shape = RoundedCornerShape(10.dp)
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val pressed by interaction.collectIsPressedAsState()
-    Row(
-        modifier = Modifier
-            .height(RECENT_CHIP_HEIGHT)
-            .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
-            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
-            .padding(start = 12.dp, end = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold
-            ),
-            color = fill.ink,
-            maxLines = 1
-        )
-        KeyIconButton(onClick = onTogglePin, modifier = Modifier.size(24.dp)) {
-            Icon(
-                painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
-                modifier = Modifier.size(13.dp),
-                tint = if (isPinned) MaterialTheme.semantic.favorite else fill.ink.copy(alpha = STAR_OFF_ALPHA)
-            )
-        }
-    }
-}
-
-private const val STAR_OFF_ALPHA = 0.45f

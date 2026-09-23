@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.position_showing_at
@@ -47,7 +48,7 @@ private const val GRID_COLUMNS = 3
 private const val SCREEN_ASPECT = 16f / 9f
 private const val HOVER_ALPHA = 0.16f
 private const val DOT_ALPHA = 0.5f
-private val SCREEN_WIDTH = 176.dp
+private val SCREEN_WIDTH = 150.dp
 private val SCREEN_PADDING = 5.dp
 private val CELL_GAP = 4.dp
 private val DOT_HEIGHT = 5.dp
@@ -69,10 +70,11 @@ fun ScreenPositionPicker(
     modifier: Modifier = Modifier,
 ) {
     val palette = elevationPalette()
-    Row(
+    // Stacked, not side by side: the tab's side panel is narrow, and a name beside the screen ran
+    // off its right edge.
+    Column(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Column(
             modifier = Modifier
@@ -98,18 +100,23 @@ fun ScreenPositionPicker(
                 }
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 text = stringResource(Res.string.position_showing_at),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
             )
             Text(
                 text = positions.firstOrNull { it.first == selected }?.second ?: selected,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

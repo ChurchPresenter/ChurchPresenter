@@ -7,7 +7,6 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
@@ -92,8 +91,6 @@ import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.ic_subtitles
 import churchpresenter.composeapp.generated.resources.ic_volume_off
@@ -122,7 +119,6 @@ import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
 import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.media_url_placeholder
-import churchpresenter.composeapp.generated.resources.media_volume
 import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
@@ -130,8 +126,6 @@ import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.stop
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
@@ -178,6 +172,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.extension
 import kotlinx.coroutines.launch
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
 private const val HANDLE_VISIBLE_ALPHA = 0.01f
 
@@ -392,8 +389,7 @@ fun MediaTab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -531,32 +527,24 @@ fun MediaTab(
                         val isPinned = path in RecentMediaFiles.pinned
                         val isActive = viewModel.isLoaded && viewModel.mediaUrl == path
                         val displayName = if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://")) path else java.io.File(path).name
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .height(26.dp)
-                                    .background(if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent, RoundedCornerShape(6.dp))
-                                    .border(1.dp, if (isActive) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
-                                    .clickable {
-                                        val ext = java.io.File(path).extension.lowercase()
-                                        val type = when {
-                                            path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
-                                            ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
-                                            else -> Constants.MEDIA_TYPE_LOCAL
-                                        }
-                                        if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
-                                        viewModel.loadMedia(path, type)
-                                        RecentMediaFiles.add(path)
-                                    }
-                                    .padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(displayName, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f), maxLines = 1)
-                            }
-                            KeyIconButton(onClick = { RecentMediaFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star), contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin), modifier = Modifier.size(12.dp), tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))
-                            }
-                        }
+                        RecentChip(
+                            name = displayName,
+                            isActive = isActive,
+                            isPinned = isPinned,
+                            onOpen = {
+                                val ext = java.io.File(path).extension.lowercase()
+                                val type = when {
+                                    path.startsWith("http://") || path.startsWith("https://") ||
+                                        path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
+                                    ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
+                                    else -> Constants.MEDIA_TYPE_LOCAL
+                                }
+                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                viewModel.loadMedia(path, type)
+                                RecentMediaFiles.add(path)
+                            },
+                            onTogglePin = { RecentMediaFiles.togglePin(path) },
+                        )
                     }
                 }
             }
@@ -832,7 +820,9 @@ fun MediaTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                val muteLabel = stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute)
+                val muteLabel = stringResource(
+                    if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
+                )
                 TooltipArea(
                     tooltip = { TransportTooltip(muteLabel) },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))

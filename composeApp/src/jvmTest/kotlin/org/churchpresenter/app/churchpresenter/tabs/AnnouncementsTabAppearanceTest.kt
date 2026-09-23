@@ -141,7 +141,8 @@ class AnnouncementsTabAppearanceTest {
                     val p = map[x, y]
                     // Near-transparent pixels are shadow fringe over the empty root, not paint.
                     val opaque = p.alpha > 0.5f
-                    if (opaque && p.red > 0.6f && p.blue > 0.6f && p.green < 0.35f) found++
+                    val magenta = p.red > 0.6f && p.blue > 0.6f && p.green < 0.35f
+                    if (opaque && magenta) found++
                 }
             }
             return found

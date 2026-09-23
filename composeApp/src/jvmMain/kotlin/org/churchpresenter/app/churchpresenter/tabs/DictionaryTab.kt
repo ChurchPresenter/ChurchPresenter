@@ -5,7 +5,6 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -120,6 +119,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.RaisedChip
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 private const val DEFINITION_PREVIEW_CHARS = 200
 
@@ -519,8 +519,7 @@ private fun DictionaryDetailPane(
                 Box(
                     modifier = Modifier
                         .height(32.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -966,8 +965,7 @@ private fun DictionarySearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

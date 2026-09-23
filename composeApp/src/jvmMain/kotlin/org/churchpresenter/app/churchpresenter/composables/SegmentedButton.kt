@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +49,9 @@ private const val LINE_HEIGHT_RATIO = 1.15f
 
 private const val ICON_SCALE = 1.1f
 private val TRACK_INSET = 3.dp
-private val SEGMENT_GAP = 3.dp
+private val SEGMENT_GAP = 9.dp
+private val DIVIDER_WIDTH = 1.dp
+private const val DIVIDER_HEIGHT_FRACTION = 0.5f
 private val TRACK_RADIUS = 10.dp
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -129,10 +133,15 @@ private fun <T> SegmentedButtonGrid(
         items.chunked(columns).forEach { rowItems ->
             Row(
                 modifier = Modifier.sunken(trackShape, palette).padding(TRACK_INSET),
-                horizontalArrangement = Arrangement.spacedBy(SEGMENT_GAP)
             ) {
-                rowItems.forEach { item ->
+                rowItems.forEachIndexed { index, item ->
                     val isSelected = selectedValue == item.value
+                    if (index > 0) {
+                        // The gap between two segments, with a hairline in it when neither side is
+                        // raised -- without it two flat labels in the track run into one another.
+                        val divided = !isSelected && selectedValue != rowItems[index - 1].value
+                        SegmentDivider(visible = divided, height = segmentHeight)
+                    }
 
                     val button: @Composable () -> Unit = {
                         val size = Modifier.size(segmentWidth, segmentHeight)
@@ -214,35 +223,51 @@ private fun <T> Segment(
             .padding(style.contentPadding),
         contentAlignment = Alignment.Center
     ) {
-        if (item.icon != null) {
-            Icon(
-                imageVector = item.icon,
-                contentDescription = item.label,
-                tint = ink,
-                modifier = Modifier.size(style.fontSize.value.dp * ICON_SCALE)
-            )
-        } else {
-            Text(
-                text = item.label,
-                color = ink,
-                fontSize = style.fontSize,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                // Only tightened where a label may actually take two
-                // lines. Setting it on a single-line label shrinks the line
-                // box around the glyphs, which the button then centres by
-                // the box rather than by the type -- so the word sits off
-                // centre in a control whose whole job is to line up.
-                lineHeight = if (style.maxLines > 1) {
-                    style.fontSize * LINE_HEIGHT_RATIO
-                } else {
-                    TextUnit.Unspecified
-                },
-                textAlign = TextAlign.Center,
-                // Ellipsized rather than clipped. A segment too narrow for
-                // its label used to cut it mid-glyph, which reads as a
-                // rendering fault rather than as a label that does not fit.
-                overflow = TextOverflow.Ellipsis,
-                maxLines = style.maxLines
+        ProvideTextStyle(MaterialTheme.typography.labelLarge) {
+            if (item.icon != null) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.label,
+                    tint = ink,
+                    modifier = Modifier.size(style.fontSize.value.dp * ICON_SCALE)
+                )
+            } else {
+                Text(
+                    text = item.label,
+                    color = ink,
+                    fontSize = style.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    // Only tightened where a label may actually take two
+                    // lines. Setting it on a single-line label shrinks the line
+                    // box around the glyphs, which the button then centres by
+                    // the box rather than by the type -- so the word sits off
+                    // centre in a control whose whole job is to line up.
+                    lineHeight = if (style.maxLines > 1) {
+                        style.fontSize * LINE_HEIGHT_RATIO
+                    } else {
+                        TextUnit.Unspecified
+                    },
+                    textAlign = TextAlign.Center,
+                    // Ellipsized rather than clipped. A segment too narrow for
+                    // its label used to cut it mid-glyph, which reads as a
+                    // rendering fault rather than as a label that does not fit.
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = style.maxLines
+                )
+            }
+        }
+    }
+}
+
+/** The [SEGMENT_GAP]-wide space between two segments, drawn with a short hairline when [visible]. */
+@Composable
+private fun SegmentDivider(visible: Boolean, height: Dp) {
+    Box(modifier = Modifier.size(SEGMENT_GAP, height), contentAlignment = Alignment.Center) {
+        if (visible) {
+            Box(
+                Modifier
+                    .size(DIVIDER_WIDTH, height * DIVIDER_HEIGHT_FRACTION)
+                    .background(elevationPalette().wellBorder)
             )
         }
     }

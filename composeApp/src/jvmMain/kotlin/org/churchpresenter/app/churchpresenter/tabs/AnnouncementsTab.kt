@@ -181,11 +181,11 @@ import org.churchpresenter.theme.elevationPalette
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.LocalContentColor
 
-private val STEP_KEY_HEIGHT = 30.dp
-private val STEP_KEY_WIDTH = 72.dp
-private val STEP_GAP = 6.dp
-private val WELL_WIDTH = 84.dp
-private val WELL_HEIGHT = 68.dp
+private val STEP_KEY_HEIGHT = 24.dp
+private val STEP_KEY_WIDTH = 48.dp
+private val STEP_GAP = 4.dp
+private val WELL_WIDTH = 56.dp
+private val WELL_HEIGHT = 44.dp
 private const val HOURS_PER_HALF_DAY = 12
 private const val HOUR_WRAP_OFFSET = 11
 private const val HOURS_PER_DAY = 24
@@ -344,8 +344,7 @@ fun AnnouncementsTab(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 BasicTextField(
@@ -616,7 +615,7 @@ fun AnnouncementsTab(
 
                         // Steppers
                         val sepColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                        val sepStyle = MaterialTheme.typography.displaySmall
+                        val sepStyle = MaterialTheme.typography.headlineSmall
                         // separator aligns with the center of the number well (after the + key and its gap)
                         val sepBox: @Composable () -> Unit = {
                             Box(
@@ -837,8 +836,7 @@ fun AnnouncementsTab(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 BasicTextField(
@@ -1240,12 +1238,12 @@ private fun TimerColumn(
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
         }
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            textStyle = MaterialTheme.typography.displaySmall.copy(
+            textStyle = MaterialTheme.typography.headlineSmall.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
@@ -1255,8 +1253,8 @@ private fun TimerColumn(
             singleLine = true,
             modifier = Modifier
                 .size(WELL_WIDTH, WELL_HEIGHT)
-                .sunken(RoundedCornerShape(14.dp), elevationPalette())
-                .padding(horizontal = 4.dp),
+                .sunken(RoundedCornerShape(10.dp), elevationPalette())
+                .padding(horizontal = 2.dp),
             decorationBox = { inner ->
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { inner() }
             }
@@ -1267,7 +1265,7 @@ private fun TimerColumn(
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(14.dp))
         }
         Text(
             label.uppercase(),
@@ -1287,13 +1285,13 @@ private fun AmPmToggle(isPm: Boolean, onToggle: () -> Unit) {
         Spacer(Modifier.height(STEP_KEY_HEIGHT))
         KeyButton(
             onClick = onToggle,
-            modifier = Modifier.size(56.dp, WELL_HEIGHT),
-            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.size(44.dp, WELL_HEIGHT),
+            shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(
                 text = stringResource(if (isPm) Res.string.timer_pm else Res.string.timer_am),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }

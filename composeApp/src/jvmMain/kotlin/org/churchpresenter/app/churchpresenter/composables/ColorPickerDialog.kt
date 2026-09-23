@@ -240,7 +240,9 @@ fun ColorPickerDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                        Text(stringResource(Res.string.cancel))
+                    }
                     Spacer(Modifier.width(8.dp))
                     RaisedButton(
                         shape = RoundedCornerShape(6.dp),

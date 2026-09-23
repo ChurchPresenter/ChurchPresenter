@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,7 +84,8 @@ fun ResolutionPicker(
             shape = RoundedCornerShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-            modifier = Modifier.fillMaxWidth(),
+            // Inset in its cell so it does not butt against the raised key beside it.
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 3.dp),
         ) {
             Text(
                 text = formatResolution(width, height),

@@ -58,6 +58,9 @@ import churchpresenter.composeapp.generated.resources.content_bible_translations
 import churchpresenter.composeapp.generated.resources.song_language_primary
 import churchpresenter.composeapp.generated.resources.top
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.elevationPalette
 
 private const val DIMMED_ALPHA = 0.55f
 
@@ -438,9 +441,18 @@ internal fun ContentTranslationCell(
             Box(
                 modifier = Modifier
                     .size(18.dp)
-                    .clip(masterCheckShape)
-                    .background(if (enabledCount > 0) MaterialTheme.colorScheme.primary else Color.Transparent)
-                    .border(1.dp, if (enabledCount > 0) Color.Transparent else MaterialTheme.colorScheme.outline, masterCheckShape),
+                    .then(
+                        if (enabledCount > 0) {
+                            Modifier.raised(
+                                masterCheckShape,
+                                elevationPalette().accent,
+                                elevationPalette(),
+                                lift = 2.dp,
+                            )
+                        } else {
+                            Modifier.sunken(masterCheckShape, elevationPalette())
+                        }
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 if (allSelected && showing) {
@@ -514,9 +526,18 @@ internal fun ContentTranslationCell(
                             modifier = Modifier
                                 .width(58.dp)
                                 .height(26.dp)
-                                .clip(chipShape)
-                                .background(if (ticked) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, if (ticked) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant, chipShape)
+                                .then(
+                                    if (ticked) {
+                                        Modifier.raised(
+                                            chipShape,
+                                            elevationPalette().selected,
+                                            elevationPalette(),
+                                            lift = 2.dp,
+                                        )
+                                    } else {
+                                        Modifier.sunken(chipShape, elevationPalette())
+                                    }
+                                )
                                 .padding(horizontal = 4.dp),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -579,9 +600,18 @@ internal fun ContentTranslationCell(
                         Box(
                             modifier = Modifier
                                 .size(18.dp)
-                                .clip(rowCheckShape)
-                                .background(if (ticked) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                .border(1.dp, if (ticked) Color.Transparent else MaterialTheme.colorScheme.outline, rowCheckShape),
+                                .then(
+                                    if (ticked) {
+                                        Modifier.raised(
+                                            rowCheckShape,
+                                            elevationPalette().accent,
+                                            elevationPalette(),
+                                            lift = 2.dp,
+                                        )
+                                    } else {
+                                        Modifier.sunken(rowCheckShape, elevationPalette())
+                                    }
+                                ),
                             contentAlignment = Alignment.Center,
                         ) {
                             if (ticked) {

@@ -708,7 +708,10 @@ fun SongsTab(
                     }
                 },
                 dismissButton = {
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = { dialogs.closeDelete(); dialogs.closeDelete() }) {
+                    GhostButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { dialogs.closeDelete(); dialogs.closeDelete() }
+                    ) {
                         Text(stringResource(Res.string.cancel))
                     }
                 }

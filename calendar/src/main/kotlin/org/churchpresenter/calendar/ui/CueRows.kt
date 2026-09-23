@@ -41,6 +41,9 @@ import org.churchpresenter.calendar.model.ProblemFix
 import org.churchpresenter.calendar.model.fix
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.elevationPalette
 
 /*
  * A cue row of the run of show -- what a cue looks like inside the list.
@@ -92,9 +95,13 @@ private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
         Box(
             Modifier
                 .size(TICK_BOX)
-                .clip(RoundedCornerShape(5.dp))
-                .background(if (enabled) scheme.primary else scheme.surfaceVariant.copy(alpha = ROW_ALPHA))
-                .border(1.dp, if (enabled) Color.Transparent else scheme.outlineVariant, RoundedCornerShape(5.dp))
+                .then(
+                    if (enabled) {
+                        Modifier.raised(RoundedCornerShape(5.dp), elevationPalette().accent, elevationPalette(), lift = 2.dp)
+                    } else {
+                        Modifier.sunken(RoundedCornerShape(5.dp), elevationPalette())
+                    }
+                )
                 .clickable(onClick = onToggle),
             contentAlignment = Alignment.Center,
         ) {
