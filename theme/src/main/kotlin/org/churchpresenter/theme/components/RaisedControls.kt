@@ -265,7 +265,7 @@ fun RaisedSwitch(
     }
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
+            .then(if (onCheckedChange != null) Modifier.minimumInteractiveComponentSize() else Modifier)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .then(toggle),
         contentAlignment = Alignment.Center,

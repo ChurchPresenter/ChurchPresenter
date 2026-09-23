@@ -52,6 +52,8 @@ import org.churchpresenter.theme.sunken
 
 private const val DISABLED_ALPHA = 0.45f
 private val BOX_SIZE = 18.dp
+/** Material draws its checkbox and radio 18dp inside a 20dp box; this is the difference. */
+private val CONTROL_PADDING = 1.dp
 private val BOX_RADIUS = 5.dp
 private val RADIO_DOT = 7.dp
 private val CHIP_RADIUS = 8.dp
@@ -98,7 +100,10 @@ fun RaisedCheckbox(
     }
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
+            // Only a control with a handler of its own needs the touch target; a display-only one
+            // sits in a row that is itself clickable, and Material's is its bare size there too.
+            .then(if (onCheckedChange != null) Modifier.minimumInteractiveComponentSize() else Modifier)
+            .padding(CONTROL_PADDING)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .then(toggle),
         contentAlignment = Alignment.Center,
@@ -161,7 +166,8 @@ fun RaisedRadioButton(
     }
     Box(
         modifier = modifier
-            .minimumInteractiveComponentSize()
+            .then(if (onClick != null) Modifier.minimumInteractiveComponentSize() else Modifier)
+            .padding(CONTROL_PADDING)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .then(select),
         contentAlignment = Alignment.Center,
