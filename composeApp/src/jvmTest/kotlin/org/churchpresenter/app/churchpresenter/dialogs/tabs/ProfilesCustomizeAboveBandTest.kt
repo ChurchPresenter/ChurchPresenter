@@ -116,4 +116,35 @@ class ProfilesCustomizeAboveBandTest {
             assertEquals(!before, get().storedBand().aboveBandFillsBehindBand)
         }
     }
+
+    @Test
+    fun `the wash takes a colour of its own`() {
+        profilesTab(output()) { get ->
+            openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
+            chooseSegment("Color", nth = 1)
+            recolor(get().storedBand().aboveBandColor, "#123456")
+
+            assertEquals("#123456", get().storedBand().aboveBandColor)
+            assertEquals(
+                Constants.BACKGROUND_TRANSPARENT,
+                get().storedBand().backgroundType,
+                "the band below it is still transparent",
+            )
+        }
+    }
+
+    @Test
+    fun `the wash takes an opacity of its own`() {
+        // Its own value and not the band's: a wash at half strength over a band drawn solid is the
+        // ordinary case, and the two sharing one number would make that impossible to ask for.
+        profilesTab(output()) { get ->
+            openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
+            chooseSegment("Color", nth = 1)
+            val bandOpacity = get().storedBand().backgroundOpacity
+            tapSliderTrack(FILL_OPACITY, "100%", fraction = 0.25f)
+
+            assertEquals(0.25f, get().storedBand().aboveBandOpacity, absoluteTolerance = 0.02f)
+            assertEquals(bandOpacity, get().storedBand().backgroundOpacity, "the band's own opacity must not move")
+        }
+    }
 }

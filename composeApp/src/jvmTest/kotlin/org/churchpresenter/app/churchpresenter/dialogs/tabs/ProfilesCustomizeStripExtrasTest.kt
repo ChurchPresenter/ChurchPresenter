@@ -129,4 +129,51 @@ class ProfilesCustomizeStripExtrasTest {
             onNodeWithText("Bible · Lower Third").assertExists()
         }
     }
+
+    @Test
+    fun `the song strip's own signpost opens the song band's surface`() {
+        // The same row, from the pane beside it, pointing at the *song* band rather than the
+        // Bible's. Two signposts writing the same surface would be the easy mistake here.
+        profilesTab(doc(band)) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            onAllNodes(hasText("Background") and hasClickAction()).onLast().performClick()
+            waitForIdle()
+
+            onNodeWithText("Songs · Lower Third").assertExists()
+        }
+    }
+
+    // ── Long verses, and the crossfade ──────────────────────────────────────────────────────────
+
+    /**
+     * Splitting a long verse across two slides, and the word count that decides what "long" is.
+     *
+     * The count only appears once the split is on, which is the part worth pinning: a threshold
+     * shown beside a switch that is off reads as a setting in force, and there is nothing on the
+     * slide to say otherwise.
+     */
+    @Test
+    fun `the long-verse word count appears only once splitting is on`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            assertFalse(get().bible().splitLongVerses, "it starts off")
+            onNodeWithText("WORDS").assertDoesNotExist()
+
+            toggleCheckbox("Split long verses across two slides")
+
+            assertTrue(get().bible().splitLongVerses)
+            onNodeWithText("WORDS").assertExists()
+        }
+    }
+
+    @Test
+    fun `the song strip stores a crossfade of its own`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            val before = get().song().crossfade
+            toggleCheckbox("Crossfade")
+
+            assertEquals(!before, get().song().crossfade)
+        }
+    }
 }

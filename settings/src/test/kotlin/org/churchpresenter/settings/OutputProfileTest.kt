@@ -2,6 +2,7 @@ package org.churchpresenter.settings
 
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -125,5 +126,37 @@ class OutputProfileTest {
         assertTrue(bandWithoutSongs.isLowerThird)
         assertFalse(bandWithoutSongs.showSongs)
         assertTrue(bandWithoutSongs.showBible, "these decisions are made separately")
+    }
+
+    // ── Which of the stacked translations this output draws ──────────────────────────────────────
+
+    /**
+     * An untouched profile follows the stack rather than freezing a copy of it.
+     *
+     * Empty has to mean "all of them" rather than "none": a profile nobody has narrowed must pick
+     * up a translation added afterwards, and storing today's positions at creation time would mean
+     * every existing profile silently ignored the next translation the church installs.
+     */
+    @Test
+    fun `a profile that names no translations draws the whole stack`() {
+        assertEquals(listOf(0, 1, 2, 3), OutputProfile().bibleTranslationPositions(4))
+        assertEquals(emptyList<Int>(), OutputProfile().bibleTranslationPositions(0))
+    }
+
+    @Test
+    fun `a narrowed profile draws only the positions it names`() {
+        val narrowed = OutputProfile(bibleTranslations = listOf(0, 2))
+
+        assertEquals(listOf(0, 2), narrowed.bibleTranslationPositions(4))
+    }
+
+    @Test
+    fun `a position past the end of the stack is dropped rather than drawn`() {
+        // A settings file outlives the translations it names: a profile pinned to the fourth
+        // translation, on a document whose stack is now two, must draw two and not crash on the
+        // fourth.
+        val stale = OutputProfile(bibleTranslations = listOf(0, 3))
+
+        assertEquals(listOf(0), stale.bibleTranslationPositions(2))
     }
 }

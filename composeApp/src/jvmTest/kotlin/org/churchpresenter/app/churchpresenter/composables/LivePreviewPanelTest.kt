@@ -760,4 +760,166 @@ class LivePreviewPanelTest {
         onNodeWithText("Screen 1").assertExists()
         onNodeWithText("Live").assertExists()
     }
+
+    // ── The profile swap menu ──────────────────────────────────────────────────────────────────
+
+    private val SWAP = "Swap output profile"
+
+    /** Two named profiles, and one screen following the first. */
+    private fun twoProfiles(activeId: String? = "main") = AppSettings(
+        projectionSettings = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "main", name = "Auditorium"),
+                OutputProfile(
+                    id = "band",
+                    name = "Stream band",
+                    displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                ),
+            ),
+            screenAssignments = listOf(ScreenAssignment(activeProfileId = activeId)),
+        ),
+    )
+
+    /**
+     * The swap is offered from the preview tile itself, which is where the operator is watching.
+     *
+     * The point of putting it here rather than only in settings is that the swap happens mid-
+     * service -- between the congregational song and the choir item -- and opening a settings
+     * dialog to do it means the booth stops watching the output at exactly the moment it changes.
+     */
+    @Test
+    fun `an open preview offers the swap menu once a profile exists`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertExists()
+    }
+
+    @Test
+    fun `a document with no profiles at all draws no swap menu`() = runComposeUiTest {
+        // An empty menu on every tile would be clutter on the one panel that is on screen all
+        // service, so the control appears only once there is something to swap to. A fresh install
+        // always has the Default profile, so this is a document whose profiles were all deleted.
+        val empty = AppSettings(projectionSettings = ProjectionSettings(outputProfiles = emptyList()))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = empty)
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the menu lists every profile, plus a way back to none`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+
+        onNodeWithText("Auditorium").assertExists()
+        onNodeWithText("Stream band").assertExists()
+        onNodeWithText("None").assertExists()
+    }
+
+    @Test
+    fun `picking a profile points that output at it`() = runComposeUiTest {
+        var doc = twoProfiles()
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+        onNodeWithText("Stream band").performClick()
+        waitForIdle()
+
+        assertEquals("band", doc.projectionSettings.screenAssignments[0].activeProfileId)
+    }
+
+    @Test
+    fun `picking None clears the output's profile rather than leaving the old one`() = runComposeUiTest {
+        var doc = twoProfiles()
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+        onNodeWithText("None").performClick()
+        waitForIdle()
+
+        assertNull(doc.projectionSettings.screenAssignments[0].activeProfileId)
+    }
+
+    @Test
+    fun `a browser source output swaps its own profile and leaves the screen alone`() = runComposeUiTest {
+        // The three kinds of output are stored in three separate lists and the menu writes into
+        // whichever one this tile came from. Writing into the wrong list would repoint a monitor
+        // from a control that named a stream.
+        var doc = AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(
+                    OutputProfile(id = "main", name = "Auditorium"),
+                    OutputProfile(id = "band", name = "Stream band"),
+                ),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "main")),
+                browserSourceOutputs = listOf(ScreenAssignment(activeProfileId = "main")),
+            ),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        // The browser source tile is the second, so its menu is the last one in the tree.
+        onAllNodesWithContentDescription(SWAP).onLast().performClick()
+        waitForIdle()
+        onAllNodesWithText("Stream band").onLast().performClick()
+        waitForIdle()
+
+        assertEquals("band", doc.projectionSettings.browserSourceOutputs[0].activeProfileId)
+        assertEquals("main", doc.projectionSettings.screenAssignments[0].activeProfileId, "the screen is untouched")
+    }
+
+    @Test
+    fun `a collapsed preview hides the swap menu`() = runComposeUiTest {
+        // The collapsed row is one line, reserved for the output's name -- which is the only thing
+        // telling a stack of folded tiles apart.
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertExists()
+        onNodeWithContentDescription(HIDE).performClick()
+        waitForIdle()
+
+        onNodeWithContentDescription(SWAP).assertDoesNotExist()
+    }
 }

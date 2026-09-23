@@ -27,28 +27,6 @@ private val overrideJson = Json {
     ignoreUnknownKeys = true
 }
 
-/**
- * What [customized] says that [global] does not, as a sparse tree, or null when it says nothing.
- *
- * [atomicKeys] are compared whole rather than descended into -- a list whose entries are matched by
- * something other than position, which a key-by-key diff would mangle. [ignoredKeys] are never
- * stored at all: settings that are one per install (a library folder, a column width) and have no
- * business differing from one screen to the next.
- */
-fun <T> sparseOverrideOf(
-    global: T,
-    customized: T,
-    serializer: KSerializer<T>,
-    ignoredKeys: Set<String> = emptySet(),
-    atomicKeys: Set<String> = emptySet(),
-): JsonObject? {
-    val globalTree = overrideJson.encodeToJsonElement(serializer, global) as JsonObject
-    val customizedTree = overrideJson.encodeToJsonElement(serializer, customized) as JsonObject
-    val diff = diffObjects(globalTree, customizedTree, atomicKeys)
-    val kept = diff.filterKeys { it !in ignoredKeys }
-    return if (kept.isEmpty()) null else JsonObject(kept)
-}
-
 /** [global] with [override]'s keys written over it, or [global] itself when there is no override. */
 fun <T> withSparseOverride(global: T, override: JsonObject?, serializer: KSerializer<T>): T {
     if (override == null || override.isEmpty()) return global
@@ -59,7 +37,7 @@ fun <T> withSparseOverride(global: T, override: JsonObject?, serializer: KSerial
 /**
  * [full] encoded whole, with [ignoredKeys] dropped -- a **keep-list projection**, not a diff.
  *
- * Where [sparseOverrideOf] asks "what did [full] change from some other object," this asks nothing
+ * Where [diffObjects] asks "what does one object say that another does not," this asks nothing
  * about any other object at all: every field of [full] outside [ignoredKeys] is kept, whether or
  * not it happens to equal a class default. Feeding the result into [withSparseOverride] is what
  * lets an [OutputProfile] carry a *full* settings object as its styling while the fields that must

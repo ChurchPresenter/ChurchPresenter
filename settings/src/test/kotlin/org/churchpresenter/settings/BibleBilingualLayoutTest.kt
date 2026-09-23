@@ -2,6 +2,8 @@ package org.churchpresenter.settings
 
 import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.bilingualColumns
+import org.churchpresenter.settings.utils.bilingualGrid
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -61,6 +63,63 @@ class BibleBilingualLayoutTest {
         val restored = json.decodeFromString(AppSettings.serializer(), legacy).bibleSettings
         assertEquals(Constants.BILINGUAL_TOP_BOTTOM, restored.bilingualLayout)
         assertEquals(Constants.BILINGUAL_SIDE_BY_SIDE, restored.bilingualLayoutLowerThird)
+    }
+
+    // ── What an arrangement means ──────────────────────────────────────────────────────────────
+
+    /**
+     * Every named grid reads as the rows × cols it says.
+     *
+     * The mapping is made in one place precisely because two renderers read it, and they disagreed
+     * before it existed: the full screen took the setting as a side-by-side boolean and drew every
+     * grid as a plain stack, while the band took the grid and dropped any translation past its cell
+     * count. Both were quiet.
+     */
+    @Test
+    fun `each grid reads as the shape its name says`() {
+        assertEquals(2 to 1, bilingualGrid(Constants.BILINGUAL_TOP_BOTTOM))
+        assertEquals(1 to 3, bilingualGrid(Constants.BILINGUAL_GRID_1X3))
+        assertEquals(3 to 1, bilingualGrid(Constants.BILINGUAL_GRID_3X1))
+        assertEquals(1 to 4, bilingualGrid(Constants.BILINGUAL_GRID_1X4))
+        assertEquals(4 to 1, bilingualGrid(Constants.BILINGUAL_GRID_4X1))
+        assertEquals(2 to 2, bilingualGrid(Constants.BILINGUAL_GRID_2X2))
+        assertEquals(1 to 2, bilingualGrid(Constants.BILINGUAL_SIDE_BY_SIDE))
+    }
+
+    @Test
+    fun `a value from a future or corrupted file reads as side by side`() {
+        // Not an exception and not a blank screen: an unknown arrangement draws what side by side
+        // has always drawn, so a document from a build with a grid this one lacks still presents.
+        assertEquals(1 to 2, bilingualGrid("grid_9x9"))
+        assertEquals(1 to 2, bilingualGrid(""))
+    }
+
+    /**
+     * How many columns an arrangement puts a stack of translations in.
+     *
+     * The two original arrangements are counts rather than fixed grids -- side by side is one row
+     * however many there are, top/bottom one column -- so they have to answer against the stack
+     * size, and a grid has to ignore it. Six translations under Side-by-side is six columns; six
+     * under 2x2 is two columns and three rows, not four translations and two dropped.
+     */
+    @Test
+    fun `side by side and top bottom follow the stack, and a grid does not`() {
+        assertEquals(6, bilingualColumns(Constants.BILINGUAL_SIDE_BY_SIDE, 6))
+        assertEquals(2, bilingualColumns(Constants.BILINGUAL_SIDE_BY_SIDE, 2))
+        assertEquals(1, bilingualColumns(Constants.BILINGUAL_TOP_BOTTOM, 6))
+
+        assertEquals(2, bilingualColumns(Constants.BILINGUAL_GRID_2X2, 6))
+        assertEquals(4, bilingualColumns(Constants.BILINGUAL_GRID_1X4, 6))
+        assertEquals(1, bilingualColumns(Constants.BILINGUAL_GRID_4X1, 6))
+        assertEquals(4, bilingualColumns(Constants.BILINGUAL_GRID_1X4, 2), "a grid ignores the stack size")
+    }
+
+    @Test
+    fun `an empty stack still asks for one column, never zero`() {
+        // A zero would divide the width by nothing on the way to a cell size.
+        assertEquals(1, bilingualColumns(Constants.BILINGUAL_SIDE_BY_SIDE, 0))
+        assertEquals(1, bilingualColumns(Constants.BILINGUAL_TOP_BOTTOM, 0))
+        assertEquals(2, bilingualColumns("grid_9x9", 0))
     }
 
     @Test

@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
@@ -140,6 +141,49 @@ class ProfilesCustomizeBackgroundGradientTest {
             chooseSegment("Color")
 
             assertEquals(false, get().storedBand().gradientEnabled)
+        }
+    }
+
+    @Test
+    fun `recolouring the lower end leaves the upper one alone`() {
+        profilesTab(output()) { get ->
+            openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
+            recolor("#202020", "#FEDCBA")
+
+            assertEquals("#FEDCBA", get().storedBand().gradientBottomColor)
+            assertEquals("#101010", get().storedBand().gradientTopColor, "the other end must not move")
+        }
+    }
+
+    @Test
+    fun `the lower end's opacity moves on its own`() {
+        profilesTab(output()) { get ->
+            openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
+            val before = get().storedBand().gradientTopOpacity
+            tapSliderTrack("Bottom Opacity", "40%", fraction = 0.75f)
+
+            assertEquals(0.75f, get().storedBand().gradientBottomOpacity, absoluteTolerance = 0.02f)
+            assertEquals(before, get().storedBand().gradientTopOpacity, "the upper end must not move")
+        }
+    }
+
+    /**
+     * Where the gradient turns over, which is a number field rather than a slider.
+     *
+     * It is the one control here that changes the *shape* of the wash rather than its colour: at
+     * 100 the lower colour never arrives, at 0 the upper one never does, and the default sits in
+     * the middle.
+     */
+    @Test
+    fun `the turnover point is stored as a fraction of the height`() {
+        profilesTab(output()) { get ->
+            openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
+            assertEquals(0.37f, get().storedBand().gradientPosition, "the seeded value is what is shown")
+
+            onAllNodesWithText("37")[0].performTextReplacement("80")
+            waitForIdle()
+
+            assertEquals(0.8f, get().storedBand().gradientPosition, absoluteTolerance = 0.02f)
         }
     }
 }

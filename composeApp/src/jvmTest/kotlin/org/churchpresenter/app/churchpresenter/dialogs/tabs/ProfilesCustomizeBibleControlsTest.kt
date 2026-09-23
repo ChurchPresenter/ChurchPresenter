@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -191,6 +193,74 @@ class ProfilesCustomizeBibleControlsTest {
             assertEquals(620f, stored.transitionDuration)
             assertTrue(stored.multiTranslationDivider)
             assertEquals(19, stored.multiTranslationSpacing)
+        }
+    }
+
+    // ── How parallel translations are arranged ──────────────────────────────────────────────────
+
+    /** Two translations, so the arrangement means something. */
+    private fun parallel(mode: String = Constants.DISPLAY_MODE_FULLSCREEN) = profileDocument(
+        mode = mode,
+        bible = BibleSettings(
+            translations = listOf(
+                BibleTranslationSettings(fileName = "kjv.spb"),
+                BibleTranslationSettings(fileName = "syn.spb"),
+            ),
+        ),
+    )
+
+    /**
+     * The arrangement is one value for the Bible rather than one per translation, and the two output
+     * shapes keep it separately.
+     *
+     * Separately because they have always drawn differently -- a full screen stacks, a band splits
+     * across its width -- and one shared field could not have preserved both on upgrade.
+     */
+    @Test
+    fun `a full screen stores its own arrangement`() {
+        profilesTab(parallel()) { get ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            chooseSegment("2x2")
+
+            assertEquals(Constants.BILINGUAL_GRID_2X2, get().bible().bilingualLayout)
+            assertEquals(
+                Constants.BILINGUAL_SIDE_BY_SIDE,
+                get().bible().bilingualLayoutLowerThird,
+                "the band's own arrangement must be untouched",
+            )
+        }
+    }
+
+    @Test
+    fun `a band stores the other half of that pair`() {
+        profilesTab(parallel(band)) { get ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            chooseSegment("2x2")
+
+            assertEquals(Constants.BILINGUAL_GRID_2X2, get().bible().bilingualLayoutLowerThird)
+            assertEquals(
+                Constants.BILINGUAL_TOP_BOTTOM,
+                get().bible().bilingualLayout,
+                "the full screen's own arrangement must be untouched",
+            )
+        }
+    }
+
+    @Test
+    fun `one translation is offered no arrangement at all`() {
+        // Nothing to arrange against, and a control that changes nothing reads as a broken one.
+        profilesTab(output()) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            onAllNodesWithText("2x2").assertCountEquals(0)
+        }
+    }
+
+    @Test
+    fun `the reference element is not the place it is offered`() {
+        // It arranges the verse block, so it is drawn on the verse text and nowhere else.
+        profilesTab(parallel()) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_REFERENCE)
+            onAllNodesWithText("2x2").assertCountEquals(0)
         }
     }
 }

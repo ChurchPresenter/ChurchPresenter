@@ -6,10 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG
 import org.churchpresenter.settings.AppSettings
@@ -138,5 +144,159 @@ class BibleSettingsTabStackTest {
         openSlotAndChoose(1, "None")
 
         assertEquals(listOf("syn.spb"), files(harness))
+    }
+
+    // ── Adding, reordering and removing ─────────────────────────────────────────────────────────
+
+    /**
+     * The picker below the stack, which appends rather than repointing a slot.
+     *
+     * It is the only control that grows the stack, and it is deliberately absent in two states
+     * -- nothing left in the folder to add, and the stack already at its cap -- because
+     * `addTranslation` refuses past the cap and a picker that answers a choice by doing nothing is
+     * worse than no picker at all.
+     */
+    @Test
+    fun `the Add translation picker appends to the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "niv.spb" to "New International")
+        val harness = showTab(stackOf(dir, "kjv.spb"))
+
+        chooseFromMenu("Add translation", "New International")
+
+        assertEquals(listOf("kjv.spb", "niv.spb"), files(harness), "it adds a slot rather than repointing one")
+    }
+
+    @Test
+    fun `there is nothing to add once the folder is exhausted`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James")
+        showTab(stackOf(dir, "kjv.spb"))
+
+        onAllNodesWithText("Add translation").assertCountEquals(0)
+    }
+
+    @Test
+    fun `a translation can be moved up the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
+
+        // The first row has no "up", so the one button carrying that description is the second
+        // row's -- which is the one that moves Synodal above King James.
+        onNodeWithContentDescription("Move translation up").performClick()
+        waitForIdle()
+
+        assertEquals(listOf("syn.spb", "kjv.spb"), files(harness))
+    }
+
+    @Test
+    fun `a translation can be moved down the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
+
+        // Likewise the last row has no "down", so this is the first row's.
+        onNodeWithContentDescription("Move translation down").performClick()
+        waitForIdle()
+
+        assertEquals(listOf("syn.spb", "kjv.spb"), files(harness))
+    }
+
+    @Test
+    fun `a single translation is offered neither reorder button`() {
+        // Nothing to swap with, and a button that cannot do anything reads as one that is broken.
+        runComposeUiTest {
+            val dir = bibleFolder("kjv.spb" to "King James")
+            showTab(stackOf(dir, "kjv.spb"))
+
+            onAllNodesWithContentDescription("Move translation up").assertCountEquals(0)
+            onAllNodesWithContentDescription("Move translation down").assertCountEquals(0)
+        }
+    }
+
+    @Test
+    fun `Remove takes a translation out of the stack`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(stackOf(dir, "kjv.spb", "syn.spb"))
+
+        onAllNodesWithContentDescription("Remove")[1].performClick()
+        waitForIdle()
+
+        assertEquals(listOf("kjv.spb"), files(harness))
+    }
+
+    // ── What this church calls a translation ────────────────────────────────────────────────────
+
+    /**
+     * The name and abbreviation a church overrides its modules' own with.
+     *
+     * Both are per translation and both default to blank, which means "use what the module says" --
+     * so a blank field is not an empty setting, it is the fallback still being in force. The two are
+     * stored apart because a church can want one without the other: "Synodal" relabelled for the
+     * congregation while the abbreviation beside each verse stays the module's.
+     */
+    @Test
+    fun `a custom name is stored against its own translation`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(named(dir))
+
+        // The fields carry no label semantics of their own -- the caption above each is a separate
+        // Text node -- so each is addressed by the value it is showing, which is why the fixture
+        // seeds four distinct ones.
+        editableShowing("seed-name-2").performTextReplacement("Синодальный")
+        waitForIdle()
+
+        val stack = harness.current.bibleSettings.translationList()
+        assertEquals("Синодальный", stack[1].customName)
+        assertEquals("seed-name-1", stack[0].customName, "the translation above it must not have been renamed")
+    }
+
+    @Test
+    fun `an abbreviation is stored apart from the name`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "syn.spb" to "Synodal")
+        val harness = showTab(named(dir))
+
+        editableShowing("seed-abbr-1").performTextReplacement("AV")
+        waitForIdle()
+
+        val first = harness.current.bibleSettings.translationList()[0]
+        assertEquals("AV", first.customAbbreviation)
+        assertEquals("seed-name-1", first.customName, "the name beside it is a separate choice")
+    }
+
+    /**
+     * The one editable field showing [text].
+     *
+     * The slot dropdown above each row displays the same custom name, so plain text alone matches
+     * two nodes -- the read-only button and the field.
+     */
+    private fun ComposeUiTest.editableShowing(text: String) =
+        onNode(hasSetTextAction() and hasText(text))
+
+    /** Two translations whose four identity fields each show a value of their own. */
+    private fun named(dir: File) = AppSettings(
+        bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
+            listOf(
+                BibleTranslationSettings(
+                    fileName = "kjv.spb",
+                    customName = "seed-name-1",
+                    customAbbreviation = "seed-abbr-1",
+                ),
+                BibleTranslationSettings(
+                    fileName = "syn.spb",
+                    customName = "seed-name-2",
+                    customAbbreviation = "seed-abbr-2",
+                ),
+            ),
+        ),
+    )
+
+    /** Opens the dropdown labelled [control] and picks [option] out of the menu it drops. */
+    private fun ComposeUiTest.chooseFromMenu(control: String, option: String) {
+        val before = onAllNodesWithText(option)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false).map { it.id }.toSet()
+        onAllNodesWithText(control).onFirst().performClick()
+        waitForIdle()
+        val opened = onAllNodesWithText(option).fetchSemanticsNodes().indexOfFirst { it.id !in before }
+        assertTrue(opened >= 0, "\"$control\" must offer \"$option\"")
+        onAllNodesWithText(option)[opened].performClick()
+        waitForIdle()
     }
 }
