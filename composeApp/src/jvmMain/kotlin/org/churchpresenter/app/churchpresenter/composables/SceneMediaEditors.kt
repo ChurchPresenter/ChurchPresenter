@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -145,8 +146,10 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
                     }
                 }
             },
-            modifier = Modifier.height(40.dp),
-            shape = RoundedCornerShape(8.dp)
+            // A square icon key: the default text-button padding made it far wider than its icon.
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),
@@ -403,8 +406,10 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
                     }
                 }
             },
-            modifier = Modifier.height(40.dp),
-            shape = RoundedCornerShape(8.dp)
+            // A square icon key: the default text-button padding made it far wider than its icon.
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),

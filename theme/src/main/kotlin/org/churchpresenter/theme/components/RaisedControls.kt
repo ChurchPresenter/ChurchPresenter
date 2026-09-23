@@ -93,6 +93,8 @@ fun KeyButton(
     border: BorderStroke? = null,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource? = null,
+    /** A palette fill to use as it is -- [ElevationPalette.danger], say -- in place of [colors]. */
+    fill: RaisedFill? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     val palette = elevationPalette()
@@ -102,8 +104,12 @@ fun KeyButton(
         modifier = modifier,
         enabled = enabled,
         shape = shape,
-        fill = if (filled) palette.tinted(colors.containerColor, colors.contentColor) else palette.key,
-        ink = if (enabled) colors.contentColor else colors.disabledContentColor,
+        fill = fill ?: if (filled) palette.tinted(colors.containerColor, colors.contentColor) else palette.key,
+        ink = when {
+            !enabled -> colors.disabledContentColor
+            fill != null -> fill.ink
+            else -> colors.contentColor
+        },
         border = border,
         contentPadding = contentPadding,
         interactionSource = interactionSource,

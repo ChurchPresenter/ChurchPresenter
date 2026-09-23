@@ -50,6 +50,12 @@ data class ElevationPalette(
     val selected: RaisedFill,
     /** A key that is switched on, or a primary action. */
     val accent: RaisedFill,
+    /**
+     * A destructive action: a key tinted toward the theme's error color, its label a shade of that
+     * red chosen to clear 4.5:1 on it. The raw `error` red on a dark key does not -- 2.5:1 to 4.1:1
+     * across the dark themes.
+     */
+    val danger: RaisedFill,
     /** The 0.5dp hairline light keys carry so they read against a pale page. Transparent on dark. */
     val keyEdge: Color,
     val dropShadow: Color,
@@ -103,6 +109,13 @@ fun elevationPalette(): ElevationPalette {
                 highlight = Color.White.copy(alpha = 0.5f),
                 glow = scheme.primary,
             ),
+            danger = RaisedFill(
+                top = lerp(scheme.surfaceContainer, scheme.error, fraction = 0.16f),
+                bottom = lerp(scheme.surfaceContainer, scheme.error, fraction = 0.10f),
+                ink = lerp(scheme.error, Color.White, fraction = 0.45f),
+                highlight = Color.White.copy(alpha = 0.07f),
+                glow = scheme.error,
+            ),
             keyEdge = Color.White.copy(alpha = 0.07f),
             dropShadow = Color.Black,
             disabledFill = lerp(surface, Color.White, fraction = 0.04f),
@@ -135,6 +148,13 @@ fun elevationPalette(): ElevationPalette {
                 ink = scheme.onPrimary,
                 highlight = Color.White.copy(alpha = 0.3f),
                 glow = scheme.primary,
+            ),
+            danger = RaisedFill(
+                top = lerp(Color.White, scheme.error, fraction = 0.04f),
+                bottom = lerp(Color.White, scheme.error, fraction = 0.10f),
+                ink = scheme.error,
+                highlight = Color.White,
+                glow = scheme.error,
             ),
             keyEdge = Color.Black.copy(alpha = 0.16f),
             dropShadow = Color.Black,

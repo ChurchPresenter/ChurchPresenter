@@ -181,11 +181,11 @@ import org.churchpresenter.theme.elevationPalette
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.LocalContentColor
 
-private val STEP_KEY_HEIGHT = 24.dp
-private val STEP_KEY_WIDTH = 48.dp
-private val STEP_GAP = 4.dp
-private val WELL_WIDTH = 56.dp
-private val WELL_HEIGHT = 44.dp
+private val STEP_KEY_HEIGHT = 20.dp
+private val STEP_KEY_WIDTH = 40.dp
+private val STEP_GAP = 3.dp
+private val WELL_WIDTH = 46.dp
+private val WELL_HEIGHT = 36.dp
 private const val HOURS_PER_HALF_DAY = 12
 private const val HOUR_WRAP_OFFSET = 11
 private const val HOURS_PER_DAY = 24
@@ -527,9 +527,17 @@ fun AnnouncementsTab(
                                         viewModel.setBackgroundColor("transparent")
                                         viewModel.saveToSettings(onSettingsChange)
                                     },
-                                    shape = RoundedCornerShape(8.dp)
+                                    shape = RoundedCornerShape(8.dp),
+                                    // Compact, so the color field beside it keeps its width.
+                                    contentPadding = PaddingValues(horizontal = 10.dp),
+                                    modifier = Modifier.height(42.dp)
                                 ) {
-                                    Text(stringResource(Res.string.transparent_default), style = MaterialTheme.typography.labelMedium)
+                                    Text(
+                                        stringResource(Res.string.transparent_default),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
                                 }
                             }
                         }
@@ -615,7 +623,7 @@ fun AnnouncementsTab(
 
                         // Steppers
                         val sepColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                        val sepStyle = MaterialTheme.typography.headlineSmall
+                        val sepStyle = MaterialTheme.typography.titleLarge
                         // separator aligns with the center of the number well (after the + key and its gap)
                         val sepBox: @Composable () -> Unit = {
                             Box(
@@ -634,7 +642,7 @@ fun AnnouncementsTab(
                             LaunchedEffect(viewModel.timerSeconds) { secText = "%02d".format(viewModel.timerSeconds) }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                                 verticalAlignment = Alignment.Top
                             ) {
                                 TimerColumn(hrText, hrLabel,
@@ -664,7 +672,7 @@ fun AnnouncementsTab(
                             LaunchedEffect(viewModel.targetSecond) { tSecText = "%02d".format(viewModel.targetSecond) }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                                 verticalAlignment = Alignment.Top
                             ) {
                                 TimerColumn(tHrText, hrLabel,
@@ -1238,12 +1246,12 @@ private fun TimerColumn(
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(12.dp))
         }
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            textStyle = MaterialTheme.typography.headlineSmall.copy(
+            textStyle = MaterialTheme.typography.titleLarge.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
@@ -1265,7 +1273,7 @@ private fun TimerColumn(
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(14.dp))
+            Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(12.dp))
         }
         Text(
             label.uppercase(),
@@ -1285,13 +1293,15 @@ private fun AmPmToggle(isPm: Boolean, onToggle: () -> Unit) {
         Spacer(Modifier.height(STEP_KEY_HEIGHT))
         KeyButton(
             onClick = onToggle,
-            modifier = Modifier.size(44.dp, WELL_HEIGHT),
+            modifier = Modifier.size(40.dp, WELL_HEIGHT),
             shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(
                 text = stringResource(if (isPm) Res.string.timer_pm else Res.string.timer_am),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                softWrap = false,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }

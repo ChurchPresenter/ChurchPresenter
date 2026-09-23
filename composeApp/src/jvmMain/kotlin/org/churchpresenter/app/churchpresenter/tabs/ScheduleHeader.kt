@@ -48,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -370,8 +369,9 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
                        else MaterialTheme.colorScheme.outlineVariant
     val contentColor = if (hovered) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
-    val bg = if (hovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-             else MaterialTheme.colorScheme.surfaceContainerHigh
+    // A sunken well like the other inputs, rather than a lighter block on the schedule; the accent
+    // wash on hover sits over the well.
+    val hoverWash = if (hovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f) else Color.Transparent
     val strokeWidthPx = with(LocalDensity.current) { 1.dp.toPx() }
     val cornerRadiusPx = with(LocalDensity.current) { 8.dp.toPx() }
 
@@ -380,8 +380,8 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
             .fillMaxWidth()
             .height(32.dp)
             .hoverable(interactionSource)
-            .clip(shape)
-            .background(bg, shape)
+            .sunken(shape, elevationPalette())
+            .background(hoverWash, shape)
             .drawWithContent {
                 drawContent()
                 drawRoundRect(

@@ -74,6 +74,9 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.JOptionPane
+import org.churchpresenter.theme.elevationPalette
+
+private const val DANGER_EDGE_ALPHA = 0.3f
 
 @Composable
 fun SystemSettingsTab(
@@ -337,22 +340,15 @@ private fun ManageButton(text: String, danger: Boolean = false, onClick: () -> U
         modifier = Modifier.height(34.dp),
         shape = RoundedCornerShape(8.dp),
         contentPadding = PaddingValues(horizontal = 15.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (danger) {
-                MaterialTheme.colorScheme.surfaceContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            },
-            contentColor = if (danger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-        ),
-        border = BorderStroke(
-            1.dp,
-            if (danger) {
-                MaterialTheme.colorScheme.error.copy(alpha = 0.42f)
-            } else {
-                MaterialTheme.colorScheme.outlineVariant
-            }
-        )
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        // Destructive: the palette's red-tinted key, whose label clears 4.5:1 in every theme, with
+        // a faint red edge.
+        fill = if (danger) elevationPalette().danger else null,
+        border = if (danger) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = DANGER_EDGE_ALPHA))
+        } else {
+            null
+        }
     ) {
         Text(text = text, style = MaterialTheme.typography.labelMedium)
     }
