@@ -39,12 +39,17 @@ class ControlLookTest {
             setContent {
                 AppThemeWrapper(theme = ThemeMode.DARK) {
                     Column {
-                        Box(Modifier.size(30.dp).testTag("on").raisedKey(RoundedCornerShape(6.dp), elevationPalette().key) {
-                            clicks++
-                        })
+                        Box(
+                            Modifier.size(30.dp).testTag("on")
+                                .raisedKey(RoundedCornerShape(6.dp), elevationPalette().key) { clicks++ }
+                        )
                         Box(
                             Modifier.size(30.dp).testTag("off")
-                                .raisedKey(RoundedCornerShape(6.dp), elevationPalette().key, enabled = false) { clicks++ }
+                                .raisedKey(
+                                    RoundedCornerShape(6.dp),
+                                    elevationPalette().key,
+                                    enabled = false,
+                                ) { clicks++ }
                         )
                     }
                 }

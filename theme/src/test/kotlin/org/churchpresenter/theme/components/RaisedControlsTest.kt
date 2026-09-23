@@ -73,7 +73,9 @@ class RaisedControlsTest {
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) { Text("Delete") }
                     KeyButton(onClick = { clicks++ }, fill = elevationPalette().danger) { Text("Reset") }
-                    KeyButton(onClick = { clicks++ }, enabled = false, fill = elevationPalette().danger) { Text("None") }
+                    KeyButton(onClick = { clicks++ }, enabled = false, fill = elevationPalette().danger) {
+                        Text("None")
+                    }
                 }
             }
         }
@@ -252,7 +254,11 @@ class RaisedControlsTest {
             MaterialTheme {
                 Column {
                     SunkenOutlinedTextField(value = value, onValueChange = { value = it }, label = { Text("Name") })
-                    SunkenOutlinedTextField(value = "x", onValueChange = {}, colors = OutlinedTextFieldDefaults.colors())
+                    SunkenOutlinedTextField(
+                        value = "x",
+                        onValueChange = {},
+                        colors = OutlinedTextFieldDefaults.colors(),
+                    )
                 }
             }
         }

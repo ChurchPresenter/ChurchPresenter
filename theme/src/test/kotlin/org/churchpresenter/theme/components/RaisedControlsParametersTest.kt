@@ -97,11 +97,13 @@ class RaisedControlsParametersTest {
                     )
                     RaisedCheckbox(
                         checked = true, onCheckedChange = { clicks++ }, modifier = Modifier.testTag("cb"),
-                        enabled = true, colors = CheckboxDefaults.colors(), interactionSource = MutableInteractionSource(),
+                        enabled = true, colors = CheckboxDefaults.colors(),
+                        interactionSource = MutableInteractionSource(),
                     )
                     RaisedRadioButton(
                         selected = false, onClick = { clicks++ }, modifier = Modifier.testTag("rb"),
-                        enabled = true, colors = RadioButtonDefaults.colors(), interactionSource = MutableInteractionSource(),
+                        enabled = true, colors = RadioButtonDefaults.colors(),
+                        interactionSource = MutableInteractionSource(),
                     )
                     RaisedRadioButton(selected = true, onClick = { clicks++ }, enabled = false)
                     RaisedCheckbox(checked = false, onCheckedChange = null)

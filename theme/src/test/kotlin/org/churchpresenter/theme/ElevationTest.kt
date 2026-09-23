@@ -56,8 +56,10 @@ class ElevationTest {
     fun `the danger label clears 4_5 to 1 on its key in every theme`() {
         palettes.forEach { mode ->
             val danger = paletteFor(mode).danger
-            assertTrue(contrast(danger.ink, danger.top) >= 4.5, "$mode top: ${contrast(danger.ink, danger.top)}")
-            assertTrue(contrast(danger.ink, danger.bottom) >= 4.5, "$mode bottom: ${contrast(danger.ink, danger.bottom)}")
+            val top = contrast(danger.ink, danger.top)
+            val bottom = contrast(danger.ink, danger.bottom)
+            assertTrue(top >= 4.5, "$mode top: $top")
+            assertTrue(bottom >= 4.5, "$mode bottom: $bottom")
         }
     }
 
