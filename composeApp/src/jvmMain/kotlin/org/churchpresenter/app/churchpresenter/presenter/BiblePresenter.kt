@@ -61,7 +61,7 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.utils.bilingualGrid
+import org.churchpresenter.settings.utils.bilingualColumns
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 
@@ -915,11 +915,7 @@ fun BiblePresenter(
                         // row however many translations there are, and top/bottom one column. A named
                         // grid means what it says.
                         val slots = visible.size.coerceAtLeast(1)
-                        val gridCols = when (bs.bilingualLayout) {
-                            Constants.BILINGUAL_SIDE_BY_SIDE -> slots
-                            Constants.BILINGUAL_TOP_BOTTOM -> 1
-                            else -> bilingualGrid(bs.bilingualLayout).second.coerceAtLeast(1)
-                        }
+                        val gridCols = bilingualColumns(bs.bilingualLayout, slots)
                         val gridRows = ((slots + gridCols - 1) / gridCols).coerceAtLeast(1)
                         // The spacing between two translations plus the divider's own line, along one
                         // axis. It scales with the fit, so every scale the search probes has to
@@ -1024,15 +1020,19 @@ fun BiblePresenter(
                 // both the new 3/4-translation branch and the [bandSplits] gate below agree on it.
                 // A vertical strip has no width to split, so it always stacks (one column) regardless
                 // of what is configured, exactly as the single Top/Bottom choice always has.
-                val (lowerThirdGridRows, lowerThirdGridCols) = bilingualGrid(bs.bilingualLayoutLowerThird)
+                // Every translation this band shows, laid out in whatever the arrangement means for
+                // that many -- not `rows x cols` of them. Capped only by what a band can carry.
+                val lowerThirdSlots = verses.size.coerceAtMost(MAX_BIBLE_BAND_TRANSLATIONS)
+                val lowerThirdGridCols = bilingualColumns(bs.bilingualLayoutLowerThird, lowerThirdSlots)
+                val lowerThirdGridRows =
+                    ((lowerThirdSlots + lowerThirdGridCols - 1) / lowerThirdGridCols).coerceAtLeast(1)
                 // Three or four languages, only when the band is actually configured for that many
                 // and asked to show them. Two keep the layouts proven below, byte-for-byte unchanged
                 // -- this is new capability, not a rewrite of what was already there.
                 val lowerThirdMultiVisible = if (showParallelLayout && !isLowerThirdVertical &&
-                    lowerThirdGridRows * lowerThirdGridCols > 2
+                    lowerThirdSlots > 2
                 ) {
-                    val cells = (lowerThirdGridRows * lowerThirdGridCols).coerceAtMost(MAX_BIBLE_BAND_TRANSLATIONS)
-                    verses.take(cells).mapIndexedNotNull { index, verse ->
+                    verses.take(lowerThirdSlots).mapIndexedNotNull { index, verse ->
                         val style = when (index) {
                             0 -> t0
                             1 -> t1
