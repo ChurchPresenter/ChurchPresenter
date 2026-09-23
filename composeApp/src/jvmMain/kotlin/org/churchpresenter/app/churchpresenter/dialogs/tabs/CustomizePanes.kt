@@ -13,14 +13,8 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.shadow_opacity
-import churchpresenter.composeapp.generated.resources.shadow_size
-import churchpresenter.composeapp.generated.resources.shadow_settings
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.top
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The shared parts of the Customize dialog's per-output panes, built from [CustomizeForm]'s
@@ -60,50 +54,6 @@ internal fun PaneScaffold(content: @Composable ColumnScope.() -> Unit) {
             content = content,
         )
         SettingsScrollbar(scrollState)
-    }
-}
-
-/**
- * Shadow, and the three settings that only mean anything while it is on.
- *
- * Folded away when it is off rather than dimmed: three rows reading nothing is worse than three
- * rows absent, and the checkbox above them says why they are gone.
- */
-@Composable
-internal fun ShadowRows(
-    shadow: Boolean,
-    shadowColor: String,
-    shadowSize: Int,
-    shadowOpacity: Int,
-    onShadow: (Boolean) -> Unit,
-    onShadowColor: (String) -> Unit,
-    onShadowSize: (Int) -> Unit,
-    onShadowOpacity: (Int) -> Unit,
-) {
-    CustomizeRow(stringResource(Res.string.shadow_settings), labelInsideControl = true) {
-        ToggleControl(stringResource(Res.string.shadow_settings), shadow, onShadow)
-
-    }
-    if (shadow) {
-        CustomizeRow(stringResource(Res.string.color), labelInsideControl = true) {
-            ColorControl(stringResource(Res.string.color), shadowColor, onShadowColor)
-        }
-        CustomizeRow(stringResource(Res.string.shadow_size), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.shadow_size),
-                value = shadowSize,
-                onValueChange = onShadowSize,
-                range = SHADOW_RANGE,
-            )
-        }
-        CustomizeRow(stringResource(Res.string.shadow_opacity), labelInsideControl = true) {
-            NumberControl(
-                label = stringResource(Res.string.shadow_opacity),
-                value = shadowOpacity,
-                onValueChange = onShadowOpacity,
-                range = PERCENT_RANGE,
-            )
-        }
     }
 }
 
