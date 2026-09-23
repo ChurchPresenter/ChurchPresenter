@@ -65,7 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.draggable

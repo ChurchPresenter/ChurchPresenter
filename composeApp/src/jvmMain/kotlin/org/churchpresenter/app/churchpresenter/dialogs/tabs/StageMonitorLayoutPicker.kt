@@ -10,15 +10,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -72,6 +71,8 @@ import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.toStyleZone
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.SegmentTrack
+import org.churchpresenter.theme.components.SegmentTrackItem
 
 private const val VARIANT_CARD_WIDTH = 132
 private const val BEZEL_ALPHA = 0.38f
@@ -109,21 +110,17 @@ internal fun StageMonitorLayoutPicker(
 ) {
     val counts = StageMonitorLayout.zoneCounts()
     val activeCount = layout.slots.size
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(30.dp)) {
-        counts.forEachIndexed { index, count ->
-            SegmentedButton(
+    SegmentTrack(modifier = Modifier.fillMaxWidth().height(34.dp)) {
+        counts.forEach { count ->
+            SegmentTrackItem(
                 selected = count == activeCount,
                 onClick = { StageMonitorLayout.withZoneCount(count).firstOrNull()?.let(onPick) },
-                shape = segmentedItemShape(index = index, count = counts.size),
-                colors = SegmentedButtonDefaults.colors(
-                    activeContainerColor = MaterialTheme.colorScheme.primary,
-                    activeContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                icon = {},
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
                 Text(
                     stringResource(Res.string.stage_monitor_zone_count, count),
                     style = MaterialTheme.typography.labelSmall,
+                    color = LocalContentColor.current,
                     maxLines = 1,
                 )
             }

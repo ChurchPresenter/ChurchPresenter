@@ -26,6 +26,7 @@ import java.awt.Canvas
 import java.awt.Component
 import java.awt.Container
 import java.awt.Window as AwtWindow
+import org.churchpresenter.theme.components.RaisedButton
 private const val RESCUE_ATTEMPTS = 10
 private const val RESCUE_INTERVAL_MS = 100L
 

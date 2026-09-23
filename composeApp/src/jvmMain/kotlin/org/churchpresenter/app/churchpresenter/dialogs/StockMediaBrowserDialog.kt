@@ -32,13 +32,13 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -257,7 +257,7 @@ internal fun StockMediaBrowserDialogContent(
                 HorizontalDivider()
                 Spacer(Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) {
+                    GhostButton(onClick = onDismiss) {
                         Text(stringResource(Res.string.cancel))
                     }
                 }
@@ -310,7 +310,7 @@ private fun StockSourcePane(
                     keyboardActions = KeyboardActions(onSearch = { viewModel.search(apiKey) })
                 )
                 Spacer(Modifier.width(8.dp))
-                IconButton(onClick = { viewModel.search(apiKey) }) {
+                KeyIconButton(onClick = { viewModel.search(apiKey) }) {
                     Icon(Icons.Default.Search, contentDescription = searchPlaceholder)
                 }
             }
@@ -355,7 +355,7 @@ private fun StockSourcePane(
                                         if (viewModel.isLoading) {
                                             CircularProgressIndicator(modifier = Modifier.size(20.dp))
                                         } else {
-                                            TextButton(onClick = { viewModel.loadMore(apiKey) }) {
+                                            GhostButton(onClick = { viewModel.loadMore(apiKey) }) {
                                                 Text(stringResource(Res.string.stock_photo_load_more))
                                             }
                                         }
@@ -443,7 +443,7 @@ private fun StockMediaThumbnail(
             )
         }
 
-        IconButton(
+        KeyIconButton(
             onClick = onDownload,
             enabled = !isDownloading,
             modifier = Modifier
@@ -495,7 +495,7 @@ private fun ApiKeyField(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = { showKey = !showKey }) {
+                KeyIconButton(onClick = { showKey = !showKey }) {
                     Icon(
                         imageVector = if (showKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                         contentDescription = stringResource(
@@ -522,7 +522,7 @@ private fun ApiKeyField(
                 }
             }
         ) {
-            TextButton(onClick = { openUrl(signupUrl) }) {
+            GhostButton(onClick = { openUrl(signupUrl) }) {
                 Text(getKeyStr, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         }

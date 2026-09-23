@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,7 +83,7 @@ internal fun PolygonEditor(element: PolygonElement, onChange: (PolygonElement) -
                     },
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = {
+                KeyIconButton(onClick = {
                     onChange(element.copy(verticesEm = element.verticesEm.filterIndexed { i, _ -> i != index }))
                 }) {
                     Icon(
@@ -94,7 +94,7 @@ internal fun PolygonEditor(element: PolygonElement, onChange: (PolygonElement) -
                 }
             }
         }
-        TextButton(onClick = { onChange(element.copy(verticesEm = element.verticesEm + listOf(listOf(0.0, 0.0)))) }) {
+        GhostButton(onClick = { onChange(element.copy(verticesEm = element.verticesEm + listOf(listOf(0.0, 0.0)))) }) {
             Text(Strings.editorAddVertex)
         }
         CheckboxRow(
@@ -150,7 +150,7 @@ internal fun ImageOptionsEditor(element: ImageElement, onChange: (ImageElement) 
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        TextButton(onClick = {
+        GhostButton(onClick = {
             val chooser = JFileChooser()
             chooser.fileFilter = FileNameExtensionFilter("Images", "png", "jpg", "jpeg")
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -210,7 +210,7 @@ internal fun PathVerticesEditor(element: PathElement, onChange: (PathElement) ->
                     onCommit = { new -> edit { it.copy(y = new) } },
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = {
+                KeyIconButton(onClick = {
                     onChange(element.copy(verticesEm = element.verticesEm.filterIndexed { i, _ -> i != index }))
                 }) {
                     Icon(
@@ -243,7 +243,7 @@ internal fun PathVerticesEditor(element: PathElement, onChange: (PathElement) ->
                 )
             }
         }
-        TextButton(onClick = {
+        GhostButton(onClick = {
             val last = element.verticesEm.lastOrNull() ?: CurveVertex(0.0, 0.0)
             onChange(element.copy(verticesEm = element.verticesEm + CurveVertex(last.x + 1.0, last.y)))
         }) {

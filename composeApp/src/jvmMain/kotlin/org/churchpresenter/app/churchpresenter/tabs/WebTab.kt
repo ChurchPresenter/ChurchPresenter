@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -346,7 +346,7 @@ fun WebTab(
                     )
                 }
                 if (urlInput.isNotEmpty() && urlInput != "https://") {
-                    IconButton(
+                    KeyIconButton(
                         onClick = { urlInput = "" },
                         modifier = Modifier.size(30.dp)
                     ) {
@@ -611,7 +611,7 @@ fun WebTab(
                             )
                         }
                         if (typeBuffer.isNotEmpty()) {
-                            IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
+                            KeyIconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
                                 Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }

@@ -22,14 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -180,7 +180,7 @@ internal fun BibleCatalogBrowserDialogContent(
                         }
                     }
                     viewModel.catalogError != null && viewModel.modules.isEmpty() -> {
-                        TextButton(
+                        GhostButton(
                             onClick = { viewModel.load() },
                             modifier = Modifier.align(Alignment.Center)
                         ) {
@@ -297,7 +297,7 @@ internal fun BibleCatalogBrowserDialogContent(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.dismissInstalledNotice() }) {
+                GhostButton(onClick = { viewModel.dismissInstalledNotice() }) {
                     Text(stringResource(Res.string.ok))
                 }
             }

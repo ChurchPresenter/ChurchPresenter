@@ -4,9 +4,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,12 +25,12 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -88,7 +88,8 @@ import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
+import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.app.churchpresenter.utils.DroppedFileAction
 import org.churchpresenter.app.churchpresenter.utils.IMAGE_EXTENSIONS
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
@@ -97,6 +98,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.sunken
 
 private const val MENU_OFFSET_DP = 8
 private const val DASH_ON_PX = 6f
@@ -122,6 +126,7 @@ internal fun ScheduleHeader(
     onImportPlanningCenter: () -> Unit,
     onOpenCalendar: () -> Unit,
     onClearSchedule: () -> Unit,
+    canClear: Boolean = true,
     legacyRowActions: Boolean = false,
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
     hiddenButtons: Set<String> = emptySet(),
@@ -148,15 +153,17 @@ internal fun ScheduleHeader(
             )
 
             if (ScheduleToolbarButton.ITEM_COUNT.shownIn(hiddenButtons)) {
-            PillGroup {
+                // The count sits in a sunken pill: it is a readout, not something to press.
                 Text(
                     text = stringResource(Res.string.schedule_item_count, itemCount),
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                    maxLines = 1,
+                    modifier = Modifier
+                        .sunken(CircleShape, elevationPalette())
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 )
-            }
             }
             Spacer(modifier = Modifier.weight(1f))
             if (ScheduleToolbarButton.ZOOM.shownIn(hiddenButtons)) {
@@ -178,7 +185,7 @@ internal fun ScheduleHeader(
             itemVerticalAlignment = Alignment.CenterVertically
         ) {
             PillGroup {
-                ScheduleFileButtons(hiddenButtons, onNewSchedule, onOpenSchedule, onSaveSchedule, onClearSchedule)
+                ScheduleFileButtons(hiddenButtons, onNewSchedule, onOpenSchedule, onSaveSchedule, onClearSchedule, canClear)
                 if (scheduleToolbarDividerVisible(0, hiddenButtons)) PillDivider()
                 ScheduleHistoryButtons(hiddenButtons, canUndo, canRedo, onUndo, onRedo)
                 if (scheduleToolbarDividerVisible(1, hiddenButtons)) PillDivider()
@@ -204,25 +211,24 @@ private fun ScheduleOptionsButton(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        // Styled as the tab-visibility button in `MainDesktop`, not as the pill-group toolbar
-        // buttons beside it: both open a checkbox DropdownMenu of panel-level options, so they
-        // read as the same control. Hence the same Tune icon, the bare 36.dp button and the
-        // onSurface tint, and no
-        // PillGroup — the pills are for the compact file/undo/label actions on the row below.
-        TooltipIconButton(
+        // Styled as the tab-visibility button in `MainDesktop`, not as the toolbar strip's icons:
+        // both open a checkbox DropdownMenu of panel-level options, so they read as the same
+        // control -- a panel toggle, raised with an accent dot while its menu is open.
+        ToolbarKey(
             painter = rememberVectorPainter(Icons.Default.Tune),
             text = stringResource(Res.string.tooltip_schedule_options),
             onClick = { expanded = true },
             modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
-            buttonSize = 36.dp,
-            iconTint = MaterialTheme.colorScheme.onSurface
+            style = ToolbarKeyStyle.PANEL_TOGGLE,
+            open = expanded,
+            buttonSize = 40.dp,
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.schedule_show_buttons_under_title)) },
                 onClick = { onLegacyRowActionsChange(!legacyRowActions) },
                 modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS_LEGACY_ACTIONS),
-                leadingIcon = { Checkbox(checked = legacyRowActions, onCheckedChange = null) }
+                leadingIcon = { RaisedCheckbox(checked = legacyRowActions, onCheckedChange = null) }
             )
             HorizontalDivider()
             ScheduleToolbarButton.entries.forEach { button ->
@@ -233,7 +239,7 @@ private fun ScheduleOptionsButton(
                     modifier = Modifier.testTag(button.menuTag),
                     leadingIcon = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(checked = shown, onCheckedChange = null)
+                            RaisedCheckbox(checked = shown, onCheckedChange = null)
                             Icon(
                                 painter = scheduleToolbarButtonPainter(button),
                                 contentDescription = null,
@@ -284,13 +290,14 @@ private fun scheduleToolbarButtonLabel(button: ScheduleToolbarButton): String = 
     ScheduleToolbarButton.CALENDAR -> stringResource(Res.string.open_calendar_manager)
 }
 
+/** The toolbar: one raised strip, its icons flat inside it. */
 @Composable
 internal fun PillGroup(content: @Composable () -> Unit) {
+    val palette = elevationPalette()
     FlowRow(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .padding(2.dp),
+            .raised(RoundedCornerShape(10.dp), palette.key, palette, lift = 2.dp)
+            .padding(3.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp)
@@ -300,7 +307,7 @@ internal fun PillGroup(content: @Composable () -> Unit) {
 @Composable
 internal fun PillDivider() {
     VerticalDivider(
-        modifier = Modifier.height(14.dp).padding(horizontal = 2.dp),
+        modifier = Modifier.height(18.dp).padding(horizontal = 3.dp),
         color = MaterialTheme.colorScheme.outlineVariant,
         thickness = 1.dp
     )
@@ -341,7 +348,7 @@ internal fun ScheduleRowActionButton(
             }
         }
     ) {
-        IconButton(onClick = onClick, modifier = modifier.size(buttonSize), colors = colors) {
+        KeyIconButton(onClick = onClick, modifier = modifier.size(buttonSize), colors = colors) {
             Image(
                 painter = painter,
                 contentDescription = text,

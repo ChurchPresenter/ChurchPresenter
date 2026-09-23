@@ -35,7 +35,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -670,7 +670,7 @@ private fun SingleDisplayPreview(
             }
 
             // Lock toggle button — bottom-right corner
-            IconButton(
+            KeyIconButton(
                 onClick = {
                     if (lockedMode != null) {
                         onToggleLock(null)
@@ -873,7 +873,7 @@ private fun MediaPreviewControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        IconButton(
+        KeyIconButton(
             onClick = onTogglePlayPause,
             modifier = Modifier.size(32.dp),
             colors = IconButtonDefaults.iconButtonColors(

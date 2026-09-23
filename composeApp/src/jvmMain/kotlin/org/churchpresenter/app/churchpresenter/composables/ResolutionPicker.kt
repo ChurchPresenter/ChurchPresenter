@@ -15,7 +15,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +37,7 @@ import churchpresenter.composeapp.generated.resources.output_resolution_width
 import org.churchpresenter.app.churchpresenter.utils.OUTPUT_RESOLUTIONS
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.KeyButton
 
 /** The widest and narrowest an output may be set to. Wide enough for 8K, narrow enough to stay sane. */
 private val RESOLUTION_RANGE = 16..8192
@@ -163,12 +164,12 @@ private fun CustomResolutionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(draftWidth, draftHeight) }) {
+            GhostButton(onClick = { onConfirm(draftWidth, draftHeight) }) {
                 Text(stringResource(Res.string.ok))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+            GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
         },
     )
 }

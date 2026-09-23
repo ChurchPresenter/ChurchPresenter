@@ -22,14 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.RaisedSwitch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -989,7 +989,7 @@ private fun ClientRow(
             }
             Spacer(Modifier.width(8.dp))
             // Edit (pencil) button
-            IconButton(
+            KeyIconButton(
                 onClick = { editing = !editing; editText = label },
                 modifier = Modifier.size(32.dp)
             ) {
@@ -1034,7 +1034,7 @@ private fun ClientRow(
                     }
                 )
                 // Confirm
-                IconButton(
+                KeyIconButton(
                     onClick = {
                         onSetLabel(editText)
                         editing = false
@@ -1049,7 +1049,7 @@ private fun ClientRow(
                     )
                 }
                 // Cancel
-                IconButton(
+                KeyIconButton(
                     onClick = { editing = false; editText = label },
                     modifier = Modifier.size(32.dp)
                 ) {

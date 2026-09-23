@@ -83,6 +83,13 @@ fun TooltipIconButton(
         Box(
             modifier = modifier
                 .size(buttonSize)
+                .clickable(
+                    interactionSource = interaction,
+                    indication = null,
+                    enabled = enabled,
+                    role = Role.Button,
+                    onClick = onClick
+                )
                 .padding(ICON_KEY_INSET)
                 .then(
                     if (enabled && (hovered || pressed)) {
@@ -90,13 +97,6 @@ fun TooltipIconButton(
                     } else {
                         Modifier.clip(shape)
                     }
-                )
-                .clickable(
-                    interactionSource = interaction,
-                    indication = null,
-                    enabled = enabled,
-                    role = Role.Button,
-                    onClick = onClick
                 ),
             contentAlignment = Alignment.Center
         ) {

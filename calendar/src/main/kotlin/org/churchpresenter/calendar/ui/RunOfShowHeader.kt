@@ -23,7 +23,7 @@ import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -213,7 +213,7 @@ private fun ArmSwitch(armed: Boolean, onArmed: (Boolean) -> Unit) {
         // the theme's colors and its accessibility role.
         val tip = stringResource(Res.string.calendar_arm_tip)
         Box(Modifier.height(20.dp).width(36.dp), contentAlignment = Alignment.Center) {
-            Switch(
+            RaisedSwitch(
                 checked = armed,
                 onCheckedChange = onArmed,
                 modifier = Modifier.scale(SWITCH_SCALE).semantics { contentDescription = tip },

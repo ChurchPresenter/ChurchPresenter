@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -277,9 +277,9 @@ private fun DialogButtons(confirmEnabled: Boolean, onDismiss: () -> Unit, onConf
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TextButton(onClick = onDismiss, shape = ButtonShape) { Text(Strings.cancelBtn) }
+        GhostButton(onClick = onDismiss, shape = ButtonShape) { Text(Strings.cancelBtn) }
         Spacer(Modifier.width(8.dp))
-        Button(onClick = onConfirm, enabled = confirmEnabled, shape = ButtonShape) {
+        RaisedButton(onClick = onConfirm, enabled = confirmEnabled, shape = ButtonShape) {
             Text(Strings.ok)
         }
     }

@@ -34,15 +34,15 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -447,7 +447,7 @@ fun QATab(
                             )
                         }
                         if (addQuestionText.isNotEmpty()) {
-                            FilledIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            RaisedIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
                                 Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))
                             }
                         }
@@ -634,7 +634,7 @@ fun QATab(
                 title = { Text(stringResource(Res.string.qa_clear_all_questions)) },
                 text = { Text(stringResource(Res.string.qa_clear_all_confirm_message)) },
                 confirmButton = {
-                    TextButton(
+                    GhostButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                         qaManager.clearAll()
@@ -646,7 +646,7 @@ fun QATab(
                 },
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(
+                        GhostButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = {
                             // Close the confirm dialog before the save dialog opens and snapshot
@@ -681,7 +681,7 @@ fun QATab(
                                 }
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
-                        TextButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
                     }
                 }
             )
@@ -1014,7 +1014,7 @@ private fun QAIconButton(
         },
         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
     ) {
-        FilledIconButton(
+        RaisedIconButton(
             onClick = onClick,
             enabled = enabled,
             modifier = modifier,

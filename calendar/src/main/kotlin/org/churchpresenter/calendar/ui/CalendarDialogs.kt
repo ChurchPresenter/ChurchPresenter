@@ -3,7 +3,7 @@ package org.churchpresenter.calendar.ui
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
@@ -274,12 +274,12 @@ private fun LoadServiceConfirm(
         title = { Text(stringResource(Res.string.calendar_load_title)) },
         text = { Text(stringResource(Res.string.calendar_load_body, currentCount)) },
         confirmButton = {
-            TextButton(onClick = onReplace) { Text(stringResource(Res.string.calendar_load_replace)) }
+            GhostButton(onClick = onReplace) { Text(stringResource(Res.string.calendar_load_replace)) }
         },
         dismissButton = {
             Row {
-                TextButton(onClick = onAppend) { Text(stringResource(Res.string.calendar_load_append)) }
-                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_cancel)) }
+                GhostButton(onClick = onAppend) { Text(stringResource(Res.string.calendar_load_append)) }
+                GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_cancel)) }
             }
         },
     )

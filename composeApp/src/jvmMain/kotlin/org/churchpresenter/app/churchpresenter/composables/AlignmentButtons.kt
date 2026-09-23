@@ -227,7 +227,7 @@ private fun IconChoiceTrack(
                             selected = isSelected,
                             interactionSource = interaction,
                             indication = null,
-                            role = Role.RadioButton,
+                            role = Role.Button,
                             onClick = { onSelect(choice.value) },
                         ),
                     contentAlignment = Alignment.Center,

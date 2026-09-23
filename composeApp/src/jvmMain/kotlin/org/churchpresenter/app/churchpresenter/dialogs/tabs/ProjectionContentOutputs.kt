@@ -24,12 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -345,7 +345,7 @@ internal fun ContentOutputsDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = onDismiss) {
+                KeyIconButton(onClick = onDismiss) {
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = stringResource(Res.string.content_outputs_done),

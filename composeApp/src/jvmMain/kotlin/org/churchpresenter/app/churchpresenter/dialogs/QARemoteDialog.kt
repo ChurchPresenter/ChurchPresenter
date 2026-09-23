@@ -24,15 +24,15 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -483,7 +483,7 @@ internal fun QARemoteContent(
                                     }
                                 )
                             }
-                            FilledIconButton(
+                            RaisedIconButton(
                                 onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
                                 modifier = Modifier.size(30.dp),
                                 shape = RoundedCornerShape(5.dp),

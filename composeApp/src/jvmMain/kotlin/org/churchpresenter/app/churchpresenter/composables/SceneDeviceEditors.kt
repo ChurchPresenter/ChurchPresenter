@@ -50,8 +50,6 @@ import churchpresenter.composeapp.generated.resources.canvas_ndi_low_bandwidth
 import churchpresenter.composeapp.generated.resources.canvas_ndi_low_bandwidth_help
 import churchpresenter.composeapp.generated.resources.canvas_ndi_runtime_missing
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,6 +58,7 @@ import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.theme.components.RaisedButton
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f

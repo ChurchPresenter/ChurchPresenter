@@ -26,7 +26,7 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,13 +34,13 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import org.churchpresenter.app.churchpresenter.composables.RaisedSwitch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -738,7 +738,7 @@ private fun EditSongFooter(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        TextButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
+        GhostButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
             Text(stringResource(Res.string.cancel))
         }
         RaisedButton(
@@ -842,7 +842,7 @@ private fun RowScope.SongbookCard(
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(
+                KeyIconButton(
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
                     modifier = Modifier.size(20.dp),
                 ) {

@@ -23,7 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -262,7 +262,7 @@ internal fun Messages(viewModel: BibleCatalogViewModel, onRetryInstall: () -> Un
             )
 
             if (error == BibleDownloadError.DOWNLOAD_STALLED) {
-                TextButton(onClick = onRetryInstall) {
+                GhostButton(onClick = onRetryInstall) {
                     Text(stringResource(Res.string.bible_catalog_retry))
                 }
             }

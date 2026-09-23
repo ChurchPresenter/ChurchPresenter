@@ -41,13 +41,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
@@ -328,7 +328,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 if (searchQuery.isNotEmpty()) {
                     // Focus goes back to the tab, not to this button — left on the IconButton, a
                     // following Enter or Space would just re-fire the clear. Matches BibleTab.
-                    IconButton(
+                    KeyIconButton(
                         onClick = { onSearchQueryChange(""); tabFocusRequester.requestFocus() },
                         modifier = Modifier.size(30.dp),
                     ) {
@@ -569,7 +569,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     DropdownMenuItem(
                         text = { Text(allColLabels[colId] ?: colId) },
                         leadingIcon = {
-                            Checkbox(
+                            RaisedCheckbox(
                                 checked = isVisible,
                                 onCheckedChange = null,
                                 modifier = Modifier.size(20.dp)
@@ -599,7 +599,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 DropdownMenuItem(
                     text = { Text(allColLabels[colId] ?: colId) },
                     leadingIcon = {
-                        Checkbox(
+                        RaisedCheckbox(
                             checked = isVisible,
                             onCheckedChange = null,
                             modifier = Modifier.size(20.dp)
@@ -784,7 +784,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             } else {
                                 Box(modifier = Modifier.width(6.dp))
                                 when (colId) {
-                                    "add_to_schedule" -> IconButton(
+                                    "add_to_schedule" -> KeyIconButton(
                                         onClick = { onAddToSchedule?.invoke(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
@@ -797,7 +797,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     }
                                     "favorites" -> {
                                         val isFav = song.songId in favorites
-                                        IconButton(
+                                        KeyIconButton(
                                             onClick = {
                                                 onToggleFavorite(song.songId)
                                             },
@@ -966,7 +966,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = {
+                    KeyIconButton(onClick = {
                         onClearFavorites()
                     }) {
                         Icon(
@@ -1034,7 +1034,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                         modifier = Modifier.weight(1f, fill = false)
                                     )
                                     if (onAddToSchedule != null) {
-                                        IconButton(
+                                        KeyIconButton(
                                             onClick = {
                                                 onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
                                             },

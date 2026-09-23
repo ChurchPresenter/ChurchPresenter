@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -87,7 +87,7 @@ internal fun BibleHistoryPanel(
                     },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = onClear) {
+                    KeyIconButton(onClick = onClear) {
                         Icon(painter = painterResource(Res.drawable.ic_delete), contentDescription = stringResource(Res.string.bible_history_clear), modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }

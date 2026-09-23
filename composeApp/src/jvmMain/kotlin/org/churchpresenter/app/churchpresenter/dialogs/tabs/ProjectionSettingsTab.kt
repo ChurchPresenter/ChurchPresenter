@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.core.models.scene.Scene
@@ -93,7 +93,6 @@ import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import androidx.compose.runtime.collectAsState
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection

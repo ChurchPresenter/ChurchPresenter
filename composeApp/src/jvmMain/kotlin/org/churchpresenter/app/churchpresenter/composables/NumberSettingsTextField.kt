@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -122,7 +122,7 @@ fun NumberSettingsTextField(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            IconButton(
+            KeyIconButton(
                 onClick = {
                     val newValue = value + 1
                     if (newValue in range) { value = newValue; onValueChange.invoke(newValue); isError = false }
@@ -137,7 +137,7 @@ fun NumberSettingsTextField(
                     modifier = Modifier.size(12.dp)
                 )
             }
-            IconButton(
+            KeyIconButton(
                 onClick = {
                     val newValue = value - 1
                     if (newValue in range) { value = newValue; onValueChange.invoke(newValue); isError = false }

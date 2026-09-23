@@ -19,15 +19,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -340,7 +339,7 @@ internal fun KeyboardShortcutsDialogContent(
                 }
                 // Toggling either way drops whatever the other mode had filtered by, so the list is
                 // never narrowed by a filter the header is no longer showing.
-                FilterChip(
+                RaisedFilterChip(
                     selected = pressMode,
                     onClick = {
                         pressMode = !pressMode
@@ -501,7 +500,7 @@ internal fun KeyboardShortcutsDialogContent(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                     Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
                 }
                 // A map with two actions on one combination cannot be saved: one of them would
@@ -596,7 +595,7 @@ private fun sectionSubtitle(
  */
 @Composable
 private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
+    RaisedFilterChip(
         selected = selected,
         enabled = count > 0,
         onClick = onClick,
@@ -608,10 +607,8 @@ private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Un
                 tint = if (count > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
-            selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer,
-        ),
+        selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
+        selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer,
         label = {
             Text(
                 text = when (count) {

@@ -16,18 +16,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -256,7 +256,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         Text(stringResource(Res.string.browser_source_confirm_remove_message, outputLabel))
                     },
                     confirmButton = {
-                        TextButton(
+                        GhostButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 showRemoveConfirm = false
@@ -269,7 +269,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                     },
                     dismissButton = {
-                        TextButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
                             Text(stringResource(Res.string.cancel))
                         }
                     }
@@ -399,7 +399,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) } },
                             state = rememberTooltipState()
                         ) {
-                            Checkbox(
+                            RaisedCheckbox(
                                 checked = output.browserSourceApiKeyRequired,
                                 onCheckedChange = { checked ->
                                     val updated = output.copy(browserSourceApiKeyRequired = checked)

@@ -8,14 +8,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
-import org.churchpresenter.app.churchpresenter.composables.RaisedSwitch
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -170,7 +170,7 @@ internal fun CalendarSyncCardContent(
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
-                    TextButton(
+                    GhostButton(
                         onClick = onUnpair,
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
@@ -280,7 +280,7 @@ private fun DevicesList(
                     )
                 }
             }
-            TextButton(
+            GhostButton(
                 onClick = { onRevoke(device.id) },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
             ) { Text(stringResource(Res.string.calendar_sync_revoke), style = MaterialTheme.typography.labelSmall) }

@@ -69,7 +69,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.stage_monitor_size_reset
 import churchpresenter.composeapp.generated.resources.stage_monitor_size_hint
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.setValue
@@ -229,7 +229,7 @@ private fun StageMonitorPreviewSection(
     SettingsSection(
         title = stringResource(Res.string.stage_monitor_content_section),
         headerTrailing = {
-            TextButton(
+            GhostButton(
                 onClick = { update { withDefaultZoneSizes() } },
                 enabled = sm.hasCustomZoneSizes(),
                 shape = RoundedCornerShape(6.dp),

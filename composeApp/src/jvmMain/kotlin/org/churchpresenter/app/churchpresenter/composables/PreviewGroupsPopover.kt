@@ -54,6 +54,7 @@ import org.churchpresenter.settings.updatePreviewGroup
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.RaisedSwitch
 
 /** Test handles for the switches, which carry no text of their own. */
 internal const val TAG_SHOW_LABELS = "preview_show_labels"

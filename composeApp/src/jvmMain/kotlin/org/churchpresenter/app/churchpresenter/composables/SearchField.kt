@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -88,7 +88,7 @@ fun SearchField(
         }
         // Only drawn when there is something to clear, so the empty field stays quiet.
         if (value.isNotEmpty()) {
-            IconButton(onClick = { onValueChange("") }, modifier = Modifier.size(30.dp)) {
+            KeyIconButton(onClick = { onValueChange("") }, modifier = Modifier.size(30.dp)) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),

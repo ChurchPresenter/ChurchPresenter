@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -358,7 +358,7 @@ internal fun SongTransitionSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Checkbox(
+            RaisedCheckbox(
                 checked = song.showEndOfSongIndicator,
                 onCheckedChange = {
                     onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showEndOfSongIndicator = it)) }

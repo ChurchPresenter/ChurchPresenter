@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.theme.components
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -109,6 +109,70 @@ fun KeyButton(
         interactionSource = interactionSource,
         content = content,
     )
+}
+
+/**
+ * `TextButton` in the elevated look: no surface at rest, a faint outline under the pointer and an
+ * inner shade while pressed -- the quiet action beside a raised one, like Cancel beside OK.
+ */
+@Composable
+fun GhostButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = RoundedCornerShape(BUTTON_RADIUS),
+    colors: ButtonColors = ButtonDefaults.textButtonColors(),
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val palette = elevationPalette()
+    val interaction = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    val ink = if (enabled) colors.contentColor else colors.disabledContentColor
+    val filled = colors.containerColor.alpha > 0f
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .clip(shape)
+            .then(if (filled) Modifier.background(colors.containerColor) else Modifier)
+            .then(
+                when {
+                    !enabled -> Modifier
+                    pressed -> Modifier.sunken(
+                        shape,
+                        palette,
+                        fill = palette.wellBottom.copy(alpha = GHOST_PRESS_ALPHA),
+                    )
+                    hovered -> Modifier.border(1.dp, palette.wellBorder, shape)
+                    else -> Modifier
+                }
+            )
+            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            ),
+        propagateMinConstraints = true,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides ink) {
+            ProvideTextStyle(MaterialTheme.typography.labelLarge) {
+                Row(
+                    modifier = Modifier
+                        .defaultMinSize(ButtonDefaults.MinWidth, ButtonDefaults.MinHeight)
+                        .padding(contentPadding),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = content,
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -232,6 +296,7 @@ private fun knobFill(palette: ElevationPalette, checked: Boolean): RaisedFill {
 }
 
 private const val DISABLED_ALPHA = 0.45f
+private const val GHOST_PRESS_ALPHA = 0.6f
 private val BUTTON_RADIUS = 10.dp
 private val SWITCH_WIDTH = 44.dp
 private val SWITCH_HEIGHT = 24.dp

@@ -21,10 +21,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -226,7 +226,7 @@ fun ScheduleTab(
                 }) { Text(stringResource(Res.string.autosave_restore_confirm)) }
             },
             dismissButton = {
-                TextButton(
+                GhostButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = {
                     viewModel.clearAutoSave()
@@ -322,6 +322,7 @@ fun ScheduleTab(
             onImportPlanningCenter = { showPlanningCenterImport = true },
             onOpenCalendar = LocalOpenCalendar.current,
             onClearSchedule = { viewModel.clearSchedule() },
+            canClear = scheduleItems.isNotEmpty(),
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,

@@ -26,11 +26,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,7 +112,7 @@ fun TextBackdropDialog(
                 Column(Modifier.padding(SECTION_PADDING)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SectionLabel(stringResource(Res.string.backdrop_style), Modifier.weight(1f))
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
+                        KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_close),
                                 contentDescription = stringResource(Res.string.close),
@@ -277,7 +277,7 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
         }
         val alreadySaved = saved.firstOrNull() == current
         Spacer(Modifier.height(2.dp))
-        TextButton(
+        GhostButton(
             onClick = { SavedTextBackdrops.add(current) },
             enabled = !alreadySaved,
             shape = RoundedCornerShape(6.dp),

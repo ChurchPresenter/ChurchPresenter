@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
+import org.churchpresenter.theme.components.RaisedRadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import org.churchpresenter.theme.components.RaisedSwitch
 
 /**
  * A checkbox, radio button or switch together with its label, where **the label is part of the
@@ -71,9 +72,9 @@ fun LabeledCheckbox(
         // publish a second, competing click target inside the first.
         if (controlAtEnd) {
             LabelText(label, supporting, style, color, Modifier.weight(1f))
-            Checkbox(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
+            RaisedCheckbox(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
         } else {
-            Checkbox(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
+            RaisedCheckbox(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
             LabelText(label, supporting, style, color)
         }
     }
@@ -105,9 +106,9 @@ fun LabeledRadioButton(
     ) {
         if (controlAtEnd) {
             LabelText(label, supporting, style, color, Modifier.weight(1f))
-            RadioButton(selected = selected, onClick = null, enabled = enabled, modifier = controlModifier)
+            RaisedRadioButton(selected = selected, onClick = null, enabled = enabled, modifier = controlModifier)
         } else {
-            RadioButton(selected = selected, onClick = null, enabled = enabled, modifier = controlModifier)
+            RaisedRadioButton(selected = selected, onClick = null, enabled = enabled, modifier = controlModifier)
             LabelText(label, supporting, style, color)
         }
     }

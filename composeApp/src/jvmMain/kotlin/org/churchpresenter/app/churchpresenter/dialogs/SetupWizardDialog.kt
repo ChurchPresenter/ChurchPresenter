@@ -41,12 +41,12 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Warning
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -458,7 +458,7 @@ private fun LanguageStep(selectedLanguage: Language, onLanguageSelected: (Langua
         title = stringResource(Res.string.setup_step0_title),
         subtitle = stringResource(Res.string.setup_step0_subtitle),
     )
-    OutlinedTextField(
+    SunkenOutlinedTextField(
         value = query,
         onValueChange = { query = it },
         singleLine = true,

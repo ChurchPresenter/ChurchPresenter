@@ -44,13 +44,13 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,10 +62,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -650,7 +650,7 @@ fun LowerThirdTab(
                                     expanded = slotExpanded,
                                     onExpandedChange = { slotExpanded = !slotExpanded }
                                 ) {
-                                    OutlinedTextField(
+                                    SunkenOutlinedTextField(
                                         value = atemSlotLabel(atemSlot, atemSlots),
                                         onValueChange = {},
                                         readOnly = true,
@@ -673,7 +673,7 @@ fun LowerThirdTab(
                             }
                             else -> {
                                 // Manual entry fallback — displayed 1-based like ATEM Software Control
-                                OutlinedTextField(
+                                SunkenOutlinedTextField(
                                     value = (atemSlot + 1).toString(),
                                     onValueChange = { it.toIntOrNull()?.let { v -> atemSlot = (v - 1).coerceAtLeast(0) } },
                                     singleLine = true,
@@ -769,7 +769,7 @@ fun LowerThirdTab(
                 }
             },
             dismissButton = {
-                TextButton(
+                GhostButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = { showAtemDialog = false },
                     enabled = !atemBusy
@@ -995,7 +995,7 @@ fun LowerThirdTab(
                     // One string for the tooltip and the button's name, so they cannot drift apart.
                     val goLiveKeyLabel = stringResource(Res.string.atem_golive_key)
                     Tooltip(goLiveKeyLabel) {
-                        FilledIconButton(
+                        RaisedIconButton(
                             onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
                             modifier = Modifier.size(34.dp),
                             shape = RoundedCornerShape(8.dp),
@@ -1018,19 +1018,19 @@ fun LowerThirdTab(
 
                         val quickStillLabel = if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
                         Tooltip(quickStillLabel) {
-                            FilledIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
+                            RaisedIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
                                 Icon(Icons.Filled.Image, contentDescription = quickStillLabel, modifier = Modifier.size(16.dp))
                             }
                         }
                         val quickClipLabel = when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }
                         Tooltip(quickClipLabel) {
-                            FilledIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
+                            RaisedIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
                                 Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))
                             }
                         }
                     } else {
                         Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
-                            FilledIconButton(
+                            RaisedIconButton(
                                 onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
                                 enabled = canPlay && !atemBusy && atemReachable,
                                 modifier = Modifier.size(34.dp),
@@ -1049,7 +1049,7 @@ fun LowerThirdTab(
 
                 // Play / Pause
                 Tooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
-                    FilledIconButton(
+                    RaisedIconButton(
                         onClick = {
                             if (canPlay) {
                                 if (isPlaying) {

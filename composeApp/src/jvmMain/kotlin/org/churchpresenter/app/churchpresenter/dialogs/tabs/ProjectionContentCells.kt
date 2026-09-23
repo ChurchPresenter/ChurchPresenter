@@ -20,7 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -96,7 +96,7 @@ internal fun ContentToggleCell(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
+                RaisedCheckbox(checked = checked, onCheckedChange = null, enabled = enabled)
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyMedium,

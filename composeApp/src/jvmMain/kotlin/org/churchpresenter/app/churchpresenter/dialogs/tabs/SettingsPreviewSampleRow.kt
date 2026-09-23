@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +68,7 @@ internal fun SettingsPreviewSampleRow(
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
         )
         Spacer(Modifier.weight(1f))
-        TextButton(
+        GhostButton(
             onClick = { onScreenChange(!onScreen) },
             enabled = onScreenEnabled,
             modifier = Modifier.testTag(PREVIEW_ON_SCREEN_TAG),

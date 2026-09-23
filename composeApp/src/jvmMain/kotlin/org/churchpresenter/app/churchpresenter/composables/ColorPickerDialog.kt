@@ -27,7 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +55,7 @@ import churchpresenter.composeapp.generated.resources.recent
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.components.RaisedButton
 
 private const val HUE_DEGREES = 360f
 private const val HUE_SECTOR_DEGREES = 60f
@@ -239,7 +240,7 @@ fun ColorPickerDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
                     Spacer(Modifier.width(8.dp))
                     RaisedButton(
                         shape = RoundedCornerShape(6.dp),

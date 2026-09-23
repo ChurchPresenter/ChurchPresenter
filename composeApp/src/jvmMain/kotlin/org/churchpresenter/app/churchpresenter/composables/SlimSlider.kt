@@ -28,7 +28,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.ElevationPalette
 import org.churchpresenter.theme.elevationPalette
+import kotlin.math.abs
 
 private const val DISABLED_ALPHA = 0.5f
 private const val HANDLE_REST_SCALE = 0.85f
@@ -67,6 +67,9 @@ fun SlimSlider(
     val end = valueRange.endInclusive
     val span = (end - start).takeIf { it != 0f } ?: 1f
     val fraction = ((value - start) / span).coerceIn(0f, 1f)
+    // Where the fill starts: zero, when the range runs either side of it -- a curve at 0% is an
+    // empty bar, not a half-full one -- and the range's start otherwise.
+    val originFraction = ((0f.coerceIn(start, end) - start) / span).coerceIn(0f, 1f)
 
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
@@ -76,8 +79,6 @@ fun SlimSlider(
 
     // Hoisted for the Canvas below, which cannot read the theme itself.
     val palette = elevationPalette()
-    val primary = MaterialTheme.colorScheme.primary
-    val playedStart = palette.accent.top
 
     // `pointerInput` below keeps the block it was given until one of its keys changes, so the block
     // holds whichever lambda was passed on the composition that created it. A caller whose lambda
@@ -121,7 +122,7 @@ fun SlimSlider(
             contentAlignment = Alignment.CenterStart
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                drawElevatedSlider(fraction, handleScale, palette, primary, playedStart)
+                drawElevatedSlider(originFraction, fraction, handleScale, palette)
             }
         }
         if (trailingLabel != null) {
@@ -137,13 +138,15 @@ fun SlimSlider(
     }
 }
 
-/** The sunken track, its accent fill up to [fraction], and the raised knob at the fill's end. */
+/**
+ * The sunken track, its accent fill between [originFraction] and [fraction], and the raised knob
+ * at [fraction].
+ */
 private fun DrawScope.drawElevatedSlider(
+    originFraction: Float,
     fraction: Float,
     handleScale: Float,
     palette: ElevationPalette,
-    primary: Color,
-    playedStart: Color,
 ) {
     val trackH = 6.dp.toPx()
     val cy = size.height / 2f
@@ -160,15 +163,16 @@ private fun DrawScope.drawElevatedSlider(
         size = Size(size.width, trackH),
         cornerRadius = radius
     )
-    if (fraction > 0f) {
-        val playedW = size.width * fraction
+    if (fraction != originFraction) {
+        val fillStart = size.width * minOf(originFraction, fraction)
+        val playedW = size.width * abs(fraction - originFraction)
         drawRoundRect(
             brush = Brush.horizontalGradient(
-                listOf(primary, playedStart),
-                startX = 0f,
-                endX = playedW.coerceAtLeast(trackH)
+                listOf(palette.accent.bottom, palette.accent.top),
+                startX = fillStart,
+                endX = fillStart + playedW.coerceAtLeast(trackH)
             ),
-            topLeft = Offset(0f, top),
+            topLeft = Offset(fillStart, top),
             size = Size(playedW, trackH),
             cornerRadius = radius
         )

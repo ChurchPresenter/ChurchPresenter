@@ -35,17 +35,17 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Slideshow
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -311,7 +311,7 @@ internal fun PlanningCenterConnectDialogContent(
                 }
             }
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.padding(end = 8.dp)) {
+                GhostButton(onClick = onDismiss, modifier = Modifier.padding(end = 8.dp)) {
                     Text(stringResource(Res.string.cancel))
                 }
                 RaisedButton(
@@ -435,7 +435,7 @@ internal fun PlanningCenterImportDialogContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.width(12.dp))
-                    Checkbox(
+                    RaisedCheckbox(
                         checked = viewModel.allSelected,
                         onCheckedChange = { viewModel.setAllSelected(it) },
                         enabled = viewModel.planItems.isNotEmpty()
@@ -478,7 +478,7 @@ internal fun PlanningCenterImportDialogContent(
                                 ) {
                                     when (pco.itemType) {
                                         "song" -> {
-                                            Checkbox(
+                                            RaisedCheckbox(
                                                 checked = entry.selected && entry.matchedSongId != null,
                                                 enabled = entry.matchedSongId != null,
                                                 onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
@@ -519,7 +519,7 @@ internal fun PlanningCenterImportDialogContent(
                                             }
                                         }
                                         "header" -> {
-                                            Checkbox(
+                                            RaisedCheckbox(
                                                 checked = entry.selected,
                                                 onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                             )
@@ -542,7 +542,7 @@ internal fun PlanningCenterImportDialogContent(
                                             // Non-null (no-op) onCheckedChange keeps the same
                                             // minimumInteractiveComponentSize footprint as the
                                             // interactive rows so the checkbox stays aligned.
-                                            Checkbox(checked = false, enabled = false, onCheckedChange = {})
+                                            RaisedCheckbox(checked = false, enabled = false, onCheckedChange = {})
                                             PlanItemTypeIcon(Icons.Filled.PlayCircle, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
                                             Text(
                                                 pco.title,
@@ -558,7 +558,7 @@ internal fun PlanningCenterImportDialogContent(
                                             // Otherwise fall back to a plain checkbox (import the
                                             // title as an announcement). hasScripture is hoisted above.
                                             if (!hasScripture) {
-                                                Checkbox(
+                                                RaisedCheckbox(
                                                     checked = entry.selected,
                                                     onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                                 )
@@ -625,7 +625,7 @@ internal fun PlanningCenterImportDialogContent(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            Checkbox(
+                                            RaisedCheckbox(
                                                 checked = supported && att.id in selectedIds,
                                                 enabled = supported,
                                                 onCheckedChange = { viewModel.toggleAttachmentSelected(pco.id, att.id) }

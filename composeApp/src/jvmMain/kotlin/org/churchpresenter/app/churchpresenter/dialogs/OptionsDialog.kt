@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,7 +30,7 @@ import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -408,7 +408,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextButton(
+        GhostButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(

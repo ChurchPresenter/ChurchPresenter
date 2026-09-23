@@ -26,7 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -672,7 +672,7 @@ private fun RecoveryBanner(source: CalendarSource, onDismiss: () -> Unit) {
                 color = scheme.onErrorContainer,
             )
         }
-        TextButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_dismiss)) }
+        GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_dismiss)) }
     }
 }
 

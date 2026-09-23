@@ -32,19 +32,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.layout.PaddingValues
@@ -918,12 +918,12 @@ private fun ConfirmClearDialog(message: String, onConfirm: () -> Unit, onDismiss
         title = { Text(stringResource(Res.string.confirm_delete)) },
         text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
         confirmButton = {
-            TextButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
                 Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
-            TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.cancel))
             }
         }

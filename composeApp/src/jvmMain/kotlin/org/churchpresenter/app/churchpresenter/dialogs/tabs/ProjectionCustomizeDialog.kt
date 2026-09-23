@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.app.churchpresenter.composables.RaisedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltip
@@ -30,10 +30,10 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
-import org.churchpresenter.app.churchpresenter.composables.RaisedSwitch
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -386,7 +386,7 @@ private fun CustomizeDialogButtons(
         )
         // The same buttons, in the same styles, as the Options dialog's own row below this one: a
         // plain-text Cancel, a secondary Apply and a primary Done.
-        TextButton(
+        GhostButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),

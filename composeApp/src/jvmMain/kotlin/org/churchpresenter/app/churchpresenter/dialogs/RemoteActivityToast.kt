@@ -20,10 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.composables.KeyButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -266,14 +266,14 @@ private fun RemoteActivityToast(
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
-                TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                     Text(
                         stringResource(Res.string.remote_activity_dismiss),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (remaining > 0) {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismissAll) {
+                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismissAll) {
                         Text(
                             stringResource(Res.string.remote_activity_dismiss_all),
                             color = MaterialTheme.colorScheme.primary
