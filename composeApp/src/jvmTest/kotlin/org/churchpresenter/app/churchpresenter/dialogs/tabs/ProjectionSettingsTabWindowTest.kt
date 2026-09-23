@@ -2,30 +2,29 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasTextExactly
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
- * The Projection tab's last two cards: where a presenter window sits, and what it plays audio on.
+ * Where a presenter window sits: the four inset fields laid out around a picture of a screen.
  *
- * The four inset fields are one control repeated, so the thing worth pinning is which of the four
- * each writes -- they are laid out as a picture of a screen with a field on each side, and a pair
- * crossed over there moves the window the wrong way by exactly the amount asked for, which looks
- * like the setting being ignored rather than like it being wired backwards.
+ * One control repeated four times, so what is worth pinning is which of the four each writes. A
+ * pair crossed over here moves the window the wrong way by exactly the amount asked for, which
+ * reads as the setting being ignored rather than as its being wired backwards.
  *
- * The audio dropdown is asserted only as far as it goes headless: VLC supplies the device list, so
- * without it the menu holds nothing but the system default. Picking that is the branch that clears
- * a stored device id, which is worth having either way.
+ * ## The audio card is not covered, and cannot be from here
+ *
+ * The Output Device dropdown beside these fields sits behind `vlcDetected`, which is
+ * `isVlcAvailable` -- a property of the machine running the suite, not a parameter. A test of it
+ * passes on a developer's machine with VLC installed and fails on CI, which has none: two written
+ * that way did exactly that. The tab already takes [ProjectionSettingsTab]'s `detectScreens`,
+ * `ndiStatus` and `ffmpegProbe` as parameters so a headless test can hand it a machine rather than
+ * reading the one it is on; VLC availability is the one probe left that has no such seam. Giving it
+ * one would cover the "System Default" branch, which is the branch that clears a device id left
+ * behind by a machine that no longer has that device -- worth doing, but it is a change to
+ * production code and belongs in its own piece of work.
  */
 class ProjectionSettingsTabWindowTest {
 
@@ -74,39 +73,6 @@ class ProjectionSettingsTabWindowTest {
             assertEquals(22, proj.windowLeft)
             assertEquals(33, proj.windowRight)
             assertEquals(44, proj.windowBottom)
-        }
-    }
-
-    @Test
-    fun `the audio card offers the system default`() {
-        projectionTab(insets()) { _ ->
-            assertTrue(
-                onAllNodesWithText("System Default").fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty(),
-                "with no VLC device list the default is the whole menu, and it must still be offered",
-            )
-        }
-    }
-
-    @Test
-    fun `picking the system default clears a stored device id`() {
-        // The one audio branch reachable without VLC, and the one that matters most: a device id
-        // left behind by a machine that no longer has that device silences the output entirely.
-        val withDevice = insets().let {
-            it.copy(projectionSettings = it.projectionSettings.copy(audioOutputDeviceId = "alsa:hw:2,0"))
-        }
-        projectionTab(withDevice) { get ->
-            onAllNodesWithText("System Default")[0].performClick()
-            waitForIdle()
-            // The closed dropdown already reads "System Default" -- a stored id that matches no
-            // device falls back to the default label -- so the open menu's item is the one of the
-            // two that is not the button.
-            onNode(
-                hasClickAction() and hasTextExactly("System Default") and
-                    !SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button),
-            ).performClick()
-            waitForIdle()
-
-            assertEquals("", get().projectionSettings.audioOutputDeviceId)
         }
     }
 }
