@@ -8,6 +8,13 @@ import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import java.awt.Font
+import java.awt.Shape
+import java.awt.font.FontRenderContext
+import java.awt.font.TextLayout
+import java.awt.geom.AffineTransform
+import java.awt.geom.PathIterator
+import java.awt.geom.Point2D
 import java.io.ByteArrayInputStream
 import java.io.File
 
@@ -28,6 +35,9 @@ private const val META_GAP = 10f
 private const val HEADING_GAP = 14f
 private const val SECTION_RULE_GAP = 4f
 private const val RULE_WIDTH = 0.5f
+private const val QUAD_TO_CUBIC = 2f / 3f
+private const val SEGMENT_COORDS = 6
+private const val FONT_UNITS = 1000f
 
 /**
  * The run of show as a one-page-per-however-many-rows PDF, for the band and the booth.
@@ -37,9 +47,9 @@ private const val RULE_WIDTH = 0.5f
  * reproduction of the screen.
  *
  * [font] supplies the embedded TrueType face — see [org.churchpresenter.calendar.CalendarHost.pdfFont].
- * When it returns null the built-in Helvetica stands in, and any character that face cannot encode
- * is replaced rather than thrown on: a Cyrillic song library would otherwise fail the whole export
- * on its first row.
+ * When it returns null the built-in Helvetica stands in. Either way, a run of text the face cannot
+ * encode -- Tamil, say, which OpenSans has no glyphs for -- is drawn as glyph outlines from a system
+ * font instead; see [SheetPage.text].
  *
  * [use24Hour] is the calendar's clock format, so the sheet reads the way the window does.
  */
@@ -151,14 +161,77 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
 
     override fun close() = stream.close()
 
-    /** One line of text at the cursor, with whatever the font cannot encode replaced rather than thrown on. */
+    /**
+     * One line of text at the cursor.
+     *
+     * Runs [font] can encode are set as real text. The rest are shaped by AWT, which falls back to
+     * an installed font that has the script and reorders it correctly (PDFBox does neither: Tamil's
+     * pre-base vowel signs would land after their consonant), and filled as outlines. A run no
+     * installed font can display is marked with `?` rather than failing the export.
+     */
     private fun text(value: String, x: Float, font: PDFont, size: Float) {
-        if (value.isEmpty()) return
+        var pen = x
+        for ((run, encodable) in value.runsBy { font.canEncode(it) }) {
+            pen += when {
+                encodable -> showText(run, pen, font, size)
+                else -> showOutline(run, pen, font, size)
+                    ?: showText(run.placeholders(), pen, font, size)
+            }
+        }
+    }
+
+    private fun showText(value: String, x: Float, font: PDFont, size: Float): Float {
         stream.beginText()
         stream.setFont(font, size)
         stream.newLineAtOffset(x, y)
-        stream.showText(value.encodableIn(font))
+        stream.showText(value)
         stream.endText()
+        return font.getStringWidth(value) / FONT_UNITS * size
+    }
+
+    private fun showOutline(value: String, x: Float, font: PDFont, size: Float): Float? {
+        val style = if (font === faces.bold) Font.BOLD else Font.PLAIN
+        val awtFont = Font(Font.SANS_SERIF, style, 1).deriveFont(size)
+        if (awtFont.canDisplayUpTo(value) != -1) return null
+        val layout = TextLayout(value, awtFont, FontRenderContext(null, true, true))
+        fillOutline(layout.getOutline(null), x, y)
+        return layout.advance
+    }
+
+    private fun fillOutline(shape: Shape, x: Float, baseline: Float) {
+        // Flipped into PDF space, where y runs up from the page's foot.
+        val path = shape.getPathIterator(AffineTransform(1f, 0f, 0f, -1f, x, baseline))
+        val coords = FloatArray(SEGMENT_COORDS)
+        var last = Point2D.Float()
+        var drawn = false
+        while (!path.isDone) {
+            val type = path.currentSegment(coords)
+            val points = coords.toList().chunked(2) { Point2D.Float(it[0], it[1]) }
+            when (type) {
+                PathIterator.SEG_MOVETO -> stream.moveTo(points[0].x, points[0].y)
+                PathIterator.SEG_LINETO -> stream.lineTo(points[0].x, points[0].y)
+                PathIterator.SEG_QUADTO -> stream.curveTo(
+                    last.x + QUAD_TO_CUBIC * (points[0].x - last.x), last.y + QUAD_TO_CUBIC * (points[0].y - last.y),
+                    points[1].x + QUAD_TO_CUBIC * (points[0].x - points[1].x),
+                    points[1].y + QUAD_TO_CUBIC * (points[0].y - points[1].y),
+                    points[1].x, points[1].y,
+                )
+                PathIterator.SEG_CUBICTO -> stream.curveTo(
+                    points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y,
+                )
+                PathIterator.SEG_CLOSE -> stream.closePath()
+            }
+            last = when (type) {
+                PathIterator.SEG_QUADTO -> points[1]
+                PathIterator.SEG_CUBICTO -> points[2]
+                PathIterator.SEG_CLOSE -> last
+                else -> points[0]
+            }
+            drawn = true
+            path.next()
+        }
+        if (!drawn) return
+        if (path.windingRule == PathIterator.WIND_EVEN_ODD) stream.fillEvenOdd() else stream.fill()
     }
 
     private fun rule(at: Float) {
@@ -169,23 +242,29 @@ private class SheetPage(document: PDDocument, private val faces: Faces) : AutoCl
     }
 }
 
+private fun PDFont.canEncode(glyph: String): Boolean = runCatching { encode(glyph) }.isSuccess
+
 /**
- * [this] with every character [font] cannot encode replaced by `?`.
- *
- * PDFBox throws `IllegalArgumentException` from `showText` on the first character the font has no
- * glyph for, which would abandon the export part-written. That is not only the built-in Helvetica
- * fallback: the embedded TrueType face has gaps too -- OpenSans has no Tamil, and a Tamil item title
- * failed the whole export (Sentry CHURCH-PRESENTER-DESKTOP-7K). So each character is asked of the
- * font actually in use, and one it cannot draw costs a legible placeholder instead of the sheet.
+ * [this] split into runs of code points that do or do not satisfy [encodable]. A combining mark or
+ * a joiner stays with the run before it, so a cluster is never split between text and outline.
  */
-private fun String.encodableIn(font: PDFont): String {
-    val out = StringBuilder(length)
+private fun String.runsBy(encodable: (String) -> Boolean): List<Pair<String, Boolean>> {
+    val runs = mutableListOf<Pair<StringBuilder, Boolean>>()
     var i = 0
     while (i < length) {
         val codePoint = codePointAt(i)
         val glyph = String(Character.toChars(codePoint))
-        out.append(if (runCatching { font.encode(glyph) }.isSuccess) glyph else "?")
+        val last = runs.lastOrNull()
+        val fits = if (last != null && codePoint.attachesToPrevious()) last.second else encodable(glyph)
+        if (last != null && last.second == fits) last.first.append(glyph) else runs += StringBuilder(glyph) to fits
         i += Character.charCount(codePoint)
     }
-    return out.toString()
+    return runs.map { (run, fits) -> run.toString() to fits }
 }
+
+private fun Int.attachesToPrevious(): Boolean = when (Character.getType(this).toByte()) {
+    Character.NON_SPACING_MARK, Character.COMBINING_SPACING_MARK, Character.ENCLOSING_MARK, Character.FORMAT -> true
+    else -> false
+}
+
+private fun String.placeholders(): String = "?".repeat(codePointCount(0, length))

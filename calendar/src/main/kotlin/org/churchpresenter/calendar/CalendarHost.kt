@@ -66,7 +66,7 @@ data class CalendarHost(
      * a library like this one an un-embedded export is not a degraded export, it is a crash.
      *
      * Returning null is honest — [org.churchpresenter.calendar.model.exportRunOfShowPdf] then falls
-     * back to Helvetica and replaces whatever it cannot encode.
+     * back to Helvetica, and anything that cannot encode is drawn as outlines from a system font.
      */
     val pdfFont: (bold: Boolean) -> ByteArray? = { null },
 
