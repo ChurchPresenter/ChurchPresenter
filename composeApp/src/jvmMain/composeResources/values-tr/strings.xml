@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Köşe yarıçapı</string>
     <string name="open_calendar_manager">Takvim Yöneticisi</string>
     <string name="calendar_locate_file_title">%1$s dosyasını bul</string>
+    <string name="calendar_choose_logo_title">Bir kilise logosu seçin</string>
+    <string name="calendar_export_title">Akış planını dışa aktar</string>
     <string name="calendar_locate_folder_title">%1$s klasörünü bul</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Art arda %1$d çökmeden sonra video arka planları kapatıldı.</string>

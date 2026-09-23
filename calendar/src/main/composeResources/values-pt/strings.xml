@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Quem, ou uma nota</string>
     <string name="calendar_cloud_sync">Sincronizar com a nuvem e os dispositivos móveis</string>
     <string name="calendar_cloud_sync_sub">Mantém este calendário a par dos telemóveis através do relay. Desligado, nada sai deste computador</string>
+    <string name="calendar_settings_export">Exportar</string>
+    <string name="calendar_export_note">O cabeçalho com que começa cada PDF exportado. Deixe um campo vazio para o omitir.</string>
+    <string name="calendar_export_logo">Logótipo da igreja</string>
+    <string name="calendar_export_logo_sub">PNG ou JPEG, centrado no topo da página</string>
+    <string name="calendar_export_logo_none">Nenhum logótipo escolhido</string>
+    <string name="calendar_export_logo_choose">Escolher…</string>
+    <string name="calendar_export_logo_remove">Remover logótipo</string>
+    <string name="calendar_export_church_name">Nome da igreja</string>
+    <string name="calendar_export_church_address">Endereço da igreja</string>
+    <string name="calendar_export_public_heading">Secções só para a equipa</string>
+    <string name="calendar_export_public_note">A cópia pública mostra apenas a hora de início — sem horas das linhas nem durações — e omite as marcas e cada secção ativada abaixo. A cópia da equipa tem tudo.</string>
+    <string name="calendar_export_sections_empty">Ainda não há secções definidas.</string>
+    <string name="calendar_export_public">Pública</string>
+    <string name="calendar_export_public_sub">Ordem do culto para a congregação — apenas a hora de início, sem horas das linhas, durações, marcas nem secções só para a equipa</string>
+    <string name="calendar_export_staff">Equipa da igreja</string>
+    <string name="calendar_export_staff_sub">A ordem do culto completa com horas das linhas, durações, marcas e itens de antes e depois do culto</string>
+    <string name="calendar_export_choose">Escolha que cópia exportar</string>
 </resources>

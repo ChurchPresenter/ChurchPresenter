@@ -2662,6 +2662,8 @@
     <string name="backdrop_border_radius">Eckenradius</string>
     <string name="open_calendar_manager">Kalender-Manager</string>
     <string name="calendar_locate_file_title">%1$s suchen</string>
+    <string name="calendar_choose_logo_title">Gemeindelogo auswählen</string>
+    <string name="calendar_export_title">Ablauf exportieren</string>
     <string name="calendar_locate_folder_title">Ordner %1$s suchen</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Videohintergründe wurden nach %1$d Abstürzen in Folge ausgeschaltet.</string>

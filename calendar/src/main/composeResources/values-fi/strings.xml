@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Kuka tai huomautus</string>
     <string name="calendar_cloud_sync">Synkronoi pilven ja mobiililaitteiden kanssa</string>
     <string name="calendar_cloud_sync_sub">Pitää tämän kalenterin ajan tasalla puhelinten kanssa välittimen kautta. Pois päältä mikään ei lähde tältä tietokoneelta</string>
+    <string name="calendar_settings_export">Vienti</string>
+    <string name="calendar_export_note">Ylätunniste, jolla jokainen viety PDF alkaa. Jätä kenttä tyhjäksi, jos haluat jättää sen pois.</string>
+    <string name="calendar_export_logo">Seurakunnan logo</string>
+    <string name="calendar_export_logo_sub">PNG tai JPEG, keskitettynä sivun yläreunaan</string>
+    <string name="calendar_export_logo_none">Logoa ei ole valittu</string>
+    <string name="calendar_export_logo_choose">Valitse…</string>
+    <string name="calendar_export_logo_remove">Poista logo</string>
+    <string name="calendar_export_church_name">Seurakunnan nimi</string>
+    <string name="calendar_export_church_address">Seurakunnan osoite</string>
+    <string name="calendar_export_public_heading">Vain tiimille näkyvät osiot</string>
+    <string name="calendar_export_public_note">Julkinen kopio näyttää vain alkamisajan — ei rivien aikoja eikä kestoja — ja jättää pois merkit ja jokaisen alla päälle kytketyn osion. Tiimin kopiossa on kaikki.</string>
+    <string name="calendar_export_sections_empty">Osioita ei ole vielä määritetty.</string>
+    <string name="calendar_export_public">Julkinen</string>
+    <string name="calendar_export_public_sub">Tilaisuuden järjestys seurakunnalle — vain alkamisaika, ilman rivien aikoja, kestoja, merkkejä tai vain tiimille näkyviä osioita</string>
+    <string name="calendar_export_staff">Seurakunnan tiimi</string>
+    <string name="calendar_export_staff_sub">Koko kulkusuunnitelma rivien aikoineen, kestoineen ja merkkeineen sekä tilaisuutta edeltävine ja sen jälkeisine kohtineen</string>
+    <string name="calendar_export_choose">Valitse vietävä kopio</string>
 </resources>

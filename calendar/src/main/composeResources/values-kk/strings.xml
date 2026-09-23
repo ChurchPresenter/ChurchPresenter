@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Кім немесе ескертпе</string>
     <string name="calendar_cloud_sync">Бұлтпен және мобильді құрылғылармен синхрондау</string>
     <string name="calendar_cloud_sync_sub">Осы күнтізбені реле арқылы телефондармен сәйкес ұстайды. Өшірулі кезде одан ештеңе осы компьютерден шықпайды</string>
+    <string name="calendar_settings_export">Экспорт</string>
+    <string name="calendar_export_note">Әрбір экспортталған PDF басталатын бланк тақырыбы. Өрісті қоспау үшін оны бос қалдырыңыз.</string>
+    <string name="calendar_export_logo">Шіркеу логотипі</string>
+    <string name="calendar_export_logo_sub">PNG немесе JPEG, беттің жоғарғы ортасында</string>
+    <string name="calendar_export_logo_none">Логотип таңдалмаған</string>
+    <string name="calendar_export_logo_choose">Таңдау…</string>
+    <string name="calendar_export_logo_remove">Логотипті жою</string>
+    <string name="calendar_export_church_name">Шіркеу атауы</string>
+    <string name="calendar_export_church_address">Шіркеу мекенжайы</string>
+    <string name="calendar_export_public_heading">Тек қызметкерлерге арналған бөлімдер</string>
+    <string name="calendar_export_public_note">Жалпы көшірме тек басталу уақытын көрсетеді — жол уақыттары мен ұзақтықтарсыз — және белгілерді әрі төменде қосылған әр бөлімді қамтымайды. Қызметкерлер көшірмесінде бәрі бар.</string>
+    <string name="calendar_export_sections_empty">Бөлімдер әлі анықталмаған.</string>
+    <string name="calendar_export_public">Жалпы</string>
+    <string name="calendar_export_public_sub">Қауымға арналған қызмет реті — тек басталу уақыты, жол уақыттарынсыз, ұзақтықтарсыз, белгілерсіз және тек қызметкерлерге арналған бөлімдерсіз</string>
+    <string name="calendar_export_staff">Шіркеу қызметкерлері</string>
+    <string name="calendar_export_staff_sub">Жол уақыттары, ұзақтықтар, белгілер және қызметке дейінгі әрі кейінгі тармақтар бар толық қызмет реті</string>
+    <string name="calendar_export_choose">Қай көшірмені экспорттау керектігін таңдаңыз</string>
 </resources>

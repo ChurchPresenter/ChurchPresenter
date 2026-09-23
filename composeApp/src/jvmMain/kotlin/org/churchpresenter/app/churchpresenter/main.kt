@@ -86,6 +86,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import churchpresenter.composeapp.generated.resources.bible_font
 import churchpresenter.composeapp.generated.resources.calendar_locate_folder_title
+import churchpresenter.composeapp.generated.resources.calendar_choose_logo_title
+import churchpresenter.composeapp.generated.resources.calendar_export_title
 import churchpresenter.composeapp.generated.resources.calendar_locate_file_title
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
@@ -2135,7 +2137,19 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                                 filters = listOf(
                                                     FileNameExtensionFilter("PDF Document (*.pdf)", "pdf")
                                                 ),
-                                                title = "Export Run of Show"
+                                                title = getString(Res.string.calendar_export_title)
+                                            )?.toFile()
+                                        },
+                                        chooseImageFile = {
+                                            FileChooser.platformInstance.chooseSingle(
+                                                path = null,
+                                                filters = listOf(
+                                                    FileNameExtensionFilter(
+                                                        "Images (*.png, *.jpg)", "png", "jpg", "jpeg",
+                                                    )
+                                                ),
+                                                title = getString(Res.string.calendar_choose_logo_title),
+                                                selectDirectory = false,
                                             )?.toFile()
                                         },
                                         loadIntoSchedule = loadFromCalendar,

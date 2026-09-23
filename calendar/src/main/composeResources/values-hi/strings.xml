@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">कौन, या नोट</string>
     <string name="calendar_cloud_sync">क्लाउड और मोबाइल डिवाइस के साथ सिंक करें</string>
     <string name="calendar_cloud_sync_sub">रिले के ज़रिए इस कैलेंडर को फ़ोन के साथ मेल में रखता है। बंद होने पर इसका कुछ भी इस कंप्यूटर से बाहर नहीं जाता</string>
+    <string name="calendar_settings_export">निर्यात</string>
+    <string name="calendar_export_note">वह शीर्ष भाग जिससे हर निर्यात किया गया PDF शुरू होता है। किसी फ़ील्ड को छोड़ना हो तो उसे खाली रहने दें।</string>
+    <string name="calendar_export_logo">कलीसिया का लोगो</string>
+    <string name="calendar_export_logo_sub">PNG या JPEG, पृष्ठ के ऊपर बीच में</string>
+    <string name="calendar_export_logo_none">कोई लोगो नहीं चुना गया</string>
+    <string name="calendar_export_logo_choose">चुनें…</string>
+    <string name="calendar_export_logo_remove">लोगो हटाएँ</string>
+    <string name="calendar_export_church_name">कलीसिया का नाम</string>
+    <string name="calendar_export_church_address">कलीसिया का पता</string>
+    <string name="calendar_export_public_heading">केवल टीम के लिए खंड</string>
+    <string name="calendar_export_public_note">सार्वजनिक प्रति केवल आरंभ समय दिखाती है — पंक्तियों के समय या अवधि नहीं — और चिह्नों तथा नीचे चालू किए गए हर खंड को छोड़ देती है। टीम की प्रति में सब कुछ होता है।</string>
+    <string name="calendar_export_sections_empty">अभी कोई खंड तय नहीं किया गया है।</string>
+    <string name="calendar_export_public">सार्वजनिक</string>
+    <string name="calendar_export_public_sub">मंडली के लिए सभा क्रम — केवल आरंभ समय, पंक्तियों के समय, अवधि, चिह्नों या केवल टीम वाले खंडों के बिना</string>
+    <string name="calendar_export_staff">कलीसिया की टीम</string>
+    <string name="calendar_export_staff_sub">पंक्तियों के समय, अवधि, चिह्नों और सभा से पहले व बाद के आइटमों के साथ पूरा सभा क्रम</string>
+    <string name="calendar_export_choose">चुनें कि कौन-सी प्रति निर्यात करनी है</string>
 </resources>

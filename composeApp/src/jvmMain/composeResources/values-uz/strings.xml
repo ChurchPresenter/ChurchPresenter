@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Burchak radiusi</string>
     <string name="open_calendar_manager">Taqvim menejeri</string>
     <string name="calendar_locate_file_title">%1$s ni topish</string>
+    <string name="calendar_choose_logo_title">Cherkov logotipini tanlang</string>
+    <string name="calendar_export_title">Xizmat tartibini eksport qilish</string>
     <string name="calendar_locate_folder_title">%1$s jildini topish</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Ketma-ket %1$d marta buzilgandan so‘ng video fonlar o‘chirildi.</string>

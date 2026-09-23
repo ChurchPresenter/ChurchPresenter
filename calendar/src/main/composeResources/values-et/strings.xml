@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Kes või märkus</string>
     <string name="calendar_cloud_sync">Sünkrooni pilve ja mobiilseadmetega</string>
     <string name="calendar_cloud_sync_sub">Hoiab selle kalendri relee kaudu telefonidega samas seisus. Väljas olles ei lahku sellest arvutist midagi</string>
+    <string name="calendar_settings_export">Eksport</string>
+    <string name="calendar_export_note">Päis, millega iga eksporditud PDF algab. Jäta väli tühjaks, et see välja jätta.</string>
+    <string name="calendar_export_logo">Koguduse logo</string>
+    <string name="calendar_export_logo_sub">PNG või JPEG, lehe ülaosas keskel</string>
+    <string name="calendar_export_logo_none">Logo pole valitud</string>
+    <string name="calendar_export_logo_choose">Vali…</string>
+    <string name="calendar_export_logo_remove">Eemalda logo</string>
+    <string name="calendar_export_church_name">Koguduse nimi</string>
+    <string name="calendar_export_church_address">Koguduse aadress</string>
+    <string name="calendar_export_public_heading">Ainult meeskonnale mõeldud osad</string>
+    <string name="calendar_export_public_note">Avalik koopia näitab ainult algusaega — ilma ridade aegade ja kestusteta — ning jätab välja märgid ja kõik allpool sisse lülitatud osad. Meeskonna koopias on kõik.</string>
+    <string name="calendar_export_sections_empty">Osasid pole veel määratud.</string>
+    <string name="calendar_export_public">Avalik</string>
+    <string name="calendar_export_public_sub">Jumalateenistuse kord kogudusele — ainult algusaeg, ilma ridade aegade, kestuste, märkide ja ainult meeskonnale mõeldud osadeta</string>
+    <string name="calendar_export_staff">Koguduse meeskond</string>
+    <string name="calendar_export_staff_sub">Täielik kava ridade aegade, kestuste, märkide ning enne ja pärast teenistust toimuvate punktidega</string>
+    <string name="calendar_export_choose">Vali, millist koopiat eksportida</string>
 </resources>

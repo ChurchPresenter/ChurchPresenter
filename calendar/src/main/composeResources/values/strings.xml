@@ -340,4 +340,21 @@
     <string name="calendar_fix_locate_file">click to find the file</string>
     <string name="calendar_fix_locate_folder">click to find the folder</string>
     <string name="calendar_fix_pick_again">click to pick another</string>
+    <string name="calendar_settings_export">Export</string>
+    <string name="calendar_export_note">The letterhead every exported PDF starts with. Leave a field empty to leave it out.</string>
+    <string name="calendar_export_logo">Church logo</string>
+    <string name="calendar_export_logo_sub">PNG or JPEG, centered at the top of the page</string>
+    <string name="calendar_export_logo_none">No logo chosen</string>
+    <string name="calendar_export_logo_choose">Choose…</string>
+    <string name="calendar_export_logo_remove">Remove logo</string>
+    <string name="calendar_export_church_name">Church name</string>
+    <string name="calendar_export_church_address">Church address</string>
+    <string name="calendar_export_public_heading">Staff-only sections</string>
+    <string name="calendar_export_public_note">The public copy shows only the start time — no row times or lengths — and leaves out cues and every section switched on below. The staff copy has everything.</string>
+    <string name="calendar_export_sections_empty">No sections defined yet.</string>
+    <string name="calendar_export_public">Public</string>
+    <string name="calendar_export_public_sub">Order of service for the congregation — the start time only, with no row times, lengths, cues or staff-only sections</string>
+    <string name="calendar_export_staff">Church staff</string>
+    <string name="calendar_export_staff_sub">The full run of show with row times, lengths, cues and pre- and post-service items</string>
+    <string name="calendar_export_choose">Choose which copy to export</string>
 </resources>

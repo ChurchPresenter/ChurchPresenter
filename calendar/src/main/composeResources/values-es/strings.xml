@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Quién, o una nota</string>
     <string name="calendar_cloud_sync">Sincronizar con la nube y los dispositivos móviles</string>
     <string name="calendar_cloud_sync_sub">Mantiene este calendario al día con los teléfonos a través del relay. Desactivado, nada sale de este ordenador</string>
+    <string name="calendar_settings_export">Exportar</string>
+    <string name="calendar_export_note">El membrete con el que empieza cada PDF exportado. Deja un campo vacío para omitirlo.</string>
+    <string name="calendar_export_logo">Logotipo de la iglesia</string>
+    <string name="calendar_export_logo_sub">PNG o JPEG, centrado en la parte superior de la página</string>
+    <string name="calendar_export_logo_none">Ningún logotipo elegido</string>
+    <string name="calendar_export_logo_choose">Elegir…</string>
+    <string name="calendar_export_logo_remove">Quitar logotipo</string>
+    <string name="calendar_export_church_name">Nombre de la iglesia</string>
+    <string name="calendar_export_church_address">Dirección de la iglesia</string>
+    <string name="calendar_export_public_heading">Secciones solo para el equipo</string>
+    <string name="calendar_export_public_note">La copia pública muestra solo la hora de inicio — sin horas de fila ni duraciones — y omite las marcas y cada sección activada abajo. La copia del equipo lo incluye todo.</string>
+    <string name="calendar_export_sections_empty">Aún no hay secciones definidas.</string>
+    <string name="calendar_export_public">Pública</string>
+    <string name="calendar_export_public_sub">Orden del servicio para la congregación — solo la hora de inicio, sin horas de fila, duraciones, marcas ni secciones solo para el equipo</string>
+    <string name="calendar_export_staff">Equipo de la iglesia</string>
+    <string name="calendar_export_staff_sub">El orden del servicio completo con horas de fila, duraciones, marcas y elementos de antes y después del servicio</string>
+    <string name="calendar_export_choose">Elige qué copia exportar</string>
 </resources>

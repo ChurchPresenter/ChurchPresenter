@@ -2662,6 +2662,8 @@
     <string name="backdrop_border_radius">Бұрыш радиусы</string>
     <string name="open_calendar_manager">Күнтізбе менеджері</string>
     <string name="calendar_locate_file_title">%1$s табу</string>
+    <string name="calendar_choose_logo_title">Шіркеу логотипін таңдаңыз</string>
+    <string name="calendar_export_title">Қызмет ретін экспорттау</string>
     <string name="calendar_locate_folder_title">%1$s қалтасын табу</string>
     <string name="background_camera_option">Камера</string>
     <string name="crash_video_bg_banner">Қатарынан %1$d рет құлағаннан кейін бейне фондар өшірілді.</string>

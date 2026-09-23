@@ -45,6 +45,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_sections_note
 import org.churchpresenter.calendar.generated.resources.calendar_settings
 import org.churchpresenter.calendar.generated.resources.calendar_settings_defaults
 import org.churchpresenter.calendar.generated.resources.calendar_settings_done
+import org.churchpresenter.calendar.generated.resources.calendar_settings_export
 import org.churchpresenter.calendar.generated.resources.calendar_settings_sections
 import org.churchpresenter.calendar.generated.resources.calendar_settings_sub
 import org.churchpresenter.calendar.generated.resources.calendar_settings_templates
@@ -91,6 +92,7 @@ fun CalendarSettingsDialog(
     onInsertSection: (SectionStyle) -> Unit,
     onRemoveTemplate: (id: String) -> Unit,
     onRemovePreset: (id: String) -> Unit,
+    onChooseLogo: () -> Unit = {},
     onDismiss: () -> Unit,
     cloudSync: CalendarCloudSync? = null,
 ) {
@@ -133,6 +135,12 @@ fun CalendarSettingsDialog(
                     SettingsTab.TEMPLATES -> TemplatesTab(templates, onRemoveTemplate)
                     SettingsTab.PRESETS -> PresetsTab(presets, onRemovePreset)
                     SettingsTab.DEFAULTS -> DefaultsTab(preferences, onPreferencesChange, cloudSync)
+                    SettingsTab.EXPORT -> ExportTab(
+                        settings = preferences.pdfExport,
+                        sections = preferences.sections,
+                        onChange = { onPreferencesChange(preferences.copy(pdfExport = it)) },
+                        onChooseLogo = onChooseLogo,
+                    )
                 }
             }
         }
@@ -146,6 +154,7 @@ private fun tabLabel(tab: SettingsTab): String = stringResource(
         SettingsTab.TEMPLATES -> Res.string.calendar_settings_templates
         SettingsTab.PRESETS -> Res.string.calendar_settings_presets
         SettingsTab.DEFAULTS -> Res.string.calendar_settings_defaults
+        SettingsTab.EXPORT -> Res.string.calendar_settings_export
     }
 )
 

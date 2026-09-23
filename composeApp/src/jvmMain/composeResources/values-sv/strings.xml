@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Hörnradie</string>
     <string name="open_calendar_manager">Kalenderhanterare</string>
     <string name="calendar_locate_file_title">Hitta %1$s</string>
+    <string name="calendar_choose_logo_title">Välj församlingens logotyp</string>
+    <string name="calendar_export_title">Exportera körschema</string>
     <string name="calendar_locate_folder_title">Hitta mappen %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Videobakgrunder stängdes av efter %1$d krascher i rad.</string>

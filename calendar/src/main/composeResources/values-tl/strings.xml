@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Sino, o tala</string>
     <string name="calendar_cloud_sync">I-sync sa cloud at mga mobile device</string>
     <string name="calendar_cloud_sync_sub">Pinapanatiling magkatugma ang kalendaryong ito at ang mga telepono sa pamamagitan ng relay. Kapag naka-off, walang umaalis sa computer na ito</string>
+    <string name="calendar_settings_export">I-export</string>
+    <string name="calendar_export_note">Ang letterhead na simula ng bawat na-export na PDF. Iwanang blangko ang isang field para hindi ito isama.</string>
+    <string name="calendar_export_logo">Logo ng iglesya</string>
+    <string name="calendar_export_logo_sub">PNG o JPEG, nasa gitna sa itaas ng pahina</string>
+    <string name="calendar_export_logo_none">Walang napiling logo</string>
+    <string name="calendar_export_logo_choose">Pumili…</string>
+    <string name="calendar_export_logo_remove">Alisin ang logo</string>
+    <string name="calendar_export_church_name">Pangalan ng iglesya</string>
+    <string name="calendar_export_church_address">Address ng iglesya</string>
+    <string name="calendar_export_public_heading">Mga seksyon para sa staff lamang</string>
+    <string name="calendar_export_public_note">Ang pampublikong kopya ay nagpapakita lamang ng oras ng simula — walang oras ng bawat hilera o tagal — at hindi isinasama ang mga marka at bawat seksyong naka-on sa ibaba. Nasa kopya ng staff ang lahat.</string>
+    <string name="calendar_export_sections_empty">Wala pang tinukoy na seksyon.</string>
+    <string name="calendar_export_public">Pampubliko</string>
+    <string name="calendar_export_public_sub">Ayos ng pagsamba para sa kongregasyon — oras ng simula lamang, walang oras ng bawat hilera, tagal, marka o seksyong para sa staff lamang</string>
+    <string name="calendar_export_staff">Staff ng iglesya</string>
+    <string name="calendar_export_staff_sub">Ang buong takbo ng programa na may oras ng bawat hilera, tagal, marka at mga item bago at pagkatapos ng pagsamba</string>
+    <string name="calendar_export_choose">Piliin kung aling kopya ang i-export</string>
 </resources>

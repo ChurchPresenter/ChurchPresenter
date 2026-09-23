@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">ຄວາມມົນຂອງມຸມ</string>
     <string name="open_calendar_manager">ຕົວຈັດການປະຕິທິນ</string>
     <string name="calendar_locate_file_title">ຊອກຫາ %1$s</string>
+    <string name="calendar_choose_logo_title">ເລືອກໂລໂກ້ຄຣິດຕະຈັກ</string>
+    <string name="calendar_export_title">ສົ່ງອອກລຳດັບລາຍການ</string>
     <string name="calendar_locate_folder_title">ຊອກຫາໂຟນເດີ %1$s</string>
     <string name="background_camera_option">ກ້ອງ</string>
     <string name="crash_video_bg_banner">ພື້ນຫລັງວິດີໂອຖືກປິດແລ້ວ ຫລັງຈາກໂປຣແກຣມຂັດຂ້ອງ %1$d ຄັ້ງຕິດຕໍ່ກັນ.</string>

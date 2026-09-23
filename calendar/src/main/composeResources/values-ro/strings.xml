@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Cine, sau o notă</string>
     <string name="calendar_cloud_sync">Sincronizează cu cloudul și dispozitivele mobile</string>
     <string name="calendar_cloud_sync_sub">Menține acest calendar în pas cu telefoanele prin releu. Oprit, nimic nu părăsește acest computer</string>
+    <string name="calendar_settings_export">Export</string>
+    <string name="calendar_export_note">Antetul cu care începe fiecare PDF exportat. Lăsați un câmp gol pentru a-l omite.</string>
+    <string name="calendar_export_logo">Logoul bisericii</string>
+    <string name="calendar_export_logo_sub">PNG sau JPEG, centrat în partea de sus a paginii</string>
+    <string name="calendar_export_logo_none">Niciun logo ales</string>
+    <string name="calendar_export_logo_choose">Alege…</string>
+    <string name="calendar_export_logo_remove">Elimină logoul</string>
+    <string name="calendar_export_church_name">Numele bisericii</string>
+    <string name="calendar_export_church_address">Adresa bisericii</string>
+    <string name="calendar_export_public_heading">Secțiuni doar pentru echipă</string>
+    <string name="calendar_export_public_note">Copia publică arată doar ora de început — fără orele rândurilor sau durate — și omite marcajele și fiecare secțiune activată mai jos. Copia echipei le conține pe toate.</string>
+    <string name="calendar_export_sections_empty">Nicio secțiune definită încă.</string>
+    <string name="calendar_export_public">Publică</string>
+    <string name="calendar_export_public_sub">Ordinea serviciului pentru adunare — doar ora de început, fără orele rândurilor, durate, marcaje sau secțiuni doar pentru echipă</string>
+    <string name="calendar_export_staff">Echipa bisericii</string>
+    <string name="calendar_export_staff_sub">Desfășurarea completă, cu orele rândurilor, duratele, marcajele și punctele de dinainte și de după serviciu</string>
+    <string name="calendar_export_choose">Alegeți ce copie să exportați</string>
 </resources>

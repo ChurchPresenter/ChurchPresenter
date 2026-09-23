@@ -239,6 +239,17 @@ class CalendarStateTest {
     }
 
     @Test
+    fun `renaming a section keeps it staff-only in the pdf export`() {
+        val state = state()
+
+        state.renameSection("Pre-Service", "Before the service")
+
+        val export = CalendarStore(folder).load().document.preferences.pdfExport
+        assertTrue(export.isStaffOnly("Before the service"))
+        assertFalse(export.isStaffOnly("Pre-Service"))
+    }
+
+    @Test
     fun `a preference change is written straight out`() {
         val state = state()
 

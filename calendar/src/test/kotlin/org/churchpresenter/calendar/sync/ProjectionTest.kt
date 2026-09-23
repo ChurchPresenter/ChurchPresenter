@@ -106,4 +106,31 @@ class ProjectionTest {
         assertEquals(listOf(RemoteTombstone("x", "2026-09-01T00:00:00Z")), Projection.tombstones(document))
         assertEquals(listOf(RemotePreset("p1", "Countdown", RemoteKind.TIMER)), Projection.presets(presets))
     }
+
+    @Test
+    fun `an ascii songbook keeps a readable slug, and a part number after it`() {
+        val first = Projection.catalogRecordId("Songs of Praise", 0)
+
+        assertTrue(first.startsWith("catalog:Songs_of_Praise-"), first)
+        assertEquals("$first:2", Projection.catalogRecordId("Songs of Praise", 2))
+    }
+
+    @Test
+    fun `a songbook named in another script still makes a record id the relay accepts`() {
+        val ids = listOf("பாடல்கள்", "Песни", "Песни Возрождения", "Hymns — Гимны").flatMap { book ->
+            listOf(Projection.catalogRecordId(book, 0), Projection.catalogRecordId(book, 3))
+        }
+
+        assertTrue(ids.all { Sanitize.isId(it) }, "every id is ascii and short enough: $ids")
+        assertEquals(ids.size, ids.toSet().size, "no two books share an id")
+    }
+
+    @Test
+    fun `a very long songbook name in another script is capped and still distinct`() {
+        val long = "Г".repeat(200)
+
+        val first = Projection.catalogRecordId(long, 0)
+        assertTrue(Sanitize.isId(Projection.catalogRecordId(long, 99)))
+        assertTrue(first != Projection.catalogRecordId(long + "Д", 0))
+    }
 }

@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Siapa, atau catatan</string>
     <string name="calendar_cloud_sync">Sinkronkan dengan cloud dan perangkat seluler</string>
     <string name="calendar_cloud_sync_sub">Menjaga kalender ini tetap selaras dengan ponsel melalui relai. Saat nonaktif, tidak ada yang keluar dari komputer ini</string>
+    <string name="calendar_settings_export">Ekspor</string>
+    <string name="calendar_export_note">Kop surat yang mengawali setiap PDF yang diekspor. Kosongkan kolom untuk tidak menyertakannya.</string>
+    <string name="calendar_export_logo">Logo gereja</string>
+    <string name="calendar_export_logo_sub">PNG atau JPEG, di tengah bagian atas halaman</string>
+    <string name="calendar_export_logo_none">Belum ada logo yang dipilih</string>
+    <string name="calendar_export_logo_choose">Pilih…</string>
+    <string name="calendar_export_logo_remove">Hapus logo</string>
+    <string name="calendar_export_church_name">Nama gereja</string>
+    <string name="calendar_export_church_address">Alamat gereja</string>
+    <string name="calendar_export_public_heading">Bagian khusus tim</string>
+    <string name="calendar_export_public_note">Salinan publik hanya menampilkan waktu mulai — tanpa waktu per baris atau durasi — dan tidak menyertakan penanda serta setiap bagian yang diaktifkan di bawah. Salinan tim berisi semuanya.</string>
+    <string name="calendar_export_sections_empty">Belum ada bagian yang ditentukan.</string>
+    <string name="calendar_export_public">Publik</string>
+    <string name="calendar_export_public_sub">Tata ibadah untuk jemaat — hanya waktu mulai, tanpa waktu per baris, durasi, penanda, atau bagian khusus tim</string>
+    <string name="calendar_export_staff">Tim gereja</string>
+    <string name="calendar_export_staff_sub">Susunan acara lengkap dengan waktu per baris, durasi, penanda, serta item sebelum dan sesudah ibadah</string>
+    <string name="calendar_export_choose">Pilih salinan yang akan diekspor</string>
 </resources>

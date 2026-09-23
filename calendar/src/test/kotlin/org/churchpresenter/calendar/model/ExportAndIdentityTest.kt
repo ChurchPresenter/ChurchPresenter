@@ -6,6 +6,7 @@ import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
+import java.awt.Font
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -73,19 +74,21 @@ class ExportAndIdentityTest {
     }
 
     @Test
-    fun `a character the embedded font has no glyph for is replaced rather than failing the export`() {
+    fun `a script the embedded font has no glyph for is drawn from a system font rather than failing`() {
         // OpenSans, the face the app embeds, has no Tamil -- the export died on the first Tamil
-        // title (Sentry CHURCH-PRESENTER-DESKTOP-7K).
+        // title (Sentry CHURCH-PRESENTER-DESKTOP-7K), and then printed it as question marks.
         val openSans = assertNotNull(javaClass.getResourceAsStream("/fonts/OpenSans-Regular.ttf"))
             .use { it.readBytes() }
         val target = File(folder, "tamil.pdf")
-        val tamil = service(items = listOf(song("a", "\u0BAA\u0BBE\u0B9F\u0BB2\u0BCD Grace"))).copy(name = "Sunday")
+        val title = "\u0BAA\u0BBE\u0B9F\u0BB2\u0BCD"
+        val tamil = service(items = listOf(song("a", "$title Grace"))).copy(name = "Sunday")
 
         exportRunOfShowPdf(tamil, target, dateLabel = "Sunday", font = { openSans })
 
         val text = PDDocument.load(target).use { PDFTextStripper().getText(it) }
-        assertTrue("Grace" in text, "what the font can draw is still drawn")
-        assertTrue("?" in text, "what it cannot is marked, not dropped")
+        assertTrue("Grace" in text, "what the font can draw is still text")
+        val systemHasTamil = Font(Font.SANS_SERIF, Font.PLAIN, 1).canDisplayUpTo(title) == -1
+        assertEquals(!systemHasTamil, "?" in text, "only a script no installed font has is marked")
     }
 
     @Test

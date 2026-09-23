@@ -2707,6 +2707,8 @@
     <string name="backdrop_border_radius">نصف قطر الزوايا</string>
     <string name="open_calendar_manager">مدير التقويم</string>
     <string name="calendar_locate_file_title">العثور على %1$s</string>
+    <string name="calendar_choose_logo_title">اختيار شعار الكنيسة</string>
+    <string name="calendar_export_title">تصدير ترتيب الاجتماع</string>
     <string name="calendar_locate_folder_title">العثور على المجلد %1$s</string>
     <string name="background_camera_option">كاميرا</string>
     <string name="crash_video_bg_banner">تم إيقاف خلفيات الفيديو بعد %1$d أعطال متتالية.</string>

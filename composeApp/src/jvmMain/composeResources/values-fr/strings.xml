@@ -2689,6 +2689,8 @@
     <string name="backdrop_border_radius">Rayon des coins</string>
     <string name="open_calendar_manager">Gestionnaire de calendrier</string>
     <string name="calendar_locate_file_title">Retrouver %1$s</string>
+    <string name="calendar_choose_logo_title">Choisir un logo d'église</string>
+    <string name="calendar_export_title">Exporter le déroulé</string>
     <string name="calendar_locate_folder_title">Retrouver le dossier %1$s</string>
     <string name="background_camera_option">Caméra</string>
     <string name="crash_video_bg_banner">Les fonds vidéo ont été désactivés après %1$d plantages d'affilée.</string>

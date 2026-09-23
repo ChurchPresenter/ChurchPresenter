@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Kim yoki izoh</string>
     <string name="calendar_cloud_sync">Bulut va mobil qurilmalar bilan sinxronlash</string>
     <string name="calendar_cloud_sync_sub">Ushbu taqvimni rele orqali telefonlar bilan moslikda saqlaydi. O‘chirilganda undan hech narsa bu kompyuterdan chiqmaydi</string>
+    <string name="calendar_settings_export">Eksport</string>
+    <string name="calendar_export_note">Har bir eksport qilingan PDF boshlanadigan blanka sarlavhasi. Maydonni kiritmaslik uchun uni bo‘sh qoldiring.</string>
+    <string name="calendar_export_logo">Cherkov logotipi</string>
+    <string name="calendar_export_logo_sub">PNG yoki JPEG, sahifa tepasida markazda</string>
+    <string name="calendar_export_logo_none">Logotip tanlanmagan</string>
+    <string name="calendar_export_logo_choose">Tanlash…</string>
+    <string name="calendar_export_logo_remove">Logotipni olib tashlash</string>
+    <string name="calendar_export_church_name">Cherkov nomi</string>
+    <string name="calendar_export_church_address">Cherkov manzili</string>
+    <string name="calendar_export_public_heading">Faqat xodimlar uchun bo‘limlar</string>
+    <string name="calendar_export_public_note">Ommaviy nusxada faqat boshlanish vaqti ko‘rsatiladi — qator vaqtlari va davomiyliklarsiz — hamda belgilar va quyida yoqilgan har bir bo‘lim kiritilmaydi. Xodimlar nusxasida hammasi bor.</string>
+    <string name="calendar_export_sections_empty">Hali bo‘limlar belgilanmagan.</string>
+    <string name="calendar_export_public">Ommaviy</string>
+    <string name="calendar_export_public_sub">Jamoat uchun xizmat tartibi — faqat boshlanish vaqti; qator vaqtlari, davomiyliklar, belgilar va faqat xodimlar uchun bo‘limlarsiz</string>
+    <string name="calendar_export_staff">Cherkov xodimlari</string>
+    <string name="calendar_export_staff_sub">Qator vaqtlari, davomiyliklar, belgilar hamda xizmatdan oldingi va keyingi bandlar bilan to‘liq xizmat tartibi</string>
+    <string name="calendar_export_choose">Qaysi nusxani eksport qilishni tanlang</string>
 </resources>

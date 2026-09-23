@@ -2690,6 +2690,8 @@
     <string name="backdrop_border_radius">Raio dos cantos</string>
     <string name="open_calendar_manager">Gerenciador de calendário</string>
     <string name="calendar_locate_file_title">Localizar %1$s</string>
+    <string name="calendar_choose_logo_title">Escolher o logótipo da igreja</string>
+    <string name="calendar_export_title">Exportar ordem do culto</string>
     <string name="calendar_locate_folder_title">Localizar a pasta %1$s</string>
     <string name="background_camera_option">Câmera</string>
     <string name="crash_video_bg_banner">Os fundos de vídeo foram desligados após %1$d falhas seguidas.</string>

@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Kto lub notatka</string>
     <string name="calendar_cloud_sync">Synchronizuj z chmurą i urządzeniami mobilnymi</string>
     <string name="calendar_cloud_sync_sub">Utrzymuje ten kalendarz w zgodzie z telefonami przez przekaźnik. Gdy wyłączone, nic nie opuszcza tego komputera</string>
+    <string name="calendar_settings_export">Eksport</string>
+    <string name="calendar_export_note">Nagłówek, od którego zaczyna się każdy eksportowany PDF. Zostaw pole puste, aby je pominąć.</string>
+    <string name="calendar_export_logo">Logo kościoła</string>
+    <string name="calendar_export_logo_sub">PNG lub JPEG, wyśrodkowane u góry strony</string>
+    <string name="calendar_export_logo_none">Nie wybrano logo</string>
+    <string name="calendar_export_logo_choose">Wybierz…</string>
+    <string name="calendar_export_logo_remove">Usuń logo</string>
+    <string name="calendar_export_church_name">Nazwa kościoła</string>
+    <string name="calendar_export_church_address">Adres kościoła</string>
+    <string name="calendar_export_public_heading">Sekcje tylko dla zespołu</string>
+    <string name="calendar_export_public_note">Kopia publiczna pokazuje tylko godzinę rozpoczęcia — bez godzin wierszy i czasów trwania — i pomija znaczniki oraz każdą sekcję włączoną poniżej. Kopia dla zespołu zawiera wszystko.</string>
+    <string name="calendar_export_sections_empty">Nie zdefiniowano jeszcze sekcji.</string>
+    <string name="calendar_export_public">Publiczna</string>
+    <string name="calendar_export_public_sub">Porządek nabożeństwa dla zboru — tylko godzina rozpoczęcia, bez godzin wierszy, czasów trwania, znaczników i sekcji tylko dla zespołu</string>
+    <string name="calendar_export_staff">Zespół kościoła</string>
+    <string name="calendar_export_staff_sub">Pełny przebieg nabożeństwa z godzinami wierszy, czasami trwania, znacznikami oraz punktami przed nabożeństwem i po nim</string>
+    <string name="calendar_export_choose">Wybierz, którą kopię wyeksportować</string>
 </resources>

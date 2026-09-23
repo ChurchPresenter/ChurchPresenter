@@ -330,4 +330,21 @@
     <string name="calendar_ministry_who">Tko ili bilješka</string>
     <string name="calendar_cloud_sync">Sinkroniziraj s oblakom i mobilnim uređajima</string>
     <string name="calendar_cloud_sync_sub">Održava ovaj kalendar usklađenim s telefonima putem releja. Isključeno: ništa ne napušta ovo računalo</string>
+    <string name="calendar_settings_export">Izvoz</string>
+    <string name="calendar_export_note">Zaglavlje kojim počinje svaki izvezeni PDF. Ostavite polje prazno da biste ga izostavili.</string>
+    <string name="calendar_export_logo">Logotip crkve</string>
+    <string name="calendar_export_logo_sub">PNG ili JPEG, centriran na vrhu stranice</string>
+    <string name="calendar_export_logo_none">Nije odabran logotip</string>
+    <string name="calendar_export_logo_choose">Odaberi…</string>
+    <string name="calendar_export_logo_remove">Ukloni logotip</string>
+    <string name="calendar_export_church_name">Naziv crkve</string>
+    <string name="calendar_export_church_address">Adresa crkve</string>
+    <string name="calendar_export_public_heading">Odjeljci samo za tim</string>
+    <string name="calendar_export_public_note">Javna kopija prikazuje samo vrijeme početka — bez vremena redaka i trajanja — i izostavlja oznake te svaki odjeljak uključen ispod. Kopija za tim sadrži sve.</string>
+    <string name="calendar_export_sections_empty">Još nema definiranih odjeljaka.</string>
+    <string name="calendar_export_public">Javna</string>
+    <string name="calendar_export_public_sub">Red bogoslužja za zajednicu — samo vrijeme početka, bez vremena redaka, trajanja, oznaka i odjeljaka samo za tim</string>
+    <string name="calendar_export_staff">Crkveni tim</string>
+    <string name="calendar_export_staff_sub">Cijeli tijek bogoslužja s vremenima redaka, trajanjima, oznakama te stavkama prije i poslije bogoslužja</string>
+    <string name="calendar_export_choose">Odaberite koju kopiju izvesti</string>
 </resources>

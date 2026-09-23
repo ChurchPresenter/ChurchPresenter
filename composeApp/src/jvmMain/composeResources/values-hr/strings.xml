@@ -2706,6 +2706,8 @@
     <string name="backdrop_border_radius">Radijus kutova</string>
     <string name="open_calendar_manager">Upravitelj kalendara</string>
     <string name="calendar_locate_file_title">Pronađi %1$s</string>
+    <string name="calendar_choose_logo_title">Odaberite logotip crkve</string>
+    <string name="calendar_export_title">Izvoz tijeka bogoslužja</string>
     <string name="calendar_locate_folder_title">Pronađi mapu %1$s</string>
     <string name="background_camera_option">Kamera</string>
     <string name="crash_video_bg_banner">Video pozadine isključene su nakon %1$d uzastopnih rušenja.</string>
