@@ -163,8 +163,13 @@ internal data class ResolvedBackground(
     val imagePath: String,
     val videoPath: String,
     val color: Color,
-    /** The far end of a gradient; null for everything else. Only a [SongBackground] sets one. */
+    /** The far end of a gradient; null for everything else. */
     val gradientEndColor: Color? = null,
+    /**
+     * Where the gradient finishes its transition, 0..1 down the frame. Everything past it is the
+     * far colour flat, which is what the band's own gradient has always drawn.
+     */
+    val gradientPosition: Float = 1f,
     val opacity: Float = 1f,
     /** Percent of black washed over the background, 0–100. */
     val dimPercent: Int = 0,
@@ -243,7 +248,20 @@ internal fun resolveBackground(
             type = config.backgroundType,
             imagePath = config.backgroundImage,
             videoPath = config.backgroundVideo,
-            color = parseHexColor(config.backgroundColor),
+            // A gradient's near colour is its top, not the surface's flat colour -- without this the
+            // full screen drew nothing at all for a gradient, which is why the type was withheld
+            // from every surface but the two bands.
+            color = if (config.backgroundType == Constants.BACKGROUND_GRADIENT) {
+                parseHexColor(config.gradientTopColor).copy(alpha = config.gradientTopOpacity)
+            } else {
+                parseHexColor(config.backgroundColor)
+            },
+            gradientEndColor = if (config.backgroundType == Constants.BACKGROUND_GRADIENT) {
+                parseHexColor(config.gradientBottomColor).copy(alpha = config.gradientBottomOpacity)
+            } else {
+                null
+            },
+            gradientPosition = config.gradientPosition,
             opacity = config.backgroundOpacity,
             dimPercent = config.dim,
             blurReferencePx = config.blur,
@@ -400,10 +418,20 @@ internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThi
 
 /** The modifier that paints [background] — the colour, the gradient or the picture itself. */
 internal fun backgroundModifier(background: ResolvedBackground, bitmap: ImageBitmap?): Modifier = when {
+    // The stops the band's own gradient has always used: the near colour at the top, the far one
+    // reached at `gradientPosition` and held flat from there. A SongBackground leaves the position
+    // at 1f, which is the plain two-stop gradient it drew before.
     background.gradientEndColor != null ->
-        Modifier.background(Brush.verticalGradient(listOf(background.color, background.gradientEndColor)))
+        Modifier.background(
+            Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0f to background.color,
+                    background.gradientPosition.coerceIn(0f, 1f) to background.gradientEndColor,
+                    1f to background.gradientEndColor,
+                ),
+            ),
+        )
     background.type == Constants.BACKGROUND_TRANSPARENT -> Modifier
-    background.type == Constants.BACKGROUND_GRADIENT -> Modifier
     // The clip and the camera are drawn as overlays by PresenterBackgroundLayers; this is what
     // sits under them, and what a camera with no frame yet shows on its own.
     background.usesVideo || background.usesCamera -> Modifier.background(Color.Black)

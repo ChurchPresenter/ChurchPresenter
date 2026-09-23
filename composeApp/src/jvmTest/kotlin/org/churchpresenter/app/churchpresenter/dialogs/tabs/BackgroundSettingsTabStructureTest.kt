@@ -56,16 +56,24 @@ class BackgroundSettingsTabStructureTest {
         assertEquals(1, controlsCount(TypeLabel.DEFAULT), "a content surface inherits by saying Default")
     }
 
+    /**
+     * The four content surfaces, not the two Defaults.
+     *
+     * A Default has no gradient colours to store -- `configFor(DEFAULT)` builds its config from the
+     * flat `defaultBackground*` fields, which have no gradient twin -- so offering it there would
+     * be a control with nowhere to write. The full-screen pair were withheld for a different and
+     * now-fixed reason: `backgroundModifier` drew nothing for a gradient, so the type was hidden
+     * rather than the renderer finished.
+     */
     @Test
-    fun `gradient is offered only by the two content lower thirds`() = backgroundTab { _ ->
+    fun `gradient is offered by the four content surfaces`() = backgroundTab { _ ->
         val offered = Surface.entries.filter { surface ->
             openSurface(surface)
             controlsCount(TypeLabel.GRADIENT) == 1
         }
         assertEquals(
-            listOf(Surface.BIBLE_LOWER_THIRD, Surface.SONG_LOWER_THIRD),
+            listOf(Surface.BIBLE, Surface.BIBLE_LOWER_THIRD, Surface.SONG, Surface.SONG_LOWER_THIRD),
             offered,
-            "a band drawn over something else is the one place a fade to transparent means anything",
         )
     }
 

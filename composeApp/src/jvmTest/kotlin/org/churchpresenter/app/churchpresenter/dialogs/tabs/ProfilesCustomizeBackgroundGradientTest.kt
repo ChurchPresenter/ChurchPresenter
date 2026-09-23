@@ -55,11 +55,11 @@ class ProfilesCustomizeBackgroundGradientTest {
     }
 
     @Test
-    fun `a full screen's Bible surface does not`() {
+    fun `a full screen's Bible surface offers one too`() {
         profilesTab(output(mode = Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE, own = false)
-            // A gradient is a band's background; the full screen's surfaces do not list it.
-            onNodeWithText("Gradient").assertDoesNotExist()
+            // It was withheld here only because `backgroundModifier` drew nothing for a gradient.
+            onNodeWithText("Gradient").assertExists()
         }
     }
 

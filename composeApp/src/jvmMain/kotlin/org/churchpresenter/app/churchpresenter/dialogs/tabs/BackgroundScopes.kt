@@ -29,6 +29,13 @@ internal enum class BackgroundScope(
     val group: BackgroundScopeGroup,
     val lowerThird: Boolean,
     val inheritType: String?,
+    /**
+     * Whether this surface can be a gradient.
+     *
+     * The two content surfaces on each shape can; the two Defaults cannot, having no gradient
+     * colours of their own to store -- `configFor(DEFAULT)` builds its config from the flat
+     * `defaultBackground*` fields, which have no gradient twin.
+     */
     val offersGradient: Boolean = false,
     /** Whether this band can play a Lottie template in place of a backdrop: the two content bands can. */
     val offersLottie: Boolean = false,
@@ -39,7 +46,12 @@ internal enum class BackgroundScope(
         lowerThird = true,
         inheritType = Constants.BACKGROUND_FOLLOW_DEFAULT,
     ),
-    BIBLE(BackgroundScopeGroup.BIBLE, lowerThird = false, inheritType = Constants.BACKGROUND_DEFAULT),
+    BIBLE(
+        BackgroundScopeGroup.BIBLE,
+        lowerThird = false,
+        inheritType = Constants.BACKGROUND_DEFAULT,
+        offersGradient = true,
+    ),
     BIBLE_LOWER_THIRD(
         BackgroundScopeGroup.BIBLE,
         lowerThird = true,
@@ -47,7 +59,12 @@ internal enum class BackgroundScope(
         offersGradient = true,
         offersLottie = true,
     ),
-    SONG(BackgroundScopeGroup.SONGS, lowerThird = false, inheritType = Constants.BACKGROUND_DEFAULT),
+    SONG(
+        BackgroundScopeGroup.SONGS,
+        lowerThird = false,
+        inheritType = Constants.BACKGROUND_DEFAULT,
+        offersGradient = true,
+    ),
     SONG_LOWER_THIRD(
         BackgroundScopeGroup.SONGS,
         lowerThird = true,
