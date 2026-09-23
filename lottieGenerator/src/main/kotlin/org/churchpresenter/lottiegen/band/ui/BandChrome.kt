@@ -12,10 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +34,9 @@ import org.churchpresenter.lottiegen.band.LocalBandColorField
 import org.churchpresenter.lottiegen.ui.components.ColorPickerDialog
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
+import org.churchpresenter.lottiegen.ui.components.LottieCheckbox
+import org.churchpresenter.lottiegen.ui.components.raisedKey
+import org.churchpresenter.theme.elevationPalette
 
 /*
  * The band generator's own chrome: the small pieces every section is built from, drawn to the
@@ -179,7 +178,6 @@ internal fun OwnColorField(label: String, color: String, onColorChange: (String)
         label = label,
         modifier = modifier,
         fillWidth = true,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         trailingIcon = {
             Box(
                 Modifier
@@ -207,44 +205,22 @@ internal fun parseBandHex(hex: String): Color? {
     return Color(digits.toLong(HEX_RADIX) or OPAQUE)
 }
 
-/** The 17dp square check with its label. */
+/** The 17dp square check with its label -- the main generator's own [LottieCheckbox], so the two windows share one. */
 @Composable
 internal fun BandCheckbox(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable { onCheckedChange(!checked) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(9.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(17.dp)
-                .clip(RoundedCornerShape(5.dp))
-                .background(if (checked) Tokens.Accent else Tokens.FieldBg)
-                .border(1.5.dp, if (checked) Tokens.Accent else Tokens.CheckOffBorder, RoundedCornerShape(5.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (checked) {
-                Icon(
-                    Icons.Default.Check, contentDescription = null, tint = Tokens.OnAccent,
-                    modifier = Modifier.size(11.dp),
-                )
-            }
-        }
-        Text(label, fontSize = 12.sp, color = Tokens.OutlineText)
-    }
+    LottieCheckbox(label, checked, onCheckedChange, Modifier.fillMaxWidth())
 }
 
-/** The teal filled button the pane's main action is. */
+/** The pane's main action: the raised accent key, as the main generator's [AccentButton] draws it. */
 @Composable
 internal fun AccentAction(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val fill = elevationPalette().accent
     Box(
         modifier = modifier
             .height(42.dp)
-            .clip(MENU_SHAPE)
-            .background(Tokens.Accent)
-            .clickable(onClick = onClick),
+            .raisedKey(MENU_SHAPE, fill, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Tokens.OnAccent, maxLines = 1)
+        Text(label, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = fill.ink, maxLines = 1)
     }
 }

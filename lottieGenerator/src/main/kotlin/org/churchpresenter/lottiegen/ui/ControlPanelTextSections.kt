@@ -33,6 +33,7 @@ import org.churchpresenter.lottiegen.ui.components.LottieDropdown
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
+import org.churchpresenter.lottiegen.ui.components.ScrollingMenuItems
 
 
 /** A field's own "Hide X" checkbox is checked, so it won't render. */
@@ -115,25 +116,27 @@ private fun FontAndSizeRows(viewModel: LottieGenState, fontPicker: BandFontPicke
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(fontExpanded, { fontExpanded = false }) {
-                    LottieFont.entries.forEach { font ->
-                        DropdownMenuItem(
-                            text = { Text(font.familyName) },
-                            onClick = {
-                                viewModel.updateConfig { it.copy(fontFamily = font.familyName) }
-                                fontExpanded = false
-                            }
-                        )
-                    }
-                    if (systemFontNames.isNotEmpty()) {
-                        HorizontalDivider()
-                        systemFontNames.forEach { name ->
+                    ScrollingMenuItems(LottieFont.entries.size + systemFontNames.size) {
+                        LottieFont.entries.forEach { font ->
                             DropdownMenuItem(
-                                text = { Text(name) },
+                                text = { Text(font.familyName) },
                                 onClick = {
-                                    viewModel.updateConfig { it.copy(fontFamily = name) }
+                                    viewModel.updateConfig { it.copy(fontFamily = font.familyName) }
                                     fontExpanded = false
                                 }
                             )
+                        }
+                        if (systemFontNames.isNotEmpty()) {
+                            HorizontalDivider()
+                            systemFontNames.forEach { name ->
+                                DropdownMenuItem(
+                                    text = { Text(name) },
+                                    onClick = {
+                                        viewModel.updateConfig { it.copy(fontFamily = name) }
+                                        fontExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }

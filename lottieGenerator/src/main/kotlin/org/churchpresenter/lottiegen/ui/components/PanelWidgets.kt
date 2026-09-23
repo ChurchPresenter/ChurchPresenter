@@ -1,14 +1,8 @@
 package org.churchpresenter.lottiegen.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -28,17 +22,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.LocalContentColor
 import org.churchpresenter.lottiegen.ui.Tokens
+import org.churchpresenter.theme.RaisedFill
+import org.churchpresenter.theme.components.SegmentTrack
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.sunken
 
 /** Hover tooltip wrapper for control-panel widgets. */
 @OptIn(ExperimentalFoundationApi::class)
@@ -82,7 +80,10 @@ fun HiddenFieldWarning(tooltip: String) {
     }
 }
 
-/** A square check with the accent fill when on, a hollow outline when off. */
+/**
+ * A square check: sunken while clear, a raised accent key with a check mark when ticked -- the
+ * app's own checkbox look.
+ */
 @Composable
 fun LottieCheckbox(
     label: String,
@@ -90,6 +91,8 @@ fun LottieCheckbox(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val palette = elevationPalette()
+    val boxShape = RoundedCornerShape(5.dp)
     Row(
         modifier = modifier.clickable { onCheckedChange(!checked) },
         verticalAlignment = Alignment.CenterVertically,
@@ -98,11 +101,12 @@ fun LottieCheckbox(
         Box(
             modifier = Modifier
                 .size(17.dp)
-                .clip(RoundedCornerShape(5.dp))
-                .background(if (checked) Tokens.Accent else Tokens.OutlineBg)
                 .then(
-                    if (checked) Modifier
-                    else Modifier.border(1.5.dp, Tokens.CheckOffBorder, RoundedCornerShape(5.dp))
+                    if (checked) {
+                        Modifier.raised(boxShape, palette.accent, palette, lift = 2.dp)
+                    } else {
+                        Modifier.sunken(boxShape, palette)
+                    }
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -110,7 +114,7 @@ fun LottieCheckbox(
                 Icon(
                     Icons.Default.Check,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = palette.accent.ink,
                     modifier = Modifier.size(12.dp)
                 )
             }
@@ -125,8 +129,8 @@ fun LottieCheckbox(
 }
 
 /**
- * A segmented control. [selectedIndex] may be -1 when the current config matches no preset,
- * in which case every segment renders inactive.
+ * A segmented control: the app's sunken track with the chosen option raised. [selectedIndex] may
+ * be -1 when the current config matches no preset, in which case every segment renders flat.
  */
 @Composable
 fun SegmentedButtons(
@@ -135,31 +139,19 @@ fun SegmentedButtons(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(9.dp))
-            .background(Tokens.FieldBg)
-            .border(1.dp, Tokens.SegBorder, RoundedCornerShape(9.dp))
-            .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
-    ) {
+    SegmentTrack(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(9.dp)) {
         labels.forEachIndexed { i, label ->
             val active = i == selectedIndex
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(if (active) Tokens.Accent else Color.Transparent)
-                    .clickable { onSelect(i) },
-                contentAlignment = Alignment.Center
+            SegmentTrackItem(
+                selected = active,
+                onClick = { onSelect(i) },
+                modifier = Modifier.weight(1f).height(28.dp),
             ) {
                 Text(
                     label,
                     fontSize = 12.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
-                    color = if (active) Tokens.OnAccent else Tokens.SegInactive,
+                    color = LocalContentColor.current,
                     maxLines = 1
                 )
             }
@@ -167,31 +159,25 @@ fun SegmentedButtons(
     }
 }
 
-/** The filled primary action (Download JSON / Save Lower Third). */
+/** The raised primary action (Download JSON / Save Lower Third), in the accent. */
 @Composable
 fun AccentButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val bg by animateColorAsState(if (hovered) Tokens.AccentHover else Tokens.Accent, label = "accentBtn")
-
+    val fill = elevationPalette().accent
     Box(
         modifier = modifier
             .height(38.dp)
-            .clip(Tokens.ButtonShape)
-            .background(bg)
-            .hoverable(interaction)
-            .clickable(onClick = onClick),
+            .raisedKey(Tokens.ButtonShape, fill, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(text, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Tokens.OnAccent, maxLines = 1)
+        Text(text, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = fill.ink, maxLines = 1)
     }
 }
 
-/** The bordered secondary action. [compact] is the 25–30dp variant used inside section headers. */
+/** The raised neutral secondary action. [compact] is the 25–30dp variant used inside section headers. */
 @Composable
 fun SubtleButton(
     text: String,
@@ -199,22 +185,13 @@ fun SubtleButton(
     modifier: Modifier = Modifier,
     compact: Boolean = false
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val border by animateColorAsState(
-        if (hovered) Tokens.BorderHover else Tokens.SubtleBorder,
-        label = "subtleBtnBorder"
-    )
+    val fill = elevationPalette().key
     val shape = if (compact) RoundedCornerShape(7.dp) else Tokens.ButtonShape
 
     Box(
         modifier = modifier
             .height(if (compact) 25.dp else 38.dp)
-            .clip(shape)
-            .background(if (compact) Tokens.SubtleBg else Tokens.OutlineBg)
-            .border(1.dp, border, shape)
-            .hoverable(interaction)
-            .clickable(onClick = onClick)
+            .raisedKey(shape, fill, onClick = onClick)
             .padding(horizontal = if (compact) 10.dp else 14.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -222,48 +199,37 @@ fun SubtleButton(
             text,
             fontSize = if (compact) 11.sp else 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (compact) Tokens.SmallBtnText else Tokens.OutlineText,
+            color = fill.ink,
             maxLines = 1
         )
     }
 }
 
-/** The small ✕ used to remove a saved preset or colour theme. */
+/** The small ✕ used to remove a saved preset or color theme -- a destructive key. */
 @Composable
 fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete") {
-    SmallIconButton(Icons.Default.Close, onClick, contentDescription)
+    SmallIconButton(Icons.Default.Close, onClick, contentDescription, elevationPalette().danger)
 }
 
 /** The small pencil that opens a row's fuller controls. */
 @Composable
 fun EditIconButton(onClick: () -> Unit, contentDescription: String = "Edit") {
-    SmallIconButton(Icons.Default.Edit, onClick, contentDescription)
+    SmallIconButton(Icons.Default.Edit, onClick, contentDescription, elevationPalette().key)
 }
 
-/** A 24dp bordered chip around one icon, the shape the ✕ and the pencil share. */
+/** A 24dp raised key around one icon, the shape the ✕ and the pencil share. */
 @Composable
-private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescription: String) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val border by animateColorAsState(
-        if (hovered) Tokens.BorderHover else Tokens.SubtleBorder,
-        label = "smallIconBtnBorder"
-    )
-
+private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescription: String, fill: RaisedFill) {
     Box(
         modifier = Modifier
             .size(24.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(Tokens.SubtleBg)
-            .border(1.dp, border, RoundedCornerShape(6.dp))
-            .hoverable(interaction)
-            .clickable(onClick = onClick),
+            .raisedKey(RoundedCornerShape(6.dp), fill, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             icon,
             contentDescription = contentDescription,
-            tint = Tokens.SmallBtnText,
+            tint = fill.ink,
             modifier = Modifier.size(13.dp)
         )
     }

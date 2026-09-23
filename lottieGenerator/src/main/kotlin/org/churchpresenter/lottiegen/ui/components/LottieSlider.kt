@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -31,13 +30,18 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.lottiegen.ui.Tokens
+import androidx.compose.material3.MaterialTheme
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.flatDisabled
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.sunken
 import kotlin.math.roundToInt
 
 /**
- * The house slider: a flat rounded track with a teal gradient fill and a white knob that
- * swells slightly on hover. Replaces Material's Slider so the control panel and the preview
- * transport share one visual language.
+ * The house slider, in the app's elevated look: a sunken rounded track with the accent gradient
+ * filling it up to the value, and a raised knob that swells slightly on hover -- the same slider as
+ * the app's own panels. Replaces Material's Slider so the control panel and the preview transport
+ * share one visual language.
  *
  * Both a press anywhere on the track and a drag move the value, matching the reference's
  * pointer-capture behaviour.
@@ -51,12 +55,15 @@ fun LottieSlider(
     steps: Int = 0,
     trackHeight: Dp = 5.dp,
     knobSize: Dp = 13.dp,
-    trackColor: Color = Tokens.TrackBg,
+    /** The well's fill; unspecified is the theme's own sunken well. */
+    trackColor: Color = Color.Unspecified,
     enabled: Boolean = true,
     /** What the filled part of the track is painted with; the accent gradient by default. */
     fillBrush: Brush? = null,
 ) {
     val density = LocalDensity.current
+    val palette = elevationPalette()
+    val defaultFill = Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary, palette.accent.top))
     var widthPx by remember { mutableStateOf(0) }
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -100,8 +107,7 @@ fun LottieSlider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(trackHeight)
-                .clip(RoundedCornerShape(99.dp))
-                .background(trackColor)
+                .sunken(RoundedCornerShape(99.dp), palette, fill = trackColor)
         ) {
             // Fill
             Box(
@@ -109,7 +115,7 @@ fun LottieSlider(
                     .fillMaxWidth(fraction)
                     .height(trackHeight)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(fillBrush ?: Brush.horizontalGradient(listOf(Tokens.FillStart, Tokens.FillEnd)))
+                    .background(fillBrush ?: defaultFill)
             )
         }
 
@@ -121,8 +127,13 @@ fun LottieSlider(
                 .offset(x = knobX)
                 .size(knobSize)
                 .graphicsLayer { scaleX = knobScale; scaleY = knobScale }
-                .shadow(4.dp, CircleShape)
-                .background(if (enabled) Color.White else Tokens.SegInactive, CircleShape)
+                .then(
+                    if (enabled) {
+                        Modifier.raised(CircleShape, palette.key, palette, lift = 2.dp)
+                    } else {
+                        Modifier.flatDisabled(CircleShape, palette)
+                    }
+                )
         )
     }
 }

@@ -1,12 +1,8 @@
 package org.churchpresenter.lottiegen.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -32,6 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /** Alpha arrives from the UI as a percentage; Compose wants one 0..255 channel. */
 private const val FULLY_OPAQUE_PERCENT = 100
@@ -57,12 +55,6 @@ fun ColorPickerRow(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val chipBorder by animateColorAsState(
-        if (hovered) Tokens.FieldBorderHover else Tokens.FieldBorder,
-        label = "colorChipBorder"
-    )
 
     if (showDialog) {
         ColorPickerDialog(
@@ -92,10 +84,8 @@ fun ColorPickerRow(
         Row(
             modifier = Modifier
                 .height(28.dp)
-                .clip(Tokens.ChipShape)
-                .background(Tokens.FieldBg)
-                .border(1.dp, chipBorder, Tokens.ChipShape)
-                .hoverable(interaction)
+                // The app's sunken color field -- the same well as its other inputs.
+                .sunken(Tokens.ChipShape, elevationPalette())
                 .clickable { showDialog = true }
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,

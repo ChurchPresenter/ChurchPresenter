@@ -40,6 +40,7 @@ import org.churchpresenter.lottiegen.ui.components.SubtleButton
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.lottiegen.ui.components.ScrollingMenuItems
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,14 +112,16 @@ internal fun StyleLayoutSection(viewModel: LottieGenState) {
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(styleExpanded, { styleExpanded = false }) {
-                    StyleCatalog.entries.forEach { style ->
-                        DropdownMenuItem(
-                            text = { Text(style.label) },
-                            onClick = {
-                                viewModel.updateConfig { it.copy(style = style.id) }
-                                styleExpanded = false
-                            }
-                        )
+                    ScrollingMenuItems(StyleCatalog.entries.size) {
+                        StyleCatalog.entries.forEach { style ->
+                            DropdownMenuItem(
+                                text = { Text(style.label) },
+                                onClick = {
+                                    viewModel.updateConfig { it.copy(style = style.id) }
+                                    styleExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }

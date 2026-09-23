@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
@@ -84,6 +83,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.RaisedFill
+import androidx.compose.ui.graphics.lerp
 private const val PALETTE_SIZE = 4
 private const val GRADIENT_MIDPOINT = 0.35f
 
@@ -277,8 +279,21 @@ internal fun ScheduleItemRow(
                 .fillMaxWidth()
                 .testTag(SCHEDULE_ROW_CARD_TAG)
                 .hoverable(interactionSource)
-                .clip(CARD_SHAPE)
-                .background(cardBg, CARD_SHAPE)
+                // Raised off the list in its own color: a touch lighter along the top, a soft
+                // shadow, lifted a little further while selected or under the pointer.
+                .raised(
+                    CARD_SHAPE,
+                    RaisedFill(
+                        top = lerp(cardBg, Color.White, CARD_TOP_LIFT),
+                        bottom = cardBg,
+                        ink = MaterialTheme.colorScheme.onSurface,
+                        highlight = Color.Transparent,
+                        glow = Color.Black,
+                    ),
+                    elevationPalette(),
+                    hovered = hovered || isSelected,
+                    lift = CARD_LIFT,
+                )
                 .border(1.dp, cardBorder, CARD_SHAPE)
         ) {
             Row(
@@ -663,3 +678,6 @@ internal fun ScheduleItemContent(
     ScheduleRowDetailLine(item = item, density = density)
     ScheduleRowKindChips(item = item, density = density)
 }
+
+private val CARD_LIFT = 2.dp
+private const val CARD_TOP_LIFT = 0.05f

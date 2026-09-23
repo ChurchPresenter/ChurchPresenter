@@ -2,8 +2,6 @@ package org.churchpresenter.lottiegen.band.ui
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -37,6 +33,10 @@ import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import java.io.File
+import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /** The five panes the band generator's controls are split across. */
 private enum class BandPane {
@@ -93,34 +93,28 @@ internal fun BandControlPanel(
     }
 }
 
-/** The segmented strip of pane names; the chosen one is filled with the accent. */
+/** The segmented strip of pane names: the app's sunken track, the chosen pane raised. */
 @Composable
 private fun PaneTabs(current: BandPane, onPick: (BandPane) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(CARD_SHAPE)
-            .background(Tokens.FieldBg)
-            .border(1.dp, Tokens.FieldBorder, CARD_SHAPE)
+            .sunken(CARD_SHAPE, elevationPalette())
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         BandPane.entries.forEach { p ->
             val on = p == current
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(29.dp)
-                    .clip(FIELD_SHAPE)
-                    .background(if (on) Tokens.Accent else Color.Transparent)
-                    .clickable { onPick(p) }
-                    .padding(horizontal = 4.dp),
-                contentAlignment = Alignment.Center,
+            SegmentTrackItem(
+                selected = on,
+                onClick = { onPick(p) },
+                modifier = Modifier.weight(1f).height(29.dp),
             ) {
                 Text(
                     p.label, fontSize = 11.5.sp, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
-                    color = if (on) Tokens.OnAccent else Tokens.LabelText,
+                    color = LocalContentColor.current,
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
             }
         }

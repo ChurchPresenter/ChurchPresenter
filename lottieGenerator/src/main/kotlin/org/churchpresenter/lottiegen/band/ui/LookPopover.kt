@@ -46,6 +46,8 @@ import org.churchpresenter.lottiegen.ui.Tokens
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.lottiegen.ui.components.raisedKey
+import org.churchpresenter.theme.elevationPalette
 
 private const val MAX_ALPHA = 100f
 private const val MAX_BLUR_PX = 60f
@@ -133,16 +135,15 @@ internal fun LookPopover(
                 PictureTransformSliders(viewModel, role, image)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                val okFill = elevationPalette().accent
                 Box(
                     modifier = Modifier
                         .height(33.dp)
-                        .clip(RoundedCornerShape(17.dp))
-                        .background(Tokens.Accent)
-                        .clickable(onClick = onDismiss)
+                        .raisedKey(RoundedCornerShape(17.dp), okFill, onClick = onDismiss)
                         .padding(horizontal = 24.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(Strings.ok, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = Tokens.OnAccent)
+                    Text(Strings.ok, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = okFill.ink)
                 }
             }
         }
@@ -214,17 +215,15 @@ private fun PictureTransformSliders(viewModel: BibleLottieGenViewModel, role: Ba
 /** The button that opens the picture chooser — the host's when it lends one, Swing's otherwise. */
 @Composable
 private fun PictureButton(onClick: () -> Unit) {
+    val fill = elevationPalette().key
     Box(
         modifier = Modifier
             .height(30.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Tokens.SubtleBg)
-            .border(1.dp, Tokens.SubtleBorder, RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .raisedKey(RoundedCornerShape(8.dp), fill, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(Strings.bandImageChoose, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = Tokens.OutlineText)
+        Text(Strings.bandImageChoose, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = fill.ink)
     }
 }
 
@@ -256,18 +255,16 @@ internal fun ColorRoleRow(viewModel: BibleLottieGenViewModel, role: BandColorRol
                     format = { it.toInt().toString() },
                 )
             }
+            val lookFill = if (lookOpen) elevationPalette().accent else elevationPalette().key
             Box(
                 modifier = Modifier
                     .size(FIELD_HEIGHT)
-                    .clip(FIELD_SHAPE)
-                    .background(if (lookOpen) Tokens.Accent else Tokens.SubtleBg)
-                    .border(1.dp, if (lookOpen) Tokens.Accent else Tokens.SubtleBorder, FIELD_SHAPE)
-                    .clickable { lookOpen = !lookOpen },
+                    .raisedKey(FIELD_SHAPE, lookFill) { lookOpen = !lookOpen },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     Icons.Default.Edit, contentDescription = Strings.bandLookTooltip,
-                    tint = if (lookOpen) Tokens.OnAccent else Tokens.LabelText, modifier = Modifier.size(12.dp),
+                    tint = lookFill.ink, modifier = Modifier.size(12.dp),
                 )
             }
             if (hasImage) {
