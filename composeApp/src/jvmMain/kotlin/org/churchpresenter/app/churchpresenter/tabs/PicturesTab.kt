@@ -162,9 +162,9 @@ private const val SMALL_LABEL_FONT_SP = 11.5f
 private const val MAX_AUTO_SCROLL_SECONDS = 30
 private const val HINT_DIVIDER_ALPHA = 0.5f
 private val RECENT_BAR_HEIGHT = 40.dp
-private val TRANSPORT_KEY_SIZE = 36.dp
-private val PLAY_KEY_SIZE = 52.dp
-private val LOOP_KEY_SIZE = 38.dp
+private val TRANSPORT_KEY_SIZE = 30.dp
+private val PLAY_KEY_SIZE = 38.dp
+private val LOOP_KEY_SIZE = 28.dp
 private const val MIN_TRANSITION_MS = 100
 private const val MAX_TRANSITION_MS = 2000
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -409,7 +409,7 @@ fun PicturesTab(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp)
+                    contentPadding = PaddingValues(vertical = 5.dp, horizontal = 4.dp)
                 ) {
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPictureFolders.pinned
@@ -438,12 +438,12 @@ fun PicturesTab(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 64.dp)
+                .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 18.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 5.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val neutralKeyColors = IconButtonDefaults.iconButtonColors(
                 containerColor = Color.Transparent,
@@ -454,7 +454,7 @@ fun PicturesTab(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             )
             // Transport controls: raised keys either side of the biggest one, Play
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
@@ -468,7 +468,7 @@ fun PicturesTab(
                         Icon(
                             painter = painterResource(Res.drawable.ic_skip_previous),
                             contentDescription = stringResource(Res.string.previous_image),
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -489,7 +489,7 @@ fun PicturesTab(
                         Icon(
                             painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
                             contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(15.dp)
                         )
                     }
                 }
@@ -506,7 +506,7 @@ fun PicturesTab(
                         Icon(
                             painter = painterResource(Res.drawable.ic_skip_next),
                             contentDescription = stringResource(Res.string.next_image),
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -570,7 +570,7 @@ fun PicturesTab(
                             s.copy(pictureSettings = s.pictureSettings.copy(scaleMode = scaleMode.next()))
                         }
                     },
-                    modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                    modifier = Modifier.size(LOOP_KEY_SIZE),
                     colors = if (scaled) accentKeyColors else neutralKeyColors
                 ) {
                     Icon(

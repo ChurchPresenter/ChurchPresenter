@@ -181,8 +181,8 @@ private const val HANDLE_VISIBLE_ALPHA = 0.01f
 /** Upper bound of the loop-count field; 0 means repeat forever. */
 private const val MAX_LOOP_COUNT = 99
 private const val DISABLED_TRANSPORT_ALPHA = 0.38f
-private val TRANSPORT_KEY_SIZE = 36.dp
-private val PLAY_KEY_SIZE = 52.dp
+private val TRANSPORT_KEY_SIZE = 30.dp
+private val PLAY_KEY_SIZE = 38.dp
 private val VOLUME_SLIDER_WIDTH = 150.dp
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -555,9 +555,9 @@ fun MediaTab(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 68.dp)
+                .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 20.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 5.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
@@ -580,7 +580,7 @@ fun MediaTab(
             )
 
             // Transport: raised keys, Play the biggest and lit
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
@@ -594,7 +594,7 @@ fun MediaTab(
                         Icon(
                             painterResource(Res.drawable.ic_fast_rewind),
                             contentDescription = stringResource(Res.string.media_seek_backward),
-                            modifier = Modifier.size(15.dp),
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 }
@@ -612,7 +612,7 @@ fun MediaTab(
                         Icon(
                             painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
                             contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(15.dp),
                         )
                     }
                 }
@@ -629,7 +629,7 @@ fun MediaTab(
                         Icon(
                             painterResource(Res.drawable.ic_stop),
                             contentDescription = stringResource(Res.string.stop),
-                            modifier = Modifier.size(15.dp),
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 }
@@ -646,7 +646,7 @@ fun MediaTab(
                         Icon(
                             painterResource(Res.drawable.ic_fast_forward),
                             contentDescription = stringResource(Res.string.media_seek_forward),
-                            modifier = Modifier.size(15.dp),
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 }
@@ -656,7 +656,7 @@ fun MediaTab(
             // no longer shown here.)
 
             // Divider
-            Box(modifier = Modifier.width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
             // Loop: the button arms it, and the count beside it says how many repeats to play.
             // The count only appears while looping is on, so the bar stays as it was otherwise.
@@ -683,7 +683,7 @@ fun MediaTab(
                         Icon(
                             painterResource(Res.drawable.ic_refresh),
                             contentDescription = loopLabel,
-                            modifier = Modifier.size(15.dp),
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 }
@@ -736,7 +736,7 @@ fun MediaTab(
             }
 
             // Divider
-            Box(modifier = Modifier.width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
             // Subtitles: off, one of the tracks VLC found, or a file of the operator's own.
             var subtitlesExpanded by remember { mutableStateOf(false) }
@@ -813,7 +813,7 @@ fun MediaTab(
             }
 
             // Divider
-            Box(modifier = Modifier.width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
             // Volume: a mute key with the slider beside it, both always in the bar
             Row(

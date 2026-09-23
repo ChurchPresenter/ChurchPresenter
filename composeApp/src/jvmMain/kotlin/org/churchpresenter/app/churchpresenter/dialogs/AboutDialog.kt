@@ -397,6 +397,12 @@ fun CalendarWindow(
     host: CalendarHost,
     /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
     typicalSongSeconds: (SongItem) -> Int? = { null },
+    /**
+     * Dialogs the app opens on the calendar's behalf -- the phone-invite QR. Composed inside this
+     * window so it owns them: one composed in the main window's scope is owned by the main window,
+     * and opening it brings the main window forward over the calendar.
+     */
+    dialogs: @Composable () -> Unit = {},
     onClose: () -> Unit,
 ) {
     Window(
@@ -456,6 +462,7 @@ fun CalendarWindow(
                 },
                 onClose = onClose,
             )
+            dialogs()
         }
     }
 }

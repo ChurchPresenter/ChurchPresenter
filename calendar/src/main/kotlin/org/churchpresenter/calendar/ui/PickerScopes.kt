@@ -1,7 +1,5 @@
 package org.churchpresenter.calendar.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,23 +43,18 @@ import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
 
 private val SCOPE_LIST_HEIGHT = 196.dp
 
 @Composable
 internal fun PickChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
+    val fill = if (selected) palette.selected else palette.key
     Box(
         Modifier
             .height(26.dp)
-            .clip(RoundedCornerShape(7.dp))
-            .background(if (selected) scheme.primary.copy(alpha = 0.16f) else Color.Transparent)
-            .border(
-                width = 1.dp,
-                color = if (selected) scheme.primary.copy(alpha = 0.55f) else scheme.outlineVariant,
-                shape = RoundedCornerShape(7.dp),
-            )
-            .clickable(onClick = onClick)
+            .raisedKey(RoundedCornerShape(7.dp), fill, onClick = onClick)
             .padding(horizontal = 11.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -71,7 +62,7 @@ internal fun PickChip(label: String, selected: Boolean, onClick: () -> Unit) {
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) scheme.primary else scheme.onSurfaceVariant,
+            color = fill.ink,
         )
     }
 }
@@ -181,21 +172,27 @@ internal fun SongBookScope(songs: List<SongItem>, selected: String?, onSelect: (
 @Composable
 private fun ScopeRow(label: String, count: Int, selected: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
+    val selectedFill = elevationPalette().selected
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(7.dp))
-            .background(if (selected) scheme.primary.copy(alpha = 0.14f) else Color.Transparent)
-            .clickable(onClick = onClick)
+            .then(
+                // The chosen scope is a raised row, the way a chosen list row is everywhere else.
+                if (selected) {
+                    Modifier.raisedKey(RoundedCornerShape(7.dp), selectedFill, onClick = onClick)
+                } else {
+                    Modifier.clip(RoundedCornerShape(7.dp)).clickable(onClick = onClick)
+                }
+            )
             .padding(horizontal = 9.dp, vertical = 7.dp),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.5.sp),
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) scheme.primary else scheme.onSurface,
+            color = if (selected) selectedFill.ink else scheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -203,7 +200,7 @@ private fun ScopeRow(label: String, count: Int, selected: Boolean, onClick: () -
         Text(
             text = count.toString(),
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-            color = scheme.onSurfaceVariant,
+            color = if (selected) selectedFill.ink else scheme.onSurfaceVariant,
         )
     }
 }

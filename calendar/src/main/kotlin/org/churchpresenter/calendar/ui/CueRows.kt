@@ -97,7 +97,12 @@ private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
                 .size(TICK_BOX)
                 .then(
                     if (enabled) {
-                        Modifier.raised(RoundedCornerShape(5.dp), elevationPalette().accent, elevationPalette(), lift = 2.dp)
+                        Modifier.raised(
+                            RoundedCornerShape(5.dp),
+                            elevationPalette().accent,
+                            elevationPalette(),
+                            lift = 2.dp,
+                        )
                     } else {
                         Modifier.sunken(RoundedCornerShape(5.dp), elevationPalette())
                     }
@@ -120,20 +125,18 @@ private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
 /** The small `▶` that fires a cue by hand. */
 @Composable
 private fun FireButton(onFire: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
+    val accent = elevationPalette().accent
     Hint(stringResource(Res.string.calendar_cue_fire_now)) {
         Box(
             Modifier
                 .size(CalendarMetrics.rowAction)
-                .clip(CalendarMetrics.smallRadius)
-                .background(scheme.primary.copy(alpha = CHIP_TINT))
-                .clickable(onClick = onFire),
+                .raisedKey(CalendarMetrics.smallRadius, accent, onClick = onFire),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 Icons.Filled.PlayArrow,
                 contentDescription = stringResource(Res.string.calendar_cue_fire_now),
-                tint = scheme.primary,
+                tint = accent.ink,
                 modifier = Modifier.size(12.dp),
             )
         }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -78,9 +77,15 @@ import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.recurrenceDates
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.components.SegmentTrack
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
 
 private val SHEET_WIDTH = 450.dp
 private val TARGET_HEIGHT = 30.dp
@@ -88,8 +93,6 @@ private val COUNT_FIELD = 34.dp
 private val STEPPER_BUTTON = 14.dp
 private val PREVIEW_MAX = 130.dp
 private val PREVIEW_INDEX = 13.dp
-private const val ON_TINT = 0.16f
-private const val ON_BORDER = 0.55f
 private const val CLASH_TINT = 0.14f
 private const val CARD_TINT = 0.4f
 private const val CARD_BORDER = 0.6f
@@ -209,44 +212,25 @@ fun CopySheet(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PasteOn(selected: CopyTarget, onSelect: (CopyTarget) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
     Column {
         FieldLabel(stringResource(Res.string.calendar_copy_paste_on))
         Spacer(Modifier.height(6.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        // One segmented control, the same sunken track the app's other either/or choices sit on.
+        SegmentTrack(modifier = Modifier.fillMaxWidth().height(TARGET_HEIGHT)) {
             CopyTarget.entries.forEach { option ->
                 val on = option == selected
-                Box(
-                    Modifier
-                        .height(TARGET_HEIGHT)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            if (on) {
-                                scheme.primary.copy(alpha = ON_TINT)
-                            } else {
-                                scheme.surfaceVariant.copy(alpha = CARD_TINT)
-                            }
-                        )
-                        .border(
-                            1.dp,
-                            if (on) {
-                                scheme.primary.copy(alpha = ON_BORDER)
-                            } else {
-                                scheme.outlineVariant.copy(alpha = CARD_BORDER)
-                            },
-                            RoundedCornerShape(8.dp),
-                        )
-                        .clickable { onSelect(option) }
-                        .padding(horizontal = 12.dp),
-                    contentAlignment = Alignment.Center,
+                SegmentTrackItem(
+                    selected = on,
+                    onClick = { onSelect(option) },
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                 ) {
                     Text(
                         text = targetLabel(option),
                         style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
                         fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
-                        color = if (on) scheme.onSurface else scheme.onSurfaceVariant,
+                        color = LocalContentColor.current,
                         maxLines = 1,
-                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -279,9 +263,7 @@ private fun CountStepper(count: Int, onChange: (Int) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .height(TARGET_HEIGHT)
-                .clip(RoundedCornerShape(8.dp))
-                .background(scheme.surface)
-                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(8.dp))
+                .sunken(RoundedCornerShape(8.dp), elevationPalette())
                 .padding(start = 6.dp, end = 4.dp),
         ) {
             CompactTextField(

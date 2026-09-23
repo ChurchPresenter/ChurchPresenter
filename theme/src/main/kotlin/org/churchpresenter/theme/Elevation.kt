@@ -198,9 +198,9 @@ fun Modifier.sunken(
     .border(1.dp, if (rim.isSpecified) rim else palette.wellBorder, shape)
 
 /**
- * A control raised off the page in [fill]: a top-lit gradient, a shine along the top edge, a dark
- * line along the bottom and a drop shadow tinted with the fill's own color. [pressed] pushes it
- * back in — no shadow, an inner shade instead of the shine.
+ * A control raised off the page in [fill]: a top-lit gradient, a dark line along the bottom and a
+ * drop shadow tinted with the fill's own color. [pressed] pushes it back in — no shadow, an inner
+ * shade along the top instead.
  */
 fun Modifier.raised(
     shape: Shape,
@@ -232,7 +232,8 @@ fun Modifier.raised(
                     size = Size(size.width, depth),
                 )
             } else {
-                drawLine(fill.highlight, Offset(0f, line / 2), Offset(size.width, line / 2), line)
+                // No shine along the top edge: on the dark keys it read as a hard line rather than
+                // a highlight. The top-lit gradient and the drop shadow carry the lift.
                 drawLine(
                     Color.Black.copy(alpha = BOTTOM_EDGE_ALPHA),
                     Offset(0f, size.height - line / 2),

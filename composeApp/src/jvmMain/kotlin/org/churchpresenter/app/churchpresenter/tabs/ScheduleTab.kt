@@ -640,7 +640,8 @@ fun ScheduleTab(
 
         Row(
             modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainer)
+                // The list's own fill, so the button's strip reads as the bottom of the list.
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(10.dp),
             horizontalArrangement = Arrangement.Center
         ) {

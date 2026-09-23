@@ -1,7 +1,5 @@
 package org.churchpresenter.calendar.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,13 +24,15 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /**
  * The flat, compact text input this window is drawn with.
@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.sp
  * with a floating label and its own internal padding, which in a dense planner makes a one-line
  * name entry taller than the row of chips beside it — the panes stop lining up and the dialogs read
  * as a form rather than as the design. This is what the design actually specifies: roughly 30dp
- * high, one border, the label sitting above it as separate text.
+ * high, one sunken well like every other field in the app, the label sitting above it as separate
+ * text.
  *
  * [errorBorder] draws the invalid state without reserving the space M3 keeps for supporting text,
  * so a field that becomes invalid does not shift everything under it.
@@ -61,18 +62,16 @@ fun CompactTextField(
 ) {
     val scheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(FIELD_RADIUS)
-    val border = when {
+    val rim = when {
         errorBorder -> scheme.error
         focused -> scheme.primary
-        else -> scheme.outlineVariant
+        else -> Color.Unspecified
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .height(height)
-            .clip(shape)
-            .background(scheme.surfaceVariant.copy(alpha = FIELD_TINT))
-            .border(1.dp, border, shape)
+            .sunken(shape, elevationPalette(), rim = rim)
             .padding(horizontal = 10.dp),
     ) {
         if (leading != null) {
@@ -162,5 +161,4 @@ fun Modifier.commitOnExit(hasChanges: Boolean, onCommit: () -> Unit): Modifier =
 private val FIELD_HEIGHT = 34.dp
 private val FIELD_RADIUS = 8.dp
 private const val FIELD_FONT = 13f
-private const val FIELD_TINT = 0.45f
 private const val PLACEHOLDER_ALPHA = 0.55f

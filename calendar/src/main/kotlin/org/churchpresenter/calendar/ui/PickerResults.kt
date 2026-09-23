@@ -1,8 +1,6 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,6 +75,7 @@ import org.churchpresenter.calendar.model.parseDuration
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
 
 private val RESULT_ICON = 24.dp
 private val ADD_BADGE = 21.dp
@@ -344,10 +343,7 @@ internal fun ResultRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(SheetMetrics.cardRadius)
-            .background(scheme.surfaceVariant.copy(alpha = 0.4f))
-            .border(1.dp, scheme.outlineVariant.copy(alpha = 0.6f), SheetMetrics.cardRadius)
-            .clickable(onClick = onClick)
+            .raisedKey(SheetMetrics.cardRadius, elevationPalette().key, onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 8.dp),
     ) {
         Box(

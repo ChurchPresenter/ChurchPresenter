@@ -99,15 +99,19 @@ fun KeyButton(
 ) {
     val palette = elevationPalette()
     val filled = colors.containerColor.alpha > 0f
+    // An unfilled key labelled in the error red is a destructive action: it takes the danger key,
+    // whose label clears 4.5:1 -- the raw error red on the neutral key does not in dark themes.
+    val destructive = !filled && colors.contentColor == MaterialTheme.colorScheme.error
+    val resolved = fill ?: if (destructive) palette.danger else null
     RaisedButtonSurface(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         shape = shape,
-        fill = fill ?: if (filled) palette.tinted(colors.containerColor, colors.contentColor) else palette.key,
+        fill = resolved ?: if (filled) palette.tinted(colors.containerColor, colors.contentColor) else palette.key,
         ink = when {
             !enabled -> colors.disabledContentColor
-            fill != null -> fill.ink
+            resolved != null -> resolved.ink
             else -> colors.contentColor
         },
         border = border,

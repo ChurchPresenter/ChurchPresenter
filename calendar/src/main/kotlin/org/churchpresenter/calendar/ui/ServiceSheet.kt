@@ -1,7 +1,6 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +51,9 @@ import org.churchpresenter.calendar.model.parseClockText
 import org.churchpresenter.calendar.model.storedTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.elevationPalette
 
 private val SHEET_WIDTH = 460.dp
 /** `Start time` and `Type` share the row as 1 : 1.3, so three segment labels are not truncated. */
@@ -279,15 +281,22 @@ private fun TemplateRow(label: String, sub: String, selected: Boolean, onClick: 
             .background(if (selected) scheme.primary.copy(alpha = ON_TINT) else Color.Transparent)
             .clickable(onClick = onClick),
     ) {
+        val palette = elevationPalette()
+        // The app's radio: a sunken well, or a raised accent disc with a dot when chosen.
         Box(
             Modifier
                 .size(14.dp)
-                .clip(CircleShape)
-                .border(1.5.dp, if (selected) scheme.primary else scheme.outline, CircleShape),
+                .then(
+                    if (selected) {
+                        Modifier.raised(CircleShape, palette.accent, palette, lift = 2.dp)
+                    } else {
+                        Modifier.sunken(CircleShape, palette)
+                    }
+                ),
             contentAlignment = Alignment.Center,
         ) {
             if (selected) {
-                Box(Modifier.size(7.dp).clip(CircleShape).background(scheme.primary))
+                Box(Modifier.size(6.dp).clip(CircleShape).background(palette.accent.ink))
             }
         }
         CardText(title = label, subtitle = sub)
