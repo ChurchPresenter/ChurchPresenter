@@ -122,8 +122,8 @@ fun KeyButton(
 }
 
 /**
- * `TextButton` in the elevated look: no surface at rest, a faint outline under the pointer and an
- * inner shade while pressed -- the quiet action beside a raised one, like Cancel beside OK.
+ * `TextButton` in the elevated look: no surface at rest or under the pointer, and an inner shade
+ * while pressed -- the quiet action beside a raised one, like Cancel beside OK.
  */
 @Composable
 fun GhostButton(
@@ -139,7 +139,6 @@ fun GhostButton(
 ) {
     val palette = elevationPalette()
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
     val ink = if (enabled) colors.contentColor else colors.disabledContentColor
     val filled = colors.containerColor.alpha > 0f
@@ -156,7 +155,6 @@ fun GhostButton(
                         palette,
                         fill = palette.wellBottom.copy(alpha = GHOST_PRESS_ALPHA),
                     )
-                    hovered -> Modifier.border(1.dp, palette.wellBorder, shape)
                     else -> Modifier
                 }
             )
