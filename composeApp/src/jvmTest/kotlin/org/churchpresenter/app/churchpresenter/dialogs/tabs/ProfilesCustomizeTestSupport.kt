@@ -8,12 +8,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
@@ -126,6 +128,46 @@ internal fun SkikoComposeUiTest.openElement(element: CustomizeElement) {
     onNodeWithTag(elementChipTag(element.name)).performClick()
     waitForIdle()
 }
+
+/**
+ * Opens a background surface, taking it over from the Background tab unless [own] is false.
+ *
+ * A surface that is following is drawn dimmed under a blanket that swallows clicks, so a test that
+ * drives any control below has to take it over first, exactly as an operator does. Tests that only
+ * assert on what is *rendered* leave [own] alone and see the inherited values.
+ */
+internal fun SkikoComposeUiTest.openBackgroundSurface(
+    element: CustomizeElement = CustomizeElement.BACKGROUND_SONG,
+    own: Boolean = true,
+) {
+    openCustomizePane(CustomizePane.BACKGROUND, element)
+    if (own) takeOverBackground()
+}
+
+/** Clicks "Custom" on the open surface's follow row. */
+internal fun SkikoComposeUiTest.takeOverBackground() {
+    onNodeWithText(BACKGROUND_OWN).performScrollTo().performClick()
+    waitForIdle()
+}
+
+/** Hands the open surface back to the Background tab. */
+internal fun SkikoComposeUiTest.followBackground() {
+    onNodeWithText(BACKGROUND_FOLLOW).performScrollTo().performClick()
+    waitForIdle()
+}
+
+internal const val BACKGROUND_OWN = "Custom"
+internal const val BACKGROUND_FOLLOW = "Follow Background tab"
+
+/** The background config this profile draws for [scope], after resolution. */
+internal fun AppSettings.backgroundFor(
+    scope: BackgroundScope,
+    id: String = PROFILE_ID,
+): BackgroundConfig = asRendered(id).backgroundSettings.configFor(scope)
+
+/** Whether [scope] is this profile's own rather than the Background tab's. */
+internal fun AppSettings.overrides(scope: BackgroundScope, id: String = PROFILE_ID): Boolean =
+    scope.name in profile(id).backgroundOverrides
 
 /**
  * Picks [option] from a `ChoiceControl`, whose segments are plain labelled buttons.
