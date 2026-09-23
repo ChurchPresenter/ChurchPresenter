@@ -43,6 +43,8 @@ class CalendarSyncServiceTest {
         var clientKey = "key-1"
         var refuseKeyOnce = false
         var relayDown = false
+        var keyEndpointDown = false
+        var refuseRecords = false
         val catalogPuts = mutableListOf<String>()
         var otherInstall = ""
         var slowMs = 0L
@@ -52,11 +54,14 @@ class CalendarSyncServiceTest {
                 """{"id":"$it","nameBox":"","pairedAt":"2026-09-20T00:00:00Z","lastSeen":""}"""
             }
 
+        private fun clientKeyReply(): RelayReply =
+            if (keyEndpointDown) RelayReply(503, "{}") else RelayReply(200, """{"clientKey":"$clientKey"}""")
+
         override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
             calls += "$method $url"
             if (relayDown) throw IOException("relay down")
             if (slowMs > 0) Thread.sleep(slowMs)
-            if (url == CalendarSyncSettings.CLIENT_KEY_URL) return RelayReply(200, """{"clientKey":"$clientKey"}""")
+            if (url == CalendarSyncSettings.CLIENT_KEY_URL) return clientKeyReply()
             if (headers["X-Client-Key"] != clientKey || refuseKeyOnce) {
                 refuseKeyOnce = false
                 return RelayReply(401, """{"error":"client_key"}""")
@@ -79,6 +84,8 @@ class CalendarSyncServiceTest {
                     enrolled[path.removePrefix("devices/")] = body.orEmpty()
                     RelayReply(200, "{}")
                 }
+                path.startsWith("records/") && method == "PUT" && refuseRecords ->
+                    RelayReply(401, """{"error":"unauthorized"}""")
                 path.startsWith("records/") && method == "PUT" -> {
                     catalogPuts += path.removePrefix("records/")
                     rev += 1
@@ -188,7 +195,7 @@ class CalendarSyncServiceTest {
         withTimeout(5_000) { while (relay.catalogPuts.isEmpty()) delay(10) }
         loop.cancelAndJoin()
 
-        assertEquals(listOf("catalog:Hymnal"), relay.catalogPuts)
+        assertEquals(listOf("catalog:Hymnal-cf49adf4"), relay.catalogPuts)
         // Unchanged since: nothing more to write.
         assertEquals(0, service.pushCatalog())
         assertEquals(1, relay.catalogPuts.size)
@@ -329,6 +336,83 @@ class CalendarSyncServiceTest {
         service().syncNow()
         assertEquals(minted, settings.installId)
         assertTrue(relay.calls.isNotEmpty())
+    }
+
+    @Test
+    fun `an invite enrolls a nameless device and becomes the QR the card opens`() = runBlocking<Unit> {
+        val service = service()
+
+        val invite = service.invitePhone().asInvite(service)
+
+        val ready = assertIs<CalendarInvite.Ready>(invite)
+        val enrollment = ready.enrollment
+        // A device of its own, not one the operator named: the phone that scans it names itself.
+        assertEquals(setOf(enrollment.deviceId), relay.enrolled.keys)
+        assertTrue("\"nameBox\":\"\"" in relay.enrolled.getValue(enrollment.deviceId))
+        assertTrue("device=${enrollment.deviceId}" in enrollment.qrContent)
+        assertEquals(settings.instanceKey, enrollment.instanceKey)
+    }
+
+    @Test
+    fun `an invite the relay refused opens the dialog on the reason instead of a QR`() = runBlocking<Unit> {
+        relay.relayDown = true
+        val service = service()
+
+        val invite = service.invitePhone().asInvite(service)
+
+        val failed = assertIs<CalendarInvite.Failed>(invite)
+        assertIs<CalendarSyncStatus.Failed>(failed.status)
+        assertEquals(service.status.value, failed.status)
+    }
+
+    @Test
+    fun `an invite is never sent without a client key, and says so`() = runBlocking<Unit> {
+        service().syncOnStartup()
+        // The website cannot be asked: no key to send, and a keyless call is a wrong-key attempt.
+        settings = settings.copy(clientKey = "")
+        relay.keyEndpointDown = true
+        val service = service()
+
+        val invite = service.invitePhone().asInvite(service)
+
+        assertIs<CalendarInvite.Failed>(invite)
+        assertIs<CalendarSyncStatus.Failed>(service.status.value)
+        assertTrue(relay.calls.none { it.contains("/devices/") })
+    }
+
+    @Test
+    fun `a relay that refuses the songbooks is reported, and the app carries on`() = runBlocking<Unit> {
+        val service = service(songFolder = songFolder())
+        assertTrue(service.syncOnStartup())
+        relay.refuseRecords = true
+
+        assertEquals(0, service.pushCatalog())
+
+        assertIs<CalendarSyncStatus.Unauthorized>(service.status.value)
+        // The failure is a status, not an exception: the next good push clears it.
+        relay.refuseRecords = false
+        assertEquals(1, service.pushCatalog())
+    }
+
+    @Test
+    fun `a stored key that is not a key is treated as a lost pairing`() = runBlocking<Unit> {
+        service().syncOnStartup()
+        settings = settings.copy(instanceKey = "not-a-key")
+        val service = service()
+
+        assertFalse(service.syncNow())
+
+        assertEquals(CalendarSyncStatus.Unauthorized, service.status.value)
+    }
+
+    @Test
+    fun `a desktop with no song folder pushes no songbooks`() = runBlocking<Unit> {
+        val service = service(songFolder = null)
+        assertTrue(service.syncOnStartup())
+
+        assertEquals(0, service.pushCatalog())
+
+        assertTrue(relay.catalogPuts.isEmpty())
     }
 
     @Test

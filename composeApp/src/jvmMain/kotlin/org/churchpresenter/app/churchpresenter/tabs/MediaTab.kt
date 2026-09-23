@@ -82,6 +82,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.output_scale_mode
 import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
@@ -164,8 +165,12 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.followerMediaUrl
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.app.churchpresenter.utils.contentScale
+import org.churchpresenter.app.churchpresenter.utils.icon
+import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -712,6 +717,44 @@ fun MediaTab(
                 }
             }
 
+            // Scale: each click moves Fit → Fill → Stretch, lit whenever it is not Fit.
+            val scaleMode = appSettings.mediaScaleMode
+            val scaled = scaleMode != OutputScaleMode.FIT
+            val scaleName = stringResource(scaleMode.label)
+            val scaleLabel = stringResource(Res.string.output_scale_mode, scaleName)
+            TooltipArea(
+                tooltip = { TransportTooltip(scaleLabel) },
+                tooltipPlacement = TooltipPlacement.ComponentRect(
+                    anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp)
+                )
+            ) {
+                IconButton(
+                    onClick = { onSettingsChange { s -> s.copy(mediaScaleMode = scaleMode.next()) } },
+                    enabled = viewModel.isLoaded,
+                    modifier = Modifier.size(30.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = if (scaled) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            Color.Transparent
+                        },
+                        contentColor = if (scaled) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            transportTint
+                        },
+                        disabledContentColor = transportTint,
+                    )
+                ) {
+                    Icon(
+                        scaleMode.icon,
+                        contentDescription = scaleLabel,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+
             // Divider
             Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
@@ -902,7 +945,10 @@ fun MediaTab(
                             Text(stringResource(Res.string.media_now_presenting), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.8f))
                             Text(viewModel.mediaTitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
-                        viewModel.isLoaded -> SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize())
+                        viewModel.isLoaded -> SharedVideoOutputDisplay(
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = appSettings.mediaScaleMode.contentScale,
+                        )
                         else -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.4f))
                             Text(stringResource(Res.string.media_no_source), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.6f))

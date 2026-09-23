@@ -5,7 +5,6 @@ import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
-import java.security.MessageDigest
 import java.time.LocalDate
 
 /**
@@ -42,28 +41,17 @@ object Projection {
         if (part == 0) "$CATALOG_PREFIX${catalogKey(songbook)}" else "$CATALOG_PREFIX${catalogKey(songbook)}:$part"
 
     /**
-     * A songbook name as a record id can carry it -- ASCII id characters only: `Songs of Praise` is
-     * `Songs_of_Praise`. A name with letters outside ASCII (Tamil, Cyrillic) also carries a hash of
-     * the whole name, or every such book would come out as the same row of underscores.
+     * A songbook name as a record id can carry it: a readable ASCII slug -- `Songs of Praise` is
+     * `Songs_of_Praise` -- plus a short hash of the real name, so a book named in another script
+     * (`Гимны`, whose slug is nothing) still has an id of its own, and two such books never share one.
+     * The phone builds the same id for a book it receives over the LAN; keep the two in step.
      */
-    private fun catalogKey(songbook: String): String {
-        val key = songbook.map { if (it.isAsciiIdChar()) it else '_' }.joinToString("")
-        if (songbook.all { it.code < ASCII_END }) return key.take(CATALOG_KEY_CHARS).ifEmpty { "_" }
-        val hash = MessageDigest.getInstance("SHA-256").digest(songbook.toByteArray())
-            .take(HASH_BYTES).joinToString("") { "%02x".format(it) }
-        return key.take(CATALOG_KEY_CHARS - hash.length - 1) + "-" + hash
+    fun catalogKey(songbook: String): String {
+        val slug = songbook.map { if (isSlugChar(it)) it else '_' }.joinToString("").trim('_').take(CATALOG_SLUG_CHARS)
+        return (if (slug.isEmpty()) "" else "$slug-") + fnv1a(songbook)
     }
 
-    private fun Char.isAsciiIdChar(): Boolean =
-        this in 'a'..'z' || this in 'A'..'Z' || this in '0'..'9' || this in ID_PUNCTUATION
-
-    private const val ID_PUNCTUATION = "_-."
-
-    private const val CATALOG_KEY_CHARS = 48
-
-    private const val ASCII_END = 128
-
-    private const val HASH_BYTES = 4
+    private const val CATALOG_SLUG_CHARS = 32
 
     /** The services the relay keeps: from [WireLimits.RETENTION_DAYS] ago onward, newest first, capped. */
     fun services(document: CalendarDocument, today: LocalDate): List<RemoteService> {
@@ -133,3 +121,20 @@ object Projection {
 
     const val DESKTOP = "desktop"
 }
+
+private fun isSlugChar(c: Char): Boolean = c in 'A'..'Z' || c in 'a'..'z' || c in '0'..'9' || c in ID_PUNCTUATION
+
+/** FNV-1a over the UTF-8 bytes, as eight hex characters -- stable, tiny, and the same on every platform. */
+private fun fnv1a(text: String): String {
+    var hash = FNV_OFFSET
+    for (byte in text.toByteArray()) hash = ((hash xor (byte.toLong() and BYTE_MASK)) * FNV_PRIME) and UINT_MASK
+    return (hash and UINT_MASK).toString(HEX).padStart(HEX_CHARS, '0')
+}
+
+private const val FNV_OFFSET = 0x811c9dc5L
+private const val FNV_PRIME = 0x01000193L
+private const val BYTE_MASK = 0xffL
+private const val UINT_MASK = 0xffffffffL
+private const val HEX = 16
+private const val HEX_CHARS = 8
+private const val ID_PUNCTUATION = "_-."

@@ -216,7 +216,7 @@ jobs:
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the
-        # module suites below (`if: always()`) and the report upload still get to run.
+        # module suites below (`!cancelled()`) and the report upload still get to run.
         #
         # Runs land around 19 minutes (18m45s and 19m24s, measured 2026-08-21) -- they used to be
         # 11-14, and this comment said so long after it stopped being true, which is how a 20-minute
@@ -241,7 +241,7 @@ jobs:
       # So an outlier explains itself instead of needing a guess: the one killed run above was
       # attributed to the wrong fixture precisely because nothing recorded where the time went.
       - name: Slowest test classes
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           python3 - <<'PY'
           import glob, re
@@ -287,15 +287,24 @@ jobs:
       # GITHUB_STEP_SUMMARY names a fresh file per step that the runner consumes at that step's
       # end. So the block landed in Detekt's already-read file and never appeared anywhere. A
       # property travels with this invocation, so it is the live path.
+      #
+      # This and the suite, coverage and report steps after it run on `!cancelled()`, not
+      # `always()`. Both run after a failed suite, which is the point; `always()` also runs after
+      # the RUN was cancelled -- by `cancel-in-progress` when the branch moves -- and then the suite
+      # stopped partway, JaCoCo has no execution data, and the coverage table posts every
+      # composeApp counter at 0% under a "below floor" warning (#598 got exactly that). A step that
+      # hits its own `timeout-minutes` is failed, not cancelled, so a hang in the suite still
+      # reaches the steps below.
       - name: Coverage summary
-        if: always()
+        if: ${{ !cancelled() }}
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
-      # The 75% line-coverage floor, off the execution data the tests above just produced. Its
-      # denominator excludes the app-entry wiring that only runs under a real display -- see
-      # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
-      # regression is reported alongside test failures rather than hidden behind them.
+      # The six-counter floors (85% on most, 79% branch, 75% complexity), off the execution data the
+      # tests above just produced. Their denominator excludes the app-entry wiring that only runs
+      # under a real display -- see jacocoTestCoverageVerification in composeApp/build.gradle.kts.
+      # `!cancelled()` so a coverage regression is reported alongside test failures rather than
+      # hidden behind them.
       #
       # `-x jvmTest -x jvmTestSerial` is load-bearing. The Gradle task `dependsOn` both, which is
       # right for a developer running it directly, but here the suite has already run in the step
@@ -313,7 +322,7 @@ jobs:
       # for a better reason, and `outcome != 'success'` covers the skipped case as well as the failed
       # one. When the suite passed this gates exactly as before, in seconds.
       - name: Coverage floor
-        if: always()
+        if: ${{ !cancelled() }}
         continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
@@ -323,164 +332,164 @@ jobs:
       # than a fresh Gradle bootstrap. That is why it is not gated on `steps.modules` the way they
       # are: there is nothing to save, and :composeApp depends on it, so an app change can break it.
       - name: Converter tests
-        if: always() && steps.modules.outputs.converter == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.converter == 'true' }}
         run: ./gradlew :converter:test
 
       # The module's own six-counter floor, off the execution data the step above just wrote.
       # `-x test` for the same reason the app's floor step has it: the task `dependsOn` the suite,
       # which is right for a developer running it directly and would re-run it here.
       - name: Converter coverage floor
-        if: always() && steps.modules.outputs.converter == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.converter == 'true' }}
         run: ./gradlew :converter:jacocoTestCoverageVerification -x test
 
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task rather
       # than a separate Gradle bootstrap, and ungated because :composeApp depends on it.
       - name: Companion Satellite tests
-        if: always() && steps.modules.outputs.satellite == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.satellite == 'true' }}
         run: ./gradlew :companion-satellite:test
 
       - name: Companion Satellite coverage floor
-        if: always() && steps.modules.outputs.satellite == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.satellite == 'true' }}
         run: ./gradlew :companion-satellite:jacocoTestCoverageVerification -x test
 
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task
       # rather than a wrapper of its own.
       - name: Lower Third generator tests
-        if: always() && steps.modules.outputs.lottiegen == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.lottiegen == 'true' }}
         run: ./gradlew :lottieGenerator:test
 
       - name: Lower Third generator coverage floor
-        if: always() && steps.modules.outputs.lottiegen == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.lottiegen == 'true' }}
         run: ./gradlew :lottieGenerator:jacocoTestCoverageVerification -x test
 
       # Same again: a module of this build, and its data layer carries the six-counter floor while
       # the Compose UI package is excluded from it.
       - name: Crossword tests
-        if: always() && steps.modules.outputs.cross == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.cross == 'true' }}
         run: ./gradlew :crossword:test
 
       - name: Crossword coverage floor
-        if: always() && steps.modules.outputs.cross == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.cross == 'true' }}
         run: ./gradlew :crossword:jacocoTestCoverageVerification -x test
 
       # The last module to be promoted out of the mounted sub-builds. Its floors are its measured
       # coverage rather than the 85% default — see the comment in its build file.
       - name: Presentation Engine tests
-        if: always() && steps.modules.outputs.engine == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.engine == 'true' }}
         run: ./gradlew :presentation-engine:test
 
       - name: Presentation Engine coverage floor
-        if: always() && steps.modules.outputs.engine == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.engine == 'true' }}
         run: ./gradlew :presentation-engine:jacocoTestCoverageVerification -x test
 
       - name: Theme tests
-        if: always() && steps.modules.outputs.theme == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.theme == 'true' }}
         run: ./gradlew :theme:test
 
       - name: Theme coverage floor
-        if: always() && steps.modules.outputs.theme == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.theme == 'true' }}
         run: ./gradlew :theme:jacocoTestCoverageVerification -x test
 
       - name: Bible Lookup Engine tests
-        if: always() && steps.modules.outputs.ble == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.ble == 'true' }}
         run: ./gradlew :bible-engine:test
 
       - name: Bible Lookup Engine coverage floor
-        if: always() && steps.modules.outputs.ble == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.ble == 'true' }}
         run: ./gradlew :bible-engine:jacocoTestCoverageVerification -x test
 
       - name: Core models tests
-        if: always() && steps.modules.outputs.coremodels == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.coremodels == 'true' }}
         run: ./gradlew :core-models:test
 
       - name: Core models coverage floor
-        if: always() && steps.modules.outputs.coremodels == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.coremodels == 'true' }}
         run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
 
       - name: Song library tests
-        if: always() && steps.modules.outputs.songlibrary == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.songlibrary == 'true' }}
         run: ./gradlew :songlibrary:test
 
       - name: Song library coverage floor
-        if: always() && steps.modules.outputs.songlibrary == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.songlibrary == 'true' }}
         run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
 
       - name: Settings tests
-        if: always() && steps.modules.outputs.settingsmodule == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.settingsmodule == 'true' }}
         run: ./gradlew :settings:test
 
       - name: Settings coverage floor
-        if: always() && steps.modules.outputs.settingsmodule == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.settingsmodule == 'true' }}
         run: ./gradlew :settings:jacocoTestCoverageVerification -x test
 
       - name: Diagnostics tests
-        if: always() && steps.modules.outputs.diagnostics == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.diagnostics == 'true' }}
         run: ./gradlew :diagnostics:test
 
       - name: Diagnostics coverage floor
-        if: always() && steps.modules.outputs.diagnostics == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.diagnostics == 'true' }}
         run: ./gradlew :diagnostics:jacocoTestCoverageVerification -x test
 
       # The ATEM protocol client. Its suite is loopback UDP against FakeAtemSwitcher -- no
       # hardware, no display -- so it runs here like any other module. Its BRANCH/COMPLEXITY floors
       # are below the 85% default for the reason given in its build file.
       - name: ATEM client tests
-        if: always() && steps.modules.outputs.atem == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.atem == 'true' }}
         run: ./gradlew :atem:test
 
       - name: ATEM client coverage floor
-        if: always() && steps.modules.outputs.atem == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.atem == 'true' }}
         run: ./gradlew :atem:jacocoTestCoverageVerification -x test
 
       # The NDI send client. Its suite drives the whole module -- the JNA marshalling included --
       # through a plain Kotlin fake, so it needs no NDI Runtime and no network, and it meets the
       # default 85% floor on all six counters with no override.
       - name: NDI client tests
-        if: always() && steps.modules.outputs.ndi == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.ndi == 'true' }}
         run: ./gradlew :ndi:test
 
       - name: NDI client coverage floor
-        if: always() && steps.modules.outputs.ndi == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.ndi == 'true' }}
         run: ./gradlew :ndi:jacocoTestCoverageVerification -x test
 
       - name: Planning Center tests
-        if: always() && steps.modules.outputs.planningcenter == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.planningcenter == 'true' }}
         run: ./gradlew :planning-center:test
 
       - name: Planning Center coverage floor
-        if: always() && steps.modules.outputs.planningcenter == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.planningcenter == 'true' }}
         run: ./gradlew :planning-center:jacocoTestCoverageVerification -x test
 
       - name: Bible formats tests
-        if: always() && steps.modules.outputs.bibleformats == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.bibleformats == 'true' }}
         run: ./gradlew :bible-formats:test
 
       - name: Bible formats coverage floor
-        if: always() && steps.modules.outputs.bibleformats == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.bibleformats == 'true' }}
         run: ./gradlew :bible-formats:jacocoTestCoverageVerification -x test
 
       - name: Song chords tests
-        if: always() && steps.modules.outputs.songchords == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.songchords == 'true' }}
         run: ./gradlew :song-chords:test
 
       - name: Song chords coverage floor
-        if: always() && steps.modules.outputs.songchords == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.songchords == 'true' }}
         run: ./gradlew :song-chords:jacocoTestCoverageVerification -x test
 
       - name: Bible tests
-        if: always() && steps.modules.outputs.bible == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.bible == 'true' }}
         run: ./gradlew :bible:test
 
       - name: Bible coverage floor
-        if: always() && steps.modules.outputs.bible == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.bible == 'true' }}
         run: ./gradlew :bible:jacocoTestCoverageVerification -x test
 
       - name: Calendar tests
-        if: always() && steps.modules.outputs.calendar == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.calendar == 'true' }}
         run: ./gradlew :calendar:test
 
       - name: Calendar coverage floor
-        if: always() && steps.modules.outputs.calendar == 'true'
+        if: ${{ !cancelled() && steps.modules.outputs.calendar == 'true' }}
         run: ./gradlew :calendar:jacocoTestCoverageVerification -x test
 
 
@@ -488,14 +497,14 @@ jobs:
       # instead of leaving a reviewer to download the report artifact below and open it locally.
       # Also annotates the failing line in the Files-changed view.
       #
-      # `if: always()` so it runs after a failed suite — that is the only time it has anything to
+      # `!cancelled()` so it runs after a failed suite — that is the only time it has anything to
       # say — and `detailed_summary` so each failure is listed by name rather than as a count.
       #
       # It never fails the job on its own (`fail_on_failure: false`): the test step that produced
       # the XML has already done that, and a reporter that can also fail turns one red step into
       # two for the same cause.
       - name: Report failing tests on the pull request
-        if: always() && github.event_name == 'pull_request'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: |
@@ -556,7 +565,7 @@ jobs:
       # reported modules containing changed files -- one row, and a red mark on a module at 99%.
       # Never gates: the jacocoTestCoverageVerification steps above are the real floors.
       - name: Coverage table
-        if: always() && github.event_name == 'pull_request'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
@@ -578,6 +587,32 @@ jobs:
                   if len(parts) == 4 and parts[0] == "FLOOR":
                       floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
 
+          # Classes a module's verification task leaves out of its floor but its report keeps in.
+          # composeApp's report is all-inclusive on purpose (main.kt shows at 0%, which is the truth),
+          # while jacocoTestCoverageVerification excludes `MainKt*` -- the app entry, only runnable
+          # under a display. Reading the report's totals against the verification's floors compared
+          # two different sets of classes and flagged four counters on every PR while the real gate
+          # passed. Keep this in step with that task's `exclude(...)` list in composeApp/build.gradle.kts.
+          GATE_EXCLUDED = {"composeApp": ("org/churchpresenter/app/churchpresenter/MainKt",)}
+
+          def totals(root, excluded):
+              """Covered/total per counter: the report's own totals, or the sum over the gated classes."""
+              sums = {}
+              if excluded:
+                  counters = [
+                      c
+                      for cls in root.iter("class")
+                      if not any(cls.get("name", "").startswith(x) for x in excluded)
+                      for c in cls.findall("counter")
+                  ]
+              else:
+                  counters = root.findall("counter")
+              for c in counters:
+                  missed, covered = int(c.get("missed")), int(c.get("covered"))
+                  m, k = sums.get(c.get("type"), (0, 0))
+                  sums[c.get("type")] = (m + missed, k + covered)
+              return {t: 100 * k / (m + k) for t, (m, k) in sums.items() if m + k}
+
           # Only modules that actually produced a report in THIS run. The sub-builds are gated on
           # their own directories, so a run that skipped them simply has no section for them.
           found = {}
@@ -588,12 +623,7 @@ jobs:
                       root = ET.parse(path).getroot()
                   except ET.ParseError:
                       continue
-                  ratios = {}
-                  for c in root.findall("counter"):
-                      missed, covered = int(c.get("missed")), int(c.get("covered"))
-                      total = missed + covered
-                      if total:
-                          ratios[c.get("type")] = 100 * covered / total
+                  ratios = totals(root, GATE_EXCLUDED.get(module))
                   if ratios:
                       found[module] = ratios
 

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.app.churchpresenter.tabs.PictureLabel
 import org.churchpresenter.app.churchpresenter.tabs.RecentPictureFolders
 import org.churchpresenter.app.churchpresenter.tabs.openAnimationDropdown
@@ -157,6 +158,18 @@ class PicturesTabScreenshotTest {
     fun `looping turned off`() = shoot(
         "loop_off",
         settings = { it.copy(pictureSettings = it.pictureSettings.copy(isLooping = false)) },
+    )
+
+    @Test
+    fun `scaled to fill, the button lit`() = shoot(
+        "scale_fill",
+        settings = { it.copy(pictureSettings = it.pictureSettings.copy(scaleMode = OutputScaleMode.FILL)) },
+    )
+
+    @Test
+    fun `scaled to stretch`() = shoot(
+        "scale_stretch",
+        settings = { it.copy(pictureSettings = it.pictureSettings.copy(scaleMode = OutputScaleMode.STRETCH)) },
     )
 
     @Test

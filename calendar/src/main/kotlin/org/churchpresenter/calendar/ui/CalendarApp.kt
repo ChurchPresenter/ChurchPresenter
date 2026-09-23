@@ -76,7 +76,9 @@ import org.churchpresenter.calendar.generated.resources.calendar_recovered_body
 import org.churchpresenter.calendar.generated.resources.calendar_recovered_title
 import org.churchpresenter.calendar.generated.resources.calendar_title
 import org.churchpresenter.calendar.generated.resources.calendar_today
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Settings
+import org.churchpresenter.calendar.generated.resources.calendar_cloud_invite
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
 import org.churchpresenter.calendar.model.PdfAudience
@@ -264,6 +266,9 @@ private fun CalendarBody(
             onToday = state::goToToday,
             onExport = onExport,
             exportAudience = exportAudience,
+            // Only while the cloud sync is on: an invite to a relay this computer is not talking
+            // to would be a code that leads nowhere.
+            onInvite = host.cloudSync?.takeIf { it.enabled() }?.invitePhone,
             onSettings = dialogs::openSettings,
         )
         HorizontalDivider()
@@ -455,6 +460,7 @@ private fun Header(
     onToday: () -> Unit,
     onExport: ((PdfAudience) -> Unit)?,
     exportAudience: PdfAudience,
+    onInvite: (() -> Unit)?,
     onSettings: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -516,6 +522,13 @@ private fun Header(
         )
         if (onExport != null) {
             ExportSplitButton(audience = exportAudience, height = HEADER_BUTTON, onExport = onExport)
+        }
+        if (onInvite != null) {
+            HeaderButton(
+                label = stringResource(Res.string.calendar_cloud_invite),
+                icon = Icons.Filled.QrCode2,
+                onClick = onInvite,
+            )
         }
         HeaderButton(
             label = stringResource(Res.string.calendar_settings_open),
