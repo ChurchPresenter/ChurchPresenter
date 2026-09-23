@@ -101,6 +101,8 @@ class CompanionServerQaTest {
         @AfterClass
         fun stopServer() {
             runCatching { server.stop() }
+            // Same race as [resetState]: a write landing after the delete leaves the next class a session.
+            server.qaManager?.let { runBlocking { it.awaitPendingSave() } }
             qaStateFile.delete()
         }
     }
@@ -110,6 +112,9 @@ class CompanionServerQaTest {
         client = HttpClient(CIO)
         // QAManager restores the previous session from disk when it is constructed, so the file
         // has to go too — otherwise each test starts holding the questions the last one asked.
+        // The last test's manager writes that file off-thread, so wait for its writes first: one
+        // landing after the delete brings its questions straight back into the next session.
+        server.qaManager?.let { runBlocking { it.awaitPendingSave() } }
         qaStateFile.delete()
         server.qaManager = null
         server.qaAdminPassword = ""

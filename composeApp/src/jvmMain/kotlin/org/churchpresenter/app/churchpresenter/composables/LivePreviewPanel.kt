@@ -5,6 +5,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -528,6 +529,7 @@ private fun SingleDisplayPreview(
                                     transitionAlpha = pictureTransitionAlpha,
                                     slideOffset = pictureSlideOffset,
                                     animationType = animationType,
+                                    contentScale = outputSettings.pictureSettings.scaleMode.contentScale,
                                 )
                             Presenting.PRESENTATION ->
                                 PresentationPresenter(
@@ -541,7 +543,11 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                    MediaPresenter(modifier = Modifier.fillMaxSize(), transitionAlpha = mediaTransitionAlpha)
+                                    MediaPresenter(
+                                        modifier = Modifier.fillMaxSize(),
+                                        transitionAlpha = mediaTransitionAlpha,
+                                        contentScale = outputSettings.mediaScaleMode.contentScale,
+                                    )
                                 }
                             Presenting.LOWER_THIRD ->
                                 LowerThirdPresenter(

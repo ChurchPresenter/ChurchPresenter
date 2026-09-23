@@ -26,6 +26,7 @@ import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
+import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
@@ -154,7 +155,8 @@ internal fun PresenterModeContent(
                     previousImagePath = previousDisplayedImagePath,
                     transitionAlpha = pictureTransitionAlpha,
                     slideOffset = pictureSlideOffset,
-                    animationType = animationType
+                    animationType = animationType,
+                    contentScale = appSettings.pictureSettings.scaleMode.contentScale,
                 )
 
         Presenting.PRESENTATION ->
@@ -181,6 +183,7 @@ internal fun PresenterModeContent(
                         outputRole = outputRole,
                         showSubtitles = screenAssignment.showSubtitles,
                         mediaSettings = appSettings.mediaSettings,
+                        contentScale = appSettings.mediaScaleMode.contentScale,
                     )
                 }
             }

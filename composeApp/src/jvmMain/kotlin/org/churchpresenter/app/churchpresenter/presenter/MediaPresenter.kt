@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
 import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.utils.Constants
@@ -22,6 +23,8 @@ fun MediaPresenter(
     /** Whether this output draws the subtitle overlay at all -- `ScreenAssignment.showSubtitles`. */
     showSubtitles: Boolean = true,
     mediaSettings: MediaSettings = MediaSettings(),
+    /** How the video meets the output -- `AppSettings.mediaScaleMode`, through `contentScale`. */
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     // Key mode: solid white frame (mixer sees "fully visible")
     if (outputRole == Constants.OUTPUT_ROLE_KEY) {
@@ -47,7 +50,7 @@ fun MediaPresenter(
             // MainDesktop / MediaTab) decodes once and writes every frame to SharedVideoOutput.
             // All presenter windows (any number of screens) just display that shared bitmap,
             // eliminating the multiple-decoder jitter that occurred with per-window VideoPlayers.
-            SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize())
+            SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize(), contentScale = contentScale)
 
             // Drawn per-output, unlike the shared decoded frame: this is what lets one output
             // hide the subtitle overlay ([showSubtitles]) while another keeps showing it.
