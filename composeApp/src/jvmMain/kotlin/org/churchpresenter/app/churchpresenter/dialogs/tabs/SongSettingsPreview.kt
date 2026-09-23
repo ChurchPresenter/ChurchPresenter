@@ -19,6 +19,7 @@ import churchpresenter.composeapp.generated.resources.song_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import churchpresenter.composeapp.generated.resources.song_preview_title_slide
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.core.models.songs.LyricSection
@@ -73,9 +74,16 @@ internal fun SongPreviewPanel(
      */
     languageOverride: String? = null,
     languageSelection: List<Int> = emptyList(),
+    /**
+     * Whether this band stacks its two languages rather than setting them side by side.
+     *
+     * The caller's profile answers it, not the document: read as "does *any* output happen to be
+     * portrait" a landscape band previewed as a stacked one because some unrelated screen was
+     * portrait, which is a picture of an output that does not exist.
+     */
+    vertical: Boolean = false,
 ) {
     val song = settings.songSettings
-    val vertical = settings.projectionSettings.outputProfiles.any { it.isLowerThirdVertical }
 
     Box(
         modifier = modifier
@@ -86,6 +94,14 @@ internal fun SongPreviewPanel(
     ) {
         ScaledPresenterBox(output) {
             SongPresenter(
+                // The region the output confines its text to, applied exactly as
+                // `PresenterModeContent` applies it. Left off, the CONTENT REGION controls moved
+                // the screen and not the picture of it.
+                modifier = if (target.isLowerThird) {
+                    Modifier
+                } else {
+                    Modifier.contentRegion(song.layoutExtras.contentRegion)
+                },
                 lyricSection = sections.first(),
                 appSettings = settings,
                 isLowerThird = target.isLowerThird,

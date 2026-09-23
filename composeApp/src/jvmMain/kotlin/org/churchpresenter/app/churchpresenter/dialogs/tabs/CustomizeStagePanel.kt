@@ -104,6 +104,8 @@ private fun BibleStage(
             slot = slot,
             moduleTitles = emptyMap(),
         ),
+        // This profile's own shape, not whether some other output happens to be portrait.
+        vertical = profile.isLowerThirdVertical,
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -152,6 +154,8 @@ private fun SongStage(
         // nothing: the pane is still where its type is set, and type cannot be judged on a blank.
         languageOverride = profile.songMode.takeIf { it != Constants.SONG_LANG_OFF },
         languageSelection = profile.songTranslations,
+        // This profile's own shape, not whether some other output happens to be portrait.
+        vertical = profile.isLowerThirdVertical,
         titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
     )

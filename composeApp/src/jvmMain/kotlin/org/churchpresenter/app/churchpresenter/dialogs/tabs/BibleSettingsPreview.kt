@@ -23,6 +23,7 @@ import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_long
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_short
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
@@ -121,11 +122,16 @@ internal fun BiblePreviewPanel(
     /** What each translation quotes -- see [bibleSampleVerses]. */
     selectedVerses: List<SelectedVerse>,
     modifier: Modifier = Modifier,
+    /**
+     * Whether this band stacks its parallel translations rather than setting them side by side.
+     *
+     * The caller's profile answers it, not the document: read as "does *any* output happen to be
+     * portrait" a landscape band previewed as a stacked one because some unrelated screen was
+     * portrait, which is a picture of an output that does not exist.
+     */
+    vertical: Boolean = false,
 ) {
     val bible = settings.bibleSettings
-    // Which lower third the outputs are actually set up for: the bottom band and the right-hand
-    // strip are different shapes, and previewing the wrong one misreports where the text sits.
-    val vertical = settings.projectionSettings.outputProfiles.any { it.isLowerThirdVertical }
 
     Box(
         modifier = modifier
@@ -144,6 +150,14 @@ internal fun BiblePreviewPanel(
         } else {
             ScaledPresenterBox(output) {
                 BiblePresenter(
+                    // The region the output confines its text to, applied exactly as
+                    // `PresenterModeContent` applies it. Left off, the CONTENT REGION controls
+                    // moved the screen and not the picture of it.
+                    modifier = if (target.isLowerThird) {
+                        Modifier
+                    } else {
+                        Modifier.contentRegion(bible.contentRegion)
+                    },
                     selectedVerses = selectedVerses,
                     appSettings = settings,
                     isLowerThird = target.isLowerThird,
