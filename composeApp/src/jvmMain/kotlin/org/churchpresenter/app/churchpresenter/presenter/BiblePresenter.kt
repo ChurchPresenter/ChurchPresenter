@@ -68,12 +68,16 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 private const val SHADOW_OFFSET_PX = 6f
 
 /**
- * The most translations the lower third's own 3/4-language grid will ever draw, whatever
- * `bilingualLayoutLowerThird`'s grid or the translation stack itself carries -- a narrow band
- * has room for a 2x2 at most, not [org.churchpresenter.settings.utils.Constants.MAX_BIBLE_TRANSLATIONS]'s
- * full six the full-screen stack allows.
+ * The most translations a band will draw: the whole stack, as the full screen does.
+ *
+ * This was 4 on the reasoning that a narrow band has room for a 2x2 at most. That is a judgement
+ * about legibility rather than a limit the layout has, and it was made where nothing could see it:
+ * a stack of six on a band drew four and dropped two with nothing on screen saying so. The auto-fit
+ * below already shrinks whatever it is given until every translation is inside its own cell, so a
+ * band asked for six shows six -- small, and the operator can see that it is small and choose
+ * differently.
  */
-private const val MAX_BIBLE_BAND_TRANSLATIONS = 4
+private const val MAX_BIBLE_BAND_TRANSLATIONS = Constants.MAX_BIBLE_TRANSLATIONS
 
 /** The gap between the lower third grid's rows and its columns, in the 1920x1080 reference space. */
 private const val LOWER_THIRD_GRID_GAP_DP = 12
@@ -984,23 +988,34 @@ fun BiblePresenter(
                         Column(modifier = Modifier.fillMaxSize()) {
                             rowsOfVisible.forEachIndexed { rowIndex, rowItems ->
                                 Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                                    rowItems.forEachIndexed { colIndex, (verse, item) ->
+                                    // Every column position is laid out, filled or not, and the
+                                    // separators between them are laid out either way -- so a row
+                                    // that does not fill the grid still lines its cells up with the
+                                    // rows above. Padding only the empty cells left a short row
+                                    // one divider lighter and therefore fractionally wider, which
+                                    // put six translations in a four-column grid out of true.
+                                    for (colIndex in 0 until gridCols) {
+                                        val cell = rowItems.getOrNull(colIndex)
                                         Box(
                                             modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds(),
                                             contentAlignment = contentAlignment,
                                         ) {
-                                            translationBlock(verse, item, fitScale)
+                                            if (cell != null) {
+                                                translationBlock(cell.first, cell.second, fitScale)
+                                            }
                                         }
-                                        if (colIndex < rowItems.lastIndex) {
+                                        if (colIndex < gridCols - 1) {
                                             Spacer(modifier = Modifier.width(halfGap))
-                                            if (bs.multiTranslationDivider) {
+                                            // Drawn only between two translations: a rule running
+                                            // down the empty half of a short row divides nothing.
+                                            val between = cell != null && rowItems.getOrNull(colIndex + 1) != null
+                                            if (bs.multiTranslationDivider && between) {
                                                 VerticalDivider(color = dividerColor, thickness = 1.dp)
+                                            } else if (bs.multiTranslationDivider) {
+                                                Spacer(modifier = Modifier.width(1.dp))
                                             }
                                             Spacer(modifier = Modifier.width(halfGap))
                                         }
-                                    }
-                                    repeat(gridCols - rowItems.size) {
-                                        Spacer(modifier = Modifier.weight(1f))
                                     }
                                 }
                                 if (rowIndex < rowsOfVisible.lastIndex) {
@@ -1096,9 +1111,18 @@ fun BiblePresenter(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(gap),
                                 ) {
-                                    row.forEach { (verse, item) ->
-                                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
-                                            translationBlock(verse, item, fitScale)
+                                    // Every column position, filled or not, so a row short of a
+                                    // full one keeps the column width the rows above it set
+                                    // instead of stretching its cells across the band.
+                                    for (colIndex in 0 until cols) {
+                                        val cell = row.getOrNull(colIndex)
+                                        Box(
+                                            modifier = Modifier.weight(1f),
+                                            contentAlignment = Alignment.BottomCenter,
+                                        ) {
+                                            if (cell != null) {
+                                                translationBlock(cell.first, cell.second, fitScale)
+                                            }
                                         }
                                     }
                                 }

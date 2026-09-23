@@ -151,4 +151,66 @@ class ProfilesBibleArrangementTest {
         assertShape(Constants.BILINGUAL_SIDE_BY_SIDE, cols = 2, rows = 1, translations = 2, mode = band)
         assertShape(Constants.BILINGUAL_TOP_BOTTOM, cols = 1, rows = 2, translations = 2, mode = band)
     }
+
+    // ── The whole stack, which is six ───────────────────────────────────────────────────────────
+
+    /**
+     * `MAX_BIBLE_TRANSLATIONS` is six, and both shapes draw all six.
+     *
+     * The band used to stop at four on the reasoning that a narrow band has room for a 2x2 at most.
+     * That is a judgement about legibility, not a limit the layout has, and it was made where
+     * nothing could see it: a stack of six drew four and dropped two silently. The auto-fit shrinks
+     * whatever it is given until every translation is inside its own cell, so six is small rather
+     * than absent -- and an operator can see that it is small and choose a different arrangement.
+     */
+    @Test
+    fun `six translations all draw, on both shapes`() {
+        for (mode in listOf(Constants.DISPLAY_MODE_FULLSCREEN, band)) {
+            assertShape(Constants.BILINGUAL_SIDE_BY_SIDE, cols = 6, rows = 1, translations = 6, mode = mode)
+            assertShape(Constants.BILINGUAL_TOP_BOTTOM, cols = 1, rows = 6, translations = 6, mode = mode)
+            assertShape(Constants.BILINGUAL_GRID_2X2, cols = 2, rows = 3, translations = 6, mode = mode)
+            assertShape(Constants.BILINGUAL_GRID_1X3, cols = 3, rows = 2, translations = 6, mode = mode)
+            assertShape(Constants.BILINGUAL_GRID_1X4, cols = 4, rows = 2, translations = 6, mode = mode)
+        }
+    }
+
+    /**
+     * Five in a four-column grid: four on the first row, one on the second.
+     *
+     * The short row keeps the column width the row above it set. Laying out only its own cells left
+     * it one divider lighter and so fractionally wider, which put the rows out of true -- six in a
+     * four-column grid came out with five distinct left edges instead of four.
+     */
+    @Test
+    fun `a row short of a full one still lines up with the rows above`() {
+        for (mode in listOf(Constants.DISPLAY_MODE_FULLSCREEN, band)) {
+            assertShape(Constants.BILINGUAL_GRID_1X4, cols = 4, rows = 2, translations = 5, mode = mode)
+            assertShape(Constants.BILINGUAL_GRID_2X2, cols = 2, rows = 3, translations = 5, mode = mode)
+        }
+    }
+
+    /** The two shapes agree about every arrangement, at every stack size. */
+    @Test
+    fun `a band and a full screen arrange the same stack the same way`() {
+        for (count in listOf(3, 4, 5, 6)) {
+            for (layout in listOf(
+                Constants.BILINGUAL_SIDE_BY_SIDE,
+                Constants.BILINGUAL_TOP_BOTTOM,
+                Constants.BILINGUAL_GRID_2X2,
+                Constants.BILINGUAL_GRID_1X4,
+            )) {
+                var full = 0 to 0
+                var strip = 0 to 0
+                profilesTab(doc(layout, count, Constants.DISPLAY_MODE_FULLSCREEN)) { _ ->
+                    openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+                    full = shape()
+                }
+                profilesTab(doc(layout, count, band)) { _ ->
+                    openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+                    strip = shape()
+                }
+                assertEquals(full, strip, "$layout with $count translations must arrange alike")
+            }
+        }
+    }
 }
