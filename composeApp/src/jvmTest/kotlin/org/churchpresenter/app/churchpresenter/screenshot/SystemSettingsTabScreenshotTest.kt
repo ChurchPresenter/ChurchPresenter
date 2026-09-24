@@ -11,6 +11,8 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.runtime.CompositionLocalProvider
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalDefaultCalendarFolder
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
@@ -175,13 +177,19 @@ class SystemSettingsTabScreenshotTest {
         block: ComposeUiTest.() -> Unit,
     ) = runDesktopComposeUiTest(width = width, height = height) {
         setContent {
-            ChurchPresenterTheme(themeMode = themeMode) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(Modifier.fillMaxSize()) {
-                        SystemSettingsTab(
-                            settings = settings,
-                            onSettingsChange = {},
-                        )
+            // The Storage card prints the calendar's folder, and with none configured that is the
+            // machine's app data folder — which under test lands inside the working copy, so the
+            // committed images carried the absolute path of whichever checkout recorded them and
+            // failed everywhere else. See `LocalDefaultCalendarFolder` (issue #617).
+            CompositionLocalProvider(LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER) {
+                ChurchPresenterTheme(themeMode = themeMode) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(Modifier.fillMaxSize()) {
+                            SystemSettingsTab(
+                                settings = settings,
+                                onSettingsChange = {},
+                            )
+                        }
                     }
                 }
             }
@@ -191,6 +199,14 @@ class SystemSettingsTabScreenshotTest {
 
     private companion object {
         const val SECTION = "systemSettingsTab"
+
+        /**
+         * Stands in for the machine's app data folder, which the Calendar row prints.
+         *
+         * A plausible-looking absolute path rather than a temp directory: the row only draws it, and
+         * the point is that every machine draws the *same* one.
+         */
+        const val PINNED_CALENDAR_FOLDER = "/Users/church/Library/Application Support/ChurchPresenter"
 
         /** The options dialog's own size, where the cards sit side by side. */
         const val WIDE_WIDTH = 1400
