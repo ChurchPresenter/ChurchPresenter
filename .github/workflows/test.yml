@@ -35,8 +35,7 @@ on:
   push:
     branches: [main]
   # Draft pull requests run nothing; `ready_for_review` is what runs the checks once one is marked
-  # ready. The job-level `if` below does the skipping -- a skipped `test` never blocks, and a draft
-  # cannot be merged anyway.
+  # ready. The `draft` job below decides, from the PR's live state -- see the note there.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
@@ -65,8 +64,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Whether the pull request is a draft *now*, asked of the API rather than read from the event.
+  # Events can arrive out of order: #634 was opened as a draft and marked ready five seconds later,
+  # and the `opened` run was queued after the `ready_for_review` one. Its payload still said draft,
+  # so it skipped `test` -- which the required check counts as a pass -- and, being newer in the
+  # concurrency group, cancelled the real run. Auto-merge merged it with no suite run at all.
+  #
+  # Read live, a late `opened` sees the PR is ready and runs the suite. `ready_for_review` is taken
+  # at its word, so the API cannot answer with a stale draft on the one event that means "not one".
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      draft: ${{ steps.check.outputs.draft }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          if [ -z "$PR" ] || [ "$ACTION" = "ready_for_review" ]; then
+            echo "draft=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "draft=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    needs: draft
+    # Fails open: if the check above could not answer, the output is empty and this still runs.
+    if: ${{ !cancelled() && needs.draft.outputs.draft != 'true' }}
     runs-on: ubuntu-latest
     # The suite takes ~14 minutes. Without a timeout a test that hangs instead of failing holds
     # the runner until GitHub's 6-hour default kills it, so the deadline is the failure signal.
