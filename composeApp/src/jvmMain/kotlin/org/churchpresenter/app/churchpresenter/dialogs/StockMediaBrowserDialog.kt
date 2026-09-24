@@ -86,6 +86,7 @@ import churchpresenter.composeapp.generated.resources.stock_photo_source_pexels
 import churchpresenter.composeapp.generated.resources.stock_photo_source_pixabay
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.viewmodel.StockDownloadError
@@ -158,20 +159,22 @@ fun StockMediaBrowserDialog(
         title = stringResource(titleRes),
         resizable = true
     ) {
-        StockMediaBrowserDialogContent(
-            titleRes = titleRes,
-            searchPlaceholderRes = searchPlaceholderRes,
-            pexelsViewModel = pexelsViewModel,
-            pixabayViewModel = pixabayViewModel,
-            pexelsApiKey = pexelsApiKey,
-            onPexelsApiKeyChange = onPexelsApiKeyChange,
-            pixabayApiKey = pixabayApiKey,
-            onPixabayApiKeyChange = onPixabayApiKeyChange,
-            selectedTab = selectedTab,
-            onSelectedTabChange = { selectedTab = it },
-            onDismiss = onDismiss,
-            onDownloadedAndClose = onDownloadedAndClose,
-        )
+        ProvideUiFontScale {
+            StockMediaBrowserDialogContent(
+                titleRes = titleRes,
+                searchPlaceholderRes = searchPlaceholderRes,
+                pexelsViewModel = pexelsViewModel,
+                pixabayViewModel = pixabayViewModel,
+                pexelsApiKey = pexelsApiKey,
+                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                pixabayApiKey = pixabayApiKey,
+                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                selectedTab = selectedTab,
+                onSelectedTabChange = { selectedTab = it },
+                onDismiss = onDismiss,
+                onDownloadedAndClose = onDownloadedAndClose,
+            )
+        }
     }
 }
 

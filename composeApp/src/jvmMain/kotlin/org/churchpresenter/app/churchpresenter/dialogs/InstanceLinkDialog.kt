@@ -74,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.InstanceLinkRole
@@ -118,18 +119,20 @@ fun InstanceLinkDialog(
         title = stringResource(Res.string.instance_link_title),
         resizable = false
     ) {
-        InstanceLinkDialogContent(
-            isVisible = isVisible,
-            settings = settings,
-            connectionStatus = connectionStatus,
-            remoteLiveState = remoteLiveState,
-            remoteScheduleCount = remoteScheduleCount,
-            lastMessageAtMs = lastMessageAtMs,
-            onConnect = onConnect,
-            onSave = onSave,
-            onDisconnect = onDisconnect,
-            onDismiss = onDismiss,
-        )
+        ProvideUiFontScale {
+            InstanceLinkDialogContent(
+                isVisible = isVisible,
+                settings = settings,
+                connectionStatus = connectionStatus,
+                remoteLiveState = remoteLiveState,
+                remoteScheduleCount = remoteScheduleCount,
+                lastMessageAtMs = lastMessageAtMs,
+                onConnect = onConnect,
+                onSave = onSave,
+                onDisconnect = onDisconnect,
+                onDismiss = onDismiss,
+            )
+        }
     }
 }
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.app.churchpresenter.composables.CenteredGlyphLine
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
@@ -823,7 +824,11 @@ fun CanvasTab(
                                             "freehand" -> "\u270E"
                                             else -> "?"
                                         },
-                                        style = MaterialTheme.typography.titleSmall
+                                        // Trimmed to the glyph, so the shape itself is centred
+                                        // in the key rather than the font's line box around it.
+                                        style = MaterialTheme.typography.titleSmall.let {
+                                            it.copy(lineHeight = it.fontSize, lineHeightStyle = CenteredGlyphLine)
+                                        }
                                     )
                                 }
                             }

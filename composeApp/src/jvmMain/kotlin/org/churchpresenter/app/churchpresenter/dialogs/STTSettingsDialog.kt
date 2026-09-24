@@ -80,6 +80,7 @@ import churchpresenter.composeapp.generated.resources.stt_word_highlighting
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -134,12 +135,14 @@ fun STTSettingsDialog(
         title = stringResource(Res.string.stt_settings_dialog_title),
         resizable = false
     ) {
-        STTSettingsDialogContent(
-            appSettings = appSettings,
-            onSettingsChange = onSettingsChange,
-            onDismiss = onDismiss,
-            availableFonts = availableFonts,
-        )
+        ProvideUiFontScale {
+            STTSettingsDialogContent(
+                appSettings = appSettings,
+                onSettingsChange = onSettingsChange,
+                onDismiss = onDismiss,
+                availableFonts = availableFonts,
+            )
+        }
     }
 }
 

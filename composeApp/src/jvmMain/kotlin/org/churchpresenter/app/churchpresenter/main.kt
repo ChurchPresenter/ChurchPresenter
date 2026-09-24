@@ -94,6 +94,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
+import org.churchpresenter.app.churchpresenter.dialogs.CustomizeThemeDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
@@ -113,6 +114,11 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
+import org.churchpresenter.app.churchpresenter.ui.theme.themeChoiceFrom
+import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
+import org.churchpresenter.theme.LocalThemeCustomization
+import org.churchpresenter.theme.ThemeCustomization
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.themeFromSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
@@ -401,7 +407,12 @@ fun main() {
     )
 
     application(exitProcessOnExit = true) {
-        ChurchPresenterApp(coroutineExceptionHandler)
+        // Held above every window so each one -- the main window, Settings, every dialog -- is drawn
+        // with the same accent, font and text size, and a change reaches all of them at once.
+        var themeCustomization by remember { mutableStateOf(themeCustomizationFrom(startupSettings)) }
+        CompositionLocalProvider(LocalThemeCustomization provides themeCustomization) {
+            ChurchPresenterApp(coroutineExceptionHandler, onThemeCustomizationChange = { themeCustomization = it })
+        }
     }
 }
 
@@ -413,7 +424,10 @@ fun main() {
  * fonts, VLC and the single-instance lock — and this is the Compose tree.
  */
 @Composable
-private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: CoroutineExceptionHandler) {
+private fun ApplicationScope.ChurchPresenterApp(
+    coroutineExceptionHandler: CoroutineExceptionHandler,
+    onThemeCustomizationChange: (ThemeCustomization) -> Unit,
+) {
     var appReady by remember { mutableStateOf(false) }
     val settingsManager = remember { SettingsManager() }
     val statisticsManager = remember { StatisticsManager() }
@@ -877,6 +891,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var showStatisticsDialog by remember { mutableStateOf(false) }
     var showInstanceLinkDialog by remember { mutableStateOf(false) }
     var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
+    var showCustomizeThemeDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
     var contactDialogInitialType by remember { mutableStateOf<String?>(null) }
@@ -1564,6 +1579,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
 
                             NavigationTopBar(
                                 currentTheme = theme,
+                                hasCustomTheme = appSettings.customThemeAccent.isNotBlank(),
+                                onCustomizeTheme = { showCustomizeThemeDialog = true },
                                 onAbout = { showAboutDialog = true },
                                 onContactUs = { showContactDialog = true },
                                 onGettingStarted = { showSetupWizard = true },
@@ -1952,6 +1969,31 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     settingsManager.saveSettings(updated)
                                 },
                                 onDismiss = { showKeyboardShortcutsDialog = false; dialogDismissSignal++ }
+                            )
+                            CustomizeThemeDialog(
+                                isVisible = showCustomizeThemeDialog,
+                                currentTheme = theme,
+                                initial = themeChoiceFrom(
+                                    appSettings,
+                                    // On unless a custom look exists and a preset has been picked
+                                    // since: then opening this is more likely about font or size.
+                                    useCustomColors = theme == ThemeMode.CUSTOM ||
+                                        appSettings.customThemeAccent.isBlank(),
+                                ),
+                                onApply = { choice ->
+                                    if (choice.useCustomColors) theme = ThemeMode.CUSTOM
+                                    appSettings = appSettings.copy(
+                                        theme = theme.toString(),
+                                        customThemeAccent = choice.accentHex,
+                                        customThemeDark = choice.dark,
+                                        customThemeColors = choice.colors,
+                                        uiFontFamily = choice.fontFamily,
+                                        uiFontScale = choice.fontScale,
+                                    )
+                                    settingsManager.saveSettings(appSettings)
+                                    onThemeCustomizationChange(themeCustomizationFrom(appSettings))
+                                },
+                                onDismiss = { showCustomizeThemeDialog = false; dialogDismissSignal++ }
                             )
                             CCLIReportDialog(
                                 isVisible = showStatisticsDialog,

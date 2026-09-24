@@ -262,6 +262,7 @@
 ## Personalization & Workflow
 - **34 languages** — full interface translation: English, Spanish, French, German, Portuguese, Dutch, Swedish, Norwegian, Finnish, Estonian, Latvian, Polish, Czech, Slovak, Croatian, Romanian, Ukrainian, Russian, Belarusian, Kazakh, Uzbek, Turkish, Arabic, Persian, Hindi, Nepali, Thai, Lao, Japanese, Chinese, Indonesian, Malay, Tagalog and Swahili — with the interface laid out right-to-left for Arabic and Persian.
 - **9 themes** — light, dark, system and six accent themes to match your booth.
+- **Make it yours** — View → Customize Theme… builds a whole palette from one accent color on a light or dark base, lets you set the background, text, secondary, selection, success, warning and error colors too — or leave any on Auto — and sets the font and text size the app's own windows use. Text is kept readable whatever you pick, and output screens are never affected.
 - **Guided setup** — a friendly first-run wizard gets your Bibles, songs and media ready in minutes.
 - **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service.
 - **Portable settings** — export and import your entire configuration to set up another machine instantly.
@@ -269,7 +270,9 @@
 
 **Source locations:**
 - `ui/theme/LanguageProvider.kt`
-- `theme/` (the `:theme` Gradle module, at the repo root) — `Theme.kt`, `ThemeManager.kt`, `SemanticColors.kt`, `AppThemeWrapper.kt`
+- `theme/` (the `:theme` Gradle module, at the repo root) — `Theme.kt`, `ThemeManager.kt`, `ThemeCustomization.kt`, `SemanticColors.kt`, `AppThemeWrapper.kt`
+- `dialogs/CustomizeThemeDialog.kt`, `dialogs/CustomizeThemePreview.kt`, `dialogs/ThemeCustomizationChoice.kt`, `ui/theme/ThemeCustomizationSettings.kt` — the Customize Theme window, its preview, what it hands back, and the settings it is read from
+- `data/settings/CustomThemeColors.kt` (the `:settings` module) — the optional per-role colours
 - `dialogs/SetupWizardDialog.kt`
 - `dialogs/KeyboardShortcutsDialog.kt`
 - `dialogs/OptionsDialog.kt`

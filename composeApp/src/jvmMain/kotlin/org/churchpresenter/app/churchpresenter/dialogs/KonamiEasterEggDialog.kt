@@ -39,6 +39,7 @@ import churchpresenter.composeapp.generated.resources.konami_dialog_message
 import churchpresenter.composeapp.generated.resources.konami_dialog_title
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sin
 import kotlin.random.Random
@@ -82,13 +83,15 @@ fun KonamiEasterEggDialog(
         title = stringResource(Res.string.konami_dialog_title),
         resizable = false
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                ConfettiOverlay()
-                KonamiEasterEggDialogContent(onDismiss = onDismiss)
+        ProvideUiFontScale {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    ConfettiOverlay()
+                    KonamiEasterEggDialogContent(onDismiss = onDismiss)
+                }
             }
         }
     }

@@ -20,7 +20,10 @@ enum class ThemeMode {
     STUDIO,
     SLATE,
     SAND,
-    PLUM
+    PLUM,
+
+    /** Generated from the user's own accent — see [ThemeCustomization] and [customColorScheme]. */
+    CUSTOM
 }
 
 class ThemeManager {

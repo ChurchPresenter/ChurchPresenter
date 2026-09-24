@@ -89,6 +89,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.searchText
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.sunken
@@ -155,11 +156,13 @@ fun KeyboardShortcutsDialog(
         title = stringResource(Res.string.keyboard_shortcuts_title),
         resizable = true
     ) {
-        KeyboardShortcutsDialogContent(
-            initialSettings = settings,
-            onSave = onSave,
-            onDismiss = onDismiss,
-        )
+        ProvideUiFontScale {
+            KeyboardShortcutsDialogContent(
+                initialSettings = settings,
+                onSave = onSave,
+                onDismiss = onDismiss,
+            )
+        }
     }
 }
 

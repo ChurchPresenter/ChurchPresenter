@@ -76,6 +76,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.settings.utils.UpdateCheckInterval
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
 import java.io.File
@@ -313,26 +314,28 @@ fun UpdateAvailableDialog(
         title = dialogTitle,
         resizable = false
     ) {
-        UpdateAvailableContent(
-            result = result,
-            isManualCheck = isManualCheck,
-            participateInPrereleases = participateInPrereleases,
-            onParticipateInPrereleasesChange = onParticipateInPrereleasesChange,
-            updateCheckInterval = updateCheckInterval,
-            onUpdateCheckIntervalChange = onUpdateCheckIntervalChange,
-            downloadState = downloadState,
-            onDownload = startDownload,
-            onInstall = { file ->
-                try {
-                    launchInstaller(file)
-                    exitProcess(0)
-                } catch (e: Exception) {
-                    downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
-                }
-            },
-            onOpenReleasePage = { UrlOpener.open(it) },
-            onDismiss = onDismiss
-        )
+        ProvideUiFontScale {
+            UpdateAvailableContent(
+                result = result,
+                isManualCheck = isManualCheck,
+                participateInPrereleases = participateInPrereleases,
+                onParticipateInPrereleasesChange = onParticipateInPrereleasesChange,
+                updateCheckInterval = updateCheckInterval,
+                onUpdateCheckIntervalChange = onUpdateCheckIntervalChange,
+                downloadState = downloadState,
+                onDownload = startDownload,
+                onInstall = { file ->
+                    try {
+                        launchInstaller(file)
+                        exitProcess(0)
+                    } catch (e: Exception) {
+                        downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
+                    }
+                },
+                onOpenReleasePage = { UrlOpener.open(it) },
+                onDismiss = onDismiss
+            )
+        }
     }
 }
 

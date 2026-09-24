@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -207,7 +208,7 @@ private fun ProfilesRail(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         KeyButton(onClick = onNew, modifier = Modifier.fillMaxWidth()) {
-            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.width(16.dp))
+            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(6.dp))
             Text(stringResource(Res.string.output_profile_new), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -250,7 +251,7 @@ private fun RailIconTextButton(
     onClick: () -> Unit,
 ) {
     KeyButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Icon(icon, contentDescription = null, modifier = Modifier.width(16.dp))
+        Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(6.dp))
         Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
     }
@@ -293,19 +294,19 @@ private fun ProfileRailRow(
                 )
             }
         }
-        KeyIconButton(onClick = onDuplicate, modifier = Modifier.width(28.dp)) {
+        KeyIconButton(onClick = onDuplicate, modifier = Modifier.size(28.dp)) {
             Icon(
                 Icons.Filled.ContentCopy,
                 contentDescription = stringResource(Res.string.output_profile_duplicate),
-                modifier = Modifier.width(14.dp),
+                modifier = Modifier.size(14.dp),
                 tint = ink,
             )
         }
-        KeyIconButton(onClick = onRequestDelete, modifier = Modifier.width(28.dp)) {
+        KeyIconButton(onClick = onRequestDelete, modifier = Modifier.size(28.dp)) {
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(Res.string.output_profile_delete),
-                modifier = Modifier.width(14.dp),
+                modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.error,
             )
         }

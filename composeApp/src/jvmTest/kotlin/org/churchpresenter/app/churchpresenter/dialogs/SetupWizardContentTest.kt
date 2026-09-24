@@ -321,7 +321,8 @@ class SetupWizardContentTest {
     @Test
     fun `every theme the app ships is offered, under a light or dark heading`() = wizard { _ ->
         next()
-        ThemeMode.entries.forEach { mode ->
+        // Custom is made in View → Customize Theme… from the user's own accent, not picked here.
+        ThemeMode.entries.filter { it != ThemeMode.CUSTOM }.forEach { mode ->
             assertTrue(onAllNodesWithTextCount(themeLabelFor(mode)) >= 1, "$mode must be offered")
         }
         listOf("Light", "Dark", "Follows your system").forEach { heading ->
@@ -384,6 +385,7 @@ class SetupWizardContentTest {
         ThemeMode.SLATE -> "Slate Theme"
         ThemeMode.SAND -> "Sand Theme"
         ThemeMode.PLUM -> "Plum Theme"
+        ThemeMode.CUSTOM -> "Custom Theme"
     }
 
     /** Presses the rail's Nth step (1-based) by tag, so a label appearing twice cannot confuse it. */

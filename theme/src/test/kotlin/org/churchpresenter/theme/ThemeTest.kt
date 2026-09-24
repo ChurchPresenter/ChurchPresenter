@@ -151,13 +151,15 @@ class ThemeTest {
     // ── The picker offers distinct themes ───────────────────────────────────────
 
     @Test
-    fun `every theme mode except system has its own scheme`() {
+    fun `every theme mode except system and custom has its own scheme`() {
+        // CUSTOM is generated from the user's accent by customColorScheme, not declared.
         assertEquals(
-            ThemeMode.entries.size - 1,
+            ThemeMode.entries.size - 2,
             allThemes.size,
             "a newly added ThemeMode needs a scheme here and in ChurchPresenterTheme's when",
         )
         assertTrue(ThemeMode.SYSTEM !in allThemes.keys, "system follows the OS rather than having its own colours")
+        assertTrue(ThemeMode.CUSTOM !in allThemes.keys, "custom is generated rather than declared")
     }
 
     @Test
