@@ -7,8 +7,9 @@ package org.churchpresenter.settings
  *
  * [styleTreeOf] projects a *full* settings object down to its non-content keys -- a keep-list, not
  * a diff -- and [withSparseOverride]/[BibleSettings.withSparseBibleOverride] merge that onto the
- * global document exactly as they always have. [DictionarySettings]/[StageMonitorSettings] have no
- * content-only fields at all, so the profile's copies are used wholesale.
+ * global document exactly as they always have; captions and Q&A go the same way, keeping
+ * [STT_GLOBAL_KEYS]/[QA_GLOBAL_KEYS]. [DictionarySettings]/[MediaSettings]/[StageMonitorSettings]
+ * have no content-only fields at all, so the profile's copies are used wholesale.
  *
  * Backgrounds are the exception: a profile follows the Background tab surface by surface unless it
  * says otherwise ([OutputProfile.backgroundOverrides]), so the house background -- what shows when
@@ -16,8 +17,22 @@ package org.churchpresenter.settings
  */
 fun AppSettings.resolvedFor(profile: OutputProfile): AppSettings = copy(
     stageMonitorSettings = profile.stageMonitorSettings,
-    // No `dictionarySettings` here on purpose: the dictionary's look is one per install, edited
-    // from the Dictionary tab's own gear, so every output resolves the document's copy unchanged.
+    dictionarySettings = profile.dictionarySettings,
+    mediaSettings = profile.mediaSettings,
+    // Scaling is a property of the screen's shape, so it is the profile's: a wall that wants Fill
+    // and a portrait confidence screen that wants Fit can show the same picture at once.
+    pictureSettings = pictureSettings.copy(scaleMode = profile.pictureScaleMode),
+    mediaScaleMode = profile.mediaScaleMode,
+    sttSettings = withSparseOverride(
+        sttSettings,
+        styleTreeOf(profile.sttSettings, STTSettings.serializer(), STT_GLOBAL_KEYS),
+        STTSettings.serializer(),
+    ),
+    qaSettings = withSparseOverride(
+        qaSettings,
+        styleTreeOf(profile.qaSettings, QASettings.serializer(), QA_GLOBAL_KEYS),
+        QASettings.serializer(),
+    ),
     backgroundSettings = resolveBackgroundSurfaces(
         global = backgroundSettings,
         profile = profile.backgroundSettings,

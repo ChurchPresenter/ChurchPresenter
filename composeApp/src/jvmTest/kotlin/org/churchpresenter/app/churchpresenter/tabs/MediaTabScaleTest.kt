@@ -8,13 +8,15 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * The Media tab's scale button: it names the mode the output is in, and one click saves the next.
+ * The Media tab's scale button: it names the mode every profile is in, and one click moves them all
+ * to the next.
  *
  * Like loop, it waits for something to be loaded. The harness applies a write to the settings the
  * tab was composed with and does not recompose, so each test starts in one mode and makes one click;
@@ -32,14 +34,17 @@ class MediaTabScaleTest {
     }
 
     private fun clickingFrom(mode: OutputScaleMode, label: String, next: OutputScaleMode) = mediaTab(
-        settings = { it.copy(mediaScaleMode = mode) },
+        settings = { it.withMediaScaleEverywhere(mode) },
     ) { _, reports ->
         loadUrl()
 
         mediaButton("Scale: $label").performClick()
         waitForIdle()
 
-        assertEquals(next, reports.settingsAfterChange?.mediaScaleMode)
+        // Scaling is per profile; the button is the shortcut that moves every one of them.
+        val after = reports.settingsAfterChange
+        assertEquals(next, after?.mediaScaleMode)
+        assertEquals(listOf(next), after?.projectionSettings?.outputProfiles?.map { it.mediaScaleMode }?.distinct())
     }
 
     @Test

@@ -3,12 +3,14 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.performClick
+import org.churchpresenter.app.churchpresenter.utils.withPictureScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The Pictures tab's scale button: it names the mode the output is in, and one click saves the next.
+ * The Pictures tab's scale button: it names the mode every profile is in, and one click moves them
+ * all to the next.
  *
  * The harness applies a write to the settings the tab was composed with and does not recompose, so
  * each test starts in one mode and makes one click. The order itself is pinned in `:settings` by
@@ -17,12 +19,15 @@ import kotlin.test.assertEquals
 class PicturesTabScaleTest {
 
     private fun clickingFrom(mode: OutputScaleMode, label: String, next: OutputScaleMode) = picturesTab(
-        settings = { it.copy(pictureSettings = it.pictureSettings.copy(scaleMode = mode)) },
+        settings = { it.withPictureScaleEverywhere(mode) },
     ) { _, reports ->
         pictureButton("Scale: $label").performClick()
         waitForIdle()
 
-        assertEquals(next, reports.settingsAfterChange?.pictureSettings?.scaleMode)
+        // Scaling is per profile; the button is the shortcut that moves every one of them.
+        val after = reports.settingsAfterChange
+        assertEquals(next, after?.pictureSettings?.scaleMode)
+        assertEquals(listOf(next), after?.projectionSettings?.outputProfiles?.map { it.pictureScaleMode }?.distinct())
     }
 
     @Test

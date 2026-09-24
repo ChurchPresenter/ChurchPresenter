@@ -14,7 +14,8 @@ const val DEFAULT_OUTPUT_PROFILE_ID = "default"
 
 /**
  * A named, reusable bundle of everything that decides how an output behaves: its display mode,
- * what content it shows, and its full Stage Monitor/Bible/Song/Background/Dictionary appearance.
+ * what content it shows, and its full Stage Monitor/Bible/Song/Background/captions/Dictionary/Q&A/
+ * subtitle appearance.
  *
  * An output only ever *assigns* one of these -- via [ScreenAssignment.activeProfileId] -- it never
  * carries any styling of its own. Editing a profile changes every output currently assigned to it,
@@ -27,8 +28,10 @@ const val DEFAULT_OUTPUT_PROFILE_ID = "default"
  * actually renders with ([resolvedFor]) keeps [BIBLE_GLOBAL_KEYS]/[SONG_GLOBAL_KEYS] -- the library
  * folder, file lists, translation-stack membership, column widths -- from the *global* document
  * and takes every other field from here; a profile that stored its own copy of the library folder
- * would go stale the moment the folder moved. [backgroundSettings]/[dictionarySettings]/
- * [stageMonitorSettings] have no such "one per install" fields, so they are carried wholesale.
+ * would go stale the moment the folder moved. [sttSettings] and [qaSettings] work the same way,
+ * keeping [STT_GLOBAL_KEYS]/[QA_GLOBAL_KEYS] (the caption server, the Q&A rate limit) from the
+ * document. [backgroundSettings]/[dictionarySettings]/[mediaSettings]/[stageMonitorSettings] have
+ * no such "one per install" fields, so they are carried wholesale.
  *
  * Deliberately excludes every field [ScreenAssignment] carries about the output's own identity or
  * physical wiring -- which monitor, key output, NDI/Browser Source network settings, names. Those
@@ -77,6 +80,18 @@ data class OutputProfile(
     val bibleSettings: BibleSettings = BibleSettings(),
     val songSettings: SongSettings = SongSettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
+    /** How live captions look on this output -- see [STT_GLOBAL_KEYS] for what stays install-wide. */
+    val sttSettings: STTSettings = STTSettings(),
+    /** How a Strong's dictionary card looks on this output. */
+    val dictionarySettings: DictionarySettings = DictionarySettings(),
+    /** How a Q&A question and its QR code look on this output -- see [QA_GLOBAL_KEYS]. */
+    val qaSettings: QASettings = QASettings(),
+    /** How video subtitles look on this output. */
+    val mediaSettings: MediaSettings = MediaSettings(),
+    /** How a picture or slide meets this output's shape: fit, fill or stretch. */
+    val pictureScaleMode: OutputScaleMode = OutputScaleMode.FIT,
+    /** How a video meets this output's shape: fit, fill or stretch. */
+    val mediaScaleMode: OutputScaleMode = OutputScaleMode.FIT,
 ) {
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF

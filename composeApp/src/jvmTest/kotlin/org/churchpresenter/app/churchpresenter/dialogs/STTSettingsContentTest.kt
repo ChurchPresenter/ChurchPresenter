@@ -3,6 +3,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,8 +27,13 @@ import kotlin.test.assertTrue
 
 class STTSettingsContentTest {
 
+    /**
+     * The dialog, or -- with [display] -- the caption form the Profiles tab draws, which is where
+     * everything about how captions look moved when it became per-profile.
+     */
     private fun dialog(
         settings: AppSettings = AppSettings(),
+        display: Boolean = false,
         block: ComposeUiTest.(latest: () -> AppSettings) -> Unit,
     ) {
         var latestSnapshot = settings
@@ -32,15 +42,21 @@ class STTSettingsContentTest {
                 MaterialTheme {
                     var current by remember { mutableStateOf(settings) }
                     latestSnapshot = current
-                    STTSettingsDialogContent(
-                        appSettings = current,
-                        onSettingsChange = { transform ->
-                            current = transform(current)
-                            latestSnapshot = current
-                        },
-                        onDismiss = {},
-                        availableFonts = listOf("Arial"),
-                    )
+                    val onChange: ((AppSettings) -> AppSettings) -> Unit = { transform ->
+                        current = transform(current)
+                        latestSnapshot = current
+                    }
+                    if (display) {
+                        Column(Modifier.verticalScroll(rememberScrollState())) {
+                            STTDisplaySettings(
+                                appSettings = current,
+                                onSettingsChange = onChange,
+                                availableFonts = listOf("Arial"),
+                            )
+                        }
+                    } else {
+                        STTSettingsDialogContent(appSettings = current, onSettingsChange = onChange, onDismiss = {})
+                    }
                 }
             }
             block { latestSnapshot }
@@ -68,41 +84,41 @@ class STTSettingsContentTest {
     // ── Toggles ──────────────────────────────────────────────────────────────────
 
     @Test
-    fun `word highlighting can be turned on`() = dialog { latest ->
+    fun `word highlighting can be turned on`() = dialog(display = true) { latest ->
         onNodeWithText("Word Highlighting").assertExists()
-        // index 0 is scripture detection, 1 is help-dev-mode (visible by default), 2 is word highlighting
-        onAllNodes(isToggleable())[2].assertIsOff().performClick()
+        // The caption form's first toggle -- the engine's two stayed in the dialog.
+        onAllNodes(isToggleable())[0].assertIsOff().performClick()
 
         assertEquals(true, latest().sttSettings.showWordHighlighting)
     }
 
     @Test
-    fun `in-progress text can be turned on`() = dialog { latest ->
-        onAllNodes(isToggleable())[3].assertIsOff().performClick()
+    fun `in-progress text can be turned on`() = dialog(display = true) { latest ->
+        onAllNodes(isToggleable())[1].assertIsOff().performClick()
         assertEquals(true, latest().sttSettings.showInProgress)
     }
 
     @Test
-    fun `translation in-progress can be turned on`() = dialog { latest ->
-        onAllNodes(isToggleable())[4].assertIsOff().performClick()
+    fun `translation in-progress can be turned on`() = dialog(display = true) { latest ->
+        onAllNodes(isToggleable())[2].assertIsOff().performClick()
         assertEquals(true, latest().sttSettings.showTranslationInProgress)
     }
 
     @Test
-    fun `drip feed is on by default and can be turned off`() = dialog { latest ->
-        onAllNodes(isToggleable())[5].assertIsOn().performClick()
+    fun `drip feed is on by default and can be turned off`() = dialog(display = true) { latest ->
+        onAllNodes(isToggleable())[3].assertIsOn().performClick()
         assertEquals(false, latest().sttSettings.dripFeedEnabled)
     }
 
     // ── Display mode / layout ────────────────────────────────────────────────────
 
     @Test
-    fun `the layout choice is hidden until Both is selected`() = dialog {
+    fun `the layout choice is hidden until Both is selected`() = dialog(display = true) {
         onNodeWithText("LAYOUT").assertDoesNotExist()
     }
 
     @Test
-    fun `picking Both reveals the layout choice`() = dialog { latest ->
+    fun `picking Both reveals the layout choice`() = dialog(display = true) { latest ->
         onNodeWithText("Transcription Only").performClick()
         onNodeWithText("Both").performClick()
         waitForIdle()
@@ -128,23 +144,24 @@ class STTSettingsContentTest {
     }
 
     @Test
-    fun `picking a position tile updates the setting`() = dialog { latest ->
-        onNodeWithText("C").performClick()
+    fun `picking a position tile updates the setting`() = dialog(display = true) { latest ->
+        onNodeWithContentDescription("C").performClick()
         assertEquals(Constants.CENTER, latest().sttSettings.position)
     }
 
     @Test
     fun `picking a different position tile replaces the previous choice`() = dialog(
         settings = AppSettings().let { it.copy(sttSettings = it.sttSettings.copy(position = Constants.CENTER)) },
+        display = true,
     ) { latest ->
-        onNodeWithText("TL").performClick()
+        onNodeWithContentDescription("TL").performClick()
         assertEquals(Constants.TOP_LEFT, latest().sttSettings.position)
     }
 
     // ── Text style ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `the styling column renders`() = dialog {
+    fun `the styling column renders`() = dialog(display = true) {
         onNodeWithText("Opacity:").assertExists()
     }
 
@@ -158,7 +175,6 @@ class STTSettingsContentTest {
                         appSettings = AppSettings(),
                         onSettingsChange = {},
                         onDismiss = { dismissed++ },
-                        availableFonts = listOf("Arial"),
                     )
                 }
             }

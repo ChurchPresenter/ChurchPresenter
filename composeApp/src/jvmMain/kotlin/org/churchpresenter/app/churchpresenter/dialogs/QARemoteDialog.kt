@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +29,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,32 +49,16 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.qa_admin_panel
 import churchpresenter.composeapp.generated.resources.qa_admin_uses_api_key
-import churchpresenter.composeapp.generated.resources.qa_background_color
 import churchpresenter.composeapp.generated.resources.qa_copy_url
 import churchpresenter.composeapp.generated.resources.qa_cooldown_label
 import churchpresenter.composeapp.generated.resources.qa_disable_public_access
-import churchpresenter.composeapp.generated.resources.qa_display_styling
 import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
 import churchpresenter.composeapp.generated.resources.qa_enable_public_access
-import churchpresenter.composeapp.generated.resources.qa_font
 import churchpresenter.composeapp.generated.resources.qa_local
-import churchpresenter.composeapp.generated.resources.qa_opacity
-import churchpresenter.composeapp.generated.resources.qa_position
-import churchpresenter.composeapp.generated.resources.qa_pos_bc
-import churchpresenter.composeapp.generated.resources.qa_pos_bl
-import churchpresenter.composeapp.generated.resources.qa_pos_br
-import churchpresenter.composeapp.generated.resources.qa_pos_c
-import churchpresenter.composeapp.generated.resources.qa_pos_cl
-import churchpresenter.composeapp.generated.resources.qa_pos_cr
-import churchpresenter.composeapp.generated.resources.qa_pos_tc
-import churchpresenter.composeapp.generated.resources.qa_pos_tl
-import churchpresenter.composeapp.generated.resources.qa_pos_tr
 import churchpresenter.composeapp.generated.resources.qa_public
 import churchpresenter.composeapp.generated.resources.qa_public_access
 import churchpresenter.composeapp.generated.resources.qa_public_access_description
-import churchpresenter.composeapp.generated.resources.qa_qr_bg_color
 import churchpresenter.composeapp.generated.resources.qa_qr_code_shows
-import churchpresenter.composeapp.generated.resources.qa_qr_fg_color
 import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qa_qr_message_label
 import churchpresenter.composeapp.generated.resources.qa_qr_message_reset
@@ -84,34 +66,21 @@ import churchpresenter.composeapp.generated.resources.qa_remote_dialog_descripti
 import churchpresenter.composeapp.generated.resources.qa_remote_dialog_title
 import churchpresenter.composeapp.generated.resources.qa_retry
 import churchpresenter.composeapp.generated.resources.qa_server_hint
-import churchpresenter.composeapp.generated.resources.qa_size
 import churchpresenter.composeapp.generated.resources.qa_starting_tunnel
-import churchpresenter.composeapp.generated.resources.qa_styling_qr_group
-import churchpresenter.composeapp.generated.resources.qa_styling_text_group
 import churchpresenter.composeapp.generated.resources.qa_submit_questions
-import churchpresenter.composeapp.generated.resources.qa_text_color
-import churchpresenter.composeapp.generated.resources.qa_transparent
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 
 
 @Composable
@@ -129,10 +98,11 @@ fun QARemoteDialog(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val availableFonts = rememberSystemFonts()
     val mainWindowState = LocalMainWindowState.current
     val dialogWidth = 760.dp
-    val dialogHeight = 700.dp
+    // Sized for the links, public access and the QR message -- how questions look on screen is
+    // styled per profile now -- and grown below if a tunnel state ever needs more.
+    val dialogHeight = 560.dp
     val maxDialogHeight = 900.dp
     val density = LocalDensity.current
     val scrollState = rememberScrollState()
@@ -173,7 +143,6 @@ fun QARemoteDialog(
                 onStopTunnel = onStopTunnel,
                 qaSettings = qaSettings,
                 onSettingsChange = onSettingsChange,
-                availableFonts = availableFonts,
                 scrollState = scrollState,
                 copyText = { text ->
                     SystemClipboard.copy(text)
@@ -191,9 +160,9 @@ fun QARemoteDialog(
  * Held apart from [QARemoteDialog] because that function's remaining work is the `DialogWindow` it
  * opens and the grow-to-fit effect sizing it, neither of which can run on a headless machine.
  *
- * Three things are taken as parameters rather than reached for here, because each is a piece of the
- * machine rather than of the dialog: [availableFonts] comes from the machine's installed fonts,
- * [copyText] writes the system clipboard, and [scrollState] is shared with the sizing effect above.
+ * Two things are taken as parameters rather than reached for here, because each is a piece of the
+ * machine rather than of the dialog: [copyText] writes the system clipboard, and [scrollState] is
+ * shared with the sizing effect above.
  * Passing them in is what lets a test press Copy and see *which* address was handed over — the
  * point of the URL-building rules below.
  */
@@ -210,7 +179,6 @@ internal fun QARemoteContent(
     onStopTunnel: () -> Unit,
     qaSettings: QASettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    availableFonts: List<String>,
     scrollState: ScrollState = rememberScrollState(),
     copyText: (String) -> Unit = {},
     onDismiss: () -> Unit
@@ -447,168 +415,45 @@ internal fun QARemoteContent(
                 Spacer(Modifier.height(16.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(Modifier.height(12.dp))
-
-                Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // ── Left: QR Code styling ────────────────────────
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(Res.string.qa_styling_qr_group), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(Modifier.height(8.dp))
-
-                        Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp)
-                                .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                                .hoverTint(RoundedCornerShape(8.dp)),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                                BasicTextField(
-                                    value = qaSettings.qrCodeMessage,
-                                    onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    singleLine = true,
-                                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                    decorationBox = { innerTextField ->
-                                        if (qaSettings.qrCodeMessage.isEmpty()) {
-                                            Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                                        }
-                                        innerTextField()
+                // What the QR code's link page says -- one message for the install. How a question
+                // and its QR code look on each output is styled per profile, on the Profiles tab.
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                            .hoverTint(RoundedCornerShape(8.dp)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                            BasicTextField(
+                                value = qaSettings.qrCodeMessage,
+                                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                decorationBox = { innerTextField ->
+                                    if (qaSettings.qrCodeMessage.isEmpty()) {
+                                        Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
                                     }
-                                )
-                            }
-                            RaisedIconButton(
-                                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
-                                modifier = Modifier.size(30.dp),
-                                shape = RoundedCornerShape(5.dp),
-                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                            ) {
-                                Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
-                            }
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))
-                            ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                            Spacer(Modifier.width(4.dp))
-                            SlimSlider(
-                                value = qaSettings.qrBackgroundOpacity / 100f,
-                                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } },
-                                valueRange = 0f..1f,
-                                modifier = Modifier.weight(1f),
-                                trailingLabel = "${qaSettings.qrBackgroundOpacity}%"
-                            )
-                        }
-                    }
-
-                    // ── Center: Position ──────────────────────────────
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(Modifier.height(8.dp))
-                        val positions = listOf(
-                            Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
-                            Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
-                            Constants.TOP_RIGHT to stringResource(Res.string.qa_pos_tr),
-                            Constants.CENTER_LEFT to stringResource(Res.string.qa_pos_cl),
-                            Constants.CENTER to stringResource(Res.string.qa_pos_c),
-                            Constants.CENTER_RIGHT to stringResource(Res.string.qa_pos_cr),
-                            Constants.BOTTOM_LEFT to stringResource(Res.string.qa_pos_bl),
-                            Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
-                            Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
-                        )
-                        ScreenPositionPicker(
-                            positions = positions,
-                            selected = qaSettings.position,
-                            onSelect = { posConst ->
-                                onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) }
-                            },
-                        )
-                    }
-
-                    // ── Right: Text & Background ─────────────────────
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(Res.string.qa_styling_text_group), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(Modifier.height(8.dp))
-
-                        ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.fillMaxWidth())
-                        Spacer(Modifier.height(8.dp))
-                        TextStyleButtons(
-                                bold = qaSettings.bold, italic = qaSettings.italic, underline = qaSettings.underline, shadow = qaSettings.shadow,
-                                onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },
-                                onItalicChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(italic = it)) } },
-                                onUnderlineChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(underline = it)) } },
-                                onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } },
-                                backdrop = qaSettings.backdrop,
-                                onBackdropChange = { updated ->
-                                    onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backdrop = updated)) }
-                                },
-                                outline = qaSettings.outline,
-                                onOutlineChange = { updated ->
-                                    onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(outline = updated)) }
-                                },
-                        )
-
-                        AnimatedVisibility(visible = qaSettings.shadow) {
-                            ShadowDetailRow(
-                                shadowColor = qaSettings.shadowColor, shadowSize = qaSettings.shadowSize, shadowOpacity = qaSettings.shadowOpacity,
-                                onColorChange = { c -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowColor = c)) } },
-                                onSizeChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowSize = v)) } },
-                                onOpacityChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowOpacity = v)) } },
-                            )
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
-                            NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-                        Column(horizontalAlignment = Alignment.Start) {
-                            val bgIsTransparent = qaSettings.backgroundColor.equals("transparent", ignoreCase = true)
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-                                if (bgIsTransparent) {
-                                    KeyButton(
-                                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(6.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                                    ) { Text(stringResource(Res.string.qa_background_color) + " · " + stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
-                                } else {
-                                    ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.weight(1f))
-                                    KeyButton(
-                                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } },
-                                        shape = RoundedCornerShape(6.dp)
-                                    ) { Text(stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
+                                    innerTextField()
                                 }
-                            }
-                            Spacer(Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                                Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                                Spacer(Modifier.width(4.dp))
-                                SlimSlider(
-                                    value = qaSettings.backgroundOpacity / 100f,
-                                    onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
-                                    valueRange = 0f..1f,
-                                    modifier = Modifier.weight(1f),
-                                    trailingLabel = "${qaSettings.backgroundOpacity}%"
-                                )
-                            }
+                            )
+                        }
+                        RaisedIconButton(
+                            onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
+                            modifier = Modifier.size(30.dp),
+                            shape = RoundedCornerShape(5.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
                         }
                     }
+                    Spacer(Modifier.height(8.dp))
                 }
             } else {
                 Spacer(Modifier.height(12.dp))

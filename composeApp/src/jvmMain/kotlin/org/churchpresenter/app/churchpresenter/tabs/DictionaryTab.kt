@@ -104,13 +104,9 @@ import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.search_clear
-import churchpresenter.composeapp.generated.resources.tooltip_dictionary_settings
 import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Cursor
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tune
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.dialogs.DictionarySettingsDialog
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.theme.components.DropdownSelector
@@ -157,7 +153,6 @@ fun DictionaryTab(
     // sits in the detail pane's action row beside Go Live, the way STTTab's does. Offered only
     // where there is a document to edit: the tab is also composed with no settings at all in
     // previews and tests.
-    var showDictionarySettings by remember { mutableStateOf(false) }
 
     Row(modifier = modifier) {
         DictionaryListPane(
@@ -215,15 +210,6 @@ fun DictionaryTab(
             getEntry = { number -> entryIndex[number] },
             onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
             onGoLive = onGoLive,
-            onOpenSettings = appSettings?.let { { showDictionarySettings = true } },
-        )
-    }
-
-    appSettings?.takeIf { showDictionarySettings }?.let { settings ->
-        DictionarySettingsDialog(
-            appSettings = settings,
-            onSettingsChange = { transform -> onSettingsChangeState.value(transform) },
-            onDismiss = { showDictionarySettings = false },
         )
     }
 }
@@ -500,8 +486,6 @@ private fun DictionaryDetailPane(
     getEntry: ((strongsNumber: String) -> StrongsEntry?)? = null,
     onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
-    /** Opens how the dictionary looks on screen. Absent where there is no document to edit. */
-    onOpenSettings: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier) {
         DictionaryDetailActionRow(
@@ -514,7 +498,6 @@ private fun DictionaryDetailPane(
             onToggleDictLanguage = onToggleDictLanguage,
             onAddToSchedule = onAddToSchedule,
             onGoLive = onGoLive,
-            onOpenSettings = onOpenSettings,
         )
 
         HorizontalDivider()
@@ -595,7 +578,6 @@ private fun DictionaryDetailActionRow(
     onToggleDictLanguage: () -> Unit,
     onAddToSchedule: ((StrongsEntry) -> Unit)?,
     onGoLive: ((StrongsEntry) -> Unit)?,
-    onOpenSettings: (() -> Unit)?,
 ) {
     val addScheduleStr = stringResource(Res.string.add_to_schedule)
     val goLiveStr = stringResource(Res.string.go_live)
@@ -659,15 +641,6 @@ private fun DictionaryDetailActionRow(
                     onClick = { entry?.let { onAddToSchedule(it) } },
                     enabled = entry != null,
                     tooltipText = addScheduleStr
-                )
-            }
-            if (onOpenSettings != null) {
-                ActionIconButton(
-                    onClick = onOpenSettings,
-                    tooltipText = stringResource(Res.string.tooltip_dictionary_settings),
-                    icon = Icons.Default.Tune,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
             // Go Live stays last, as it does on every other tab: it is the button the operator

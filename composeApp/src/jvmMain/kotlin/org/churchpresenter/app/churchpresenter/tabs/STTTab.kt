@@ -63,6 +63,7 @@ import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.StyledTextField
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.captionSettingsOnScreen
 import org.churchpresenter.app.churchpresenter.dialogs.STTSettingsDialog
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -82,7 +83,10 @@ fun STTTab(
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
-    val sttSettings = appSettings.sttSettings
+    // The server is the install's; how the transcript below reads -- how many segments, which
+    // languages, in-progress text, highlighting -- follows the captions an output actually shows,
+    // since those are set per profile now and the document's own copy is no longer edited.
+    val sttSettings = remember(appSettings) { appSettings.captionSettingsOnScreen() }
     val connected by sttManager.connected
     val connecting by sttManager.connecting
     val connectError by sttManager.connectError

@@ -67,7 +67,16 @@ internal fun sttTab(
     themeMode: ThemeMode? = null,
     block: ComposeUiTest.(stt: STTManager, presenter: PresenterManager, reports: STTReports) -> Unit,
 ) {
-    val appSettings = AppSettings(sttSettings = settings)
+    // On the document for the server, and on every profile for the rest: the tab's transcript
+    // reads the caption settings of a profile that shows captions, which are per profile now.
+    val appSettings = AppSettings(sttSettings = settings).let { doc ->
+        val projection = doc.projectionSettings
+        doc.copy(
+            projectionSettings = projection.copy(
+                outputProfiles = projection.outputProfiles.map { it.copy(sttSettings = settings) },
+            ),
+        )
+    }
     val stt = STTManager()
     val presenter = PresenterManager()
     val reports = STTReports()

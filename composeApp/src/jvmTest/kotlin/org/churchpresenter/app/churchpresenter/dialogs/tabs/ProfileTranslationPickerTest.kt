@@ -3,8 +3,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.SkikoComposeUiTest
-import androidx.compose.ui.test.assertIsOff
-import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,28 +18,23 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The Bible-translation picker in the profile header.
+ * The profile's Bible and song-language sources, on the Sources row of the Profiles tab.
  *
  * Which translations a profile shows is stored as [OutputProfile.bibleTranslations], a list of
- * positions in the configured stack, where **empty means all of them** -- so a translation added
- * later appears on every profile rather than having to be ticked on each one. Most of what is
- * tested here follows from that one normalisation:
+ * positions in the configured stack, in the order the profile draws them, where **empty means all
+ * of them** -- so a translation added later appears on every profile that was showing everything.
+ * Most of what is tested here follows from that one normalisation:
  *
  *  * it makes "none selected" unrepresentable as a selection, so showing none of them has to be
  *    stored as `bibleMode = SONG_LANG_OFF` instead, which is the same statement about the profile.
- *    Before that, unticking the last box wrote an empty list that read straight back as *all* and
- *    every box silently re-ticked;
+ *    An empty list written for "none" reads straight back as *all*;
  *  * and a **position** is only meaningful against the stack it was stored for. One past the end of
  *    the current stack is ignored rather than counted, and a selection left with none of its
  *    positions surviving shows nothing rather than reading as the empty "all of them".
  *
- * Ported from `ProjectionSettingsTabTranslationPickerTest`, which reached the same widget through
- * the Projection tab's Content Outputs dialog. It sits in the profile header now, always on screen,
- * so there is no dialog to open first.
- *
- * The controls are addressed by test tag, not caption: see [TranslationPickerTags]. The cleared
- * trigger reads "None", which is also what an unassigned dropdown reads, so text was never a safe
- * way to find it.
+ * The Bible source is an ordered list -- remove, add back, reorder -- rather than a checklist, since
+ * a profile can put its translations in its own order; the song languages keep their checklist.
+ * Controls are addressed by test tag: the rows live in a popup, and their captions repeat.
  */
 class ProfileTranslationPickerTest {
 
@@ -53,18 +49,16 @@ class ProfileTranslationPickerTest {
     )
 
     private fun SkikoComposeUiTest.openPicker() {
-        // No performScrollTo: the picker lives in the profile header, which is fixed above the
-        // scrolling panes, so there is no scrollable ancestor to ask.
-        onNodeWithTag(TranslationPickerTags.BIBLE.trigger).performClick()
+        onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
         waitForIdle()
     }
 
-    private fun SkikoComposeUiTest.toggleTranslation(index: Int) {
-        onNodeWithTag(TranslationPickerTags.BIBLE.row(index)).performClick()
+    /** Removes the translation drawn in [slot] -- a position in the profile's order, not the stack's. */
+    private fun SkikoComposeUiTest.removeSlot(slot: Int) {
+        onNode(hasContentDescription("Remove translation") and hasAnyAncestor(hasTestTag(bibleOrderRowTag(slot))))
+            .performClick()
         waitForIdle()
     }
-
-    private fun SkikoComposeUiTest.master() = onNodeWithTag(TranslationPickerTags.BIBLE.master)
 
     private fun AppSettings.picked(): List<Int> = profile().bibleTranslations
 
@@ -73,75 +67,59 @@ class ProfileTranslationPickerTest {
         profilesTab(threeTranslations()) { get ->
             openPicker()
             assertEquals(emptyList(), get().picked(), "empty means all of them")
-            master().assertIsOn()
+            onNodeWithTag(bibleOrderRowTag(2)).assertExists()
         }
     }
 
     @Test
-    fun `unticking narrows the selection to what is left`() {
+    fun `removing one narrows the selection to what is left`() {
         profilesTab(threeTranslations()) { get ->
             openPicker()
-            toggleTranslation(0)
+            removeSlot(0)
 
-            assertEquals(listOf(1, 2), get().picked(), "the unticked one is gone from the selection")
+            assertEquals(listOf(1, 2), get().picked(), "the removed one is gone from the selection")
         }
     }
 
     @Test
-    fun `unticking the last translation switches scripture off`() {
+    fun `removing the last translation switches scripture off`() {
         profilesTab(threeTranslations()) { get ->
             openPicker()
-            toggleTranslation(0)
-            toggleTranslation(1)
+            removeSlot(0)
+            removeSlot(0)
             assertEquals(listOf(2), get().picked())
 
-            toggleTranslation(2)
+            removeSlot(0)
 
             // Showing none of them is the same statement as switching scripture off. Storing it as
-            // an empty selection instead is what used to read back as "all" and re-tick every box.
+            // an empty selection instead is what used to read back as "all".
             assertEquals(Constants.SONG_LANG_OFF, get().profile().bibleMode)
-            master().assertIsOff()
-            onNodeWithText("0 of 3 translations enabled").assertExists()
+            onNodeWithText("0 of 3 translations").assertExists()
         }
     }
 
     @Test
-    fun `ticking one back on switches scripture on with just that one`() {
+    fun `adding one back switches scripture on with just that one`() {
         profilesTab(threeTranslations()) { get ->
             openPicker()
-            toggleTranslation(0)
-            toggleTranslation(1)
-            toggleTranslation(2)
+            repeat(3) { removeSlot(0) }
             assertEquals(Constants.SONG_LANG_OFF, get().profile().bibleMode)
 
-            toggleTranslation(1)
+            onNodeWithTag(bibleAddRowTag(1)).performClick()
+            waitForIdle()
 
             assertEquals(Constants.SONG_LANG_BOTH, get().profile().bibleMode, "scripture comes back on")
-            assertEquals(listOf(1), get().picked(), "with only the one that was ticked")
+            assertEquals(listOf(1), get().picked(), "with only the one that was added")
         }
     }
 
     @Test
-    fun `the master row switches the whole profile off and back on`() {
-        profilesTab(threeTranslations()) { get ->
-            openPicker()
-            master().performClick()
-            waitForIdle()
-            assertEquals(Constants.SONG_LANG_OFF, get().profile().bibleMode)
-
-            master().performClick()
-            waitForIdle()
-            assertEquals(Constants.SONG_LANG_BOTH, get().profile().bibleMode)
-        }
-    }
-
-    @Test
-    fun `the menu stays open across a toggle`() {
+    fun `the menu stays open across a removal`() {
         profilesTab(threeTranslations()) { _ ->
             openPicker()
-            toggleTranslation(0)
+            removeSlot(0)
 
-            onNodeWithTag(TranslationPickerTags.BIBLE.row(0)).assertExists("the menu must still be open")
+            onNodeWithTag(bibleOrderRowTag(0)).assertExists("the menu must still be open")
         }
     }
 
@@ -152,9 +130,8 @@ class ProfileTranslationPickerTest {
             profile = OutputProfile(bibleTranslations = listOf(0, 7)),
         )
         profilesTab(doc) { _ ->
-            openPicker()
             // One real translation, one stale position: the stale one must not be counted.
-            onNodeWithText("1 of 1 translations enabled").assertExists()
+            onNodeWithText("1 of 1 translations").assertExists()
         }
     }
 
@@ -165,8 +142,7 @@ class ProfileTranslationPickerTest {
             profile = OutputProfile(bibleTranslations = listOf(4, 5)),
         )
         profilesTab(doc) { _ ->
-            openPicker()
-            onNodeWithText("0 of 1 translations enabled").assertExists()
+            onNodeWithText("0 of 1 translations").assertExists()
         }
     }
 

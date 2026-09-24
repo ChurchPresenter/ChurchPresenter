@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
@@ -86,10 +87,14 @@ internal fun OutlinedText(
         return
     }
     Box(modifier = modifier) {
+        val strokeColor = parseHexColor(outline.color)
         Text(
             modifier = Modifier.matchParentSize(),
-            text = text,
-            color = parseHexColor(outline.color),
+            // Recoloured run by run: a span's own colour beats `color` below, so text built from
+            // coloured runs -- captions, a highlighted word -- stroked itself in its fill colour and
+            // the outline colour did nothing at all.
+            text = text.inColor(strokeColor),
+            color = strokeColor,
             fontSize = fontSize,
             fontFamily = fontFamily,
             fontWeight = fontWeight,
@@ -163,3 +168,16 @@ internal fun OutlinedText(
     maxLines = maxLines,
     onTextLayout = onTextLayout,
 )
+
+/**
+ * This text with every span drawn in [color], keeping everything else each span sets -- weight,
+ * style, decoration -- so the stroke copy lines up with the fill glyph for glyph.
+ */
+internal fun AnnotatedString.inColor(color: Color): AnnotatedString {
+    if (spanStyles.none { it.item.color.isSpecified }) return this
+    return AnnotatedString(
+        text = text,
+        spanStyles = spanStyles.map { range -> range.copy(item = range.item.copy(color = color)) },
+        paragraphStyles = paragraphStyles,
+    )
+}

@@ -3,6 +3,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,10 +48,15 @@ import kotlin.test.assertTrue
 class STTSettingsDialogContentTest {
 
     @OptIn(ExperimentalTestApi::class)
+    /**
+     * The dialog, or -- with [display] -- the caption form the Profiles tab draws, which is where
+     * everything about how captions look moved when it became per-profile.
+     */
     private fun sttDialog(
         sttSettings: STTSettings = STTSettings(),
         bibleEngineSettings: BibleEngineSettings = BibleEngineSettings(),
         availableFonts: List<String> = Utils.getAvailableSystemFonts(),
+        display: Boolean = false,
         block: ComposeUiTest.(get: () -> AppSettings, dismissCount: () -> Int) -> Unit,
     ) = runComposeUiTest {
         var current = AppSettings(sttSettings = sttSettings, bibleEngineSettings = bibleEngineSettings)
@@ -54,12 +64,25 @@ class STTSettingsDialogContentTest {
         setContent {
             MaterialTheme {
                 var state by remember { mutableStateOf(current) }
-                STTSettingsDialogContent(
-                    appSettings = state,
-                    onSettingsChange = { transform -> state = transform(state); current = state },
-                    onDismiss = { dismissCount++ },
-                    availableFonts = availableFonts,
-                )
+                val onChange: ((AppSettings) -> AppSettings) -> Unit = { transform ->
+                    state = transform(state)
+                    current = state
+                }
+                if (display) {
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        STTDisplaySettings(
+                            appSettings = state,
+                            onSettingsChange = onChange,
+                            availableFonts = availableFonts,
+                        )
+                    }
+                } else {
+                    STTSettingsDialogContent(
+                        appSettings = state,
+                        onSettingsChange = onChange,
+                        onDismiss = { dismissCount++ },
+                    )
+                }
             }
         }
         block({ current }, { dismissCount })
@@ -125,7 +148,8 @@ class STTSettingsDialogContentTest {
     // ── Display mode and layout ─────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the display mode dropdown stores each option and only reveals Layout for Both`() = sttDialog { get, _ ->
+    fun `the display mode dropdown stores each option and only reveals Layout for Both`() =
+        sttDialog(display = true) { get, _ ->
         onNodeWithText("Stacked").assertDoesNotExist()
 
         chooseFromDropdown(currentValue = "Transcription Only", target = "Translation Only")
@@ -139,7 +163,7 @@ class STTSettingsDialogContentTest {
 
     @Test
     fun `the layout dropdown stores each option`() =
-        sttDialog(sttSettings = STTSettings(displayMode = "both")) { get, _ ->
+        sttDialog(display = true, sttSettings = STTSettings(displayMode = "both")) { get, _ ->
             chooseFromDropdown(currentValue = "Stacked", target = "Stacked (Inverse)")
             assertEquals("stacked_inverse", get().sttSettings.layout)
 
@@ -153,7 +177,8 @@ class STTSettingsDialogContentTest {
     // ── Numeric fields ───────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `max segments stores a value within range and rejects one outside it`() = sttDialog { get, _ ->
+    fun `max segments stores a value within range and rejects one outside it`() =
+        sttDialog(display = true) { get, _ ->
         retypeNumberField(showing = 5, to = 20)
         assertEquals(20, get().sttSettings.maxSegments)
         retypeNumberField(showing = 20, to = 500)
@@ -163,7 +188,7 @@ class STTSettingsDialogContentTest {
     }
 
     @Test
-    fun `max lines stores a value within range and rejects one outside it`() = sttDialog { get, _ ->
+    fun `max lines stores a value within range and rejects one outside it`() = sttDialog(display = true) { get, _ ->
         retypeNumberField(showing = 3, to = 10)
         assertEquals(10, get().sttSettings.maxLines)
         retypeNumberField(showing = 10, to = 90)
@@ -173,7 +198,7 @@ class STTSettingsDialogContentTest {
     }
 
     @Test
-    fun `line spacing stores a value within range and rejects one outside it`() = sttDialog { get, _ ->
+    fun `line spacing stores a value within range and rejects one outside it`() = sttDialog(display = true) { get, _ ->
         retypeNumberField(showing = 130, to = 150)
         assertEquals(150, get().sttSettings.lineSpacing)
         retypeNumberField(showing = 150, to = 50)
@@ -185,18 +210,19 @@ class STTSettingsDialogContentTest {
     // ── Preview-behaviour checkboxes ────────────────────────────────────────────────────────────────
 
     @Test
-    fun `word highlighting in-progress and translation in-progress toggle independently`() = sttDialog { get, _ ->
-        onAllNodes(isToggleable())[2].performClick()
+    fun `word highlighting in-progress and translation in-progress toggle independently`() =
+        sttDialog(display = true) { get, _ ->
+        onAllNodes(isToggleable())[0].performClick()
         waitForIdle()
         assertEquals(true, get().sttSettings.showWordHighlighting)
         assertEquals(false, get().sttSettings.showInProgress)
 
-        onAllNodes(isToggleable())[3].performClick()
+        onAllNodes(isToggleable())[1].performClick()
         waitForIdle()
         assertEquals(true, get().sttSettings.showInProgress)
         assertEquals(true, get().sttSettings.showWordHighlighting, "word highlighting must stay on")
 
-        onAllNodes(isToggleable())[4].performClick()
+        onAllNodes(isToggleable())[2].performClick()
         waitForIdle()
         assertEquals(true, get().sttSettings.showTranslationInProgress)
         assertEquals(true, get().sttSettings.showInProgress, "in-progress must stay on")
@@ -205,9 +231,10 @@ class STTSettingsDialogContentTest {
     // ── Drip feed ────────────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the drip feed checkbox toggles and the speed field stores a value within its range`() = sttDialog { get, _ ->
+    fun `the drip feed checkbox toggles and the speed field stores a value within its range`() =
+        sttDialog(display = true) { get, _ ->
         assertEquals(true, get().sttSettings.dripFeedEnabled, "on by default")
-        onAllNodes(isToggleable())[5].performClick()
+        onAllNodes(isToggleable())[3].performClick()
         waitForIdle()
         assertEquals(false, get().sttSettings.dripFeedEnabled)
 
@@ -223,7 +250,7 @@ class STTSettingsDialogContentTest {
 
     @Test
     fun `the text colour field stores the confirmed hex`() =
-        sttDialog(sttSettings = STTSettings(translationTextColor = "#123123")) { get, _ ->
+        sttDialog(display = true, sttSettings = STTSettings(translationTextColor = "#123123")) { get, _ ->
             recolor(fromHex = "#FFFFFF", toHex = "#ABCDEF")
             assertTrue(get().sttSettings.textColor.equals("#ABCDEF", ignoreCase = true))
             assertEquals("#123123", get().sttSettings.translationTextColor, "must be untouched")
@@ -231,14 +258,14 @@ class STTSettingsDialogContentTest {
 
     @Test
     fun `the translation colour field stores the confirmed hex`() =
-        sttDialog(sttSettings = STTSettings(textColor = "#123123")) { get, _ ->
+        sttDialog(display = true, sttSettings = STTSettings(textColor = "#123123")) { get, _ ->
             recolor(fromHex = "#FFFFFF", toHex = "#654321")
             assertTrue(get().sttSettings.translationTextColor.equals("#654321", ignoreCase = true))
             assertEquals("#123123", get().sttSettings.textColor, "must be untouched")
         }
 
     @Test
-    fun `the background colour field stores the confirmed hex`() = sttDialog { get, _ ->
+    fun `the background colour field stores the confirmed hex`() = sttDialog(display = true) { get, _ ->
         recolor(fromHex = "transparent", toHex = "#334455")
         assertTrue(get().sttSettings.backgroundColor.equals("#334455", ignoreCase = true))
     }
@@ -246,7 +273,7 @@ class STTSettingsDialogContentTest {
     // ── Bold / italic / underline / shadow ──────────────────────────────────────────────────────────
 
     @Test
-    fun `the style buttons toggle bold italic and underline independently`() = sttDialog { get, _ ->
+    fun `the style buttons toggle bold italic and underline independently`() = sttDialog(display = true) { get, _ ->
         onNodeWithText("B").performClick()
         waitForIdle()
         assertEquals(true, get().sttSettings.bold)
@@ -269,7 +296,8 @@ class STTSettingsDialogContentTest {
     }
 
     @Test
-    fun `the shadow toggle reveals its detail row and clearing it hides the row again`() = sttDialog { get, _ ->
+    fun `the shadow toggle reveals its detail row and clearing it hides the row again`() =
+        sttDialog(display = true) { get, _ ->
         assertEquals(false, get().sttSettings.shadow, "no shadow out of the box")
         onAllNodesWithText("SIZE (%)").assertCountEquals(0)
 
@@ -288,6 +316,7 @@ class STTSettingsDialogContentTest {
     @Test
     fun `the shadow colour size and opacity fields store independently`() =
         sttDialog(
+            display = true,
             sttSettings = STTSettings(shadow = true, shadowColor = "#654321", shadowSize = 120, shadowOpacity = 60),
         ) { get, _ ->
             recolor(fromHex = "#654321", toHex = "#0F0F0F")
@@ -307,14 +336,15 @@ class STTSettingsDialogContentTest {
     @Test
     fun `the font dropdown stores the picked family`() {
         val target = uniquelyNamedFont()
-        sttDialog(sttSettings = STTSettings(fontType = SENTINEL_FONT)) { get, _ ->
+        sttDialog(display = true, sttSettings = STTSettings(fontType = SENTINEL_FONT)) { get, _ ->
             pickFont(showing = SENTINEL_FONT, to = target)
             assertEquals(target, get().sttSettings.fontType)
         }
     }
 
     @Test
-    fun `the font size field stores a value within range and rejects one outside it`() = sttDialog { get, _ ->
+    fun `the font size field stores a value within range and rejects one outside it`() =
+        sttDialog(display = true) { get, _ ->
         retypeNumberField(showing = 42, to = 72)
         assertEquals(72, get().sttSettings.fontSize)
         retypeNumberField(showing = 72, to = 400)
@@ -326,7 +356,7 @@ class STTSettingsDialogContentTest {
     // ── Position grid ────────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `every position button stores its own constant`() = sttDialog { get, _ ->
+    fun `every position button stores its own constant`() = sttDialog(display = true) { get, _ ->
         val positions = listOf(
             "TL" to Constants.TOP_LEFT,
             "TC" to Constants.TOP_CENTER,
@@ -339,7 +369,8 @@ class STTSettingsDialogContentTest {
             "BR" to Constants.BOTTOM_RIGHT,
         )
         for ((label, constant) in positions) {
-            onNodeWithText(label).performClick()
+            // The tiles are spots on a mini-screen now; their names are what they are called by.
+            onNodeWithContentDescription(label).performClick()
             waitForIdle()
             assertEquals(constant, get().sttSettings.position, "clicking $label must store $constant")
         }
@@ -348,7 +379,7 @@ class STTSettingsDialogContentTest {
     // ── Opacity slider ───────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `dragging the opacity slider to the far right stores 100`() = sttDialog { get, _ ->
+    fun `dragging the opacity slider to the far right stores 100`() = sttDialog(display = true) { get, _ ->
         val reading = dragOpacitySliderToEnd(toRight = true)
         assertEquals(100, reading)
         assertEquals(100, get().sttSettings.backgroundOpacity)
@@ -356,7 +387,7 @@ class STTSettingsDialogContentTest {
 
     @Test
     fun `dragging the opacity slider to the far left stores 0`() =
-        sttDialog(sttSettings = STTSettings(backgroundOpacity = 100)) { get, _ ->
+        sttDialog(display = true, sttSettings = STTSettings(backgroundOpacity = 100)) { get, _ ->
             val reading = dragOpacitySliderToEnd(toRight = false)
             assertEquals(0, reading)
             assertEquals(0, get().sttSettings.backgroundOpacity)

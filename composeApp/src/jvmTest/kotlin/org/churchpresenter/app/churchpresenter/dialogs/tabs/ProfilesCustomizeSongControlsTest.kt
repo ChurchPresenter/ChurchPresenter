@@ -35,7 +35,8 @@ class ProfilesCustomizeSongControlsTest {
         songMode: String = Constants.SONG_LANG_PRIMARY,
     ) = profileDocument(
         mode = mode,
-        profile = OutputProfile(songMode = songMode),
+        // The look-ahead on, or its chip is not offered at all.
+        profile = OutputProfile(songMode = songMode, songLookAhead = true),
         song = SongSettings(
             marginTop = 11,
             marginBottom = 22,

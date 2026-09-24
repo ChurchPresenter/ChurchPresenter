@@ -88,6 +88,20 @@ declares nothing at top level, so it generates no `ConstantsKt` facade to collid
 
 All three run in CI, gated on this directory or the shared build files changing.
 
+## Output profiles
+
+An output renders with `AppSettings.resolvedFor(profile)`: the profile's copy of each styled
+category, with the fields that are **one per install** taken from the document instead. Those are
+named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOBAL_KEYS`
+(`OutputSettingsResolution.kt`).
+
+- **A new field on one of those categories is per-profile by default.** If it is a folder, a
+  file list, a server address or anything else that must not differ between screens, add it to the
+  category's keep-list in the same change — otherwise one profile can quietly point somewhere else.
+- **Moving styling onto the profile needs a migration step** that seeds every profile from the
+  document's current value, only where the profile has none of its own (see versions 14 and 15).
+  Without it every profile silently takes the class defaults on the next load.
+
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test both in scope.

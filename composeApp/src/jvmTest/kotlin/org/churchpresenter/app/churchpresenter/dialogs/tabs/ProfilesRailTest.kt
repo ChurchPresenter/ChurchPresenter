@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -20,7 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * The rail down the left of the Profiles tab: creating, duplicating, renaming, deleting and
+ * The list down the left of the Profiles tab: creating, duplicating, renaming, deleting and
  * selecting a profile, and the empty state before there is one.
  *
  * New ground rather than a port -- the Projection tab had no such list. What it replaces is a set
@@ -43,6 +44,17 @@ class ProfilesRailTest {
     )
 
     private fun AppSettings.names() = projectionSettings.outputProfiles.map { it.name }
+
+    /**
+     * Opens [name]'s row and presses its Delete. A row's Duplicate and Delete show under the pointer
+     * and on the selected row, so selecting it first is what puts the button there.
+     */
+    private fun SkikoComposeUiTest.deleteProfile(name: String) {
+        onAllNodesWithText(name)[0].performClick()
+        waitForIdle()
+        onNode(hasContentDescription("Delete")).performClick()
+        waitForIdle()
+    }
 
     @Test
     fun `an empty document says what to do about it`() {
@@ -110,8 +122,7 @@ class ProfilesRailTest {
     @Test
     fun `Delete asks first, and removes the profile when confirmed`() {
         profilesTab(two()) { get ->
-            onAllNodes(hasContentDescription("Delete"))[1].performClick()
-            waitForIdle()
+            deleteProfile("Foyer")
             onNodeWithText("Delete \"Foyer\"? This can't be undone.").assertExists()
 
             onNodeWithText("OK").performClick()
@@ -124,8 +135,7 @@ class ProfilesRailTest {
     @Test
     fun `Delete can be backed out of`() {
         profilesTab(two()) { get ->
-            onAllNodes(hasContentDescription("Delete"))[1].performClick()
-            waitForIdle()
+            deleteProfile("Foyer")
             onNodeWithText("Cancel").performClick()
             waitForIdle()
 
@@ -141,8 +151,7 @@ class ProfilesRailTest {
             assignments = listOf(ScreenAssignment(activeProfileId = "foyer")),
         )
         profilesTab(doc) { get ->
-            onAllNodes(hasContentDescription("Delete"))[1].performClick()
-            waitForIdle()
+            deleteProfile("Foyer")
 
             // Refused rather than merely warned about: the dialog names the outputs still on it
             // and offers no confirm button at all, so the only way out is to back out.
@@ -156,7 +165,7 @@ class ProfilesRailTest {
     }
 
     @Test
-    fun `the rail says how many outputs each profile drives`() {
+    fun `the list names the outputs each profile drives`() {
         val doc = docWith(
             OutputProfile(id = "main", name = "Main"),
             assignments = listOf(
@@ -165,7 +174,7 @@ class ProfilesRailTest {
             ),
         )
         profilesTab(doc) { _ ->
-            onNodeWithText("Used by 2 output(s)").assertExists()
+            onAllNodesWithText("Used by Screen 1, Screen 2")[0].assertExists()
         }
     }
 
@@ -178,7 +187,7 @@ class ProfilesRailTest {
     @Test
     fun `Create Default Profile makes a named one`() {
         profilesTab(docWith()) { get ->
-            onNodeWithText("Create Default Profile").performClick()
+            onNode(hasContentDescription("Create Default Profile")).performClick()
             waitForIdle()
 
             val profiles = get().projectionSettings.outputProfiles

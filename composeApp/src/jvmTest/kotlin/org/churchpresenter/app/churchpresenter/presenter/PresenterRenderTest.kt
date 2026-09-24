@@ -19,6 +19,7 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * What the congregation actually reads off the screen.
@@ -248,6 +249,49 @@ class PresenterRenderTest {
         onNodeWithText("Also sehr liebte Gott", substring = true).assertExists()
         onAllNodesWithText(russian, substring = true).assertCountEquals(0)
         onAllNodesWithText("Want so lief het God", substring = true).assertCountEquals(0)
+    }
+
+    // ── A profile's own order ───────────────────────────────────────────────────────────────────
+    //
+    // The Profiles tab lets a room put its translations in its own order, and `bibleTranslations`
+    // stores that order. The screen draws them in it, not in the stack's.
+
+    @Test
+    fun `a screen draws its translations in the profile's order`() = runComposeUiTest {
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse(translationFileName = "kjv.spb"),
+                        verse(text = russian, abbreviation = "RST", translationFileName = "rst.spb"),
+                    ),
+                    appSettings = fourTranslations,
+                    bibleTranslations = listOf(1, 0),
+                )
+            }
+        }
+
+        val russianTop = onNodeWithText(russian, substring = true).fetchSemanticsNode().boundsInRoot.top
+        val englishTop = onNodeWithText(english, substring = true).fetchSemanticsNode().boundsInRoot.top
+        assertTrue(russianTop < englishTop, "the second of the stack was put first, so it is drawn first")
+    }
+
+    @Test
+    fun `verses with no translation identity follow the profile's order too`() = runComposeUiTest {
+        // Relayed from a linked instance: position is all there is to go on.
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(verse(), verse(text = russian, abbreviation = "RST")),
+                    appSettings = fourTranslations,
+                    bibleTranslations = listOf(1, 0),
+                )
+            }
+        }
+
+        val russianTop = onNodeWithText(russian, substring = true).fetchSemanticsNode().boundsInRoot.top
+        val englishTop = onNodeWithText(english, substring = true).fetchSemanticsNode().boundsInRoot.top
+        assertTrue(russianTop < englishTop)
     }
 
     // ── Selections survive a gap in what actually rendered ──────────────────────────────────────

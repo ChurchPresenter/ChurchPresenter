@@ -112,7 +112,7 @@ fun FontSettingsDropdown(
     /**
      * Told whenever the panel opens or closes. The panel's own height is a fraction of whatever
      * window hosts it (see [FontPickerPanel]'s `maxHeight`), so a caller sitting in a small dialog
-     * -- one that has nothing else forcing it wide, e.g. `MediaSubtitleSettingsDialog` -- can grow
+     * -- one that has nothing else forcing it wide -- can grow
      * its window while the panel is open and shrink back once it closes, rather than staying that
      * tall (and that empty below its own content) all the time.
      */

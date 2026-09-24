@@ -2,10 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.OutputProfile
@@ -37,9 +39,19 @@ class ProfileHeaderTest {
     private fun SkikoComposeUiTest.displayMode(label: String) =
         onNode(hasTextExactly(label) and hasClickAction() and !isToggleable())
 
-    /** A content switch, by its exact caption -- several of them are prefixes of each other. */
-    private fun SkikoComposeUiTest.contentSwitch(label: String) =
-        onNode(isToggleable() and hasTextExactly(label))
+    /**
+     * A content switch, by its exact caption -- several of them are prefixes of each other.
+     *
+     * The switches fold away behind "Content on this output", so the section is opened first if it
+     * is shut; it stays open across edits, so this is a no-op after the first call.
+     */
+    private fun SkikoComposeUiTest.contentSwitch(label: String): SemanticsNodeInteraction {
+        if (onAllNodesWithTag(PROFILE_CONTENT_LIST_TAG).fetchSemanticsNodes().isEmpty()) {
+            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
+            waitForIdle()
+        }
+        return onNode(isToggleable() and hasTextExactly(label))
+    }
 
     // ── Display mode ────────────────────────────────────────────────────────────────────────────
 

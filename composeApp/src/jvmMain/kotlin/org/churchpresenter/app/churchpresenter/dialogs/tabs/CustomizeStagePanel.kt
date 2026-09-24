@@ -65,8 +65,13 @@ internal fun CustomizeStagePanel(
             CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot)
             CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
-            // The stage monitor's own tab already draws its zone layout at full size; a second,
-            // smaller copy of it beside the controls would say nothing the tab does not.
+            CustomizePane.CAPTIONS,
+            CustomizePane.SUBTITLES,
+            CustomizePane.QA,
+            CustomizePane.DICTIONARY,
+            -> ProfileFormStage(pane, settings, output)
+            // The stage monitor gets no preview column -- its own tab draws its zone layout at full
+            // size -- so this is never reached.
             CustomizePane.STAGE_MONITOR -> NoStage()
         }
     }

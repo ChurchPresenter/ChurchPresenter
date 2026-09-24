@@ -75,7 +75,7 @@ internal fun CustomizeCategoryStrip(
     val lowerThird = LocalOutputStyleScope.current == OutputStyleScope.LOWER_THIRD
     // Background and the stage monitor have nothing at this level: a background surface is entirely
     // per-element, and the stage monitor's zones carry their own geometry.
-    if (pane == CustomizePane.BACKGROUND || pane == CustomizePane.STAGE_MONITOR) return
+    if (pane == CustomizePane.BACKGROUND || pane.isWholeForm) return
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -120,9 +120,8 @@ internal fun CustomizeCategoryStrip(
                 )
             }
             }
-            // Ruled out by the guard above; the compiler sees the same and calls an `else` here
-            // redundant.
-            CustomizePane.BACKGROUND, CustomizePane.STAGE_MONITOR -> Unit
+            // Ruled out by the guard above.
+            else -> Unit
         }
     }
 }

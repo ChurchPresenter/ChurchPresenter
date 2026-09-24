@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
+import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
+import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -78,7 +81,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.output_scale_mode
 import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
@@ -112,7 +114,6 @@ import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.media_subtitles_files
 import churchpresenter.composeapp.generated.resources.media_subtitles_load_file
 import churchpresenter.composeapp.generated.resources.media_subtitles_off
-import churchpresenter.composeapp.generated.resources.tooltip_media_subtitle_settings
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_select_file
@@ -129,11 +130,9 @@ import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.stop
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.LocalWentLive
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
@@ -150,7 +149,6 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.dialogs.MediaSubtitleSettingsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -251,7 +249,6 @@ fun MediaTab(
 
     val viewModel = LocalMediaViewModel.current ?: return
     val focusRequester = remember { FocusRequester() }
-    var showSubtitleSettingsDialog by remember { mutableStateOf(false) }
 
     val localFileLabel = stringResource(Res.string.media_local_file)
     val networkUrlLabel = stringResource(Res.string.media_network_url)
@@ -471,13 +468,6 @@ fun MediaTab(
                         tooltipText = stringResource(Res.string.add_to_schedule)
                     )
                 }
-                ActionIconButton(
-                    onClick = { showSubtitleSettingsDialog = true },
-                    tooltipText = stringResource(Res.string.tooltip_media_subtitle_settings),
-                    icon = Icons.Default.Tune,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
                 if (presenterManager != null) {
                     GoLiveButton(
                         onClick = {
@@ -720,11 +710,12 @@ fun MediaTab(
                 }
             }
 
-            // Scale: each click moves Fit → Fill → Stretch, lit whenever it is not Fit.
-            val scaleMode = appSettings.mediaScaleMode
-            val scaled = scaleMode != OutputScaleMode.FIT
-            val scaleName = stringResource(scaleMode.label)
-            val scaleLabel = stringResource(Res.string.output_scale_mode, scaleName)
+            // Scale: each click moves Fit → Fill → Stretch on every profile at once -- see the
+            // Pictures tab's button, which works the same way.
+            val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
+            val scaleMode = shared ?: OutputScaleMode.FIT
+            val scaled = shared != OutputScaleMode.FIT
+            val scaleLabel = scaleButtonLabel(shared, scaleMode)
             TooltipArea(
                 tooltip = { TransportTooltip(scaleLabel) },
                 tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -733,7 +724,10 @@ fun MediaTab(
                 )
             ) {
                 RaisedIconButton(
-                    onClick = { onSettingsChange { s -> s.copy(mediaScaleMode = scaleMode.next()) } },
+                    onClick = {
+                        val next = if (shared == null) scaleMode else scaleMode.next()
+                        onSettingsChange { s -> s.withMediaScaleEverywhere(next) }
+                    },
                     enabled = viewModel.isLoaded,
                     modifier = Modifier.size(TRANSPORT_KEY_SIZE),
                     colors = if (scaled) litKeyColors else keyColors
@@ -928,14 +922,6 @@ fun MediaTab(
                 }
             }
         }
-    }
-
-    if (showSubtitleSettingsDialog) {
-        MediaSubtitleSettingsDialog(
-            appSettings = appSettings,
-            onSettingsChange = onSettingsChange,
-            onDismiss = { showSubtitleSettingsDialog = false }
-        )
     }
 }
 
