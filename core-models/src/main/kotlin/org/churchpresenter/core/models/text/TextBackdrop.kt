@@ -37,6 +37,16 @@ data class TextBackdrop(
     val lineBackgroundOpacity: Int = DEFAULT_LINE_BACKGROUND_OPACITY,
     /** Added above *and* below each line box, so the band grows by twice this. */
     val lineBackgroundHeight: Int = 0,
+    /**
+     * Added to the left *and* right of each line's own text, so the band grows by twice this.
+     *
+     * The horizontal twin of [lineBackgroundHeight], and the reason it exists: a band sized to the
+     * text alone stops exactly at the last glyph, which reads as clipped rather than as a highlight.
+     * Only the band moves — the text is already laid out by the time any of this is drawn.
+     */
+    val lineBackgroundWidth: Int = 0,
+    /** Corner rounding of each band. 0 is a square corner, as it always was. */
+    val lineBackgroundRadius: Int = 0,
     /** Moves the band down; negative moves it up. The text does not move. */
     val lineBackgroundOffset: Int = 0,
     val border: Boolean = false,
@@ -59,6 +69,15 @@ data class TextBackdrop(
 
         /** The range each measurement is clamped to by the fields that edit it. */
         val OPACITY_RANGE = 0..100
+
+        /**
+         * How far a band may be grown, on either axis — [lineBackgroundHeight] and
+         * [lineBackgroundWidth] share it.
+         *
+         * Negative is allowed and useful: it pulls the band *inside* the text's own box, which is
+         * how a band is tightened onto a face whose glyphs leave slack in their line box. Not to be
+         * confused with [WIDTH_RANGE], which is the border's stroke thickness.
+         */
         val HEIGHT_RANGE = -100..200
         val OFFSET_RANGE = -200..200
         val WIDTH_RANGE = 0..40
