@@ -59,6 +59,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.semantic
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll
@@ -266,24 +267,26 @@ fun RemoteEventDialog(
         resizable = false,
         alwaysOnTop = true
     ) {
-        RemoteEventDialogContent(
-            event = event,
-            actionLabel = presentation.actionLabel,
-            typeIcon = presentation.typeIcon,
-            typeAccent = presentation.typeAccent,
-            bodyTitle = presentation.bodyTitle,
-            remaining = presentation.remaining,
-            showAllowPermanently = presentation.showAllowPermanently,
-            isClientKnownAllowed = isClientKnownAllowed,
-            isClientKnownBlocked = isClientKnownBlocked,
-            isInstanceLinkFollower = isInstanceLinkFollower,
-            onAllow = onAllow,
-            onAllowForSession = onAllowForSession,
-            onAllowPermanently = onAllowPermanently,
-            onBlockForSession = onBlockForSession,
-            onBlockPermanently = onBlockPermanently,
-            onDeny = onDeny,
-        )
+        ProvideUiFontScale {
+            RemoteEventDialogContent(
+                event = event,
+                actionLabel = presentation.actionLabel,
+                typeIcon = presentation.typeIcon,
+                typeAccent = presentation.typeAccent,
+                bodyTitle = presentation.bodyTitle,
+                remaining = presentation.remaining,
+                showAllowPermanently = presentation.showAllowPermanently,
+                isClientKnownAllowed = isClientKnownAllowed,
+                isClientKnownBlocked = isClientKnownBlocked,
+                isInstanceLinkFollower = isInstanceLinkFollower,
+                onAllow = onAllow,
+                onAllowForSession = onAllowForSession,
+                onAllowPermanently = onAllowPermanently,
+                onBlockForSession = onBlockForSession,
+                onBlockPermanently = onBlockPermanently,
+                onDeny = onDeny,
+            )
+        }
     }
 }
 

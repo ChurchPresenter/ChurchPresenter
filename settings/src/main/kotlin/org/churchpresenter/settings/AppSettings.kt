@@ -66,6 +66,19 @@ data class AppSettings(
     val maximizedLayout: WindowLayoutSettings = WindowLayoutSettings(),
     val windowedLayout: WindowLayoutSettings = WindowLayoutSettings(),
     val theme: String = Constants.SYSTEM,
+    /**
+     * The accent the Custom theme is generated from, as `#RRGGBB`. Empty until one is picked, which
+     * leaves the theme module's own default accent in place.
+     */
+    val customThemeAccent: String = "",
+    /** The Custom theme's optional per-role colours; each empty one is derived from the accent. */
+    val customThemeColors: CustomThemeColors = CustomThemeColors(),
+    /** Whether the Custom theme is built on a dark base rather than a light one. */
+    val customThemeDark: Boolean = true,
+    /** The font family the app's own UI is set in. Empty is the platform default. */
+    val uiFontFamily: String = "",
+    /** The UI text size, as a multiplier of the platform's font scale. Output windows ignore it. */
+    val uiFontScale: Float = 1f,
     val language: String = "en",
     val eulaAcceptedVersion: Int = 0,
     val webBookmarks: List<WebBookmark> = emptyList(),

@@ -105,6 +105,7 @@ import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
@@ -158,25 +159,27 @@ fun QARemoteDialog(
         title = stringResource(Res.string.qa_remote_dialog_title),
         resizable = false
     ) {
-        QARemoteContent(
-            serverUrl = serverUrl,
-            qaDisplayUrl = qaDisplayUrl,
-            onQaDisplayUrlChanged = onQaDisplayUrlChanged,
-            apiKeyEnabled = apiKeyEnabled,
-            apiKey = apiKey,
-            tunnelStatus = tunnelStatus,
-            tunnelUrl = tunnelUrl,
-            onStartTunnel = onStartTunnel,
-            onStopTunnel = onStopTunnel,
-            qaSettings = qaSettings,
-            onSettingsChange = onSettingsChange,
-            availableFonts = availableFonts,
-            scrollState = scrollState,
-            copyText = { text ->
-                SystemClipboard.copy(text)
-            },
-            onDismiss = onDismiss
-        )
+        ProvideUiFontScale {
+            QARemoteContent(
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                onQaDisplayUrlChanged = onQaDisplayUrlChanged,
+                apiKeyEnabled = apiKeyEnabled,
+                apiKey = apiKey,
+                tunnelStatus = tunnelStatus,
+                tunnelUrl = tunnelUrl,
+                onStartTunnel = onStartTunnel,
+                onStopTunnel = onStopTunnel,
+                qaSettings = qaSettings,
+                onSettingsChange = onSettingsChange,
+                availableFonts = availableFonts,
+                scrollState = scrollState,
+                copyText = { text ->
+                    SystemClipboard.copy(text)
+                },
+                onDismiss = onDismiss
+            )
+        }
     }
 }
 

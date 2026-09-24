@@ -69,6 +69,7 @@ import churchpresenter.composeapp.generated.resources.open_song_library
 import churchpresenter.composeapp.generated.resources.menu_check_for_updates
 import churchpresenter.composeapp.generated.resources.menu_contact_us
 import churchpresenter.composeapp.generated.resources.menu_language
+import churchpresenter.composeapp.generated.resources.menu_customize_theme
 import churchpresenter.composeapp.generated.resources.menu_view
 import churchpresenter.composeapp.generated.resources.menu_new_schedule
 import churchpresenter.composeapp.generated.resources.menu_open_schedule
@@ -90,6 +91,9 @@ import org.jetbrains.compose.resources.stringResource
 fun FrameWindowScope.NavigationTopBar(
     theme: (ThemeMode) -> Unit,
     currentTheme: ThemeMode = ThemeMode.SYSTEM,
+    /** Whether a custom accent has been saved, so View offers Custom beside the presets. */
+    hasCustomTheme: Boolean = false,
+    onCustomizeTheme: () -> Unit = {},
     onLanguageChange: (Language) -> Unit = {},
     onNewSchedule: () -> Unit = {},
     onOpenSchedule: () -> Unit = {},
@@ -151,7 +155,7 @@ fun FrameWindowScope.NavigationTopBar(
             onClearSchedule)
         EditMenu(editLabel, editMnemonic, ::accelerator, onSettings, onStatistics)
         ConnectMenu(onConnectToInstance, onDisconnectInstance, isInstanceLinkConnected)
-        ViewMenu(theme, currentTheme)
+        ViewMenu(theme, currentTheme, hasCustomTheme, onCustomizeTheme)
         LanguageMenu(onLanguageChange)
         HelpMenu(helpLabel, helpMnemonic, ::accelerator, onGettingStarted, onKeyboardShortcuts, onHowToBlog,
             onConverter, onSongLibrary, onCalendar, onAbout, onHelp, onContactUs, onCheckForUpdates)
@@ -280,17 +284,32 @@ private fun MenuBarScope.ConnectMenu(
 }
 
 @Composable
-private fun MenuBarScope.ViewMenu(theme: (ThemeMode) -> Unit, currentTheme: ThemeMode) {
+private fun MenuBarScope.ViewMenu(
+    theme: (ThemeMode) -> Unit,
+    currentTheme: ThemeMode,
+    hasCustomTheme: Boolean,
+    onCustomizeTheme: () -> Unit,
+) {
     Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
-        // Every theme, from the enum. This was ten RadioButtonItems written out by hand, which
+        // Every preset, from the enum. This was ten RadioButtonItems written out by hand, which
         // compiled perfectly while silently offering fewer themes than the app shipped.
-        ThemeMode.entries.forEach { mode ->
+        ThemeMode.entries.filter { it != ThemeMode.CUSTOM }.forEach { mode ->
             RadioButtonItem(
                 text = themeDisplayName(mode),
                 selected = currentTheme == mode,
                 onClick = { theme.invoke(mode) }
             )
         }
+        Separator()
+        // Custom only once there is one to go back to; until then it would paint the default accent.
+        if (hasCustomTheme || currentTheme == ThemeMode.CUSTOM) {
+            RadioButtonItem(
+                text = themeDisplayName(ThemeMode.CUSTOM),
+                selected = currentTheme == ThemeMode.CUSTOM,
+                onClick = { theme.invoke(ThemeMode.CUSTOM) }
+            )
+        }
+        Item(stringResource(Res.string.menu_customize_theme), onClick = onCustomizeTheme)
     }
 }
 

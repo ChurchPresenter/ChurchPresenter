@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import org.churchpresenter.app.churchpresenter.composables.CenteredGlyphLine
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -930,17 +931,27 @@ private fun AtemUploadIconButton(
                     }
                 }
             }
-            Text(
-                text = badge,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                color = MaterialTheme.colorScheme.onPrimary,
-                textAlign = TextAlign.Center,
+            // The digit is centred by the circle's own Box, on a line box trimmed to the glyph: a bare
+            // Text kept labelSmall's 16sp line inside the 12dp circle, and sat low or clipped.
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 4.dp, end = 4.dp)
                     .size(12.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-            )
+                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = badge,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        lineHeight = 9.sp,
+                        lineHeightStyle = CenteredGlyphLine,
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }

@@ -46,6 +46,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.presenter.invalidateBibleLottieTemplates
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.DropdownSelector
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -169,24 +170,26 @@ internal fun BibleLottieGeneratorWindow(
         title = stringResource(Res.string.bible_lottie_gen_window_title),
         resizable = true,
     ) {
-        BibleLottieGenApp(
-            outputDir = outputDir,
-            onFileSaved = onSaved,
-            seed = seed,
-            embedded = true,
-            // The app's native chooser, which shows the pictures themselves, opened on the stock
-            // library so the bundled and downloaded backgrounds are the first thing offered.
-            pickImage = {
-                FileChooser.platformInstance.chooseSingle(
-                    path = stockBackgroundsDir(),
-                    filters = listOf(FileNameExtensionFilter(imageFilter, "jpg", "jpeg", "png", "webp")),
-                    title = "",
-                    selectDirectory = false,
-                )?.toFile()
-            },
-            colorField = hostColorField,
-            fontPicker = hostFontPicker(fonts, fontLabel),
-        )
+        ProvideUiFontScale {
+            BibleLottieGenApp(
+                outputDir = outputDir,
+                onFileSaved = onSaved,
+                seed = seed,
+                embedded = true,
+                // The app's native chooser, which shows the pictures themselves, opened on the stock
+                // library so the bundled and downloaded backgrounds are the first thing offered.
+                pickImage = {
+                    FileChooser.platformInstance.chooseSingle(
+                        path = stockBackgroundsDir(),
+                        filters = listOf(FileNameExtensionFilter(imageFilter, "jpg", "jpeg", "png", "webp")),
+                        title = "",
+                        selectDirectory = false,
+                    )?.toFile()
+                },
+                colorField = hostColorField,
+                fontPicker = hostFontPicker(fonts, fontLabel),
+            )
+        }
     }
 }
 

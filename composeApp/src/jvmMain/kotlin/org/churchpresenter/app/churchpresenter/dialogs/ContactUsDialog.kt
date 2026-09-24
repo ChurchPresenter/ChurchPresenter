@@ -55,6 +55,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
@@ -168,32 +169,34 @@ fun ContactUsDialog(
         title = stringResource(Res.string.contact_us_title),
         resizable = false
     ) {
-        ContactUsDialogContent(
-            onDismiss = onDismiss,
-            types = types,
-            selectedType = selectedType,
-            onSelectedTypeChange = { selectedType = it },
-            name = name,
-            onNameChange = { name = it },
-            email = email,
-            onEmailChange = { email = it },
-            message = message,
-            onMessageChange = { message = it },
-            status = status,
-            onSend = {
-                status = SendStatus.Sending
-                scope.launch {
-                    status = submitContactRequest(
-                        selectedType.second, name, email, message, errorText, networkText, rateLimitedText
-                    )
-                    if (status == SendStatus.Sent) {
-                        delay(SENT_CONFIRMATION_MS)
-                        onDismiss()
+        ProvideUiFontScale {
+            ContactUsDialogContent(
+                onDismiss = onDismiss,
+                types = types,
+                selectedType = selectedType,
+                onSelectedTypeChange = { selectedType = it },
+                name = name,
+                onNameChange = { name = it },
+                email = email,
+                onEmailChange = { email = it },
+                message = message,
+                onMessageChange = { message = it },
+                status = status,
+                onSend = {
+                    status = SendStatus.Sending
+                    scope.launch {
+                        status = submitContactRequest(
+                            selectedType.second, name, email, message, errorText, networkText, rateLimitedText
+                        )
+                        if (status == SendStatus.Sent) {
+                            delay(SENT_CONFIRMATION_MS)
+                            onDismiss()
+                        }
                     }
-                }
-            },
-            sentText = sentText,
-        )
+                },
+                sentText = sentText,
+            )
+        }
     }
 }
 

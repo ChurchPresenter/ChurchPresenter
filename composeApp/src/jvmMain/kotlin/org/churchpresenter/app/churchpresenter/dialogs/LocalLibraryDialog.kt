@@ -59,6 +59,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.jetbrains.compose.resources.stringResource
@@ -176,13 +177,15 @@ fun LocalLibraryDialog(
         title = stringResource(titleRes),
         resizable = true
     ) {
-        LocalLibraryDialogContent(
-            mediaType = mediaType,
-            downloadedFiles = allFiles,
-            bundledFileNames = bundledFileNames,
-            onDismiss = onDismiss,
-            onMediaSelected = onMediaSelected,
-        )
+        ProvideUiFontScale {
+            LocalLibraryDialogContent(
+                mediaType = mediaType,
+                downloadedFiles = allFiles,
+                bundledFileNames = bundledFileNames,
+                onDismiss = onDismiss,
+                onMediaSelected = onMediaSelected,
+            )
+        }
     }
 }
 

@@ -69,6 +69,7 @@ import churchpresenter.composeapp.generated.resources.story_prompt_share
 import churchpresenter.composeapp.generated.resources.story_prompt_window_title
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.isDarkScheme
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.Font
@@ -144,7 +145,9 @@ fun ShareYourStoryDialog(
         title = stringResource(Res.string.story_prompt_window_title),
         resizable = false,
     ) {
-        ShareYourStoryContent(onShare = onShare, onDismiss = onDismiss)
+        ProvideUiFontScale {
+            ShareYourStoryContent(onShare = onShare, onDismiss = onDismiss)
+        }
     }
 }
 

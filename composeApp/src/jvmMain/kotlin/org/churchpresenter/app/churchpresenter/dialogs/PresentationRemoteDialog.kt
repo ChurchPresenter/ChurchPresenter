@@ -59,6 +59,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 
@@ -110,22 +111,24 @@ fun PresentationRemoteDialog(
         title = stringResource(Res.string.presentation_remote_control),
         resizable = false
     ) {
-        PresentationRemoteDialogContent(
-            settings = settings,
-            onSettingsChange = onSettingsChange,
-            serverUrl = serverUrl,
-            apiKeyEnabled = apiKeyEnabled,
-            apiKey = apiKey,
-            tunnelStatus = tunnelStatus,
-            tunnelUrl = tunnelUrl,
-            presentationDisplayUrl = presentationDisplayUrl,
-            onPresentationDisplayUrlChanged = onPresentationDisplayUrlChanged,
-            onStartTunnel = onStartTunnel,
-            onStopTunnel = onStopTunnel,
-            onDismiss = onDismiss,
-            scrollState = scrollState,
-            copyText = copyText,
-        )
+        ProvideUiFontScale {
+            PresentationRemoteDialogContent(
+                settings = settings,
+                onSettingsChange = onSettingsChange,
+                serverUrl = serverUrl,
+                apiKeyEnabled = apiKeyEnabled,
+                apiKey = apiKey,
+                tunnelStatus = tunnelStatus,
+                tunnelUrl = tunnelUrl,
+                presentationDisplayUrl = presentationDisplayUrl,
+                onPresentationDisplayUrlChanged = onPresentationDisplayUrlChanged,
+                onStartTunnel = onStartTunnel,
+                onStopTunnel = onStopTunnel,
+                onDismiss = onDismiss,
+                scrollState = scrollState,
+                copyText = copyText,
+            )
+        }
     }
 }
 

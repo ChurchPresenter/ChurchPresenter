@@ -66,6 +66,7 @@ import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.EBibleSource
 import org.churchpresenter.bibleformats.catalog.ZefaniaSource
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -103,12 +104,14 @@ fun BibleCatalogBrowserDialog(
         title = stringResource(Res.string.bible_catalog_title),
         resizable = true
     ) {
-        BibleCatalogBrowserDialogContent(
-            viewModels = viewModels,
-            tabLabels = tabLabels,
-            onDismiss = onDismiss,
-            onBibleInstalled = onBibleInstalled,
-        )
+        ProvideUiFontScale {
+            BibleCatalogBrowserDialogContent(
+                viewModels = viewModels,
+                tabLabels = tabLabels,
+                onDismiss = onDismiss,
+                onBibleInstalled = onBibleInstalled,
+            )
+        }
     }
 }
 

@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_bg_color
@@ -207,25 +208,27 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
             title = stringResource(Res.string.canvas_text_content),
             resizable = true
         ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                    StyledTextField(
-                        value = textValue,
-                        onValueChange = {
-                            textValue = it
-                            onUpdate(source.copy(text = it))
-                        },
-                        label = stringResource(Res.string.canvas_text_content),
-                        singleLine = false,
-                        modifier = Modifier.fillMaxWidth().weight(1f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        RaisedButton(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
-                            Text(stringResource(Res.string.close))
+            ProvideUiFontScale {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                        StyledTextField(
+                            value = textValue,
+                            onValueChange = {
+                                textValue = it
+                                onUpdate(source.copy(text = it))
+                            },
+                            label = stringResource(Res.string.canvas_text_content),
+                            singleLine = false,
+                            modifier = Modifier.fillMaxWidth().weight(1f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            RaisedButton(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
+                                Text(stringResource(Res.string.close))
+                            }
                         }
                     }
                 }

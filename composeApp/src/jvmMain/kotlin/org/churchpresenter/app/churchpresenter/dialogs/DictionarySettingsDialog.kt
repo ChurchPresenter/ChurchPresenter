@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -58,17 +59,19 @@ fun DictionarySettingsDialog(
         state = dialogState,
         title = stringResource(Res.string.dictionary_settings_dialog_title),
     ) {
-        Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    DictionarySettingsTab(settings = appSettings, onSettingsChange = onSettingsChange)
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    RaisedButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
-                        Text(stringResource(Res.string.close))
+        ProvideUiFontScale {
+            Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                        DictionarySettingsTab(settings = appSettings, onSettingsChange = onSettingsChange)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        RaisedButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
+                            Text(stringResource(Res.string.close))
+                        }
                     }
                 }
             }

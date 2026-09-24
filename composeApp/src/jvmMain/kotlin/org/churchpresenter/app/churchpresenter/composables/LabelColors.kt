@@ -62,7 +62,7 @@ internal fun LabelColors.matches(other: LabelColors): Boolean =
 internal fun themeLabelPresets(): List<LabelColors> {
     val current = MaterialTheme.colorScheme
     val palettes = ThemeMode.entries
-        .filter { it != ThemeMode.SYSTEM }
+        .filter { it != ThemeMode.SYSTEM && it != ThemeMode.CUSTOM }
         .map { colorSchemeFor(it) }
         .map { LabelColors(cpColorToHex(it.primaryContainer), cpColorToHex(it.onPrimaryContainer)) }
     return buildList {
