@@ -8,6 +8,10 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
+import java.awt.Insets
+import java.awt.Rectangle
+import java.awt.Toolkit
+import java.awt.Window
 
 /**
  * Provides the main application [WindowState] to all descendant composables so that
@@ -83,3 +87,22 @@ fun dialogSizeWithin(
     )
 }
 
+data class ScreenArea(val x: Dp, val y: Dp, val width: Dp, val height: Dp)
+
+fun usableScreenArea(near: Window?): ScreenArea? = try {
+    val config = near?.graphicsConfiguration
+        ?: GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+    areaInside(config.bounds, Toolkit.getDefaultToolkit().getScreenInsets(config))
+} catch (_: HeadlessException) {
+    null
+}
+
+internal fun areaInside(bounds: Rectangle, insets: Insets): ScreenArea = ScreenArea(
+    x = (bounds.x + insets.left).dp,
+    y = (bounds.y + insets.top).dp,
+    width = (bounds.width - insets.left - insets.right).dp,
+    height = (bounds.height - insets.top - insets.bottom).dp,
+)
+
+internal fun staysAboveMainWindow(active: Any?, mainWindow: Any?, own: Any?): Boolean =
+    mainWindow != null && active != null && (active === mainWindow || active === own)

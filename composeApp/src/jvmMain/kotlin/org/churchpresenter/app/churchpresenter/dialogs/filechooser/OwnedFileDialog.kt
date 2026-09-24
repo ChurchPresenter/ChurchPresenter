@@ -15,8 +15,11 @@ import java.io.File
  */
 internal object OwnedFileDialog {
 
-    suspend fun save(owner: Frame, title: String, suggestedName: String): File? =
-        show(owner, title, FileDialog.SAVE) { it.file = suggestedName }
+    suspend fun save(owner: Frame, title: String, suggestedName: String, folder: File? = null): File? =
+        show(owner, title, FileDialog.SAVE) { dialog ->
+            dialog.file = suggestedName
+            if (folder != null) dialog.directory = folder.path
+        }
 
     suspend fun open(owner: Frame, title: String, extensions: Set<String>): File? =
         show(owner, title, FileDialog.LOAD) { dialog ->

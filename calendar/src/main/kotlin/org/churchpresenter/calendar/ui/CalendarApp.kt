@@ -429,7 +429,14 @@ private fun exportAction(
             )
         }
         scope.launch {
-            val target = host.chooseExportFile("${service.name} - ${service.date}.pdf") ?: return@launch
+            val lastFolder = File(preferences.pdfExport.lastFolder).takeIf { it.path.isNotEmpty() && it.isDirectory }
+            val target = host.chooseExportFile("${service.name} - ${service.date}.pdf", lastFolder) ?: return@launch
+            target.parentFile?.path?.let { folder ->
+                val current = state.document.preferences
+                if (folder != current.pdfExport.lastFolder) {
+                    state.updatePreferences(current.copy(pdfExport = current.pdfExport.copy(lastFolder = folder)))
+                }
+            }
             // Off the composing thread: this embeds a font and writes a file.
             withContext(io) {
                 runCatching {
