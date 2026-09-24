@@ -82,17 +82,37 @@ class AnnouncementsTabAppearanceTest {
         }
     }
 
+    /**
+     * Fade/None take a different preview branch than the slide-from animations, with its own
+     * position-to-alignment mapping — these walk every position under that branch.
+     *
+     * **Split by row rather than run as one loop**, and the reason is the clock. That branch draws
+     * an `AnimatedContent` keyed on the position, so *changing* the position runs a full fade of the
+     * announcement's own display duration, and `waitForIdle` waits for it. Nine of them in one body
+     * cost ~9s here and blew `runTest`'s 60s budget on a loaded CI runner — which fails as
+     * `UncompletedCoroutinesError`, naming neither the test's own assertion nor the wait. The total
+     * is unchanged; what changes is that no single body is anywhere near the limit.
+     *
+     * The fade is production behaviour and correct, so it is not injectable and not worth making so.
+     */
     @Test
-    fun `every screen position is honored by the static preview too`() =
+    fun `the top row of positions is honored by the static preview`() = walkPositions(
+        "Top Left", "Top Center", "Top Right",
+    )
+
+    @Test
+    fun `the middle row of positions is honored by the static preview`() = walkPositions(
+        "Center Left", AnnouncementLabel.CENTER, "Center Right",
+    )
+
+    @Test
+    fun `the bottom row of positions is honored by the static preview`() = walkPositions(
+        "Bottom Left", "Bottom Center", "Bottom Right",
+    )
+
+    private fun walkPositions(vararg labels: String) =
         announcementsTab(initial = AnnouncementsSettings(animationType = Constants.ANIMATION_FADE)) { _, reports ->
-            // Fade/None take a different preview branch than the slide-from animations, with its
-            // own position-to-alignment mapping — this walks every position under that branch.
-            for (label in listOf(
-                "Top Left", "Top Center", "Top Right",
-                "Center Left", "Center Right",
-                "Bottom Left", "Bottom Center", "Bottom Right",
-                AnnouncementLabel.CENTER,
-            )) {
+            for (label in labels) {
                 clickPosition(label)
                 assertEquals(label, reports.settings?.position)
             }

@@ -13,6 +13,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -267,6 +268,31 @@ class TextBackdropDialogTest {
     fun `an opacity past 100 is not reported`() = dialog(tuned("fill")) { get, _ ->
         retype(71, 140)
         assertEquals(71, get().lineBackgroundOpacity, "the field withholds a value outside its range")
+    }
+
+    @Test
+    fun `the equal-width toggle turns sharing on`() = dialog(tuned("fill")) { get, _ ->
+        assertFalse(get().lineBackgroundUniformWidth, "each band follows its own line by default")
+
+        onNodeWithTag(BACKDROP_UNIFORM_WIDTH_TAG).performClick()
+
+        assertTrue(get().lineBackgroundUniformWidth, "the bands should now share one width")
+        assertEquals(47, get().lineBackgroundWidth, "the width offset is a separate setting")
+    }
+
+    @Test
+    fun `the equal-width toggle turns sharing back off`() = dialog(
+        tuned("fill").copy(lineBackgroundUniformWidth = true)
+    ) { get, _ ->
+        onNodeWithTag(BACKDROP_UNIFORM_WIDTH_TAG).performClick()
+
+        assertFalse(get().lineBackgroundUniformWidth, "back to a band per line")
+    }
+
+    @Test
+    fun `the equal-width toggle belongs to the fill, not the border`() = dialog(tuned("border")) { _, _ ->
+        // Border-only draws one box around the whole block, so there is nothing to equalise.
+        onNodeWithTag(BACKDROP_UNIFORM_WIDTH_TAG).assertDoesNotExist()
     }
 
     // ── The border fields ─────────────────────────────────────────────────────

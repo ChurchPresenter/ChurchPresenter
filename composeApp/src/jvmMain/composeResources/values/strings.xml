@@ -108,6 +108,7 @@
     <string name="backdrop_height_offset">Height offset</string>
     <string name="backdrop_width_offset">Width offset</string>
     <string name="backdrop_fill_radius">Corner radius</string>
+    <string name="backdrop_fill_uniform_width">Same width for every line</string>
     <string name="backdrop_vertical_offset">Vertical offset</string>
     <string name="backdrop_border_color">Border color</string>
     <string name="backdrop_border_width">Thickness</string>
@@ -798,6 +799,7 @@
     <string name="tooltip_collapse_schedule">Collapse Schedule</string>
     <string name="tooltip_expand_schedule">Expand Schedule</string>
     <string name="schedule_drop_hint">Drag files here to add to schedule</string>
+    <string name="schedule_drop_unsupported">Can't add %1$s</string>
     <string name="schedule_add_files">Add Files…</string>
     <string name="schedule_item_count">%1$d items</string>
     <string name="schedule_density_compact">Compact</string>

@@ -89,7 +89,10 @@ sealed class ScheduleItem {
         val mediaUrl: String,       // local path or URL
         val mediaTitle: String,
         val mediaType: String,      // "local", "youtube", "vimeo"
-        override val displayText: String = "🎬 $mediaTitle",
+        // No glyph prefix. The row draws a type chip carrying the same clapperboard, so a marked
+        // title put two of them side by side — which is not what the other kinds do, and not what
+        // the chip is for. It was added when the list had no chip to tell kinds apart.
+        override val displayText: String = mediaTitle,
         val subtitleUrl: String = "" // external subtitle file, blank for none
     ) : ScheduleItem()
 
@@ -101,7 +104,8 @@ sealed class ScheduleItem {
         val presetLabel: String,
         val pauseAtFrame: Boolean,
         val pauseDurationMs: Long,
-        override val displayText: String = "▼ $presetLabel"
+        // As with MediaItem above: the chip already draws this triangle.
+        override val displayText: String = presetLabel
     ) : ScheduleItem()
 
     @Serializable

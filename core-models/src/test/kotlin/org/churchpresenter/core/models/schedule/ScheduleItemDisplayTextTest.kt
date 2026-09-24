@@ -89,7 +89,7 @@ class ScheduleItemDisplayTextTest {
     }
 
     @Test
-    fun `media and lower thirds are marked so they stand out in the list`() {
+    fun `media and lower thirds name themselves, and leave the glyph to the chip`() {
         val media = ScheduleItem.MediaItem(
             id = "1",
             mediaUrl = "/clip.mp4",
@@ -100,8 +100,10 @@ class ScheduleItemDisplayTextTest {
             id = "2", presetId = "p", presetLabel = "Guest speaker", pauseAtFrame = false, pauseDurationMs = 0,
         )
 
-        assertEquals("🎬 Baptism video", media.displayText)
-        assertEquals("▼ Guest speaker", lowerThird.displayText)
+        // These two were the only kinds that prefixed a glyph, which the schedule row's type chip
+        // then drew a second time. The chip is the marking; the text is the name.
+        assertEquals("Baptism video", media.displayText)
+        assertEquals("Guest speaker", lowerThird.displayText)
     }
 
     @Test
