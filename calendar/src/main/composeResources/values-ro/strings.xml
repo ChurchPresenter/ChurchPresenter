@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Ce se întâmplă</string>
     <string name="calendar_ministry_who">Cine, sau o notă</string>
     <string name="calendar_cloud_sync">Sincronizează cu cloudul și dispozitivele mobile</string>
+    <string name="calendar_cloud_invite">Invită un telefon</string>
     <string name="calendar_cloud_sync_sub">Menține acest calendar în pas cu telefoanele prin releu. Oprit, nimic nu părăsește acest computer</string>
     <string name="calendar_settings_export">Export</string>
     <string name="calendar_export_note">Antetul cu care începe fiecare PDF exportat. Lăsați un câmp gol pentru a-l omite.</string>

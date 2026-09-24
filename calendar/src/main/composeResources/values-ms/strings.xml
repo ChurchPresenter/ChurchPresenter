@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Apa yang berlaku</string>
     <string name="calendar_ministry_who">Siapa, atau nota</string>
     <string name="calendar_cloud_sync">Segerakkan dengan awan dan peranti mudah alih</string>
+    <string name="calendar_cloud_invite">Jemput telefon</string>
     <string name="calendar_cloud_sync_sub">Mengekalkan kalendar ini selaras dengan telefon melalui relai. Apabila dimatikan, tiada apa-apa yang keluar dari komputer ini</string>
     <string name="calendar_settings_export">Eksport</string>
     <string name="calendar_export_note">Kepala surat yang memulakan setiap PDF yang dieksport. Biarkan medan kosong untuk tidak menyertakannya.</string>

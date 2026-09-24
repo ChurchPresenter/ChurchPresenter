@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Что происходит</string>
     <string name="calendar_ministry_who">Кто или заметка</string>
     <string name="calendar_cloud_sync">Синхронизировать с облаком и мобильными устройствами</string>
+    <string name="calendar_cloud_invite">Пригласить телефон</string>
     <string name="calendar_cloud_sync_sub">Держит этот календарь согласованным с телефонами через ретранслятор. Если выключено, ничего не покидает этот компьютер</string>
     <string name="calendar_settings_export">Экспорт</string>
     <string name="calendar_export_note">Шапка, с которой начинается каждый экспортированный PDF. Оставьте поле пустым, чтобы не включать его.</string>

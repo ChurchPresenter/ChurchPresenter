@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">ما يحدث</string>
     <string name="calendar_ministry_who">مَن، أو ملاحظة</string>
     <string name="calendar_cloud_sync">المزامنة مع السحابة والأجهزة المحمولة</string>
+    <string name="calendar_cloud_invite">دعوة هاتف</string>
     <string name="calendar_cloud_sync_sub">يبقي هذا التقويم متوافقًا مع الهواتف عبر المُرحِّل. عند الإيقاف لا يغادر شيء منه هذا الحاسوب</string>
     <string name="calendar_settings_export">التصدير</string>
     <string name="calendar_export_note">الترويسة التي يبدأ بها كل ملف PDF مُصدَّر. اترك الحقل فارغًا لحذفه منها.</string>

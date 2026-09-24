@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">何をするか</string>
     <string name="calendar_ministry_who">誰が、またはメモ</string>
     <string name="calendar_cloud_sync">クラウドとモバイル端末と同期する</string>
+    <string name="calendar_cloud_invite">電話を招待</string>
     <string name="calendar_cloud_sync_sub">リレーを通じてこのカレンダーを電話と同期させます。オフの場合、何もこのコンピューターから出ません</string>
     <string name="calendar_settings_export">書き出し</string>
     <string name="calendar_export_note">書き出すすべての PDF の冒頭に入るレターヘッドです。空欄の項目は省略されます。</string>

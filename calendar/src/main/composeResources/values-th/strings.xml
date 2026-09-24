@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">เกิดอะไรขึ้น</string>
     <string name="calendar_ministry_who">ใคร หรือหมายเหตุ</string>
     <string name="calendar_cloud_sync">ซิงค์กับคลาวด์และอุปกรณ์มือถือ</string>
+    <string name="calendar_cloud_invite">เชิญโทรศัพท์</string>
     <string name="calendar_cloud_sync_sub">ทำให้ปฏิทินนี้ตรงกับโทรศัพท์ผ่านรีเลย์ เมื่อปิด จะไม่มีสิ่งใดออกจากคอมพิวเตอร์เครื่องนี้</string>
     <string name="calendar_settings_export">ส่งออก</string>
     <string name="calendar_export_note">หัวกระดาษที่อยู่ต้น PDF ทุกไฟล์ที่ส่งออก เว้นช่องใดว่างไว้หากไม่ต้องการแสดง</string>

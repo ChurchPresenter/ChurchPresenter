@@ -39,6 +39,7 @@
     <string name="service_schedule">礼拝進行表：</string>
     <string name="songs">賛美歌</string>
     <string name="song">賛美歌</string>
+    <string name="output_profiles_tab">プロファイル</string>
     <string name="bible">聖書</string>
     <string name="pictures">画像</string>
     <string name="presentation">プレゼンテーション</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">文字の折り返し</string>
     <string name="show_on_first_page_only">最初のページにのみ表示</string>
     <string name="position_on_screen">画面上の位置：</string>
+    <string name="position_showing_at">表示位置</string>
     <string name="top_left">左上</string>
     <string name="top_right">右上</string>
     <string name="bottom_left">左下</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">リモコンを開く</string>
     <string name="tooltip_qa_remote">共有とリモートアクセス</string>
     <string name="tooltip_stt_settings">STT の表示設定</string>
+    <string name="tooltip_dictionary_settings">辞書の表示設定</string>
     <string name="tooltip_send_to_stage_monitor">ステージモニターに送る</string>
     <string name="tooltip_hide_from_stage_monitor">お知らせを隠す</string>
     <string name="tooltip_add_label">ラベルを追加</string>
@@ -715,6 +718,7 @@
     <string name="loop">ループ</string>
     <string name="loop_on">ループ オン</string>
     <string name="loop_off">ループ オフ</string>
+    <string name="output_scale_mode">スケール：%1$s</string>
     <string name="transition_duration">切り替えの長さ：</string>
     <string name="unit_s">秒</string>
     <string name="unit_ms">ms</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">ウィンドウ数（1〜3）</string>
     <string name="window_position">ウィンドウの位置</string>
     <string name="text_margins">文字の余白</string>
+    <string name="content_region">コンテンツ領域</string>
+    <string name="content_region_width">幅 %</string>
+    <string name="content_region_x_offset">X オフセット %</string>
+    <string name="content_region_y_offset">Y オフセット %</string>
     <string name="end_of_song_spacing">曲の終わり（*）の余白</string>
     <string name="auto_fit">自動</string>
     <string name="auto_fit_checkbox_tooltip">フォントサイズを上限として、文字を画面の大きさに自動で合わせます</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">ブラウザーエンジンを起動できませんでした。Microsoft Visual C++ 再頒布可能パッケージ (x64) をインストールし、アプリを再起動してください。</string>
     <string name="web_engine_unavailable_macos_title">Web ブラウザーには新しい macOS が必要です</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter のブラウザーエンジンは、このバージョンの macOS に対応しなくなりました。Web タブとブラウザーソースを使うには macOS 12 (Monterey) 以降に更新してください。</string>
+    <string name="web_engine_unavailable_windows_title">Web ブラウザーには Windows 10 以降が必要です</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenter のブラウザーエンジンは、このバージョンの Windows に対応しなくなりました。Web タブとブラウザーソースを使うには Windows 10 以降に更新してください。</string>
     <string name="web_live_badge">ライブ</string>
     <string name="web_type_to_page_label">ページに入力</string>
     <string name="web_type_to_page_placeholder">先にライブ中のページの入力欄をクリックしてください</string>
@@ -1665,11 +1675,25 @@
     <string name="tab_label_style_text">テキストのみ</string>
     <string name="tab_label_style_icons_and_text">アイコンとテキスト</string>
     <string name="tab_label_style_icons">アイコンのみ</string>
+    <string name="tab_label_style_button_hint">タブのラベル：テキスト、アイコン、または両方。クリックで切り替え。</string>
+    <string name="tab_label_margin_hint">タブの間隔：各タブの幅。クリックで切り替え。</string>
+    <string name="tab_label_margin_small">小</string>
+    <string name="tab_label_margin_small_normal">やや小</string>
+    <string name="tab_label_margin_normal">標準</string>
+    <string name="tab_label_margin_normal_large">やや大</string>
+    <string name="tab_label_margin_large">大</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">番号をタイトルの前に表示</string>
     <string name="song_number_corner">角</string>
     <string name="song_number_corner_off">オフ</string>
+    <string name="song_number_offset_needs_corner">上で角を選ぶと、番号の位置を自由に調整できます</string>
+    <string name="song_number_offset_x">X オフセット %</string>
+    <string name="song_number_offset_y">Y オフセット %</string>
+    <string name="song_section_label">セクションラベル</string>
+    <string name="song_section_label_enabled">現在のセクションを表示（Aメロ、サビ…）</string>
+    <string name="song_section_label_font_size">フォントサイズ</string>
+    <string name="song_section_label_color">色</string>
     <string name="fullscreen_display">全画面表示</string>
     <string name="display_mode_label">表示方法:</string>
     <string name="display_mode_one_verse">1 節ずつ</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">不透明度:</string>
     <string name="stt_position">位置</string>
     <string name="stt_settings_dialog_title">STT 表示設定</string>
+    <string name="dictionary_settings_dialog_title">辞書の表示設定</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI レポート</string>
@@ -2574,6 +2599,24 @@
     <string name="customize_marker">マーカー</string>
     <string name="customize_bilingual">2 言語</string>
     <string name="customize_no_preview">このセクションのプレビューはありません</string>
+    <string name="output_profile_none">なし</string>
+    <string name="output_profile_new">新しいプロファイル</string>
+    <string name="output_profile_create_default">既定のプロファイルを作成</string>
+    <string name="output_profile_create_default_tooltip">アプリの初期設定のスタイルで新しいプロファイルを追加し、いつでも戻せる予備として使います</string>
+    <string name="output_profile_duplicate">複製</string>
+    <string name="output_profile_rename">名前を変更</string>
+    <string name="output_profile_delete">削除</string>
+    <string name="output_profile_delete_confirm">「%1$s」を削除しますか？この操作は元に戻せません。</string>
+    <string name="output_profile_delete_blocked">「%1$s」を削除できません — 次で使用中です：%2$s</string>
+    <string name="output_profile_usage_count">%1$d 個の出力で使用中</string>
+    <string name="output_profile_name_hint">プロファイル名</string>
+    <string name="output_profile_picker_tooltip">出力プロファイル</string>
+    <string name="output_profile_swap_menu_tooltip">出力プロファイルを切り替え</string>
+    <string name="output_profile_new_name_default">新しいプロファイル</string>
+    <string name="output_profile_display_mode">表示モード</string>
+    <string name="output_profile_content">コンテンツ</string>
+    <string name="output_profile_empty_state">プロファイルを作成してスタイルを設定しましょう</string>
+    <string name="output_profile_preview_resolution_tooltip">プレビューの形のみ — 出力の実際の解像度は変更しません</string>
     <string name="customize_bible">聖書</string>
     <string name="customize_songs">賛美歌</string>
     <string name="customize_lower_third_vertical_hint">下部の帯ではなく、横に縦長の帯を表示します。</string>
@@ -2590,6 +2633,9 @@
     <string name="customize_group_card">カード</string>
     <string name="customize_group_background">画面の背景</string>
     <string name="customize_group_background_lower_third">下部テロップの背景</string>
+    <string name="customize_background_source">背景</string>
+    <string name="customize_background_follow">背景タブに従う</string>
+    <string name="customize_background_own">カスタム</string>
     <string name="customize_background_type">種類</string>
     <string name="customize_background_image">画像</string>
     <string name="customize_background_video">動画</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">このデバイスからカレンダーを計画する</string>
     <string name="remote_api_calendar_enroll_code">コード %1$s — 電話に同じコードが表示されている場合のみ許可してください</string>
     <string name="calendar_enroll_qr_title">電話でスキャン</string>
+    <string name="calendar_enroll_invite_failed">招待を作成できませんでした — このコンピューターからリレーに接続できません。</string>
     <string name="calendar_enroll_qr_body">完了するには、今許可した電話でこのコードをスキャンしてください。</string>
     <string name="remote_api_calendar_enroll_detail">電話またはタブレットが、どこからでもカレンダーの礼拝を計画しようとしています。</string>
     <string name="remote_activity_calendar_enroll">カレンダーを計画するために登録済み</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">リレーがこのコンピューターを受け付けなくなりました。続けるには再度ペアリングしてください。</string>
     <string name="calendar_sync_status_other_desktop">別のコンピューターがこのカレンダーを同期しています。どちらかのペアリングを解除するまで、このコンピューターは送信を停止します。</string>
     <string name="calendar_sync_enroll_hint">電話を追加するには: いつも通りこのコンピューターに接続し（サーバー設定 → QR コード）、アプリでカレンダーを開いて「登録」をタップします。ここで許可を求められます。</string>
+    <string name="calendar_sync_invite">電話を招待…</string>
     <string name="calendar_sync_sync_now">今すぐ同期</string>
     <string name="calendar_sync_unpair">新しいキーでやり直す</string>
     <string name="calendar_sync_devices">登録済みの電話</string>

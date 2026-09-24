@@ -27,6 +27,7 @@
     <string name="service_schedule">Програма служіння:</string>
     <string name="songs">Пісні</string>
     <string name="song">Пісня</string>
+    <string name="output_profiles_tab">Профілі</string>
     <string name="bible">Біблія</string>
     <string name="pictures">Зображення</string>
     <string name="media">Медіа</string>
@@ -138,6 +139,7 @@
     <string name="word_wrap">Перенос слів</string>
     <string name="show_on_first_page_only">Показувати тільки ��а першій сторінці</string>
     <string name="position_on_screen">Положення на екрані:</string>
+    <string name="position_showing_at">Розташування</string>
     <string name="top_left">Вгорі зліва</string>
     <string name="top_right">Вгорі справа</string>
     <string name="bottom_left">Внизу зліва</string>
@@ -797,6 +799,7 @@
     <string name="live_preview_title">Ефір</string>
     <string name="live_preview_website">Вебсайт</string>
     <string name="loop_off">Повтор вимкнено</string>
+    <string name="output_scale_mode">Масштаб: %1$s</string>
     <string name="loop_on">Повтор увімкнено</string>
     <string name="lower_third_height">Висота нижньої третини % (для Біблії та Пісень)</string>
     <string name="lower_third_storage_directory">Папка зберігання нижніх третин</string>
@@ -863,6 +866,10 @@
     <string name="tab_canvas">Полотно</string>
     <string name="tab_visibility">Видимість вкладок</string>
     <string name="text_margins">Відступи тексту</string>
+    <string name="content_region">Область контенту</string>
+    <string name="content_region_width">Ширина %</string>
+    <string name="content_region_x_offset">Зсув X %</string>
+    <string name="content_region_y_offset">Зсув Y %</string>
     <string name="end_of_song_spacing">Кінець пісні (*) відстань</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Час вийшов!</string>
@@ -910,6 +917,8 @@
     <string name="web_engine_unavailable_body">Не вдалося запустити рушій браузера. Встановіть Microsoft Visual C++ Redistributable (x64) і перезапустіть застосунок.</string>
     <string name="web_engine_unavailable_macos_title">Веб-браузеру потрібна новіша macOS</string>
     <string name="web_engine_unavailable_macos_body">Рушій браузера ChurchPresenter більше не підтримує цю версію macOS. Оновіть до macOS 12 (Monterey) або новішої, щоб користуватися вкладкою "Веб" і джерелами браузера.</string>
+    <string name="web_engine_unavailable_windows_title">Веб-браузеру потрібна Windows 10 або новіша</string>
+    <string name="web_engine_unavailable_windows_body">Рушій браузера ChurchPresenter більше не підтримує цю версію Windows. Оновіть до Windows 10 або новішої, щоб користуватися вкладкою "Веб" і джерелами браузера.</string>
     <string name="web_under_construction">Ця функція в розробці.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1125,12 +1134,26 @@
     <string name="tab_label_style_text">Лише текст</string>
     <string name="tab_label_style_icons_and_text">Значки та текст</string>
     <string name="tab_label_style_icons">Лише значки</string>
+    <string name="tab_label_style_button_hint">Підписи вкладок: текст, значки або обидва. Натисніть, щоб змінити.</string>
+    <string name="tab_label_margin_hint">Відступи вкладок: скільки місця отримує кожна вкладка. Натисніть, щоб змінити.</string>
+    <string name="tab_label_margin_small">Малий</string>
+    <string name="tab_label_margin_small_normal">Нижче середнього</string>
+    <string name="tab_label_margin_normal">Звичайний</string>
+    <string name="tab_label_margin_normal_large">Вище середнього</string>
+    <string name="tab_label_margin_large">Великий</string>
     <string name="file_not_supported_short">не підтримується</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Номер перед назвою</string>
     <string name="song_number_corner">Кут</string>
     <string name="song_number_corner_off">Вимк.</string>
+    <string name="song_number_offset_needs_corner">Виберіть кут вище, щоб вільно розташувати номер</string>
+    <string name="song_number_offset_x">Зсув X %</string>
+    <string name="song_number_offset_y">Зсув Y %</string>
+    <string name="song_section_label">Підпис розділу</string>
+    <string name="song_section_label_enabled">Показувати поточний розділ (куплет, приспів…)</string>
+    <string name="song_section_label_font_size">Розмір шрифту</string>
+    <string name="song_section_label_color">Колір</string>
     <string name="fullscreen_display">Повноекранний режим</string>
     <string name="display_mode_label">Режим відображення:</string>
     <string name="display_mode_one_verse">1 куплет</string>
@@ -2133,6 +2156,7 @@
     <string name="browser_source_fps">Макс. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Дублює вебсайт, показаний на основному виводі — активний лише поки вкладка «Веб» або вікно виводу відображає його</string>
     <string name="tooltip_stt_settings">Налаштування відображення STT</string>
+    <string name="tooltip_dictionary_settings">Налаштування відображення словника</string>
     <string name="presentation_builds_counter">Крок побудови %1$d з %2$d</string>
     <string name="presentation_animate_keynote">Анімувати презентації Keynote</string>
     <string name="presentation_focus_lost">Фокус клавіатури втрачено — натисніть тут, щоб знову увімкнути стрілки та клікер</string>
@@ -2146,6 +2170,7 @@
     <string name="instance_link_controlling_host">Керування %1$s</string>
     <string name="instance_link_primary_badge">Основний — підключено підписників: %1$d</string>
     <string name="stt_settings_dialog_title">Налаштування відображення STT</string>
+    <string name="dictionary_settings_dialog_title">Налаштування відображення словника</string>
     <string name="update_dialog_channel_stable">Стабільний випуск</string>
     <string name="update_dialog_channel_prerelease">Попередній випуск</string>
     <string name="atem_section_background_uploads">Завантаження фонів</string>
@@ -2528,6 +2553,24 @@
     <string name="customize_marker">Маркер</string>
     <string name="customize_bilingual">Дві мови</string>
     <string name="customize_no_preview">Для цього розділу немає попереднього перегляду</string>
+    <string name="output_profile_none">Немає</string>
+    <string name="output_profile_new">Новий профіль</string>
+    <string name="output_profile_create_default">Створити профіль за замовчуванням</string>
+    <string name="output_profile_create_default_tooltip">Додати новий профіль зі стандартним оформленням застосунку — як запасний варіант, до якого можна повернутися</string>
+    <string name="output_profile_duplicate">Дублювати</string>
+    <string name="output_profile_rename">Перейменувати</string>
+    <string name="output_profile_delete">Видалити</string>
+    <string name="output_profile_delete_confirm">Видалити «%1$s»? Цю дію не можна скасувати.</string>
+    <string name="output_profile_delete_blocked">Неможливо видалити «%1$s» — він досі використовується: %2$s</string>
+    <string name="output_profile_usage_count">Використовується виводами: %1$d</string>
+    <string name="output_profile_name_hint">Назва профілю</string>
+    <string name="output_profile_picker_tooltip">Профіль виводу</string>
+    <string name="output_profile_swap_menu_tooltip">Змінити профіль виводу</string>
+    <string name="output_profile_new_name_default">Новий профіль</string>
+    <string name="output_profile_display_mode">Режим відображення</string>
+    <string name="output_profile_content">Контент</string>
+    <string name="output_profile_empty_state">Створіть профіль, щоб почати його оформлювати</string>
+    <string name="output_profile_preview_resolution_tooltip">Лише форма попереднього перегляду — не задає фактичну роздільну здатність виводу</string>
     <string name="customize_bible">Біблія</string>
     <string name="customize_songs">Пісні</string>
     <string name="customize_lower_third_vertical_hint">Смуга збоку замість стрічки внизу.</string>
@@ -2544,6 +2587,9 @@
     <string name="customize_group_card">Картка</string>
     <string name="customize_group_background">Фон екрана</string>
     <string name="customize_group_background_lower_third">Фон нижньої третини</string>
+    <string name="customize_background_source">Фон</string>
+    <string name="customize_background_follow">Як на вкладці «Фон»</string>
+    <string name="customize_background_own">Власний</string>
     <string name="customize_background_type">Тип</string>
     <string name="customize_background_image">Зображення</string>
     <string name="customize_background_video">Відео</string>
@@ -2793,6 +2839,7 @@
     <string name="remote_api_calendar_enroll">Планувати календар із цього пристрою</string>
     <string name="remote_api_calendar_enroll_code">Код %1$s — дозволяйте лише якщо телефон показує той самий код</string>
     <string name="calendar_enroll_qr_title">Скануйте телефоном</string>
+    <string name="calendar_enroll_invite_failed">Не вдалося створити запрошення — цей комп’ютер не зміг зв’язатися з ретранслятором.</string>
     <string name="calendar_enroll_qr_body">Щоб завершити, відскануйте цей код телефоном, який ви щойно дозволили.</string>
     <string name="remote_api_calendar_enroll_detail">Телефон або планшет хоче планувати служіння в календарі звідусіль.</string>
     <string name="remote_activity_calendar_enroll">Зареєстровано для планування календаря</string>
@@ -2813,6 +2860,7 @@
     <string name="calendar_sync_status_unauthorized">Ретранслятор більше не приймає цей комп’ютер. Створіть пару знову, щоб продовжити.</string>
     <string name="calendar_sync_status_other_desktop">Інший комп’ютер синхронізує цей календар. Цей припинив надсилання, доки ви не роз’єднаєте один із них.</string>
     <string name="calendar_sync_enroll_hint">Щоб додати телефон: під’єднайте його до цього комп’ютера як зазвичай (Налаштування сервера → QR-код), потім відкрийте Календар у додатку й торкніться Зареєструвати. Тут вас попросять дозволити це.</string>
+    <string name="calendar_sync_invite">Запросити телефон…</string>
     <string name="calendar_sync_sync_now">Синхронізувати зараз</string>
     <string name="calendar_sync_unpair">Почати заново з новим ключем</string>
     <string name="calendar_sync_devices">Зареєстровані телефони</string>

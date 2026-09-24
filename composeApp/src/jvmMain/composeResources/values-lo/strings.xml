@@ -39,6 +39,7 @@
     <string name="service_schedule">ລາຍການນະມັດສະການ:</string>
     <string name="songs">ເພງ</string>
     <string name="song">ເພງ</string>
+    <string name="output_profiles_tab">ໂປຣໄຟລ໌</string>
     <string name="bible">ພຣະຄຳພີ</string>
     <string name="pictures">ຮູບພາບ</string>
     <string name="presentation">ການນຳສະເໜີ</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">ຕັດຄຳຂຶ້ນແຖວໃໝ່</string>
     <string name="show_on_first_page_only">ສະແດງສະເພາະໜ້າທຳອິດ</string>
     <string name="position_on_screen">ຕຳແໜ່ງເທິງຈໍ:</string>
+    <string name="position_showing_at">ສະແດງຢູ່</string>
     <string name="top_left">ເທິງຊ້າຍ</string>
     <string name="top_right">ເທິງຂວາ</string>
     <string name="bottom_left">ລຸ່ມຊ້າຍ</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">ເປີດການຄວບຄຸມທາງໄກ</string>
     <string name="tooltip_qa_remote">ການແບ່ງປັນ ແລະ ການເຂົ້າເຖິງທາງໄກ</string>
     <string name="tooltip_stt_settings">ການຕັ້ງຄ່າການສະແດງ STT</string>
+    <string name="tooltip_dictionary_settings">ການຕັ້ງຄ່າການສະແດງວັດຈະນານຸກົມ</string>
     <string name="tooltip_send_to_stage_monitor">ສົ່ງໄປຈໍເວທີ</string>
     <string name="tooltip_hide_from_stage_monitor">ເຊື່ອງປະກາດ</string>
     <string name="tooltip_add_label">ເພີ່ມປ້າຍ</string>
@@ -715,6 +718,7 @@
     <string name="loop">ວົນຊ້ຳ</string>
     <string name="loop_on">ເປີດວົນຊ້ຳ</string>
     <string name="loop_off">ປິດວົນຊ້ຳ</string>
+    <string name="output_scale_mode">ຂະໜາດ: %1$s</string>
     <string name="transition_duration">ໄລຍະການປ່ຽນພາບ:</string>
     <string name="unit_s">ວິ</string>
     <string name="unit_ms">ms</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">ໜ້າຕ່າງ (1-3)</string>
     <string name="window_position">ຕຳແໜ່ງໜ້າຕ່າງ</string>
     <string name="text_margins">ຂອບຂໍ້ຄວາມ</string>
+    <string name="content_region">ພື້ນທີ່ເນື້ອຫາ</string>
+    <string name="content_region_width">ຄວາມກວ້າງ %</string>
+    <string name="content_region_x_offset">ເລື່ອນ X %</string>
+    <string name="content_region_y_offset">ເລື່ອນ Y %</string>
     <string name="end_of_song_spacing">ໄລຍະຫ່າງທ້າຍເພງ (*)</string>
     <string name="auto_fit">ອັດຕະໂນມັດ</string>
     <string name="auto_fit_checkbox_tooltip">ປັບຂໍ້ຄວາມໃຫ້ພໍດີກັບຈໍອັດຕະໂນມັດ ໂດຍໃຊ້ຂະໜາດຕົວອັກສອນເປັນຄ່າສູງສຸດ</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">ເປີດເອັນຈິນບຣາວເຊີບໍ່ໄດ້. ກະລຸນາຕິດຕັ້ງ Microsoft Visual C++ Redistributable (x64) ແລ້ວເປີດໂປຣແກຣມຄືນໃໝ່.</string>
     <string name="web_engine_unavailable_macos_title">ບຣາວເຊີຕ້ອງການ macOS ຮຸ່ນໃໝ່ກວ່າ</string>
     <string name="web_engine_unavailable_macos_body">ເອັນຈິນບຣາວເຊີຂອງ ChurchPresenter ບໍ່ຮອງຮັບ macOS ຮຸ່ນນີ້ອີກຕໍ່ໄປ. ກະລຸນາອັບເດດເປັນ macOS 12 (Monterey) ຫຼື ໃໝ່ກວ່າ ເພື່ອໃຊ້ແຖບເວັບ ແລະ browser source.</string>
+    <string name="web_engine_unavailable_windows_title">ເວັບບຣາວເຊີຕ້ອງການ Windows 10 ຂຶ້ນໄປ</string>
+    <string name="web_engine_unavailable_windows_body">ເຄື່ອງມືບຣາວເຊີຂອງ ChurchPresenter ບໍ່ຮອງຮັບ Windows ລຸ້ນນີ້ອີກຕໍ່ໄປ. ອັບເດດເປັນ Windows 10 ຂຶ້ນໄປເພື່ອໃຊ້ແຖບເວັບ ແລະ ແຫຼ່ງບຣາວເຊີ.</string>
     <string name="web_live_badge">ສົດ</string>
     <string name="web_type_to_page_label">ພິມໃສ່ໜ້າເວັບ</string>
     <string name="web_type_to_page_placeholder">ໃຫ້ຄລິກຊ່ອງປ້ອນຂໍ້ມູນໃນໜ້າສົດກ່ອນ</string>
@@ -1664,12 +1674,26 @@
     <string name="tab_label_style_text">ຂໍ້ຄວາມເທົ່ານັ້ນ</string>
     <string name="tab_label_style_icons_and_text">ໄອຄອນ ແລະ ຂໍ້ຄວາມ</string>
     <string name="tab_label_style_icons">ໄອຄອນເທົ່ານັ້ນ</string>
+    <string name="tab_label_style_button_hint">ປ້າຍຊື່ແຖບ: ຂໍ້ຄວາມ, ໄອຄອນ ຫຼື ທັງສອງ. ຄລິກເພື່ອປ່ຽນ.</string>
+    <string name="tab_label_margin_hint">ໄລຍະຫ່າງແຖບ: ພື້ນທີ່ທີ່ແຕ່ລະແຖບໄດ້ຮັບ. ຄລິກເພື່ອປ່ຽນ.</string>
+    <string name="tab_label_margin_small">ນ້ອຍ</string>
+    <string name="tab_label_margin_small_normal">ນ້ອຍປານກາງ</string>
+    <string name="tab_label_margin_normal">ປົກກະຕິ</string>
+    <string name="tab_label_margin_normal_large">ໃຫຍ່ປານກາງ</string>
+    <string name="tab_label_margin_large">ໃຫຍ່</string>
     <string name="file_not_supported_short">ບໍ່ຮອງຮັບ</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">ໝາຍເລກກ່ອນຊື່</string>
     <string name="song_number_corner">ມຸມ</string>
     <string name="song_number_corner_off">ປິດ</string>
+    <string name="song_number_offset_needs_corner">ເລືອກມຸມຂ້າງເທິງເພື່ອຈັດວາງຕົວເລກໄດ້ຢ່າງອິດສະຫຼະ</string>
+    <string name="song_number_offset_x">ເລື່ອນ X %</string>
+    <string name="song_number_offset_y">ເລື່ອນ Y %</string>
+    <string name="song_section_label">ປ້າຍຊື່ທ່ອນ</string>
+    <string name="song_section_label_enabled">ສະແດງທ່ອນປັດຈຸບັນ (ບົດ, ຮ້ອງຮັບ…)</string>
+    <string name="song_section_label_font_size">ຂະໜາດຟອນ</string>
+    <string name="song_section_label_color">ສີ</string>
     <string name="fullscreen_display">ສະແດງເຕັມຈໍ</string>
     <string name="display_mode_label">ຮູບແບບການສະແດງ:</string>
     <string name="display_mode_one_verse">1 ບົດ</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">ຄວາມທຶບ:</string>
     <string name="stt_position">ຕຳແໜ່ງ</string>
     <string name="stt_settings_dialog_title">ການຕັ້ງຄ່າການສະແດງ STT</string>
+    <string name="dictionary_settings_dialog_title">ການຕັ້ງຄ່າການສະແດງວັດຈະນານຸກົມ</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">ລາຍງານ CCLI</string>
@@ -2573,6 +2598,24 @@
     <string name="customize_marker">ເຄື່ອງໝາຍ</string>
     <string name="customize_bilingual">ສອງພາສາ</string>
     <string name="customize_no_preview">ບໍ່ມີການສະແດງຕົວຢ່າງສຳລັບພາກນີ້</string>
+    <string name="output_profile_none">ບໍ່ມີ</string>
+    <string name="output_profile_new">ໂປຣໄຟລ໌ໃໝ່</string>
+    <string name="output_profile_create_default">ສ້າງໂປຣໄຟລ໌ເລີ່ມຕົ້ນ</string>
+    <string name="output_profile_create_default_tooltip">ເພີ່ມໂປຣໄຟລ໌ໃໝ່ດ້ວຍຮູບແບບເລີ່ມຕົ້ນຂອງແອັບ ເພື່ອເປັນສຳຮອງໄວ້ກັບຄືນ</string>
+    <string name="output_profile_duplicate">ສຳເນົາ</string>
+    <string name="output_profile_rename">ປ່ຽນຊື່</string>
+    <string name="output_profile_delete">ລຶບ</string>
+    <string name="output_profile_delete_confirm">ລຶບ \"%1$s\" ບໍ? ການກະທຳນີ້ບໍ່ສາມາດຍົກເລີກໄດ້.</string>
+    <string name="output_profile_delete_blocked">ບໍ່ສາມາດລຶບ \"%1$s\" ໄດ້ — ຍັງຖືກໃຊ້ໂດຍ: %2$s</string>
+    <string name="output_profile_usage_count">ຖືກໃຊ້ໂດຍ %1$d ຊ່ອງອອກ</string>
+    <string name="output_profile_name_hint">ຊື່ໂປຣໄຟລ໌</string>
+    <string name="output_profile_picker_tooltip">ໂປຣໄຟລ໌ຊ່ອງອອກ</string>
+    <string name="output_profile_swap_menu_tooltip">ສະຫຼັບໂປຣໄຟລ໌ຊ່ອງອອກ</string>
+    <string name="output_profile_new_name_default">ໂປຣໄຟລ໌ໃໝ່</string>
+    <string name="output_profile_display_mode">ຮູບແບບການສະແດງ</string>
+    <string name="output_profile_content">ເນື້ອຫາ</string>
+    <string name="output_profile_empty_state">ສ້າງໂປຣໄຟລ໌ເພື່ອເລີ່ມກຳນົດຮູບແບບ</string>
+    <string name="output_profile_preview_resolution_tooltip">ສະເພາະຮູບຮ່າງຕົວຢ່າງ — ບໍ່ໄດ້ປ່ຽນຄວາມລະອຽດແທ້ຂອງຊ່ອງອອກ</string>
     <string name="customize_bible">ພຣະຄຳພີ</string>
     <string name="customize_songs">ເພງ</string>
     <string name="customize_lower_third_vertical_hint">ແຖບຢູ່ດ້ານຂ້າງແທນແຖບຢູ່ດ້ານລຸ່ມ.</string>
@@ -2589,6 +2632,9 @@
     <string name="customize_group_card">ບັດ</string>
     <string name="customize_group_background">ພື້ນຫຼັງຈໍ</string>
     <string name="customize_group_background_lower_third">ພື້ນຫຼັງແຖບລຸ່ມ</string>
+    <string name="customize_background_source">ພື້ນຫຼັງ</string>
+    <string name="customize_background_follow">ຕາມແຖບພື້ນຫຼັງ</string>
+    <string name="customize_background_own">ກຳນົດເອງ</string>
     <string name="customize_background_type">ປະເພດ</string>
     <string name="customize_background_image">ຮູບ</string>
     <string name="customize_background_video">ວິດີໂອ</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">ວາງແຜນປະຕິທິນຈາກອຸປະກອນນີ້</string>
     <string name="remote_api_calendar_enroll_code">ລະຫັດ %1$s — ອະນຸຍາດສະເພາະເມື່ອໂທລະສັບສະແດງລະຫັດດຽວກັນ</string>
     <string name="calendar_enroll_qr_title">ສະແກນດ້ວຍໂທລະສັບ</string>
+    <string name="calendar_enroll_invite_failed">ບໍ່ສາມາດສ້າງຄຳເຊີນໄດ້ — ຄອມພິວເຕີນີ້ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບ relay ໄດ້.</string>
     <string name="calendar_enroll_qr_body">ສະແກນລະຫັດນີ້ດ້ວຍໂທລະສັບທີ່ທ່ານຫາກໍອະນຸຍາດເພື່ອສຳເລັດ.</string>
     <string name="remote_api_calendar_enroll_detail">ໂທລະສັບ ຫຼື ແທັບເລັດຕ້ອງການວາງແຜນພິທີໃນປະຕິທິນຈາກທຸກບ່ອນ.</string>
     <string name="remote_activity_calendar_enroll">ລົງທະບຽນເພື່ອວາງແຜນປະຕິທິນແລ້ວ</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">ຣີເລບໍ່ຍອມຮັບຄອມພິວເຕີເຄື່ອງນີ້ອີກຕໍ່ໄປ. ຈັບຄູ່ອີກຄັ້ງເພື່ອສືບຕໍ່.</string>
     <string name="calendar_sync_status_other_desktop">ຄອມພິວເຕີເຄື່ອງອື່ນກຳລັງຊິງຄ໌ປະຕິທິນນີ້. ເຄື່ອງນີ້ຢຸດສົ່ງຈົນກວ່າທ່ານຈະຍົກເລີກການຈັບຄູ່ເຄື່ອງໃດເຄື່ອງໜຶ່ງ.</string>
     <string name="calendar_sync_enroll_hint">ການເພີ່ມໂທລະສັບ: ເຊື່ອມຕໍ່ກັບຄອມພິວເຕີເຄື່ອງນີ້ຕາມປົກກະຕິ (ການຕັ້ງຄ່າເຊີບເວີ → ລະຫັດ QR), ຈາກນັ້ນເປີດປະຕິທິນໃນແອັບ ແລ້ວແຕະລົງທະບຽນ. ທ່ານຈະຖືກຖາມໃຫ້ອະນຸຍາດຢູ່ບ່ອນນີ້.</string>
+    <string name="calendar_sync_invite">ເຊີນໂທລະສັບ…</string>
     <string name="calendar_sync_sync_now">ຊິງຄ໌ດຽວນີ້</string>
     <string name="calendar_sync_unpair">ເລີ່ມໃໝ່ດ້ວຍກະແຈໃໝ່</string>
     <string name="calendar_sync_devices">ໂທລະສັບທີ່ລົງທະບຽນ</string>

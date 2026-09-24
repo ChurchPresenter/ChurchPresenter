@@ -39,6 +39,7 @@
     <string name="service_schedule">برنامه مراسم:</string>
     <string name="songs">سرودها</string>
     <string name="song">سرود</string>
+    <string name="output_profiles_tab">پروفایل‌ها</string>
     <string name="bible">کتاب‌مقدس</string>
     <string name="pictures">تصاویر</string>
     <string name="presentation">ارائه</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">شکستن سطر</string>
     <string name="show_on_first_page_only">فقط در صفحه اول نمایش داده شود</string>
     <string name="position_on_screen">جایگاه روی صفحه:</string>
+    <string name="position_showing_at">نمایش در:</string>
     <string name="top_left">بالا چپ</string>
     <string name="top_right">بالا راست</string>
     <string name="bottom_left">پایین چپ</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">باز کردن کنترل از راه دور</string>
     <string name="tooltip_qa_remote">هم‌رسانی و دسترسی از راه دور</string>
     <string name="tooltip_stt_settings">تنظیمات نمایش زیرنویس</string>
+    <string name="tooltip_dictionary_settings">تنظیمات نمایش واژه‌نامه</string>
     <string name="tooltip_send_to_stage_monitor">فرستادن به مانیتور صحنه</string>
     <string name="tooltip_hide_from_stage_monitor">پنهان کردن اطلاعیه</string>
     <string name="tooltip_add_label">افزودن برچسب</string>
@@ -715,6 +718,7 @@
     <string name="loop">تکرار</string>
     <string name="loop_on">تکرار روشن</string>
     <string name="loop_off">تکرار خاموش</string>
+    <string name="output_scale_mode">مقیاس: %1$s</string>
     <string name="transition_duration">مدت گذار:</string>
     <string name="unit_s">ث</string>
     <string name="unit_ms">ms</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">پنجره‌ها (1-3)</string>
     <string name="window_position">موقعیت پنجره</string>
     <string name="text_margins">حاشیه‌های متن</string>
+    <string name="content_region">ناحیهٔ محتوا</string>
+    <string name="content_region_width">عرض %</string>
+    <string name="content_region_x_offset">جابه‌جایی X %</string>
+    <string name="content_region_y_offset">جابه‌جایی Y %</string>
     <string name="end_of_song_spacing">فاصله پایان سرود (*)</string>
     <string name="auto_fit">خودکار</string>
     <string name="auto_fit_checkbox_tooltip">متن به‌صورت خودکار در صفحه جا داده می‌شود و اندازه قلم بیشینه در نظر گرفته می‌شود</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">موتور مرورگر راه‌اندازی نشد. Microsoft Visual C++ Redistributable (x64) را نصب کنید و برنامه را دوباره راه‌اندازی کنید.</string>
     <string name="web_engine_unavailable_macos_title">مرورگر وب به نسخه تازه‌تری از macOS نیاز دارد</string>
     <string name="web_engine_unavailable_macos_body">موتور مرورگر ChurchPresenter دیگر از این نسخه macOS پشتیبانی نمی‌کند. برای استفاده از زبانه وب و منابع مرورگر، به macOS 12 (Monterey) یا بالاتر به‌روزرسانی کنید.</string>
+    <string name="web_engine_unavailable_windows_title">مرورگر وب به Windows 10 یا بالاتر نیاز دارد</string>
+    <string name="web_engine_unavailable_windows_body">موتور مرورگر ChurchPresenter دیگر از این نسخهٔ Windows پشتیبانی نمی‌کند. برای استفاده از زبانهٔ وب و منابع مرورگر، به Windows 10 یا بالاتر به‌روزرسانی کنید.</string>
     <string name="web_live_badge">زنده</string>
     <string name="web_type_to_page_label">تایپ در صفحه</string>
     <string name="web_type_to_page_placeholder">نخست روی یک کادر ورودی در صفحه زنده کلیک کنید</string>
@@ -1664,12 +1674,26 @@
     <string name="tab_label_style_text">فقط متن</string>
     <string name="tab_label_style_icons_and_text">نماد و متن</string>
     <string name="tab_label_style_icons">فقط نماد</string>
+    <string name="tab_label_style_button_hint">برچسب زبانه‌ها: متن، نماد یا هر دو. برای تغییر کلیک کنید.</string>
+    <string name="tab_label_margin_hint">فاصلهٔ زبانه‌ها: هر زبانه چقدر فضا بگیرد. برای تغییر کلیک کنید.</string>
+    <string name="tab_label_margin_small">کوچک</string>
+    <string name="tab_label_margin_small_normal">نیمه‌کوچک</string>
+    <string name="tab_label_margin_normal">معمولی</string>
+    <string name="tab_label_margin_normal_large">نیمه‌بزرگ</string>
+    <string name="tab_label_margin_large">بزرگ</string>
     <string name="file_not_supported_short">پشتیبانی نمی‌شود</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">شماره پیش از عنوان</string>
     <string name="song_number_corner">گوشه</string>
     <string name="song_number_corner_off">خاموش</string>
+    <string name="song_number_offset_needs_corner">برای جای‌گذاری آزاد شماره، یک گوشه را در بالا انتخاب کنید</string>
+    <string name="song_number_offset_x">جابه‌جایی X %</string>
+    <string name="song_number_offset_y">جابه‌جایی Y %</string>
+    <string name="song_section_label">برچسب بخش</string>
+    <string name="song_section_label_enabled">نمایش بخش فعلی (بند، ترجیع‌بند…)</string>
+    <string name="song_section_label_font_size">اندازه قلم</string>
+    <string name="song_section_label_color">رنگ</string>
     <string name="fullscreen_display">نمایش تمام‌صفحه</string>
     <string name="display_mode_label">شیوهٔ نمایش:</string>
     <string name="display_mode_one_verse">۱ بند</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">کدری:</string>
     <string name="stt_position">جایگاه</string>
     <string name="stt_settings_dialog_title">تنظیمات نمایش STT</string>
+    <string name="dictionary_settings_dialog_title">تنظیمات نمایش واژه‌نامه</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">گزارش CCLI</string>
@@ -2574,6 +2599,24 @@
     <string name="customize_marker">نشانگر</string>
     <string name="customize_bilingual">دوزبانه</string>
     <string name="customize_no_preview">برای این بخش پیش‌نمایشی نیست</string>
+    <string name="output_profile_none">هیچ</string>
+    <string name="output_profile_new">پروفایل جدید</string>
+    <string name="output_profile_create_default">ایجاد پروفایل پیش‌فرض</string>
+    <string name="output_profile_create_default_tooltip">افزودن پروفایلی تازه با سبک پیش‌فرض کارخانهٔ برنامه، به‌عنوان پشتیبانی برای بازگشت</string>
+    <string name="output_profile_duplicate">تکثیر</string>
+    <string name="output_profile_rename">تغییر نام</string>
+    <string name="output_profile_delete">حذف</string>
+    <string name="output_profile_delete_confirm">«%1$s» حذف شود؟ این کار بازگشت‌پذیر نیست.</string>
+    <string name="output_profile_delete_blocked">امکان حذف «%1$s» نیست — هنوز در این موارد استفاده می‌شود: %2$s</string>
+    <string name="output_profile_usage_count">استفاده‌شده در %1$d خروجی</string>
+    <string name="output_profile_name_hint">نام پروفایل</string>
+    <string name="output_profile_picker_tooltip">پروفایل خروجی</string>
+    <string name="output_profile_swap_menu_tooltip">تعویض پروفایل خروجی</string>
+    <string name="output_profile_new_name_default">پروفایل جدید</string>
+    <string name="output_profile_display_mode">حالت نمایش</string>
+    <string name="output_profile_content">محتوا</string>
+    <string name="output_profile_empty_state">برای شروع طراحی، یک پروفایل بسازید</string>
+    <string name="output_profile_preview_resolution_tooltip">فقط شکل پیش‌نمایش — وضوح واقعی خروجی را تنظیم نمی‌کند</string>
     <string name="customize_bible">کتاب‌مقدس</string>
     <string name="customize_songs">سرودها</string>
     <string name="customize_lower_third_vertical_hint">نواری در کنار به‌جای نواری در پایین.</string>
@@ -2590,6 +2633,9 @@
     <string name="customize_group_card">کارت</string>
     <string name="customize_group_background">پس‌زمینه نمایشگر</string>
     <string name="customize_group_background_lower_third">پس‌زمینه نوار پایین</string>
+    <string name="customize_background_source">پس‌زمینه</string>
+    <string name="customize_background_follow">پیروی از زبانهٔ پس‌زمینه</string>
+    <string name="customize_background_own">سفارشی</string>
     <string name="customize_background_type">نوع</string>
     <string name="customize_background_image">تصویر</string>
     <string name="customize_background_video">ویدیو</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">برنامه‌ریزی تقویم از این دستگاه</string>
     <string name="remote_api_calendar_enroll_code">کد %1$s — فقط در صورتی اجازه دهید که تلفن همین کد را نشان دهد</string>
     <string name="calendar_enroll_qr_title">با تلفن اسکن کنید</string>
+    <string name="calendar_enroll_invite_failed">ایجاد دعوت‌نامه ممکن نشد — این رایانه نتوانست به رله دسترسی پیدا کند.</string>
     <string name="calendar_enroll_qr_body">برای پایان، این کد را با تلفنی که هم‌اکنون اجازه دادید اسکن کنید.</string>
     <string name="remote_api_calendar_enroll_detail">یک تلفن یا تبلت می‌خواهد خدمات را از هر جا در تقویم برنامه‌ریزی کند.</string>
     <string name="remote_activity_calendar_enroll">برای برنامه‌ریزی تقویم ثبت‌نام شد</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">رله دیگر این رایانه را نمی‌پذیرد. برای ادامه دوباره جفت کنید.</string>
     <string name="calendar_sync_status_other_desktop">رایانهٔ دیگری این تقویم را همگام می‌کند. این رایانه تا زمانی که جفت‌شدن یکی از آن‌ها را لغو کنید ارسال را متوقف کرده است.</string>
     <string name="calendar_sync_enroll_hint">برای افزودن تلفن: آن را مانند همیشه به این رایانه وصل کنید (تنظیمات سرور ← کد QR)، سپس تقویم را در برنامه باز کرده و ثبت‌نام را بزنید. اینجا از شما خواسته می‌شود اجازه دهید.</string>
+    <string name="calendar_sync_invite">دعوت از تلفن…</string>
     <string name="calendar_sync_sync_now">همگام‌سازی اکنون</string>
     <string name="calendar_sync_unpair">شروع دوباره با کلید جدید</string>
     <string name="calendar_sync_devices">تلفن‌های ثبت‌شده</string>
