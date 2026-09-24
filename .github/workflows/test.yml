@@ -34,7 +34,11 @@ name: Tests
 on:
   push:
     branches: [main]
+  # Draft pull requests run nothing; `ready_for_review` is what runs the checks once one is marked
+  # ready. The job-level `if` below does the skipping -- a skipped `test` never blocks, and a draft
+  # cannot be merged anyway.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
   workflow_dispatch:
 
@@ -62,6 +66,7 @@ concurrency:
 
 jobs:
   test:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     # The suite takes ~14 minutes. Without a timeout a test that hangs instead of failing holds
     # the runner until GitHub's 6-hour default kills it, so the deadline is the failure signal.
