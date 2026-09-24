@@ -1646,6 +1646,8 @@
     <string name="canvas_shape_fill_color">Fill</string>
     <string name="canvas_shape_stroke_width">Stroke Width</string>
     <string name="canvas_rename_scene">Rename</string>
+    <string name="canvas_duplicate_scene">Duplicate</string>
+    <string name="canvas_scene_copy_name">%1$s (copy)</string>
     <string name="canvas_remove_scene">Remove</string>
     <string name="canvas_add_source">Add source</string>
     <string name="canvas_delete_source">Delete source</string>
