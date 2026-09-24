@@ -2,6 +2,8 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.input.key.type
@@ -218,7 +220,12 @@ internal fun MinistryResults(
                     modifier = Modifier.fillMaxWidth().then(enterAdds),
                 )
             }
-            Column(Modifier.width(DURATION_FIELD), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // At least the field's width, and wider when the caption needs it: fixed at 92dp, a longer
+            // translation of "Duration" broke onto a second line and threw the row's fields out of line.
+            Column(
+                Modifier.widthIn(min = DURATION_FIELD).width(IntrinsicSize.Max),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 FieldLabel(stringResource(Res.string.calendar_duration))
                 CompactTextField(
                     value = duration,

@@ -3,16 +3,19 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -32,6 +35,34 @@ class AnnouncementsTabAppearanceTest {
             waitForIdle()
 
             assertEquals("#000000", reports.settings?.backgroundColor, "clicking it gives a real starting color")
+        }
+
+    private fun leftPanel(widthDp: Int): (AppSettings) -> AppSettings = { s ->
+        s.copy(
+            maximizedLayout = s.maximizedLayout.copy(announcementsLeftPanelWidthDp = widthDp),
+            windowedLayout = s.windowedLayout.copy(announcementsLeftPanelWidthDp = widthDp),
+        )
+    }
+
+    private fun ComposeUiTest.transparentButtonBesideField(): Boolean {
+        val field = onNodeWithText("BACKGROUND COLOR", substring = true).fetchSemanticsNode().boundsInRoot
+        val button = onNodeWithText(AnnouncementLabel.TRANSPARENT).fetchSemanticsNode().boundsInRoot
+        return button.center.y in field.top..field.bottom && button.left > field.left
+    }
+
+    @Test
+    fun `the transparent button sits beside the colour when there is room`() =
+        announcementsTab(settings = leftPanel(400)) { _, _ ->
+            assertTrue(transparentButtonBesideField())
+        }
+
+    @Test
+    fun `the transparent button moves under the colour when the panel is too narrow for both`() =
+        announcementsTab(settings = leftPanel(220)) { _, _ ->
+            assertFalse(transparentButtonBesideField())
+            val field = onNodeWithText("BACKGROUND COLOR", substring = true).fetchSemanticsNode().boundsInRoot
+            val button = onNodeWithText(AnnouncementLabel.TRANSPARENT).fetchSemanticsNode().boundsInRoot
+            assertTrue(button.top >= field.bottom, "under it: $field vs $button")
         }
 
     // ── Animation type ────────────────────────────────────────────────────────────

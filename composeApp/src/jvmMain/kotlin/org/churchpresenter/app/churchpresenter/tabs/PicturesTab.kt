@@ -167,6 +167,7 @@ private val RECENT_BAR_HEIGHT = 40.dp
 private val TRANSPORT_KEY_SIZE = 30.dp
 private val PLAY_KEY_SIZE = 38.dp
 private val LOOP_KEY_SIZE = 28.dp
+private val SETTING_BOX_WIDTH = 150.dp
 private const val MIN_TRANSITION_MS = 100
 private const val MAX_TRANSITION_MS = 2000
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -604,14 +605,14 @@ fun PicturesTab(
                 Column(
                     modifier = Modifier
                         .height(42.dp)
-                        .width(170.dp)
+                        .width(SETTING_BOX_WIDTH)
                         .sunken(RoundedCornerShape(8.dp), elevationPalette())
                         .clickable { editingInterval = true }
                         .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = stringResource(Res.string.auto_scroll_interval).uppercase(),
+                        text = stringResource(Res.string.auto_scroll_interval).removeSuffix(":").uppercase(),
                         fontSize = 10.sp,
                         lineHeight = 11.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -671,14 +672,14 @@ fun PicturesTab(
                 Column(
                     modifier = Modifier
                         .height(42.dp)
-                        .width(170.dp)
+                        .width(SETTING_BOX_WIDTH)
                         .sunken(RoundedCornerShape(8.dp), elevationPalette())
                         .clickable { editingTransition = true }
                         .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = stringResource(Res.string.transition_duration).uppercase(),
+                        text = stringResource(Res.string.transition_duration).removeSuffix(":").uppercase(),
                         fontSize = 10.sp,
                         lineHeight = 11.sp,
                         fontWeight = FontWeight.SemiBold,

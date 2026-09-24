@@ -106,6 +106,7 @@ internal fun BibleTypographyPanel(
      * chips of its own above the pane and would otherwise draw both twice.
      */
     showHeader: Boolean = true,
+    blockAlignment: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (showHeader) ElementHeaderRow(
@@ -116,12 +117,10 @@ internal fun BibleTypographyPanel(
             onTranslationChange = onTranslationChange,
             onReset = onReset,
         )
-        // The colour and the four face buttons, then the font and its size: two rows rather than
-        // one flowing across three cells. All three together come to more than the pane, so the
-        // single row wrapped wherever it happened to run out -- which put the size box on a line of
-        // its own, away from the font it sizes. Splitting them deliberately keeps the pair that
-        // belong together together at any width.
-        ColorControl(style, onStyleChange)
+        // The colour and the four face buttons, then the font and its size, on one flowing row. The
+        // font and its size are one cell: as two, the row wrapped wherever it ran out and put the
+        // size box on a line of its own, away from the font it sizes.
+        //
         // Flowing, not a hard row. Every cell holds fixed-size controls, so a `Row` that runs out
         // of width clips the last one instead of shrinking it -- and a clipped control is still
         // *there*, so it keeps its semantics and a click aimed at it silently lands on nothing.
@@ -133,22 +132,30 @@ internal fun BibleTypographyPanel(
             verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
             itemVerticalAlignment = Alignment.Top,
         ) {
-            FontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
-            SizeControl(style, onStyleChange, autoFit, autoFitEnabled)
+            ColorControl(style, onStyleChange)
+            Row(horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP), verticalAlignment = Alignment.Top) {
+                FontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
+                SizeControl(style, onStyleChange, autoFit, autoFitEnabled)
+            }
         }
-        Row(
+        // Flowing, like the font row above: alignment and the transform share it, which is more
+        // than a narrow column holds, and a clipped last cell is a control nobody can reach.
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Top,
+            verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            itemVerticalAlignment = Alignment.Top,
         ) {
             // Alignment sits here rather than beside Size, matching the Song tab: with the Auto
             // button in that row as well, the four cells came to more than the pane.
             AlignmentControl(style, onStyleChange)
+            blockAlignment?.invoke()
             // Only the reference has anywhere to sit relative to the verse, so the control is absent
             // rather than disabled while the verse is being edited.
             if (element == BibleStyleElement.REFERENCE) {
                 PositionControl(style, onStyleChange)
             }
+            TransformControl(style, onStyleChange)
         }
         // The two sliders take a row of their own rather than the tail of the one above. They are
         // the only controls here that stretch, so in a narrow column -- the per-output Customize
@@ -183,10 +190,8 @@ internal fun BibleTypographyPanel(
                 )
             }
         }
-        TransformControl(style, onStyleChange)
-        // A row of its own. The transform's four segments are 96dp each, so beside them the shadow
-        // cell had nothing left in a narrow column and its three fields were crushed to their
-        // padding the moment the box was ticked.
+        // A row of its own: beside anything else the shadow cell had nothing left in a narrow
+        // column and its three fields were crushed to their padding the moment the box was ticked.
         ShadowControl(style, onStyleChange, Modifier.fillMaxWidth())
     }
 }

@@ -480,7 +480,7 @@ private fun TranslationCodeChip(code: String, ticked: Boolean, shape: Shape) {
             style = MaterialTheme.typography.labelSmall,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
-            color = if (ticked) MaterialTheme.colorScheme.primary
+            color = if (ticked) elevationPalette().selected.ink
                     else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             softWrap = false,

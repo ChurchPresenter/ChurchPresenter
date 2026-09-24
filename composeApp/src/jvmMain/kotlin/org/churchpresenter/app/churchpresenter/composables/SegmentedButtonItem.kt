@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 
 data class SegmentedButtonItem<T>(
     val value: T,
@@ -14,4 +15,5 @@ data class SegmentedButtonItem<T>(
      * tagged chips with one has nowhere else to put the tag its tests reach the segment by.
      */
     val testTag: String? = null,
+    val width: Dp? = null,
 )
