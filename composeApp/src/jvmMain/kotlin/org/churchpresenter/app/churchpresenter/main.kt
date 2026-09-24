@@ -131,7 +131,7 @@ import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
-import org.churchpresenter.app.churchpresenter.server.CalendarEnrollReply
+import org.churchpresenter.app.churchpresenter.server.asReply
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
 import org.churchpresenter.app.churchpresenter.server.CalendarInvite
 import org.churchpresenter.app.churchpresenter.server.asInvite
@@ -1097,8 +1097,8 @@ private fun ApplicationScope.ChurchPresenterApp(
                             }
 
                             // A phone asking to plan the calendar through the relay: blocked devices
-                            // are refused, everyone else is asked, and on Allow the desktop shows the
-                            // QR the phone scans to finish.
+                            // are refused, everyone else is asked, and on Allow the phone is handed
+                            // its enrollment in the reply -- no QR to scan afterwards.
                             val enrollCodeFormat = stringResource(Res.string.remote_api_calendar_enroll_code)
                             LaunchedEffect(Unit) {
                                 companionServer.onCalendarEnroll.collect { pending ->
@@ -1123,14 +1123,11 @@ private fun ApplicationScope.ChurchPresenterApp(
                                             // sat in the queue.
                                             if (pending.decision.isCompleted) return@launch
                                             val enrollment = calendarSync.enroll(clientId, pending.deviceName)
-                                            calendarEnrollQr = enrollment?.let { CalendarInvite.Ready(it) }
                                             pending.decision.complete(
                                                 if (enrollment == null) {
                                                     CalendarEnrollDecision.RelayFailed
                                                 } else {
-                                                    CalendarEnrollDecision.Approved(
-                                                        CalendarEnrollReply(enrollment.relayUrl, enrollment.instanceId),
-                                                    )
+                                                    CalendarEnrollDecision.Approved(enrollment.asReply())
                                                 },
                                             )
                                         }
