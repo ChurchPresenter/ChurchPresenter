@@ -87,7 +87,7 @@ enum class UsageEvent(
     CALENDAR_CUE_FIRED("calendarCueFired"),
     QA_SESSION_STARTED("qaSessionStarted"),
     QA_QUESTION_RECEIVED("qaQuestionReceived"),
-    STAGE_MONITOR("stageMonitor"),
+    STAGE_MONITOR("stageMonitorShown"),
     CONVERTER_OPENED("converterOpened"),
     CONVERTED_BIBLE("convertedBible"),
     CONVERTED_EASYSLIDES("convertedEasySlides"),
