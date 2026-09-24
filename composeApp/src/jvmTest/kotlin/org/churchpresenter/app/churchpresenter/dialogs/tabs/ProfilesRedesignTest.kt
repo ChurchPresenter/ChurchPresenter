@@ -84,6 +84,19 @@ class ProfilesRedesignTest {
     }
 
     @Test
+    fun `Hide all keeps the preview column in place`() {
+        profilesTab(profileDocument()) { _ ->
+            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
+            waitForIdle()
+            onNodeWithText("Hide all").performClick()
+            waitForIdle()
+
+            onNodeWithText("PREVIEW").assertExists()
+            onNodeWithText("Short").assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun `Show all switches them back on`() {
         val off = OutputProfile(bibleMode = Constants.SONG_LANG_OFF, showMedia = false, showQA = false)
         profilesTab(profileDocument(profile = off)) { get ->

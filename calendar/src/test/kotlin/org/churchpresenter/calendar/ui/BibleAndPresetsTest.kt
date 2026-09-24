@@ -10,12 +10,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import org.churchpresenter.calendar.CalendarBibleBook
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** Browsing scripture, and the presets a service is built from. */
@@ -84,6 +87,38 @@ class BibleAndPresetsTest {
 
             assertTrue(shows("Psalms 2"), "the reference typed out is a result of its own")
         }
+
+    @Test
+    fun `a book shows its short name, is found by either, and is stored by the Bible's own`() {
+        val isaiah = CalendarBibleBook(
+            bookId = 23,
+            name = "Книга пророка Исаии",
+            verseCounts = listOf(31, 22),
+            shortName = "Исаия",
+        )
+        withCalendar(emptyService(), host = CalendarHost(bibleBooks = { listOf(isaiah) })) { folder ->
+            awaitText("Sunday Morning")
+            clickFirst("Add song, verse or section")
+            awaitText("Songs")
+            clickFirst("Bible")
+            awaitText("Исаия")
+            assertFalse(shows("Книга пророка Исаии"), "the tile carries the short name")
+
+            typeIntoFirstField("пророка")
+            waitForIdle()
+            clickInSheet("Исаия")
+            clickInSheet("1")
+            clickFirst("Whole chapter")
+            waitForIdle()
+            clickLast("Add")
+            waitForIdle()
+
+            val verse = stored(folder).services.single().items
+                .filterIsInstance<ScheduleItem.BibleVerseItem>()
+                .single()
+            assertEquals("Книга пророка Исаии", verse.bookName)
+        }
+    }
 
     @Test
     fun `presets can be narrowed to one kind`() = withCalendar(documentWith(service())) { folder ->
