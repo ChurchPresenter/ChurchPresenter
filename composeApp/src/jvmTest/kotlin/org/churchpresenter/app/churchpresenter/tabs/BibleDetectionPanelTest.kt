@@ -4,7 +4,10 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -257,5 +260,39 @@ class BibleDetectionPanelTest {
             waitForIdle()
             assertEquals(listOf(1), reports.clicked)
             assertTrue(reports.doubleClicked.isEmpty())
+        }
+
+    // ── The reserved list area ──────────────────────────────────────────────────────────────────
+    //
+    // This panel sits above a browser pane that takes `weight(1f)`, so every pixel the list gains is
+    // one the book, chapter and verse columns lose. The list used to be sized to its contents, so
+    // those columns shifted under the operator's cursor as each of the first four detections landed.
+
+    @Test
+    fun `the list reserves its full height before anything is detected`() =
+        panel(detections = emptyList()) { _ ->
+            onNodeWithTag(DETECTION_LIST_TAG).assertHeightIsEqualTo(DETECTION_LIST_HEIGHT)
+        }
+
+    @Test
+    fun `a first detection does not make the panel taller`() =
+        panel(detections = listOf(detection())) { _ ->
+            onNodeWithTag(DETECTION_LIST_TAG).assertHeightIsEqualTo(DETECTION_LIST_HEIGHT)
+        }
+
+    @Test
+    fun `a detection past the fourth does not make the panel taller either`() =
+        panel(detections = List(10) { detection(label = "Genesis 1:${it + 1}") }) { _ ->
+            onNodeWithTag(DETECTION_LIST_TAG).assertHeightIsEqualTo(DETECTION_LIST_HEIGHT)
+        }
+
+    @Test
+    fun `a row is the height the reservation is reckoned from`() =
+        panel(detections = listOf(detection())) { _ ->
+            // The rows are content-sized on purpose — they share the History panel's vertical
+            // rhythm rather than being pinned — so DETECTION_ROW_HEIGHT agrees with the typography
+            // instead of imposing itself. This is what turns a drift in `bodySmall` into a failing
+            // test rather than a fourth row quietly clipped by the reservation.
+            onAllNodesWithTag(DETECTION_ROW_TAG)[0].assertHeightIsEqualTo(DETECTION_ROW_HEIGHT)
         }
 }
