@@ -17,6 +17,9 @@ import org.churchpresenter.core.models.qa.QuestionDto
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.qa.toDto
 import java.io.File
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
@@ -30,7 +33,7 @@ private data class QAState(
     val votedIps: Map<String, Map<String, String>> = emptyMap()
 )
 
-class QAManager {
+class QAManager(private val usage: UsageEventStore = UsageEvents) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
@@ -107,6 +110,7 @@ class QAManager {
         _questions.add(question)
         emitEvent(QAEvent.QuestionSubmitted(question))
         saveState()
+        usage.record(UsageEvent.QA_QUESTION_RECEIVED)
         question
     }
 
@@ -207,6 +211,7 @@ class QAManager {
 
     fun toggleSession(): Unit = synchronized(this) {
         _sessionActive.value = !_sessionActive.value
+        if (_sessionActive.value) usage.record(UsageEvent.QA_SESSION_STARTED)
         if (!_sessionActive.value) {
             _showQRCodeOnDisplay.value = false
             _history.addAll(_questions)

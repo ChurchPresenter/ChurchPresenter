@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarUsage
 import org.churchpresenter.calendar.CalendarState
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_cancel
@@ -85,7 +86,12 @@ internal fun CalendarDialogs(
     }
 
     if (dialogs.creatingService || dialogs.editingService != null) {
-        ServiceDialog(state, dialogs.editingService, onClose = dialogs::closeServiceSheet)
+        ServiceDialog(
+            state,
+            dialogs.editingService,
+            onServiceAdded = { host.recordUsage(CalendarUsage.SERVICE_ADDED) },
+            onClose = dialogs::closeServiceSheet,
+        )
     }
 
     if (dialogs.addingItem && openService != null) {
@@ -99,6 +105,7 @@ internal fun CalendarDialogs(
             hasServices = state::hasServices,
             onCopy = { dates, includeRunOfShow, includeCues, repeat ->
                 state.copyService(service, dates, includeRunOfShow, includeCues, repeat)
+                host.recordUsage(CalendarUsage.SERVICE_COPIED)
                 // A single paste is a jump to where it landed; a series is visible as the dots.
                 if (repeat == ServiceRepeat.NONE) dates.firstOrNull()?.let(state::select)
                 dialogs.copyFrom = null
@@ -114,6 +121,7 @@ internal fun CalendarDialogs(
             existing = state.document.templates,
             onSave = { name, sections, items, cues ->
                 state.saveTemplate(service, name, sections, items, cues)
+                host.recordUsage(CalendarUsage.TEMPLATE_SAVED)
                 dialogs.templateFrom = null
             },
             onDismiss = { dialogs.templateFrom = null },
@@ -144,7 +152,12 @@ internal fun CalendarDialogs(
 
 /** The service sheet: a new service on the selected day, or [existing] being edited. */
 @Composable
-private fun ServiceDialog(state: CalendarState, existing: PlannedService?, onClose: () -> Unit) {
+private fun ServiceDialog(
+    state: CalendarState,
+    existing: PlannedService?,
+    onServiceAdded: () -> Unit,
+    onClose: () -> Unit,
+) {
     ServiceSheet(
         existing = existing,
         defaultStartTime = state.document.preferences.defaultStartTime,
@@ -155,6 +168,7 @@ private fun ServiceDialog(state: CalendarState, existing: PlannedService?, onClo
         onSave = { form ->
             if (existing == null) {
                 state.addService(form.name, form.startTime, form.kind, form.template)
+                onServiceAdded()
             } else {
                 state.updateService(
                     existing.copy(name = form.name, startTime = form.startTime, kind = form.kind.id),

@@ -23,6 +23,7 @@ import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -92,6 +93,10 @@ import kotlin.io.path.writeText
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.app.churchpresenter.utils.converterEvent
+import org.churchpresenter.app.churchpresenter.utils.songLibraryUsageEvent
 
 private const val GRADIENT_DARKEN = 0.45f
 
@@ -313,6 +318,7 @@ internal fun AboutDialogContent(
 
 @Composable
 fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onClose: () -> Unit) {
+    LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CONVERTER_OPENED) }
     val language = LocalLanguage.current
     // The converter is a separate module with its own `ResourceBundle`, which it initialises from
     // the OS locale — so without this it answers in the machine's language and ignores the one
@@ -326,7 +332,10 @@ fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onC
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
         AppWindowRoot(theme = theme) {
-            ConverterApp(initialTab = initialTab)
+            ConverterApp(
+                initialTab = initialTab,
+                onConverted = { sourceId -> converterEvent(sourceId)?.let { UsageEvents.record(it) } },
+            )
         }
     }
 }
@@ -348,6 +357,7 @@ fun SongLibraryWindow(
 ) {
     // No locale plumbing here: the window's strings are Compose resources now, and the app already
     // sets the JVM default locale when the language changes — which is what picks values-xx.
+    LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.SONG_LIBRARY_OPENED) }
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.open_song_library),
@@ -358,6 +368,7 @@ fun SongLibraryWindow(
             SongLibraryApp(
                 libraryFolder = File(songStorageDirectory),
                 onClose = onClose,
+                onUsage = { usage, count -> UsageEvents.record(songLibraryUsageEvent(usage), count) },
                 typicalSeconds = typicalSongSeconds,
                 // The row's Edit opens the app's own editor, so a song is edited in one place
                 // whether it was reached from the Songs tab or from here.
@@ -405,6 +416,7 @@ fun CalendarWindow(
     dialogs: @Composable () -> Unit = {},
     onClose: () -> Unit,
 ) {
+    LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_OPENED) }
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.open_calendar_manager),
@@ -457,7 +469,10 @@ fun CalendarWindow(
                         theme = theme,
                         typicalSeconds = typicalSongSeconds(editing.song),
                         onDismiss = editing.onDismiss,
-                        onSave = { edited, _ -> editing.onSave(edited) },
+                        onSave = { edited, _ ->
+                            editing.onSave(edited)
+                            UsageEvents.record(UsageEvent.SONG_EDITED)
+                        },
                     )
                 },
                 onClose = onClose,

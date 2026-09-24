@@ -177,6 +177,7 @@ import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.app.churchpresenter.utils.calendarUsageEvent
 import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
 import org.churchpresenter.settings.answered
@@ -1070,6 +1071,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     )
                                     val item = pending.item
                                     val add: () -> Unit = {
+                                        UsageEvents.record(UsageEvent.REMOTE_ADDED_TO_SCHEDULE)
                                         addScheduleItem(item, currentScheduleActions) { song ->
                                             coroutineScope.launch { remoteSelectSongFlow.emit(song) }
                                         }
@@ -1127,6 +1129,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                                 if (enrollment == null) {
                                                     CalendarEnrollDecision.RelayFailed
                                                 } else {
+                                                    UsageEvents.record(UsageEvent.CALENDAR_PHONE_ADDED)
                                                     CalendarEnrollDecision.Approved(enrollment.asReply())
                                                 },
                                             )
@@ -1186,6 +1189,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                         sessionAllowedClients, sessionBlockedClients,
                                     )
                                     val addAll: () -> Unit = {
+                                        UsageEvents.record(UsageEvent.REMOTE_ADDED_TO_SCHEDULE, pending.items.size)
                                         for (item in pending.items) {
                                             addScheduleItem(item, currentScheduleActions) { song ->
                                                 coroutineScope.launch { remoteSelectSongFlow.emit(song) }
@@ -1224,6 +1228,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     )
                                     val item = pending.item
                                     val project: () -> Unit = {
+                                        UsageEvents.record(UsageEvent.REMOTE_PUT_LIVE)
                                         if (item is ScheduleItem.AnnouncementItem) {
                                             appSettings = appSettings.withAnnouncement(item)
                                         }
@@ -1314,6 +1319,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                             val loadFromCalendar: (
                                 List<ScheduleItem>, Map<String, RowTiming>, Boolean, Boolean, String?,
                             ) -> Unit = { items, timing, replace, armed, startTime ->
+                                UsageEvents.record(UsageEvent.CALENDAR_LOADED)
                                 // The service's start anchors the Schedule's clock column where
                                 // no row is pinned. Appending to a schedule keeps the start it
                                 // already runs from; appending to an empty one adopts this one's.
@@ -1351,7 +1357,16 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     items = { currentScheduleItems },
                                     timing = { currentScheduleActions.currentTiming() },
                                     armed = { automationArmed },
-                                    host = cueHost,
+                                    host = cueHost.copy(
+                                        projectItem = { item, plays ->
+                                            UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_CUE_FIRED)
+                                            cueHost.projectItem(item, plays)
+                                        },
+                                        blankOutputs = {
+                                            UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_CUE_FIRED)
+                                            cueHost.blankOutputs()
+                                        },
+                                    ),
                                     operatorLive = {
                                         presenterManager.presentingMode.value != Presenting.NONE &&
                                             engineLiveItem?.let { liveDurationLog.showing(it) } != true
@@ -1383,6 +1398,12 @@ private fun ApplicationScope.ChurchPresenterApp(
                             // background thread, so it works with the Calendar window closed.
                             val calendarFolder =
                                 remember(appSettings.calendarStorageDirectory) { appSettings.calendarFolder() }
+                            var calendarSyncWasOn by remember { mutableStateOf(appSettings.calendarSync.enabled) }
+                            LaunchedEffect(appSettings.calendarSync.enabled) {
+                                val on = appSettings.calendarSync.enabled
+                                if (on && !calendarSyncWasOn) UsageEvents.record(UsageEvent.CALENDAR_SYNC_ENABLED)
+                                calendarSyncWasOn = on
+                            }
                             LaunchedEffect(calendarFolder, appSettings.calendarSync.enabled) {
                                 // A folder chosen in Settings starts from what the app data folder
                                 // holds, once, so the calendar does not vanish on the switch.
@@ -1394,7 +1415,12 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 val store = CalendarStore(calendarFolder)
                                 ServiceAutoLoader(
                                     document = { withContext(Dispatchers.IO) { store.load().document } },
-                                    host = cueHost,
+                                    host = cueHost.copy(
+                                        loadIntoSchedule = { items, timing, replace, armed, startTime ->
+                                            UsageEvents.record(UsageEvent.CALENDAR_AUTO_LOADED)
+                                            loadFromCalendar(items, timing, replace, armed, startTime)
+                                        },
+                                    ),
                                 ).run()
                             }
 
@@ -2077,6 +2103,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     host = CalendarHost(
                                         // The switch in the calendar's own settings; the same flag the
                                         // Server tab's card shows, so the two never disagree.
+                                        recordUsage = { usage -> UsageEvents.record(calendarUsageEvent(usage)) },
                                         cloudSync = CalendarCloudSync(
                                             enabled = { appSettings.calendarSync.enabled },
                                             setEnabled = { on ->
@@ -2280,6 +2307,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     companionServer.connectedInstanceLinkFollowers.collectAsState().value,
                                 ),
                                 onAllow = {
+                                    if (currentRemote != null) UsageEvents.record(UsageEvent.REMOTE_APPROVED)
                                     currentRemote?.second?.invoke()
                                     if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
                                 },
@@ -2294,6 +2322,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     val toApprove = remoteEventQueue.filter {
                                         remoteEventTargetsClient(it.first.clientId, clientToAllow)
                                     }
+                                    UsageEvents.record(UsageEvent.REMOTE_APPROVED, toApprove.size)
                                     toApprove.forEach { it.second.invoke() }
                                     remoteEventQueue.removeAll(toApprove)
                                 },
@@ -2303,6 +2332,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     val toApprove = remoteEventQueue.filter {
                                         remoteEventTargetsClient(it.first.clientId, clientToAllow)
                                     }
+                                    UsageEvents.record(UsageEvent.REMOTE_APPROVED, toApprove.size)
                                     toApprove.forEach { it.second.invoke() }
                                     remoteEventQueue.removeAll(toApprove)
                                 },
@@ -2317,6 +2347,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     val toRemove = remoteEventQueue.filter {
                                         remoteEventTargetsClient(it.first.clientId, clientToBlock)
                                     }
+                                    UsageEvents.record(UsageEvent.REMOTE_DENIED, toRemove.size)
                                     toRemove.forEach { it.third.invoke() }
                                     remoteEventQueue.removeAll(toRemove)
                                 },
@@ -2326,10 +2357,12 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     val toRemove = remoteEventQueue.filter {
                                         remoteEventTargetsClient(it.first.clientId, clientToBlock)
                                     }
+                                    UsageEvents.record(UsageEvent.REMOTE_DENIED, toRemove.size)
                                     toRemove.forEach { it.third.invoke() }
                                     remoteEventQueue.removeAll(toRemove)
                                 },
                                 onDeny = {
+                                    if (currentRemote != null) UsageEvents.record(UsageEvent.REMOTE_DENIED)
                                     currentRemote?.third?.invoke()
                                     if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
                                 }
@@ -2380,6 +2413,13 @@ private fun ApplicationScope.ChurchPresenterApp(
     }
 
     if (appReady && eulaAccepted && showSetupWizard) {
+        LaunchedEffect(Unit) { UsageEvents.record(UsageEvent.SETUP_WIZARD_OPENED) }
+        val closeSetupWizard = {
+            val updated = appSettings.copy(setupWizardShown = true)
+            settingsManager.saveSettings(updated)
+            appSettings = updated
+            showSetupWizard = false
+        }
         SetupWizardDialog(
             theme = theme,
             selectedLanguage = currentLanguage,
@@ -2401,17 +2441,23 @@ private fun ApplicationScope.ChurchPresenterApp(
                 appSettings = appSettings.copy(theme = newTheme.toString())
                 settingsManager.saveSettings(appSettings)
             },
-            onOpenSettings = { openOptionsDialog(0) },
+            onOpenSettings = {
+                UsageEvents.record(UsageEvent.SETUP_WIZARD_OPENED_SETTINGS)
+                openOptionsDialog(0)
+            },
             onOpenConverter = {
+                UsageEvents.record(UsageEvent.SETUP_WIZARD_OPENED_CONVERTER)
                 converterInitialTab = ConverterTab.SONGS
                 showConverterWindow = true
             },
             onDismiss = {
-                val updated = appSettings.copy(setupWizardShown = true)
-                settingsManager.saveSettings(updated)
-                appSettings = updated
-                showSetupWizard = false
-            }
+                UsageEvents.record(UsageEvent.SETUP_WIZARD_SKIPPED)
+                closeSetupWizard()
+            },
+            onFinish = {
+                UsageEvents.record(UsageEvent.SETUP_WIZARD_FINISHED)
+                closeSetupWizard()
+            },
         )
     }
 

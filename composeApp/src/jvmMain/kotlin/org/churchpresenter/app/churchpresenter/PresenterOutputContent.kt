@@ -35,6 +35,8 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
@@ -101,6 +103,7 @@ internal fun PresenterOutputContent(
         val showBg = showsOutputBackground(profile)
         CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
             if (profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+                LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.STAGE_MONITOR) }
                 // Stage monitor: dedicated presenter-confidence layout
                 StageMonitorScreen(
                     sm = outputSettings.stageMonitorSettings,

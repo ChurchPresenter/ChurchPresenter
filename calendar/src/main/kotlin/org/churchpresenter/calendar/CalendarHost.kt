@@ -156,7 +156,11 @@ data class CalendarHost(
      * app offers no such thing. Off, nothing about the calendar leaves this computer.
      */
     val cloudSync: CalendarCloudSync? = null,
+
+    val recordUsage: (CalendarUsage) -> Unit = {},
 )
+
+enum class CalendarUsage { SERVICE_ADDED, SERVICE_COPIED, TEMPLATE_SAVED, MISSING_FILE_FIXED, EXPORTED }
 
 /**
  * The cloud sync switch as the settings dialog draws it: what it reads, what a flip does, and

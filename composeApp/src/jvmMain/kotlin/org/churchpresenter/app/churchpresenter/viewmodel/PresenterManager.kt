@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
@@ -1082,6 +1084,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
     val displayedDictionaryEntry: State<StrongsEntry?> = _displayedDictionaryEntry
 
     fun setDisplayedDictionaryEntry(entry: StrongsEntry?) {
+        if (entry != null && entry != _displayedDictionaryEntry.value) UsageEvents.record(UsageEvent.STRONGS_SHOWN)
         _displayedDictionaryEntry.value = entry
         notifyLiveStateChanged(Presenting.DICTIONARY)
     }

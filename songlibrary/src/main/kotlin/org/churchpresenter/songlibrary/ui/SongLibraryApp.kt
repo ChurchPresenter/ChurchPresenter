@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import org.churchpresenter.songlibrary.SongLibraryState
+import org.churchpresenter.songlibrary.SongLibraryUsage
 import org.churchpresenter.songlibrary.generated.resources.delete
 
 /**
@@ -55,8 +56,9 @@ fun SongLibraryApp(
      * read* reachable at all: the grid is only in it for as long as the disk takes.
      */
     io: CoroutineDispatcher = Dispatchers.IO,
+    onUsage: (usage: SongLibraryUsage, count: Int) -> Unit = { _, _ -> },
 ) {
-    val state = remember(libraryFolder) { SongLibraryState(libraryFolder, typicalSeconds) }
+    val state = remember(libraryFolder) { SongLibraryState(libraryFolder, onUsage, typicalSeconds) }
     LaunchedEffect(libraryFolder) { state.reloadAsync(io) }
     // Writing a song, a songbook or a deletion goes to disk, which is why those calls suspend. They
     // are started from here rather than awaited: the dialog closes at once and the grid keeps
@@ -107,7 +109,7 @@ fun SongLibraryApp(
             songbooks = state.songbooks,
             onDismiss = { batchOpen = false },
             onApply = { fields ->
-                state.editAll(fields)
+                state.bulkEdit(fields)
                 batchOpen = false
             },
         )

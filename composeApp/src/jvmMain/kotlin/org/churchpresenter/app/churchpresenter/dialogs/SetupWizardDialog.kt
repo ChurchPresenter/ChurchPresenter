@@ -230,7 +230,8 @@ fun SetupWizardDialog(
     onThemeSelected: (ThemeMode) -> Unit,
     onOpenSettings: () -> Unit = {},
     onOpenConverter: () -> Unit = {},
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onFinish: () -> Unit = onDismiss,
 ) {
     // Roomier than the 700x620 it replaces, and resizable now: the rail plus a panel wide enough
     // for 35 language chips does not fit the old box, and a window the user cannot resize is what
@@ -258,7 +259,8 @@ fun SetupWizardDialog(
             onThemeSelected = onThemeSelected,
             onOpenSettings = onOpenSettings,
             onOpenConverter = onOpenConverter,
-            onDismiss = onDismiss
+            onDismiss = onDismiss,
+            onFinish = onFinish,
         )
     }
 }
@@ -282,6 +284,7 @@ internal fun SetupWizardContent(
     onOpenSettings: () -> Unit,
     onOpenConverter: () -> Unit = {},
     onDismiss: () -> Unit,
+    onFinish: () -> Unit = onDismiss,
     loadSummary: suspend () -> SetupSummary = { loadSetupSummary(bibleDirectory, songsDirectory) },
 ) {
     var step by remember { mutableStateOf(0) }
@@ -358,7 +361,7 @@ internal fun SetupWizardContent(
                             },
                             onContinue = {
                                 if (step == TOTAL_STEPS - 1) {
-                                    onDismiss()
+                                    onFinish()
                                 } else {
                                     goingForward = true
                                     step++

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -396,7 +398,10 @@ private fun DictionaryListPane(
                         DictionaryEntryRow(
                             entry = entry,
                             isSelected = viewModel.selectedEntry?.number == entry.number,
-                            onClick = { viewModel.onEntrySelected(entry) },
+                            onClick = {
+                                UsageEvents.record(UsageEvent.STRONGS_LOOKUP)
+                                viewModel.onEntrySelected(entry)
+                            },
                         )
                         HorizontalDivider(thickness = 0.5.dp)
                     }

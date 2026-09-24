@@ -74,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.app.churchpresenter.lottieBandPath
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
@@ -84,7 +85,7 @@ import org.churchpresenter.app.churchpresenter.utils.availableSongColumns
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
-import org.churchpresenter.app.churchpresenter.utils.isDualLanguagePresentation
+import org.churchpresenter.app.churchpresenter.utils.songLanguageEvent
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong
@@ -239,10 +240,11 @@ fun SongsTab(
                 // section changes.
                 val proj = appSettings.projectionSettings
                 val outputs = proj.screenAssignments.filter { it.isLiveOutput() }.mapNotNull { proj.profileFor(it) }
-                if (isDualLanguagePresentation(song, outputs)) {
-                    UsageEvents.record(UsageEvent.SONG_DUAL_LANGUAGE)
-                }
+                songLanguageEvent(song, outputs)?.let { UsageEvents.record(it) }
                 if (isSplitScreenSong(outputs)) UsageEvents.record(UsageEvent.SONG_SPLIT_SCREEN)
+                if (lottieBandPath(appSettings, Presenting.LYRICS) != null) {
+                    UsageEvents.record(UsageEvent.SONG_LOTTIE_BAND)
+                }
                 if (isChordChartPresentation(song, outputs)) {
                     UsageEvents.record(UsageEvent.SONG_CHORD_CHART)
                 }
@@ -670,6 +672,7 @@ fun SongsTab(
                 val wasLive = isPresenting && live.songId == oldSong.songId
                 val success = viewModel.updateSong(oldSong, updatedSong)
                 if (success) {
+                    UsageEvents.record(UsageEvent.SONG_EDITED)
                     onSettingsChangeState.value { s -> s.withTuning(updatedSong.songId, tuning) }
                     dialogs.closeEditor()
                     dialogs.closeEditor()

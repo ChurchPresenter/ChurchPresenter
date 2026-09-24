@@ -49,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import androidx.compose.runtime.collectAsState
 import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarUsage
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.CalendarSource
 import org.churchpresenter.calendar.CalendarState
@@ -354,7 +355,10 @@ private fun ColumnScope.OpenServicePane(
             when (problem.fix) {
                 ProblemFix.PICK_AGAIN -> dialogs.openPicker(item)
                 ProblemFix.LOCATE_FILE, ProblemFix.LOCATE_FOLDER -> fixScope.launch {
-                    relocate(item, problem.fix, host)?.let { state.updateItem(service.id, it) }
+                    relocate(item, problem.fix, host)?.let {
+                        state.updateItem(service.id, it)
+                        host.recordUsage(CalendarUsage.MISSING_FILE_FIXED)
+                    }
                 }
             }
         },
@@ -438,7 +442,8 @@ private fun exportAction(
                         settings = preferences.pdfExport,
                         audience = audience,
                     )
-                }.onFailure { host.reportError("Calendar run-of-show PDF export", it) }
+                }.onSuccess { host.recordUsage(CalendarUsage.EXPORTED) }
+                    .onFailure { host.reportError("Calendar run-of-show PDF export", it) }
             }
         }
     }

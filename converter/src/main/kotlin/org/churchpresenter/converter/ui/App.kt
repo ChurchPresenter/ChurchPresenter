@@ -136,7 +136,7 @@ object ConverterTab {
 }
 
 @Composable
-fun App(initialTab: Int = ConverterTab.BIBLES) {
+fun App(initialTab: Int = ConverterTab.BIBLES, onConverted: (sourceId: String) -> Unit = {}) {
     var selectedTab by remember { mutableStateOf(initialTab) }
     val tabs = listOf(Strings.tabBibles, Strings.tabSongs, Strings.tabDuplicates, Strings.tabRename)
 
@@ -145,8 +145,8 @@ fun App(initialTab: Int = ConverterTab.BIBLES) {
             ConverterTabRow(tabs, selectedTab) { selectedTab = it }
 
             when (selectedTab) {
-                0 -> BibleConverterTab()
-                1 -> SongsTab()
+                0 -> BibleConverterTab(onConverted)
+                1 -> SongsTab(onConverted)
                 2 -> DuplicateFinderTab()
                 3 -> BulkRenameTab()
             }
@@ -156,12 +156,16 @@ fun App(initialTab: Int = ConverterTab.BIBLES) {
 
 enum class ConvertState { SELECT, PREVIEW, CONVERTING, DONE }
 
+const val BIBLE_CONVERSION = "bible"
+
+private fun List<String>.anyConverted(): Boolean = any { it.startsWith("OK:") }
+
 // =============================================================================
 // Songs Tab — "convert from" rail plus a stepped conversion panel
 // =============================================================================
 
 @Composable
-fun SongsTab() {
+fun SongsTab(onConverted: (sourceId: String) -> Unit = {}) {
     var query by remember { mutableStateOf("") }
     var selectedId by remember { mutableStateOf(SongSources.default.id) }
     val source = SongSources.byId(selectedId)
@@ -178,9 +182,9 @@ fun SongsTab() {
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
             SourceHeader(source)
             when (source.id) {
-                SongSources.SOFTPROJECTOR -> SoftProjectorPanel()
-                SongSources.DOCUMENTS -> DocumentsPanel(source)
-                else -> BatchFilePanel(source, SongFormatConverters.byId(source.id))
+                SongSources.SOFTPROJECTOR -> SoftProjectorPanel(onConverted)
+                SongSources.DOCUMENTS -> DocumentsPanel(source, onConverted)
+                else -> BatchFilePanel(source, SongFormatConverters.byId(source.id), onConverted)
             }
         }
     }
@@ -296,7 +300,11 @@ private fun SourceHeader(source: SongSource) {
  * `.song` file each — SongBeamer and Free Worship today.
  */
 @Composable
-private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
+private fun BatchFilePanel(
+    source: SongSource,
+    format: SongFormatConverter,
+    onConverted: (sourceId: String) -> Unit,
+) {
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     var summary by remember { mutableStateOf("") }
     var outputDir by remember { mutableStateOf<File?>(null) }
@@ -335,6 +343,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
                 completed++
             }
             log = messages
+            if (messages.anyConverted()) onConverted(source.id)
             state = ConvertState.DONE
         }
     }
@@ -448,7 +457,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
  * by hand.
  */
 @Composable
-private fun SoftProjectorPanel() {
+private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
     val spsSource = SongSources.byId(SongSources.SOFTPROJECTOR)
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     var summary by remember { mutableStateOf("") }
@@ -481,6 +490,7 @@ private fun SoftProjectorPanel() {
                 completed++
             }
             log = messages
+            if (messages.anyConverted()) onConverted(spsSource.id)
             state = ConvertState.DONE
         }
     }
@@ -633,7 +643,7 @@ private fun convertSongBook(file: File, outputDir: File): List<String> = runCatc
 
 /** PDF / PPTX / DOCX: text is extracted, split into songs, then written out. */
 @Composable
-private fun DocumentsPanel(source: SongSource) {
+private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -> Unit) {
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     var outputDir by remember { mutableStateOf<File?>(null) }
     var parsedSongs by remember { mutableStateOf<List<ParsedSong>>(emptyList()) }
@@ -673,6 +683,7 @@ private fun DocumentsPanel(source: SongSource) {
                 completed++
             }
             log = msgs
+            if (msgs.anyConverted()) onConverted(source.id)
             state = ConvertState.DONE
         }
     }
@@ -898,7 +909,7 @@ private fun ConversionActionBar(
 // =============================================================================
 
 @Composable
-fun BibleConverterTab() {
+fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
     var inputFiles by remember { mutableStateOf<List<File>>(emptyList()) }
     var outputDir by remember { mutableStateOf<File?>(null) }
     var logMessages by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -972,6 +983,7 @@ fun BibleConverterTab() {
                                     } catch (e: Exception) { "ERROR: ${file.name} - ${e.message}" }
                                 }
                             }
+                            if (logMessages.anyConverted()) onConverted(BIBLE_CONVERSION)
                             state = ConvertState.DONE
                         }
                     }, enabled = inputFiles.isNotEmpty()) {
@@ -993,6 +1005,7 @@ fun BibleConverterTab() {
                                     } catch (e: Exception) { "ERROR: ${file.name} - ${e.message}" }
                                 }
                             }
+                            if (logMessages.anyConverted()) onConverted(BIBLE_CONVERSION)
                             state = ConvertState.DONE
                         }
                     }) {
