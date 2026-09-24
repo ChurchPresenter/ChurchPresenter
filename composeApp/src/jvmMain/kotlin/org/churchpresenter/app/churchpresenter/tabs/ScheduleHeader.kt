@@ -412,7 +412,19 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
     }
 }
 
-internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel) {
+/**
+ * Adds every file the schedule understands, and **names the ones it does not**.
+ *
+ * The return value is what stops an unusable drop being indistinguishable from a broken one. A file
+ * whose extension means nothing here, and a folder with no pictures in it, both used to fall through
+ * to nothing at all — no row, no message — which is how dropping onto the schedule came to be
+ * reported as not working (#606, #623).
+ *
+ * The names come back rather than a count so the caller can say *which* file it could not take;
+ * "one of these four did not work" is barely better than silence.
+ */
+internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel): List<String> {
+    val skipped = mutableListOf<String>()
     for (file in files) {
         if (file.isDirectory) {
 
@@ -421,6 +433,8 @@ internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel)
             } ?: 0
             if (imageCount > 0) {
                 viewModel.addPicture(file.absolutePath, file.name, imageCount)
+            } else {
+                skipped += file.name
             }
             continue
         }
@@ -445,7 +459,8 @@ internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel)
             }
             DroppedFileAction.LOWER_THIRD ->
                 viewModel.addLowerThird(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
-            DroppedFileAction.NONE -> {}
+            DroppedFileAction.NONE -> skipped += file.name
         }
     }
+    return skipped
 }

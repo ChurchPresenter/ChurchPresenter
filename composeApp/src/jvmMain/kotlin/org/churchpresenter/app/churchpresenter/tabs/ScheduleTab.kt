@@ -45,6 +45,8 @@ import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -66,6 +68,7 @@ import churchpresenter.composeapp.generated.resources.autosave_restore_discard
 import churchpresenter.composeapp.generated.resources.autosave_restore_message
 import churchpresenter.composeapp.generated.resources.autosave_restore_title
 import churchpresenter.composeapp.generated.resources.schedule_drop_hint
+import churchpresenter.composeapp.generated.resources.schedule_drop_unsupported
 import churchpresenter.composeapp.generated.resources.schedule_drop_to_remove
 import kotlin.math.abs
 import kotlinx.coroutines.launch
@@ -142,6 +145,14 @@ private val FILE_DROP_BORDER = 3.dp
 private val FILE_DROP_CALLOUT_ELEVATION = 6.dp
 private val FILE_DROP_CALLOUT_PADDING_H = 20.dp
 private val FILE_DROP_CALLOUT_PADDING_V = 14.dp
+
+/** Matches the app's other toasts, which clear themselves rather than wait to be dismissed. */
+private const val SKIPPED_FILES_DISMISS_MS = 6_000L
+private val SKIPPED_FILES_MARGIN = 16.dp
+private const val SKIPPED_FILES_MAX_LINES = 2
+
+/** Test handle for the message naming what a drop could not add. */
+internal const val SCHEDULE_SKIPPED_FILES_TAG = "schedule_skipped_files"
 
 data class ScheduleTabActions(
     val newSchedule: () -> Unit = {},
@@ -395,6 +406,8 @@ fun ScheduleTab(
 
         // True while a file from outside the app is being dragged over this panel.
         var fileDragOver by remember { mutableStateOf(false) }
+        // The files the last drop could not use, named so the message can say which.
+        var skippedFiles by remember { mutableStateOf(emptyList<String>()) }
         val fileDropTarget = remember {
             object : DragAndDropTarget {
                 override fun onEntered(event: DragAndDropEvent) { fileDragOver = true }
@@ -404,9 +417,17 @@ fun ScheduleTab(
                 override fun onDrop(event: DragAndDropEvent): Boolean {
                     fileDragOver = false
                     val files = event.droppedFiles() ?: return false
-                    handleDroppedFiles(files, viewModelState.value)
+                    skippedFiles = handleDroppedFiles(files, viewModelState.value)
                     return true
                 }
+            }
+        }
+        // Clears itself, like the app's other toasts — a message about a drop is stale the moment
+        // the next one lands, and keying on the list restarts the countdown when it does.
+        LaunchedEffect(skippedFiles) {
+            if (skippedFiles.isNotEmpty()) {
+                delay(SKIPPED_FILES_DISMISS_MS)
+                skippedFiles = emptyList()
             }
         }
 
@@ -672,6 +693,37 @@ fun ScheduleTab(
                 }
             }
 
+            // What the drop could not take. Sits in the panel the file was aimed at rather than in
+            // an app-level toast: the operator is looking here, and the answer is about this list.
+            if (skippedFiles.isNotEmpty()) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(SKIPPED_FILES_MARGIN)
+                        .zIndex(FILE_DROP_OVERLAY_Z_INDEX)
+                        .testTag(SCHEDULE_SKIPPED_FILES_TAG),
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    shape = CARD_SHAPE,
+                    shadowElevation = FILE_DROP_CALLOUT_ELEVATION,
+                ) {
+                    Text(
+                        text = stringResource(
+                            Res.string.schedule_drop_unsupported,
+                            skippedFiles.joinToString(),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        maxLines = SKIPPED_FILES_MAX_LINES,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(
+                            horizontal = FILE_DROP_CALLOUT_PADDING_H,
+                            vertical = FILE_DROP_CALLOUT_PADDING_V,
+                        ),
+                    )
+                }
+            }
+
             if (isDragActive) {
                 val dragItem = scheduleItems.getOrNull(draggingFromIndex)
                 dragItem?.let { item ->
@@ -725,7 +777,8 @@ fun ScheduleTab(
                             selectDirectory = false
                         )
                         if (files != null) {
-                            handleDroppedFiles(files.map(Path::toFile), viewModel)
+                            // Picked by hand or dragged in, an unusable file gets the same answer.
+                            skippedFiles = handleDroppedFiles(files.map(Path::toFile), viewModel)
                         }
                     }
                 }
