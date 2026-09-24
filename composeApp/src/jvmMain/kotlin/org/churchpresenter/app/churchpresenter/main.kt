@@ -2101,6 +2101,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 val shortBookNames = BibleBookNames.getBookResourceIds().map { stringResource(it) }
                                 CalendarWindow(
                                     theme = theme,
+                                    mainWindow = window,
                                     appDataDirectory = calendarFolder,
                                     songStorageDirectory = appSettings.songSettings.storageDirectory,
                                     typicalSongSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
@@ -2201,9 +2202,9 @@ private fun ApplicationScope.ChurchPresenterApp(
                                         reportError = { context, error ->
                                             CrashReporter.reportException(error, context = context)
                                         },
-                                        chooseExportFile = { suggested ->
+                                        chooseExportFile = { suggested, folder ->
                                             FileChooser.platformInstance.save(
-                                                location = null,
+                                                location = folder?.toPath(),
                                                 suggestedName = suggested,
                                                 filters = listOf(
                                                     FileNameExtensionFilter("PDF Document (*.pdf)", "pdf")

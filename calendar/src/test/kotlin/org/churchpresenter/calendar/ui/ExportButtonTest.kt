@@ -31,7 +31,8 @@ class ExportButtonTest {
     ) {
         val target = Files.createTempFile("run-of-show", ".pdf").toFile().apply { delete() }
         try {
-            withCalendar(document, host = CalendarHost(chooseExportFile = { target }, pdfFont = { null })) { folder ->
+            val host = CalendarHost(chooseExportFile = { _, _ -> target }, pdfFont = { null })
+            withCalendar(document, host = host) { folder ->
                 awaitText("Amazing Grace")
                 body(target, folder)
             }

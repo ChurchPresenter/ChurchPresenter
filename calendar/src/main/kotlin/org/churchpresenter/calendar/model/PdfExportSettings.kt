@@ -17,6 +17,7 @@ data class PdfExportSettings(
     val staffOnlySections: List<String> = listOf("Pre-Service", "Post-Service"),
     /** What the Export button does when clicked rather than picked from. */
     val lastAudience: PdfAudience = PdfAudience.STAFF,
+    val lastFolder: String = "",
 ) {
     fun isStaffOnly(section: String): Boolean = staffOnlySections.any { it.equals(section, ignoreCase = true) }
 

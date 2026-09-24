@@ -5,8 +5,13 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
+import java.awt.Insets
+import java.awt.Rectangle
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * [centeredOnMainWindow] decides where every modal dialog in the app opens. Get it wrong and a
@@ -111,5 +116,33 @@ class WindowUtilsTest {
             DpSize(1400.dp, 900.dp),
             dialogSizeWithin(1400.dp, 900.dp, screenWidth = 0.dp, screenHeight = 0.dp),
         )
+    }
+
+    @Test
+    fun `the usable area is the screen less its taskbar`() {
+        val area = areaInside(Rectangle(0, 0, 1536, 864), Insets(0, 0, 38, 0))
+        assertEquals(ScreenArea(0.dp, 0.dp, 1536.dp, 826.dp), area)
+    }
+
+    @Test
+    fun `a taskbar on the left or top moves the area off it`() {
+        val area = areaInside(Rectangle(1920, 0, 1920, 1080), Insets(40, 60, 0, 0))
+        assertEquals(ScreenArea(1980.dp, 40.dp, 1860.dp, 1040.dp), area)
+    }
+
+    @Test
+    fun `there is no usable area without a display`() {
+        assertNull(usableScreenArea(null))
+    }
+
+    @Test
+    fun `the calendar stays above the main window only while one of the two is in use`() {
+        val main = Any()
+        val calendar = Any()
+        assertTrue(staysAboveMainWindow(main, main, calendar), "the main window is in use")
+        assertTrue(staysAboveMainWindow(calendar, main, calendar), "the calendar is in use")
+        assertFalse(staysAboveMainWindow(Any(), main, calendar), "a dialog of the app's own is in use")
+        assertFalse(staysAboveMainWindow(null, main, calendar), "another app is in use")
+        assertFalse(staysAboveMainWindow(calendar, null, calendar), "there is no main window to stay above")
     }
 }
