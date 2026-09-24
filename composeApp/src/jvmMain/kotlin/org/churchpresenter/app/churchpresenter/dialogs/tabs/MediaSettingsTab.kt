@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -96,7 +96,7 @@ fun MediaSettingsTab(
 
         // Loop checkbox
         SettingRow(stringResource(Res.string.loop)) {
-            Checkbox(
+            RaisedCheckbox(
                 checked = settings.pictureSettings.isLooping,
                 onCheckedChange = { value ->
                     onSettingsChange { s ->
@@ -110,7 +110,7 @@ fun MediaSettingsTab(
         // Keynote animated playback (the parser is reverse-engineered — this is the
         // one-click escape hatch back to static slides if a .key renders wrong)
         SettingRow(stringResource(Res.string.presentation_animate_keynote)) {
-            Checkbox(
+            RaisedCheckbox(
                 checked = settings.presentationSettings.animateKeynote,
                 onCheckedChange = { value ->
                     onSettingsChange { s ->

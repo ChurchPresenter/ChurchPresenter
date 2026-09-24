@@ -2,8 +2,6 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +53,9 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.no_results_found
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.hoverOutline
 
 /**
  * A dropdown whose value is also a search box: typing narrows the menu to the options that contain
@@ -132,8 +133,8 @@ fun SearchableDropdownField(
     Box(
         modifier = modifier
             .heightIn(min = 42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverOutline(RoundedCornerShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 focusRequester.requestFocus()
                 expanded = true

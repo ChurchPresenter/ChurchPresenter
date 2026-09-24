@@ -16,14 +16,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -120,7 +120,7 @@ private fun LevelHeader(state: AdminState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Tip("Go to previous level") {
-            IconButton(
+            KeyIconButton(
                 onClick = { state.loadLevel(state.levels[index - 1]) },
                 enabled = index > 0
             ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = Strings.navPrev) }
@@ -134,7 +134,7 @@ private fun LevelHeader(state: AdminState) {
         )
 
         Tip("Go to next level") {
-            IconButton(
+            KeyIconButton(
                 onClick = { state.loadLevel(state.levels[index + 1]) },
                 enabled = index < state.levels.size - 1
             ) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = Strings.navNext) }
@@ -143,12 +143,12 @@ private fun LevelHeader(state: AdminState) {
         Spacer(Modifier.width(16.dp))
 
         Tip("Create a new empty level and open it for editing") {
-            OutlinedButton(onClick = { state.newLevel() }) { Text(Strings.newLevel) }
+            KeyButton(onClick = { state.newLevel() }) { Text(Strings.newLevel) }
         }
 
         Spacer(Modifier.width(16.dp))
 
-        OutlinedTextField(
+        SunkenOutlinedTextField(
             value = state.jumpText,
             onValueChange = { entered -> state.jumpText = entered.filter { it.isDigit() } },
             label = { Text(Strings.jumpTo) },
@@ -189,7 +189,7 @@ private fun UnexportedWarnings(state: AdminState) {
 private fun EditorPane(state: AdminState, modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         val editorStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 13.sp)
-        OutlinedTextField(
+        SunkenOutlinedTextField(
             value = state.rawText,
             onValueChange = { state.edit(it) },
             modifier = Modifier.fillMaxSize().padding(12.dp).padding(start = 18.dp),
@@ -238,7 +238,7 @@ private fun ActionBar(state: AdminState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Tip("Import a .txt plaintext puzzle file from disk into this level") {
-            OutlinedButton(onClick = {
+            KeyButton(onClick = {
                 openFileDialog("Load Plaintext", listOf("txt"))?.let { file ->
                     state.edit(file.readText(Charsets.UTF_8))
                     state.say("Imported ${file.name}")
@@ -249,13 +249,13 @@ private fun ActionBar(state: AdminState) {
         Spacer(Modifier.width(8.dp))
 
         Tip("Decode and load the saved .xwp file for this level back into the editor") {
-            OutlinedButton(onClick = { state.loadEncoded() }) { Text(Strings.loadXwp) }
+            KeyButton(onClick = { state.loadEncoded() }) { Text(Strings.loadXwp) }
         }
 
         Spacer(Modifier.width(8.dp))
 
         Tip("Encode and save this level as a .xwp file for use in the presenter") {
-            Button(onClick = { state.exportCurrent() }) { Text(Strings.exportXwp) }
+            RaisedButton(onClick = { state.exportCurrent() }) { Text(Strings.exportXwp) }
         }
 
         Spacer(Modifier.width(8.dp))
@@ -265,13 +265,13 @@ private fun ActionBar(state: AdminState) {
                 "(top→bottom, left→right). Also converts simplified formats to " +
                 "standard layout."
         ) {
-            OutlinedButton(onClick = { state.fixReorder() }) { Text(Strings.fixReorder) }
+            KeyButton(onClick = { state.fixReorder() }) { Text(Strings.fixReorder) }
         }
 
         Spacer(Modifier.width(16.dp))
 
         Tip("Export all levels to .xwp files in one go, skipping any that are invalid or still unedited") {
-            OutlinedButton(onClick = {
+            KeyButton(onClick = {
                 state.say(exportAllLevels())
                 state.refreshLevels()
             }) { Text(Strings.exportAll) }
@@ -280,7 +280,7 @@ private fun ActionBar(state: AdminState) {
         Spacer(Modifier.width(8.dp))
 
         Tip("Decode all .xwp files in the encoded/ folder back to plaintext .txt files") {
-            OutlinedButton(onClick = {
+            KeyButton(onClick = {
                 state.say(decodeAllLevels())
                 state.refreshLevels()
             }) { Text(Strings.decodeAll) }

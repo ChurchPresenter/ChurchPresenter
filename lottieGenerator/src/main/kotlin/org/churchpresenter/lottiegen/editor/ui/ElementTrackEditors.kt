@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,7 +78,7 @@ internal fun TracksEditor(element: ElementSpec, onChange: (List<AnimTrack>) -> U
                 onRemove = { onChange(tracks.filterIndexed { i, _ -> i != trackIndex }) }
             )
         }
-        TextButton(onClick = {
+        GhostButton(onClick = {
             onChange(tracks + AnimTrack(AnimProperty.OPACITY, defaultKeyframes(AnimProperty.OPACITY)))
         }) {
             Text(Strings.editorAddTrack)
@@ -108,7 +108,7 @@ internal fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemo
                 },
                 modifier = Modifier.weight(1f)
             )
-            TextButton(onClick = onRemove) { Text(Strings.editorRemoveTrack) }
+            GhostButton(onClick = onRemove) { Text(Strings.editorRemoveTrack) }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OptionDropdown(
@@ -141,7 +141,7 @@ internal fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemo
         for (align in ALIGN_KEYS) {
             val override = track.alignOverrides[align]
             if (override == null) {
-                TextButton(onClick = {
+                GhostButton(onClick = {
                     onChange(track.copy(alignOverrides = track.alignOverrides + (align to track.keyframes)))
                 }) {
                     Text("${Strings.editorAddOverride}: ${EditorLabels.align(align)}")
@@ -157,7 +157,7 @@ internal fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemo
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    TextButton(onClick = {
+                    GhostButton(onClick = {
                         onChange(track.copy(alignOverrides = track.alignOverrides - align))
                     }) {
                         Text(Strings.editorRemoveOverride)
@@ -215,7 +215,7 @@ internal fun KeyframeTable(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                IconButton(onClick = { onChange(keyframes.filterIndexed { i, _ -> i != index }) }) {
+                KeyIconButton(onClick = { onChange(keyframes.filterIndexed { i, _ -> i != index }) }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = Strings.editorDelete,
@@ -224,7 +224,7 @@ internal fun KeyframeTable(
                 }
             }
         }
-        TextButton(onClick = {
+        GhostButton(onClick = {
             val last = keyframes.lastOrNull()
             val newKf = SpecKeyframe(100.0, last?.values ?: List(arity) { 0.0 })
             onChange(keyframes + newKf)

@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -122,6 +122,8 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
 import kotlinx.coroutines.delay
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 private const val MOUSE_MOVE_THROTTLE_MS = 50
 private const val SNAPSHOT_RETRY_DELAY_MS = 7000L
@@ -298,8 +300,7 @@ fun WebTab(
                     .weight(1f)
                     .widthIn(min = minUrlWidth)
                     .height(42.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -349,7 +350,7 @@ fun WebTab(
                     )
                 }
                 if (urlInput.isNotEmpty() && urlInput != "https://") {
-                    IconButton(
+                    KeyIconButton(
                         onClick = { urlInput = "" },
                         modifier = Modifier.size(30.dp)
                     ) {
@@ -567,8 +568,7 @@ fun WebTab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -614,7 +614,7 @@ fun WebTab(
                             )
                         }
                         if (typeBuffer.isNotEmpty()) {
-                            IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
+                            KeyIconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
                                 Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }

@@ -14,14 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -130,7 +130,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Button(shape = RoundedCornerShape(6.dp), onClick = { onIdentifyScreen() }) {
+        RaisedButton(shape = RoundedCornerShape(6.dp), onClick = { onIdentifyScreen() }) {
             Text(
                 text = stringResource(Res.string.identify_screen),
                 style = MaterialTheme.typography.labelSmall
@@ -257,7 +257,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_decklink_io_conflict_tooltip)) } },
                         state = rememberTooltipState()
                     ) {
-                        OutlinedButton(
+                        KeyButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = { dropdownExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
@@ -273,7 +273,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         }
                     }
                 } else {
-                    OutlinedButton(
+                    KeyButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = { dropdownExpanded = true },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
@@ -414,7 +414,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_decklink_io_conflict_tooltip)) } },
                         state = rememberTooltipState()
                     ) {
-                        OutlinedButton(
+                        KeyButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = { keyExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
@@ -430,7 +430,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         }
                     }
                 } else {
-                    OutlinedButton(
+                    KeyButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = { keyExpanded = true },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)

@@ -37,6 +37,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.elevationPalette
 
 /**
  * The reusable text field behind every setting in the app's settings dialogs, in both its
@@ -325,7 +326,7 @@ class SettingsTextFieldTest {
         setContent {
             MaterialTheme {
                 accent = MaterialTheme.colorScheme.primary
-                resting = MaterialTheme.colorScheme.outlineVariant
+                resting = elevationPalette().wellBorder
                 SettingsTextField(
                     value = "16",
                     onValueChange = { },

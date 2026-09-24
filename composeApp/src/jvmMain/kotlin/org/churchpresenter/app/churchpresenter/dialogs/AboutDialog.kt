@@ -17,9 +17,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -139,7 +139,7 @@ private fun IssueLinkRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             modifier = Modifier.weight(1f),
             onClick = { onOpen(url) }
@@ -245,7 +245,7 @@ internal fun AboutDialogContent(
                     onCopy = copyText,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
@@ -261,7 +261,7 @@ internal fun AboutDialogContent(
                 val savedMsg = stringResource(Res.string.diagnostic_info_saved)
                 val saveFailedMsg = stringResource(Res.string.diagnostic_info_save_failed)
                 val saveCoroutineScope = rememberCoroutineScope()
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
@@ -299,7 +299,7 @@ internal fun AboutDialogContent(
                     Text(saveTitle, maxLines = 1, textAlign = TextAlign.Center)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onDismiss
@@ -397,6 +397,12 @@ fun CalendarWindow(
     host: CalendarHost,
     /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
     typicalSongSeconds: (SongItem) -> Int? = { null },
+    /**
+     * Dialogs the app opens on the calendar's behalf -- the phone-invite QR. Composed inside this
+     * window so it owns them: one composed in the main window's scope is owned by the main window,
+     * and opening it brings the main window forward over the calendar.
+     */
+    dialogs: @Composable () -> Unit = {},
     onClose: () -> Unit,
 ) {
     Window(
@@ -456,6 +462,7 @@ fun CalendarWindow(
                 },
                 onClose = onClose,
             )
+            dialogs()
         }
     }
 }

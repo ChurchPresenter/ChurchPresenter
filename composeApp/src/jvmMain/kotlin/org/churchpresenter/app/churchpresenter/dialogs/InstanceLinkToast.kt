@@ -19,7 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -90,7 +90,7 @@ fun InstanceLinkToastHost(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         Spacer(Modifier.width(8.dp))
-                        TextButton(shape = RoundedCornerShape(6.dp), onClick = { onDismiss(current) }) {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { onDismiss(current) }) {
                             Text(
                                 stringResource(Res.string.remote_activity_dismiss),
                                 color = MaterialTheme.colorScheme.primary

@@ -1,7 +1,5 @@
 package org.churchpresenter.theme.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -35,8 +33,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.theme.ElevationPalette
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
-private val FieldShape = RoundedCornerShape(6.dp)
+private val FieldShape = RoundedCornerShape(8.dp)
 
 @Composable
 fun SettingsTextField(
@@ -56,8 +57,8 @@ fun SettingsTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     fillWidth: Boolean = false,
-    /** The fill behind the text; a caller sitting the field beside dropdowns passes their `surfaceVariant`. */
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    /** The fill of the sunken well behind the text; unspecified is the theme's own well. */
+    containerColor: Color = Color.Unspecified,
 ) {
     val hasLabel = label.isNotEmpty()
     val interactionSource = remember { MutableInteractionSource() }
@@ -69,12 +70,12 @@ fun SettingsTextField(
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
         focused -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.outlineVariant
+        else -> Color.Unspecified
     }
     val textColor = if (enabled) MaterialTheme.colorScheme.onSurface
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
 
-    val chrome = FieldChrome(interactionSource, borderColor, textColor, containerColor)
+    val chrome = FieldChrome(interactionSource, borderColor, textColor, containerColor, elevationPalette())
     val input = FieldInput(enabled, readOnly, keyboardOptions, keyboardActions, visualTransformation)
     val options = FieldOptions(input, singleLine, maxLines, placeholder, trailingIcon)
     Column(modifier = modifier) {
@@ -102,6 +103,7 @@ private class FieldChrome(
     val borderColor: Color,
     val textColor: Color,
     val containerColor: Color,
+    val palette: ElevationPalette,
 )
 
 /** How the field takes typing: passed to `BasicTextField` as it was given. */
@@ -143,8 +145,7 @@ private fun LabelledField(
             .widthIn(min = 60.dp)
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(IntrinsicSize.Max))
             .then(if (o.singleLine) Modifier.height(42.dp) else Modifier.heightIn(min = 42.dp))
-            .background(chrome.containerColor, FieldShape)
-            .border(1.dp, chrome.borderColor, FieldShape)
+            .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor)
             .padding(horizontal = 9.dp, vertical = 4.dp)
     ) {
         Text(
@@ -203,8 +204,7 @@ private fun PlainField(value: String, onValueChange: (String) -> Unit, chrome: F
         modifier = Modifier
             .fillMaxWidth()
             .then(if (o.singleLine) Modifier.height(28.dp) else Modifier.padding(vertical = 5.dp))
-            .background(chrome.containerColor, FieldShape)
-            .border(1.dp, chrome.borderColor, FieldShape),
+            .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor),
         enabled = o.input.enabled,
         readOnly = o.input.readOnly,
         singleLine = o.singleLine,

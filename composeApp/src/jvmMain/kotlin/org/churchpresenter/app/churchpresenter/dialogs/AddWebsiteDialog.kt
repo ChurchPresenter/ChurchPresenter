@@ -8,14 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -154,14 +154,14 @@ internal fun AddWebsiteDialogContent(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(
                             stringResource(Res.string.cancel),
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val finalUrl = url.trim()

@@ -27,6 +27,7 @@
     <string name="service_schedule">Программа служения:</string>
     <string name="songs">Песни</string>
     <string name="song">Песня</string>
+    <string name="output_profiles_tab">Профили</string>
     <string name="bible">Библия</string>
     <string name="pictures">Изображения</string>
     <string name="media">Медиа</string>
@@ -161,6 +162,7 @@
     <string name="word_wrap">Перенос слов</string>
     <string name="show_on_first_page_only">Показывать только на первой странице</string>
     <string name="position_on_screen">Положение на экране:</string>
+    <string name="position_showing_at">Расположение</string>
     <string name="top_left">Вверху слева</string>
     <string name="top_right">Вверху справа</string>
     <string name="bottom_left">Внизу слева</string>
@@ -834,6 +836,7 @@
     <string name="live_preview_title">Эфир</string>
     <string name="live_preview_website">Веб-сайт</string>
     <string name="loop_off">Повтор выкл.</string>
+    <string name="output_scale_mode">Масштаб: %1$s</string>
     <string name="loop_on">Повтор вкл.</string>
     <string name="lower_third_height">Высота нижней трети % (для Библии и Песен)</string>
     <string name="lower_third_storage_directory">Папка хранения нижних третей</string>
@@ -900,6 +903,10 @@
     <string name="tab_canvas">Холст</string>
     <string name="tab_visibility">Видимость вкладок</string>
     <string name="text_margins">Отступы текста</string>
+    <string name="content_region">Область контента</string>
+    <string name="content_region_width">Ширина %</string>
+    <string name="content_region_x_offset">Смещение X %</string>
+    <string name="content_region_y_offset">Смещение Y %</string>
     <string name="end_of_song_spacing">Конец песни (*) интервал</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Время вышло!</string>
@@ -950,6 +957,8 @@
     <string name="web_engine_unavailable_body">Не удалось запустить движок браузера. Установите Microsoft Visual C++ Redistributable (x64) и перезапустите приложение.</string>
     <string name="web_engine_unavailable_macos_title">Для веб-браузера требуется более новая macOS</string>
     <string name="web_engine_unavailable_macos_body">Движок браузера ChurchPresenter больше не поддерживает эту версию macOS. Обновите систему до macOS 12 (Monterey) или новее, чтобы использовать вкладку "Веб" и источники браузера.</string>
+    <string name="web_engine_unavailable_windows_title">Для веб-браузера требуется Windows 10 или новее</string>
+    <string name="web_engine_unavailable_windows_body">Движок браузера ChurchPresenter больше не поддерживает эту версию Windows. Обновите систему до Windows 10 или новее, чтобы использовать вкладку "Веб" и источники браузера.</string>
     <string name="web_under_construction">Эта функция находится в разработке.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1165,12 +1174,26 @@
     <string name="tab_label_style_text">Только текст</string>
     <string name="tab_label_style_icons_and_text">Значки и текст</string>
     <string name="tab_label_style_icons">Только значки</string>
+    <string name="tab_label_style_button_hint">Подписи вкладок: текст, значки или и то и другое. Нажмите, чтобы изменить.</string>
+    <string name="tab_label_margin_hint">Отступы вкладок: сколько места получает каждая вкладка. Нажмите, чтобы изменить.</string>
+    <string name="tab_label_margin_small">Маленький</string>
+    <string name="tab_label_margin_small_normal">Ниже среднего</string>
+    <string name="tab_label_margin_normal">Обычный</string>
+    <string name="tab_label_margin_normal_large">Выше среднего</string>
+    <string name="tab_label_margin_large">Большой</string>
     <string name="file_not_supported_short">не поддерживается</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Номер перед названием</string>
     <string name="song_number_corner">Угол</string>
     <string name="song_number_corner_off">Выкл.</string>
+    <string name="song_number_offset_needs_corner">Выберите угол выше, чтобы свободно расположить номер</string>
+    <string name="song_number_offset_x">Смещение X %</string>
+    <string name="song_number_offset_y">Смещение Y %</string>
+    <string name="song_section_label">Подпись раздела</string>
+    <string name="song_section_label_enabled">Показывать текущий раздел (куплет, припев…)</string>
+    <string name="song_section_label_font_size">Размер шрифта</string>
+    <string name="song_section_label_color">Цвет</string>
     <string name="fullscreen_display">Полноэкранный режим</string>
     <string name="display_mode_label">Режим отображения:</string>
     <string name="display_mode_one_verse">1 куплет</string>
@@ -2136,6 +2159,7 @@
     <string name="browser_source_fps">Макс. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Зеркалирует веб-сайт, показанный на основном выходе — активно, только пока вкладка «Веб» или окно вывода отображает его</string>
     <string name="tooltip_stt_settings">Настройки отображения STT</string>
+    <string name="tooltip_dictionary_settings">Настройки отображения словаря</string>
     <string name="presentation_builds_counter">Шаг анимации %1$d из %2$d</string>
     <string name="presentation_animate_keynote">Анимировать презентации Keynote</string>
     <string name="presentation_focus_lost">Клавиатурный фокус потерян — нажмите здесь, чтобы снова включить стрелки и кликер</string>
@@ -2149,6 +2173,7 @@
     <string name="instance_link_controlling_host">Управляет %1$s</string>
     <string name="instance_link_primary_badge">Основной — подключено ведомых: %1$d</string>
     <string name="stt_settings_dialog_title">Настройки отображения STT</string>
+    <string name="dictionary_settings_dialog_title">Настройки отображения словаря</string>
     <string name="update_dialog_channel_stable">Стабильный выпуск</string>
     <string name="update_dialog_channel_prerelease">Предварительный выпуск</string>
     <string name="atem_section_background_uploads">Загрузка фонов</string>
@@ -2531,6 +2556,24 @@
     <string name="customize_marker">Маркер</string>
     <string name="customize_bilingual">Два языка</string>
     <string name="customize_no_preview">Для этого раздела нет предпросмотра</string>
+    <string name="output_profile_none">Нет</string>
+    <string name="output_profile_new">Новый профиль</string>
+    <string name="output_profile_create_default">Создать профиль по умолчанию</string>
+    <string name="output_profile_create_default_tooltip">Добавить новый профиль со стандартным оформлением приложения — как запасной вариант, к которому можно вернуться</string>
+    <string name="output_profile_duplicate">Дублировать</string>
+    <string name="output_profile_rename">Переименовать</string>
+    <string name="output_profile_delete">Удалить</string>
+    <string name="output_profile_delete_confirm">Удалить «%1$s»? Это действие нельзя отменить.</string>
+    <string name="output_profile_delete_blocked">Нельзя удалить «%1$s» — он всё ещё используется: %2$s</string>
+    <string name="output_profile_usage_count">Используется выходами: %1$d</string>
+    <string name="output_profile_name_hint">Название профиля</string>
+    <string name="output_profile_picker_tooltip">Профиль вывода</string>
+    <string name="output_profile_swap_menu_tooltip">Сменить профиль вывода</string>
+    <string name="output_profile_new_name_default">Новый профиль</string>
+    <string name="output_profile_display_mode">Режим отображения</string>
+    <string name="output_profile_content">Контент</string>
+    <string name="output_profile_empty_state">Создайте профиль, чтобы начать его оформлять</string>
+    <string name="output_profile_preview_resolution_tooltip">Только форма предпросмотра — не задаёт фактическое разрешение вывода</string>
     <string name="customize_bible">Библия</string>
     <string name="customize_songs">Песни</string>
     <string name="customize_lower_third_vertical_hint">Полоса сбоку вместо ленты внизу.</string>
@@ -2547,6 +2590,9 @@
     <string name="customize_group_card">Карточка</string>
     <string name="customize_group_background">Фон экрана</string>
     <string name="customize_group_background_lower_third">Фон нижней трети</string>
+    <string name="customize_background_source">Фон</string>
+    <string name="customize_background_follow">Как на вкладке «Фон»</string>
+    <string name="customize_background_own">Свой</string>
     <string name="customize_background_type">Тип</string>
     <string name="customize_background_image">Изображение</string>
     <string name="customize_background_video">Видео</string>
@@ -2796,6 +2842,7 @@
     <string name="remote_api_calendar_enroll">Планировать календарь с этого устройства</string>
     <string name="remote_api_calendar_enroll_code">Код %1$s — разрешайте только если телефон показывает тот же код</string>
     <string name="calendar_enroll_qr_title">Отсканируйте телефоном</string>
+    <string name="calendar_enroll_invite_failed">Не удалось создать приглашение — этот компьютер не смог связаться с ретранслятором.</string>
     <string name="calendar_enroll_qr_body">Чтобы завершить, отсканируйте этот код телефоном, который вы только что разрешили.</string>
     <string name="remote_api_calendar_enroll_detail">Телефон или планшет хочет планировать служения в календаре откуда угодно.</string>
     <string name="remote_activity_calendar_enroll">Зарегистрирован для планирования календаря</string>
@@ -2816,6 +2863,7 @@
     <string name="calendar_sync_status_unauthorized">Ретранслятор больше не принимает этот компьютер. Создайте пару заново, чтобы продолжить.</string>
     <string name="calendar_sync_status_other_desktop">Другой компьютер синхронизирует этот календарь. Этот прекратил отправку, пока вы не разорвёте пару с одним из них.</string>
     <string name="calendar_sync_enroll_hint">Чтобы добавить телефон: подключите его к этому компьютеру как обычно (Настройки сервера → QR-код), затем откройте Календарь в приложении и нажмите Зарегистрировать. Здесь вас попросят разрешить это.</string>
+    <string name="calendar_sync_invite">Пригласить телефон…</string>
     <string name="calendar_sync_sync_now">Синхронизировать сейчас</string>
     <string name="calendar_sync_unpair">Начать заново с новым ключом</string>
     <string name="calendar_sync_devices">Зарегистрированные телефоны</string>

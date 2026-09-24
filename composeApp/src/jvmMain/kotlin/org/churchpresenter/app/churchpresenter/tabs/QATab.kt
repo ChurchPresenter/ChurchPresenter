@@ -5,7 +5,6 @@ import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,15 +33,15 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -143,6 +142,8 @@ import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 private const val SORT_BY_VOTES = 3
 private const val DISPLAY_PREVIEW_CHARS = 50
@@ -269,7 +270,7 @@ fun QATab(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                     } else if (sessionActive) {
-                        Button(
+                        RaisedButton(
                             onClick = {
                                 qaManager.toggleSession()
                                 presenterManager.setDisplayedQuestion(null)
@@ -287,7 +288,7 @@ fun QATab(
                             Text(stringResource(Res.string.qa_stop_session))
                         }
                     } else {
-                        Button(
+                        RaisedButton(
                             onClick = { qaManager.toggleSession() },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.inverseSurface,
@@ -300,7 +301,7 @@ fun QATab(
                             Text(stringResource(Res.string.qa_new_session))
                         }
                         if (qaManager.history.isNotEmpty()) {
-                            OutlinedButton(onClick = { qaManager.restoreFromHistory() },
+                            KeyButton(onClick = { qaManager.restoreFromHistory() },
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -356,7 +357,7 @@ fun QATab(
 
                 // Clear all questions
                 if (questions.isNotEmpty()) {
-                    OutlinedButton(
+                    KeyButton(
                         onClick = { showClearConfirm = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                         shape = RoundedCornerShape(8.dp)
@@ -402,7 +403,7 @@ fun QATab(
                 Spacer(Modifier.weight(1f))
 
                 // History button
-                OutlinedButton(
+                KeyButton(
                     onClick = { selectedFilter = 6 },
                     modifier = Modifier.height(42.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding,
@@ -426,8 +427,7 @@ fun QATab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -447,12 +447,20 @@ fun QATab(
                             )
                         }
                         if (addQuestionText.isNotEmpty()) {
-                            FilledIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            RaisedIconButton(
+                                onClick = { addQuestionText = "" },
+                                modifier = Modifier.size(30.dp),
+                                shape = RoundedCornerShape(5.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
                                 Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))
                             }
                         }
                     }
-                    Button(
+                    RaisedButton(
                         onClick = {
                             qaManager.addQuestion(addQuestionText)
                             addQuestionText = ""
@@ -482,7 +490,7 @@ fun QATab(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    OutlinedButton(
+                    KeyButton(
                         onClick = {
                             qaManager.clearDisplay()
                             presenterManager.setDisplayedQuestion(null)
@@ -520,7 +528,7 @@ fun QATab(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedButton(onClick = {
+                        KeyButton(onClick = {
                             coroutineScope.launch {
                                 val path = FileChooser.platformInstance.save(
                                     location = null,
@@ -547,7 +555,7 @@ fun QATab(
                         ) {
                             Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)
                         }
-                        OutlinedButton(onClick = {
+                        KeyButton(onClick = {
                             coroutineScope.launch {
                                 val path = FileChooser.platformInstance.chooseSingle(
                                     path = null,
@@ -573,7 +581,7 @@ fun QATab(
                         ) {
                             Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)
                         }
-                        OutlinedButton(
+                        KeyButton(
                             onClick = { qaManager.clearHistory() },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                             shape = RoundedCornerShape(8.dp)
@@ -634,7 +642,7 @@ fun QATab(
                 title = { Text(stringResource(Res.string.qa_clear_all_questions)) },
                 text = { Text(stringResource(Res.string.qa_clear_all_confirm_message)) },
                 confirmButton = {
-                    TextButton(
+                    GhostButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                         qaManager.clearAll()
@@ -646,7 +654,7 @@ fun QATab(
                 },
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(
+                        GhostButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = {
                             // Close the confirm dialog before the save dialog opens and snapshot
@@ -681,7 +689,9 @@ fun QATab(
                                 }
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
-                        TextButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) {
+                            Text(stringResource(Res.string.cancel))
+                        }
                     }
                 }
             )
@@ -965,8 +975,7 @@ private fun QuestionRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 50.dp, top = 4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 BasicTextField(
@@ -1014,7 +1023,7 @@ private fun QAIconButton(
         },
         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
     ) {
-        FilledIconButton(
+        RaisedIconButton(
             onClick = onClick,
             enabled = enabled,
             modifier = modifier,

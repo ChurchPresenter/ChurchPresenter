@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -74,7 +74,7 @@ fun DictionarySettingsTab(
             // Word section
             SettingsSection(title = stringResource(Res.string.dictionary_settings_word_text)) {
                 SettingRow(label = stringResource(Res.string.show)) {
-                    Switch(
+                    RaisedSwitch(
                         checked = ds.showWord,
                         onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
                     )
@@ -149,7 +149,7 @@ fun DictionarySettingsTab(
             // Definition section
             SettingsSection(title = stringResource(Res.string.dictionary_settings_definition_text)) {
                 SettingRow(label = stringResource(Res.string.show)) {
-                    Switch(
+                    RaisedSwitch(
                         checked = ds.showDefinition,
                         onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
                     )
@@ -208,7 +208,7 @@ fun DictionarySettingsTab(
                 // Reference & Transliteration
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_reference_text)) {
                     SettingRow(label = stringResource(Res.string.show)) {
-                        Switch(
+                        RaisedSwitch(
                             checked = ds.showReference,
                             onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
                         )
@@ -286,7 +286,7 @@ fun DictionarySettingsTab(
                 // KJV Usage
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_kjv_usage)) {
                     SettingRow(label = stringResource(Res.string.show)) {
-                        Switch(
+                        RaisedSwitch(
                             checked = ds.showKjvUsage,
                             onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
                         )
@@ -315,13 +315,13 @@ fun DictionarySettingsTab(
                 // Transitions
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_transitions)) {
                     SettingRow(label = stringResource(Res.string.fade_in)) {
-                        Switch(
+                        RaisedSwitch(
                             checked = ds.fadeIn,
                             onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }
                         )
                     }
                     SettingRow(label = stringResource(Res.string.fade_out)) {
-                        Switch(
+                        RaisedSwitch(
                             checked = ds.fadeOut,
                             onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }
                         )

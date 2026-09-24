@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -176,7 +176,7 @@ internal fun SongTypographyPanel(
             // four segments are 96dp each, and the shadow fields fill what is left of the column --
             // so anything parked on one of those was squeezed out of the picture entirely.
             Spacer(modifier = Modifier.weight(1f))
-            TextButton(
+            GhostButton(
                 onClick = onReset,
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier.height(32.dp),

@@ -10,10 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,25 +63,25 @@ fun ProjectToolbarActions(state: EditorState) {
 private fun ToolbarRow(state: EditorState, d: ProjectDialogState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         EditorTooltip(Strings.editorTipNew) {
-            TextButton(onClick = {
+            GhostButton(onClick = {
                 if (state.dirty) d.confirmDiscardFor = PendingAction.NEW else d.showNewDialog = true
             }) { Text(Strings.editorNew) }
         }
         EditorTooltip(Strings.editorTipOpen) {
-            TextButton(onClick = {
+            GhostButton(onClick = {
                 if (state.dirty) d.confirmDiscardFor = PendingAction.OPEN else d.showOpenDialog = true
             }) { Text(Strings.editorOpen) }
         }
         EditorTooltip(Strings.editorTipSave) {
-            TextButton(onClick = {
+            GhostButton(onClick = {
                 if (!state.saveProject()) d.showSaveAsDialog = true
             }) { Text(Strings.editorSave) }
         }
         EditorTooltip(Strings.editorTipSaveAs) {
-            TextButton(onClick = { d.showSaveAsDialog = true }) { Text(Strings.editorSaveAs) }
+            GhostButton(onClick = { d.showSaveAsDialog = true }) { Text(Strings.editorSaveAs) }
         }
         EditorTooltip(Strings.editorTipExport) {
-            TextButton(onClick = { d.showExportDialog = true }) { Text(Strings.editorExport) }
+            GhostButton(onClick = { d.showExportDialog = true }) { Text(Strings.editorExport) }
         }
     }
 }
@@ -128,7 +128,7 @@ private fun ProjectDialogHost(state: EditorState, d: ProjectDialogState) {
                 )
             },
             confirmButton = {
-                TextButton(onClick = { d.registered = null }) { Text(Strings.ok) }
+                GhostButton(onClick = { d.registered = null }) { Text(Strings.ok) }
             }
         )
     }
@@ -139,7 +139,7 @@ private fun ProjectDialogHost(state: EditorState, d: ProjectDialogState) {
             title = { Text(Strings.editorExportDoneTitle) },
             text = { Text(EditorStrings.exportDoneSteps(state.spec.id, fileName, state.spec.name)) },
             confirmButton = {
-                TextButton(onClick = { d.exportedFileName = null }) { Text(Strings.ok) }
+                GhostButton(onClick = { d.exportedFileName = null }) { Text(Strings.ok) }
             }
         )
     }
@@ -154,7 +154,7 @@ private fun DiscardConfirmDialog(d: ProjectDialogState) {
             title = { Text(Strings.editorUnsavedTitle) },
             text = { Text(Strings.editorUnsavedMessage) },
             confirmButton = {
-                TextButton(onClick = {
+                GhostButton(onClick = {
                     d.confirmDiscardFor = null
                     when (pending) {
                         PendingAction.NEW -> d.showNewDialog = true
@@ -163,7 +163,7 @@ private fun DiscardConfirmDialog(d: ProjectDialogState) {
                 }) { Text(Strings.editorDiscard) }
             },
             dismissButton = {
-                TextButton(onClick = { d.confirmDiscardFor = null }) { Text(Strings.cancelBtn) }
+                GhostButton(onClick = { d.confirmDiscardFor = null }) { Text(Strings.cancelBtn) }
             }
         )
     }
@@ -179,7 +179,7 @@ private fun NewProjectDialog(state: EditorState, d: ProjectDialogState) {
             title = { Text(Strings.editorNewTitle) },
             text = {
                 ScrollableDialogColumn {
-                    TextButton(onClick = {
+                    GhostButton(onClick = {
                         d.showNewDialog = false
                         state.newProject(null)
                     }) { Text(Strings.editorNewBlank) }
@@ -194,7 +194,7 @@ private fun NewProjectDialog(state: EditorState, d: ProjectDialogState) {
                         .mapNotNull { info -> info.specResource?.let { info.label to it } }
                         .filterNot { (_, resource) -> bundled.any { it.second == resource } }
                     for ((label, resource) in bundled + fromRegistry) {
-                        TextButton(onClick = {
+                        GhostButton(onClick = {
                             d.showNewDialog = false
                             state.newProject(resource)
                         }) { Text(label) }
@@ -203,7 +203,7 @@ private fun NewProjectDialog(state: EditorState, d: ProjectDialogState) {
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { d.showNewDialog = false }) { Text(Strings.cancelBtn) }
+                GhostButton(onClick = { d.showNewDialog = false }) { Text(Strings.cancelBtn) }
             }
         )
 }
@@ -242,7 +242,7 @@ private fun OpenProjectDialog(state: EditorState, onClose: () -> Unit) {
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
-                        IconButton(onClick = {
+                        KeyIconButton(onClick = {
                             StyleSpecStorage.delete(file)
                             files = StyleSpecStorage.list()
                         }) {
@@ -259,7 +259,7 @@ private fun OpenProjectDialog(state: EditorState, onClose: () -> Unit) {
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onClose) { Text(Strings.cancelBtn) }
+            GhostButton(onClick = onClose) { Text(Strings.cancelBtn) }
         }
     )
 }
@@ -279,7 +279,7 @@ private fun SaveAsDialog(state: EditorState, onClose: () -> Unit) {
             )
         },
         confirmButton = {
-            TextButton(
+            GhostButton(
                 onClick = {
                     state.saveProjectAs(name.trim().ifEmpty { "Untitled" })
                     onClose()
@@ -287,7 +287,7 @@ private fun SaveAsDialog(state: EditorState, onClose: () -> Unit) {
             ) { Text(Strings.editorSave) }
         },
         dismissButton = {
-            TextButton(onClick = onClose) { Text(Strings.cancelBtn) }
+            GhostButton(onClick = onClose) { Text(Strings.cancelBtn) }
         }
     )
 }
@@ -361,7 +361,7 @@ private fun ExportDialog(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (canRegister) {
                     EditorTooltip(Strings.editorTipRegister) {
-                        TextButton(
+                        GhostButton(
                             enabled = issues.isEmpty(),
                             onClick = {
                                 state.registerIntoBuild()?.let(onRegistered)
@@ -369,7 +369,7 @@ private fun ExportDialog(
                         ) { Text(Strings.editorRegisterBuild) }
                     }
                 }
-                TextButton(
+                GhostButton(
                     enabled = issues.isEmpty(),
                     onClick = {
                         val suggested = "style${state.spec.id}_${StyleSpecStorage.slugify(state.spec.name)}.json"
@@ -387,7 +387,7 @@ private fun ExportDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onClose) { Text(Strings.cancelBtn) }
+            GhostButton(onClick = onClose) { Text(Strings.cancelBtn) }
         }
     )
 }

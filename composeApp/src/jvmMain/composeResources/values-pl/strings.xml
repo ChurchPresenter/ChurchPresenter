@@ -27,6 +27,7 @@
     <string name="service_schedule">Program nabożeństwa:</string>
     <string name="songs">Pieśni</string>
     <string name="song">Pieśń</string>
+    <string name="output_profiles_tab">Profile</string>
     <string name="bible">Biblia</string>
     <string name="pictures">Obrazy</string>
     <string name="media">Media</string>
@@ -138,6 +139,7 @@
     <string name="word_wrap">Zawijanie słów</string>
     <string name="show_on_first_page_only">Pokaż tylko na pierwszej stronie</string>
     <string name="position_on_screen">Pozycja na ekranie:</string>
+    <string name="position_showing_at">Wyświetlane w miejscu</string>
     <string name="top_left">Góra lewa</string>
     <string name="top_right">Góra prawa</string>
     <string name="bottom_left">Dół lewa</string>
@@ -796,6 +798,7 @@
     <string name="live_preview_title">Na żywo</string>
     <string name="live_preview_website">Strona internetowa</string>
     <string name="loop_off">Pętla wyłączona</string>
+    <string name="output_scale_mode">Skala: %1$s</string>
     <string name="loop_on">Pętla włączona</string>
     <string name="lower_third_height">Wysokość dolnej trzeciej % (dla Biblii i Pieśni)</string>
     <string name="lower_third_storage_directory">Katalog przechowywania dolnej trzeciej</string>
@@ -862,6 +865,10 @@
     <string name="tab_canvas">Płótno</string>
     <string name="tab_visibility">Widoczność kart</string>
     <string name="text_margins">Marginesy tekstu</string>
+    <string name="content_region">Obszar treści</string>
+    <string name="content_region_width">Szerokość %</string>
+    <string name="content_region_x_offset">Przesunięcie X %</string>
+    <string name="content_region_y_offset">Przesunięcie Y %</string>
     <string name="end_of_song_spacing">Koniec pieśni (*) odstęp</string>
     <string name="theme">Motyw</string>
     <string name="timer_expired">Czas minął!</string>
@@ -909,6 +916,8 @@
     <string name="web_engine_unavailable_body">Nie udało się uruchomić silnika przeglądarki. Zainstaluj Microsoft Visual C++ Redistributable (x64) i uruchom ponownie aplikację.</string>
     <string name="web_engine_unavailable_macos_title">Przeglądarka internetowa wymaga nowszej wersji macOS</string>
     <string name="web_engine_unavailable_macos_body">Silnik przeglądarki ChurchPresenter nie obsługuje już tej wersji macOS. Zaktualizuj do macOS 12 (Monterey) lub nowszego, aby korzystać z karty Web i źródeł przeglądarki.</string>
+    <string name="web_engine_unavailable_windows_title">Przeglądarka internetowa wymaga systemu Windows 10 lub nowszego</string>
+    <string name="web_engine_unavailable_windows_body">Silnik przeglądarki ChurchPresenter nie obsługuje już tej wersji systemu Windows. Zaktualizuj do Windows 10 lub nowszego, aby korzystać z karty Web i źródeł przeglądarki.</string>
     <string name="web_under_construction">Ta funkcja jest w trakcie budowy.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1124,12 +1133,26 @@
     <string name="tab_label_style_text">Tylko tekst</string>
     <string name="tab_label_style_icons_and_text">Ikony i tekst</string>
     <string name="tab_label_style_icons">Tylko ikony</string>
+    <string name="tab_label_style_button_hint">Etykiety kart: tekst, ikony lub oba. Kliknij, aby zmienić.</string>
+    <string name="tab_label_margin_hint">Odstępy kart: ile miejsca dostaje każda karta. Kliknij, aby zmienić.</string>
+    <string name="tab_label_margin_small">Małe</string>
+    <string name="tab_label_margin_small_normal">Średnio małe</string>
+    <string name="tab_label_margin_normal">Normalne</string>
+    <string name="tab_label_margin_normal_large">Średnio duże</string>
+    <string name="tab_label_margin_large">Duże</string>
     <string name="file_not_supported_short">nieobsługiwany</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numer przed tytułem</string>
     <string name="song_number_corner">Róg</string>
     <string name="song_number_corner_off">Wyłączone</string>
+    <string name="song_number_offset_needs_corner">Wybierz powyżej narożnik, aby swobodnie ustawić numer</string>
+    <string name="song_number_offset_x">Przesunięcie X %</string>
+    <string name="song_number_offset_y">Przesunięcie Y %</string>
+    <string name="song_section_label">Etykieta sekcji</string>
+    <string name="song_section_label_enabled">Pokaż bieżącą sekcję (Zwrotka, Refren…)</string>
+    <string name="song_section_label_font_size">Rozmiar czcionki</string>
+    <string name="song_section_label_color">Kolor</string>
     <string name="fullscreen_display">Wyświetlanie pełnoekranowe</string>
     <string name="display_mode_label">Tryb wyświetlania:</string>
     <string name="display_mode_one_verse">1 zwrotka</string>
@@ -2133,6 +2156,7 @@
     <string name="browser_source_fps">Maks. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Odzwierciedla stronę internetową wyświetlaną na głównym wyjściu — aktywne tylko wtedy, gdy karta Web lub okno wyjścia ją wyświetla</string>
     <string name="tooltip_stt_settings">Ustawienia wyświetlania STT</string>
+    <string name="tooltip_dictionary_settings">Ustawienia wyświetlania słownika</string>
     <string name="presentation_builds_counter">Krok %1$d z %2$d</string>
     <string name="presentation_animate_keynote">Animuj prezentacje Keynote</string>
     <string name="presentation_focus_lost">Utracono fokus klawiatury — kliknij tutaj, aby ponownie włączyć klawisze strzałek i pilota</string>
@@ -2146,6 +2170,7 @@
     <string name="instance_link_controlling_host">Sterowanie: %1$s</string>
     <string name="instance_link_primary_badge">Instancja główna — %1$d obserwator(ów) połączonych</string>
     <string name="stt_settings_dialog_title">Ustawienia wyświetlania STT</string>
+    <string name="dictionary_settings_dialog_title">Ustawienia wyświetlania słownika</string>
     <string name="update_dialog_channel_stable">Wersja stabilna</string>
     <string name="update_dialog_channel_prerelease">Wersja przedpremierowa</string>
     <string name="atem_section_background_uploads">Przesyłanie teł</string>
@@ -2528,6 +2553,24 @@
     <string name="customize_marker">Znacznik</string>
     <string name="customize_bilingual">Dwujęzycznie</string>
     <string name="customize_no_preview">Brak podglądu dla tej sekcji</string>
+    <string name="output_profile_none">Brak</string>
+    <string name="output_profile_new">Nowy profil</string>
+    <string name="output_profile_create_default">Utwórz profil domyślny</string>
+    <string name="output_profile_create_default_tooltip">Dodaj nowy profil z fabrycznym stylem aplikacji jako kopię zapasową, do której można wrócić</string>
+    <string name="output_profile_duplicate">Duplikuj</string>
+    <string name="output_profile_rename">Zmień nazwę</string>
+    <string name="output_profile_delete">Usuń</string>
+    <string name="output_profile_delete_confirm">Usunąć „%1$s”? Tej operacji nie można cofnąć.</string>
+    <string name="output_profile_delete_blocked">Nie można usunąć „%1$s” — nadal używa go: %2$s</string>
+    <string name="output_profile_usage_count">Używany przez wyjścia: %1$d</string>
+    <string name="output_profile_name_hint">Nazwa profilu</string>
+    <string name="output_profile_picker_tooltip">Profil wyjścia</string>
+    <string name="output_profile_swap_menu_tooltip">Zmień profil wyjścia</string>
+    <string name="output_profile_new_name_default">Nowy profil</string>
+    <string name="output_profile_display_mode">Tryb wyświetlania</string>
+    <string name="output_profile_content">Treść</string>
+    <string name="output_profile_empty_state">Utwórz profil, aby zacząć go stylizować</string>
+    <string name="output_profile_preview_resolution_tooltip">Tylko kształt podglądu — nie ustawia rzeczywistej rozdzielczości wyjścia</string>
     <string name="customize_bible">Biblia</string>
     <string name="customize_songs">Pieśni</string>
     <string name="customize_lower_third_vertical_hint">Pionowy pasek z boku zamiast paska na dole.</string>
@@ -2544,6 +2587,9 @@
     <string name="customize_group_card">Karta</string>
     <string name="customize_group_background">Tło ekranu</string>
     <string name="customize_group_background_lower_third">Tło dolnej trzeciej</string>
+    <string name="customize_background_source">Tło</string>
+    <string name="customize_background_follow">Zgodnie z kartą Tło</string>
+    <string name="customize_background_own">Własne</string>
     <string name="customize_background_type">Typ</string>
     <string name="customize_background_image">Obraz</string>
     <string name="customize_background_video">Wideo</string>
@@ -2793,6 +2839,7 @@
     <string name="remote_api_calendar_enroll">Planuj kalendarz z tego urządzenia</string>
     <string name="remote_api_calendar_enroll_code">Kod %1$s — zezwól tylko wtedy, gdy telefon pokazuje ten sam kod</string>
     <string name="calendar_enroll_qr_title">Zeskanuj telefonem</string>
+    <string name="calendar_enroll_invite_failed">Nie można utworzyć zaproszenia — ten komputer nie może połączyć się z przekaźnikiem.</string>
     <string name="calendar_enroll_qr_body">Aby zakończyć, zeskanuj ten kod telefonem, który właśnie dopuszczono.</string>
     <string name="remote_api_calendar_enroll_detail">Telefon lub tablet chce planować nabożeństwa w kalendarzu z dowolnego miejsca.</string>
     <string name="remote_activity_calendar_enroll">Zarejestrowano do planowania kalendarza</string>
@@ -2813,6 +2860,7 @@
     <string name="calendar_sync_status_unauthorized">Przekaźnik nie akceptuje już tego komputera. Sparuj ponownie, aby kontynuować.</string>
     <string name="calendar_sync_status_other_desktop">Inny komputer synchronizuje ten kalendarz. Ten przestał wysyłać, dopóki nie rozparujesz jednego z nich.</string>
     <string name="calendar_sync_enroll_hint">Aby dodać telefon: połącz go z tym komputerem jak zwykle (Ustawienia serwera → kod QR), następnie otwórz Kalendarz w aplikacji i dotknij Zarejestruj. Zostaniesz tutaj poproszony o zgodę.</string>
+    <string name="calendar_sync_invite">Zaproś telefon…</string>
     <string name="calendar_sync_sync_now">Synchronizuj teraz</string>
     <string name="calendar_sync_unpair">Zacznij od nowa z nowym kluczem</string>
     <string name="calendar_sync_devices">Zarejestrowane telefony</string>

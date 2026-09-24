@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,13 +42,13 @@ fun CrashFeedbackDialog(
             Column {
                 Text(stringResource(Res.string.crash_feedback_message))
                 Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
+                SunkenOutlinedTextField(
                     value = comment,
                     onValueChange = { comment = it },
                     label = { Text(stringResource(Res.string.crash_feedback_comment_label)) }
                 )
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
+                SunkenOutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text(stringResource(Res.string.crash_feedback_email_label)) }
@@ -56,13 +56,13 @@ fun CrashFeedbackDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            GhostButton(
                 onClick = { onSend(comment.trim(), email.trim()) },
                 enabled = comment.isNotBlank()
             ) { Text(stringResource(Res.string.crash_feedback_send)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.crash_feedback_dismiss)) }
+            GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.crash_feedback_dismiss)) }
         }
     )
 }

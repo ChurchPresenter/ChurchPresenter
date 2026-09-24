@@ -5,17 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -84,6 +83,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.theme.components.RaisedButton
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f
@@ -125,7 +125,7 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
         PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
-        Button(
+        RaisedButton(
             onClick = {
                 scope.launch {
                     val imageFilter = FileNameExtensionFilter(
@@ -146,8 +146,10 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
                     }
                 }
             },
-            modifier = Modifier.height(40.dp),
-            shape = RoundedCornerShape(8.dp)
+            // A square icon key: the default text-button padding made it far wider than its icon.
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),
@@ -222,7 +224,7 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        Button(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
+                        RaisedButton(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
                             Text(stringResource(Res.string.close))
                         }
                     }
@@ -383,7 +385,7 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
         PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
-        Button(
+        RaisedButton(
             onClick = {
                 scope.launch {
                     val videoFilter = FileNameExtensionFilter(
@@ -404,8 +406,10 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
                     }
                 }
             },
-            modifier = Modifier.height(40.dp),
-            shape = RoundedCornerShape(8.dp)
+            // A square icon key: the default text-button padding made it far wider than its icon.
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),

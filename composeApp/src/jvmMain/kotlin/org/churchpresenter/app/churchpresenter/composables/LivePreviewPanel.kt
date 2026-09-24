@@ -38,7 +38,7 @@ import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -714,7 +714,7 @@ private fun SingleDisplayPreview(
             }
 
             // Lock toggle button — bottom-right corner
-            IconButton(
+            KeyIconButton(
                 onClick = {
                     if (lockedMode != null) {
                         onToggleLock(null)
@@ -846,7 +846,7 @@ private fun OutputProfileSwapMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        IconButton(
+        KeyIconButton(
             onClick = { expanded = true },
             modifier = Modifier.size(18.dp),
         ) {
@@ -971,7 +971,7 @@ private fun MediaPreviewControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        IconButton(
+        KeyIconButton(
             onClick = onTogglePlayPause,
             modifier = Modifier.size(32.dp),
             colors = IconButtonDefaults.iconButtonColors(

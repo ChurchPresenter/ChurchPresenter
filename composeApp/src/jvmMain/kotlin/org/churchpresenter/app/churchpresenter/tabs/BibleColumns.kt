@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,7 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -83,6 +82,8 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.foundation.layout.width
 import java.awt.Cursor
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 @Composable
 internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifier = Modifier) {
@@ -219,8 +220,7 @@ internal fun BibleSearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -260,7 +260,7 @@ internal fun BibleSearchField(
             )
         }
         if (value.isNotEmpty()) {
-            IconButton(
+            KeyIconButton(
                 onClick = onClear,
 
                 modifier = Modifier.size(30.dp).testTag("bible_searchClear")

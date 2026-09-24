@@ -27,6 +27,7 @@
     <string name="service_schedule">Қызмет бағдарламасы:</string>
     <string name="songs">Әнұрандар</string>
     <string name="song">Әнұран</string>
+    <string name="output_profiles_tab">Профильдер</string>
     <string name="bible">Киелі Кітап</string>
     <string name="pictures">Суреттер</string>
     <string name="media">Медиа</string>
@@ -138,6 +139,7 @@
     <string name="word_wrap">Сөзді тасымалдау</string>
     <string name="show_on_first_page_only">Тек бірінші бетте көрсету</string>
     <string name="position_on_screen">Экрандағы орны:</string>
+    <string name="position_showing_at">Көрсетілетін орны</string>
     <string name="top_left">Жоғары сол жақта</string>
     <string name="top_right">Жоғары оң жақта</string>
     <string name="bottom_left">Төмен сол жақта</string>
@@ -797,6 +799,7 @@
     <string name="live_preview_title">Эфир</string>
     <string name="live_preview_website">Веб-сайт</string>
     <string name="loop_off">Қайталау өшірулі</string>
+    <string name="output_scale_mode">Масштаб: %1$s</string>
     <string name="loop_on">Қайталау қосулы</string>
     <string name="lower_third_height">Төменгі үштен бір биіктігі % (Киелі Кітап және Әндер үшін)</string>
     <string name="lower_third_storage_directory">Төменгі үштен бір сақтау қалтасы</string>
@@ -863,6 +866,10 @@
     <string name="tab_canvas">Кенеп</string>
     <string name="tab_visibility">Қойындылар көрінісі</string>
     <string name="text_margins">Мәтін жиектері</string>
+    <string name="content_region">Мазмұн аймағы</string>
+    <string name="content_region_width">Ені %</string>
+    <string name="content_region_x_offset">X ығысуы %</string>
+    <string name="content_region_y_offset">Y ығысуы %</string>
     <string name="end_of_song_spacing">Ән соңы (*) аралығы</string>
     <string name="theme">Тақырып</string>
     <string name="timer_expired">Уақыт бітті!</string>
@@ -910,6 +917,8 @@
     <string name="web_engine_unavailable_body">Браузер қозғалтқышын іске қосу мүмкін болмады. Microsoft Visual C++ Redistributable (x64) орнатып, қолданбаны қайта іске қосыңыз.</string>
     <string name="web_engine_unavailable_macos_title">Веб-браузерге жаңарақ macOS қажет</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter браузер қозғалтқышы бұл macOS нұсқасын енді қолдамайды. "Веб" қойындысы мен браузер көздерін пайдалану үшін macOS 12 (Monterey) немесе жаңарақ нұсқаға жаңартыңыз.</string>
+    <string name="web_engine_unavailable_windows_title">Веб-браузер үшін Windows 10 немесе одан кейінгі нұсқасы қажет</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenter браузер қозғалтқышы Windows-тың бұл нұсқасын енді қолдамайды. Веб қойындысы мен браузер көздерін пайдалану үшін Windows 10 немесе одан кейінгі нұсқаға жаңартыңыз.</string>
     <string name="web_under_construction">Бұл мүмкіндік әзірленуде.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1125,12 +1134,26 @@
     <string name="tab_label_style_text">Тек мәтін</string>
     <string name="tab_label_style_icons_and_text">Белгішелер мен мәтін</string>
     <string name="tab_label_style_icons">Тек белгішелер</string>
+    <string name="tab_label_style_button_hint">Қойынды белгілері: мәтін, белгішелер немесе екеуі де. Өзгерту үшін басыңыз.</string>
+    <string name="tab_label_margin_hint">Қойынды аралығы: әр қойындыға қанша орын беріледі. Өзгерту үшін басыңыз.</string>
+    <string name="tab_label_margin_small">Кіші</string>
+    <string name="tab_label_margin_small_normal">Шағындау</string>
+    <string name="tab_label_margin_normal">Қалыпты</string>
+    <string name="tab_label_margin_normal_large">Үлкендеу</string>
+    <string name="tab_label_margin_large">Үлкен</string>
     <string name="file_not_supported_short">қолданылмайды</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Тақырыптың алдындағы нөмір</string>
     <string name="song_number_corner">Бұрыш</string>
     <string name="song_number_corner_off">Өшірулі</string>
+    <string name="song_number_offset_needs_corner">Нөмірді еркін орналастыру үшін жоғарыдан бұрышты таңдаңыз</string>
+    <string name="song_number_offset_x">X ығысуы %</string>
+    <string name="song_number_offset_y">Y ығысуы %</string>
+    <string name="song_section_label">Бөлім белгісі</string>
+    <string name="song_section_label_enabled">Ағымдағы бөлімді көрсету (Шумақ, Қайырма…)</string>
+    <string name="song_section_label_font_size">Қаріп өлшемі</string>
+    <string name="song_section_label_color">Түс</string>
     <string name="fullscreen_display">Толық экран режимі</string>
     <string name="display_mode_label">Көрсету режимі:</string>
     <string name="display_mode_one_verse">1 шумақ</string>
@@ -2134,6 +2157,7 @@
     <string name="browser_source_fps">Макс. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Негізгі шығыста көрсетілетін веб-сайтты қайталайды — тек «Веб» қойындысы немесе шығыс терезесі оны көрсетіп тұрғанда ғана тікелей болады</string>
     <string name="tooltip_stt_settings">STT дисплей параметрлері</string>
+    <string name="tooltip_dictionary_settings">Сөздікті көрсету параметрлері</string>
     <string name="presentation_builds_counter">%1$d / %2$d қадам</string>
     <string name="presentation_animate_keynote">Keynote презентацияларын анимациялау</string>
     <string name="presentation_focus_lost">Пернетақта фокусы жоғалды — көрсеткі пернелері мен кликерді қайта қосу үшін осы жерді басыңыз</string>
@@ -2147,6 +2171,7 @@
     <string name="instance_link_controlling_host">%1$s басқарылуда</string>
     <string name="instance_link_primary_badge">Негізгі — %1$d ізбасар қосылған</string>
     <string name="stt_settings_dialog_title">STT дисплей параметрлері</string>
+    <string name="dictionary_settings_dialog_title">Сөздікті көрсету параметрлері</string>
     <string name="update_dialog_channel_stable">Тұрақты шығарылым</string>
     <string name="update_dialog_channel_prerelease">Алдын ала шығарылым</string>
     <string name="atem_section_background_uploads">Фон жүктеулері</string>
@@ -2529,6 +2554,24 @@
     <string name="customize_marker">Маркер</string>
     <string name="customize_bilingual">Екі тілде</string>
     <string name="customize_no_preview">Бұл бөлім үшін алдын ала қарау жоқ</string>
+    <string name="output_profile_none">Жоқ</string>
+    <string name="output_profile_new">Жаңа профиль</string>
+    <string name="output_profile_create_default">Әдепкі профиль жасау</string>
+    <string name="output_profile_create_default_tooltip">Қолданбаның зауыттық әдепкі стилімен жаңа профиль қосу — қайта оралуға арналған сақтық көшірме ретінде</string>
+    <string name="output_profile_duplicate">Көшірмесін жасау</string>
+    <string name="output_profile_rename">Атын өзгерту</string>
+    <string name="output_profile_delete">Жою</string>
+    <string name="output_profile_delete_confirm">«%1$s» жойылсын ба? Бұл әрекетті болдырмау мүмкін емес.</string>
+    <string name="output_profile_delete_blocked">«%1$s» жою мүмкін емес — ол әлі мыналарда қолданылады: %2$s</string>
+    <string name="output_profile_usage_count">%1$d шығыста қолданылады</string>
+    <string name="output_profile_name_hint">Профиль атауы</string>
+    <string name="output_profile_picker_tooltip">Шығыс профилі</string>
+    <string name="output_profile_swap_menu_tooltip">Шығыс профилін ауыстыру</string>
+    <string name="output_profile_new_name_default">Жаңа профиль</string>
+    <string name="output_profile_display_mode">Көрсету режимі</string>
+    <string name="output_profile_content">Мазмұн</string>
+    <string name="output_profile_empty_state">Стиль беруді бастау үшін профиль жасаңыз</string>
+    <string name="output_profile_preview_resolution_tooltip">Тек алдын ала қарау пішіні — шығыстың нақты ажыратымдылығын өзгертпейді</string>
     <string name="customize_bible">Киелі Кітап</string>
     <string name="customize_songs">Әнұрандар</string>
     <string name="customize_lower_third_vertical_hint">Төменгі жолақтың орнына бүйірдегі жолақ.</string>
@@ -2545,6 +2588,9 @@
     <string name="customize_group_card">Карта</string>
     <string name="customize_group_background">Экран фоны</string>
     <string name="customize_group_background_lower_third">Төменгі үштен бір фоны</string>
+    <string name="customize_background_source">Фон</string>
+    <string name="customize_background_follow">Фон қойындысына сәйкес</string>
+    <string name="customize_background_own">Өзіндік</string>
     <string name="customize_background_type">Түрі</string>
     <string name="customize_background_image">Сурет</string>
     <string name="customize_background_video">Бейне</string>
@@ -2794,6 +2840,7 @@
     <string name="remote_api_calendar_enroll">Күнтізбені осы құрылғыдан жоспарлау</string>
     <string name="remote_api_calendar_enroll_code">Код %1$s — телефон дәл осы кодты көрсетсе ғана рұқсат етіңіз</string>
     <string name="calendar_enroll_qr_title">Телефонмен сканерлеу</string>
+    <string name="calendar_enroll_invite_failed">Шақыру жасау мүмкін болмады — бұл компьютер релеге қосыла алмады.</string>
     <string name="calendar_enroll_qr_body">Аяқтау үшін осы кодты жаңа ғана рұқсат етілген телефонмен сканерлеңіз.</string>
     <string name="remote_api_calendar_enroll_detail">Телефон немесе планшет күнтізбедегі қызметтерді кез келген жерден жоспарлағысы келеді.</string>
     <string name="remote_activity_calendar_enroll">Күнтізбені жоспарлауға тіркелді</string>
@@ -2814,6 +2861,7 @@
     <string name="calendar_sync_status_unauthorized">Реле бұл компьютерді енді қабылдамайды. Жалғастыру үшін қайта жұптаңыз.</string>
     <string name="calendar_sync_status_other_desktop">Бұл күнтізбені басқа компьютер синхрондап жатыр. Біреуінің жұптасуын үзгенше бұл компьютер жіберуді тоқтатты.</string>
     <string name="calendar_sync_enroll_hint">Телефон қосу үшін: оны әдеттегідей осы компьютерге қосыңыз (Сервер параметрлері → QR коды), содан кейін қолданбада Күнтізбені ашып, Тіркелу түймесін түртіңіз. Осы жерде рұқсат сұралады.</string>
+    <string name="calendar_sync_invite">Телефонды шақыру…</string>
     <string name="calendar_sync_sync_now">Қазір синхрондау</string>
     <string name="calendar_sync_unpair">Жаңа кілтпен қайта бастау</string>
     <string name="calendar_sync_devices">Тіркелген телефондар</string>

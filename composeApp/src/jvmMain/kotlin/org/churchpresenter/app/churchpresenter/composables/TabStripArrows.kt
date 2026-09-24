@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -83,7 +83,7 @@ private fun TabStripArrow(
     scrollState: ScrollState,
     target: () -> Int,
 ) {
-    IconButton(
+    KeyIconButton(
         onClick = { coroutineScope.launch { scrollState.animateScrollTo(target()) } },
         modifier = Modifier.size(ARROW_BUTTON_SIZE).testTag(tag),
         colors = IconButtonDefaults.iconButtonColors(

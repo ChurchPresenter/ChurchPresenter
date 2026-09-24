@@ -39,6 +39,7 @@
     <string name="service_schedule">आराधना तालिका:</string>
     <string name="songs">गीत</string>
     <string name="song">गीत</string>
+    <string name="output_profiles_tab">प्रोफाइलहरू</string>
     <string name="bible">बाइबल</string>
     <string name="pictures">तस्बिर</string>
     <string name="presentation">प्रस्तुति</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">शब्द बेर्ने</string>
     <string name="show_on_first_page_only">पहिलो पृष्ठमा मात्र देखाउनुहोस्</string>
     <string name="position_on_screen">पर्दामा स्थान:</string>
+    <string name="position_showing_at">देखाइने स्थान</string>
     <string name="top_left">माथि बायाँ</string>
     <string name="top_right">माथि दायाँ</string>
     <string name="bottom_left">तल बायाँ</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">रिमोट नियन्त्रण खोल्नुहोस्</string>
     <string name="tooltip_qa_remote">साझेदारी र टाढाबाट पहुँच</string>
     <string name="tooltip_stt_settings">STT प्रदर्शन सेटिङ</string>
+    <string name="tooltip_dictionary_settings">शब्दकोश प्रदर्शन सेटिङ</string>
     <string name="tooltip_send_to_stage_monitor">स्टेज मनिटरमा पठाउनुहोस्</string>
     <string name="tooltip_hide_from_stage_monitor">सूचना लुकाउनुहोस्</string>
     <string name="tooltip_add_label">लेबल थप्नुहोस्</string>
@@ -715,6 +718,7 @@
     <string name="loop">दोहोर्‍याउनुहोस्</string>
     <string name="loop_on">दोहोर्‍याउने खुला</string>
     <string name="loop_off">दोहोर्‍याउने बन्द</string>
+    <string name="output_scale_mode">मापन: %1$s</string>
     <string name="transition_duration">सङ्क्रमण अवधि:</string>
     <string name="unit_s">से</string>
     <string name="unit_ms">ms</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">विन्डो (1-3)</string>
     <string name="window_position">विन्डोको स्थान</string>
     <string name="text_margins">पाठको सीमान्त</string>
+    <string name="content_region">सामग्री क्षेत्र</string>
+    <string name="content_region_width">चौडाइ %</string>
+    <string name="content_region_x_offset">X अफसेट %</string>
+    <string name="content_region_y_offset">Y अफसेट %</string>
     <string name="end_of_song_spacing">गीतको अन्त्य (*) खाली ठाउँ</string>
     <string name="auto_fit">स्वतः</string>
     <string name="auto_fit_checkbox_tooltip">अक्षरको आकारलाई अधिकतम मानी पाठ पर्दामा स्वतः अटाउने</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">ब्राउजर इन्जिन सुरु हुन सकेन। Microsoft Visual C++ Redistributable (x64) स्थापना गरी एप पुनः सुरु गर्नुहोस्।</string>
     <string name="web_engine_unavailable_macos_title">वेब ब्राउजरलाई नयाँ macOS चाहिन्छ</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter को ब्राउजर इन्जिनले अब macOS को यो संस्करण समर्थन गर्दैन। वेब ट्याब र browser source प्रयोग गर्न macOS 12 (Monterey) वा नयाँमा अद्यावधिक गर्नुहोस्।</string>
+    <string name="web_engine_unavailable_windows_title">वेब ब्राउजरका लागि Windows 10 वा त्यसपछिको संस्करण चाहिन्छ</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenter को ब्राउजर इन्जिनले Windows को यो संस्करण अब समर्थन गर्दैन। वेब ट्याब र ब्राउजर स्रोतहरू प्रयोग गर्न Windows 10 वा त्यसपछिको संस्करणमा अपडेट गर्नुहोस्।</string>
     <string name="web_live_badge">प्रस्तुतिमा</string>
     <string name="web_type_to_page_label">पृष्ठमा टाइप गर्नुहोस्</string>
     <string name="web_type_to_page_placeholder">पहिले प्रस्तुतिमा रहेको पृष्ठको इनपुटमा क्लिक गर्नुहोस्</string>
@@ -1664,12 +1674,26 @@
     <string name="tab_label_style_text">पाठ मात्र</string>
     <string name="tab_label_style_icons_and_text">आइकन र पाठ</string>
     <string name="tab_label_style_icons">आइकन मात्र</string>
+    <string name="tab_label_style_button_hint">ट्याब लेबल: पाठ, आइकन वा दुवै। बदल्न क्लिक गर्नुहोस्।</string>
+    <string name="tab_label_margin_hint">ट्याब दूरी: प्रत्येक ट्याबले कति ठाउँ पाउँछ। बदल्न क्लिक गर्नुहोस्।</string>
+    <string name="tab_label_margin_small">सानो</string>
+    <string name="tab_label_margin_small_normal">अलि सानो</string>
+    <string name="tab_label_margin_normal">सामान्य</string>
+    <string name="tab_label_margin_normal_large">अलि ठूलो</string>
+    <string name="tab_label_margin_large">ठूलो</string>
     <string name="file_not_supported_short">समर्थित छैन</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">शीर्षकभन्दा अघि नम्बर</string>
     <string name="song_number_corner">कुना</string>
     <string name="song_number_corner_off">बन्द</string>
+    <string name="song_number_offset_needs_corner">नम्बरलाई स्वतन्त्र रूपमा राख्न माथि एउटा कुना छान्नुहोस्</string>
+    <string name="song_number_offset_x">X अफसेट %</string>
+    <string name="song_number_offset_y">Y अफसेट %</string>
+    <string name="song_section_label">खण्ड लेबल</string>
+    <string name="song_section_label_enabled">हालको खण्ड देखाउनुहोस् (पद, कोरस…)</string>
+    <string name="song_section_label_font_size">अक्षरको आकार</string>
+    <string name="song_section_label_color">रङ</string>
     <string name="fullscreen_display">पूरा पर्दामा देखाउने</string>
     <string name="display_mode_label">देखाउने तरिका:</string>
     <string name="display_mode_one_verse">१ पद</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">गाढापन:</string>
     <string name="stt_position">स्थान</string>
     <string name="stt_settings_dialog_title">STT प्रदर्शन सेटिङ</string>
+    <string name="dictionary_settings_dialog_title">शब्दकोश प्रदर्शन सेटिङ</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI प्रतिवेदन</string>
@@ -2573,6 +2598,24 @@
     <string name="customize_marker">चिन्ह</string>
     <string name="customize_bilingual">दुई भाषा</string>
     <string name="customize_no_preview">यो खण्डको लागि पूर्वावलोकन छैन</string>
+    <string name="output_profile_none">कुनै पनि होइन</string>
+    <string name="output_profile_new">नयाँ प्रोफाइल</string>
+    <string name="output_profile_create_default">पूर्वनिर्धारित प्रोफाइल बनाउनुहोस्</string>
+    <string name="output_profile_create_default_tooltip">एपको मूल पूर्वनिर्धारित शैलीसहित नयाँ प्रोफाइल थप्नुहोस्, फर्किनका लागि ब्याकअपको रूपमा</string>
+    <string name="output_profile_duplicate">प्रतिलिपि बनाउनुहोस्</string>
+    <string name="output_profile_rename">नाम परिवर्तन गर्नुहोस्</string>
+    <string name="output_profile_delete">मेटाउनुहोस्</string>
+    <string name="output_profile_delete_confirm">\"%1$s\" मेटाउने? यो कार्य पूर्ववत गर्न सकिँदैन।</string>
+    <string name="output_profile_delete_blocked">\"%1$s\" मेटाउन सकिँदैन — यो अझै यीमा प्रयोग भइरहेको छ: %2$s</string>
+    <string name="output_profile_usage_count">%1$d आउटपुटले प्रयोग गरिरहेको</string>
+    <string name="output_profile_name_hint">प्रोफाइलको नाम</string>
+    <string name="output_profile_picker_tooltip">आउटपुट प्रोफाइल</string>
+    <string name="output_profile_swap_menu_tooltip">आउटपुट प्रोफाइल बदल्नुहोस्</string>
+    <string name="output_profile_new_name_default">नयाँ प्रोफाइल</string>
+    <string name="output_profile_display_mode">प्रदर्शन मोड</string>
+    <string name="output_profile_content">सामग्री</string>
+    <string name="output_profile_empty_state">शैली मिलाउन सुरु गर्न प्रोफाइल बनाउनुहोस्</string>
+    <string name="output_profile_preview_resolution_tooltip">पूर्वावलोकनको आकार मात्र — आउटपुटको वास्तविक रिजोलुसन सेट गर्दैन</string>
     <string name="customize_bible">बाइबल</string>
     <string name="customize_songs">गीत</string>
     <string name="customize_lower_third_vertical_hint">तलको पट्टीको सट्टा छेउमा एउटा पट्टी।</string>
@@ -2589,6 +2632,9 @@
     <string name="customize_group_card">कार्ड</string>
     <string name="customize_group_background">पर्दाको पृष्ठभूमि</string>
     <string name="customize_group_background_lower_third">तल्लो पट्टीको पृष्ठभूमि</string>
+    <string name="customize_background_source">पृष्ठभूमि</string>
+    <string name="customize_background_follow">पृष्ठभूमि ट्याब अनुसार</string>
+    <string name="customize_background_own">आफ्नै</string>
     <string name="customize_background_type">किसिम</string>
     <string name="customize_background_image">तस्बिर</string>
     <string name="customize_background_video">भिडियो</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">यस उपकरणबाट पात्रो योजना गर्नुहोस्</string>
     <string name="remote_api_calendar_enroll_code">कोड %1$s — फोनले उही कोड देखाएमा मात्र अनुमति दिनुहोस्</string>
     <string name="calendar_enroll_qr_title">फोनले स्क्यान गर्नुहोस्</string>
+    <string name="calendar_enroll_invite_failed">निमन्त्रणा बनाउन सकिएन — यो कम्प्युटर रिलेसम्म पुग्न सकेन।</string>
     <string name="calendar_enroll_qr_body">पूरा गर्न यो कोड भर्खर अनुमति दिएको फोनले स्क्यान गर्नुहोस्।</string>
     <string name="remote_api_calendar_enroll_detail">एक फोन वा ट्याब्लेटले जहाँबाट पनि पात्रोमा सेवाहरू योजना गर्न चाहन्छ।</string>
     <string name="remote_activity_calendar_enroll">पात्रो योजना गर्न दर्ता भयो</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">रिलेले अब यो कम्प्युटर स्वीकार गर्दैन। जारी राख्न फेरि जोडा बनाउनुहोस्।</string>
     <string name="calendar_sync_status_other_desktop">अर्को कम्प्युटरले यो पात्रो सिंक गरिरहेको छ। तपाईंले एउटाको जोडा नहटाएसम्म यसले पठाउन रोकेको छ।</string>
     <string name="calendar_sync_enroll_hint">फोन थप्न: सधैंझैं यसलाई यो कम्प्युटरसँग जोड्नुहोस् (सर्भर सेटिङ → QR कोड), त्यसपछि एपमा पात्रो खोली दर्ता थिच्नुहोस्। यहाँ तपाईंलाई अनुमति दिन सोधिनेछ।</string>
+    <string name="calendar_sync_invite">फोनलाई निमन्त्रणा…</string>
     <string name="calendar_sync_sync_now">अहिले सिंक गर्नुहोस्</string>
     <string name="calendar_sync_unpair">नयाँ कुञ्जीसँग फेरि सुरु गर्नुहोस्</string>
     <string name="calendar_sync_devices">दर्ता भएका फोनहरू</string>

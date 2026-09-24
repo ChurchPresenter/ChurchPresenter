@@ -1,8 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +42,8 @@ import churchpresenter.composeapp.generated.resources.decrement
 import churchpresenter.composeapp.generated.resources.increment
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 @Composable
 fun NumberSettingsTextField(
@@ -58,11 +59,10 @@ fun NumberSettingsTextField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-            .border(
-                1.dp,
-                if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(6.dp)
+            .sunken(
+                RoundedCornerShape(8.dp),
+                elevationPalette(),
+                rim = if (isError) MaterialTheme.colorScheme.error else Color.Unspecified
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -122,7 +122,7 @@ fun NumberSettingsTextField(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            IconButton(
+            KeyIconButton(
                 onClick = {
                     val newValue = value + 1
                     if (newValue in range) { value = newValue; onValueChange.invoke(newValue); isError = false }
@@ -137,7 +137,7 @@ fun NumberSettingsTextField(
                     modifier = Modifier.size(12.dp)
                 )
             }
-            IconButton(
+            KeyIconButton(
                 onClick = {
                     val newValue = value - 1
                     if (newValue in range) { value = newValue; onValueChange.invoke(newValue); isError = false }

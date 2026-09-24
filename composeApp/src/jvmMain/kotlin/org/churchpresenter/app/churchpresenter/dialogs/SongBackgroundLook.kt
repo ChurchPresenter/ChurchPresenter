@@ -52,6 +52,8 @@ import org.churchpresenter.core.models.songs.SONG_BACKGROUND_MAX_BLUR
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 @Composable
 internal fun SongBackgroundLookColumn(
@@ -187,8 +189,7 @@ private fun YourColor(background: SongBackground, onChange: (SongBackground) -> 
         PanelCaption(stringResource(Res.string.song_background_your_color))
         Row(
             modifier = Modifier.fillMaxWidth().height(27.dp)
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(7.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp))
+                .sunken(RoundedCornerShape(7.dp), elevationPalette())
                 .padding(start = 8.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),

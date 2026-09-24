@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Mis toimub</string>
     <string name="calendar_ministry_who">Kes või märkus</string>
     <string name="calendar_cloud_sync">Sünkrooni pilve ja mobiilseadmetega</string>
+    <string name="calendar_cloud_invite">Kutsu telefon</string>
     <string name="calendar_cloud_sync_sub">Hoiab selle kalendri relee kaudu telefonidega samas seisus. Väljas olles ei lahku sellest arvutist midagi</string>
     <string name="calendar_settings_export">Eksport</string>
     <string name="calendar_export_note">Päis, millega iga eksporditud PDF algab. Jäta väli tühjaks, et see välja jätta.</string>

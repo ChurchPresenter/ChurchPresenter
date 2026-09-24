@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,7 +86,7 @@ internal fun ElementHeaderRow(
             )
         }
         val reset: @Composable () -> Unit = {
-            TextButton(
+            GhostButton(
                 onClick = onReset,
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier.height(32.dp),

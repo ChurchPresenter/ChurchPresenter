@@ -1,7 +1,7 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -105,7 +105,7 @@ internal fun DefaultsTab(
             title = stringResource(Res.string.calendar_auto_load),
             subtitle = stringResource(Res.string.calendar_auto_load_sub),
         )
-        Switch(
+        RaisedSwitch(
             checked = preferences.autoLoadService,
             onCheckedChange = { onChange(preferences.copy(autoLoadService = it)) },
         )
@@ -131,7 +131,7 @@ internal fun DefaultsTab(
                 title = stringResource(Res.string.calendar_cloud_sync),
                 subtitle = stringResource(Res.string.calendar_cloud_sync_sub),
             )
-            Switch(checked = cloudSync.enabled(), onCheckedChange = cloudSync.setEnabled)
+            RaisedSwitch(checked = cloudSync.enabled(), onCheckedChange = cloudSync.setEnabled)
         }
     }
 }

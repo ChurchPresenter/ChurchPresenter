@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.core.models.scene.Scene
@@ -64,7 +64,6 @@ import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import androidx.compose.runtime.collectAsState
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -423,7 +422,7 @@ fun ProjectionSettingsTab(
                     val currentDevice = audioDevices.orEmpty().find { it.id == proj.audioOutputDeviceId }
                     val currentLabel = currentDevice?.description ?: defaultLabel
 
-                    OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = { expanded = true }) {
+                    KeyButton(shape = RoundedCornerShape(6.dp), onClick = { expanded = true }) {
                         Text(
                             text = currentLabel,
                             style = MaterialTheme.typography.labelSmall,
@@ -508,7 +507,7 @@ fun ProjectionSettingsTab(
                 singleLine = true,
                 modifier = Modifier.weight(1f)
             )
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = {
                 scope.launch {

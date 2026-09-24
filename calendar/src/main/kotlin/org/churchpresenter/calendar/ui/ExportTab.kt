@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -93,7 +93,7 @@ internal fun ExportTab(
                         .background(parseHex(section.colorHex))
                 )
                 CardText(title = section.name, subtitle = null)
-                Switch(
+                RaisedSwitch(
                     checked = settings.isStaffOnly(section.name),
                     onCheckedChange = { onChange(settings.withStaffOnly(section.name, it)) },
                 )

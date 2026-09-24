@@ -27,6 +27,7 @@
     <string name="service_schedule">Program bohoslužby:</string>
     <string name="songs">Piesne</string>
     <string name="song">Pieseň</string>
+    <string name="output_profiles_tab">Profily</string>
     <string name="bible">Biblia</string>
     <string name="pictures">Obrázky</string>
     <string name="presentation">Prezentácia</string>
@@ -224,6 +225,7 @@
     <string name="word_wrap">Zalamovanie textu</string>
     <string name="show_on_first_page_only">Zobraziť iba na prvej strane</string>
     <string name="position_on_screen">Pozícia na obrazovke:</string>
+    <string name="position_showing_at">Umiestnenie</string>
     <string name="top_left">Vľavo hore</string>
     <string name="top_right">Vpravo hore</string>
     <string name="bottom_left">Vľavo dole</string>
@@ -541,6 +543,7 @@
     <string name="loop">Slučka</string>
     <string name="loop_on">Slučka zapnutá</string>
     <string name="loop_off">Slučka vypnutá</string>
+    <string name="output_scale_mode">Mierka: %1$s</string>
     <string name="transition_duration">Trvanie prechodu:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -594,6 +597,10 @@
     <string name="windows_count_label">Okná (1-3)</string>
     <string name="window_position">Pozícia okna</string>
     <string name="text_margins">Okraje textu</string>
+    <string name="content_region">Oblasť obsahu</string>
+    <string name="content_region_width">Šírka %</string>
+    <string name="content_region_x_offset">Posun X %</string>
+    <string name="content_region_y_offset">Posun Y %</string>
     <string name="end_of_song_spacing">Medzera konca piesne (*)</string>
     <string name="auto_fit">Automaticky</string>
     <string name="auto_fit_checkbox_tooltip">Automaticky prispôsobiť text obrazovke, veľkosť písma ako maximum</string>
@@ -867,6 +874,8 @@
     <string name="web_engine_unavailable_body">Prehliadačové jadro sa nepodarilo spustiť. Nainštalujte Microsoft Visual C++ Redistributable (x64) a reštartujte aplikáciu.</string>
     <string name="web_engine_unavailable_macos_title">Webový prehliadač vyžaduje novší macOS</string>
     <string name="web_engine_unavailable_macos_body">Prehliadačové jadro ChurchPresenter už túto verziu macOS nepodporuje. Aktualizujte na macOS 12 (Monterey) alebo novší, aby ste mohli používať kartu Web a zdroje prehliadača.</string>
+    <string name="web_engine_unavailable_windows_title">Webový prehliadač vyžaduje Windows 10 alebo novší</string>
+    <string name="web_engine_unavailable_windows_body">Prehliadačové jadro ChurchPresenter už túto verziu Windows nepodporuje. Aktualizujte na Windows 10 alebo novší, aby ste mohli používať kartu Web a zdroje prehliadača.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Písanie na stránku</string>
     <string name="web_type_to_page_placeholder">Najprv kliknite na vstupné pole na živej stránke</string>
@@ -1372,12 +1381,26 @@
     <string name="tab_label_style_text">Iba text</string>
     <string name="tab_label_style_icons_and_text">Ikony a text</string>
     <string name="tab_label_style_icons">Iba ikony</string>
+    <string name="tab_label_style_button_hint">Popisky záložiek: text, ikony alebo oboje. Kliknutím zmeníte.</string>
+    <string name="tab_label_margin_hint">Rozostup záložiek: koľko miesta dostane každá záložka. Kliknutím zmeníte.</string>
+    <string name="tab_label_margin_small">Malý</string>
+    <string name="tab_label_margin_small_normal">Stredne malý</string>
+    <string name="tab_label_margin_normal">Normálny</string>
+    <string name="tab_label_margin_normal_large">Stredne veľký</string>
+    <string name="tab_label_margin_large">Veľký</string>
     <string name="file_not_supported_short">nie je podporované</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Číslo pred názvom</string>
     <string name="song_number_corner">Roh</string>
     <string name="song_number_corner_off">Vypnuté</string>
+    <string name="song_number_offset_needs_corner">Vyberte roh vyššie, aby ste mohli číslo voľne umiestniť</string>
+    <string name="song_number_offset_x">Posun X %</string>
+    <string name="song_number_offset_y">Posun Y %</string>
+    <string name="song_section_label">Popis sekcie</string>
+    <string name="song_section_label_enabled">Zobraziť aktuálnu sekciu (sloha, refrén…)</string>
+    <string name="song_section_label_font_size">Veľkosť písma</string>
+    <string name="song_section_label_color">Farba</string>
     <string name="fullscreen_display">Zobrazenie na celú obrazovku</string>
     <string name="display_mode_label">Režim zobrazenia:</string>
     <string name="display_mode_one_verse">1 verš</string>
@@ -2163,6 +2186,7 @@
     <string name="browser_source_fps">Max. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Zrkadlí webovú stránku zobrazenú na hlavnom výstupe — aktívne iba počas zobrazenia v záložke Web alebo vo výstupnom okne</string>
     <string name="tooltip_stt_settings">Nastavenia zobrazenia STT</string>
+    <string name="tooltip_dictionary_settings">Nastavenia zobrazenia slovníka</string>
     <string name="presentation_builds_counter">Krok %1$d z %2$d</string>
     <string name="presentation_animate_keynote">Animovať prezentácie Keynote</string>
     <string name="presentation_focus_lost">Fokus klávesnice bol stratený — kliknite sem pre opätovné povolenie šípok a klikača</string>
@@ -2176,6 +2200,7 @@
     <string name="instance_link_controlling_host">Ovláda %1$s</string>
     <string name="instance_link_primary_badge">Primárna — pripojených sledovateľov: %1$d</string>
     <string name="stt_settings_dialog_title">Nastavenia zobrazenia STT</string>
+    <string name="dictionary_settings_dialog_title">Nastavenia zobrazenia slovníka</string>
     <string name="update_dialog_channel_stable">Stabilné vydanie</string>
     <string name="update_dialog_channel_prerelease">Predbežné vydanie</string>
     <string name="atem_section_background_uploads">Nahrávanie pozadí</string>
@@ -2558,6 +2583,24 @@
     <string name="customize_marker">Značka</string>
     <string name="customize_bilingual">Dvojjazyčne</string>
     <string name="customize_no_preview">Pre túto sekciu nie je náhľad</string>
+    <string name="output_profile_none">Žiadny</string>
+    <string name="output_profile_new">Nový profil</string>
+    <string name="output_profile_create_default">Vytvoriť predvolený profil</string>
+    <string name="output_profile_create_default_tooltip">Pridať nový profil s predvoleným štýlom aplikácie ako zálohu, ku ktorej sa môžete vrátiť</string>
+    <string name="output_profile_duplicate">Duplikovať</string>
+    <string name="output_profile_rename">Premenovať</string>
+    <string name="output_profile_delete">Odstrániť</string>
+    <string name="output_profile_delete_confirm">Odstrániť „%1$s“? Túto akciu nemožno vrátiť späť.</string>
+    <string name="output_profile_delete_blocked">„%1$s“ nemožno odstrániť — stále ho používa: %2$s</string>
+    <string name="output_profile_usage_count">Používa %1$d výstup(ov)</string>
+    <string name="output_profile_name_hint">Názov profilu</string>
+    <string name="output_profile_picker_tooltip">Profil výstupu</string>
+    <string name="output_profile_swap_menu_tooltip">Zmeniť profil výstupu</string>
+    <string name="output_profile_new_name_default">Nový profil</string>
+    <string name="output_profile_display_mode">Režim zobrazenia</string>
+    <string name="output_profile_content">Obsah</string>
+    <string name="output_profile_empty_state">Vytvorte profil a začnite ho upravovať</string>
+    <string name="output_profile_preview_resolution_tooltip">Iba tvar náhľadu — nenastavuje skutočné rozlíšenie výstupu</string>
     <string name="customize_bible">Biblia</string>
     <string name="customize_songs">Piesne</string>
     <string name="customize_lower_third_vertical_hint">Pruh po strane namiesto pásu v spodnej časti.</string>
@@ -2574,6 +2617,9 @@
     <string name="customize_group_card">Karta</string>
     <string name="customize_group_background">Pozadie obrazovky</string>
     <string name="customize_group_background_lower_third">Pozadie lower third</string>
+    <string name="customize_background_source">Pozadie</string>
+    <string name="customize_background_follow">Podľa karty Pozadie</string>
+    <string name="customize_background_own">Vlastné</string>
     <string name="customize_background_type">Typ</string>
     <string name="customize_background_image">Obrázok</string>
     <string name="customize_background_video">Video</string>
@@ -2823,6 +2869,7 @@
     <string name="remote_api_calendar_enroll">Plánovať kalendár z tohto zariadenia</string>
     <string name="remote_api_calendar_enroll_code">Kód %1$s — povoľte len vtedy, keď telefón ukazuje rovnaký kód</string>
     <string name="calendar_enroll_qr_title">Naskenovať telefónom</string>
+    <string name="calendar_enroll_invite_failed">Pozvánku sa nepodarilo vytvoriť — tento počítač sa nemohol spojiť s relé.</string>
     <string name="calendar_enroll_qr_body">Dokončite naskenovaním tohto kódu telefónom, ktorý ste práve povolili.</string>
     <string name="remote_api_calendar_enroll_detail">Telefón alebo tablet chce plánovať bohoslužby v kalendári odkiaľkoľvek.</string>
     <string name="remote_activity_calendar_enroll">Zaregistrované na plánovanie kalendára</string>
@@ -2843,6 +2890,7 @@
     <string name="calendar_sync_status_unauthorized">Relé už tento počítač neprijíma. Pokračujte novým spárovaním.</string>
     <string name="calendar_sync_status_other_desktop">Tento kalendár synchronizuje iný počítač. Tento prestal odosielať, kým jeden z nich neodpárujete.</string>
     <string name="calendar_sync_enroll_hint">Pridanie telefónu: pripojte ho k tomuto počítaču ako zvyčajne (Nastavenia servera → QR kód), potom v aplikácii otvorte Kalendár a ťuknite na Zaregistrovať. Tu budete požiadaní o povolenie.</string>
+    <string name="calendar_sync_invite">Pozvať telefón…</string>
     <string name="calendar_sync_sync_now">Synchronizovať teraz</string>
     <string name="calendar_sync_unpair">Začať odznova s novým kľúčom</string>
     <string name="calendar_sync_devices">Zaregistrované telefóny</string>

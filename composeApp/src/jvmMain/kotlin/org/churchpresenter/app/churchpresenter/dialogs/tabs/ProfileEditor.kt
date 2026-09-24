@@ -14,7 +14,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -226,10 +226,10 @@ internal fun DeleteProfileDialog(
         },
         confirmButton = {
             if (userLabels.isEmpty()) {
-                TextButton(onClick = onConfirm) { Text(stringResource(Res.string.ok)) }
+                GhostButton(onClick = onConfirm) { Text(stringResource(Res.string.ok)) }
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 

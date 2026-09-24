@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +40,7 @@ internal fun OutputProfilePicker(
     val active = profiles.find { it.id == activeProfileId }
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),

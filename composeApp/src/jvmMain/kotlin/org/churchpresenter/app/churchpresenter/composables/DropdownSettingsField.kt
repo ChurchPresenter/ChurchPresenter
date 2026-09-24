@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.theme.dropdownField
 
 /** The style the field draws its current value in. Shared with [rememberDropdownWidthFor] so a width
  *  measured for a set of options matches the text that will actually be drawn in it. */
@@ -93,8 +92,7 @@ fun DropdownSettingsField(
         modifier = modifier
             .then(if (width != null) Modifier.width(width) else Modifier)
             .heightIn(min = 42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .dropdownField(RoundedCornerShape(8.dp), open = expanded)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
             .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
         contentAlignment = Alignment.CenterStart

@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,10 +57,13 @@ import androidx.compose.runtime.produceState
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
 import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.theme.components.RaisedButton
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 /** The font name needs the room; its size is three digits. */
 private const val FONT_NAME_WEIGHT = 2f
+/** The book name needs the room; chapter and verses are a few digits each. */
+private const val BOOK_WEIGHT = 2f
 private const val MAX_TEXT_CURVE = 200f
 /** Tracking, as a percentage of the font size. */
 private const val MIN_LETTER_SPACING = -20f
@@ -122,33 +123,36 @@ internal fun BibleProperties(
     }
 
     if (books.isNotEmpty()) {
-        DropdownSelector(
-            label = stringResource(Res.string.book),
-            items = books,
-            selected = books.getOrElse(selectedBookIndex) { "" },
-            onSelectedChange = { bookName ->
-                val idx = books.indexOf(bookName)
-                if (idx >= 0) bibleVm?.loadChapter(idx, 1)
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
         val chapterCount = bible?.getChapterCount(bible.getBookId(selectedBookIndex)) ?: 0
-        if (chapterCount > 0) {
+        var startVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
+        var endVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
+
+        // Book, chapter and the verse range on one row, the way a reference is read.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             DropdownSelector(
-                label = stringResource(Res.string.chapter),
-                items = (1..chapterCount).map { it.toString() },
-                selected = selectedChapter.toString(),
-                onSelectedChange = { bibleVm?.loadChapter(selectedBookIndex, it.toIntOrNull() ?: 1) },
-                modifier = Modifier.fillMaxWidth()
+                label = stringResource(Res.string.book),
+                value = books.getOrElse(selectedBookIndex) { "" },
+                options = books.map { it to it },
+                onValueChange = { bookName ->
+                    val idx = books.indexOf(bookName)
+                    if (idx >= 0) bibleVm?.loadChapter(idx, 1)
+                },
+                modifier = Modifier.weight(BOOK_WEIGHT)
             )
-        }
-
-        if (verses.isNotEmpty()) {
-            var startVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
-            var endVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (chapterCount > 0) {
+                DropdownSelector(
+                    label = stringResource(Res.string.chapter),
+                    value = selectedChapter.toString(),
+                    options = (1..chapterCount).map { it.toString() to it.toString() },
+                    onValueChange = { bibleVm?.loadChapter(selectedBookIndex, it.toIntOrNull() ?: 1) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (verses.isNotEmpty()) {
                 StyledTextField(
                     value = startVerse.toString(),
                     onValueChange = { v ->
@@ -173,11 +177,13 @@ internal fun BibleProperties(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
+        }
 
-            Button(
+        if (verses.isNotEmpty()) {
+            RaisedButton(
                 onClick = {
                     val bookName = books.getOrElse(selectedBookIndex) { "" }
-                    val bookId = bible?.getBookId(selectedBookIndex) ?: return@Button
+                    val bookId = bible?.getBookId(selectedBookIndex) ?: return@RaisedButton
                     val verseTexts = (startVerse..endVerse).mapNotNull { vNum ->
                         bible.getVerseDetails(bookId, selectedChapter, vNum)?.second
                     }

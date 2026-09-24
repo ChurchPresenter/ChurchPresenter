@@ -39,6 +39,7 @@
     <string name="service_schedule">برنامج الخدمة:</string>
     <string name="songs">الترانيم</string>
     <string name="song">ترنيمة</string>
+    <string name="output_profiles_tab">ملفات التعريف</string>
     <string name="bible">الكتاب المقدس</string>
     <string name="pictures">الصور</string>
     <string name="presentation">العرض التقديمي</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">لف الأسطر</string>
     <string name="show_on_first_page_only">العرض في الصفحة الأولى فقط</string>
     <string name="position_on_screen">الموضع على الشاشة:</string>
+    <string name="position_showing_at">يُعرض في:</string>
     <string name="top_left">أعلى اليسار</string>
     <string name="top_right">أعلى اليمين</string>
     <string name="bottom_left">أسفل اليسار</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">فتح التحكم عن بُعد</string>
     <string name="tooltip_qa_remote">المشاركة والوصول عن بُعد</string>
     <string name="tooltip_stt_settings">إعدادات عرض النص الحي</string>
+    <string name="tooltip_dictionary_settings">إعدادات عرض القاموس</string>
     <string name="tooltip_send_to_stage_monitor">إرسال إلى شاشة المنصة</string>
     <string name="tooltip_hide_from_stage_monitor">إخفاء الإعلان</string>
     <string name="tooltip_add_label">إضافة ملصق</string>
@@ -715,6 +718,7 @@
     <string name="loop">تكرار</string>
     <string name="loop_on">التكرار مفعّل</string>
     <string name="loop_off">التكرار معطّل</string>
+    <string name="output_scale_mode">القياس: %1$s</string>
     <string name="transition_duration">مدة الانتقال:</string>
     <string name="unit_s">ث</string>
     <string name="unit_ms">مل.ث</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">النوافذ (1-3)</string>
     <string name="window_position">موضع النافذة</string>
     <string name="text_margins">هوامش النص</string>
+    <string name="content_region">منطقة المحتوى</string>
+    <string name="content_region_width">العرض %</string>
+    <string name="content_region_x_offset">إزاحة X %</string>
+    <string name="content_region_y_offset">إزاحة Y %</string>
     <string name="end_of_song_spacing">تباعد نهاية الترنيمة (*)</string>
     <string name="auto_fit">تلقائي</string>
     <string name="auto_fit_checkbox_tooltip">ملاءمة النص للشاشة تلقائيًا، مع اعتبار حجم الخط حدًا أقصى</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">تعذّر تشغيل محرك المتصفح. ثبّت Microsoft Visual C++ Redistributable (x64) وأعد تشغيل التطبيق.</string>
     <string name="web_engine_unavailable_macos_title">متصفح الويب يتطلب إصدارًا أحدث من macOS</string>
     <string name="web_engine_unavailable_macos_body">لم يعد محرك المتصفح في ChurchPresenter يدعم هذا الإصدار من macOS. حدّث إلى macOS 12 (Monterey) أو أحدث لاستخدام تبويب الويب ومصادر المتصفح.</string>
+    <string name="web_engine_unavailable_windows_title">يتطلب متصفح الويب Windows 10 أو أحدث</string>
+    <string name="web_engine_unavailable_windows_body">لم يعد محرك المتصفح في ChurchPresenter يدعم هذا الإصدار من Windows. حدّث إلى Windows 10 أو أحدث لاستخدام تبويب الويب ومصادر المتصفح.</string>
     <string name="web_live_badge">مباشر</string>
     <string name="web_type_to_page_label">الكتابة في الصفحة</string>
     <string name="web_type_to_page_placeholder">انقر أولًا على حقل إدخال في الصفحة المباشرة</string>
@@ -1664,12 +1674,26 @@
     <string name="tab_label_style_text">نص فقط</string>
     <string name="tab_label_style_icons_and_text">أيقونات ونص</string>
     <string name="tab_label_style_icons">أيقونات فقط</string>
+    <string name="tab_label_style_button_hint">تسميات التبويبات: نص أو أيقونات أو كلاهما. انقر للتغيير.</string>
+    <string name="tab_label_margin_hint">تباعد التبويبات: مقدار المساحة لكل تبويب. انقر للتغيير.</string>
+    <string name="tab_label_margin_small">صغير</string>
+    <string name="tab_label_margin_small_normal">صغير متوسط</string>
+    <string name="tab_label_margin_normal">عادي</string>
+    <string name="tab_label_margin_normal_large">كبير متوسط</string>
+    <string name="tab_label_margin_large">كبير</string>
     <string name="file_not_supported_short">غير مدعوم</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">الرقم قبل العنوان</string>
     <string name="song_number_corner">الزاوية</string>
     <string name="song_number_corner_off">إيقاف</string>
+    <string name="song_number_offset_needs_corner">اختر زاوية في الأعلى لتحديد موضع الرقم بحرية</string>
+    <string name="song_number_offset_x">إزاحة X %</string>
+    <string name="song_number_offset_y">إزاحة Y %</string>
+    <string name="song_section_label">تسمية المقطع</string>
+    <string name="song_section_label_enabled">إظهار المقطع الحالي (مقطع، قرار…)</string>
+    <string name="song_section_label_font_size">حجم الخط</string>
+    <string name="song_section_label_color">اللون</string>
     <string name="fullscreen_display">عرض ملء الشاشة</string>
     <string name="display_mode_label">طريقة العرض:</string>
     <string name="display_mode_one_verse">مقطع واحد</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">العتامة:</string>
     <string name="stt_position">الموضع</string>
     <string name="stt_settings_dialog_title">إعدادات عرض STT</string>
+    <string name="dictionary_settings_dialog_title">إعدادات عرض القاموس</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">تقرير CCLI</string>
@@ -2574,6 +2599,24 @@
     <string name="customize_marker">علامة</string>
     <string name="customize_bilingual">لغتان</string>
     <string name="customize_no_preview">لا توجد معاينة لهذا القسم</string>
+    <string name="output_profile_none">بلا</string>
+    <string name="output_profile_new">ملف تعريف جديد</string>
+    <string name="output_profile_create_default">إنشاء ملف تعريف افتراضي</string>
+    <string name="output_profile_create_default_tooltip">إضافة ملف تعريف جديد بتنسيق التطبيق الافتراضي من المصنع، كنسخة احتياطية يمكن الرجوع إليها</string>
+    <string name="output_profile_duplicate">تكرار</string>
+    <string name="output_profile_rename">إعادة تسمية</string>
+    <string name="output_profile_delete">حذف</string>
+    <string name="output_profile_delete_confirm">حذف "%1$s"؟ لا يمكن التراجع عن ذلك.</string>
+    <string name="output_profile_delete_blocked">لا يمكن حذف "%1$s" — لا يزال مستخدمًا في: %2$s</string>
+    <string name="output_profile_usage_count">مستخدم في %1$d من المخارج</string>
+    <string name="output_profile_name_hint">اسم ملف التعريف</string>
+    <string name="output_profile_picker_tooltip">ملف تعريف المخرج</string>
+    <string name="output_profile_swap_menu_tooltip">تبديل ملف تعريف المخرج</string>
+    <string name="output_profile_new_name_default">ملف تعريف جديد</string>
+    <string name="output_profile_display_mode">وضع العرض</string>
+    <string name="output_profile_content">المحتوى</string>
+    <string name="output_profile_empty_state">أنشئ ملف تعريف لبدء تنسيقه</string>
+    <string name="output_profile_preview_resolution_tooltip">شكل المعاينة فقط — لا يغيّر الدقة الفعلية للمخرج</string>
     <string name="customize_bible">الكتاب المقدس</string>
     <string name="customize_songs">الترانيم</string>
     <string name="customize_lower_third_vertical_hint">شريط جانبي بدلاً من شريط عبر الأسفل.</string>
@@ -2590,6 +2633,9 @@
     <string name="customize_group_card">البطاقة</string>
     <string name="customize_group_background">خلفية الشاشة</string>
     <string name="customize_group_background_lower_third">خلفية الثلث السفلي</string>
+    <string name="customize_background_source">الخلفية</string>
+    <string name="customize_background_follow">اتباع تبويب الخلفية</string>
+    <string name="customize_background_own">مخصص</string>
     <string name="customize_background_type">النوع</string>
     <string name="customize_background_image">صورة</string>
     <string name="customize_background_video">فيديو</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">تخطيط التقويم من هذا الجهاز</string>
     <string name="remote_api_calendar_enroll_code">الرمز %1$s — اسمح فقط إذا كان الهاتف يعرض الرمز نفسه</string>
     <string name="calendar_enroll_qr_title">امسح بالهاتف</string>
+    <string name="calendar_enroll_invite_failed">تعذّر إنشاء دعوة — لم يتمكن هذا الكمبيوتر من الوصول إلى المُرحِّل.</string>
     <string name="calendar_enroll_qr_body">امسح هذا الرمز بالهاتف الذي سمحت به للتو لإنهاء العملية.</string>
     <string name="remote_api_calendar_enroll_detail">يريد هاتف أو جهاز لوحي تخطيط الخدمات في التقويم من أي مكان.</string>
     <string name="remote_activity_calendar_enroll">تم التسجيل لتخطيط التقويم</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">لم يعد المُرحِّل يقبل هذا الحاسوب. أعد الاقتران للمتابعة.</string>
     <string name="calendar_sync_status_other_desktop">حاسوب آخر يزامن هذا التقويم. توقف هذا الحاسوب عن الإرسال حتى تفصل اقتران أحدهما.</string>
     <string name="calendar_sync_enroll_hint">لإضافة هاتف: صِله بهذا الحاسوب كالمعتاد (إعدادات الخادم ← رمز QR)، ثم افتح التقويم في التطبيق واضغط تسجيل. سيُطلب منك السماح به هنا.</string>
+    <string name="calendar_sync_invite">دعوة هاتف…</string>
     <string name="calendar_sync_sync_now">مزامنة الآن</string>
     <string name="calendar_sync_unpair">البدء من جديد بمفتاح جديد</string>
     <string name="calendar_sync_devices">الهواتف المسجَّلة</string>

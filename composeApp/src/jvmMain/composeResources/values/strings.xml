@@ -395,6 +395,7 @@
     <string name="word_wrap">Word Wrap</string>
     <string name="show_on_first_page_only">Show on first page only</string>
     <string name="position_on_screen">Position on screen:</string>
+    <string name="position_showing_at">Showing at</string>
     <string name="top_left">Top Left</string>
     <string name="top_right">Top Right</string>
     <string name="bottom_left">Bottom Left</string>

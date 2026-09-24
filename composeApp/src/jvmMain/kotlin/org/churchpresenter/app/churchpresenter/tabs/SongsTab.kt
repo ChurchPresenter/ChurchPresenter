@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -700,7 +700,7 @@ fun SongsTab(
                     }
                 },
                 confirmButton = {
-                    TextButton(
+                    GhostButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                         viewModel.deleteSong(s)
@@ -710,7 +710,10 @@ fun SongsTab(
                     }
                 },
                 dismissButton = {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = { dialogs.closeDelete(); dialogs.closeDelete() }) {
+                    GhostButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { dialogs.closeDelete(); dialogs.closeDelete() }
+                    ) {
                         Text(stringResource(Res.string.cancel))
                     }
                 }

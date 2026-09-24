@@ -1,8 +1,5 @@
 package org.churchpresenter.lottiegen.band.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,8 +18,9 @@ import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.band.ReferencePlacement
 import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.lottiegen.ui.Strings
-import org.churchpresenter.lottiegen.ui.Tokens
 import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.lottiegen.ui.components.raisedKey
+import org.churchpresenter.theme.elevationPalette
 
 private const val PERCENT = 100
 private const val MIN_REFERENCE_FRACTION = 0.1f
@@ -122,19 +119,19 @@ internal fun <T : Enum<T>> EnumDropdown(
 /** The small pill that makes one margin slider move all four. */
 @Composable
 private fun LinkToggle(linked: Boolean, onChange: (Boolean) -> Unit) {
+    // A raised key, lit in the accent while linked -- the app's toggle key.
+    val palette = elevationPalette()
+    val fill = if (linked) palette.accent else palette.key
     Box(
         modifier = Modifier
             .height(20.dp)
-            .clip(FIELD_SHAPE)
-            .background(if (linked) Tokens.Accent else Tokens.FieldBg)
-            .border(1.dp, if (linked) Tokens.Accent else Tokens.FieldBorder, FIELD_SHAPE)
-            .clickable { onChange(!linked) }
+            .raisedKey(FIELD_SHAPE, fill) { onChange(!linked) }
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             Strings.bandTextAreaLink, fontSize = 10.sp, fontWeight = FontWeight.Bold,
-            color = if (linked) Tokens.OnAccent else Tokens.LabelText,
+            color = fill.ink,
         )
     }
 }

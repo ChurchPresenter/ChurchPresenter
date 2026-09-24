@@ -7,7 +7,6 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.horizontalScroll
@@ -41,13 +40,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
@@ -135,6 +134,9 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raisedHover
 
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
@@ -278,8 +280,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     .weight(1f)
                     .widthIn(min = 120.dp)
                     .height(42.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -328,7 +329,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 if (searchQuery.isNotEmpty()) {
                     // Focus goes back to the tab, not to this button — left on the IconButton, a
                     // following Enter or Space would just re-fire the clear. Matches BibleTab.
-                    IconButton(
+                    KeyIconButton(
                         onClick = { onSearchQueryChange(""); tabFocusRequester.requestFocus() },
                         modifier = Modifier.size(30.dp),
                     ) {
@@ -362,7 +363,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(42.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                    .raisedHover(RoundedCornerShape(8.dp), elevationPalette().accent, elevationPalette())
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                         val now = System.currentTimeMillis()
                         if (now - rebuildClickTime > REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0
@@ -569,7 +570,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     DropdownMenuItem(
                         text = { Text(allColLabels[colId] ?: colId) },
                         leadingIcon = {
-                            Checkbox(
+                            RaisedCheckbox(
                                 checked = isVisible,
                                 onCheckedChange = null,
                                 modifier = Modifier.size(20.dp)
@@ -599,7 +600,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 DropdownMenuItem(
                     text = { Text(allColLabels[colId] ?: colId) },
                     leadingIcon = {
-                        Checkbox(
+                        RaisedCheckbox(
                             checked = isVisible,
                             onCheckedChange = null,
                             modifier = Modifier.size(20.dp)
@@ -784,7 +785,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             } else {
                                 Box(modifier = Modifier.width(6.dp))
                                 when (colId) {
-                                    "add_to_schedule" -> IconButton(
+                                    "add_to_schedule" -> KeyIconButton(
                                         onClick = { onAddToSchedule?.invoke(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
@@ -797,7 +798,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     }
                                     "favorites" -> {
                                         val isFav = song.songId in favorites
-                                        IconButton(
+                                        KeyIconButton(
                                             onClick = {
                                                 onToggleFavorite(song.songId)
                                             },
@@ -966,7 +967,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = {
+                    KeyIconButton(onClick = {
                         onClearFavorites()
                     }) {
                         Icon(
@@ -1034,7 +1035,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                         modifier = Modifier.weight(1f, fill = false)
                                     )
                                     if (onAddToSchedule != null) {
-                                        IconButton(
+                                        KeyIconButton(
                                             onClick = {
                                                 onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
                                             },

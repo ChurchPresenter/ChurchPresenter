@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -122,7 +122,7 @@ internal fun KonamiEasterEggDialogContent(onDismiss: () -> Unit) {
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))
-        Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+        RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
             Text(stringResource(Res.string.konami_dialog_button))
         }
     }

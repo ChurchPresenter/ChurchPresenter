@@ -1,13 +1,10 @@
 package org.churchpresenter.lottiegen.band.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,8 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,10 +23,13 @@ import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.Strings
-import org.churchpresenter.lottiegen.ui.Tokens
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.theme.components.TextStyleToggleButton
+import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 private const val MAX_ALPHA_PCT = 100f
 private const val MIN_PREVIEW_SIZE = 12f
@@ -106,7 +104,7 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Caption(Strings.bandSampleText, Modifier.weight(1f))
         Row(
-            Modifier.clip(FIELD_SHAPE).background(Tokens.FieldBg).padding(2.dp),
+            Modifier.sunken(FIELD_SHAPE, elevationPalette()).padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             for (i in 0 until slotCount) {
@@ -122,14 +120,12 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
         label = Strings.bandLabel("preview_text_1", kind).substringBefore(' '),
         singleLine = false,
         fillWidth = true,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
     )
     SettingsTextField(
         value = reference,
         onValueChange = { v -> viewModel.updateConfig { it.withPreviewReference(lang, v) } },
         label = Strings.bandLabel("reference", kind),
         fillWidth = true,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
     )
 }
 
@@ -217,18 +213,11 @@ private fun TextStyleRow(label: String, color: String, onColor: (String) -> Unit
 
 @Composable
 private fun LangTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .height(22.dp)
-            .clip(FIELD_SHAPE)
-            .background(if (selected) Tokens.Accent else Color.Transparent)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp),
-        contentAlignment = Alignment.Center,
-    ) {
+    SegmentTrackItem(selected = selected, onClick = onClick, modifier = Modifier.height(22.dp)) {
         Text(
             label, fontSize = 10.5.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) Tokens.OnAccent else Tokens.LabelText,
+            color = LocalContentColor.current,
+            modifier = Modifier.padding(horizontal = 10.dp),
         )
     }
 }

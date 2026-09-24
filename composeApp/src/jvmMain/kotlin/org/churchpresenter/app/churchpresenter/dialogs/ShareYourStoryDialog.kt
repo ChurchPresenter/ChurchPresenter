@@ -21,12 +21,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -379,7 +379,7 @@ private fun StoryFooter(onShare: () -> Unit, onDismiss: () -> Unit) {
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 24.dp, vertical = 12.dp),
     ) {
-        Button(
+        RaisedButton(
             onClick = onShare,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.semantic.success,
@@ -402,7 +402,7 @@ private fun StoryFooter(onShare: () -> Unit, onDismiss: () -> Unit) {
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        OutlinedButton(
+        KeyButton(
             onClick = onDismiss,
             shape = RoundedCornerShape(10.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),

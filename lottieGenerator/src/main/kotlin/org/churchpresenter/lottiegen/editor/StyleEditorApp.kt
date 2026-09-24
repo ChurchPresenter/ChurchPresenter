@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
+import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -124,7 +124,7 @@ private fun EditorToolbar(state: EditorState) {
         ProjectToolbarActions(state)
         Row(verticalAlignment = Alignment.CenterVertically) {
             EditorTooltip(Strings.editorTipModePreview) {
-                FilterChip(
+                RaisedFilterChip(
                     selected = !state.matrixMode,
                     onClick = { state.setMatrixModeEnabled(false) },
                     label = { Text(Strings.editorModePreview) }
@@ -132,7 +132,7 @@ private fun EditorToolbar(state: EditorState) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             EditorTooltip(Strings.editorTipModeMatrix) {
-                FilterChip(
+                RaisedFilterChip(
                     selected = state.matrixMode,
                     onClick = { state.setMatrixModeEnabled(true) },
                     label = { Text(Strings.editorModeMatrix) }

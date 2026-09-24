@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -165,7 +165,7 @@ internal fun LicenseDialogContent(licenseText: String, onAccept: () -> Unit, onD
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = onDecline,
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -177,7 +177,7 @@ internal fun LicenseDialogContent(licenseText: String, onAccept: () -> Unit, onD
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Button(shape = RoundedCornerShape(6.dp), onClick = onAccept) {
+                RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onAccept) {
                     Text(stringResource(Res.string.license_accept_button))
                 }
             }

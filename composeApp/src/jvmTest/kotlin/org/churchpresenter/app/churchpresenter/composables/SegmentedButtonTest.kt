@@ -107,8 +107,10 @@ class SegmentedButtonTest {
             }
         }
         val size = onNodeWithText("A").fetchSemanticsNode().size
-        assertEquals(77, size.width, "the button must be laid out at the requested buttonWidth")
-        assertEquals(55, size.height, "the button must be laid out at the requested buttonHeight")
+        // The track's 3dp inset on each side comes out of the segment, so the control keeps the
+        // footprint the caller asked for.
+        assertEquals(77 - 6, size.width, "the segment must fill the requested buttonWidth inside its track")
+        assertEquals(55 - 6, size.height, "the segment must fill the requested buttonHeight inside its track")
     }
 
     @Test

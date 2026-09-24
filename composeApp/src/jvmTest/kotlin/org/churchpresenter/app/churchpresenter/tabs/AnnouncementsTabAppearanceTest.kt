@@ -93,7 +93,7 @@ class AnnouncementsTabAppearanceTest {
                 "Bottom Left", "Bottom Center", "Bottom Right",
                 AnnouncementLabel.CENTER,
             )) {
-                clickLabel(label)
+                clickPosition(label)
                 assertEquals(label, reports.settings?.position)
             }
         }
@@ -139,7 +139,10 @@ class AnnouncementsTabAppearanceTest {
                 val map = onRoot().captureToImage().toPixelMap()
                 for (y in 0 until map.height) for (x in 0 until map.width) {
                     val p = map[x, y]
-                    if (p.red > 0.6f && p.blue > 0.6f && p.green < 0.35f) found++
+                    // Near-transparent pixels are shadow fringe over the empty root, not paint.
+                    val opaque = p.alpha > 0.5f
+                    val magenta = p.red > 0.6f && p.blue > 0.6f && p.green < 0.35f
+                    if (opaque && magenta) found++
                 }
             }
             return found

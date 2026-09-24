@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Što se događa</string>
     <string name="calendar_ministry_who">Tko ili bilješka</string>
     <string name="calendar_cloud_sync">Sinkroniziraj s oblakom i mobilnim uređajima</string>
+    <string name="calendar_cloud_invite">Pozovi telefon</string>
     <string name="calendar_cloud_sync_sub">Održava ovaj kalendar usklađenim s telefonima putem releja. Isključeno: ništa ne napušta ovo računalo</string>
     <string name="calendar_settings_export">Izvoz</string>
     <string name="calendar_export_note">Zaglavlje kojim počinje svaki izvezeni PDF. Ostavite polje prazno da biste ga izostavili.</string>

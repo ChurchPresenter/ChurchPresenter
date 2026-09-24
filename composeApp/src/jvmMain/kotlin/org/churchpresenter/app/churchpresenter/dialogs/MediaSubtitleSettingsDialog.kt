@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -113,7 +113,7 @@ fun MediaSubtitleSettingsDialog(
                     onFontPickerExpandedChange = { fontPickerOpen = it },
                 )
 
-                Button(
+                RaisedButton(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     shape = RoundedCornerShape(6.dp),
                     onClick = onDismiss,

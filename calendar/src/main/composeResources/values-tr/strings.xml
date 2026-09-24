@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Ne oluyor</string>
     <string name="calendar_ministry_who">Kim ya da bir not</string>
     <string name="calendar_cloud_sync">Bulut ve mobil cihazlarla eşitle</string>
+    <string name="calendar_cloud_invite">Telefon davet et</string>
     <string name="calendar_cloud_sync_sub">Bu takvimi röle üzerinden telefonlarla uyumlu tutar. Kapalıyken hiçbir şey bu bilgisayardan çıkmaz</string>
     <string name="calendar_settings_export">Dışa aktarma</string>
     <string name="calendar_export_note">Dışa aktarılan her PDF'in başladığı antet. Bir alanı dahil etmemek için boş bırakın.</string>

@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_close_sheet
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /**
  * The window's dialog shell, and the small parts its dialogs are assembled from.
@@ -61,6 +62,8 @@ fun SheetScaffold(
     icon: ImageVector? = null,
     tabs: (@Composable RowScope.() -> Unit)? = null,
     footer: (@Composable RowScope.() -> Unit)? = null,
+    /** The header's square close button. Off for a dialog whose footer already has Done. */
+    showClose: Boolean = true,
     body: @Composable ColumnScope.() -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -106,20 +109,20 @@ fun SheetScaffold(
                         )
                     }
                 }
-                Box(
-                    Modifier
-                        .size(SheetMetrics.closeButton)
-                        .clip(RoundedCornerShape(7.dp))
-                        .background(scheme.surfaceVariant.copy(alpha = BUTTON_TINT))
-                        .clickable(onClick = onDismiss),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.calendar_close_sheet),
-                        tint = scheme.onSurfaceVariant,
-                        modifier = Modifier.size(12.dp),
-                    )
+                if (showClose) {
+                    Box(
+                        Modifier
+                            .size(SheetMetrics.closeButton)
+                            .raisedKey(RoundedCornerShape(7.dp), elevationPalette().key, onClick = onDismiss),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = stringResource(Res.string.calendar_close_sheet),
+                            tint = scheme.onSurfaceVariant,
+                            modifier = Modifier.size(12.dp),
+                        )
+                    }
                 }
             }
             HorizontalDivider()
@@ -148,18 +151,22 @@ fun SheetScaffold(
     }
 }
 
-/** A tab in a sheet's strip — filled when selected, with no border either way. */
+/** A tab in a sheet's strip — a raised key when selected, flat otherwise. */
 @Composable
 fun SheetTab(label: String, selected: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
+    val shape = RoundedCornerShape(7.dp)
     Box(
         Modifier
             .height(SheetMetrics.tabHeight)
-            .clip(RoundedCornerShape(7.dp))
-            .background(
-                if (selected) scheme.primary.copy(alpha = TAB_TINT) else Color.Transparent
+            .then(
+                if (selected) {
+                    Modifier.raisedKey(shape, palette.selected, onClick = onClick)
+                } else {
+                    Modifier.clip(shape).clickable(onClick = onClick)
+                }
             )
-            .clickable(onClick = onClick)
             .padding(horizontal = 13.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -167,7 +174,7 @@ fun SheetTab(label: String, selected: Boolean, onClick: () -> Unit) {
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) scheme.primary else scheme.onSurfaceVariant,
+            color = if (selected) palette.selected.ink else scheme.onSurfaceVariant,
         )
     }
 }
@@ -242,23 +249,19 @@ fun SmallIconButton(
     destructive: Boolean = false,
     size: Dp = SheetMetrics.smallButton,
 ) {
-    val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
+    val fill = if (destructive) palette.danger else palette.key
     Hint(description) {
         Box(
             Modifier
                 .size(size)
-                .clip(RoundedCornerShape(6.dp))
-                .background(
-                    if (destructive) scheme.error.copy(alpha = DESTRUCTIVE_TINT)
-                    else scheme.surfaceVariant.copy(alpha = BUTTON_TINT)
-                )
-                .clickable(onClick = onClick),
+                .raisedKey(RoundedCornerShape(6.dp), fill, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 icon,
                 contentDescription = description,
-                tint = if (destructive) scheme.error else scheme.onSurfaceVariant,
+                tint = fill.ink,
                 modifier = Modifier.size(size * ICON_RATIO),
             )
         }
@@ -275,8 +278,7 @@ fun DashedAddButton(label: String, icon: ImageVector, onClick: () -> Unit, modif
         modifier = modifier
             .fillMaxWidth()
             .height(32.dp)
-            .clip(SheetMetrics.cardRadius)
-            .border(1.dp, scheme.primary.copy(alpha = DASHED_BORDER), SheetMetrics.cardRadius)
+            .sunken(SheetMetrics.cardRadius, elevationPalette(), rim = scheme.primary.copy(alpha = DASHED_BORDER))
             .clickable(onClick = onClick),
     ) {
         Icon(icon, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(13.dp))
@@ -289,7 +291,7 @@ fun DashedAddButton(label: String, icon: ImageVector, onClick: () -> Unit, modif
     }
 }
 
-/** A quiet bordered action — Cancel, Insert, Browse. */
+/** A quiet action — Cancel, Insert, Browse: a neutral raised key, or the selected fill when [accent]. */
 @Composable
 fun QuietButton(
     label: String,
@@ -298,24 +300,12 @@ fun QuietButton(
     height: Dp = SheetMetrics.doneHeight,
     accent: Boolean = false,
 ) {
-    val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
+    val fill = if (accent) palette.selected else palette.key
     Box(
         modifier
             .height(height)
-            .clip(RoundedCornerShape(8.dp))
-            .background(
-                if (accent) {
-                    scheme.primary.copy(alpha = ACCENT_TINT)
-                } else {
-                    scheme.surfaceVariant.copy(alpha = BUTTON_TINT)
-                }
-            )
-            .border(
-                width = 1.dp,
-                color = if (accent) scheme.primary.copy(alpha = ACCENT_BORDER) else scheme.outlineVariant,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .clickable(onClick = onClick)
+            .raisedKey(RoundedCornerShape(8.dp), fill, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -323,7 +313,7 @@ fun QuietButton(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
             fontWeight = FontWeight.Bold,
-            color = if (accent) scheme.primary else scheme.onSurfaceVariant,
+            color = fill.ink,
             // A control's label never wraps: if it cannot fit, the layout around it is wrong and
             // should be fixed there rather than hidden by a two-line button.
             maxLines = 1,
@@ -332,16 +322,14 @@ fun QuietButton(
     }
 }
 
-/** The filled accent button a sheet's footer commits with. */
+/** The raised accent button a sheet's footer commits with. */
 @Composable
 fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
-    val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
     Box(
         Modifier
             .height(SheetMetrics.doneHeight)
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (enabled) scheme.primary else scheme.primary.copy(alpha = DISABLED))
-            .clickable(enabled = enabled, onClick = onClick)
+            .raisedKey(RoundedCornerShape(8.dp), palette.accent, enabled = enabled, onClick = onClick)
             .padding(horizontal = 17.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -349,7 +337,7 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
             fontWeight = FontWeight.Bold,
-            color = scheme.onPrimary.copy(alpha = if (enabled) 1f else DISABLED),
+            color = if (enabled) palette.accent.ink else palette.disabledInk,
             maxLines = 1,
             softWrap = false,
         )
@@ -357,15 +345,8 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
 }
 
 private const val ICON_TINT = 0.16f
-private const val BUTTON_TINT = 0.5f
 
-/** The outline of an accented quiet button -- the primary color, half strength. */
-private const val ACCENT_BORDER = 0.5f
-private const val TAB_TINT = 0.16f
 private const val CARD_TINT = 0.4f
 private const val CARD_BORDER = 0.6f
-private const val DESTRUCTIVE_TINT = 0.14f
 private const val DASHED_BORDER = 0.45f
-private const val ACCENT_TINT = 0.14f
 private const val ICON_RATIO = 0.5f
-private const val DISABLED = 0.38f

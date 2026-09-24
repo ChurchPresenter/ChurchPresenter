@@ -36,18 +36,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -87,8 +87,6 @@ import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_stop
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.tooltip_presentation_remote
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
@@ -107,8 +105,6 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.loading_slides
 import churchpresenter.composeapp.generated.resources.loop_off
 import churchpresenter.composeapp.generated.resources.loop_on
@@ -189,6 +185,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.RecentChip
+import org.churchpresenter.theme.raisedHover
 
 private const val MILLIS_PER_SECOND = 1000
 private const val MAX_AUTO_SCROLL_SECONDS = 30
@@ -461,7 +461,7 @@ fun PresentationTab(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Button(
+            RaisedButton(
                 onClick = {
                     scope.launch {
                         val allFilter = FileNameExtensionFilter("All Presentation Files", "ppt", "pptx", "key", "pdf")
@@ -640,7 +640,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
+                    KeyIconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
                         Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     }
                 }
@@ -652,41 +652,19 @@ fun PresentationTab(
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPresentationFiles.pinned
                         val isActive = viewModel.selectedPresentationDisplayPath == path
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .height(26.dp)
-                                    .background(
-                                        if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .border(1.dp, if (isActive) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
-                                    .clickable {
-                                        val f = File(path)
-                                        if (f.exists()) {
-                                            viewModel.addPresentation(f)
-                                            RecentPresentationFiles.add(path)
-                                        }
-                                    }
-                                    .padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = File(path).name,
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                    color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                                    maxLines = 1
-                                )
-                            }
-                            IconButton(onClick = { RecentPresentationFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(
-                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                                    contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
-                                    modifier = Modifier.size(12.dp),
-                                    tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                                )
-                            }
-                        }
+                        RecentChip(
+                            name = File(path).name,
+                            isActive = isActive,
+                            isPinned = isPinned,
+                            onOpen = {
+                                val f = File(path)
+                                if (f.exists()) {
+                                    viewModel.addPresentation(f)
+                                    RecentPresentationFiles.add(path)
+                                }
+                            },
+                            onTogglePin = { RecentPresentationFiles.togglePin(path) },
+                        )
                     }
                 }
             }
@@ -726,7 +704,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
+                    KeyIconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
                         Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
@@ -734,7 +712,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    FilledIconButton(
+                    RaisedIconButton(
                         onClick = { viewModel.togglePlayPause() },
                         enabled = viewModel.slideFiles.isNotEmpty(),
                         modifier = Modifier.size(38.dp),
@@ -751,7 +729,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
+                    KeyIconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
                         Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
@@ -781,7 +759,7 @@ fun PresentationTab(
                 tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
             ) {
-                IconButton(
+                KeyIconButton(
                     onClick = {
                         viewModel.isLooping = !viewModel.isLooping
                         onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping)) }
@@ -820,8 +798,7 @@ fun PresentationTab(
                 modifier = Modifier
                     .height(42.dp)
                     .width(170.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .clickable { editingInterval = true }
                     .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.Center
@@ -853,9 +830,35 @@ fun PresentationTab(
                 AlertDialog(
                     onDismissRequest = { editingInterval = false },
                     title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                    text = { OutlinedTextField(value = intervalInput, onValueChange = { intervalInput = it }, suffix = { Text(stringResource(Res.string.unit_s)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v -> viewModel.autoScrollInterval = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat())) } }; editingInterval = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) } }
+                    text = {
+                        SunkenOutlinedTextField(
+                            value = intervalInput,
+                            onValueChange = { intervalInput = it },
+                            suffix = { Text(stringResource(Res.string.unit_s)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    },
+                    confirmButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                            intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
+                                viewModel.autoScrollInterval = v.toFloat()
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        presentationSettings = s.presentationSettings.copy(
+                                            autoScrollInterval = v.toFloat()
+                                        )
+                                    )
+                                }
+                            }
+                            editingInterval = false
+                        }) { Text(stringResource(Res.string.ok)) }
+                    },
+                    dismissButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                            Text(stringResource(Res.string.cancel))
+                        }
+                    }
                 )
             }
 
@@ -863,8 +866,7 @@ fun PresentationTab(
                 modifier = Modifier
                     .height(42.dp)
                     .width(170.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .clickable { editingTransition = true }
                     .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.Center
@@ -896,9 +898,35 @@ fun PresentationTab(
                 AlertDialog(
                     onDismissRequest = { editingTransition = false },
                     title = { Text(stringResource(Res.string.transition_duration)) },
-                    text = { OutlinedTextField(value = transitionInput, onValueChange = { transitionInput = it }, suffix = { Text(stringResource(Res.string.unit_ms)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v -> viewModel.transitionDuration = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat())) } }; editingTransition = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) } }
+                    text = {
+                        SunkenOutlinedTextField(
+                            value = transitionInput,
+                            onValueChange = { transitionInput = it },
+                            suffix = { Text(stringResource(Res.string.unit_ms)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    },
+                    confirmButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                            transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v ->
+                                viewModel.transitionDuration = v.toFloat()
+                                onSettingsChange { s ->
+                                    s.copy(
+                                        presentationSettings = s.presentationSettings.copy(
+                                            transitionDuration = v.toFloat()
+                                        )
+                                    )
+                                }
+                            }
+                            editingTransition = false
+                        }) { Text(stringResource(Res.string.ok)) }
+                    },
+                    dismissButton = {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                            Text(stringResource(Res.string.cancel))
+                        }
+                    }
                 )
             }
 
@@ -1135,21 +1163,23 @@ fun PresentationTab(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         viewModel.presentations.forEach { f ->
+                            val palette = elevationPalette()
+                            val openFill = if (viewModel.selectedPresentation == f) palette.selected else palette.key
                             Row(
                                 modifier = Modifier
-                                    .background(
-                                        if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.surfaceVariant
-                                        else Color.Transparent,
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .border(1.dp, if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                                    .raisedHover(RoundedCornerShape(8.dp), openFill, palette, lift = 2.dp)
                                     .clickable { viewModel.selectPresentation(f) }
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(f.nameWithoutExtension, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
-                                IconButton(onClick = {
+                                Text(
+                                    f.nameWithoutExtension,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = openFill.ink,
+                                    maxLines = 1
+                                )
+                                KeyIconButton(onClick = {
                                     val inRecents = f.absolutePath in RecentPresentationFiles.files
                                     val inPinned = f.absolutePath in RecentPresentationFiles.pinned
                                     viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
@@ -1203,7 +1233,7 @@ private fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: Mo
                 Text(stringResource(Res.string.media_vlc_required), style = MaterialTheme.typography.titleSmall)
                 Text(detail, style = MaterialTheme.typography.bodySmall)
             }
-            IconButton(onClick = onDismiss) {
+            KeyIconButton(onClick = onDismiss) {
                 Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
             }
         }

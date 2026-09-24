@@ -28,6 +28,7 @@ dependencies {
     // The .spb converters and Bible catalogues this window offers — extracted so the app can
     // use them without depending on this Compose application module.
     implementation(projects.bibleFormats)
+    implementation(projects.theme)
     // The chord grammar songs are written in, shared with the app rather than repeated here.
     implementation(projects.songChords)
     // Keynote text, for the Documents source. The IWA reader that answers it lives there already;

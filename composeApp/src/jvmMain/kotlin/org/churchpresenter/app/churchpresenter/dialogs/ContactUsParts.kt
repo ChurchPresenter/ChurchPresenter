@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +59,7 @@ internal fun ContactUsActions(
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         // Always available: fall back to the full web contact form in a browser.
-        TextButton(shape = RoundedCornerShape(6.dp), onClick = onOpenInBrowser) {
+        GhostButton(shape = RoundedCornerShape(6.dp), onClick = onOpenInBrowser) {
             Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)
         }
         // And a way out when that browser opens where the operator cannot reach it: the operating
@@ -68,13 +68,13 @@ internal fun ContactUsActions(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+        GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
             Text(stringResource(Res.string.cancel), style = MaterialTheme.typography.labelLarge)
         }
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             enabled = canSend,
             onClick = onSend,

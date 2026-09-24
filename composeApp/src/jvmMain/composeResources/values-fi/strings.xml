@@ -39,6 +39,7 @@
     <string name="service_schedule">Jumalanpalveluksen ohjelma:</string>
     <string name="songs">Laulut</string>
     <string name="song">Laulu</string>
+    <string name="output_profiles_tab">Profiilit</string>
     <string name="bible">Raamattu</string>
     <string name="pictures">Kuvat</string>
     <string name="presentation">Esitys</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">Rivitys</string>
     <string name="show_on_first_page_only">Näytä vain ensimmäisellä sivulla</string>
     <string name="position_on_screen">Sijainti näytöllä:</string>
+    <string name="position_showing_at">Sijainti:</string>
     <string name="top_left">Ylhäällä vasemmalla</string>
     <string name="top_right">Ylhäällä oikealla</string>
     <string name="bottom_left">Alhaalla vasemmalla</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">Avaa kaukosäädin</string>
     <string name="tooltip_qa_remote">Jakaminen ja etäkäyttö</string>
     <string name="tooltip_stt_settings">Puheentunnistuksen näyttöasetukset</string>
+    <string name="tooltip_dictionary_settings">Sanakirjan näyttöasetukset</string>
     <string name="tooltip_send_to_stage_monitor">Lähetä lavamonitoriin</string>
     <string name="tooltip_hide_from_stage_monitor">Piilota tiedote</string>
     <string name="tooltip_add_label">Lisää merkintä</string>
@@ -715,6 +718,7 @@
     <string name="loop">Silmukka</string>
     <string name="loop_on">Silmukka päällä</string>
     <string name="loop_off">Silmukka pois</string>
+    <string name="output_scale_mode">Skaalaus: %1$s</string>
     <string name="transition_duration">Siirtymän kesto:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">Ikkunat (1–3)</string>
     <string name="window_position">Ikkunan sijainti</string>
     <string name="text_margins">Tekstin marginaalit</string>
+    <string name="content_region">Sisältöalue</string>
+    <string name="content_region_width">Leveys %</string>
+    <string name="content_region_x_offset">X-siirtymä %</string>
+    <string name="content_region_y_offset">Y-siirtymä %</string>
     <string name="end_of_song_spacing">Laulun lopun (*) väli</string>
     <string name="auto_fit">Auto</string>
     <string name="auto_fit_checkbox_tooltip">Sovita teksti automaattisesti näytölle käyttäen fonttikokoa ylärajana</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">Selainmoottoria ei voitu käynnistää. Asenna Microsoft Visual C++ Redistributable (x64) ja käynnistä sovellus uudelleen.</string>
     <string name="web_engine_unavailable_macos_title">Selain vaatii uudemman macOS-version</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenterin selainmoottori ei enää tue tätä macOS-versiota. Päivitä macOS 12 (Monterey) -versioon tai uudempaan käyttääksesi Web-välilehteä ja selainlähteitä.</string>
+    <string name="web_engine_unavailable_windows_title">Verkkoselain vaatii Windows 10:n tai uudemman</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenterin selainmoottori ei enää tue tätä Windows-versiota. Päivitä Windows 10:een tai uudempaan käyttääksesi Web-välilehteä ja selainlähteitä.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Kirjoita sivulle</string>
     <string name="web_type_to_page_placeholder">Napsauta ensin kenttää live-sivulla</string>
@@ -1664,12 +1674,26 @@
     <string name="tab_label_style_text">Vain teksti</string>
     <string name="tab_label_style_icons_and_text">Kuvakkeet ja teksti</string>
     <string name="tab_label_style_icons">Vain kuvakkeet</string>
+    <string name="tab_label_style_button_hint">Välilehtien nimiöt: teksti, kuvakkeet tai molemmat. Muuta napsauttamalla.</string>
+    <string name="tab_label_margin_hint">Välilehtien välistys: kuinka paljon tilaa kukin välilehti saa. Muuta napsauttamalla.</string>
+    <string name="tab_label_margin_small">Pieni</string>
+    <string name="tab_label_margin_small_normal">Keskipieni</string>
+    <string name="tab_label_margin_normal">Normaali</string>
+    <string name="tab_label_margin_normal_large">Keskisuuri</string>
+    <string name="tab_label_margin_large">Suuri</string>
     <string name="file_not_supported_short">ei tuettu</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numero ennen otsikkoa</string>
     <string name="song_number_corner">Kulma</string>
     <string name="song_number_corner_off">Pois</string>
+    <string name="song_number_offset_needs_corner">Valitse kulma yltä, jotta voit sijoittaa numeron vapaasti</string>
+    <string name="song_number_offset_x">Siirtymä X %</string>
+    <string name="song_number_offset_y">Siirtymä Y %</string>
+    <string name="song_section_label">Osion nimiö</string>
+    <string name="song_section_label_enabled">Näytä nykyinen osio (säkeistö, kertosäe…)</string>
+    <string name="song_section_label_font_size">Fonttikoko</string>
+    <string name="song_section_label_color">Väri</string>
     <string name="fullscreen_display">Koko näytön esitys</string>
     <string name="display_mode_label">Näyttötila:</string>
     <string name="display_mode_one_verse">1 säkeistö</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">Peittävyys:</string>
     <string name="stt_position">Sijainti</string>
     <string name="stt_settings_dialog_title">STT-näytön asetukset</string>
+    <string name="dictionary_settings_dialog_title">Sanakirjan näyttöasetukset</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI-raportti</string>
@@ -2573,6 +2598,24 @@
     <string name="customize_marker">Merkki</string>
     <string name="customize_bilingual">Kaksikielinen</string>
     <string name="customize_no_preview">Tälle osiolle ei ole esikatselua</string>
+    <string name="output_profile_none">Ei mitään</string>
+    <string name="output_profile_new">Uusi profiili</string>
+    <string name="output_profile_create_default">Luo oletusprofiili</string>
+    <string name="output_profile_create_default_tooltip">Lisää uusi profiili sovelluksen tehdasasetusten mukaisella tyylillä varmuusvaihtoehdoksi</string>
+    <string name="output_profile_duplicate">Monista</string>
+    <string name="output_profile_rename">Nimeä uudelleen</string>
+    <string name="output_profile_delete">Poista</string>
+    <string name="output_profile_delete_confirm">Poistetaanko ”%1$s”? Toimintoa ei voi kumota.</string>
+    <string name="output_profile_delete_blocked">Profiilia ”%1$s” ei voi poistaa — sitä käyttää vielä: %2$s</string>
+    <string name="output_profile_usage_count">Käytössä %1$d ulostulossa</string>
+    <string name="output_profile_name_hint">Profiilin nimi</string>
+    <string name="output_profile_picker_tooltip">Ulostuloprofiili</string>
+    <string name="output_profile_swap_menu_tooltip">Vaihda ulostuloprofiilia</string>
+    <string name="output_profile_new_name_default">Uusi profiili</string>
+    <string name="output_profile_display_mode">Näyttötila</string>
+    <string name="output_profile_content">Sisältö</string>
+    <string name="output_profile_empty_state">Luo profiili aloittaaksesi sen muotoilun</string>
+    <string name="output_profile_preview_resolution_tooltip">Vain esikatselun muoto — ei aseta ulostulon todellista tarkkuutta</string>
     <string name="customize_bible">Raamattu</string>
     <string name="customize_songs">Laulut</string>
     <string name="customize_lower_third_vertical_hint">Kaistale sivussa alapalkin sijaan.</string>
@@ -2589,6 +2632,9 @@
     <string name="customize_group_card">Kortti</string>
     <string name="customize_group_background">Näytön tausta</string>
     <string name="customize_group_background_lower_third">Alapalkin tausta</string>
+    <string name="customize_background_source">Tausta</string>
+    <string name="customize_background_follow">Seuraa Tausta-välilehteä</string>
+    <string name="customize_background_own">Mukautettu</string>
     <string name="customize_background_type">Tyyppi</string>
     <string name="customize_background_image">Kuva</string>
     <string name="customize_background_video">Video</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">Suunnittele kalenteria tältä laitteelta</string>
     <string name="remote_api_calendar_enroll_code">Koodi %1$s — salli vain, jos puhelin näyttää saman koodin</string>
     <string name="calendar_enroll_qr_title">Skannaa puhelimella</string>
+    <string name="calendar_enroll_invite_failed">Kutsua ei voitu luoda — tämä tietokone ei tavoittanut välitintä.</string>
     <string name="calendar_enroll_qr_body">Skannaa tämä koodi juuri sallimallasi puhelimella viimeistelläksesi.</string>
     <string name="remote_api_calendar_enroll_detail">Puhelin tai tabletti haluaa suunnitella tilaisuuksia kalenteriin mistä tahansa.</string>
     <string name="remote_activity_calendar_enroll">Rekisteröity suunnittelemaan kalenteria</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">Välitin ei enää hyväksy tätä tietokonetta. Muodosta pari uudelleen jatkaaksesi.</string>
     <string name="calendar_sync_status_other_desktop">Toinen tietokone synkronoi tätä kalenteria. Tämä on lopettanut lähettämisen, kunnes purat toisen parituksen.</string>
     <string name="calendar_sync_enroll_hint">Puhelimen lisääminen: yhdistä se tähän tietokoneeseen tavalliseen tapaan (Palvelinasetukset → QR-koodi), avaa sitten sovelluksessa Kalenteri ja napauta Rekisteröi. Sinua pyydetään sallimaan se täällä.</string>
+    <string name="calendar_sync_invite">Kutsu puhelin…</string>
     <string name="calendar_sync_sync_now">Synkronoi nyt</string>
     <string name="calendar_sync_unpair">Aloita alusta uudella avaimella</string>
     <string name="calendar_sync_devices">Rekisteröidyt puhelimet</string>

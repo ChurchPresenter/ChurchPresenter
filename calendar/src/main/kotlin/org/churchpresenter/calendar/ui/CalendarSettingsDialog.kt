@@ -64,6 +64,13 @@ import org.churchpresenter.calendar.model.SECTION_SWATCHES
 import org.churchpresenter.calendar.model.SectionStyle
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.calendar.model.clockText
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.components.SegmentTrack
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 private val DIALOG_WIDTH = 640.dp
 private val BODY_HEIGHT = 340.dp
@@ -106,14 +113,32 @@ fun CalendarSettingsDialog(
             width = DIALOG_WIDTH,
             onDismiss = onDismiss,
             tabs = {
-                SettingsTab.entries.forEach { entry ->
-                    SheetTab(label = tabLabel(entry), selected = entry == tab) { tab = entry }
+                // One segmented control, the same sunken track every other choice in the app sits on.
+                SegmentTrack(modifier = Modifier.weight(1f).height(SheetMetrics.tabHeight)) {
+                    SettingsTab.entries.forEach { entry ->
+                        SegmentTrackItem(
+                            selected = entry == tab,
+                            onClick = { tab = entry },
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        ) {
+                            Text(
+                                text = tabLabel(entry),
+                                style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
+                                fontWeight = if (entry == tab) FontWeight.Bold else FontWeight.Medium,
+                                color = LocalContentColor.current,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                 }
             },
             footer = {
                 Spacer(Modifier.weight(1f))
                 PrimaryButton(stringResource(Res.string.calendar_settings_done), onDismiss)
             },
+            // Done in the footer closes it; a second close in the header was one too many.
+            showClose = false,
         ) {
             ScrollableColumn(
                 modifier = Modifier.heightIn(min = BODY_HEIGHT, max = BODY_HEIGHT),
@@ -374,9 +399,7 @@ private fun HexReadout(hex: String, onClick: () -> Unit) {
         Modifier
             .width(HEX_FIELD)
             .height(SWATCH_BUTTON)
-            .clip(shape)
-            .background(scheme.surfaceVariant.copy(alpha = 0.45f))
-            .border(1.dp, scheme.outlineVariant, shape)
+            .sunken(shape, elevationPalette())
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.CenterStart,

@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
@@ -45,18 +46,19 @@ import churchpresenter.composeapp.generated.resources.tooltip_schedule_zoom_in
 import churchpresenter.composeapp.generated.resources.tooltip_schedule_zoom_out
 import churchpresenter.composeapp.generated.resources.tooltip_undo
 import churchpresenter.composeapp.generated.resources.tooltip_undo_unbound
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
+import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 // The pills of the Schedule header's two rows -- each group of its toolbar, and the zoom pill --
 // drawn by ScheduleHeader in the order TOOLBAR_GROUPS gives them.
-
-private const val DISABLED_ICON_ALPHA = 0.35f
 
 internal fun ScheduleToolbarButton.shownIn(hiddenButtons: Set<String>) = name !in hiddenButtons
 
@@ -69,7 +71,12 @@ internal fun ScheduleZoomPill(
     onZoomOut: () -> Unit,
     onZoomIn: () -> Unit,
 ) {
-    PillGroup {
+    Row(
+        modifier = Modifier
+            .sunken(RoundedCornerShape(10.dp), elevationPalette())
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         ToolbarButton(
             painter = painterResource(Res.drawable.ic_remove),
             text = stringResource(Res.string.tooltip_schedule_zoom_out),
@@ -77,6 +84,8 @@ internal fun ScheduleZoomPill(
             enabled = canZoomOut,
             buttonSize = 24.dp,
             iconSize = 13.dp,
+            style = ToolbarKeyStyle.RAISED,
+            tint = MaterialTheme.colorScheme.onSurface,
         )
         val compactName = stringResource(Res.string.schedule_density_compact)
         val normalName = stringResource(Res.string.schedule_density_normal)
@@ -106,7 +115,7 @@ internal fun ScheduleZoomPill(
                 text = densityName,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 softWrap = false
             )
@@ -118,6 +127,8 @@ internal fun ScheduleZoomPill(
             enabled = canZoomIn,
             buttonSize = 24.dp,
             iconSize = 13.dp,
+            style = ToolbarKeyStyle.RAISED,
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -130,6 +141,7 @@ internal fun ScheduleFileButtons(
     onOpenSchedule: () -> Unit,
     onSaveSchedule: () -> Unit,
     onClearSchedule: () -> Unit,
+    canClear: Boolean = true,
 ) {
     if (ScheduleToolbarButton.NEW.shownIn(hiddenButtons)) {
         ToolbarButton(
@@ -151,6 +163,7 @@ internal fun ScheduleFileButtons(
             painter = painterResource(Res.drawable.ic_delete),
             text = stringResource(Res.string.tooltip_clear_schedule),
             onClick = onClearSchedule,
+            enabled = canClear,
             tint = MaterialTheme.colorScheme.error,
         )
     }
@@ -221,7 +234,7 @@ internal fun SchedulePlanningButtons(
     }
 }
 
-/** One toolbar icon at the toolbar's size, dimmed when disabled. */
+/** One toolbar icon at the toolbar's size: flat in its strip, lit on hover, dimmed when disabled. */
 @Composable
 private fun ToolbarButton(
     painter: Painter,
@@ -232,15 +245,17 @@ private fun ToolbarButton(
     buttonSize: Dp = 26.dp,
     iconSize: Dp = 14.dp,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    style: ToolbarKeyStyle = ToolbarKeyStyle.FLAT,
 ) {
-    TooltipIconButton(
+    ToolbarKey(
         painter = painter,
         text = text,
         onClick = onClick,
         modifier = modifier,
+        style = style,
         enabled = enabled,
         buttonSize = buttonSize,
         iconSize = iconSize,
-        iconTint = if (enabled) tint else tint.copy(alpha = DISABLED_ICON_ALPHA),
+        tint = tint,
     )
 }

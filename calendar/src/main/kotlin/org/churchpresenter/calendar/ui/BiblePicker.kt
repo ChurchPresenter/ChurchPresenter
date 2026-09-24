@@ -1,8 +1,5 @@
 package org.churchpresenter.calendar.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
@@ -24,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +38,7 @@ import org.churchpresenter.calendar.model.parseReference
 import org.churchpresenter.calendar.model.toScheduleItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
 
 /** The trail back out of a book and a chapter, as the design draws it. */
 @Composable
@@ -91,10 +87,7 @@ private fun Crumb(label: String, onClick: () -> Unit) {
     Box(
         Modifier
             .height(23.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(scheme.surfaceVariant.copy(alpha = 0.45f))
-            .border(1.dp, scheme.outlineVariant, RoundedCornerShape(6.dp))
-            .clickable(onClick = onClick)
+            .raisedKey(RoundedCornerShape(6.dp), elevationPalette().key, onClick = onClick)
             .padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -185,10 +178,7 @@ private fun BookTile(book: CalendarBibleBook, onClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .height(34.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(scheme.surfaceVariant.copy(alpha = 0.4f))
-            .border(1.dp, scheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .raisedKey(RoundedCornerShape(8.dp), elevationPalette().key, onClick = onClick)
             .padding(horizontal = 9.dp),
     ) {
         Text(
@@ -217,7 +207,7 @@ private fun BookTile(book: CalendarBibleBook, onClick: () -> Unit) {
  */
 @Composable
 private fun NumberGrid(values: List<Int>, selected: IntRange?, onPick: (Int) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
     ScrollableGrid(
         columns = GridCells.Adaptive(40.dp),
         modifier = Modifier.fillMaxSize(),
@@ -229,21 +219,14 @@ private fun NumberGrid(values: List<Int>, selected: IntRange?, onPick: (Int) -> 
             Box(
                 Modifier
                     .height(32.dp)
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(if (on) scheme.primary else scheme.surfaceVariant.copy(alpha = 0.4f))
-                    .border(
-                        width = 1.dp,
-                        color = if (on) scheme.primary else scheme.outlineVariant.copy(alpha = 0.6f),
-                        shape = RoundedCornerShape(7.dp),
-                    )
-                    .clickable { onPick(value) },
+                    .raisedKey(RoundedCornerShape(7.dp), if (on) palette.accent else palette.key) { onPick(value) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = value.toString(),
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.5.sp),
                     fontWeight = FontWeight.SemiBold,
-                    color = if (on) scheme.onPrimary else scheme.onSurface,
+                    color = if (on) palette.accent.ink else palette.key.ink,
                 )
             }
         }

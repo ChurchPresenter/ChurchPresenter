@@ -32,19 +32,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.layout.PaddingValues
@@ -494,7 +494,7 @@ internal fun CCLIReportContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(
+                    KeyButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             coroutineScope.launch {
@@ -513,7 +513,7 @@ internal fun CCLIReportContent(
                         }
                     ) { Text(stringResource(Res.string.ccli_export_csv)) }
 
-                    OutlinedButton(
+                    KeyButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             coroutineScope.launch {
@@ -532,7 +532,7 @@ internal fun CCLIReportContent(
                         }
                     ) { Text(stringResource(Res.string.ccli_export_xls)) }
 
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = { confirmClearAll = true },
                         colors = ButtonDefaults.buttonColors(
@@ -543,7 +543,9 @@ internal fun CCLIReportContent(
 
                     Spacer(Modifier.weight(1f))
 
-                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+                    RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                        Text(stringResource(Res.string.close))
+                    }
                 }
             }
 
@@ -916,12 +918,12 @@ private fun ConfirmClearDialog(message: String, onConfirm: () -> Unit, onDismiss
         title = { Text(stringResource(Res.string.confirm_delete)) },
         text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
         confirmButton = {
-            TextButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
                 Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
-            TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.cancel))
             }
         }
@@ -1229,7 +1231,7 @@ private fun DropdownPicker(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             onClick = { expanded = true },
             modifier = modifier.height(36.dp),
@@ -1262,7 +1264,7 @@ private fun DropdownPicker(
 private fun PresetButton(label: String, active: Boolean, onClick: () -> Unit) {
     val contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)
     if (active) {
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(PILL_CORNER_PERCENT),
             onClick = onClick,
             contentPadding = contentPadding,
@@ -1271,7 +1273,7 @@ private fun PresetButton(label: String, active: Boolean, onClick: () -> Unit) {
             Text(label, style = MaterialTheme.typography.labelSmall)
         }
     } else {
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(PILL_CORNER_PERCENT),
             onClick = onClick,
             contentPadding = contentPadding,

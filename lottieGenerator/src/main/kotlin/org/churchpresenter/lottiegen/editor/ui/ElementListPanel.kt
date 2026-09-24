@@ -25,10 +25,10 @@ import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,7 +85,7 @@ private fun AddElementButton(state: EditorState) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         EditorTooltip(Strings.editorTipAddElement) {
-            TextButton(onClick = { expanded = true }) {
+            GhostButton(onClick = { expanded = true }) {
                 Text(Strings.editorAddElement)
             }
         }
@@ -134,7 +134,7 @@ private fun ElementRow(state: EditorState, element: ElementSpec) {
             modifier = Modifier.weight(1f).padding(start = 8.dp)
         )
         EditorTooltip(Strings.editorTipMoveUp) {
-            IconButton(onClick = { state.updateSpec { it.moveElement(element.id, -1) } }) {
+            KeyIconButton(onClick = { state.updateSpec { it.moveElement(element.id, -1) } }) {
                 Icon(
                     Icons.Default.KeyboardArrowUp,
                     contentDescription = Strings.editorMoveUp,
@@ -143,7 +143,7 @@ private fun ElementRow(state: EditorState, element: ElementSpec) {
             }
         }
         EditorTooltip(Strings.editorTipMoveDown) {
-            IconButton(onClick = { state.updateSpec { it.moveElement(element.id, +1) } }) {
+            KeyIconButton(onClick = { state.updateSpec { it.moveElement(element.id, +1) } }) {
                 Icon(
                     Icons.Default.KeyboardArrowDown,
                     contentDescription = Strings.editorMoveDown,
@@ -152,7 +152,7 @@ private fun ElementRow(state: EditorState, element: ElementSpec) {
             }
         }
         EditorTooltip(Strings.editorTipDeleteElement) {
-            IconButton(onClick = {
+            KeyIconButton(onClick = {
                 if (selected) state.selectElement(null)
                 state.updateSpec { it.removeElement(element.id) }
             }) {

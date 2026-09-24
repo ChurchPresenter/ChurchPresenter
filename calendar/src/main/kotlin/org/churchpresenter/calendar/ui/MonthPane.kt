@@ -47,6 +47,7 @@ import org.churchpresenter.calendar.model.weekdayOrder
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
 import java.time.YearMonth
+import org.churchpresenter.theme.elevationPalette
 
 private const val WEEK_LENGTH = 7
 private const val MAX_DOTS = 3
@@ -168,21 +169,18 @@ private fun NavButton(
     description: String,
     onClick: () -> Unit,
 ) {
-    val scheme = MaterialTheme.colorScheme
+    val key = elevationPalette().key
     Hint(description) {
         Box(
             Modifier
                 .size(CalendarMetrics.monthNavButton)
-                .clip(RoundedCornerShape(7.dp))
-                .background(scheme.surfaceVariant.copy(alpha = CELL_TINT_ALPHA))
-                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(7.dp))
-                .clickable(onClick = onClick),
+                .raisedKey(RoundedCornerShape(7.dp), key, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 icon,
                 contentDescription = description,
-                tint = scheme.onSurfaceVariant,
+                tint = key.ink,
                 modifier = Modifier.size(14.dp),
             )
         }
@@ -200,24 +198,32 @@ private fun DayCell(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val selectedFill = elevationPalette().selected
     val background = when {
-        isSelected -> scheme.primaryContainer
         services.isNotEmpty() -> scheme.surfaceVariant.copy(alpha = CELL_TINT_ALPHA)
         else -> Color.Transparent
     }
-    val border = if (isSelected) scheme.primary else scheme.outlineVariant.copy(alpha = CELL_TINT_ALPHA)
+    val border = scheme.outlineVariant.copy(alpha = CELL_TINT_ALPHA)
     val textColor = when {
-        isSelected -> scheme.onPrimaryContainer
+        isSelected -> selectedFill.ink
         !inMonth -> scheme.onSurfaceVariant.copy(alpha = OUT_OF_MONTH_ALPHA)
         else -> scheme.onSurface
     }
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(CalendarMetrics.dayCellRadius)
-            .background(background)
-            .border(1.dp, border, CalendarMetrics.dayCellRadius)
-            .clickable(onClick = onClick),
+            .then(
+                // The chosen day is a raised key, like a chosen segment everywhere else.
+                if (isSelected) {
+                    Modifier.raisedKey(CalendarMetrics.dayCellRadius, selectedFill, onClick = onClick)
+                } else {
+                    Modifier
+                        .clip(CalendarMetrics.dayCellRadius)
+                        .background(background)
+                        .border(1.dp, border, CalendarMetrics.dayCellRadius)
+                        .clickable(onClick = onClick)
+                }
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Column(

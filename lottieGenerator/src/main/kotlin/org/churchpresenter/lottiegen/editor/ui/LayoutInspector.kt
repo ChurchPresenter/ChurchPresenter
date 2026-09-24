@@ -10,10 +10,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +73,7 @@ fun LayoutInspector(state: EditorState) {
                     onRemove = { update { it.copy(slots = it.slots.filterIndexed { i, _ -> i != index }) } }
                 )
             }
-            TextButton(onClick = {
+            GhostButton(onClick = {
                 update {
                     val ids = it.slots.map { slot -> slot.id }.toSet()
                     var i = 1
@@ -106,21 +106,21 @@ private fun SlotEditor(
                 label = Strings.editorSlotId,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = { onMove(-1) }) {
+            KeyIconButton(onClick = { onMove(-1) }) {
                 Icon(
                     Icons.Default.KeyboardArrowUp,
                     contentDescription = Strings.editorMoveUp,
                     modifier = Modifier.size(16.dp)
                 )
             }
-            IconButton(onClick = { onMove(+1) }) {
+            KeyIconButton(onClick = { onMove(+1) }) {
                 Icon(
                     Icons.Default.KeyboardArrowDown,
                     contentDescription = Strings.editorMoveDown,
                     modifier = Modifier.size(16.dp)
                 )
             }
-            IconButton(onClick = onRemove) {
+            KeyIconButton(onClick = onRemove) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = Strings.editorDelete,

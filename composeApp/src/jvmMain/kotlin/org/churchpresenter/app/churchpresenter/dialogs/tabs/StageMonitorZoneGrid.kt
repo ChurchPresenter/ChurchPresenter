@@ -65,7 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.draggable
@@ -74,6 +74,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.BoxScope
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /**
  * The stage monitor grid on the Screen Content card, and the controls that resize it.
@@ -354,8 +356,7 @@ private fun SelectedZoneField(label: String, value: String, modifier: Modifier =
     Column(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .sunken(RoundedCornerShape(6.dp), elevationPalette())
             // One item, caption and value together — the number fields beside it read that way too.
             .semantics(mergeDescendants = true) {}
             .padding(horizontal = 11.dp),
@@ -382,7 +383,7 @@ private fun SelectedZoneField(label: String, value: String, modifier: Modifier =
 /** One of the two evening-out shortcuts: this row, or the whole grid. */
 @Composable
 private fun EvenOutButton(label: String, onClick: () -> Unit) {
-    OutlinedButton(
+    KeyButton(
         onClick = onClick,
         shape = RoundedCornerShape(6.dp),
         modifier = Modifier.height(26.dp),

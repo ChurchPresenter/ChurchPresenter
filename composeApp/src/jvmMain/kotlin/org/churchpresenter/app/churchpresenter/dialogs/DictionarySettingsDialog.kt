@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -67,7 +67,7 @@ fun DictionarySettingsDialog(
                     modifier = Modifier.fillMaxWidth().padding(12.dp),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    Button(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
+                    RaisedButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
                         Text(stringResource(Res.string.close))
                     }
                 }

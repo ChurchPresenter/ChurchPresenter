@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +43,10 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleSearchMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.ExperimentalFoundationApi
+import org.churchpresenter.theme.elevationPalette
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.semantics.Role
+import org.churchpresenter.theme.raisedHover
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.
@@ -102,13 +105,18 @@ internal fun BibleSearchRow(
                     )
                     Box(
                         modifier = Modifier.size(42.dp)
-                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                            .raisedHover(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
                             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                                 onSubmit()
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_search),
+                            contentDescription = stringResource(Res.string.search),
+                            modifier = Modifier.size(16.dp),
+                            tint = elevationPalette().accent.ink
+                        )
                     }
                 }
             }
@@ -142,13 +150,18 @@ internal fun BibleSearchRow(
                 )
                 Box(
                     modifier = Modifier.size(42.dp)
-                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                        .raisedHover(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
                         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                             onSubmit()
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = stringResource(Res.string.search),
+                        modifier = Modifier.size(16.dp),
+                        tint = elevationPalette().accent.ink
+                    )
                 }
             }
         }
@@ -188,12 +201,15 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
         },
         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
     ) {
-        Surface(
-            onClick = onCycle,
-            modifier = modifier,
-            shape = MaterialTheme.shapes.small,
-            color = container,
-            contentColor = content
+        val palette = elevationPalette()
+        val fill = if (searchMode == BibleSearchMode.AUTO) palette.accent else palette.tinted(container, content)
+        val interaction = remember { MutableInteractionSource() }
+        val pressed by interaction.collectIsPressedAsState()
+        Box(
+            modifier = modifier
+                .raisedHover(RoundedCornerShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
+                .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onCycle),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = stringResource(label),
@@ -202,8 +218,9 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.05.sp
                 ),
+                color = fill.ink,
                 maxLines = 1,
-                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             )
         }
     }

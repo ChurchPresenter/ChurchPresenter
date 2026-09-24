@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,7 +76,7 @@ fun CrashGuardBanner(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
             )
-            TextButton(
+            GhostButton(
                 onClick = {
                     onReEnable()
                     showBanner = false
@@ -84,7 +84,7 @@ fun CrashGuardBanner(
             ) {
                 Text(stringResource(Res.string.crash_video_bg_reenable))
             }
-            TextButton(onClick = { showBanner = false }) {
+            GhostButton(onClick = { showBanner = false }) {
                 Text(stringResource(Res.string.crash_video_bg_dismiss))
             }
         }

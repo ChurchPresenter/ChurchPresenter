@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Hva som skjer</string>
     <string name="calendar_ministry_who">Hvem, eller et notat</string>
     <string name="calendar_cloud_sync">Synkroniser med skyen og mobile enheter</string>
+    <string name="calendar_cloud_invite">Inviter en telefon</string>
     <string name="calendar_cloud_sync_sub">Holder denne kalenderen i takt med telefoner via reléet. Av: ingenting forlater denne datamaskinen</string>
     <string name="calendar_settings_export">Eksport</string>
     <string name="calendar_export_note">Brevhodet hver eksporterte PDF starter med. La et felt stå tomt for å utelate det.</string>

@@ -39,13 +39,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -311,7 +311,7 @@ fun CanvasTab(
                                     .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
                                     .padding(horizontal = 6.dp, vertical = 4.dp)
                             )
-                            IconButton(
+                            KeyIconButton(
                                 onClick = {
                                     sceneViewModel.renameScene(scene.id, renameText)
                                     renamingSceneId = null
@@ -345,7 +345,7 @@ fun CanvasTab(
                                 },
                                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
-                                IconButton(
+                                KeyIconButton(
                                     onClick = {
                                         renamingSceneId = scene.id
                                         renameText = scene.name
@@ -368,7 +368,7 @@ fun CanvasTab(
                                 },
                                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
-                                IconButton(
+                                KeyIconButton(
                                     onClick = { sceneViewModel.removeScene(scene.id) },
                                     modifier = Modifier.size(20.dp)
                                 ) {
@@ -386,7 +386,7 @@ fun CanvasTab(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Button(
+                RaisedButton(
                     onClick = { sceneViewModel.addScene() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -436,7 +436,7 @@ fun CanvasTab(
                                 },
                                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
-                                IconButton(
+                                KeyIconButton(
                                     onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
                                     modifier = Modifier.size(20.dp)
                                 ) {
@@ -458,7 +458,7 @@ fun CanvasTab(
                                 },
                                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
-                                IconButton(
+                                KeyIconButton(
                                     onClick = { sceneViewModel.toggleSourceLock(source.id) },
                                     modifier = Modifier.size(20.dp)
                                 ) {
@@ -498,7 +498,7 @@ fun CanvasTab(
                             },
                             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
-                            IconButton(
+                            KeyIconButton(
                                 onClick = { showAddMenu = true; activeTool = "select" },
                                 modifier = Modifier.size(28.dp)
                             ) {
@@ -683,7 +683,7 @@ fun CanvasTab(
                             },
                             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
-                            IconButton(
+                            KeyIconButton(
                                 onClick = { sceneViewModel.removeSource(currentSelectedId) },
                                 modifier = Modifier.size(28.dp)
                             ) {
@@ -703,7 +703,7 @@ fun CanvasTab(
                             },
                             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
-                            IconButton(
+                            KeyIconButton(
                                 onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
                                 modifier = Modifier.size(28.dp)
                             ) {
@@ -723,7 +723,7 @@ fun CanvasTab(
                             },
                             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
-                            IconButton(
+                            KeyIconButton(
                                 onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
                                 modifier = Modifier.size(28.dp)
                             ) {
@@ -797,7 +797,7 @@ fun CanvasTab(
                                 },
                                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
-                                IconButton(
+                                KeyIconButton(
                                     onClick = { activeTool = tool.id },
                                     modifier = Modifier.size(32.dp),
                                     colors = IconButtonDefaults.iconButtonColors(
@@ -910,7 +910,7 @@ fun CanvasTab(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
-                        Button(
+                        RaisedButton(
                             onClick = {
                                 sceneViewModel.updateCanvasSize(displayW, displayH)
                             },
@@ -965,7 +965,7 @@ fun CanvasTab(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
-                        Button(onClick = { sceneViewModel.addScene() }, shape = RoundedCornerShape(8.dp)) {
+                        RaisedButton(onClick = { sceneViewModel.addScene() }, shape = RoundedCornerShape(8.dp)) {
                             Text(stringResource(Res.string.canvas_create_scene))
                         }
                     }

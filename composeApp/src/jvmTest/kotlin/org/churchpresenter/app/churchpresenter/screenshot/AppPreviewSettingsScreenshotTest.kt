@@ -19,6 +19,10 @@ import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.settings.OutputProfile
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performClick
 
 class AppPreviewSettingsScreenshotTest {
 
@@ -31,7 +35,12 @@ class AppPreviewSettingsScreenshotTest {
     @AfterTest
     fun unpinRecentColors() = recents.restore()
 
-    private fun settingsTab(name: String, tab: Int, settings: AppSettings = library()) {
+    private fun settingsTab(
+        name: String,
+        tab: Int,
+        settings: AppSettings = library(),
+        drive: ComposeUiTest.() -> Unit = {},
+    ) {
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
         val appSettings = settings
@@ -63,6 +72,8 @@ class AppPreviewSettingsScreenshotTest {
                         .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isEmpty()
                 }
+                drive()
+                waitForIdle()
                 captureTo(File("$SCREENSHOT_ROOT/previewApp/settings_${name}_$suffix.png"))
             }
         }
@@ -76,6 +87,40 @@ class AppPreviewSettingsScreenshotTest {
 
     @Test
     fun background() = settingsTab("background", 2)
+
+    @Test
+    fun profiles() = settingsTab("profiles", 3)
+
+    @Test
+    fun `profiles with several`() = settingsTab(
+        "profiles_several",
+        3,
+        library().let { base ->
+            val projection = base.projectionSettings
+            base.copy(
+                projectionSettings = projection.copy(
+                    outputProfiles = projection.outputProfiles +
+                        OutputProfile(id = "profile2", name = "Lower Third") +
+                        OutputProfile(id = "profile3", name = "Stage Confidence"),
+                ),
+            )
+        },
+    )
+
+    @Test
+    fun `profiles songs section`() = settingsTab("profiles_songs", 3) {
+        onAllNodesWithText("Songs").let { it[it.fetchSemanticsNodes().lastIndex] }.performClick()
+    }
+
+    @Test
+    fun `profiles background section`() = settingsTab("profiles_background", 3) {
+        onAllNodesWithText("Background").let { it[it.fetchSemanticsNodes().lastIndex] }.performClick()
+    }
+
+    @Test
+    fun `profiles lower third mode`() = settingsTab("profiles_lower_third", 3) {
+        onAllNodesWithText("Lower Third")[0].performClick()
+    }
 
     @Test
     fun projection() = settingsTab("projection", 4)

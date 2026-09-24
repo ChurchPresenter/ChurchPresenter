@@ -16,12 +16,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -133,7 +133,7 @@ fun CompanionSatelliteSettingsTab(
                 )
             }
 
-            TextButton(onClick = { addConnection() }) {
+            GhostButton(onClick = { addConnection() }) {
                 Text(stringResource(Res.string.companion_satellite_add_connection))
             }
         }
@@ -202,11 +202,11 @@ private fun CompanionConnectionCard(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (state.status == CompanionConnectionStatus.CONNECTED || state.status == CompanionConnectionStatus.CONNECTING) {
-                            OutlinedButton(onClick = { viewModel.disconnectAll(connection) }) {
+                            KeyButton(onClick = { viewModel.disconnectAll(connection) }) {
                                 Text(stringResource(Res.string.companion_satellite_disconnect))
                             }
                         } else {
-                            Button(
+                            RaisedButton(
                                 onClick = {
                                     // Companion requires a non-empty DEVICEID ("Missing DEVICEID"
                                     // otherwise) — generate one on the fly if the field was cleared,
@@ -423,7 +423,7 @@ private fun CompanionConnectionCard(
 
         if (canRemove) {
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onRemove) {
+            GhostButton(onClick = onRemove) {
                 Text(stringResource(Res.string.companion_satellite_remove_connection), color = MaterialTheme.colorScheme.error)
             }
         }
@@ -457,7 +457,7 @@ private fun CompanionPlacementBlock(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        RaisedCheckbox(checked = checked, onCheckedChange = onCheckedChange)
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.width(100.dp))
         if (checked) {
             SettingsTextField(

@@ -1,15 +1,10 @@
 package org.churchpresenter.lottiegen.ui
 
 import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +26,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +49,8 @@ import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
+import org.churchpresenter.lottiegen.ui.components.raisedKey
+import org.churchpresenter.theme.elevationPalette
 
 /** Dotted outlines over the composition: where the host's text will go, so the margins can be judged. */
 @Composable
@@ -112,25 +109,24 @@ private fun CheckerBoard(modifier: Modifier = Modifier) {
 
 /** Round accent play/pause button on the transport. */
 @Composable
-private fun PlayButton(isPlaying: Boolean, onClick: () -> Unit) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val bg by animateColorAsState(if (hovered) Tokens.AccentHover else Tokens.Accent, label = "playBtn")
-
+internal fun PlayButton(
+    isPlaying: Boolean,
+    onClick: () -> Unit,
+    size: Dp = 36.dp,
+    iconSize: Dp = 17.dp,
+) {
+    val fill = elevationPalette().accent
     Box(
         modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(bg)
-            .hoverable(interaction)
-            .clickable(onClick = onClick),
+            .size(size)
+            .raisedKey(CircleShape, fill, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             contentDescription = if (isPlaying) "Pause" else "Play",
-            tint = Tokens.OnAccent,
-            modifier = Modifier.size(17.dp)
+            tint = fill.ink,
+            modifier = Modifier.size(iconSize)
         )
     }
 }
@@ -315,8 +311,7 @@ private fun TransportBar(
             valueRange = 0f..1f,
             modifier = Modifier.weight(1f),
             trackHeight = 6.dp,
-            knobSize = 15.dp,
-            trackColor = Tokens.TransportTrack
+            knobSize = 15.dp
         )
         Text(
             "%.0f%%".format(seekValue * PERCENT_SCALE),

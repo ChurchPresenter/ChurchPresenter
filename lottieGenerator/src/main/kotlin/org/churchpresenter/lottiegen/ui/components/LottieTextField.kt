@@ -2,12 +2,8 @@ package org.churchpresenter.lottiegen.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -41,6 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /** Disabled text and captions are dimmed rather than hidden. */
 private const val DISABLED_ALPHA = 0.38f
@@ -58,8 +55,8 @@ private class FieldChrome(
 )
 
 /**
- * A text field styled as a field card, matching [LottieDropdown]: a tiny uppercase label above
- * the editable value. Without a label it degrades to a plain bordered box (used by the batch
+ * A text field styled as the app's sunken field, matching [LottieDropdown]: a tiny uppercase
+ * label above the editable value. Without a label it degrades to a plain bordered box (used by the batch
  * import dialog's multiline area).
  */
 @Composable
@@ -81,17 +78,15 @@ fun LottieTextField(
     fillWidth: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
 
-    val borderColor by animateColorAsState(
-        when {
-            isError -> MaterialTheme.colorScheme.error
-            focused || hovered -> Tokens.FieldBorderHover
-            else -> Tokens.FieldBorder
-        },
-        label = "fieldBorder"
-    )
+    // The sunken field's rim: the theme's own at rest, the accent while focused, the error red on a
+    // bad value -- the app's text fields exactly. Hover no longer lights it.
+    val borderColor = when {
+        isError -> MaterialTheme.colorScheme.error
+        focused -> MaterialTheme.colorScheme.primary
+        else -> Color.Unspecified
+    }
     val textColor = if (enabled) Tokens.InputText else Tokens.InputText.copy(alpha = DISABLED_ALPHA)
     val chrome = FieldChrome(
         interactionSource = interactionSource,
@@ -141,9 +136,7 @@ private fun LabelledField(
             // A multi-line field grows with its text: a wrapped verse in a one-line box reads as
             // one line, and nothing says there is more until the caret is moved down into it.
             .then(if (singleLine) Modifier.height(Tokens.FieldHeight) else Modifier.heightIn(min = Tokens.FieldHeight))
-            .clip(Tokens.FieldShape)
-            .background(Tokens.FieldBg)
-            .border(1.dp, chrome.borderColor, Tokens.FieldShape)
+            .sunken(Tokens.FieldShape, elevationPalette(), rim = chrome.borderColor)
             .hoverable(chrome.interactionSource)
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
@@ -172,7 +165,7 @@ private fun LabelledField(
                 maxLines = maxLines,
                 minLines = if (singleLine) 1 else MULTI_LINE_MIN_LINES,
                 textStyle = chrome.textStyle,
-                cursorBrush = SolidColor(Tokens.Accent),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 visualTransformation = visualTransformation,
@@ -213,16 +206,14 @@ private fun PlainField(
         modifier = Modifier
             .fillMaxWidth()
             .then(if (singleLine) Modifier.height(30.dp) else Modifier.fillMaxHeight())
-            .clip(Tokens.FieldShape)
-            .background(Tokens.FieldBg)
-            .border(1.dp, chrome.borderColor, Tokens.FieldShape)
+            .sunken(Tokens.FieldShape, elevationPalette(), rim = chrome.borderColor)
             .hoverable(chrome.interactionSource),
         enabled = enabled,
         readOnly = readOnly,
         singleLine = singleLine,
         maxLines = maxLines,
         textStyle = chrome.textStyle,
-        cursorBrush = SolidColor(Tokens.Accent),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,

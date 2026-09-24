@@ -22,14 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.SettingsTextField
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -339,7 +339,7 @@ private fun ServerEnableRow(isRunning: Boolean, onEnable: (Boolean) -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Switch(checked = isRunning, onCheckedChange = onEnable)
+        RaisedSwitch(checked = isRunning, onCheckedChange = onEnable)
         Text(
             text = if (isRunning) stringResource(Res.string.server_running)
                    else stringResource(Res.string.server_stopped),
@@ -373,7 +373,7 @@ private fun ServerPortRow(
                 placeholder = { Text(stringResource(Res.string.server_port_hint)) }
             )
             if (isRunning) {
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = onRestart,
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -434,7 +434,7 @@ private fun ServerUrlRow(serverUrl: String, apiKey: String?) {
                 readOnly = true,
                 modifier = Modifier.widthIn(max = 280.dp),
             )
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { showConnectionQrDialog = true },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -466,7 +466,7 @@ private fun ApiKeySection(
 ) {
     // ── API Key protection toggle ─────────────────────────────────
     SettingRow(label = stringResource(Res.string.api_key_protection)) {
-        Switch(
+        RaisedSwitch(
             checked = settings.serverSettings.apiKeyEnabled,
             onCheckedChange = { enabled ->
                 onSettingsChange { s ->
@@ -525,7 +525,7 @@ private fun ApiKeySection(
 private fun FileUploadSection(settings: AppSettings, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
     // ── Allow File Upload toggle ──────────────────────────────────
     SettingRow(label = stringResource(Res.string.allow_file_upload)) {
-        Switch(
+        RaisedSwitch(
             checked = settings.serverSettings.fileUploadEnabled,
             onCheckedChange = { enabled ->
                 onSettingsChange { s ->
@@ -917,7 +917,7 @@ private fun CopyUrlButton(
             contentColor = scheme.onError
         )
     }
-    Button(
+    RaisedButton(
         shape = RoundedCornerShape(6.dp),
         onClick = onClick,
         contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 6.dp),
@@ -989,7 +989,7 @@ private fun ClientRow(
             }
             Spacer(Modifier.width(8.dp))
             // Edit (pencil) button
-            IconButton(
+            KeyIconButton(
                 onClick = { editing = !editing; editText = label },
                 modifier = Modifier.size(32.dp)
             ) {
@@ -1001,7 +1001,7 @@ private fun ClientRow(
                 )
             }
             Spacer(Modifier.width(4.dp))
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = onRemove,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -1034,7 +1034,7 @@ private fun ClientRow(
                     }
                 )
                 // Confirm
-                IconButton(
+                KeyIconButton(
                     onClick = {
                         onSetLabel(editText)
                         editing = false
@@ -1049,7 +1049,7 @@ private fun ClientRow(
                     )
                 }
                 // Cancel
-                IconButton(
+                KeyIconButton(
                     onClick = { editing = false; editText = label },
                     modifier = Modifier.size(32.dp)
                 ) {
@@ -1134,7 +1134,7 @@ internal fun ConnectionQrDialogContent(serverUrl: String, apiKey: String?, onDis
                     )
                 }
             }
-            Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
             }
         }

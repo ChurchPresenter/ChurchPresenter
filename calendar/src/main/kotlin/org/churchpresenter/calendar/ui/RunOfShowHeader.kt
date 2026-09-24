@@ -2,7 +2,6 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +22,7 @@ import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -62,6 +61,7 @@ import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.parseStoredTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
+import org.churchpresenter.theme.elevationPalette
 
 /**
  * The pane's header, as the design has it: the service's span (`10:00 – 11:09 AM · 69 min`), then
@@ -138,8 +138,11 @@ internal fun RunOfShowHeader(
 @Composable
 private fun ClockChip(now: LocalTime?, previewing: Boolean, onStep: () -> Unit, onReset: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
+    val key = elevationPalette().key
     val live = now != null
-    val ink = if (live) scheme.tertiary else scheme.onSurfaceVariant
+    // The chip is a raised key; a live clock keeps its tertiary on the icon, the text stays key ink.
+    val ink = key.ink
+    val iconInk = if (live) scheme.tertiary else key.ink
     val hint = if (previewing) Res.string.calendar_run_clock_tip_stepped else Res.string.calendar_run_clock_tip
     Hint(stringResource(hint)) {
         Row(
@@ -147,21 +150,14 @@ private fun ClockChip(now: LocalTime?, previewing: Boolean, onStep: () -> Unit, 
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
                 .height(HEADER_ACTION_HEIGHT)
-                .clip(RoundedCornerShape(6.dp))
-                .background(if (live) scheme.tertiary.copy(alpha = CLOCK_TINT) else Color.Transparent)
-                .border(
-                    width = 1.dp,
-                    color = if (live) scheme.tertiary.copy(alpha = CLOCK_BORDER) else scheme.outlineVariant,
-                    shape = RoundedCornerShape(6.dp),
-                )
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), onClick = onReset)
-                .clickable(onClick = onStep)
+                .raisedKey(RoundedCornerShape(6.dp), key, onClick = onStep)
                 .padding(horizontal = 8.dp),
         ) {
             Icon(
                 Icons.Filled.Schedule,
                 contentDescription = stringResource(Res.string.calendar_run_clock),
-                tint = ink,
+                tint = iconInk,
                 modifier = Modifier.size(10.dp),
             )
             Text(
@@ -213,7 +209,7 @@ private fun ArmSwitch(armed: Boolean, onArmed: (Boolean) -> Unit) {
         // the theme's colors and its accessibility role.
         val tip = stringResource(Res.string.calendar_arm_tip)
         Box(Modifier.height(20.dp).width(36.dp), contentAlignment = Alignment.Center) {
-            Switch(
+            RaisedSwitch(
                 checked = armed,
                 onCheckedChange = onArmed,
                 modifier = Modifier.scale(SWITCH_SCALE).semantics { contentDescription = tip },
@@ -223,22 +219,18 @@ private fun ArmSwitch(armed: Boolean, onArmed: (Boolean) -> Unit) {
 }
 
 /**
- * One of the header's small bordered icon buttons, at the design's 21dp.
+ * One of the header's small raised icon keys, at the design's 21dp.
  *
  * [tooltip] is both the hover hint and the accessible name: an icon this small says nothing about
  * itself, and Copy and Template were reaching the screen with neither.
  */
 @Composable
 private fun HeaderIcon(icon: ImageVector, tooltip: String, tint: Color, onClick: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
     Hint(tooltip) {
         Box(
             modifier = Modifier
                 .size(HEADER_ACTION_HEIGHT)
-                .clip(RoundedCornerShape(6.dp))
-                .background(scheme.surfaceVariant.copy(alpha = ROW_ALPHA))
-                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(6.dp))
-                .clickable(onClick = onClick),
+                .raisedKey(RoundedCornerShape(6.dp), elevationPalette().key, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = tooltip, tint = tint, modifier = Modifier.size(11.dp))
@@ -273,7 +265,9 @@ private fun runMeta(service: PlannedService): String {
 /** `2 rows need attention` -- the count of rows the pre-flight check marked, in the plan's own red. */
 @Composable
 private fun AttentionChip(count: Int) {
-    val scheme = MaterialTheme.colorScheme
+    // A badge, not a control: flat, in the palette's danger colors, whose red clears 4.5:1 where the
+    // raw error red on its own tint does not.
+    val danger = elevationPalette().danger
     Hint(stringResource(Res.string.calendar_needs_attention_tip)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -281,10 +275,10 @@ private fun AttentionChip(count: Int) {
             modifier = Modifier
                 .height(HEADER_ACTION_HEIGHT)
                 .clip(RoundedCornerShape(CalendarMetrics.chipRadius))
-                .background(scheme.error.copy(alpha = CLOCK_TINT))
+                .background(danger.bottom)
                 .padding(horizontal = 7.dp),
         ) {
-            Icon(Icons.Filled.Warning, contentDescription = null, tint = scheme.error, modifier = Modifier.size(10.dp))
+            Icon(Icons.Filled.Warning, contentDescription = null, tint = danger.ink, modifier = Modifier.size(10.dp))
             Text(
                 text = if (count == 1) {
                     stringResource(Res.string.calendar_needs_attention_one)
@@ -293,7 +287,7 @@ private fun AttentionChip(count: Int) {
                 },
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.5.sp),
                 fontWeight = FontWeight.Bold,
-                color = scheme.error,
+                color = danger.ink,
                 maxLines = 1,
                 softWrap = false,
             )
@@ -301,10 +295,7 @@ private fun AttentionChip(count: Int) {
     }
 }
 
-private const val ROW_ALPHA = 0.45f
 private const val SWITCH_SCALE = 0.7f
-private const val CLOCK_TINT = 0.14f
-private const val CLOCK_BORDER = 0.5f
 private const val SECONDS_PER_MINUTE = 60
 private val HEADER_ACTION_HEIGHT = 21.dp
 private val CLOCK_RESET_BOX = 13.dp

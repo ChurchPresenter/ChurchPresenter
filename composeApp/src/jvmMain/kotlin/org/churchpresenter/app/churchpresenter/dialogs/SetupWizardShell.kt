@@ -20,12 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -136,7 +136,7 @@ internal fun WizardRail(
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(shape = RoundedCornerShape(6.dp), onClick = onSkip) {
+            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onSkip) {
                 Text(
                     text = stringResource(Res.string.setup_wizard_skip),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -344,7 +344,7 @@ internal fun WizardPanelFooter(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (canGoBack) {
-            OutlinedButton(shape = RoundedCornerShape(8.dp), onClick = onBack) {
+            KeyButton(shape = RoundedCornerShape(8.dp), onClick = onBack) {
                 Text(stringResource(Res.string.setup_wizard_back))
             }
         }
@@ -357,7 +357,7 @@ internal fun WizardPanelFooter(
                 modifier = Modifier.padding(end = 14.dp),
             )
         }
-        Button(shape = RoundedCornerShape(8.dp), onClick = onContinue) {
+        RaisedButton(shape = RoundedCornerShape(8.dp), onClick = onContinue) {
             Text(
                 text = if (isLastStep) continueLabel else stringResource(Res.string.setup_wizard_next),
                 fontWeight = FontWeight.SemiBold,

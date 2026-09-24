@@ -3,7 +3,6 @@ package org.churchpresenter.lottiegen.band.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -49,13 +42,12 @@ import org.churchpresenter.lottiegen.ui.PreviewGuide
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
+import org.churchpresenter.lottiegen.ui.PlayButton
 
 private val STAGE_MAX_WIDTH = 880.dp
 private const val GUIDE_DASH = 4f
 private const val GUIDE_GAP = 3f
 private const val GUIDE_ALPHA = 0.55f
-private const val PAUSE_DESCRIPTION = "Pause"
-private const val PLAY_DESCRIPTION = "Play"
 
 /**
  * The band generator's right pane: the composition on a plain stage at the band's own aspect,
@@ -185,19 +177,8 @@ private fun Transport(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(13.dp),
     ) {
-        Box(
-            modifier = Modifier.size(38.dp).clip(CircleShape).background(Tokens.Accent)
-                .clickable(onClick = onPlayPause),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                // The same descriptions the main generator's transport carries; the tests find it by them.
-                contentDescription = if (isPlaying) PAUSE_DESCRIPTION else PLAY_DESCRIPTION,
-                tint = Tokens.OnAccent,
-                modifier = Modifier.size(18.dp),
-            )
-        }
+        // The main generator's own transport key, so the two windows play from one control.
+        PlayButton(isPlaying, onPlayPause, size = 38.dp, iconSize = 18.dp)
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             LottieSlider(
                 value = seekValue,
@@ -205,7 +186,6 @@ private fun Transport(
                 valueRange = 0f..1f,
                 trackHeight = 5.dp,
                 knobSize = 13.dp,
-                trackColor = Tokens.TransportTrack,
             )
             val tick = Tokens.LabelText.copy(alpha = GUIDE_ALPHA)
             Canvas(Modifier.fillMaxWidth().height(9.dp)) {

@@ -26,7 +26,7 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,13 +34,13 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -146,6 +146,8 @@ import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 private const val BPM_MAX_DIGITS = 3
 private const val MAX_BPM = 300
@@ -738,10 +740,10 @@ private fun EditSongFooter(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        TextButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
+        GhostButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
             Text(stringResource(Res.string.cancel))
         }
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(9.dp),
             enabled = saveEnabled,
             onClick = onSave,
@@ -842,7 +844,7 @@ private fun RowScope.SongbookCard(
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(
+                KeyIconButton(
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
                     modifier = Modifier.size(20.dp),
                 ) {
@@ -950,7 +952,7 @@ private fun ChordsToggle(on: Boolean, onToggle: () -> Unit) {
                 color = if (on) MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Switch(
+            RaisedSwitch(
                 checked = on,
                 onCheckedChange = { onToggle() },
                 modifier = Modifier.scale(CHORD_PREVIEW_SCALE),
@@ -985,13 +987,13 @@ private fun HoverLabel(text: String, content: @Composable () -> Unit) {
 /** A section marker offered for insertion. */
 @Composable
 private fun InsertChip(label: String, onClick: () -> Unit) {
+    val palette = elevationPalette()
     Text(
         text = label,
         fontSize = 11.sp,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = palette.key.ink,
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .raisedHover(RoundedCornerShape(6.dp), palette.key, palette, lift = 2.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 9.dp, vertical = 4.dp),
     )

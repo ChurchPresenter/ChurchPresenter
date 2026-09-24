@@ -1,7 +1,6 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -44,9 +42,10 @@ import org.churchpresenter.calendar.generated.resources.calendar_export_staff
 import org.churchpresenter.calendar.generated.resources.calendar_export_staff_sub
 import org.churchpresenter.calendar.model.PdfAudience
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 private val MENU_WIDTH = 300.dp
-private const val SPLIT_TINT = 0.5f
 
 /**
  * Export as a split button: the left half exports the copy last chosen, the right half names it
@@ -59,15 +58,16 @@ internal fun ExportSplitButton(
     onExport: (PdfAudience) -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val palette = elevationPalette()
+    val key = palette.key
     var open by remember { mutableStateOf(false) }
     Box {
+        // One raised key split in two, like the app's Outline and Text backing buttons.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .height(height)
-                .clip(CalendarMetrics.buttonRadius)
-                .background(scheme.surfaceVariant.copy(alpha = SPLIT_TINT))
-                .border(1.dp, scheme.outlineVariant, CalendarMetrics.buttonRadius),
+                .raisedHover(CalendarMetrics.buttonRadius, key, palette, lift = 2.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -80,10 +80,10 @@ internal fun ExportSplitButton(
                 Icon(
                     Icons.Filled.PictureAsPdf,
                     contentDescription = null,
-                    tint = scheme.onSurfaceVariant,
+                    tint = key.ink,
                     modifier = Modifier.size(13.dp),
                 )
-                ButtonText(stringResource(Res.string.calendar_export_pdf), scheme.onSurfaceVariant)
+                ButtonText(stringResource(Res.string.calendar_export_pdf), key.ink)
             }
             Box(Modifier.width(1.dp).fillMaxHeight().background(scheme.outlineVariant))
             Row(
@@ -97,7 +97,7 @@ internal fun ExportSplitButton(
                 Icon(
                     Icons.Filled.ArrowDropDown,
                     contentDescription = stringResource(Res.string.calendar_export_choose),
-                    tint = scheme.onSurfaceVariant,
+                    tint = key.ink,
                     modifier = Modifier.size(18.dp),
                 )
             }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -35,17 +34,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -125,6 +121,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.RaisedChip
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 private const val DEFINITION_PREVIEW_CHARS = 200
 
@@ -256,7 +255,7 @@ private fun DictionaryListPane(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             DictionaryLanguageFilter.entries.forEach { filter ->
-                FilterChip(
+                RaisedFilterChip(
                     selected = viewModel.filterLanguage == filter,
                     onClick = { viewModel.setLanguageFilter(filter) },
                     label = {
@@ -269,10 +268,8 @@ private fun DictionaryListPane(
                             style = MaterialTheme.typography.labelSmall,
                         )
                     },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             }
         }
@@ -635,8 +632,7 @@ private fun DictionaryDetailActionRow(
                 Box(
                     modifier = Modifier
                         .height(32.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -865,7 +861,7 @@ private fun InScriptureSection(
         }
         if (interlinearVerses.size > interlinearDisplayLimit) {
             val remaining = interlinearVerses.size - interlinearDisplayLimit
-            TextButton(shape = RoundedCornerShape(6.dp), onClick = onShowMore) {
+            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onShowMore) {
                 Text(
                     text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
                     style = MaterialTheme.typography.labelMedium,
@@ -974,13 +970,10 @@ private fun InterlinearWordChip(
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     val chip = @Composable {
-        SuggestionChip(
+        RaisedChip(
             onClick = onClick ?: {},
-            label = { Text(text = word.text, style = MaterialTheme.typography.labelSmall) },
-            colors = SuggestionChipDefaults.suggestionChipColors(
-                containerColor = containerColor,
-                labelColor = labelColor,
-            ),
+            fill = elevationPalette().tinted(containerColor, labelColor),
+            label = { Text(text = word.text, style = MaterialTheme.typography.labelSmall, color = labelColor) },
             enabled = isHighlighted || onClick != null,
         )
     }
@@ -1095,8 +1088,7 @@ private fun DictionarySearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -1130,7 +1122,7 @@ private fun DictionarySearchField(
             )
         }
         if (value.isNotEmpty()) {
-            IconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
+            KeyIconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),

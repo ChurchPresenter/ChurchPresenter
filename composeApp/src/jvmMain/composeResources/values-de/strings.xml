@@ -27,6 +27,7 @@
     <string name="service_schedule">Gottesdienstprogramm:</string>
     <string name="songs">Lieder</string>
     <string name="song">Lied</string>
+    <string name="output_profiles_tab">Profile</string>
     <string name="bible">Bibel</string>
     <string name="pictures">Bilder</string>
     <string name="media">Medien</string>
@@ -138,6 +139,7 @@
     <string name="word_wrap">Wortumbruch</string>
     <string name="show_on_first_page_only">Nur auf erster Seite anzeigen</string>
     <string name="position_on_screen">Position auf dem Bildschirm:</string>
+    <string name="position_showing_at">Wird angezeigt:</string>
     <string name="top_left">Oben links</string>
     <string name="top_right">Oben rechts</string>
     <string name="bottom_left">Unten links</string>
@@ -797,6 +799,7 @@
     <string name="live_preview_title">Live</string>
     <string name="live_preview_website">Webseite</string>
     <string name="loop_off">Schleife aus</string>
+    <string name="output_scale_mode">Skalierung: %1$s</string>
     <string name="loop_on">Schleife ein</string>
     <string name="lower_third_height">Höhe des unteren Drittels % (für Bibel und Lieder)</string>
     <string name="lower_third_storage_directory">Lower-Third-Speicherverzeichnis</string>
@@ -863,6 +866,10 @@
     <string name="tab_canvas">Leinwand</string>
     <string name="tab_visibility">Tab-Sichtbarkeit</string>
     <string name="text_margins">Textränder</string>
+    <string name="content_region">Inhaltsbereich</string>
+    <string name="content_region_width">Breite %</string>
+    <string name="content_region_x_offset">X-Versatz %</string>
+    <string name="content_region_y_offset">Y-Versatz %</string>
     <string name="end_of_song_spacing">Liedende (*) Abstand</string>
     <string name="theme">Design</string>
     <string name="timer_expired">Zeit abgelaufen!</string>
@@ -910,6 +917,8 @@
     <string name="web_engine_unavailable_body">Die Browser-Engine konnte nicht gestartet werden. Installieren Sie das Microsoft Visual C++ Redistributable (x64) und starten Sie die Anwendung neu.</string>
     <string name="web_engine_unavailable_macos_title">Webbrowser erfordert eine neuere macOS-Version</string>
     <string name="web_engine_unavailable_macos_body">Die Browser-Engine von ChurchPresenter unterstützt diese macOS-Version nicht mehr. Aktualisieren Sie auf macOS 12 (Monterey) oder neuer, um den Web-Tab und Browserquellen zu nutzen.</string>
+    <string name="web_engine_unavailable_windows_title">Webbrowser erfordert Windows 10 oder neuer</string>
+    <string name="web_engine_unavailable_windows_body">Die Browser-Engine von ChurchPresenter unterstützt diese Windows-Version nicht mehr. Aktualisieren Sie auf Windows 10 oder neuer, um den Web-Tab und Browserquellen zu verwenden.</string>
     <string name="web_under_construction">Diese Funktion befindet sich in Entwicklung.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1125,12 +1134,26 @@
     <string name="tab_label_style_text">Nur Text</string>
     <string name="tab_label_style_icons_and_text">Symbole und Text</string>
     <string name="tab_label_style_icons">Nur Symbole</string>
+    <string name="tab_label_style_button_hint">Tab-Beschriftung: Text, Symbole oder beides. Zum Ändern klicken.</string>
+    <string name="tab_label_margin_hint">Tab-Abstand: wie viel Platz jeder Tab erhält. Zum Ändern klicken.</string>
+    <string name="tab_label_margin_small">Klein</string>
+    <string name="tab_label_margin_small_normal">Mittelklein</string>
+    <string name="tab_label_margin_normal">Normal</string>
+    <string name="tab_label_margin_normal_large">Mittelgroß</string>
+    <string name="tab_label_margin_large">Groß</string>
     <string name="file_not_supported_short">nicht unterstützt</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer vor dem Titel</string>
     <string name="song_number_corner">Ecke</string>
     <string name="song_number_corner_off">Aus</string>
+    <string name="song_number_offset_needs_corner">Wählen Sie oben eine Ecke, um die Nummer frei zu positionieren</string>
+    <string name="song_number_offset_x">Versatz X %</string>
+    <string name="song_number_offset_y">Versatz Y %</string>
+    <string name="song_section_label">Abschnittsbezeichnung</string>
+    <string name="song_section_label_enabled">Aktuellen Abschnitt anzeigen (Strophe, Refrain…)</string>
+    <string name="song_section_label_font_size">Schriftgröße</string>
+    <string name="song_section_label_color">Farbe</string>
     <string name="fullscreen_display">Vollbildanzeige</string>
     <string name="display_mode_label">Anzeigemodus:</string>
     <string name="display_mode_one_verse">1 Strophe</string>
@@ -2134,6 +2157,7 @@
     <string name="browser_source_fps">Max. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Spiegelt die auf der Hauptausgabe angezeigte Website — nur aktiv, während die Web-Registerkarte oder ein Ausgabefenster sie anzeigt</string>
     <string name="tooltip_stt_settings">STT-Anzeigeeinstellungen</string>
+    <string name="tooltip_dictionary_settings">Wörterbuch-Anzeigeeinstellungen</string>
     <string name="presentation_builds_counter">Schritt %1$d von %2$d</string>
     <string name="presentation_animate_keynote">Keynote-Präsentationen animieren</string>
     <string name="presentation_focus_lost">Tastaturfokus verloren — klicken Sie hier, um Pfeiltasten und Fernbedienung wieder zu aktivieren</string>
@@ -2147,6 +2171,7 @@
     <string name="instance_link_controlling_host">Steuert %1$s</string>
     <string name="instance_link_primary_badge">Primärinstanz — %1$d Follower verbunden</string>
     <string name="stt_settings_dialog_title">STT-Anzeigeeinstellungen</string>
+    <string name="dictionary_settings_dialog_title">Wörterbuch-Anzeigeeinstellungen</string>
     <string name="update_dialog_channel_stable">Stabile Version</string>
     <string name="update_dialog_channel_prerelease">Vorabversion</string>
     <string name="atem_section_background_uploads">Hintergrund-Uploads</string>
@@ -2529,6 +2554,24 @@
     <string name="customize_marker">Markierung</string>
     <string name="customize_bilingual">Zweisprachig</string>
     <string name="customize_no_preview">Keine Vorschau für diesen Bereich</string>
+    <string name="output_profile_none">Keines</string>
+    <string name="output_profile_new">Neues Profil</string>
+    <string name="output_profile_create_default">Standardprofil erstellen</string>
+    <string name="output_profile_create_default_tooltip">Ein neues Profil mit dem Werksstandard-Stil der App hinzufügen, als Rückfalloption</string>
+    <string name="output_profile_duplicate">Duplizieren</string>
+    <string name="output_profile_rename">Umbenennen</string>
+    <string name="output_profile_delete">Löschen</string>
+    <string name="output_profile_delete_confirm">„%1$s“ löschen? Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="output_profile_delete_blocked">„%1$s“ kann nicht gelöscht werden — es wird noch verwendet von: %2$s</string>
+    <string name="output_profile_usage_count">Verwendet von %1$d Ausgabe(n)</string>
+    <string name="output_profile_name_hint">Profilname</string>
+    <string name="output_profile_picker_tooltip">Ausgabeprofil</string>
+    <string name="output_profile_swap_menu_tooltip">Ausgabeprofil wechseln</string>
+    <string name="output_profile_new_name_default">Neues Profil</string>
+    <string name="output_profile_display_mode">Anzeigemodus</string>
+    <string name="output_profile_content">Inhalt</string>
+    <string name="output_profile_empty_state">Erstellen Sie ein Profil, um mit der Gestaltung zu beginnen</string>
+    <string name="output_profile_preview_resolution_tooltip">Nur die Vorschauform — legt nicht die tatsächliche Auflösung der Ausgabe fest</string>
     <string name="customize_bible">Bibel</string>
     <string name="customize_songs">Lieder</string>
     <string name="customize_lower_third_vertical_hint">Ein Streifen an der Seite statt eines Bandes am unteren Rand.</string>
@@ -2545,6 +2588,9 @@
     <string name="customize_group_card">Karte</string>
     <string name="customize_group_background">Bildschirmhintergrund</string>
     <string name="customize_group_background_lower_third">Lower-Third-Hintergrund</string>
+    <string name="customize_background_source">Hintergrund</string>
+    <string name="customize_background_follow">Hintergrund-Tab folgen</string>
+    <string name="customize_background_own">Benutzerdefiniert</string>
     <string name="customize_background_type">Typ</string>
     <string name="customize_background_image">Bild</string>
     <string name="customize_background_video">Video</string>
@@ -2794,6 +2840,7 @@
     <string name="remote_api_calendar_enroll">Den Kalender von diesem Gerät aus planen</string>
     <string name="remote_api_calendar_enroll_code">Code %1$s — nur erlauben, wenn das Telefon denselben Code anzeigt</string>
     <string name="calendar_enroll_qr_title">Mit dem Telefon scannen</string>
+    <string name="calendar_enroll_invite_failed">Einladung konnte nicht erstellt werden — dieser Computer konnte das Relay nicht erreichen.</string>
     <string name="calendar_enroll_qr_body">Scanne diesen Code mit dem soeben erlaubten Telefon, um abzuschließen.</string>
     <string name="remote_api_calendar_enroll_detail">Ein Telefon oder Tablet möchte Gottesdienste im Kalender von überall aus planen.</string>
     <string name="remote_activity_calendar_enroll">Zum Planen des Kalenders angemeldet</string>
@@ -2814,6 +2861,7 @@
     <string name="calendar_sync_status_unauthorized">Das Relay akzeptiert diesen Computer nicht mehr. Kopple ihn erneut, um fortzufahren.</string>
     <string name="calendar_sync_status_other_desktop">Ein anderer Computer synchronisiert diesen Kalender. Dieser hat aufgehört zu senden, bis du einen von beiden entkoppelst.</string>
     <string name="calendar_sync_enroll_hint">So fügst du ein Telefon hinzu: Verbinde es wie gewohnt mit diesem Computer (Servereinstellungen → QR-Code), öffne dann in der App den Kalender und tippe auf Anmelden. Du wirst hier um Erlaubnis gebeten.</string>
+    <string name="calendar_sync_invite">Telefon einladen…</string>
     <string name="calendar_sync_sync_now">Jetzt synchronisieren</string>
     <string name="calendar_sync_unpair">Mit einem neuen Schlüssel neu beginnen</string>
     <string name="calendar_sync_devices">Angemeldete Telefone</string>

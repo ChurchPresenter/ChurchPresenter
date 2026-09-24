@@ -1,11 +1,5 @@
 package org.churchpresenter.lottiegen.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,24 +11,29 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.VerticalScrollbar
+import org.churchpresenter.theme.dropdownField
 
 /** The chevron points down when closed and is turned over, not spun, when open. */
 private const val CHEVRON_FLIPPED_DEGREES = 180f
 
 
 /**
- * A dropdown anchor styled as a field card: a tiny uppercase label above the current value,
+ * A dropdown anchor styled as the app's sunken field: a tiny uppercase label above the current value,
  * with a caret that flips when the menu is open.
  */
 @Composable
@@ -44,20 +43,11 @@ fun LottieDropdown(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val borderColor by animateColorAsState(
-        if (hovered || expanded) Tokens.FieldBorderHover else Tokens.FieldBorder,
-        label = "dropdownBorder"
-    )
-
     Row(
         modifier = modifier
             .height(Tokens.FieldHeight)
-            .clip(Tokens.FieldShape)
-            .background(Tokens.FieldBg)
-            .border(1.dp, borderColor, Tokens.FieldShape)
-            .hoverable(interaction)
+            // The app's sunken field; the accent rim while its menu is open.
+            .dropdownField(Tokens.FieldShape, open = expanded)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -86,6 +76,33 @@ fun LottieDropdown(
             contentDescription = null,
             modifier = Modifier.size(13.dp).rotate(if (expanded) CHEVRON_FLIPPED_DEGREES else 0f),
             tint = Tokens.FieldLabel
+        )
+    }
+}
+
+/** Material's menu item height; a menu is sized from it so a short one stays short. */
+private val MENU_ITEM_HEIGHT = 48.dp
+private val MENU_MAX_HEIGHT = 380.dp
+private val MENU_SCROLLBAR_GUTTER = 10.dp
+
+/**
+ * A dropdown menu's items, with a visible scrollbar once there are more than fit. Material's menu
+ * scrolls a long list but draws no bar, so nothing said the Style list went on past the fold -- the
+ * same fix [org.churchpresenter.theme.components.DropdownSelector] carries. The height is explicit
+ * rather than a cap because a scrollbar in an uncapped box reports an infinite height.
+ */
+@Composable
+fun ScrollingMenuItems(itemCount: Int, content: @Composable ColumnScope.() -> Unit) {
+    if (MENU_ITEM_HEIGHT * itemCount <= MENU_MAX_HEIGHT) {
+        Column(content = content)
+        return
+    }
+    val state = rememberScrollState()
+    Box(Modifier.height(MENU_MAX_HEIGHT)) {
+        Column(Modifier.verticalScroll(state).padding(end = MENU_SCROLLBAR_GUTTER), content = content)
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(state),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(end = 2.dp),
         )
     }
 }

@@ -1,8 +1,5 @@
 package org.churchpresenter.calendar.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,6 +59,7 @@ import org.churchpresenter.calendar.model.parseStoredTime
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
+import org.churchpresenter.theme.elevationPalette
 
 /** The start chips, in minutes before the service; `0` is on time. */
 private val START_OFFSETS = listOf(60, 45, 30, 20, 15, 10, 5, 0)
@@ -77,9 +73,7 @@ private val FIELD_WIDTH = 84.dp
 private val REPEATS_FIELD = 44.dp
 private val FIELD_HEIGHT = 28.dp
 private val CHIP_PADDING = 9.dp
-private const val CHIP_TINT = 0.16f
 private const val DISABLED_ALPHA = 0.35f
-private const val CHIP_BORDER = 0.55f
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3600
 private const val MINUTES_FIELD_DIGITS = 3
@@ -383,19 +377,18 @@ private fun TimingChip(
     hint: String = "",
 ) {
     val scheme = MaterialTheme.colorScheme
-    val tone = if (accent) scheme.tertiary else scheme.primary
+    val palette = elevationPalette()
+    // A raised key, lit when chosen: the selected fill, or the tertiary key for an accent chip.
+    val fill = when {
+        !selected -> palette.key
+        accent -> palette.tinted(scheme.tertiary, scheme.onTertiary)
+        else -> palette.selected
+    }
     Hint(hint) {
         Box(
             Modifier
                 .height(FIELD_HEIGHT)
-                .clip(RoundedCornerShape(7.dp))
-                .background(if (selected) tone.copy(alpha = CHIP_TINT) else Color.Transparent)
-                .border(
-                    width = 1.dp,
-                    color = if (selected) tone.copy(alpha = CHIP_BORDER) else scheme.outlineVariant,
-                    shape = RoundedCornerShape(7.dp),
-                )
-                .clickable(onClick = onClick)
+                .raisedKey(RoundedCornerShape(7.dp), fill, onClick = onClick)
                 .padding(horizontal = CHIP_PADDING),
             contentAlignment = Alignment.Center,
         ) {
@@ -403,7 +396,7 @@ private fun TimingChip(
                 text = label,
                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                color = if (selected) tone else scheme.onSurfaceVariant,
+                color = fill.ink,
                 maxLines = 1,
                 softWrap = false,
             )

@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.dropdownField
 
 private const val EXPANDED_ROTATION = 180f
 
@@ -90,12 +91,7 @@ internal fun TranslationOrderSelector(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(34.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
-                .border(
-                    1.dp,
-                    if (expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                    RoundedCornerShape(10.dp),
-                )
+                .dropdownField(RoundedCornerShape(10.dp), open = expanded)
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
                 .padding(horizontal = 10.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,

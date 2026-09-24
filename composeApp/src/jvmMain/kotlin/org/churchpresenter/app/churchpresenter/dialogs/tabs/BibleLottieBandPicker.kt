@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -91,7 +91,7 @@ internal fun LottieBandPickerRow(
         if (onGenerate != null) {
             // Shaped like the app's other settings buttons — the Browse button beside a folder —
             // not Material's default pill.
-            Button(
+            RaisedButton(
                 onClick = onGenerate,
                 modifier = Modifier.height(PICKER_ROW_HEIGHT),
                 colors = ButtonDefaults.buttonColors(
