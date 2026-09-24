@@ -119,7 +119,7 @@ class AppPathsDeepTest {
         val folder = Files.createTempDirectory("calendar-export").toFile()
         try {
             val target = File(folder, "run-of-show.pdf")
-            val host = CalendarHost(chooseExportFile = { target })
+            val host = CalendarHost(chooseExportFile = { _, _ -> target })
 
             withCalendar(documentWith(service()), host = host) {
                 awaitText("Amazing Grace")
@@ -137,7 +137,7 @@ class AppPathsDeepTest {
     @Test
     fun `an export nobody chose a file for writes nothing`() {
         var asked = false
-        val host = CalendarHost(chooseExportFile = { asked = true; null })
+        val host = CalendarHost(chooseExportFile = { _, _ -> asked = true; null })
 
         withCalendar(documentWith(service()), host = host) {
             awaitText("Amazing Grace")
