@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -19,6 +20,12 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.composed
 
 /**
  * The two-sided fill of a raised control: a vertical gradient from [top] to [bottom], the [ink]
@@ -209,6 +216,12 @@ fun Modifier.raised(
     pressed: Boolean = false,
     hovered: Boolean = false,
     lift: Dp = RAISED_LIFT,
+    /**
+     * Whether the pointer moves it: a button rises a step under the pointer and sinks on a press,
+     * the design's translateY(-1px) / (1px). Off for what is chosen rather than pressed -- a
+     * segment, a tick, a card -- which only brightens.
+     */
+    moves: Boolean = true,
 ): Modifier {
     val elevation = when {
         pressed -> 0.dp
@@ -216,10 +229,21 @@ fun Modifier.raised(
         else -> lift
     }
     val shadowTint = if (palette.isDark) fill.glow else fill.glow.copy(alpha = LIGHT_GLOW_ALPHA)
+    // Hover lights the key a shade and deepens its shadow; a button also rises a step, and sinks on
+    // a press. Drawn, not laid out: the shift never moves anything around it.
+    val shift = when {
+        !moves -> 0.dp
+        pressed -> PRESS_SHIFT
+        hovered -> -PRESS_SHIFT
+        else -> 0.dp
+    }
+    val top = if (hovered && !pressed) lerp(fill.top, Color.White, fraction = HOVER_BRIGHTEN) else fill.top
+    val bottom = if (hovered && !pressed) lerp(fill.bottom, Color.White, fraction = HOVER_BRIGHTEN) else fill.bottom
     return this
+        .graphicsLayer { translationY = shift.toPx() }
         .shadow(elevation, shape, clip = false, ambientColor = shadowTint, spotColor = shadowTint)
         .clip(shape)
-        .background(Brush.verticalGradient(listOf(fill.top, fill.bottom)))
+        .background(Brush.verticalGradient(listOf(top, bottom)))
         .drawBehind {
             val line = 1.dp.toPx()
             if (pressed) {
@@ -254,7 +278,9 @@ fun Modifier.flatDisabled(shape: Shape, palette: ElevationPalette): Modifier = t
 
 private val INNER_SHADOW_DEPTH = 4.dp
 private val RAISED_LIFT = 3.dp
-private val HOVER_EXTRA_LIFT = 2.dp
+private val HOVER_EXTRA_LIFT = 3.dp
+private const val HOVER_BRIGHTEN = 0.06f
+private val PRESS_SHIFT = 1.dp
 private val HAIRLINE = 0.5.dp
 private const val FILL_WELL_SHADE = 0.08f
 private const val BOTTOM_EDGE_ALPHA = 0.14f
@@ -263,3 +289,36 @@ private const val TINT_LIFT_DARK = 0.22f
 private const val TINT_LIFT_LIGHT = 0.16f
 private const val HIGHLIGHT_TINT_DARK = 0.4f
 private const val HIGHLIGHT_TINT_LIGHT = 0.3f
+
+/**
+ * A half-strength accent rim while the pointer is over the control -- how a sunken field that opens
+ * something (a dropdown) says it can be clicked. Its own hover tracking, so a caller adds only this.
+ */
+fun Modifier.hoverOutline(shape: Shape): Modifier = composed {
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val rim = MaterialTheme.colorScheme.primary.copy(alpha = HOVER_RIM_ALPHA)
+    this
+        .hoverable(interaction)
+        .then(if (hovered) Modifier.border(1.dp, rim, shape) else Modifier)
+}
+
+private const val HOVER_RIM_ALPHA = 0.55f
+
+/**
+ * [raised], tracking the pointer itself: for a hand-built button whose click handler does not share
+ * an interaction source, so it still lifts under the pointer like every other button.
+ */
+fun Modifier.raisedHover(
+    shape: Shape,
+    fill: RaisedFill,
+    palette: ElevationPalette,
+    pressed: Boolean = false,
+    lift: Dp = RAISED_LIFT,
+): Modifier = composed {
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    this
+        .hoverable(interaction)
+        .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = lift)
+}

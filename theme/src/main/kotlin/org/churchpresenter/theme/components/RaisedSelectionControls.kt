@@ -1,6 +1,7 @@
 package org.churchpresenter.theme.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -49,8 +52,12 @@ import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import androidx.compose.ui.graphics.graphicsLayer
 
 private const val DISABLED_ALPHA = 0.45f
+private const val SEGMENT_HOVER_ALPHA = 0.08f
+private val SEGMENT_HOVER_SHIFT = 1.dp
+private const val HOVER_RIM_ALPHA = 0.55f
 private val BOX_SIZE = 18.dp
 /** Material draws its checkbox and radio 18dp inside a 20dp box; this is the difference. */
 private val CONTROL_PADDING = 1.dp
@@ -84,6 +91,8 @@ fun RaisedCheckbox(
 ) {
     val palette = elevationPalette()
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val hoverRim = MaterialTheme.colorScheme.primary.copy(alpha = HOVER_RIM_ALPHA)
     val shape = RoundedCornerShape(BOX_RADIUS)
     val fill = checkedFill(colors.checkedBoxColor, colors.checkedCheckmarkColor)
     val toggle = if (onCheckedChange != null) {
@@ -105,14 +114,23 @@ fun RaisedCheckbox(
             .then(if (onCheckedChange != null) Modifier.minimumInteractiveComponentSize() else Modifier)
             .padding(CONTROL_PADDING)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .then(if (onCheckedChange != null && enabled) Modifier.hoverable(interaction) else Modifier)
             .then(toggle),
         contentAlignment = Alignment.Center,
     ) {
         Box(
+            // At most BOX_SIZE, and smaller when the caller sizes the control smaller: a fixed box
+            // in a tighter space was cropped, which cut its rounded corners square.
             modifier = Modifier
-                .size(BOX_SIZE)
+                .sizeIn(maxWidth = BOX_SIZE, maxHeight = BOX_SIZE)
+                .fillMaxSize()
+                .aspectRatio(1f)
                 .then(
-                    if (checked) Modifier.raised(shape, fill, palette, lift = 2.dp) else Modifier.sunken(shape, palette)
+                    if (checked) {
+                        Modifier.raised(shape, fill, palette, hovered = hovered, lift = 2.dp, moves = false)
+                    } else {
+                        Modifier.sunken(shape, palette, rim = if (hovered) hoverRim else Color.Unspecified)
+                    }
                 ),
         ) {
             if (checked) CheckMark(fill.ink)
@@ -151,6 +169,8 @@ fun RaisedRadioButton(
 ) {
     val palette = elevationPalette()
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val hoverRim = MaterialTheme.colorScheme.primary.copy(alpha = HOVER_RIM_ALPHA)
     val fill = checkedFill(colors.selectedColor, MaterialTheme.colorScheme.onPrimary)
     val select = if (onClick != null) {
         Modifier.selectable(
@@ -169,17 +189,22 @@ fun RaisedRadioButton(
             .then(if (onClick != null) Modifier.minimumInteractiveComponentSize() else Modifier)
             .padding(CONTROL_PADDING)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .then(if (onClick != null && enabled) Modifier.hoverable(interaction) else Modifier)
             .then(select),
         contentAlignment = Alignment.Center,
     ) {
         Box(
+            // At most BOX_SIZE, and smaller when the caller sizes the control smaller: a fixed box
+            // in a tighter space was cropped, which cut its rounded corners square.
             modifier = Modifier
-                .size(BOX_SIZE)
+                .sizeIn(maxWidth = BOX_SIZE, maxHeight = BOX_SIZE)
+                .fillMaxSize()
+                .aspectRatio(1f)
                 .then(
                     if (selected) {
-                        Modifier.raised(CircleShape, fill, palette, lift = 2.dp)
+                        Modifier.raised(CircleShape, fill, palette, hovered = hovered, lift = 2.dp, moves = false)
                     } else {
-                        Modifier.sunken(CircleShape, palette)
+                        Modifier.sunken(CircleShape, palette, rim = if (hovered) hoverRim else Color.Unspecified)
                     }
                 ),
             contentAlignment = Alignment.Center,
@@ -322,7 +347,13 @@ fun SegmentTrackItem(
     Box(
         modifier = modifier
             .then(
-                if (selected) Modifier.raised(shape, palette.selected, palette, lift = 2.dp) else Modifier.clip(shape)
+                when {
+                    selected -> Modifier.raised(shape, palette.selected, palette, hovered = hovered, lift = 2.dp)
+                    // A faint wash under the pointer, so an unchosen option shows it can be picked.
+                    hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
+                        .clip(shape).background(ink.copy(alpha = SEGMENT_HOVER_ALPHA))
+                    else -> Modifier.clip(shape)
+                }
             )
             .hoverable(interaction)
             .selectable(

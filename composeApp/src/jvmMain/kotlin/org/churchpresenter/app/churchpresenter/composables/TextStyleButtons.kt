@@ -58,6 +58,8 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 
 /**
  * A row of toggle buttons for text style: Bold, Italic, Underline, Shadow.
@@ -305,6 +307,7 @@ private fun StyleSegment(
     val fill = if (isActive) palette.accent else palette.key
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
+    val hovered by interaction.collectIsHoveredAsState()
     TooltipArea(
         tooltip = { BackdropTooltip(tooltip) },
         tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -317,7 +320,8 @@ private fun StyleSegment(
                 // The chip draws a letter and the caret draws an arrow; neither is a name, so the
                 // tooltip is also the accessible one.
                 .semantics { contentDescription = tooltip }
-                .raised(shape, fill, palette, pressed = pressed, lift = 2.dp)
+                .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
+                .hoverable(interaction)
                 .clickable(interactionSource = interaction, indication = null) { onClick() },
             contentAlignment = Alignment.Center,
         ) {

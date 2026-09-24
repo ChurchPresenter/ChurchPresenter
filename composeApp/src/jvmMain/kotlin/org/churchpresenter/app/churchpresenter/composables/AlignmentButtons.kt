@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -49,9 +50,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import androidx.compose.ui.graphics.graphicsLayer
 
 private val TRACK_INSET = 2.dp
 private const val ICON_FRACTION = 0.7f
+private const val SEGMENT_HOVER_ALPHA = 0.08f
+private val SEGMENT_HOVER_SHIFT = 1.dp
 
 private class IconChoice(
     val value: String,
@@ -216,10 +220,18 @@ private fun IconChoiceTrack(
                     modifier = Modifier
                         .size(segmentWidth, segmentHeight)
                         .then(
-                            if (isSelected) {
-                                Modifier.raised(segmentShape, palette.selected, palette, lift = 2.dp)
-                            } else {
-                                Modifier.clip(segmentShape)
+                            when {
+                                isSelected -> Modifier.raised(
+                                    segmentShape,
+                                    palette.selected,
+                                    palette,
+                                    hovered = hovered,
+                                    lift = 2.dp,
+                                )
+                                hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
+                                    .clip(segmentShape)
+                                    .background(tint.copy(alpha = SEGMENT_HOVER_ALPHA))
+                                else -> Modifier.clip(segmentShape)
                             }
                         )
                         .hoverable(interaction)

@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 
 private const val LABEL_SIZE_FRACTION = 0.36f
 
@@ -59,10 +61,12 @@ fun TextStyleToggleButton(
         val shape = RoundedCornerShape(8.dp)
         val interaction = remember { MutableInteractionSource() }
         val pressed by interaction.collectIsPressedAsState()
+        val hovered by interaction.collectIsHoveredAsState()
         Box(
             modifier = Modifier
                 .size(buttonSize)
-                .raised(shape, fill, palette, pressed = pressed, lift = 2.dp)
+                .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
+                .hoverable(interaction)
                 .clickable(interactionSource = interaction, indication = null) { onClick() },
             contentAlignment = Alignment.Center,
         ) {

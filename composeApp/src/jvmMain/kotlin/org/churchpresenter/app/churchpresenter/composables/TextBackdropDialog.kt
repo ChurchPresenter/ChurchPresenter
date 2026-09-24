@@ -60,6 +60,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 private val DIALOG_WIDTH = 320.dp
 private val OPACITY_FIELD_WIDTH = 104.dp
@@ -168,8 +169,10 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
         modes.forEachIndexed { index, mode ->
             val selected = backdrop.mode == mode
             val shape = segmentShape(index, modes.size)
+            // The selected key's own ink: the surface's text color on the lit key was white on light
+            // blue in the dark themes.
             val ink = if (selected) {
-                MaterialTheme.colorScheme.onSurface
+                elevationPalette().selected.ink
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             }
@@ -195,7 +198,7 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
                     // Each choice previews itself with the colours already set, so switching
                     // between Fill and Both shows what the switch will actually produce.
                     backdrop = backdrop.withMode(mode),
-                    emptyOutline = outline,
+                    emptyOutline = if (selected) ink.copy(alpha = OUTLINE_ALPHA) else outline,
                     emptyInk = ink,
                     modifier = Modifier.width(26.dp).height(15.dp),
                     label = null,
@@ -254,7 +257,12 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(PRESET_HEIGHT)
-                            .raised(RoundedCornerShape(7.dp), elevationPalette().key, elevationPalette(), lift = 2.dp)
+                            .raisedHover(
+                                RoundedCornerShape(7.dp),
+                                elevationPalette().key,
+                                elevationPalette(),
+                                lift = 2.dp,
+                            )
                             .clickable { onPick(choice.apply(current)) }
                             .padding(3.dp),
                     ) {

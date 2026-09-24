@@ -280,7 +280,7 @@ internal fun ScheduleItemRow(
                 .testTag(SCHEDULE_ROW_CARD_TAG)
                 .hoverable(interactionSource)
                 // Raised off the list in its own color: a touch lighter along the top, a soft
-                // shadow, lifted a little further while selected or under the pointer.
+                // shadow, lifted further while selected and a step more under the pointer.
                 .raised(
                     CARD_SHAPE,
                     RaisedFill(
@@ -291,8 +291,9 @@ internal fun ScheduleItemRow(
                         glow = Color.Black,
                     ),
                     elevationPalette(),
-                    hovered = hovered || isSelected,
-                    lift = CARD_LIFT,
+                    hovered = hovered,
+                    lift = if (isSelected) CARD_LIFT_SELECTED else CARD_LIFT,
+                    moves = false,
                 )
                 .border(1.dp, cardBorder, CARD_SHAPE)
         ) {
@@ -680,4 +681,5 @@ internal fun ScheduleItemContent(
 }
 
 private val CARD_LIFT = 2.dp
+private val CARD_LIFT_SELECTED = 4.dp
 private const val CARD_TOP_LIFT = 0.05f

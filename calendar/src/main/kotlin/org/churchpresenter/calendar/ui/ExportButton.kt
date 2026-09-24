@@ -42,8 +42,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_export_staff
 import org.churchpresenter.calendar.generated.resources.calendar_export_staff_sub
 import org.churchpresenter.calendar.model.PdfAudience
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 private val MENU_WIDTH = 300.dp
 
@@ -67,7 +67,7 @@ internal fun ExportSplitButton(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .height(height)
-                .raised(CalendarMetrics.buttonRadius, key, palette, lift = 2.dp),
+                .raisedHover(CalendarMetrics.buttonRadius, key, palette, lift = 2.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

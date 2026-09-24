@@ -73,6 +73,13 @@ import org.churchpresenter.settings.toStyleZone
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.SegmentTrack
 import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 
 private const val VARIANT_CARD_WIDTH = 132
 private const val BEZEL_ALPHA = 0.38f
@@ -149,14 +156,19 @@ private fun LayoutVariantCard(
     screenAspect: Float,
     onPick: () -> Unit,
 ) {
-    val border = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+    val palette = elevationPalette()
+    val shape = RoundedCornerShape(8.dp)
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
     Column(
         modifier = Modifier
             .width(VARIANT_CARD_WIDTH.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(if (selected) 2.dp else 1.dp, border, RoundedCornerShape(8.dp))
-            .clickable(onClick = onPick)
+            // A raised key like every other button: it lifts under the pointer and presses in. The
+            // chosen card keeps its accent border.
+            .raised(shape, palette.key, palette, pressed = pressed, hovered = hovered)
+            .then(if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .clickable(interactionSource = interaction, indication = null, onClick = onPick)
             .padding(6.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {

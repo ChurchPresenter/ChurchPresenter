@@ -188,7 +188,7 @@ import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.app.churchpresenter.composables.RecentChip
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.raisedHover
 
 private const val MILLIS_PER_SECOND = 1000
 private const val MAX_AUTO_SCROLL_SECONDS = 30
@@ -1167,7 +1167,7 @@ fun PresentationTab(
                             val openFill = if (viewModel.selectedPresentation == f) palette.selected else palette.key
                             Row(
                                 modifier = Modifier
-                                    .raised(RoundedCornerShape(8.dp), openFill, palette, lift = 2.dp)
+                                    .raisedHover(RoundedCornerShape(8.dp), openFill, palette, lift = 2.dp)
                                     .clickable { viewModel.selectPresentation(f) }
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically,

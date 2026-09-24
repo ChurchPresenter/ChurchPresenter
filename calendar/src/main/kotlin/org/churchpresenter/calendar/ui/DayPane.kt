@@ -47,8 +47,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import org.churchpresenter.calendar.model.clockText
-import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 /** The selected day's heading — `Sunday, 20 September 2026`, in the machine's own locale. */
 private val DAY_HEADING: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
@@ -184,7 +184,7 @@ private fun ServiceChip(
     Row(
         modifier = Modifier
             .height(CalendarMetrics.serviceChipHeight)
-            .raised(shape, fill, palette, lift = 2.dp),
+            .raisedHover(shape, fill, palette, lift = 2.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

@@ -98,8 +98,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raisedHover
 
 private const val MENU_OFFSET_DP = 8
 private const val DASH_ON_PX = 6f
@@ -297,7 +297,7 @@ internal fun PillGroup(content: @Composable () -> Unit) {
     val palette = elevationPalette()
     FlowRow(
         modifier = Modifier
-            .raised(RoundedCornerShape(8.dp), palette.key, palette, lift = 2.dp)
+            .raisedHover(RoundedCornerShape(8.dp), palette.key, palette, lift = 2.dp)
             .padding(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically,

@@ -93,7 +93,7 @@ fun TooltipIconButton(
                 .padding(ICON_KEY_INSET)
                 .then(
                     if (enabled && (hovered || pressed)) {
-                        Modifier.raised(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
+                        Modifier.raised(shape, palette.key, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
                     } else {
                         Modifier.clip(shape)
                     }

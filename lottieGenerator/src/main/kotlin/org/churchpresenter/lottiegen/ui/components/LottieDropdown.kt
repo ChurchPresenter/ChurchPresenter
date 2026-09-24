@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.VerticalScrollbar
+import org.churchpresenter.theme.hoverOutline
 
 /** The chevron points down when closed and is turned over, not spun, when open. */
 private const val CHEVRON_FLIPPED_DEGREES = 180f
@@ -55,6 +56,7 @@ fun LottieDropdown(
                 elevationPalette(),
                 rim = if (expanded) MaterialTheme.colorScheme.primary else Color.Unspecified,
             )
+            .hoverOutline(Tokens.FieldShape)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

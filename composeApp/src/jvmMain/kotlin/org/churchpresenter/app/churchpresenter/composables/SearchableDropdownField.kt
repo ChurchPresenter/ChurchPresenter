@@ -55,6 +55,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.hoverOutline
 
 /**
  * A dropdown whose value is also a search box: typing narrows the menu to the options that contain
@@ -133,6 +134,7 @@ fun SearchableDropdownField(
         modifier = modifier
             .heightIn(min = 42.dp)
             .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverOutline(RoundedCornerShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 focusRequester.requestFocus()
                 expanded = true

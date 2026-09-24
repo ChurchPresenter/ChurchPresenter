@@ -147,7 +147,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.raisedHover
 
 private const val BPM_MAX_DIGITS = 3
 private const val MAX_BPM = 300
@@ -993,7 +993,7 @@ private fun InsertChip(label: String, onClick: () -> Unit) {
         fontSize = 11.sp,
         color = palette.key.ink,
         modifier = Modifier
-            .raised(RoundedCornerShape(6.dp), palette.key, palette, lift = 2.dp)
+            .raisedHover(RoundedCornerShape(6.dp), palette.key, palette, lift = 2.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 9.dp, vertical = 4.dp),
     )

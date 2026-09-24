@@ -43,11 +43,14 @@ import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import androidx.compose.ui.graphics.graphicsLayer
 
 /** Tight enough that a two-line label still fits a segment sized for one and a bit. */
 private const val LINE_HEIGHT_RATIO = 1.15f
 
 private const val ICON_SCALE = 1.1f
+private const val SEGMENT_HOVER_ALPHA = 0.08f
+private val SEGMENT_HOVER_SHIFT = 1.dp
 private val TRACK_INSET = 3.dp
 private val SEGMENT_GAP = 9.dp
 private val DIVIDER_WIDTH = 1.dp
@@ -205,10 +208,14 @@ private fun <T> Segment(
     Box(
         modifier = modifier
             .then(
-                if (isSelected) {
-                    Modifier.raised(segmentShape, selectedFill, palette, lift = 2.dp)
-                } else {
-                    Modifier.clip(segmentShape)
+                when {
+                    isSelected -> Modifier.raised(
+                        segmentShape, selectedFill, palette, hovered = hovered, lift = 2.dp,
+                    )
+                    // A faint wash under the pointer, so an unchosen option shows it can be picked.
+                    hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
+                        .clip(segmentShape).background(ink.copy(alpha = SEGMENT_HOVER_ALPHA))
+                    else -> Modifier.clip(segmentShape)
                 }
             )
             .hoverable(interaction)

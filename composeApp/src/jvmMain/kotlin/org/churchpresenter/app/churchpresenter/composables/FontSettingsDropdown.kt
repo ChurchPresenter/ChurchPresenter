@@ -73,6 +73,7 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverOutline
 
 /** Room left around the panel so it never runs off the top or the bottom of the window. */
 private val PANEL_WINDOW_MARGIN = 32.dp
@@ -176,6 +177,7 @@ private fun FontPickerTrigger(
                 elevationPalette(),
                 rim = if (expanded) MaterialTheme.colorScheme.primary else Color.Unspecified,
             )
+            .hoverOutline(RoundedCornerShape(8.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

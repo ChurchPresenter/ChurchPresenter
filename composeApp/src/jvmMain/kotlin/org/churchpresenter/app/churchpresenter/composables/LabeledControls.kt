@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import org.churchpresenter.theme.components.RaisedSwitch
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 
 /**
  * A checkbox, radio button or switch together with its label, where **the label is part of the
@@ -58,13 +61,20 @@ fun LabeledCheckbox(
     spacing: Dp = 0.dp,
     controlAtEnd: Boolean = false,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Row(
-        modifier = modifier.toggleable(
-            value = checked,
-            enabled = enabled,
-            role = Role.Checkbox,
-            onValueChange = onCheckedChange,
-        ),
+        // No indication: the default one painted a square highlight over the whole row. The row's
+        // hover goes to the control instead, which lights its own rounded rim.
+        modifier = modifier
+            .hoverable(interaction, enabled = enabled)
+            .toggleable(
+                value = checked,
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange,
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(spacing),
     ) {
@@ -72,9 +82,21 @@ fun LabeledCheckbox(
         // publish a second, competing click target inside the first.
         if (controlAtEnd) {
             LabelText(label, supporting, style, color, Modifier.weight(1f))
-            RaisedCheckbox(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
+            RaisedCheckbox(
+                checked = checked,
+                onCheckedChange = null,
+                enabled = enabled,
+                modifier = controlModifier,
+                interactionSource = interaction,
+            )
         } else {
-            RaisedCheckbox(checked = checked, onCheckedChange = null, enabled = enabled, modifier = controlModifier)
+            RaisedCheckbox(
+                checked = checked,
+                onCheckedChange = null,
+                enabled = enabled,
+                modifier = controlModifier,
+                interactionSource = interaction,
+            )
             LabelText(label, supporting, style, color)
         }
     }
@@ -94,21 +116,38 @@ fun LabeledRadioButton(
     spacing: Dp = 0.dp,
     controlAtEnd: Boolean = false,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Row(
-        modifier = modifier.selectable(
-            selected = selected,
-            enabled = enabled,
-            role = Role.RadioButton,
-            onClick = onClick,
-        ),
+        modifier = modifier
+            .hoverable(interaction, enabled = enabled)
+            .selectable(
+                selected = selected,
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.RadioButton,
+                onClick = onClick,
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(spacing),
     ) {
         if (controlAtEnd) {
             LabelText(label, supporting, style, color, Modifier.weight(1f))
-            RaisedRadioButton(selected = selected, onClick = null, enabled = enabled, modifier = controlModifier)
+            RaisedRadioButton(
+                selected = selected,
+                onClick = null,
+                enabled = enabled,
+                modifier = controlModifier,
+                interactionSource = interaction,
+            )
         } else {
-            RaisedRadioButton(selected = selected, onClick = null, enabled = enabled, modifier = controlModifier)
+            RaisedRadioButton(
+                selected = selected,
+                onClick = null,
+                enabled = enabled,
+                modifier = controlModifier,
+                interactionSource = interaction,
+            )
             LabelText(label, supporting, style, color)
         }
     }
@@ -130,6 +169,8 @@ fun LabeledSwitch(
 ) {
     Row(
         modifier = modifier.toggleable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
             value = checked,
             enabled = enabled,
             role = Role.Switch,

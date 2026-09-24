@@ -136,7 +136,7 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.RowScope
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.raisedHover
 
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
@@ -363,7 +363,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(42.dp)
-                    .raised(RoundedCornerShape(8.dp), elevationPalette().accent, elevationPalette())
+                    .raisedHover(RoundedCornerShape(8.dp), elevationPalette().accent, elevationPalette())
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                         val now = System.currentTimeMillis()
                         if (now - rebuildClickTime > REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0

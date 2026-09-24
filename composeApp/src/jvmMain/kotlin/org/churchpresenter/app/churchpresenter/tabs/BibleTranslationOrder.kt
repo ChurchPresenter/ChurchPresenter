@@ -65,6 +65,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverOutline
 
 private const val EXPANDED_ROTATION = 180f
 
@@ -97,6 +98,7 @@ internal fun TranslationOrderSelector(
                     elevationPalette(),
                     rim = if (expanded) MaterialTheme.colorScheme.primary else Color.Unspecified,
                 )
+            .hoverOutline(RoundedCornerShape(10.dp))
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
                 .padding(horizontal = 10.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,

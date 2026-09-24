@@ -44,9 +44,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.ExperimentalFoundationApi
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.semantics.Role
+import org.churchpresenter.theme.raisedHover
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.
@@ -105,7 +105,7 @@ internal fun BibleSearchRow(
                     )
                     Box(
                         modifier = Modifier.size(42.dp)
-                            .raised(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
+                            .raisedHover(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
                             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                                 onSubmit()
                             },
@@ -150,7 +150,7 @@ internal fun BibleSearchRow(
                 )
                 Box(
                     modifier = Modifier.size(42.dp)
-                        .raised(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
+                        .raisedHover(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
                         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                             onSubmit()
                         },
@@ -207,7 +207,7 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
         val pressed by interaction.collectIsPressedAsState()
         Box(
             modifier = modifier
-                .raised(RoundedCornerShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
+                .raisedHover(RoundedCornerShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
                 .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onCycle),
             contentAlignment = Alignment.Center
         ) {
