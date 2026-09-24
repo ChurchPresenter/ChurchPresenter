@@ -134,6 +134,8 @@ import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
 import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.data.SectionBackgroundSlot
@@ -365,6 +367,14 @@ internal fun EditSongContent(
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
     var steps by remember(isVisible, song) { mutableStateOf(0) }
+    var transposeRecorded by remember(isVisible, song) { mutableStateOf(false) }
+    val transposeBy: (Int) -> Unit = { delta ->
+        steps += delta
+        if (!transposeRecorded) {
+            transposeRecorded = true
+            UsageEvents.record(UsageEvent.SONG_TRANSPOSED)
+        }
+    }
 
     // The sections a background can be pinned to, read back out of the lyrics box on every edit so
     // the list follows what is written there. Only the primary lyrics: a section is one section in
@@ -633,8 +643,8 @@ internal fun EditSongContent(
                         text = paneValue.text,
                         showChords = showChords,
                         steps = steps,
-                        onTransposeUp = { steps += 1 },
-                        onTransposeDown = { steps -= 1 },
+                        onTransposeUp = { transposeBy(1) },
+                        onTransposeDown = { transposeBy(-1) },
                         onTransposeReset = { steps = 0 },
                         onInsertChord = { chord ->
                             setPaneValue(insertSnippet(paneValue, "[$chord]", ownLine = false))

@@ -34,6 +34,19 @@ internal fun isDualLanguagePresentation(song: SongItem, outputs: List<OutputProf
     return outputs.any { it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY }
 }
 
+private const val THREE_LANGUAGES = 3
+private const val FOUR_LANGUAGES = 4
+
+internal fun songLanguageEvent(song: SongItem, outputs: List<OutputProfile>): UsageEvent? {
+    val shown = outputs.flatMap { it.songLanguages(song.translationCount) }.toSet().size
+    return when {
+        shown >= FOUR_LANGUAGES -> UsageEvent.SONG_FOUR_LANGUAGES
+        shown == THREE_LANGUAGES -> UsageEvent.SONG_THREE_LANGUAGES
+        isDualLanguagePresentation(song, outputs) -> UsageEvent.SONG_DUAL_LANGUAGE
+        else -> null
+    }
+}
+
 /**
  * True when the Bible stack holds at least two translations and some live output's profile shows
  * two or more of them at once.

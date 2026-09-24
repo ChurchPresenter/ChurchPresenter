@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
@@ -136,7 +137,9 @@ internal fun BibleViewModel.onEngineScripture(
             detectedVersion = detectedVersion,
         )
     )
+    if (added) usage.record(UsageEvent.BIBLE_REFERENCE_DETECTED)
     if (added && _autoFollowEnabled.value) {
+        usage.record(UsageEvent.BIBLE_REFERENCE_AUTO_FOLLOWED)
 
         val instantGoLive = matchType == "explicit" || matchType == "continuation" ||
             matchType == "chapter-scan"
@@ -205,6 +208,7 @@ internal fun BibleViewModel.applyDetectedReference(ref: DetectedReference, goLiv
     val matchType = ref.matchTypeLabel()
     actedDetectionKeys.add(ref.key)
     logDetectionOutcome(ref, action = "accepted")
+    usage.record(UsageEvent.BIBLE_REFERENCE_ACCEPTED)
 
     navigateToReference(
         SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, verseEnd = null),

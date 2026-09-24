@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -1846,6 +1848,7 @@ fun MainDesktop(
                                     bible?.getBookName(bookId)
                                 },
                                 onWordClick = { strongsNumber ->
+                                    UsageEvents.record(UsageEvent.STRONGS_LOOKUP)
                                     dictionaryViewModel.selectByNumber(strongsNumber)
                                 },
                                 onVerseClick = { bookId, chapter, verseNumber ->

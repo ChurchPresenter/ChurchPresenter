@@ -70,6 +70,61 @@ enum class UsageEvent(
      * signal: an install that pings week after week and never sends this never got working.
      */
     FIRST_LIVE_ON_SCREEN("firstLiveOnScreen"),
+
+    CALENDAR_OPENED("calendarOpened"),
+    CALENDAR_SERVICE_ADDED("calendarServiceAdded"),
+    CALENDAR_PHONE_ADDED("calendarPhoneAdded"),
+    CALENDAR_PHONE_INVITED("calendarPhoneInvited"),
+    CALENDAR_EXPORTED("calendarExported"),
+    SONG_LIBRARY_OPENED("songLibraryOpened"),
+    SONG_EDITED("songEdited"),
+    SONG_THREE_LANGUAGES("songThreeLanguages"),
+    SONG_FOUR_LANGUAGES("songFourLanguages"),
+    BIBLE_LOTTIE_BAND("bibleLottieBand"),
+    SONG_LOTTIE_BAND("songLottieBand"),
+    CALENDAR_LOADED("calendarLoaded"),
+    CALENDAR_AUTO_LOADED("calendarAutoLoaded"),
+    CALENDAR_CUE_FIRED("calendarCueFired"),
+    QA_SESSION_STARTED("qaSessionStarted"),
+    QA_QUESTION_RECEIVED("qaQuestionReceived"),
+    STAGE_MONITOR("stageMonitorShown"),
+    CONVERTER_OPENED("converterOpened"),
+    CONVERTED_BIBLE("convertedBible"),
+    CONVERTED_EASYSLIDES("convertedEasySlides"),
+    CONVERTED_EASYWORSHIP("convertedEasyWorship"),
+    CONVERTED_FREESHOW("convertedFreeShow"),
+    CONVERTED_FREEWORSHIP("convertedFreeWorship"),
+    CONVERTED_MEDIASHOUT("convertedMediaShout"),
+    CONVERTED_OPENLP("convertedOpenLp"),
+    CONVERTED_OPENSONG("convertedOpenSong"),
+    CONVERTED_PROPRESENTER("convertedProPresenter"),
+    CONVERTED_QUELEA("convertedQuelea"),
+    CONVERTED_SOFTPROJECTOR("convertedSoftProjector"),
+    CONVERTED_SONGBEAMER("convertedSongBeamer"),
+    CONVERTED_VIDEOPSALM("convertedVideoPsalm"),
+    CONVERTED_DOCUMENTS("convertedDocuments"),
+    BIBLE_REFERENCE_DETECTED("bibleReferenceDetected"),
+    BIBLE_REFERENCE_AUTO_FOLLOWED("bibleReferenceAutoFollowed"),
+    BIBLE_REFERENCE_ACCEPTED("bibleReferenceAccepted"),
+    STRONGS_LOOKUP("strongsLookup"),
+    STRONGS_SHOWN("strongsShown"),
+    SETUP_WIZARD_OPENED("setupWizardOpened"),
+    SETUP_WIZARD_FINISHED("setupWizardFinished"),
+    SETUP_WIZARD_SKIPPED("setupWizardSkipped"),
+    SETUP_WIZARD_OPENED_SETTINGS("setupWizardOpenedSettings"),
+    SETUP_WIZARD_OPENED_CONVERTER("setupWizardOpenedConverter"),
+    SONG_TRANSPOSED("songTransposed"),
+    REMOTE_ADDED_TO_SCHEDULE("remoteAddedToSchedule"),
+    REMOTE_PUT_LIVE("remotePutLive"),
+    REMOTE_APPROVED("remoteApproved"),
+    REMOTE_DENIED("remoteDenied"),
+    CALENDAR_SERVICE_COPIED("calendarServiceCopied"),
+    CALENDAR_TEMPLATE_SAVED("calendarTemplateSaved"),
+    CALENDAR_MISSING_FILE_FIXED("calendarMissingFileFixed"),
+    CALENDAR_SYNC_ENABLED("calendarSyncEnabled"),
+    SONG_LIBRARY_BULK_EDIT("songLibraryBulkEdit"),
+    SONG_LIBRARY_SONGBOOK_CREATED("songLibrarySongbookCreated"),
+    SONG_LIBRARY_SONGS_DELETED("songLibrarySongsDeleted"),
 }
 
 @Serializable
@@ -88,8 +143,8 @@ internal data class UsageEventLog(
     val lastSessionMinutes: Int = 0,
 )
 
-internal fun UsageEventLog.recording(event: UsageEvent): UsageEventLog =
-    copy(total = total + (event.name to (total[event.name] ?: 0) + 1))
+internal fun UsageEventLog.recording(event: UsageEvent, times: Int = 1): UsageEventLog =
+    copy(total = total + (event.name to (total[event.name] ?: 0) + times))
 
 /** What has happened but not yet been reported, per event; events with nothing new are absent. */
 internal fun UsageEventLog.unreported(): Map<UsageEvent, Int> =
@@ -125,7 +180,9 @@ open class UsageEventStore(private val fileProvider: () -> File) {
      * handful of integers, so the write costs less than handing it to another thread would, and
      * callers (and their tests) can read the count back immediately afterwards.
      */
-    fun record(event: UsageEvent): Unit = synchronized(lock) { save(load().recording(event)) }
+    fun record(event: UsageEvent, times: Int = 1): Unit = synchronized(lock) {
+        if (times > 0) save(load().recording(event, times))
+    }
 
     /**
      * Records [event] at most once for the lifetime of this process.
