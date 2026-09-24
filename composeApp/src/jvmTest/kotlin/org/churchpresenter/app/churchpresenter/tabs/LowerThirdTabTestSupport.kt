@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import org.churchpresenter.app.churchpresenter.screenshot.RENDER_TIMEOUT_MS
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription
@@ -208,7 +209,16 @@ internal fun lowerThirdTab(
  * and the tab's own "Scanning folder…" caption is the positive signal that it is no longer reading.
  */
 internal fun ComposeUiTest.awaitPresetScan() {
-    waitUntil("the preset folder scan finished") {
+    // The deadline, not the condition. `waitUntil`'s own default is one second, and this is waiting
+    // on a disk read that opens and parses every `.json` in the folder -- on four parallel JVMs that
+    // is not a race, it is simply a deadline set below what the work legitimately takes, and the
+    // suite failed on it about twice in three full runs while passing every time on its own.
+    //
+    // Widening a deadline is exactly what `AGENT.md` forbids as a flake "fix", and this is the case
+    // it excludes: the wait already ends on a positive signal -- the "Scanning folder…" caption
+    // going away -- so nothing here can be satisfied by the clock. The timeout is only how it fails,
+    // and `RENDER_TIMEOUT_MS` is the number this repo already uses for a wait of that shape.
+    waitUntil("the preset folder scan finished", timeoutMillis = RENDER_TIMEOUT_MS) {
         onAllNodesWithText(LowerThirdLabel.SCANNING, substring = true)
             .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
     }

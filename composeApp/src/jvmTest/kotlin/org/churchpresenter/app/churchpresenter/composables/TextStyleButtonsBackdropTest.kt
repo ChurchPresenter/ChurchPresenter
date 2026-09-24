@@ -164,7 +164,13 @@ class TextStyleButtonsBackdropTest {
     fun `the dialog opens on the look the row is showing`() = styleRow(plate) { _ ->
         onNodeWithContentDescription(caret).performClick()
         waitForIdle()
-        onNodeWithText("CORNER RADIUS").assertExists("Both draws the border's fields as well as the fill's")
+        // Two of them under Both: the fill rounds itself and so does the border, each under its own
+        // group heading. One would mean a half had lost its field.
+        assertEquals(
+            2,
+            onAllNodesWithText("CORNER RADIUS").fetchSemanticsNodes().size,
+            "Both draws the border's fields as well as the fill's",
+        )
     }
 
     @Test

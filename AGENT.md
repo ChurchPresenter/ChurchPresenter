@@ -434,11 +434,12 @@ produces a failure that only appears under load and only sometimes:
   and `halt`s it with exit code 93. **The hang it exists for was a deadlock, and the fifth
   occurrence's dump proved it** — an ABBA lock inversion between the on-screen AWT scene's
   `SnapshotStateObserver` and an off-screen one's, because `advanceGlobalSnapshot` fans out to every
-  registered observer. `LowerThirdOffscreenRenderer` now confines its scene to the event queue, and
-  `ComposeScenePump` still does not: a narrower form stays reachable while a Browser Source or NDI
-  output is live. The cycle and what was ruled out first are recorded in
-`LowerThirdOffscreenRenderer`'s own comment and in `HungTestReporter`, not in `ComposeScenePump` —
-which carries a pointer to them, and is tracked as issue #498. The dump goes to stderr *and* to
+  registered observer. **Both off-screen scenes now confine themselves to the event queue** —
+  `LowerThirdOffscreenRenderer` first, `ComposeScenePump` after it (issue #498, closed 2026-09-12),
+  which is what removes the second lock order; there is no way to opt a scene out of the global
+  observer list. `ComposeScenePump` keeps `readInto`/`onFrame`, the expensive half, off that thread.
+  The cycle and what was ruled out first are recorded in `LowerThirdOffscreenRenderer`'s own comment,
+  in `ComposeScenePump`'s class doc and in `HungTestReporter`. The dump goes to stderr *and* to
   `build/test-results/<task>/hung-test-dump.txt`, which is inside what the workflow already uploads
   as `test-reports`, so it survives the halt losing Gradle's buffered output. Chasing a hang, tighten
   it with `./gradlew :composeApp:jvmTest -PhangThresholdMs=30000`. It exists because the suite has

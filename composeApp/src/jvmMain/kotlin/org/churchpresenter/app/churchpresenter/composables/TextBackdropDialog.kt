@@ -44,7 +44,9 @@ import churchpresenter.composeapp.generated.resources.backdrop_border_padding
 import churchpresenter.composeapp.generated.resources.backdrop_border_radius
 import churchpresenter.composeapp.generated.resources.backdrop_border_width
 import churchpresenter.composeapp.generated.resources.backdrop_fill_color
+import churchpresenter.composeapp.generated.resources.backdrop_fill_radius
 import churchpresenter.composeapp.generated.resources.backdrop_height_offset
+import churchpresenter.composeapp.generated.resources.backdrop_width_offset
 import churchpresenter.composeapp.generated.resources.backdrop_mode_hint
 import churchpresenter.composeapp.generated.resources.backdrop_opacity
 import churchpresenter.composeapp.generated.resources.backdrop_preset_saved_already
@@ -328,11 +330,25 @@ private fun FillFields(backdrop: TextBackdrop, onChange: (TextBackdrop) -> Unit)
                 modifier = Modifier.weight(1f),
             ) { onChange(backdrop.copy(lineBackgroundHeight = it)) }
             BackdropNumberField(
+                label = stringResource(Res.string.backdrop_width_offset),
+                value = backdrop.lineBackgroundWidth,
+                range = TextBackdrop.HEIGHT_RANGE,
+                modifier = Modifier.weight(1f),
+            ) { onChange(backdrop.copy(lineBackgroundWidth = it)) }
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            BackdropNumberField(
                 label = stringResource(Res.string.backdrop_vertical_offset),
                 value = backdrop.lineBackgroundOffset,
                 range = TextBackdrop.OFFSET_RANGE,
                 modifier = Modifier.weight(1f),
             ) { onChange(backdrop.copy(lineBackgroundOffset = it)) }
+            BackdropNumberField(
+                label = stringResource(Res.string.backdrop_fill_radius),
+                value = backdrop.lineBackgroundRadius,
+                range = TextBackdrop.RADIUS_RANGE,
+                modifier = Modifier.weight(1f),
+            ) { onChange(backdrop.copy(lineBackgroundRadius = it)) }
         }
     }
 }

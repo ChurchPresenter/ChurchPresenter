@@ -267,7 +267,14 @@ fun MediaTab(
 
     LaunchedEffect(selectedMediaItem, selectedMediaItemVersion) {
         selectedMediaItem?.let {
-            if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+            // Blanked while the new file loads, so the output does not sit on the last frame of the
+            // old one — and put back at the end of this block. Both halves matter: `setPresentingMode`
+            // is the only thing that resets the clear flag, and it is not called again here because
+            // the mode is already MEDIA. Presenting a media row from the schedule sets the mode in
+            // the same handler that sets the item, so this effect always found itself "already
+            // live", always blanked, and nothing ever turned it back on. (#602)
+            val wasLive = presenterManager?.presentingMode?.value == Presenting.MEDIA
+            if (wasLive) presenterManager.requestClearDisplay()
             when (it.mediaType) {
                 Constants.MEDIA_TYPE_URL -> { selectedSourceType = Constants.MEDIA_TYPE_URL; urlInput = it.mediaUrl }
                 else -> selectedSourceType = Constants.MEDIA_TYPE_LOCAL
@@ -285,6 +292,8 @@ fun MediaTab(
                 type = it.mediaType,
                 subtitleUrl = it.subtitleUrl
             )
+            // The other half of the blanking above: the new file is loaded, so show it.
+            if (wasLive) presenterManager.setPresentingMode(Presenting.MEDIA)
             focusRequester.requestFocus()
         }
     }

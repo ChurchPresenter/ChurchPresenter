@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -79,6 +80,7 @@ import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailabilit
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -91,6 +93,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
 private const val HALF_WIDTH = 0.5f
+
+/** Test handle for the Audio Output card's device dropdown. */
+internal const val AUDIO_DEVICE_BUTTON_TAG = "projection_audio_device"
 
 /** Cap on the Window Position mockup, so a portrait output cannot balloon the row of inset fields. */
 private val WINDOW_POSITION_MOCK_MAX_HEIGHT = 220.dp
@@ -189,6 +194,17 @@ fun ProjectionSettingsTab(
      * many buttons the card draws.
      */
     ffmpegProbe: () -> FfmpegStatus = ::probeFfmpeg,
+    /**
+     * Whether VLC is installed, and what it says its audio outputs are — the last two reads of the
+     * machine this tab makes, and parameters for the same reason [ffmpegProbe] is one.
+     *
+     * Both are needed, not just the first. A test that pinned only [vlcProbe] would force the card
+     * open and then let [audioDeviceProbe] enumerate the real outputs of whichever machine is
+     * running the suite, so the menu's contents would still be the host's. Between them the Audio
+     * Output card draws the same on every machine.
+     */
+    vlcProbe: () -> Boolean = { isVlcAvailable },
+    audioDeviceProbe: () -> List<VlcAudioDevice> = ::listVlcAudioDevices,
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
@@ -214,73 +230,12 @@ fun ProjectionSettingsTab(
         screenDevicesAll.filter { !it.isPrimary }
     }
     LaunchedEffect(presenterWindowCount, nonPrimaryDevices) {
-        var changed = false
-        val assignments = proj.screenAssignments.toMutableList()
-        while (assignments.size < presenterWindowCount) {
-            val npIdx = assignments.size
-            val device = nonPrimaryDevices.getOrNull(npIdx)
-            assignments.add(ScreenAssignment(
-                targetDisplay = device?.index ?: Constants.KEY_TARGET_NONE,
-                targetBoundsX = device?.boundsX ?: Int.MIN_VALUE,
-                targetBoundsY = device?.boundsY ?: Int.MIN_VALUE,
-                targetBoundsW = device?.boundsW ?: 0,
-                targetBoundsH = device?.boundsH ?: 0
-            ))
-            changed = true
-        }
-        for (idx in assignments.indices) {
-            val current = assignments[idx]
-            // Only resolve auto (-1) to actual display; preserve none (-2)
-            if (current.targetDisplay == -1) {
-                val device = nonPrimaryDevices.getOrNull(idx)
-                assignments[idx] = if (device != null) {
-                    current.copy(
-                        targetDisplay = device.index,
-                        targetBoundsX = device.boundsX,
-                        targetBoundsY = device.boundsY,
-                        targetBoundsW = device.boundsW,
-                        targetBoundsH = device.boundsH
-                    )
-                } else {
-                    // No physical display available for this slot (e.g. DeckLink-only) — set to
-                    // None and clear its bounds, or a slot that later stands in as a dev fallback
-                    // window keeps reporting the display it used to drive instead of its own
-                    // configured devWindowWidth/Height (outputSizeOf prefers real bounds whenever
-                    // they are non-zero).
-                    current.copy(
-                        targetDisplay = Constants.KEY_TARGET_NONE,
-                        targetBoundsX = Int.MIN_VALUE,
-                        targetBoundsY = Int.MIN_VALUE,
-                        targetBoundsW = 0,
-                        targetBoundsH = 0
-                    )
+        reconcileAssignments(proj.screenAssignments, presenterWindowCount, nonPrimaryDevices, screenDevicesAll)
+            ?.let { reconciled ->
+                onSettingsChange { s ->
+                    s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = reconciled))
                 }
-                changed = true
-            } else if (
-                current.targetType == "screen" &&
-                current.targetDisplay >= 0 &&
-                screenDevicesAll.none { it.index == current.targetDisplay }
-            ) {
-                // An explicit (non-auto) display index that no longer corresponds to an attached
-                // monitor — unplugged, or this machine has fewer screens than when it was saved.
-                // Same reset as the auto case above, and for the same reason: leaving the stale
-                // targetBoundsW/H in place makes a slot that now stands in as a dev fallback
-                // window permanently report the disconnected monitor's old resolution.
-                assignments[idx] = current.copy(
-                    targetDisplay = Constants.KEY_TARGET_NONE,
-                    targetBoundsX = Int.MIN_VALUE,
-                    targetBoundsY = Int.MIN_VALUE,
-                    targetBoundsW = 0,
-                    targetBoundsH = 0
-                )
-                changed = true
             }
-        }
-        if (changed) {
-            onSettingsChange { s ->
-                s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = assignments))
-            }
-        }
     }
 
     val numScreens = presenterWindowCount
@@ -290,46 +245,7 @@ fun ProjectionSettingsTab(
     // ScreenAssignmentCard can take them as a parameter.
 
     val noneLabel = stringResource(Res.string.key_output_none)
-    val screenNames = proj.screenNames
-    val displayOptions = remember(screenDevicesAll, noneLabel, screenNames) {
-        val options = mutableListOf<DisplayOption>()
-        options.add(DisplayOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
-        // Add physical displays, skipping the primary monitor
-        var displayNum = 1
-        for (screen in screenDevicesAll) {
-            if (screen.isPrimary) continue
-            // A renamed monitor is named in the menu too: the whole point of calling it "Foyer TV"
-            // is not having to remember which of three geometries that is.
-            val named = proj.screenName(screen.key)
-            options.add(
-                DisplayOption(
-                    label = displayLabel(named, displayNum, screen),
-                    shortLabel = displayShortLabel(named, displayNum, screen),
-                    targetDisplay = screen.index,
-                    targetType = "screen",
-                    boundsX = screen.boundsX,
-                    boundsY = screen.boundsY,
-                    boundsW = screen.boundsW,
-                    boundsH = screen.boundsH
-                )
-            )
-            displayNum++
-        }
-        // Add DeckLink devices if available
-        if (DeckLinkManager.isAvailable()) {
-            DeckLinkManager.listDevices().forEachIndexed { i, device ->
-                options.add(
-                    DisplayOption(
-                        label = "DeckLink ${i + 1}: ${device.name}",
-                        shortLabel = "DK${i + 1}: ${device.name}",
-                        targetDisplay = device.index,
-                        targetType = "decklink"
-                    )
-                )
-            }
-        }
-        options.toList()
-    }
+    val displayOptions = rememberDisplayOptions(screenDevicesAll, noneLabel, proj)
 
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
@@ -383,166 +299,32 @@ fun ProjectionSettingsTab(
     )
 
     // ── Card 2: Audio Output ─────────────────────────────────────────────────
-    SettingsSection(title = stringResource(Res.string.audio_output)) {
-
-        var vlcDetected by remember { mutableStateOf(isVlcAvailable) }
-        var vlcPathText by remember { mutableStateOf(proj.vlcPath) }
-        var vlcPathError by remember { mutableStateOf(false) }
-
-        // Both of these ask VLC itself — the slowest thing this dialog does, and it used to happen
-        // inline in composition, so opening the Projection tab stalled on it.
-        LaunchedEffect(Unit) {
-            if (vlcPathText.isBlank()) {
-                val detected = withContext(Dispatchers.IO) { detectVlcInstallPath() }
-                if (vlcPathText.isBlank()) vlcPathText = detected
-            }
-        }
-
-        if (vlcDetected) {
-            // Null while VLC is being asked. The configured device's own name only exists in this
-            // list, so an empty list would label it "Default" — a wrong answer, not a pending one.
-            val audioDevices by produceState<List<VlcAudioDevice>?>(null, vlcDetected) {
-                value = withContext(Dispatchers.IO) { listVlcAudioDevices() }
-            }
-            val defaultLabel = stringResource(Res.string.audio_output_default)
-
-            if (audioDevices == null) ScanningRow(stringResource(Res.string.loading))
-            else Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.audio_output_device),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Box {
-                    var expanded by remember { mutableStateOf(false) }
-                    val currentDevice = audioDevices.orEmpty().find { it.id == proj.audioOutputDeviceId }
-                    val currentLabel = currentDevice?.description ?: defaultLabel
-
-                    KeyButton(shape = RoundedCornerShape(6.dp), onClick = { expanded = true }) {
-                        Text(
-                            text = currentLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        // System default option
-                        DropdownMenuItem(
-                            text = { Text(defaultLabel, style = MaterialTheme.typography.bodySmall) },
-                            onClick = {
-                                expanded = false
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = ""))
-                                }
-                            }
-                        )
-                        // VLC-detected devices
-                        audioDevices.orEmpty().forEach { device ->
-                            DropdownMenuItem(
-                                text = { Text(device.description, style = MaterialTheme.typography.bodySmall) },
-                                onClick = {
-                                    expanded = false
-                                    onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-                        RoundedCornerShape(4.dp)
-                    )
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(Res.string.media_vlc_required),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
-        // Custom VLC path picker
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(Res.string.vlc_custom_path),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            SettingsTextField(
-                value = vlcPathText,
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text(stringResource(Res.string.vlc_path_hint), style = MaterialTheme.typography.bodySmall) },
-                isError = vlcPathError,
-                supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
-                singleLine = true,
-                modifier = Modifier.weight(1f)
-            )
-            RaisedButton(
-                shape = RoundedCornerShape(6.dp),
-                onClick = {
-                scope.launch {
-                    val file = FileChooser.platformInstance.chooseSingle(
-                        path = Path(vlcPathText),
-                        title = "Select VLC installation directory",
-                        selectDirectory = true,
-                        filters = emptyList()
-                    )
-                    if (file != null) {
-                        val selectedPath = file.absolutePathString()
-                        vlcPathText = selectedPath
-                        vlcCustomPath = selectedPath
-                        onSettingsChange { s ->
-                            s.copy(projectionSettings = s.projectionSettings.copy(vlcPath = selectedPath))
-                        }
-                        val detected = recheckVlcAvailability()
-                        vlcDetected = detected
-                        vlcPathError = !detected && selectedPath.isNotBlank()
-                    }
-                }
-            }) {
-                Text(
-                    text = stringResource(Res.string.vlc_browse),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-        }
-
-    }
+    AudioOutputCard(proj, vlcProbe, audioDeviceProbe, onSettingsChange)
 
     // ── Card 3: Camera Capture ───────────────────────────────────────────────
     FfmpegCard(settings = settings, onSettingsChange = onSettingsChange, onProbe = ffmpegProbe)
 
     // ── Card 4: Window Position ──────────────────────────────────────────────
+    WindowPositionCard(proj, windowMockAspect, onSettingsChange)
+    }
+    SettingsScrollbar(scrollState)
+    }
+}
+
+
+/**
+ * Where the presenter window sits: four inset fields laid out around a picture of the screen.
+ *
+ * Its own composable because the tab that held it is the one detekt measures, and because the four
+ * fields are one control repeated -- keeping them together is what makes it obvious that each
+ * writes its own edge.
+ */
+@Composable
+private fun WindowPositionCard(
+    proj: ProjectionSettings,
+    windowMockAspect: Float,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
     SettingsSection(title = stringResource(Res.string.window_position)) {
 
         // Visual representation box with position fields
@@ -635,7 +417,348 @@ fun ProjectionSettingsTab(
         )
 
     }
+}
+/**
+ * The Audio Output card: which device the player opens, and where VLC lives.
+ *
+ * Its own composable so the tab that holds it stays readable, and because the three pieces of state
+ * below are shared by both halves -- the dropdown reads `vlcDetected`, and the path picker is what
+ * can change it.
+ */
+@Composable
+private fun AudioOutputCard(
+    proj: ProjectionSettings,
+    vlcProbe: () -> Boolean,
+    audioDeviceProbe: () -> List<VlcAudioDevice>,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    SettingsSection(title = stringResource(Res.string.audio_output)) {
+        var vlcDetected by remember { mutableStateOf(vlcProbe()) }
+        var vlcPathText by remember { mutableStateOf(proj.vlcPath) }
+        var vlcPathError by remember { mutableStateOf(false) }
+
+        // Asks VLC itself -- the slowest thing this dialog does, and it used to happen inline in
+        // composition, so opening the Projection tab stalled on it.
+        LaunchedEffect(Unit) {
+            if (vlcPathText.isBlank()) {
+                val detected = withContext(Dispatchers.IO) { detectVlcInstallPath() }
+                if (vlcPathText.isBlank()) vlcPathText = detected
+            }
+        }
+
+        AudioDeviceRow(vlcDetected, proj, audioDeviceProbe, onSettingsChange)
+        VlcPathRow(vlcPathText, vlcPathError, onSettingsChange) { chosen, detected ->
+            vlcPathText = chosen
+            vlcDetected = detected
+            vlcPathError = !detected && chosen.isNotBlank()
+        }
     }
-    SettingsScrollbar(scrollState)
+}
+
+/** The device dropdown, or the message that says why there is none. */
+@Composable
+private fun AudioDeviceRow(
+    vlcDetected: Boolean,
+    proj: ProjectionSettings,
+    audioDeviceProbe: () -> List<VlcAudioDevice>,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    if (vlcDetected) {
+        // Null while VLC is being asked. The configured device's own name only exists in this
+        // list, so an empty list would label it "Default" — a wrong answer, not a pending one.
+        val audioDevices by produceState<List<VlcAudioDevice>?>(null, vlcDetected) {
+            value = withContext(Dispatchers.IO) { audioDeviceProbe() }
+        }
+        val defaultLabel = stringResource(Res.string.audio_output_default)
+
+        if (audioDevices == null) ScanningRow(stringResource(Res.string.loading))
+        else Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.audio_output_device),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Box {
+                var expanded by remember { mutableStateOf(false) }
+                val currentDevice = audioDevices.orEmpty().find { it.id == proj.audioOutputDeviceId }
+                val currentLabel = currentDevice?.description ?: defaultLabel
+
+                // Tagged because the button's own text is the selected device's name, which is
+                // also what the matching menu item reads -- and with no device selected both
+                // read "System Default". There is no text that picks out the button alone.
+                KeyButton(
+                    shape = RoundedCornerShape(6.dp),
+                    onClick = { expanded = true },
+                    modifier = Modifier.testTag(AUDIO_DEVICE_BUTTON_TAG),
+                ) {
+                    Text(
+                        text = currentLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    // System default option
+                    DropdownMenuItem(
+                        text = { Text(defaultLabel, style = MaterialTheme.typography.bodySmall) },
+                        onClick = {
+                            expanded = false
+                            onSettingsChange { s ->
+                                s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = ""))
+                            }
+                        }
+                    )
+                    // VLC-detected devices
+                    audioDevices.orEmpty().forEach { device ->
+                        DropdownMenuItem(
+                            text = { Text(device.description, style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                expanded = false
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                    RoundedCornerShape(4.dp)
+                )
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column {
+                Text(
+                    text = stringResource(Res.string.media_vlc_required),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
+}
+
+/**
+ * Where VLC is, for a machine that keeps it somewhere this app does not look.
+ *
+ * [onChosen] carries both the path and what re-probing made of it, because the card above owns the
+ * `vlcDetected` the dropdown reads -- browsing to a real VLC has to switch that card over.
+ */
+@Composable
+private fun VlcPathRow(
+    vlcPathText: String,
+    vlcPathError: Boolean,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onChosen: (path: String, detected: Boolean) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    // Custom VLC path picker
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        text = stringResource(Res.string.vlc_custom_path),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        SettingsTextField(
+            value = vlcPathText,
+            onValueChange = {},
+            readOnly = true,
+            placeholder = { Text(stringResource(Res.string.vlc_path_hint), style = MaterialTheme.typography.bodySmall) },
+            isError = vlcPathError,
+            supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
+            singleLine = true,
+            modifier = Modifier.weight(1f)
+        )
+        RaisedButton(
+            shape = RoundedCornerShape(6.dp),
+            onClick = {
+            scope.launch {
+                val file = FileChooser.platformInstance.chooseSingle(
+                    path = Path(vlcPathText),
+                    title = "Select VLC installation directory",
+                    selectDirectory = true,
+                    filters = emptyList()
+                )
+                if (file != null) {
+                    val selectedPath = file.absolutePathString()
+                    vlcCustomPath = selectedPath
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(vlcPath = selectedPath))
+                    }
+                    // Re-probed here rather than by the caller: the answer depends on the path just
+                    // chosen, and the card above needs both to decide what to draw.
+                    onChosen(selectedPath, recheckVlcAvailability())
+                }
+            }
+        }) {
+            Text(
+                text = stringResource(Res.string.vlc_browse),
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    }
+}
+
+
+/**
+ * Every target a row's display dropdown can offer: None, each non-primary monitor, each DeckLink.
+ *
+ * Keyed on the things that change what it says -- the device list, the word for None, and the names
+ * the operator has given monitors -- so renaming one rebuilds the menu and nothing else does.
+ */
+@Composable
+private fun rememberDisplayOptions(
+    screenDevicesAll: List<DetectedScreen>,
+    noneLabel: String,
+    proj: ProjectionSettings,
+): List<DisplayOption> {
+    val screenNames = proj.screenNames
+    return remember(screenDevicesAll, noneLabel, screenNames) {
+        val options = mutableListOf<DisplayOption>()
+        options.add(DisplayOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
+        // Add physical displays, skipping the primary monitor
+        var displayNum = 1
+        for (screen in screenDevicesAll) {
+            if (screen.isPrimary) continue
+            // A renamed monitor is named in the menu too: the whole point of calling it "Foyer TV"
+            // is not having to remember which of three geometries that is.
+            val named = proj.screenName(screen.key)
+            options.add(
+                DisplayOption(
+                    label = displayLabel(named, displayNum, screen),
+                    shortLabel = displayShortLabel(named, displayNum, screen),
+                    targetDisplay = screen.index,
+                    targetType = "screen",
+                    boundsX = screen.boundsX,
+                    boundsY = screen.boundsY,
+                    boundsW = screen.boundsW,
+                    boundsH = screen.boundsH
+                )
+            )
+            displayNum++
+        }
+        // Add DeckLink devices if available
+        if (DeckLinkManager.isAvailable()) {
+            DeckLinkManager.listDevices().forEachIndexed { i, device ->
+                options.add(
+                    DisplayOption(
+                        label = "DeckLink ${i + 1}: ${device.name}",
+                        shortLabel = "DK${i + 1}: ${device.name}",
+                        targetDisplay = device.index,
+                        targetType = "decklink"
+                    )
+                )
+            }
+        }
+        options.toList()
+    }
+}
+
+/**
+ * The stored assignment list grown to [presenterWindowCount] and reconciled against the displays
+ * actually attached, or null when it already matches and nothing needs writing.
+ *
+ * A plain function rather than the body of the `LaunchedEffect` that calls it: none of this needs a
+ * composition, and every decision in it -- which slot gets which monitor, what an `auto` slot
+ * resolves to when there is no monitor left for it, what happens to a slot whose monitor has been
+ * unplugged -- is one a test can drive directly.
+ *
+ * Bounds are cleared alongside the target in both reset paths, and that is load-bearing: a slot that
+ * later stands in as a dev fallback window would otherwise go on reporting the resolution of the
+ * monitor it used to drive, because `outputSizeOf` prefers real bounds whenever they are non-zero.
+ */
+internal fun reconcileAssignments(
+    stored: List<ScreenAssignment>,
+    presenterWindowCount: Int,
+    nonPrimaryDevices: List<DetectedScreen>,
+    allDevices: List<DetectedScreen>,
+): List<ScreenAssignment>? {
+    var changed = false
+    val assignments = stored.toMutableList()
+    while (assignments.size < presenterWindowCount) {
+        val npIdx = assignments.size
+        val device = nonPrimaryDevices.getOrNull(npIdx)
+        assignments.add(ScreenAssignment(
+            targetDisplay = device?.index ?: Constants.KEY_TARGET_NONE,
+            targetBoundsX = device?.boundsX ?: Int.MIN_VALUE,
+            targetBoundsY = device?.boundsY ?: Int.MIN_VALUE,
+            targetBoundsW = device?.boundsW ?: 0,
+            targetBoundsH = device?.boundsH ?: 0
+        ))
+        changed = true
+    }
+    for (idx in assignments.indices) {
+        val current = assignments[idx]
+        // Only resolve auto (-1) to actual display; preserve none (-2)
+        if (current.targetDisplay == -1) {
+            val device = nonPrimaryDevices.getOrNull(idx)
+            assignments[idx] = if (device != null) {
+                current.copy(
+                    targetDisplay = device.index,
+                    targetBoundsX = device.boundsX,
+                    targetBoundsY = device.boundsY,
+                    targetBoundsW = device.boundsW,
+                    targetBoundsH = device.boundsH
+                )
+            } else {
+                // No physical display available for this slot (e.g. DeckLink-only) — set to
+                // None and clear its bounds, or a slot that later stands in as a dev fallback
+                // window keeps reporting the display it used to drive instead of its own
+                // configured devWindowWidth/Height (outputSizeOf prefers real bounds whenever
+                // they are non-zero).
+                current.copy(
+                    targetDisplay = Constants.KEY_TARGET_NONE,
+                    targetBoundsX = Int.MIN_VALUE,
+                    targetBoundsY = Int.MIN_VALUE,
+                    targetBoundsW = 0,
+                    targetBoundsH = 0
+                )
+            }
+            changed = true
+        } else if (
+            current.targetType == "screen" &&
+            current.targetDisplay >= 0 &&
+            allDevices.none { it.index == current.targetDisplay }
+        ) {
+            // An explicit (non-auto) display index that no longer corresponds to an attached
+            // monitor — unplugged, or this machine has fewer screens than when it was saved.
+            // Same reset as the auto case above, and for the same reason: leaving the stale
+            // targetBoundsW/H in place makes a slot that now stands in as a dev fallback
+            // window permanently report the disconnected monitor's old resolution.
+            assignments[idx] = current.copy(
+                targetDisplay = Constants.KEY_TARGET_NONE,
+                targetBoundsX = Int.MIN_VALUE,
+                targetBoundsY = Int.MIN_VALUE,
+                targetBoundsW = 0,
+                targetBoundsH = 0
+            )
+            changed = true
+        }
+    }
+    return assignments.takeIf { changed }
 }

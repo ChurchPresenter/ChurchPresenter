@@ -22,7 +22,9 @@ import org.churchpresenter.core.models.text.TextBackdrop
  *
  * The three states are three different shapes, not two drawings stacked:
  *
- *  * **Fill only** — a band per line, as wide as that line's own text. A highlighter.
+ *  * **Fill only** — a band per line, sized from that line's own text and grown by
+ *    [TextBackdrop.lineBackgroundWidth]/[TextBackdrop.lineBackgroundHeight], rounded by
+ *    [TextBackdrop.lineBackgroundRadius]. A highlighter.
  *  * **Border only** — one box around the whole block, [TextBackdrop.borderPadding] off the text.
  *  * **Both** — that same box, filled *and* stroked: one plate behind the paragraph.
  *
@@ -54,16 +56,30 @@ internal fun DrawScope.drawTextBackdrop(
 private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBackdrop, scale: Float) {
     val fill = backdrop.lineBackgroundColor.toBackdropColor(backdrop.lineBackgroundOpacity)
     val grow = backdrop.lineBackgroundHeight.sp.toPx() * scale
+    val growX = backdrop.lineBackgroundWidth.sp.toPx() * scale
     val shift = backdrop.lineBackgroundOffset.sp.toPx() * scale
+    val radiusPx = backdrop.lineBackgroundRadius.sp.toPx() * scale
+    val radius = CornerRadius(radiusPx, radiusPx)
     for (line in 0 until layout.lineCount) {
-        val left = layout.getLineLeft(line)
-        val right = layout.getLineRight(line)
+        val textLeft = layout.getLineLeft(line)
+        val textRight = layout.getLineRight(line)
+        // Measured *before* the horizontal grow, on purpose. A blank line is zero wide, and growing
+        // it would paint a band twice the grow wide with no text on it — a mark floating between two
+        // verses. What decides whether a line gets a band is the text, not the band's own size.
+        if (textRight - textLeft <= 0f) continue
+        val left = textLeft - growX
+        val right = textRight + growX
         val top = layout.getLineTop(line) - grow + shift
         val bottom = layout.getLineBottom(line) + grow + shift
-        // A blank line measures zero wide, and a height offset can be negative enough to invert the
-        // band. Painting either leaves a mark floating between two verses with no text on it.
-        if (right - left > 0f && bottom > top) {
-            drawRect(color = fill, topLeft = Offset(left, top), size = Size(right - left, bottom - top))
+        // Either grow can be negative enough to invert the band; painting an inverted one is a
+        // rectangle drawn back to front.
+        if (right > left && bottom > top) {
+            drawRoundRect(
+                color = fill,
+                topLeft = Offset(left, top),
+                size = Size(right - left, bottom - top),
+                cornerRadius = radius,
+            )
         }
     }
 }

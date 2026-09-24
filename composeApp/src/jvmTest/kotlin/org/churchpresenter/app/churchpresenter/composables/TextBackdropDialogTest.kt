@@ -86,6 +86,8 @@ class TextBackdropDialogTest {
         lineBackground = mode == "fill" || mode == "both",
         lineBackgroundOpacity = 71,
         lineBackgroundHeight = 32,
+        lineBackgroundWidth = 47,
+        lineBackgroundRadius = 9,
         lineBackgroundOffset = 13,
         border = mode == "border" || mode == "both",
         borderOpacity = 84,
@@ -173,7 +175,11 @@ class TextBackdropDialogTest {
     fun `Fill shows the fill fields and no border fields`() = dialog(tuned("fill")) { _, _ ->
         onNodeWithText("FILL COLOR").assertExists()
         onNodeWithText("HEIGHT OFFSET").assertExists()
+        onNodeWithText("WIDTH OFFSET").assertExists()
         onNodeWithText("VERTICAL OFFSET").assertExists()
+        // The fill rounds itself, independently of the border's radius — which is not on screen in
+        // this mode at all, so the one node here is the fill's.
+        onNodeWithText("CORNER RADIUS").assertExists()
         onNodeWithText("BORDER COLOR").assertDoesNotExist()
         onNodeWithText("THICKNESS").assertDoesNotExist()
     }
@@ -192,12 +198,16 @@ class TextBackdropDialogTest {
     fun `Both shows every field of both halves`() = dialog(tuned("both")) { _, _ ->
         onNodeWithText("FILL COLOR").assertExists()
         onNodeWithText("BORDER COLOR").assertExists()
-        onNodeWithText("CORNER RADIUS").assertExists()
-        assertEquals(
-            2,
-            onAllNodesWithText("OPACITY %").fetchSemanticsNodes().size,
-            "each half carries its own opacity",
-        )
+        // Both halves carry an opacity and a corner radius of their own, and both are labelled the
+        // same — which is right, because each sits under its own group heading. The count is what
+        // says both are drawn; a single node would mean one half had lost its field.
+        for (label in listOf("OPACITY %", "CORNER RADIUS")) {
+            assertEquals(
+                2,
+                onAllNodesWithText(label).fetchSemanticsNodes().size,
+                "each half carries its own $label",
+            )
+        }
     }
 
     @Test
@@ -230,6 +240,27 @@ class TextBackdropDialogTest {
     fun `retyping the vertical offset reports it`() = dialog(tuned("fill")) { get, _ ->
         retype(13, -45)
         assertEquals(-45, get().lineBackgroundOffset, "a band may be nudged up as well as down")
+    }
+
+    @Test
+    fun `retyping the width offset reports it`() = dialog(tuned("fill")) { get, _ ->
+        retype(47, 60)
+        assertEquals(60, get().lineBackgroundWidth)
+        assertEquals(32, get().lineBackgroundHeight, "the other axis must not move with it")
+    }
+
+    @Test
+    fun `a negative width offset is inside the range and reported`() = dialog(tuned("fill")) { get, _ ->
+        retype(47, -18)
+        assertEquals(-18, get().lineBackgroundWidth, "the band may be pulled in as well as grown")
+    }
+
+    @Test
+    fun `retyping the fill's corner radius reports it`() = dialog(tuned("fill")) { get, _ ->
+        // The fill's own, not the border's -- they are two shapes and each rounds itself.
+        retype(9, 28)
+        assertEquals(28, get().lineBackgroundRadius)
+        assertEquals(19, get().borderRadius, "the border's radius is a separate setting")
     }
 
     @Test

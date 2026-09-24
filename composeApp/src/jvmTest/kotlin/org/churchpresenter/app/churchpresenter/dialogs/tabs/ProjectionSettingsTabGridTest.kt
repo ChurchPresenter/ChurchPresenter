@@ -51,6 +51,23 @@ class ProjectionSettingsTabGridTest {
         }
     }
 
+    /**
+     * The button count follows the pinned VLC probe rather than the machine.
+     *
+     * Pinning this is the point: the two counts above are exact, so anything that appears or
+     * disappears with the host's VLC makes them pass on a developer's machine and fail on CI. Here
+     * the card is told there is no VLC and the expectation says so too, and the difference between
+     * the two runs is exactly the one dropdown.
+     */
+    @Test
+    fun `a machine without VLC draws one button fewer, and the count knows it`() {
+        projectionTab(screens = oneExternalScreen(), vlcInstalled = false) { _ ->
+            gridButtons().assertCountEquals(
+                Grid.gridButtonCount(rows = 1) + trailingButtons(vlcInstalled = false),
+            )
+        }
+    }
+
     @Test
     fun `a machine with no external display falls back to a dev window`() {
         projectionTab(screens = noExternalScreens()) { _ ->
@@ -133,14 +150,16 @@ class ProjectionSettingsTabGridTest {
 
     /**
      * How many labelled buttons follow the grid: Add Output, the NDI card's three with no runtime
-     * installed, the VLC Browse button, and the Camera Capture card's two. The audio-device
-     * dropdown between them is only composed where VLC is present, which is a property of the
-     * machine running the suite rather than of anything under test.
+     * installed, the audio-device dropdown, the VLC Browse button, and the Camera Capture card's two.
+     *
+     * The dropdown follows what [projectionTab] **pinned**, not what the machine has. This used to
+     * read the global `isVlcAvailable` — which was right while the card read it too, and became a
+     * one-off the moment the card started taking it as a parameter: on a developer's machine the two
+     * agreed and the count passed, and on CI, which has no VLC, the pinned card drew a dropdown the
+     * count was not expecting.
      */
-    private fun trailingButtons(): Int {
-        val vlc = if (org.churchpresenter.app.churchpresenter.composables.isVlcAvailable) 1 else 0
-        return 1 + 3 + 1 + 2 + vlc
-    }
+    private fun trailingButtons(vlcInstalled: Boolean = true): Int =
+        1 + 3 + (if (vlcInstalled) 1 else 0) + 1 + 2
 
     @Test
     fun `the grid's ordinals are where Grid says they are`() {

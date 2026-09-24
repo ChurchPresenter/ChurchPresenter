@@ -13,6 +13,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.text.font.FontFamily
+import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import java.io.File
@@ -47,16 +50,21 @@ class AppPreviewSettingsScreenshotTest {
         THEMES.forEach { (suffix, mode) ->
             runSkikoComposeUiTest(size = Size(1400f, 900f), density = Density(1f)) {
                 setContent {
-                    OptionsDialogContent(
-                        theme = mode,
-                        settingsManager = SettingsManager(),
-                        companionServer = CompanionServer(),
-                        remoteClientManager = RemoteClientManager(),
-                        onDismiss = {},
-                        initialTab = tab,
-                        initialSettings = appSettings,
-                        detectScreens = { emptyList() },
-                    )
+                    // Every font name drawn in one face rather than its own. The dialog's font
+                    // dropdowns otherwise render against the host's font book, which is what made
+                    // `settings_bible` disagree from machine to machine. See `LocalFontPreviewFace`.
+                    CompositionLocalProvider(LocalFontPreviewFace provides { FontFamily.Default }) {
+                        OptionsDialogContent(
+                            theme = mode,
+                            settingsManager = SettingsManager(),
+                            companionServer = CompanionServer(),
+                            remoteClientManager = RemoteClientManager(),
+                            onDismiss = {},
+                            initialTab = tab,
+                            initialSettings = appSettings,
+                            detectScreens = { emptyList() },
+                        )
+                    }
                 }
                 waitForIdle()
                 // Several tabs read something off disk in the background — the song folder on the

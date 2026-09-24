@@ -65,7 +65,6 @@ import churchpresenter.composeapp.generated.resources.font_shown_note
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.no_results_found
 import org.churchpresenter.app.churchpresenter.utils.FontCatalogSnapshot
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.rememberFontCatalog
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
@@ -209,7 +208,7 @@ private fun FontPickerTrigger(
                         fontSize = 13.sp,
                         lineHeight = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        fontFamily = remember(value) { systemFontFamilyOrDefault(value) },
+                        fontFamily = LocalFontPreviewFace.current(value),
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

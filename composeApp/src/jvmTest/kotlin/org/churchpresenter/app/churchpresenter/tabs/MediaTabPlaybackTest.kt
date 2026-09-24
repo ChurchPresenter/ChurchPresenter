@@ -28,12 +28,28 @@ import kotlin.test.assertTrue
  */
 class MediaTabPlaybackTest {
 
-    private fun ComposeUiTest.loadUrl(url: String = "https://example.org/clip.mp4") {
+    /**
+     * Loads a URL and waits until the view model says it is loaded.
+     *
+     * The wait is the point. Every transport control below is **disabled** until `isLoaded`, and a
+     * click on a disabled button is silently dropped — so a test that goes straight on to press Play
+     * asserts against a view model that never heard the press. `waitForIdle()` does not cover it:
+     * it settles composition, and what is being waited for here is the click having been dispatched
+     * and the state written, which is a step earlier.
+     *
+     * It ends on the state itself, so it costs nothing in the happy path; the timeout is only how it
+     * fails. This is what `MediaTabPlaybackTest > play toggles to pause and back` was flaking on
+     * under the parallel suite (issue #610).
+     */
+    private fun ComposeUiTest.loadUrl(vm: MediaViewModel, url: String = "https://example.org/clip.mp4") {
         onNodeWithText(MediaLabel.NETWORK_URL).performClick()
         waitForIdle()
         onAllNodes(hasSetTextAction())[0].performTextReplacement(url)
         waitForIdle()
         onNodeWithText("Load").performClick()
+        waitUntil { vm.isLoaded }
+        // The state, then the recomposition it triggers: the transport buttons are `enabled =
+        // isLoaded`, and a click on one that has not been re-enabled yet is silently dropped.
         waitForIdle()
     }
 
@@ -51,31 +67,33 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `play toggles to pause and back`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         assertTrue(hasMediaButton(MediaLabel.PLAY))
 
         mediaButton(MediaLabel.PLAY).performClick()
-        waitForIdle()
+        // Waits on the *rendered* result rather than on `waitForIdle()` or on the flag alone.
+        // There are two events here, not one — the view model writing `isPlaying`, and the
+        // recomposition that swaps the glyph — and this test kept landing between them (#610).
+        // The button changing implies both, so it is the only signal that covers the whole step.
+        waitUntil { hasMediaButton(MediaLabel.PAUSE) }
 
         assertTrue(vm.isPlaying)
-        assertTrue(hasMediaButton(MediaLabel.PAUSE))
         assertFalse(hasMediaButton(MediaLabel.PLAY))
 
         mediaButton(MediaLabel.PAUSE).performClick()
-        waitForIdle()
+        waitUntil { hasMediaButton(MediaLabel.PLAY) }
 
         assertFalse(vm.isPlaying)
-        assertTrue(hasMediaButton(MediaLabel.PLAY))
     }
 
     @Test
     fun `stop resets playback to the beginning`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         mediaButton(MediaLabel.PLAY).performClick()
-        waitForIdle()
+        waitUntil { hasMediaButton(MediaLabel.PAUSE) }
 
         mediaButton(MediaLabel.STOP).performClick()
-        waitForIdle()
+        waitUntil { hasMediaButton(MediaLabel.PLAY) }
 
         assertFalse(vm.isPlaying)
         assertEquals(0L, vm.currentPosition)
@@ -83,7 +101,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `seeking forward and backward moves the position`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         vm.setDuration(60_000L)
 
         mediaButton(MediaLabel.SEEK_FORWARD).performClick()
@@ -99,7 +117,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `the mute key in the bar mutes`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         mediaButton(MediaLabel.MUTE).performClick()
         waitForIdle()
 
@@ -119,7 +137,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `the subtitle menu lists off, every track and the file picker`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         vm.setSubtitleTracks(listOf(SubtitleTrack(3, "English"), SubtitleTrack(4, "Spanish")))
         mediaButton(MediaLabel.SUBTITLES).performClick()
         waitForIdle()
@@ -132,7 +150,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `picking a track in the menu selects it`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         vm.setSubtitleTracks(listOf(SubtitleTrack(3, "English"), SubtitleTrack(4, "Spanish")))
         mediaButton(MediaLabel.SUBTITLES).performClick()
         waitForIdle()
@@ -146,7 +164,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `choosing off in the menu hides the subtitles again`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         vm.setSubtitleTracks(listOf(SubtitleTrack(3, "English")))
         vm.selectSubtitleTrack(3)
         mediaButton(MediaLabel.SUBTITLES).performClick()
@@ -160,7 +178,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `a media item added to the schedule carries the subtitle file`() = mediaTab { vm, reports ->
-        loadUrl()
+        loadUrl(vm)
         vm.setSubtitleFile("/media/en.srt")
         waitForIdle()
 
@@ -188,7 +206,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `the loop button arms looping and shows the count beside it`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         assertFalse(vm.isLooping)
         assertFalse(showsExactly(MediaLabel.LOOP_COUNT), "the count is hidden until looping is armed")
 
@@ -202,7 +220,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `disarming looping takes the count away again`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         mediaButton(MediaLabel.LOOP_OFF).performClick()
         waitForIdle()
 
@@ -215,7 +233,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `the loop count typed into the field reaches the view model`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         mediaButton(MediaLabel.LOOP_OFF).performClick()
         waitForIdle()
 
@@ -234,7 +252,7 @@ class MediaTabPlaybackTest {
         val presenter = PresenterManager()
         val sent = mutableListOf<ScheduleItem>()
         mediaTab(presenterManager = presenter, onInstanceLinkSendProject = { sent += it }) { vm, _ ->
-            loadUrl("https://example.org/clip.mp4")
+            loadUrl(vm, "https://example.org/clip.mp4")
             mediaButton(MediaLabel.GO_LIVE).performClick()
             waitForIdle()
 
@@ -250,8 +268,8 @@ class MediaTabPlaybackTest {
     @Test
     fun `while presenting the preview shows what is live instead of a duplicate player`() {
         val presenter = PresenterManager()
-        mediaTab(presenterManager = presenter) { _, _ ->
-            loadUrl("https://example.org/clip.mp4")
+        mediaTab(presenterManager = presenter) { vm, _ ->
+            loadUrl(vm, "https://example.org/clip.mp4")
             mediaButton(MediaLabel.GO_LIVE).performClick()
             waitForIdle()
 
@@ -268,7 +286,7 @@ class MediaTabPlaybackTest {
 
     @Test
     fun `once a duration is known the seek bar shows elapsed and total time`() = mediaTab { vm, _ ->
-        loadUrl()
+        loadUrl(vm)
         vm.setDuration(125_000L)
 
         assertTrue(showsContainingText("2:05"), "got ${renderedText()}")
