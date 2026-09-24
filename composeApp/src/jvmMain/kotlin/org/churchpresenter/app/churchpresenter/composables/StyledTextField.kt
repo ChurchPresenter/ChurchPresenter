@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 @Composable
@@ -48,7 +49,8 @@ fun StyledTextField(
     }
     Row(
         modifier = rowModifier
-            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(8.dp)),
         verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
     ) {
         Column(

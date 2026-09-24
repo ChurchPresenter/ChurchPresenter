@@ -135,6 +135,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.RowScope
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raisedHover
 
@@ -280,7 +281,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     .weight(1f)
                     .widthIn(min = 120.dp)
                     .height(42.dp)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                    .hoverTint(RoundedCornerShape(8.dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(

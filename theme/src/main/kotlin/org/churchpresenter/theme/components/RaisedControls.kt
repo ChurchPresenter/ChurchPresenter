@@ -273,7 +273,8 @@ fun RaisedSwitch(
             else -> 1f
         }
     )
-    val lit = if (hovered && enabled && onCheckedChange != null) TRACK_HOVER_BRIGHTEN else 0f
+    // A switch inside a toggle row has no handler of its own but shares the row's hover.
+    val lit = if (hovered && enabled) TRACK_HOVER_BRIGHTEN else 0f
     val trackShape = CircleShape
     val toggle = if (onCheckedChange != null) {
         Modifier.toggleable(

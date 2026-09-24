@@ -1,5 +1,8 @@
 package org.churchpresenter.calendar.ui
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -85,7 +88,16 @@ internal fun ExportTab(
     }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         sections.forEach { section ->
-            SettingCard(verticalPadding = 5.dp) {
+            val staffOnly = settings.isStaffOnly(section.name)
+            val staffInteraction = remember { MutableInteractionSource() }
+            SettingCard(
+                modifier = Modifier.toggleRow(
+                    checked = staffOnly,
+                    onCheckedChange = { onChange(settings.withStaffOnly(section.name, it)) },
+                    interaction = staffInteraction,
+                ),
+                verticalPadding = 5.dp,
+            ) {
                 Box(
                     Modifier
                         .size(12.dp)
@@ -94,8 +106,10 @@ internal fun ExportTab(
                 )
                 CardText(title = section.name, subtitle = null)
                 RaisedSwitch(
-                    checked = settings.isStaffOnly(section.name),
-                    onCheckedChange = { onChange(settings.withStaffOnly(section.name, it)) },
+                    checked = staffOnly,
+                    onCheckedChange = null,
+                    interactionSource = staffInteraction,
+                    modifier = Modifier.minimumInteractiveComponentSize(),
                 )
             }
         }

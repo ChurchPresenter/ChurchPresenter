@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -435,19 +439,34 @@ internal fun PlanningCenterImportDialogContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.width(12.dp))
-                    RaisedCheckbox(
-                        checked = viewModel.allSelected,
-                        onCheckedChange = { viewModel.setAllSelected(it) },
-                        enabled = viewModel.planItems.isNotEmpty()
-                    )
-                    Text(
-                        if (viewModel.allSelected) {
-                            stringResource(Res.string.planning_center_import_deselect_all)
-                        } else {
-                            stringResource(Res.string.planning_center_import_select_all)
-                        },
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    val selectAllInteraction = remember { MutableInteractionSource() }
+                    val canSelect = viewModel.planItems.isNotEmpty()
+                    Row(
+                        modifier = Modifier.toggleRow(
+                            checked = viewModel.allSelected,
+                            onCheckedChange = { viewModel.setAllSelected(it) },
+                            interaction = selectAllInteraction,
+                            role = Role.Checkbox,
+                            enabled = canSelect,
+                        ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RaisedCheckbox(
+                            checked = viewModel.allSelected,
+                            onCheckedChange = null,
+                            enabled = canSelect,
+                            interactionSource = selectAllInteraction,
+                            modifier = Modifier.minimumInteractiveComponentSize(),
+                        )
+                        Text(
+                            if (viewModel.allSelected) {
+                                stringResource(Res.string.planning_center_import_deselect_all)
+                            } else {
+                                stringResource(Res.string.planning_center_import_select_all)
+                            },
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
                 Spacer(Modifier.height(4.dp))
 

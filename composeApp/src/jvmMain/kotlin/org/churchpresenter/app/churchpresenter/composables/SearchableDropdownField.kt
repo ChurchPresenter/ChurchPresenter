@@ -54,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.no_results_found
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.hoverOutline
 
@@ -134,6 +135,7 @@ fun SearchableDropdownField(
         modifier = modifier
             .heightIn(min = 42.dp)
             .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(8.dp))
             .hoverOutline(RoundedCornerShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 focusRequester.requestFocus()

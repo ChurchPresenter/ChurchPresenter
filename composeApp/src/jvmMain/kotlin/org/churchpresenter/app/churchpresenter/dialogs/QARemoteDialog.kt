@@ -109,6 +109,7 @@ import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 
@@ -465,7 +466,8 @@ internal fun QARemoteContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(42.dp)
-                                .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+                                .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                                .hoverTint(RoundedCornerShape(8.dp)),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {

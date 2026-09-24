@@ -173,6 +173,7 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.extension
 import kotlinx.coroutines.launch
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
@@ -398,7 +399,8 @@ fun MediaTab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                            .hoverTint(RoundedCornerShape(8.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {

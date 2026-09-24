@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -232,7 +235,12 @@ private fun ColorsSection(draft: ThemeCustomizationChoice, onChange: (ThemeCusto
     val enabled = draft.useCustomColors
     SettingsSection(title = stringResource(Res.string.customize_theme_colors)) {
         Column(modifier = Modifier.padding(SECTION_PADDING), verticalArrangement = Arrangement.spacedBy(ROW_GAP)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            val setUseCustomColors: (Boolean) -> Unit = { onChange(draft.copy(useCustomColors = it)) }
+            val interaction = remember { MutableInteractionSource() }
+            Row(
+                modifier = Modifier.toggleRow(enabled, setUseCustomColors, interaction),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         stringResource(Res.string.customize_theme_use_custom_colors),
@@ -244,7 +252,12 @@ private fun ColorsSection(draft: ThemeCustomizationChoice, onChange: (ThemeCusto
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                RaisedSwitch(checked = enabled, onCheckedChange = { onChange(draft.copy(useCustomColors = it)) })
+                RaisedSwitch(
+                    checked = enabled,
+                    onCheckedChange = null,
+                    interactionSource = interaction,
+                    modifier = Modifier.minimumInteractiveComponentSize(),
+                )
             }
             Column(
                 modifier = if (enabled) Modifier else Modifier.alpha(DISABLED_ALPHA),

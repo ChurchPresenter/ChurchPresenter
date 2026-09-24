@@ -59,6 +59,7 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 /** The panel is a fixed slab: the names it lists are long and must not resize as they are filtered. */
@@ -83,6 +84,7 @@ internal fun FontSearchRow(
             .fillMaxWidth()
             .height(28.dp)
             .sunken(RoundedCornerShape(6.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

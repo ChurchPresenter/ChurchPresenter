@@ -177,6 +177,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import androidx.compose.ui.text.style.TextOverflow
@@ -344,6 +345,7 @@ fun AnnouncementsTab(
                 modifier = Modifier
                     .weight(1f)
                     .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                    .hoverTint(RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 BasicTextField(
@@ -844,6 +846,7 @@ fun AnnouncementsTab(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                                    .hoverTint(RoundedCornerShape(8.dp))
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 BasicTextField(

@@ -21,7 +21,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -65,6 +64,7 @@ import churchpresenter.composeapp.generated.resources.obs_status_connecting
 import churchpresenter.composeapp.generated.resources.obs_status_disconnected
 import churchpresenter.composeapp.generated.resources.obs_status_error
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingSwitchRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -121,12 +121,11 @@ fun OBSSettingsTab(
                 )
                 Spacer(Modifier.height(12.dp))
 
-                SettingRow(label = stringResource(Res.string.obs_enable)) {
-                    RaisedSwitch(
-                        checked = obs.enabled,
-                        onCheckedChange = { update { copy(enabled = it) } }
-                    )
-                }
+                SettingSwitchRow(
+                    label = stringResource(Res.string.obs_enable),
+                    checked = obs.enabled,
+                    onCheckedChange = { update { copy(enabled = it) } }
+                )
 
                 if (obs.enabled) {
                     Spacer(Modifier.height(4.dp))

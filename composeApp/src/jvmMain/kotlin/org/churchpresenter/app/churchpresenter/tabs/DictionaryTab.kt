@@ -125,6 +125,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.RaisedChip
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 private const val DEFINITION_PREVIEW_CHARS = 200
@@ -1093,7 +1094,8 @@ private fun DictionarySearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
