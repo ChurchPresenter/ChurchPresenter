@@ -248,7 +248,15 @@ private fun storageFolders(
     StorageFolder(
         stringResource(Res.string.calendar_storage), Res.drawable.ic_storage_calendar,
         MaterialTheme.semantic.contentCalendar,
-        remember(settings.calendarStorageDirectory) { settings.calendarFolder().absolutePath },
+        // The chosen folder, or the machine's app data folder — which the picture prints, so a test
+        // can pin the fallback through [LocalDefaultCalendarFolder]. Null, which is what the app
+        // always passes, resolves it exactly as before.
+        LocalDefaultCalendarFolder.current.let { pinned ->
+            remember(settings.calendarStorageDirectory, pinned) {
+                pinned?.takeIf { settings.calendarStorageDirectory.isBlank() }
+                    ?: settings.calendarFolder().absolutePath
+            }
+        },
         isDefault = settings.calendarStorageDirectory.isBlank(),
         onUseDefault = { onSettingsChange { s -> s.copy(calendarStorageDirectory = "") } },
     ) { dir -> onSettingsChange { s -> s.copy(calendarStorageDirectory = dir) } },

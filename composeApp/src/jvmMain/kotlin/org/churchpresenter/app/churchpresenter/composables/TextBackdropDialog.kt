@@ -34,6 +34,7 @@ import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.backdrop_border_radius
 import churchpresenter.composeapp.generated.resources.backdrop_border_width
 import churchpresenter.composeapp.generated.resources.backdrop_fill_color
 import churchpresenter.composeapp.generated.resources.backdrop_fill_radius
+import churchpresenter.composeapp.generated.resources.backdrop_fill_uniform_width
 import churchpresenter.composeapp.generated.resources.backdrop_height_offset
 import churchpresenter.composeapp.generated.resources.backdrop_width_offset
 import churchpresenter.composeapp.generated.resources.backdrop_mode_hint
@@ -350,8 +352,20 @@ private fun FillFields(backdrop: TextBackdrop, onChange: (TextBackdrop) -> Unit)
                 modifier = Modifier.weight(1f),
             ) { onChange(backdrop.copy(lineBackgroundRadius = it)) }
         }
+        // Off is a highlighter — each band follows the words on its own line. On is a caption plate:
+        // one width for the block, so a wrapped verse stacks evenly instead of raggedly.
+        LabeledCheckbox(
+            checked = backdrop.lineBackgroundUniformWidth,
+            onCheckedChange = { onChange(backdrop.copy(lineBackgroundUniformWidth = it)) },
+            label = stringResource(Res.string.backdrop_fill_uniform_width),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.testTag(BACKDROP_UNIFORM_WIDTH_TAG),
+        )
     }
 }
+
+/** Test handle for the Fill group's equal-width toggle. */
+internal const val BACKDROP_UNIFORM_WIDTH_TAG = "backdrop_uniform_width"
 
 @Composable
 private fun BorderFields(backdrop: TextBackdrop, onChange: (TextBackdrop) -> Unit) {

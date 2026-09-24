@@ -150,4 +150,38 @@ class ScheduleTabDroppedFilesTest {
         assertEquals(1, vm.scheduleItems.size, "got ${vm.scheduleItems}")
         assertTrue(vm.scheduleItems.single() is ScheduleItem.PresentationItem)
     }
+
+    // ── What it could not use, and says so ──────────────────────────────────────────────────────
+    //
+    // Skipping used to be silent: no row, no message. A drop that added nothing looked exactly like
+    // drag-and-drop being broken, which is how it came to be reported as missing. The names come
+    // back so the panel can say which file it could not take — the tab draws them, and that one step
+    // is all that is left untested here.
+
+    @Test
+    fun `a file it cannot use is named in what comes back`() {
+        assertEquals(listOf("STT-blog-topics.md"), drop(file("STT-blog-topics.md")))
+    }
+
+    @Test
+    fun `a folder with no images is named too, not just quietly dropped`() {
+        // The other half of the silence: this folder is skipped by a different branch entirely.
+        assertEquals(listOf("documents"), drop(folder("documents", "readme.txt")))
+    }
+
+    @Test
+    fun `nothing is named when every file was added`() {
+        val skipped = drop(file("talk.pdf"), file("music.mp3"), file("welcome.json"))
+
+        assertTrue(skipped.isEmpty(), "a drop that worked has nothing to report: $skipped")
+        assertEquals(3, vm.scheduleItems.size)
+    }
+
+    @Test
+    fun `only the unusable ones are named when a drop holds both`() {
+        val skipped = drop(file("sermon.key"), file("accounts.xlsx"), file("archive.zip"))
+
+        assertEquals(listOf("accounts.xlsx", "archive.zip"), skipped)
+        assertEquals(1, vm.scheduleItems.size, "the deck still went in: ${vm.scheduleItems}")
+    }
 }

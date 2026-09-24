@@ -47,6 +47,19 @@ data class TextBackdrop(
     val lineBackgroundWidth: Int = 0,
     /** Corner rounding of each band. 0 is a square corner, as it always was. */
     val lineBackgroundRadius: Int = 0,
+    /**
+     * Whether every band takes the width of the widest line instead of its own line's.
+     *
+     * Off — the default, and what this has always drawn — sizes each band to the text on that line,
+     * which is what makes it read as a highlighter following the words. On, the bands share one
+     * width and one pair of edges, so a wrapped verse comes out as a tidy stack rather than a
+     * ragged one. Both are wanted: the first for a highlight, the second for a caption plate.
+     *
+     * The shared width is the union of every line's own — leftmost left to rightmost right — so it
+     * is right whichever way the text is aligned: centred text gets symmetric bands, left-aligned
+     * text gets a common left edge. A blank line still gets no band either way.
+     */
+    val lineBackgroundUniformWidth: Boolean = false,
     /** Moves the band down; negative moves it up. The text does not move. */
     val lineBackgroundOffset: Int = 0,
     val border: Boolean = false,

@@ -16,6 +16,7 @@ import org.churchpresenter.settings.TabLabelStyle
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.font.FontFamily
 import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalDefaultCalendarFolder
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import java.io.File
@@ -53,7 +54,13 @@ class AppPreviewSettingsScreenshotTest {
                     // Every font name drawn in one face rather than its own. The dialog's font
                     // dropdowns otherwise render against the host's font book, which is what made
                     // `settings_bible` disagree from machine to machine. See `LocalFontPreviewFace`.
-                    CompositionLocalProvider(LocalFontPreviewFace provides { FontFamily.Default }) {
+                    // And the calendar's default folder with it: the System tab prints it, and with
+                    // none configured it is the machine's app data folder — which under test lands
+                    // inside the working copy. See `LocalDefaultCalendarFolder` (issue #617).
+                    CompositionLocalProvider(
+                        LocalFontPreviewFace provides { FontFamily.Default },
+                        LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER,
+                    ) {
                         OptionsDialogContent(
                             theme = mode,
                             settingsManager = SettingsManager(),
@@ -157,4 +164,14 @@ class AppPreviewSettingsScreenshotTest {
     fun `tabs with large spacing`() =
         settingsTab("tabs_spacing_large", 0, library().copy(tabLabelMargin = TabLabelMargin.LARGE))
 
+
+    private companion object {
+        /**
+         * Stands in for the machine's app data folder, which the System tab's Calendar row prints.
+         *
+         * The same literal `SystemSettingsTabScreenshotTest` uses, so the row reads alike in both
+         * the tab's own images and the ones taken through the settings dialog.
+         */
+        const val PINNED_CALENDAR_FOLDER = "/Users/church/Library/Application Support/ChurchPresenter"
+    }
 }

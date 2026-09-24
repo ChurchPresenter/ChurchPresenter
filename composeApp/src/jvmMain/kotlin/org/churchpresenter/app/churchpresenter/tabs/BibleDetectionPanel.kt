@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +54,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -116,6 +116,33 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val SELECTION_BAR_WIDTH = 4f
+
+/**
+ * One detected-reference row, **measured rather than imposed**.
+ *
+ * The rows are content-sized — single-line `bodySmall` with 4dp above and below — so that they keep
+ * the same vertical rhythm as the History panel beside them. They were pinned at a fixed height once
+ * and `7e5b2f94e` deliberately un-pinned them for exactly that reason, so this number agrees with
+ * the typography rather than dictating it. `BibleDetectionPanelTest` measures a real row against it,
+ * which is what turns a drift in `bodySmall` into a failing test instead of a clipped fourth row.
+ */
+internal val DETECTION_ROW_HEIGHT = 24.dp
+internal const val DETECTION_VISIBLE_ROWS = 4
+
+/**
+ * The list's height, reserved from the moment the panel appears and never changed again.
+ *
+ * A *fixed* height rather than a maximum: the browser below takes `weight(1f)`, so a list that grows
+ * with its contents moves the book, chapter and verse columns under the operator's cursor every time
+ * the engine detects something — four times over, as the first four detections land.
+ */
+internal val DETECTION_LIST_HEIGHT = DETECTION_ROW_HEIGHT * DETECTION_VISIBLE_ROWS
+
+/** Test handle for the reserved list area. */
+internal const val DETECTION_LIST_TAG = "bible_detection_list"
+
+/** Test handle for one detected-reference row, so its measured height can be held to the constant. */
+internal const val DETECTION_ROW_TAG = "bible_detection_row"
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -405,14 +432,14 @@ internal fun BibleDetectionPanel(
                 }
             }
 
-            val detRowHeight = 24.dp
-            val detMaxVisibleRows = 4
-
             val markerColor = MaterialTheme.semantic.marker
-            if (detections.isNotEmpty()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val detScroll = rememberScrollState()
-            Box(modifier = Modifier.fillMaxWidth().heightIn(max = detRowHeight * detMaxVisibleRows)) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .height(DETECTION_LIST_HEIGHT)
+                    .testTag(DETECTION_LIST_TAG)
+            ) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                         .verticalScroll(detScroll)
@@ -423,6 +450,7 @@ internal fun BibleDetectionPanel(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
+                        .testTag(DETECTION_ROW_TAG)
                         .background(
                             if (isSelected) MaterialTheme.colorScheme.surfaceVariant
                             else MaterialTheme.colorScheme.surface
@@ -544,13 +572,12 @@ internal fun BibleDetectionPanel(
                 }
                 }
                 }
-                if (detections.size > detMaxVisibleRows) {
+                if (detections.size > DETECTION_VISIBLE_ROWS) {
                     VerticalScrollbar(
                         modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                         adapter = rememberScrollbarAdapter(detScroll)
                     )
                 }
-            }
             }
     }
 }

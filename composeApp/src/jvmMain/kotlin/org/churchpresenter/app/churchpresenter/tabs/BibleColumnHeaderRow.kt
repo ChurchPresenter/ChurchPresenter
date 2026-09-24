@@ -267,19 +267,6 @@ internal fun BibleColumnHeaderRow(
                         }
                     }
 
-                    if (sttToggleVisible) {
-                        val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect) else stringResource(Res.string.stt_connect)
-                        ActionIconButton(
-                            onClick = {
-                                onSttToggle()
-                            },
-                            tooltipText = sttActionStr,
-                            icon = Icons.Filled.Mic,
-                            containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
                     if (translations.size == 2) {
                         ActionIconButton(
                             onClick = {
@@ -333,6 +320,22 @@ internal fun BibleColumnHeaderRow(
                             },
                             modifier = Modifier
                                 .widthIn(min = 127.dp, max = 174.dp),
+                        )
+                    }
+
+                    // Beside Add to Schedule rather than out among the translation controls: this is
+                    // what opens the Bible Lookup Engine, so it belongs with the actions rather than
+                    // with the things that choose what is being read.
+                    if (sttToggleVisible) {
+                        val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect) else stringResource(Res.string.stt_connect)
+                        ActionIconButton(
+                            onClick = {
+                                onSttToggle()
+                            },
+                            tooltipText = sttActionStr,
+                            icon = Icons.Filled.Mic,
+                            containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
