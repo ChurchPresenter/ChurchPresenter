@@ -35,7 +35,7 @@ on:
   push:
     branches: [main]
   # Draft pull requests run nothing; `ready_for_review` renders them once one is marked ready. The
-  # `draft` job below decides, from the PR's live state, for the reason given in test.yml.
+  # first step of the job cancels a draft's run, for the reason given in test.yml.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
@@ -57,32 +57,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # See test.yml's `draft` job: the event's own draft flag can be stale.
-  draft:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      draft: ${{ steps.check.outputs.draft }}
-    steps:
-      - id: check
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number }}
-          ACTION: ${{ github.event.action }}
-        run: |
-          if [ -z "$PR" ] || [ "$ACTION" = "ready_for_review" ]; then
-            echo "draft=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "draft=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)" >> "$GITHUB_OUTPUT"
-          fi
-
   screenshots:
-    needs: draft
-    # Fails open: if the check above could not answer, the output is empty and this still runs.
-    if: ${{ !cancelled() && needs.draft.outputs.draft != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      # Cancels itself on a draft rather than skipping -- see the first step of test.yml's `test`.
+      - name: Stop if the pull request is still a draft
+        if: github.event_name == 'pull_request' && github.event.action != 'ready_for_review'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)" = "true" ]; then
+            gh run cancel "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" || true
+            sleep 120
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
 
