@@ -8,14 +8,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -130,7 +130,7 @@ internal fun CalendarSyncCardContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Switch(
+            RaisedSwitch(
                 checked = current.enabled,
                 onCheckedChange = { on ->
                     onSettingsChange { it.copy(calendarSync = it.calendarSync.copy(enabled = on)) }
@@ -150,7 +150,7 @@ internal fun CalendarSyncCardContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         onClick = onInvite,
@@ -160,7 +160,7 @@ internal fun CalendarSyncCardContent(
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
-                    OutlinedButton(
+                    KeyButton(
                         shape = RoundedCornerShape(6.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         onClick = onSyncNow,
@@ -170,7 +170,7 @@ internal fun CalendarSyncCardContent(
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
-                    TextButton(
+                    GhostButton(
                         onClick = onUnpair,
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
@@ -280,7 +280,7 @@ private fun DevicesList(
                     )
                 }
             }
-            TextButton(
+            GhostButton(
                 onClick = { onRevoke(device.id) },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
             ) { Text(stringResource(Res.string.calendar_sync_revoke), style = MaterialTheme.typography.labelSmall) }

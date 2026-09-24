@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Čo sa deje</string>
     <string name="calendar_ministry_who">Kto alebo poznámka</string>
     <string name="calendar_cloud_sync">Synchronizovať s cloudom a mobilnými zariadeniami</string>
+    <string name="calendar_cloud_invite">Pozvať telefón</string>
     <string name="calendar_cloud_sync_sub">Udržiava tento kalendár v súlade s telefónmi cez relé. Vypnuté: nič z neho tento počítač neopustí</string>
     <string name="calendar_settings_export">Export</string>
     <string name="calendar_export_note">Hlavička, ktorou začína každé exportované PDF. Pole, ktoré nechcete uviesť, nechajte prázdne.</string>

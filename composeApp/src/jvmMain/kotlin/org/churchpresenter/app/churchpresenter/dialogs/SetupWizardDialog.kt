@@ -41,12 +41,12 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -458,7 +458,7 @@ private fun LanguageStep(selectedLanguage: Language, onLanguageSelected: (Langua
         title = stringResource(Res.string.setup_step0_title),
         subtitle = stringResource(Res.string.setup_step0_subtitle),
     )
-    OutlinedTextField(
+    SunkenOutlinedTextField(
         value = query,
         onValueChange = { query = it },
         singleLine = true,
@@ -864,7 +864,7 @@ private fun ConverterCallout(onOpenConverter: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        Button(shape = RoundedCornerShape(8.dp), onClick = onOpenConverter) {
+        RaisedButton(shape = RoundedCornerShape(8.dp), onClick = onOpenConverter) {
             Text(stringResource(Res.string.setup_songs_converter_button))
         }
     }
@@ -1083,7 +1083,7 @@ internal fun VlcStep(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(8.dp),
                     onClick = { onOpenDownloadPage(downloadUrl) }
                 ) {
@@ -1097,7 +1097,7 @@ internal fun VlcStep(
                         )
                     )
                 }
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(8.dp),
                     onClick = {
                         scope.launch {
@@ -1293,7 +1293,7 @@ internal fun withoutLeadingNumber(text: String): String = text.replace(LEADING_N
 
 @Composable
 private fun OpenSettingsButton(onOpenSettings: () -> Unit) {
-    OutlinedButton(shape = RoundedCornerShape(8.dp), onClick = onOpenSettings) {
+    KeyButton(shape = RoundedCornerShape(8.dp), onClick = onOpenSettings) {
         Image(
             painter = painterResource(Res.drawable.ic_settings),
             contentDescription = null,

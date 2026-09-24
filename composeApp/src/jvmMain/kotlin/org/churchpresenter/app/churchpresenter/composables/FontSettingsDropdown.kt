@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +70,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberFontCatalog
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.dropdownField
 
 /** Room left around the panel so it never runs off the top or the bottom of the window. */
 private val PANEL_WINDOW_MARGIN = 32.dp
@@ -169,12 +169,7 @@ private fun FontPickerTrigger(
     Box(
         modifier = modifier
             .heightIn(min = 42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(
-                1.dp,
-                if (expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(8.dp),
-            )
+            .dropdownField(RoundedCornerShape(8.dp), open = expanded)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

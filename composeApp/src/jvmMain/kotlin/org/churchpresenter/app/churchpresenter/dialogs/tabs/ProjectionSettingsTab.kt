@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.core.models.scene.Scene
@@ -65,7 +65,6 @@ import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import androidx.compose.runtime.collectAsState
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -491,7 +490,7 @@ private fun AudioDeviceRow(
                 // Tagged because the button's own text is the selected device's name, which is
                 // also what the matching menu item reads -- and with no device selected both
                 // read "System Default". There is no text that picks out the button alone.
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = { expanded = true },
                     modifier = Modifier.testTag(AUDIO_DEVICE_BUTTON_TAG),
@@ -595,7 +594,7 @@ private fun VlcPathRow(
             singleLine = true,
             modifier = Modifier.weight(1f)
         )
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             onClick = {
             scope.launch {

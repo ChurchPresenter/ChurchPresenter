@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,15 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +91,8 @@ import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.utils.searchText
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /** Test tag for the reset-everything button, which several tests need to locate. */
 internal const val SHORTCUT_RESET_ALL_TAG = "shortcut_reset_all"
@@ -309,8 +309,11 @@ internal fun KeyboardShortcutsDialogContent(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                            .sunken(
+                                RoundedCornerShape(8.dp),
+                                elevationPalette(),
+                                rim = MaterialTheme.colorScheme.primary,
+                            )
                             .focusRequester(pressFocus)
                             .focusable()
                             .onPreviewKeyEvent { event ->
@@ -340,7 +343,7 @@ internal fun KeyboardShortcutsDialogContent(
                 }
                 // Toggling either way drops whatever the other mode had filtered by, so the list is
                 // never narrowed by a filter the header is no longer showing.
-                FilterChip(
+                RaisedFilterChip(
                     selected = pressMode,
                     onClick = {
                         pressMode = !pressMode
@@ -480,7 +483,7 @@ internal fun KeyboardShortcutsDialogContent(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = { editOverrides { emptyMap() }; recording = null },
                     modifier = Modifier.testTag(SHORTCUT_RESET_ALL_TAG)
@@ -501,21 +504,21 @@ internal fun KeyboardShortcutsDialogContent(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                     Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
                 }
                 // A map with two actions on one combination cannot be saved: one of them would
                 // simply never fire, and which one is an accident of registry order. The toolbar's
                 // count is the way back to the rows that have to be settled first.
                 val savable = conflicts.isEmpty()
-                OutlinedButton(
+                KeyButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = savable,
                     onClick = { onSave(currentSettings) },
                 ) {
                     Text(stringResource(Res.string.apply))
                 }
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = savable,
                     onClick = { onSave(currentSettings); onDismiss() }
@@ -596,7 +599,7 @@ private fun sectionSubtitle(
  */
 @Composable
 private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
+    RaisedFilterChip(
         selected = selected,
         enabled = count > 0,
         onClick = onClick,
@@ -608,10 +611,8 @@ private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Un
                 tint = if (count > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
-            selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer,
-        ),
+        selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
+        selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer,
         label = {
             Text(
                 text = when (count) {

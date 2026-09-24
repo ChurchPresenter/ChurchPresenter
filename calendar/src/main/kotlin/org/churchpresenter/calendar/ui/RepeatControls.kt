@@ -1,7 +1,6 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,9 @@ import org.churchpresenter.calendar.generated.resources.calendar_scope_this
 import org.churchpresenter.calendar.generated.resources.calendar_series_note
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.elevationPalette
 
 private val CHECK_BOX = 16.dp
 private const val ON_TINT = 0.16f
@@ -94,19 +96,25 @@ fun IncludeRow(label: String, sub: String, on: Boolean, onToggle: () -> Unit) {
             .background(if (on) scheme.primary.copy(alpha = ON_TINT) else Color.Transparent)
             .clickable(onClick = onToggle),
     ) {
+        val palette = elevationPalette()
         Box(
             Modifier
                 .size(CHECK_BOX)
-                .clip(RoundedCornerShape(4.dp))
-                .background(if (on) scheme.primary else Color.Transparent)
-                .border(1.5.dp, if (on) scheme.primary else scheme.outline, RoundedCornerShape(4.dp)),
+                .then(
+                    // Ticked is a raised accent key, clear a sunken well -- the app's checkbox.
+                    if (on) {
+                        Modifier.raised(RoundedCornerShape(4.dp), palette.accent, palette, lift = 2.dp)
+                    } else {
+                        Modifier.sunken(RoundedCornerShape(4.dp), palette)
+                    }
+                ),
             contentAlignment = Alignment.Center,
         ) {
             if (on) {
                 Icon(
                     Icons.Filled.Check,
                     contentDescription = null,
-                    tint = scheme.onPrimary,
+                    tint = palette.accent.ink,
                     modifier = Modifier.size(11.dp),
                 )
             }

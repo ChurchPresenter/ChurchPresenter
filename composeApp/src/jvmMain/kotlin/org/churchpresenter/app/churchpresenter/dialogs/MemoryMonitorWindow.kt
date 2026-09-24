@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -231,7 +231,7 @@ internal fun MemoryMonitorDialogContent(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = onForceGc) {
+                RaisedButton(onClick = onForceGc) {
                     Text(stringResource(Res.string.memory_monitor_force_gc))
                 }
             }

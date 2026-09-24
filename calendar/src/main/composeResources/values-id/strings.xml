@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Apa yang terjadi</string>
     <string name="calendar_ministry_who">Siapa, atau catatan</string>
     <string name="calendar_cloud_sync">Sinkronkan dengan cloud dan perangkat seluler</string>
+    <string name="calendar_cloud_invite">Undang ponsel</string>
     <string name="calendar_cloud_sync_sub">Menjaga kalender ini tetap selaras dengan ponsel melalui relai. Saat nonaktif, tidak ada yang keluar dari komputer ini</string>
     <string name="calendar_settings_export">Ekspor</string>
     <string name="calendar_export_note">Kop surat yang mengawali setiap PDF yang diekspor. Kosongkan kolom untuk tidak menyertakannya.</string>

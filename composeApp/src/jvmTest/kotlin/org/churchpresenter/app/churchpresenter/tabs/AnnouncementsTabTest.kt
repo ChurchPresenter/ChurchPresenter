@@ -183,10 +183,10 @@ class AnnouncementsTabTest {
 
     @Test
     fun `every screen position can be chosen`() = announcementsTab { _, reports ->
-        clickLabel(AnnouncementLabel.TOP_LEFT)
+        clickPosition(AnnouncementLabel.TOP_LEFT)
         assertEquals("Top Left", reports.settings?.position)
 
-        clickLabel(AnnouncementLabel.CENTER)
+        clickPosition(AnnouncementLabel.CENTER)
         assertEquals("Center", reports.settings?.position, "and changed again")
     }
 

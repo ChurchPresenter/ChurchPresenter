@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,7 +34,7 @@ fun ThemeSwitcher(
     var showMenu by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
-        Button(
+        RaisedButton(
             onClick = { showMenu = !showMenu },
             modifier = Modifier
                 .background(

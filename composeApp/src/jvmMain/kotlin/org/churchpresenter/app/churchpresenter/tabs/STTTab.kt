@@ -25,7 +25,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -116,7 +116,12 @@ fun STTTab(
                 enabled = !connected && !connecting,
                 trailingIcon = {
                     if (!connected && !connecting && urlInput.isNotEmpty()) {
-                        IconButton(onClick = { urlInput = "" }, colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        KeyIconButton(
+                            onClick = { urlInput = "" },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(Res.string.clear),

@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -207,7 +207,7 @@ private fun FfmpegPathRow(
             },
             modifier = Modifier.width(PATH_FIELD_WIDTH),
         )
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             onClick = {
                 scope.launch {
@@ -225,7 +225,7 @@ private fun FfmpegPathRow(
             Text(stringResource(Res.string.ffmpeg_browse), style = MaterialTheme.typography.labelSmall)
         }
         if (path.isNotBlank()) {
-            OutlinedButton(
+            KeyButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { applyPath("") },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -233,7 +233,7 @@ private fun FfmpegPathRow(
                 Text(stringResource(Res.string.ffmpeg_clear), style = MaterialTheme.typography.labelSmall)
             }
         }
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             // Off the UI thread: this launches `ffmpeg -version`, and on the click handler it
             // would freeze the dialog for as long as that takes to answer.
@@ -243,7 +243,7 @@ private fun FfmpegPathRow(
             Text(stringResource(Res.string.ffmpeg_check_again), style = MaterialTheme.typography.labelSmall)
         }
         if (status?.available == false) {
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { openUrl(FFMPEG_DOWNLOAD_URL) },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),

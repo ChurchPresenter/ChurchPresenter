@@ -27,6 +27,7 @@
     <string name="service_schedule">Programul Serviciului:</string>
     <string name="songs">Cântări</string>
     <string name="song">Cântare</string>
+    <string name="output_profiles_tab">Profiluri</string>
     <string name="bible">Biblie</string>
     <string name="pictures">Imagini</string>
     <string name="presentation">Prezentare</string>
@@ -247,6 +248,7 @@
     <string name="word_wrap">Reîncadrare Text</string>
     <string name="show_on_first_page_only">Afișează doar pe prima pagină</string>
     <string name="position_on_screen">Poziție pe ecran:</string>
+    <string name="position_showing_at">Afișat la</string>
     <string name="top_left">Stânga Sus</string>
     <string name="top_right">Dreapta Sus</string>
     <string name="bottom_left">Stânga Jos</string>
@@ -572,6 +574,7 @@
     <string name="loop">Buclă</string>
     <string name="loop_on">Buclă Activată</string>
     <string name="loop_off">Buclă Dezactivată</string>
+    <string name="output_scale_mode">Scală: %1$s</string>
     <string name="transition_duration">Durata Tranziției:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -625,6 +628,10 @@
     <string name="windows_count_label">Ferestre (1-3)</string>
     <string name="window_position">Poziția Ferestrei</string>
     <string name="text_margins">Margini Text</string>
+    <string name="content_region">Regiune de conținut</string>
+    <string name="content_region_width">Lățime %</string>
+    <string name="content_region_x_offset">Decalaj X %</string>
+    <string name="content_region_y_offset">Decalaj Y %</string>
     <string name="end_of_song_spacing">Spațiere Final Cântare (*)</string>
     <string name="auto_fit">Auto</string>
     <string name="auto_fit_checkbox_tooltip">Ajustează automat textul la ecran, folosind dimensiunea fontului ca maximum</string>
@@ -906,6 +913,8 @@
     <string name="web_engine_unavailable_body">Motorul browserului nu a putut porni. Instalați Microsoft Visual C++ Redistributable (x64) și reporniți aplicația.</string>
     <string name="web_engine_unavailable_macos_title">Browserul web necesită o versiune mai nouă de macOS</string>
     <string name="web_engine_unavailable_macos_body">Motorul de browser ChurchPresenter nu mai acceptă această versiune de macOS. Actualizați la macOS 12 (Monterey) sau o versiune ulterioară pentru a utiliza fila Web și sursele de browser.</string>
+    <string name="web_engine_unavailable_windows_title">Browserul web necesită Windows 10 sau o versiune ulterioară</string>
+    <string name="web_engine_unavailable_windows_body">Motorul de browser ChurchPresenter nu mai acceptă această versiune de Windows. Actualizați la Windows 10 sau o versiune ulterioară pentru a utiliza fila Web și sursele de browser.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Scrieți pe pagină</string>
     <string name="web_type_to_page_placeholder">Faceți clic pe un câmp de pe pagina live mai întâi</string>
@@ -1413,12 +1422,26 @@
     <string name="tab_label_style_text">Doar text</string>
     <string name="tab_label_style_icons_and_text">Pictograme și text</string>
     <string name="tab_label_style_icons">Doar pictograme</string>
+    <string name="tab_label_style_button_hint">Etichete file: text, pictograme sau ambele. Clic pentru a schimba.</string>
+    <string name="tab_label_margin_hint">Spațiere file: cât spațiu primește fiecare filă. Clic pentru a schimba.</string>
+    <string name="tab_label_margin_small">Mic</string>
+    <string name="tab_label_margin_small_normal">Mediu-mic</string>
+    <string name="tab_label_margin_normal">Normal</string>
+    <string name="tab_label_margin_normal_large">Mediu-mare</string>
+    <string name="tab_label_margin_large">Mare</string>
     <string name="file_not_supported_short">nesuportat</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numărul înaintea titlului</string>
     <string name="song_number_corner">Colț</string>
     <string name="song_number_corner_off">Oprit</string>
+    <string name="song_number_offset_needs_corner">Alege un colț mai sus pentru a poziționa liber numărul</string>
+    <string name="song_number_offset_x">Decalaj X %</string>
+    <string name="song_number_offset_y">Decalaj Y %</string>
+    <string name="song_section_label">Eticheta secțiunii</string>
+    <string name="song_section_label_enabled">Afișează secțiunea curentă (Strofă, Refren…)</string>
+    <string name="song_section_label_font_size">Dimensiune Font</string>
+    <string name="song_section_label_color">Culoare</string>
     <string name="fullscreen_display">Afișare Ecran Complet</string>
     <string name="display_mode_label">Mod Afișare:</string>
     <string name="display_mode_one_verse">1 Strofă</string>
@@ -2163,6 +2186,7 @@
     <string name="browser_source_fps">FPS Maxim</string>
     <string name="browser_source_website_snapshot_tooltip">Oglindește site-ul afișat pe ieșirea principală — activ doar cât timp fila Web sau o fereastră de ieșire îl afișează</string>
     <string name="tooltip_stt_settings">Setări Afișare STT</string>
+    <string name="tooltip_dictionary_settings">Setări de afișare a dicționarului</string>
     <string name="presentation_builds_counter">Pasul %1$d din %2$d</string>
     <string name="presentation_animate_keynote">Animează prezentările Keynote</string>
     <string name="presentation_focus_lost">Focus tastatură pierdut — faceți clic aici pentru a reactiva săgețile și clicker-ul</string>
@@ -2176,6 +2200,7 @@
     <string name="instance_link_controlling_host">Controlează %1$s</string>
     <string name="instance_link_primary_badge">Primară — %1$d urmăritor(i) conectat(ți)</string>
     <string name="stt_settings_dialog_title">Setări Afișare STT</string>
+    <string name="dictionary_settings_dialog_title">Setări de afișare a dicționarului</string>
     <string name="update_dialog_channel_stable">Versiune stabilă</string>
     <string name="update_dialog_channel_prerelease">Pre-lansare</string>
     <string name="atem_section_background_uploads">Încărcări Fundal</string>
@@ -2558,6 +2583,24 @@
     <string name="customize_marker">Marcaj</string>
     <string name="customize_bilingual">Bilingv</string>
     <string name="customize_no_preview">Nicio previzualizare pentru această secțiune</string>
+    <string name="output_profile_none">Niciunul</string>
+    <string name="output_profile_new">Profil nou</string>
+    <string name="output_profile_create_default">Creează profilul implicit</string>
+    <string name="output_profile_create_default_tooltip">Adaugă un profil nou cu stilul implicit din fabrică al aplicației, ca rezervă la care să revii</string>
+    <string name="output_profile_duplicate">Duplică</string>
+    <string name="output_profile_rename">Redenumește</string>
+    <string name="output_profile_delete">Șterge</string>
+    <string name="output_profile_delete_confirm">Ștergi „%1$s”? Această acțiune nu poate fi anulată.</string>
+    <string name="output_profile_delete_blocked">Nu se poate șterge „%1$s” — este încă folosit de: %2$s</string>
+    <string name="output_profile_usage_count">Folosit de %1$d ieșire(i)</string>
+    <string name="output_profile_name_hint">Numele profilului</string>
+    <string name="output_profile_picker_tooltip">Profil de ieșire</string>
+    <string name="output_profile_swap_menu_tooltip">Schimbă profilul de ieșire</string>
+    <string name="output_profile_new_name_default">Profil nou</string>
+    <string name="output_profile_display_mode">Mod Afișare</string>
+    <string name="output_profile_content">Conținut</string>
+    <string name="output_profile_empty_state">Creează un profil pentru a începe să-l stilizezi</string>
+    <string name="output_profile_preview_resolution_tooltip">Doar forma previzualizării — nu setează rezoluția reală a ieșirii</string>
     <string name="customize_bible">Biblie</string>
     <string name="customize_songs">Cântări</string>
     <string name="customize_lower_third_vertical_hint">O bandă laterală în loc de una în partea de jos.</string>
@@ -2574,6 +2617,9 @@
     <string name="customize_group_card">Card</string>
     <string name="customize_group_background">Fundalul ecranului</string>
     <string name="customize_group_background_lower_third">Fundal Lower Third</string>
+    <string name="customize_background_source">Fundal</string>
+    <string name="customize_background_follow">Urmează fila Fundal</string>
+    <string name="customize_background_own">Personalizat</string>
     <string name="customize_background_type">Tip</string>
     <string name="customize_background_image">Imagine</string>
     <string name="customize_background_video">Video</string>
@@ -2823,6 +2869,7 @@
     <string name="remote_api_calendar_enroll">Planifică calendarul de pe acest dispozitiv</string>
     <string name="remote_api_calendar_enroll_code">Cod %1$s — permite doar dacă telefonul afișează același cod</string>
     <string name="calendar_enroll_qr_title">Scanează cu telefonul</string>
+    <string name="calendar_enroll_invite_failed">Nu s-a putut crea o invitație — acest computer nu a putut contacta releul.</string>
     <string name="calendar_enroll_qr_body">Scanează acest cod cu telefonul pe care tocmai l-ai permis pentru a finaliza.</string>
     <string name="remote_api_calendar_enroll_detail">Un telefon sau o tabletă vrea să planifice servicii în calendar de oriunde.</string>
     <string name="remote_activity_calendar_enroll">Înscris pentru planificarea calendarului</string>
@@ -2843,6 +2890,7 @@
     <string name="calendar_sync_status_unauthorized">Releul nu mai acceptă acest computer. Asociază din nou pentru a continua.</string>
     <string name="calendar_sync_status_other_desktop">Alt computer sincronizează acest calendar. Acesta a încetat să trimită până când dezasociezi unul dintre ele.</string>
     <string name="calendar_sync_enroll_hint">Pentru a adăuga un telefon: conectează-l la acest computer ca de obicei (Setări server → cod QR), apoi deschide Calendar în aplicație și atinge Înscrie. Ți se va cere aici să îl permiți.</string>
+    <string name="calendar_sync_invite">Invită un telefon…</string>
     <string name="calendar_sync_sync_now">Sincronizează acum</string>
     <string name="calendar_sync_unpair">Ia-o de la capăt cu o cheie nouă</string>
     <string name="calendar_sync_devices">Telefoane înscrise</string>

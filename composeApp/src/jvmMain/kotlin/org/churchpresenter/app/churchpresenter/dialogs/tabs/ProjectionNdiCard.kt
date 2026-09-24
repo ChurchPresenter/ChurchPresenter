@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,16 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -191,7 +190,7 @@ internal fun NdiOutputsCard(
                     outputProfiles = proj.outputProfiles,
                 )
             }
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = {
                     onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.addNdiOutput()) }
@@ -228,8 +227,7 @@ private fun NdiRuntimeRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-            .padding(10.dp),
+            .padding(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         NdiRuntimeMessage(status)
@@ -255,7 +253,7 @@ private fun NdiRuntimeRow(
                 },
                 modifier = Modifier.width(PATH_FIELD_WIDTH),
             )
-            OutlinedButton(
+            KeyButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = {
                     scope.launch {
@@ -276,7 +274,7 @@ private fun NdiRuntimeRow(
             ) {
                 Text(stringResource(Res.string.ndi_runtime_browse), style = MaterialTheme.typography.labelSmall)
             }
-            OutlinedButton(
+            KeyButton(
                 shape = RoundedCornerShape(6.dp),
                 // Off the UI thread for the same reason main.kt's first start is: this is a
                 // `Native.load`, and on the click handler it would freeze the dialog while it ran.
@@ -286,7 +284,7 @@ private fun NdiRuntimeRow(
                 Text(stringResource(Res.string.ndi_runtime_check_again), style = MaterialTheme.typography.labelSmall)
             }
             if (!status.isReady) {
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     onClick = { openUrl(NDI_RUNTIME_URL) },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -377,8 +375,7 @@ private fun NdiOutputRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-            .padding(10.dp),
+            .padding(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(
@@ -422,7 +419,7 @@ private fun NdiOutputRow(
                 }
                 // Only enabled once the draft differs, so it reads as "there is something to
                 // commit" rather than as a button that might do nothing.
-                Button(
+                RaisedButton(
                     shape = RoundedCornerShape(6.dp),
                     enabled = nameChanged,
                     onClick = { update(output.copy(ndiName = draftName)) },
@@ -457,14 +454,14 @@ private fun NdiOutputRow(
             // Flashes this output's name into the feed itself, the way the Browser Source card
             // does. Worth having even though an NDI source is named in the receiver's list: with
             // several outputs live, it answers "which of these am I actually looking at".
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { onIdentifyNdi(index) },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             ) {
                 Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
             }
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { showRemoveConfirm = true },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -483,7 +480,7 @@ private fun NdiOutputRow(
                 title = { Text(stringResource(Res.string.confirm_delete)) },
                 text = { Text(stringResource(Res.string.ndi_confirm_remove_message, outputLabel)) },
                 confirmButton = {
-                    TextButton(
+                    GhostButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             showRemoveConfirm = false
@@ -496,7 +493,7 @@ private fun NdiOutputRow(
                     }
                 },
                 dismissButton = {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
+                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
                         Text(stringResource(Res.string.cancel))
                     }
                 },
@@ -592,7 +589,7 @@ private fun NdiModePicker(
             tooltip = { PlainTooltip { Text(helps.getValue(current)) } },
             state = rememberTooltipState(),
         ) {
-            OutlinedButton(
+            KeyButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { expanded = true },
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
@@ -641,7 +638,7 @@ private fun NdiDropdownCell(
             )
         }
         var expanded by remember { mutableStateOf(false) }
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),

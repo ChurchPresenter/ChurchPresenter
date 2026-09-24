@@ -1,8 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -18,9 +16,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -147,21 +144,20 @@ private fun DetectedChip(text: String) {
 /** The way out of an empty folder — fetch a Bible, drop in the sample songs. */
 @Composable
 private fun DetailAction(text: String, icon: DrawableResource, enabled: Boolean = true, onClick: () -> Unit) {
-    TextButton(
+    // A raised accent button: in a strip of detected-file chips it is the one thing to press.
+    RaisedButton(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(7.dp),
-        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
-        contentPadding = PaddingValues(horizontal = 11.dp),
-        modifier = Modifier.height(26.dp),
+        shape = RoundedCornerShape(9.dp),
+        contentPadding = PaddingValues(horizontal = 13.dp),
+        modifier = Modifier.height(30.dp),
     ) {
-        Icon(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(12.dp))
+        Icon(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(13.dp))
         Text(
             text = text,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 6.dp),
+            modifier = Modifier.padding(start = 7.dp),
         )
     }
 }
@@ -321,9 +317,9 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
         if (converting) {
             CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
         } else {
-            Button(
+            RaisedButton(
                 onClick = {
-                    if (!prompts.confirmOverwrite(directory, fileName)) return@Button
+                    if (!prompts.confirmOverwrite(directory, fileName)) return@RaisedButton
                     converting = true
                     scope.launch {
                         val result = withContext(Dispatchers.IO) {

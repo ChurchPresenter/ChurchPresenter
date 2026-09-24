@@ -49,6 +49,9 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.lottiegen.ui.Tokens
+import androidx.compose.material3.MaterialTheme
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 /*
  * The choosers of the band generator: the captioned field a menu drops from, the menu itself,
@@ -72,9 +75,13 @@ internal fun CaptionedButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
-            .clip(CARD_SHAPE)
-            .background(Tokens.FieldBg)
-            .border(1.dp, if (open) Tokens.FieldBorderHover else Tokens.FieldBorder, CARD_SHAPE)
+            // The app's sunken dropdown field, as the main generator's [LottieDropdown]: the accent
+            // rim while its menu is open.
+            .sunken(
+                CARD_SHAPE,
+                elevationPalette(),
+                rim = if (open) MaterialTheme.colorScheme.primary else Color.Unspecified,
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 9.dp),
         verticalAlignment = Alignment.CenterVertically,

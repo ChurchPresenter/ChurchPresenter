@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,9 +15,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +38,7 @@ import churchpresenter.composeapp.generated.resources.output_resolution_width
 import org.churchpresenter.app.churchpresenter.utils.OUTPUT_RESOLUTIONS
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.KeyButton
 
 /** The widest and narrowest an output may be set to. Wide enough for 8K, narrow enough to stay sane. */
 private val RESOLUTION_RANGE = 16..8192
@@ -79,11 +80,12 @@ fun ResolutionPicker(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        OutlinedButton(
+        KeyButton(
             shape = RoundedCornerShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-            modifier = Modifier.fillMaxWidth(),
+            // Inset in its cell so it does not butt against the raised key beside it.
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 3.dp),
         ) {
             Text(
                 text = formatResolution(width, height),
@@ -164,12 +166,12 @@ private fun CustomResolutionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(draftWidth, draftHeight) }) {
+            GhostButton(onClick = { onConfirm(draftWidth, draftHeight) }) {
                 Text(stringResource(Res.string.ok))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+            GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
         },
     )
 }

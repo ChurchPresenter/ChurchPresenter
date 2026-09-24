@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">என்ன நடக்கிறது</string>
     <string name="calendar_ministry_who">யார், அல்லது குறிப்பு</string>
     <string name="calendar_cloud_sync">மேகம் மற்றும் மொபைல் சாதனங்களுடன் ஒத்திசை</string>
+    <string name="calendar_cloud_invite">தொலைபேசியை அழை</string>
     <string name="calendar_cloud_sync_sub">ரிலே வழியாக இந்த நாட்காட்டியைத் தொலைபேசிகளுடன் ஒத்திசைவில் வைக்கிறது. அணைத்தால் இதிலிருந்து எதுவும் இந்தக் கணினியை விட்டு வெளியேறாது</string>
     <string name="calendar_settings_export">ஏற்றுமதி</string>
     <string name="calendar_export_note">ஏற்றுமதி செய்யப்படும் ஒவ்வொரு PDF-உம் தொடங்கும் தலைப்புப் பகுதி. ஒரு புலத்தைச் சேர்க்க வேண்டாமெனில் அதைக் காலியாக விடவும்.</string>

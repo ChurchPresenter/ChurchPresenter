@@ -41,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /** The design's section caption: 9px, bold, wide-tracked, upper case. */
 @Composable
@@ -61,8 +63,7 @@ internal fun PanelCaption(text: String, modifier: Modifier = Modifier) {
 internal fun SegmentedRow(content: @Composable RowScope.() -> Unit) {
     Row(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,

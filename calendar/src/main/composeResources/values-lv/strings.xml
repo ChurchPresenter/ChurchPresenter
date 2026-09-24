@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Kas notiek</string>
     <string name="calendar_ministry_who">Kurš vai piezīme</string>
     <string name="calendar_cloud_sync">Sinhronizēt ar mākoni un mobilajām ierīcēm</string>
+    <string name="calendar_cloud_invite">Uzaicināt tālruni</string>
     <string name="calendar_cloud_sync_sub">Uztur šo kalendāru saskaņā ar tālruņiem caur releju. Izslēgts — nekas no tā nepamet šo datoru</string>
     <string name="calendar_settings_export">Eksports</string>
     <string name="calendar_export_note">Veidlapas galvene, ar ko sākas katrs eksportētais PDF. Atstājiet lauku tukšu, lai to izlaistu.</string>

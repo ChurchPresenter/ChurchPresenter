@@ -20,10 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Copyright
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -177,14 +177,14 @@ internal fun LicenceConfirmation(
             }
         },
         confirmButton = {
-            Button(onClick = onConfirm, shape = RoundedCornerShape(6.dp)) {
+            RaisedButton(onClick = onConfirm, shape = RoundedCornerShape(6.dp)) {
                 Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(stringResource(Res.string.bible_catalog_license_accept))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
+            KeyButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
                 Text(stringResource(Res.string.cancel))
             }
         }

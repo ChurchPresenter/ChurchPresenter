@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -262,7 +262,7 @@ private fun SizeControl(
         // Still the one-shot measurement it has always been: it reads the verse that is live right
         // now and writes a size. Disabled rather than hidden when there is nothing live to measure.
         if (autoFit != null) {
-            TextButton(
+            GhostButton(
                 onClick = autoFit,
                 enabled = autoFitEnabled,
                 shape = RoundedCornerShape(6.dp),

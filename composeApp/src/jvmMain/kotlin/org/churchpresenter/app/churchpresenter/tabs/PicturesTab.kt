@@ -46,18 +46,18 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,8 +100,6 @@ import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ok
@@ -124,8 +122,6 @@ import churchpresenter.composeapp.generated.resources.no_folder_selected
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
@@ -156,11 +152,19 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
 private const val MILLIS_PER_SECOND = 1000
 private const val CAPTION_FONT_SP = 12.5f
 private const val SMALL_LABEL_FONT_SP = 11.5f
 private const val MAX_AUTO_SCROLL_SECONDS = 30
+private const val HINT_DIVIDER_ALPHA = 0.5f
+private val RECENT_BAR_HEIGHT = 40.dp
+private val TRANSPORT_KEY_SIZE = 30.dp
+private val PLAY_KEY_SIZE = 38.dp
+private val LOOP_KEY_SIZE = 28.dp
 private const val MIN_TRANSITION_MS = 100
 private const val MAX_TRANSITION_MS = 2000
 private const val DRAGGED_ITEM_ALPHA = 0.35f
@@ -308,7 +312,7 @@ fun PicturesTab(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Button(
+            RaisedButton(
                 onClick = {
                     viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
                         onSettingsChange { s ->
@@ -377,7 +381,7 @@ fun PicturesTab(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
+                    .height(RECENT_BAR_HEIGHT)
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -392,7 +396,7 @@ fun PicturesTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
+                    KeyIconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_close),
                             contentDescription = stringResource(Res.string.clear),
@@ -403,59 +407,27 @@ fun PicturesTab(
                 }
                 LazyRow(
                     modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    contentPadding = PaddingValues(vertical = 5.dp, horizontal = 4.dp)
                 ) {
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPictureFolders.pinned
                         val isActive = viewModel.selectedFolderDisplayPath == path
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .height(26.dp)
-                                    .background(
-                                        if (isActive) MaterialTheme.colorScheme.surfaceVariant
-                                        else Color.Transparent,
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isActive) MaterialTheme.colorScheme.outline
-                                        else MaterialTheme.colorScheme.outlineVariant,
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .clickable {
-                                        val folder = File(path)
-                                        if (folder.exists() && folder.isDirectory) {
-                                            viewModel.selectFolder(folder)
-                                            onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = path)) }
-                                            RecentPictureFolders.add(path)
-                                        }
-                                    }
-                                    .padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = File(path).name,
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                    color = if (isActive) MaterialTheme.colorScheme.onSurface
-                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                                    maxLines = 1
-                                )
-                            }
-                            IconButton(onClick = { RecentPictureFolders.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(
-                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                                    contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
-                                    modifier = Modifier.size(12.dp),
-                                    tint = if (isPinned) MaterialTheme.colorScheme.primary
-                                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                                )
-                            }
-                        }
+                        RecentChip(
+                            name = File(path).name,
+                            isActive = isActive,
+                            isPinned = isPinned,
+                            onOpen = {
+                                val folder = File(path)
+                                if (folder.exists() && folder.isDirectory) {
+                                    viewModel.selectFolder(folder)
+                                    onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = path)) }
+                                    RecentPictureFolders.add(path)
+                                }
+                            },
+                            onTogglePin = { RecentPictureFolders.togglePin(path) },
+                        )
                     }
                 }
             }
@@ -473,23 +445,30 @@ fun PicturesTab(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Transport controls (inner gap: 4dp)
+            val neutralKeyColors = IconButtonDefaults.iconButtonColors(
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            )
+            val accentKeyColors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
+            // Transport controls: raised keys either side of the biggest one, Play
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(
+                    RaisedIconButton(
                         onClick = { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
                         enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendPreviousPicture != null,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = neutralKeyColors
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_skip_previous),
                             contentDescription = stringResource(Res.string.previous_image),
-                            modifier = Modifier.size(16.dp),
-                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -497,10 +476,10 @@ fun PicturesTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    FilledIconButton(
+                    RaisedIconButton(
                         onClick = { viewModel.togglePlayPause() },
                         enabled = viewModel.images.isNotEmpty(),
-                        modifier = Modifier.size(38.dp),
+                        modifier = Modifier.size(PLAY_KEY_SIZE),
                         shape = CircleShape,
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -518,17 +497,16 @@ fun PicturesTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(
+                    RaisedIconButton(
                         onClick = { viewModel.nextImage(onInstanceLinkSendNextPicture) },
                         enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendNextPicture != null,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = neutralKeyColors
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_skip_next),
                             contentDescription = stringResource(Res.string.next_image),
-                            modifier = Modifier.size(16.dp),
-                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -549,19 +527,14 @@ fun PicturesTab(
                 tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
             ) {
-                IconButton(
+                RaisedIconButton(
                     onClick = {
                         viewModel.isLooping = !viewModel.isLooping
                         onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping)) }
                     },
-                    modifier = Modifier.size(28.dp),
-                    colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ) else IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                    )
+                    modifier = Modifier.size(LOOP_KEY_SIZE),
+                    shape = CircleShape,
+                    colors = if (viewModel.isLooping) accentKeyColors else neutralKeyColors
                 ) {
                     // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
                     // semantics, so without this the button has no name at all.
@@ -591,20 +564,14 @@ fun PicturesTab(
                 },
                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
             ) {
-                IconButton(
+                RaisedIconButton(
                     onClick = {
                         onSettingsChange { s ->
                             s.copy(pictureSettings = s.pictureSettings.copy(scaleMode = scaleMode.next()))
                         }
                     },
-                    modifier = Modifier.size(28.dp),
-                    colors = if (scaled) IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ) else IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                    )
+                    modifier = Modifier.size(LOOP_KEY_SIZE),
+                    colors = if (scaled) accentKeyColors else neutralKeyColors
                 ) {
                     Icon(
                         scaleMode.icon,
@@ -615,7 +582,7 @@ fun PicturesTab(
             }
 
             // Divider
-            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+            Box(modifier = Modifier.width(1.dp).height(30.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
             // Settings display boxes
             if (appSettings != null) {
@@ -633,8 +600,7 @@ fun PicturesTab(
                     modifier = Modifier
                         .height(42.dp)
                         .width(170.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
                         .clickable { editingInterval = true }
                         .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
@@ -669,7 +635,7 @@ fun PicturesTab(
                         onDismissRequest = { editingInterval = false },
                         title = { Text(stringResource(Res.string.auto_scroll_interval)) },
                         text = {
-                            OutlinedTextField(
+                            SunkenOutlinedTextField(
                                 value = intervalInput,
                                 onValueChange = { intervalInput = it },
                                 suffix = { Text(stringResource(Res.string.unit_s)) },
@@ -678,7 +644,7 @@ fun PicturesTab(
                             )
                         },
                         confirmButton = {
-                            TextButton(
+                            GhostButton(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                 intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
@@ -689,7 +655,9 @@ fun PicturesTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) }
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
                         }
                     )
                 }
@@ -699,8 +667,7 @@ fun PicturesTab(
                     modifier = Modifier
                         .height(42.dp)
                         .width(170.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
                         .clickable { editingTransition = true }
                         .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
@@ -735,7 +702,7 @@ fun PicturesTab(
                         onDismissRequest = { editingTransition = false },
                         title = { Text(stringResource(Res.string.transition_duration)) },
                         text = {
-                            OutlinedTextField(
+                            SunkenOutlinedTextField(
                                 value = transitionInput,
                                 onValueChange = { transitionInput = it },
                                 suffix = { Text(stringResource(Res.string.unit_ms)) },
@@ -744,7 +711,7 @@ fun PicturesTab(
                             )
                         },
                         confirmButton = {
-                            TextButton(
+                            GhostButton(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                 transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v ->
@@ -755,7 +722,9 @@ fun PicturesTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) }
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
                         }
                     )
                 }
@@ -798,36 +767,25 @@ fun PicturesTab(
                     }
                 )
             }
-
-            @OptIn(ExperimentalLayoutApi::class)
-            FlowRow(
-                modifier = Modifier.weight(1f, fill = false),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                // Drawn from the live bindings, so a rebind is reflected here rather than the hint
-                // going on describing the arrow keys. Hidden entirely when the user has unbound
-                // both pairs — an empty "  next/prev image" would be worse than no hint.
-                val navLabel = shortcuts.pairLabel(ShortcutAction.PICTURES_PREVIOUS, ShortcutAction.PICTURES_NEXT)
-                val rowLabel = shortcuts.pairLabel(ShortcutAction.PICTURES_ROW_UP, ShortcutAction.PICTURES_ROW_DOWN)
-                if (navLabel.isNotEmpty() || rowLabel.isNotEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.pictures_arrow_key_hint, navLabel, rowLabel),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp)
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = "·",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                    )
-                }
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = HINT_DIVIDER_ALPHA))
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 18.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            // Drawn from the live bindings, so a rebind is reflected here rather than the hint
+            // going on describing the arrow keys. Hidden entirely when the user has unbound
+            // both pairs — an empty "  next/prev image" would be worse than no hint.
+            val navLabel = shortcuts.pairLabel(ShortcutAction.PICTURES_PREVIOUS, ShortcutAction.PICTURES_NEXT)
+            val rowLabel = shortcuts.pairLabel(ShortcutAction.PICTURES_ROW_UP, ShortcutAction.PICTURES_ROW_DOWN)
+            if (navLabel.isNotEmpty() || rowLabel.isNotEmpty()) {
                 Text(
-                    text = stringResource(Res.string.pictures_reorder_hint),
+                    text = stringResource(Res.string.pictures_arrow_key_hint, navLabel, rowLabel),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp)
                     ),
@@ -835,7 +793,21 @@ fun PicturesTab(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Text(
+                    text = "·",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
             }
+            Text(
+                text = stringResource(Res.string.pictures_reorder_hint),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp)
+                ),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
@@ -1076,3 +1048,4 @@ fun PicturesTab(
         }
     }
 }
+

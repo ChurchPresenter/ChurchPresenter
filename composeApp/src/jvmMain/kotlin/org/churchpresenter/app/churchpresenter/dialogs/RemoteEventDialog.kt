@@ -29,15 +29,14 @@ import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -353,7 +352,7 @@ internal fun RemoteEventDialogContent(
                         Spacer(Modifier.width(8.dp))
                     }
                     // Prominent one-tap allow (mirrors the ✓ button below)
-                    Button(
+                    RaisedButton(
                         onClick = onAllow,
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -528,13 +527,13 @@ private fun ActionIconButton(
         state = rememberTooltipState()
     ) {
         when (style) {
-            ActionIconStyle.ErrorOutlined -> OutlinedIconButton(
+            ActionIconStyle.ErrorOutlined -> RaisedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = errorColor),
                 border = BorderStroke(1.dp, errorColor.copy(alpha = 0.5f))
             ) { Icon(icon, contentDescription = tooltip) }
 
-            ActionIconStyle.ErrorFilled -> FilledIconButton(
+            ActionIconStyle.ErrorFilled -> RaisedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = errorColor,
@@ -542,18 +541,18 @@ private fun ActionIconButton(
                 )
             ) { Icon(icon, contentDescription = tooltip) }
 
-            ActionIconStyle.Outlined -> OutlinedIconButton(
+            ActionIconStyle.Outlined -> RaisedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.outlinedIconButtonColors()
             ) { Icon(icon, contentDescription = tooltip) }
 
-            ActionIconStyle.PrimaryOutlined -> OutlinedIconButton(
+            ActionIconStyle.PrimaryOutlined -> RaisedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = primaryColor),
                 border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.5f))
             ) { Icon(icon, contentDescription = tooltip) }
 
-            ActionIconStyle.SuccessFilled -> FilledIconButton(
+            ActionIconStyle.SuccessFilled -> RaisedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.semantic.success,
@@ -561,7 +560,7 @@ private fun ActionIconButton(
                 )
             ) { Icon(icon, contentDescription = tooltip) }
 
-            ActionIconStyle.PrimaryFilled -> FilledIconButton(
+            ActionIconStyle.PrimaryFilled -> RaisedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = primaryColor,

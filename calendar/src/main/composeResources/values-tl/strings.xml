@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Ano ang mangyayari</string>
     <string name="calendar_ministry_who">Sino, o tala</string>
     <string name="calendar_cloud_sync">I-sync sa cloud at mga mobile device</string>
+    <string name="calendar_cloud_invite">Mag-imbita ng telepono</string>
     <string name="calendar_cloud_sync_sub">Pinapanatiling magkatugma ang kalendaryong ito at ang mga telepono sa pamamagitan ng relay. Kapag naka-off, walang umaalis sa computer na ito</string>
     <string name="calendar_settings_export">I-export</string>
     <string name="calendar_export_note">Ang letterhead na simula ng bawat na-export na PDF. Iwanang blangko ang isang field para hindi ito isama.</string>

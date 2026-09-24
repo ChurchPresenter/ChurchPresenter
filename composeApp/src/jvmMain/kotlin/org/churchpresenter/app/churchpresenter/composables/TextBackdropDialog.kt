@@ -26,11 +26,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +58,9 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 private val DIALOG_WIDTH = 320.dp
 private val OPACITY_FIELD_WIDTH = 104.dp
@@ -76,7 +79,6 @@ private val SECTION_PADDING = 12.dp
  *  the dialog and hard to hit. */
 private val CLOSE_BUTTON_SIZE = 28.dp
 private val CLOSE_ICON_SIZE = 14.dp
-private const val SELECTED_FILL_ALPHA = 0.18f
 
 /**
  * Everything that goes behind and around a piece of text, in one dialog.
@@ -112,7 +114,7 @@ fun TextBackdropDialog(
                 Column(Modifier.padding(SECTION_PADDING)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SectionLabel(stringResource(Res.string.backdrop_style), Modifier.weight(1f))
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
+                        KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_close),
                                 contentDescription = stringResource(Res.string.close),
@@ -167,8 +169,10 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
         modes.forEachIndexed { index, mode ->
             val selected = backdrop.mode == mode
             val shape = segmentShape(index, modes.size)
+            // The selected key's own ink: the surface's text color on the lit key was white on light
+            // blue in the dark themes.
             val ink = if (selected) {
-                MaterialTheme.colorScheme.onSurface
+                elevationPalette().selected.ink
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             }
@@ -179,15 +183,12 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
                     // 44dp the chip and its caption came to within a hair of the height, so the
                     // swatch's own border sat on the button's top edge and read as one line.
                     .heightIn(min = MODE_BUTTON_HEIGHT)
-                    .background(
-                        if (selected) {
-                            accent.copy(alpha = SELECTED_FILL_ALPHA)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        },
+                    .raised(
                         shape,
+                        if (selected) elevationPalette().selected else elevationPalette().key,
+                        elevationPalette(),
                     )
-                    .border(1.dp, if (selected) accent else outline, shape)
+                    .then(if (selected) Modifier.border(1.dp, accent, shape) else Modifier)
                     .clickable { onModeChange(mode) }
                     .padding(vertical = MODE_BUTTON_PADDING),
                 verticalArrangement = Arrangement.Center,
@@ -197,7 +198,7 @@ private fun BackdropModeRow(backdrop: TextBackdrop, onModeChange: (TextBackdropM
                     // Each choice previews itself with the colours already set, so switching
                     // between Fill and Both shows what the switch will actually produce.
                     backdrop = backdrop.withMode(mode),
-                    emptyOutline = outline,
+                    emptyOutline = if (selected) ink.copy(alpha = OUTLINE_ALPHA) else outline,
                     emptyInk = ink,
                     modifier = Modifier.width(26.dp).height(15.dp),
                     label = null,
@@ -256,8 +257,12 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(PRESET_HEIGHT)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(7.dp))
-                            .border(1.dp, outline, RoundedCornerShape(7.dp))
+                            .raisedHover(
+                                RoundedCornerShape(7.dp),
+                                elevationPalette().key,
+                                elevationPalette(),
+                                lift = 2.dp,
+                            )
                             .clickable { onPick(choice.apply(current)) }
                             .padding(3.dp),
                     ) {
@@ -277,7 +282,7 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
         }
         val alreadySaved = saved.firstOrNull() == current
         Spacer(Modifier.height(2.dp))
-        TextButton(
+        GhostButton(
             onClick = { SavedTextBackdrops.add(current) },
             enabled = !alreadySaved,
             shape = RoundedCornerShape(6.dp),

@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">发生什么</string>
     <string name="calendar_ministry_who">谁，或备注</string>
     <string name="calendar_cloud_sync">与云端和移动设备同步</string>
+    <string name="calendar_cloud_invite">邀请手机</string>
     <string name="calendar_cloud_sync_sub">通过中继使此日历与手机保持一致。关闭后，任何内容都不会离开这台电脑</string>
     <string name="calendar_settings_export">导出</string>
     <string name="calendar_export_note">每份导出的 PDF 开头的信头。某项留空即不显示。</string>

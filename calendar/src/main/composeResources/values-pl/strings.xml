@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Co się dzieje</string>
     <string name="calendar_ministry_who">Kto lub notatka</string>
     <string name="calendar_cloud_sync">Synchronizuj z chmurą i urządzeniami mobilnymi</string>
+    <string name="calendar_cloud_invite">Zaproś telefon</string>
     <string name="calendar_cloud_sync_sub">Utrzymuje ten kalendarz w zgodzie z telefonami przez przekaźnik. Gdy wyłączone, nic nie opuszcza tego komputera</string>
     <string name="calendar_settings_export">Eksport</string>
     <string name="calendar_export_note">Nagłówek, od którego zaczyna się każdy eksportowany PDF. Zostaw pole puste, aby je pominąć.</string>

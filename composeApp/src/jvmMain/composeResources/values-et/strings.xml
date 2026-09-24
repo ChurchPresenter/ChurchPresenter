@@ -33,6 +33,7 @@
     <string name="service_schedule">Jumalateenistuse kava:</string>
     <string name="songs">Laulud</string>
     <string name="song">Laul</string>
+    <string name="output_profiles_tab">Profiilid</string>
     <string name="bible">Piibel</string>
     <string name="pictures">Pildid</string>
     <string name="presentation">Esitlus</string>
@@ -252,6 +253,7 @@
     <string name="word_wrap">Reamurdmine</string>
     <string name="show_on_first_page_only">Näita ainult esimesel leheküljel</string>
     <string name="position_on_screen">Asukoht ekraanil:</string>
+    <string name="position_showing_at">Asukoht:</string>
     <string name="top_left">Üleval vasakul</string>
     <string name="top_right">Üleval paremal</string>
     <string name="bottom_left">All vasakul</string>
@@ -607,6 +609,7 @@
     <string name="loop">Korda</string>
     <string name="loop_on">Kordamine sees</string>
     <string name="loop_off">Kordamine väljas</string>
+    <string name="output_scale_mode">Skaala: %1$s</string>
     <string name="transition_duration">Ülemineku kestus:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -660,6 +663,10 @@
     <string name="windows_count_label">Aknad (1-3)</string>
     <string name="window_position">Akna asukoht</string>
     <string name="text_margins">Teksti veerised</string>
+    <string name="content_region">Sisu ala</string>
+    <string name="content_region_width">Laius %</string>
+    <string name="content_region_x_offset">X-nihe %</string>
+    <string name="content_region_y_offset">Y-nihe %</string>
     <string name="end_of_song_spacing">Laulu lõpu (*) vahe</string>
     <string name="auto_fit">Automaatne</string>
     <string name="auto_fit_checkbox_tooltip">Sobita tekst automaatselt ekraanile, kasutades fondi suurust maksimumina</string>
@@ -953,6 +960,8 @@
     <string name="web_engine_unavailable_body">Brauseri mootorit ei õnnestunud käivitada. Paigalda Microsoft Visual C++ Redistributable (x64) ja taaskäivita rakendus.</string>
     <string name="web_engine_unavailable_macos_title">Veebibrauser vajab uuemat macOS-i</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenteri brauseri mootor ei toeta enam seda macOS-i versiooni. Veebisakk ja brauseriallikate kasutamiseks uuenda macOS 12 (Monterey) või uuemale versioonile.</string>
+    <string name="web_engine_unavailable_windows_title">Veebibrauser nõuab Windows 10 või uuemat</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenteri brauserimootor ei toeta enam seda Windowsi versiooni. Uuenda Windows 10-le või uuemale, et kasutada vahekaarti Veeb ja brauseriallikaid.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Kirjuta lehele</string>
     <string name="web_type_to_page_placeholder">Klõpsa esmalt sisendväljal live-lehel</string>
@@ -1461,12 +1470,26 @@
     <string name="tab_label_style_text">Ainult tekst</string>
     <string name="tab_label_style_icons_and_text">Ikoonid ja tekst</string>
     <string name="tab_label_style_icons">Ainult ikoonid</string>
+    <string name="tab_label_style_button_hint">Vahekaartide sildid: tekst, ikoonid või mõlemad. Klõpsa muutmiseks.</string>
+    <string name="tab_label_margin_hint">Vahekaartide vahed: kui palju ruumi iga vahekaart saab. Klõpsa muutmiseks.</string>
+    <string name="tab_label_margin_small">Väike</string>
+    <string name="tab_label_margin_small_normal">Keskmiselt väike</string>
+    <string name="tab_label_margin_normal">Tavaline</string>
+    <string name="tab_label_margin_normal_large">Keskmiselt suur</string>
+    <string name="tab_label_margin_large">Suur</string>
     <string name="file_not_supported_short">ei ole toetatud</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Number enne pealkirja</string>
     <string name="song_number_corner">Nurk</string>
     <string name="song_number_corner_off">Väljas</string>
+    <string name="song_number_offset_needs_corner">Vali ülalt nurk, et numbrit vabalt paigutada</string>
+    <string name="song_number_offset_x">Nihe X %</string>
+    <string name="song_number_offset_y">Nihe Y %</string>
+    <string name="song_section_label">Lõigu silt</string>
+    <string name="song_section_label_enabled">Näita praegust lõiku (salm, refrään…)</string>
+    <string name="song_section_label_font_size">Fondi suurus</string>
+    <string name="song_section_label_color">Värv</string>
     <string name="fullscreen_display">Täisekraankuva</string>
     <string name="display_mode_label">Kuvarežiim:</string>
     <string name="display_mode_one_verse">1 salm</string>
@@ -2166,6 +2189,7 @@
     <string name="browser_source_fps">Maksimaalne FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Peegeldab peaväljundis kuvatavat veebilehte — aktiivne ainult siis, kui seda kuvab Veebi vahekaart või väljundaken</string>
     <string name="tooltip_stt_settings">STT kuva seaded</string>
+    <string name="tooltip_dictionary_settings">Sõnastiku kuvasätted</string>
     <string name="presentation_builds_counter">Samm %1$d/%2$d</string>
     <string name="presentation_animate_keynote">Animeeri Keynote esitlusi</string>
     <string name="presentation_focus_lost">Klaviatuurifookus kadus — klõpsa siia, et taasaktiveerida nooleklahvid ja slaidipult</string>
@@ -2179,6 +2203,7 @@
     <string name="instance_link_controlling_host">Juhib %1$s</string>
     <string name="instance_link_primary_badge">Peamine — %1$d jälgija(t) ühendatud</string>
     <string name="stt_settings_dialog_title">STT kuva seaded</string>
+    <string name="dictionary_settings_dialog_title">Sõnastiku kuvasätted</string>
     <string name="update_dialog_channel_stable">Stabiilne versioon</string>
     <string name="update_dialog_channel_prerelease">Eelversioon</string>
     <string name="atem_section_background_uploads">Tausta üleslaadimised</string>
@@ -2561,6 +2586,24 @@
     <string name="customize_marker">Märgis</string>
     <string name="customize_bilingual">Kakskeelne</string>
     <string name="customize_no_preview">Selle jaotise jaoks eelvaadet pole</string>
+    <string name="output_profile_none">Puudub</string>
+    <string name="output_profile_new">Uus profiil</string>
+    <string name="output_profile_create_default">Loo vaikeprofiil</string>
+    <string name="output_profile_create_default_tooltip">Lisa uus profiil rakenduse tehase vaikestiiliga, et oleks varuvariant, mille juurde naasta</string>
+    <string name="output_profile_duplicate">Dubleeri</string>
+    <string name="output_profile_rename">Nimeta ümber</string>
+    <string name="output_profile_delete">Kustuta</string>
+    <string name="output_profile_delete_confirm">Kas kustutada „%1$s”? Seda ei saa tagasi võtta.</string>
+    <string name="output_profile_delete_blocked">„%1$s” ei saa kustutada — seda kasutab veel: %2$s</string>
+    <string name="output_profile_usage_count">Kasutusel %1$d väljundis</string>
+    <string name="output_profile_name_hint">Profiili nimi</string>
+    <string name="output_profile_picker_tooltip">Väljundi profiil</string>
+    <string name="output_profile_swap_menu_tooltip">Vaheta väljundi profiili</string>
+    <string name="output_profile_new_name_default">Uus profiil</string>
+    <string name="output_profile_display_mode">Kuvarežiim</string>
+    <string name="output_profile_content">Sisu</string>
+    <string name="output_profile_empty_state">Loo profiil, et selle kujundamist alustada</string>
+    <string name="output_profile_preview_resolution_tooltip">Ainult eelvaate kuju — ei määra väljundi tegelikku eraldusvõimet</string>
     <string name="customize_bible">Piibel</string>
     <string name="customize_songs">Laulud</string>
     <string name="customize_lower_third_vertical_hint">Riba küljel, mitte riba all servas.</string>
@@ -2577,6 +2620,9 @@
     <string name="customize_group_card">Kaart</string>
     <string name="customize_group_background">Ekraani taust</string>
     <string name="customize_group_background_lower_third">Alumise kolmandiku taust</string>
+    <string name="customize_background_source">Taust</string>
+    <string name="customize_background_follow">Järgi vahekaarti Taust</string>
+    <string name="customize_background_own">Kohandatud</string>
     <string name="customize_background_type">Tüüp</string>
     <string name="customize_background_image">Pilt</string>
     <string name="customize_background_video">Video</string>
@@ -2826,6 +2872,7 @@
     <string name="remote_api_calendar_enroll">Planeeri kalendrit sellest seadmest</string>
     <string name="remote_api_calendar_enroll_code">Kood %1$s — luba ainult siis, kui telefon näitab sama koodi</string>
     <string name="calendar_enroll_qr_title">Skanni telefoniga</string>
+    <string name="calendar_enroll_invite_failed">Kutset ei õnnestunud luua — see arvuti ei jõudnud releeni.</string>
     <string name="calendar_enroll_qr_body">Lõpetamiseks skanni see kood telefoniga, mille just lubasid.</string>
     <string name="remote_api_calendar_enroll_detail">Telefon või tahvelarvuti soovib kalendris teenistusi planeerida ükskõik kust.</string>
     <string name="remote_activity_calendar_enroll">Registreeritud kalendrit planeerima</string>
@@ -2846,6 +2893,7 @@
     <string name="calendar_sync_status_unauthorized">Relee ei aktsepteeri seda arvutit enam. Jätkamiseks seo uuesti.</string>
     <string name="calendar_sync_status_other_desktop">Teine arvuti sünkroonib seda kalendrit. See arvuti on saatmise lõpetanud, kuni ühe neist lahti seod.</string>
     <string name="calendar_sync_enroll_hint">Telefoni lisamiseks: ühenda see selle arvutiga nagu tavaliselt (Serveri seaded → QR-kood), seejärel ava rakenduses Kalender ja puuduta Registreeri. Siin küsitakse sinult luba.</string>
+    <string name="calendar_sync_invite">Kutsu telefon…</string>
     <string name="calendar_sync_sync_now">Sünkrooni kohe</string>
     <string name="calendar_sync_unpair">Alusta uue võtmega otsast</string>
     <string name="calendar_sync_devices">Registreeritud telefonid</string>

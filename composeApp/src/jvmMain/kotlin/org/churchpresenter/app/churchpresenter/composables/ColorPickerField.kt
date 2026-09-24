@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,8 +32,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import kotlin.math.roundToInt
 
 private const val CHECKERBOARD_COLOR = 0xFFCCCCCC
+private const val CHECKER_CELLS = 4
+private const val HEX_ARGB_DIGITS = 8
+private const val HEX_RGB_DIGITS = 6
+private const val PERCENT = 100
+private const val OPACITY_TEXT_ALPHA = 0.7f
+private val SWATCH_SIZE = 18.dp
 
 @Composable
 fun ColorPickerField(
@@ -61,13 +69,8 @@ fun ColorPickerField(
     Column(
         modifier = modifier
             .heightIn(min = 42.dp)
-            // `surfaceVariant`, matching NumberSettingsTextField, DropdownSettingsField and
-            // FontSettingsDropdown -- the fields this one sits beside in every settings form. It
-            // was the only one on `surfaceContainerHigh`, which is also `AlertDialog`'s own
-            // container colour, so inside a dialog the field had no fill at all and read as a
-            // faint border on empty background.
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            // The same sunken well as every field it sits beside in a settings form.
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
         verticalArrangement = Arrangement.Center
@@ -89,25 +92,32 @@ fun ColorPickerField(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            // A checkerboard under the color, so a translucent one shows its opacity rather than
+            // reading as the solid color it is not.
             Box(
                 modifier = Modifier
-                    .size(14.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(2.dp))
+                    .size(SWATCH_SIZE)
+                    .clip(RoundedCornerShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
             ) {
-                if (isTransparent) {
-                    Canvas(modifier = Modifier.matchParentSize()) {
-                        val sq = size.width / 2
-                        drawRect(Color.White)
-                        drawRect(Color(CHECKERBOARD_COLOR), topLeft = Offset(0f, sq), size = Size(sq, sq))
-                        drawRect(Color(CHECKERBOARD_COLOR), topLeft = Offset(sq, 0f), size = Size(sq, sq))
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val sq = size.width / CHECKER_CELLS
+                    drawRect(Color.White)
+                    for (row in 0 until CHECKER_CELLS) for (col in 0 until CHECKER_CELLS) {
+                        if ((row + col) % 2 == 1) {
+                            drawRect(
+                                Color(CHECKERBOARD_COLOR),
+                                topLeft = Offset(col * sq, row * sq),
+                                size = Size(sq, sq)
+                            )
+                        }
                     }
-                } else {
-                    Box(modifier = Modifier.matchParentSize().background(currentColor))
+                    if (!isTransparent) drawRect(currentColor)
                 }
             }
+            val opacity = displayedOpacity(color, currentColor, isTransparent)
             Text(
-                text = color,
+                text = if (opacity == null) color else "#" + color.removePrefix("#").takeLast(HEX_RGB_DIGITS),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 13.sp,
                     lineHeight = 14.sp,
@@ -123,6 +133,21 @@ fun ColorPickerField(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            if (opacity != null) {
+                Text(
+                    text = "$opacity%",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = OPACITY_TEXT_ALPHA),
+                    maxLines = 1,
+                )
+            }
         }
     }
+}
+
+/** The opacity, in percent, of a stored `#AARRGGBB` color that is not fully opaque; else null. */
+private fun displayedOpacity(hex: String, color: Color, isTransparent: Boolean): Int? {
+    val digits = hex.removePrefix("#")
+    if (isTransparent || digits.length != HEX_ARGB_DIGITS || color.alpha >= 1f) return null
+    return (color.alpha * PERCENT).roundToInt()
 }

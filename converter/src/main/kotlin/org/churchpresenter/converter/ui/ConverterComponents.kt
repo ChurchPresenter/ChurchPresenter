@@ -32,7 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -360,7 +360,7 @@ fun SelectedFilesCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            OutlinedButton(
+            KeyButton(
                 shape = FieldShape,
                 onClick = onChange,
                 modifier = Modifier.height(26.dp),
@@ -368,7 +368,7 @@ fun SelectedFilesCard(
             ) {
                 Text(Strings.change, style = MaterialTheme.typography.labelSmall)
             }
-            OutlinedButton(
+            KeyButton(
                 shape = FieldShape,
                 onClick = onClear,
                 modifier = Modifier.height(26.dp),
@@ -452,7 +452,7 @@ fun DestinationRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            OutlinedButton(shape = FieldShape, onClick = onBrowse, modifier = Modifier.height(34.dp)) {
+            KeyButton(shape = FieldShape, onClick = onBrowse, modifier = Modifier.height(34.dp)) {
                 Text(Strings.browse, style = MaterialTheme.typography.bodySmall)
             }
         }

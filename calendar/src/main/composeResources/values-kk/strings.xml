@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">Не болады</string>
     <string name="calendar_ministry_who">Кім немесе ескертпе</string>
     <string name="calendar_cloud_sync">Бұлтпен және мобильді құрылғылармен синхрондау</string>
+    <string name="calendar_cloud_invite">Телефонды шақыру</string>
     <string name="calendar_cloud_sync_sub">Осы күнтізбені реле арқылы телефондармен сәйкес ұстайды. Өшірулі кезде одан ештеңе осы компьютерден шықпайды</string>
     <string name="calendar_settings_export">Экспорт</string>
     <string name="calendar_export_note">Әрбір экспортталған PDF басталатын бланк тақырыбы. Өрісті қоспау үшін оны бос қалдырыңыз.</string>

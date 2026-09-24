@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -219,7 +219,7 @@ private fun LottieBandStripRow(lottiePath: String, isLottie: Boolean, onOpen: ()
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = LOTTIE_NAME_MAX_WIDTH),
         )
-        OutlinedButton(
+        KeyButton(
             onClick = onOpen,
             shape = RoundedCornerShape(6.dp),
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),

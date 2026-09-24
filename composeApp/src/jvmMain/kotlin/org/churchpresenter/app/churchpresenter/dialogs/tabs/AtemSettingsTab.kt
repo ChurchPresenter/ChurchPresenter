@@ -17,7 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -224,10 +224,10 @@ fun AtemSettingsTab(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
-                            if (isTesting) return@Button
+                            if (isTesting) return@RaisedButton
                             isTesting = true
                             connectionStatus = null
                             connectionError = null

@@ -3,10 +3,10 @@ package org.churchpresenter.theme.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,9 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -24,13 +25,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 
-private const val OUTLINE_ALPHA = 0.5f
 private const val LABEL_SIZE_FRACTION = 0.36f
 
 /**
  * One square toggle of the text-style row — B, I, U and friends: the letter set in the style it
- * stands for, filled with the primary colour while on and outlined while off, with [tooltip]
+ * stands for, a raised key that turns the accent colour while on, with [tooltip]
  * under the pointer.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -45,11 +49,6 @@ fun TextStyleToggleButton(
     buttonSize: Dp = 28.dp,
     onClick: () -> Unit,
 ) {
-    val activeBackground = MaterialTheme.colorScheme.primary
-    val inactiveBackground = MaterialTheme.colorScheme.surfaceVariant
-    val activeContent = MaterialTheme.colorScheme.onPrimary
-    val inactiveContent = MaterialTheme.colorScheme.onSurfaceVariant
-
     TooltipArea(
         tooltip = { ControlTooltip(tooltip) },
         tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -57,34 +56,29 @@ fun TextStyleToggleButton(
             offset = DpOffset(0.dp, 4.dp),
         ),
     ) {
-        Surface(
+        val palette = elevationPalette()
+        val fill = if (isActive) palette.accent else palette.key
+        val shape = RoundedCornerShape(8.dp)
+        val interaction = remember { MutableInteractionSource() }
+        val pressed by interaction.collectIsPressedAsState()
+        val hovered by interaction.collectIsHoveredAsState()
+        Box(
             modifier = Modifier
                 .size(buttonSize)
-                .clip(RoundedCornerShape(8.dp))
-                .border(
-                    width = 1.dp,
-                    color = if (isActive) {
-                        activeBackground
-                    } else {
-                        MaterialTheme.colorScheme.outline.copy(alpha = OUTLINE_ALPHA)
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .clickable { onClick() },
-            color = if (isActive) activeBackground else inactiveBackground,
-            shape = RoundedCornerShape(8.dp),
+                .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
+                .hoverable(interaction)
+                .clickable(interactionSource = interaction, indication = null) { onClick() },
+            contentAlignment = Alignment.Center,
         ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = label,
-                    fontSize = (buttonSize.value * LABEL_SIZE_FRACTION).sp,
-                    fontWeight = fontWeight,
-                    fontStyle = fontStyle,
-                    textDecoration = textDecoration,
-                    color = if (isActive) activeContent else inactiveContent,
-                    maxLines = 1,
-                )
-            }
+            Text(
+                text = label,
+                fontSize = (buttonSize.value * LABEL_SIZE_FRACTION).sp,
+                fontWeight = fontWeight,
+                fontStyle = fontStyle,
+                textDecoration = textDecoration,
+                color = fill.ink,
+                maxLines = 1,
+            )
         }
     }
 }

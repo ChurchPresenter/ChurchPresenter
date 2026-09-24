@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -17,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /**
  * The recessed track a set of [PaneTab]s sits on.
@@ -31,8 +32,7 @@ fun PaneTabRow(
 ) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(9.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(9.dp))
+            .sunken(RoundedCornerShape(9.dp), elevationPalette())
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,

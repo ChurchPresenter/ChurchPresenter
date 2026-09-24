@@ -16,12 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.SettingsTextField
-import androidx.compose.material3.Switch
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -122,7 +122,7 @@ fun OBSSettingsTab(
                 Spacer(Modifier.height(12.dp))
 
                 SettingRow(label = stringResource(Res.string.obs_enable)) {
-                    Switch(
+                    RaisedSwitch(
                         checked = obs.enabled,
                         onCheckedChange = { update { copy(enabled = it) } }
                     )
@@ -185,7 +185,7 @@ fun OBSSettingsTab(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (status == OBSWebSocketManager.ConnectionStatus.CONNECTED) {
-                            Button(
+                            RaisedButton(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = { obsManager.disconnect() },
                                 colors = ButtonDefaults.buttonColors(
@@ -195,7 +195,7 @@ fun OBSSettingsTab(
                                 Text(stringResource(Res.string.obs_disconnect))
                             }
                         } else {
-                            Button(
+                            RaisedButton(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     val port = portText.toIntOrNull() ?: 4455

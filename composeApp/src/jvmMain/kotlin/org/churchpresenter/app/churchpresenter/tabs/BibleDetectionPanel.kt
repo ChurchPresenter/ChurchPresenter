@@ -39,7 +39,7 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -391,7 +391,7 @@ internal fun BibleDetectionPanel(
                     )
                 }
                 if (detections.isNotEmpty()) {
-                    IconButton(
+                    KeyIconButton(
                         onClick = onClearDetections,
                         modifier = Modifier.size(27.dp)
                     ) {

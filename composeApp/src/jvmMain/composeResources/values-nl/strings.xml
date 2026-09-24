@@ -27,6 +27,7 @@
     <string name="service_schedule">Dienst programma:</string>
     <string name="songs">Liederen</string>
     <string name="song">Lied</string>
+    <string name="output_profiles_tab">Profielen</string>
     <string name="bible">Bijbel</string>
     <string name="pictures">Afbeeldingen</string>
     <string name="presentation">Presentatie</string>
@@ -224,6 +225,7 @@
     <string name="word_wrap">Tekstterugloop</string>
     <string name="show_on_first_page_only">Alleen op de eerste pagina tonen</string>
     <string name="position_on_screen">Positie op scherm:</string>
+    <string name="position_showing_at">Weergegeven op</string>
     <string name="top_left">Linksboven</string>
     <string name="top_right">Rechtsboven</string>
     <string name="bottom_left">Linksonder</string>
@@ -541,6 +543,7 @@
     <string name="loop">Herhalen</string>
     <string name="loop_on">Herhalen aan</string>
     <string name="loop_off">Herhalen uit</string>
+    <string name="output_scale_mode">Schaal: %1$s</string>
     <string name="transition_duration">Overgangsduur:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -594,6 +597,10 @@
     <string name="windows_count_label">Vensters (1-3)</string>
     <string name="window_position">Vensterpositie</string>
     <string name="text_margins">Tekstmarges</string>
+    <string name="content_region">Inhoudsgebied</string>
+    <string name="content_region_width">Breedte %</string>
+    <string name="content_region_x_offset">X-verschuiving %</string>
+    <string name="content_region_y_offset">Y-verschuiving %</string>
     <string name="end_of_song_spacing">Einde-van-lied (*) afstand</string>
     <string name="auto_fit">Automatisch</string>
     <string name="auto_fit_checkbox_tooltip">Tekst automatisch aanpassen aan scherm, met lettergrootte als maximum</string>
@@ -867,6 +874,8 @@
     <string name="web_engine_unavailable_body">De browserengine kon niet worden gestart. Installeer de Microsoft Visual C++ Redistributable (x64) en start de toepassing opnieuw.</string>
     <string name="web_engine_unavailable_macos_title">Webbrowser vereist een nieuwere macOS-versie</string>
     <string name="web_engine_unavailable_macos_body">De browserengine van ChurchPresenter ondersteunt deze macOS-versie niet meer. Werk bij naar macOS 12 (Monterey) of nieuwer om het tabblad Web en browserbronnen te gebruiken.</string>
+    <string name="web_engine_unavailable_windows_title">Webbrowser vereist Windows 10 of nieuwer</string>
+    <string name="web_engine_unavailable_windows_body">De browser-engine van ChurchPresenter ondersteunt deze versie van Windows niet meer. Werk bij naar Windows 10 of nieuwer om het tabblad Web en browserbronnen te gebruiken.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Typen naar pagina</string>
     <string name="web_type_to_page_placeholder">Klik eerst op een invoerveld op de live pagina</string>
@@ -1372,12 +1381,26 @@
     <string name="tab_label_style_text">Alleen tekst</string>
     <string name="tab_label_style_icons_and_text">Pictogrammen en tekst</string>
     <string name="tab_label_style_icons">Alleen pictogrammen</string>
+    <string name="tab_label_style_button_hint">Tabbladlabels: tekst, pictogrammen of beide. Klik om te wijzigen.</string>
+    <string name="tab_label_margin_hint">Tabafstand: hoeveel ruimte elk tabblad krijgt. Klik om te wijzigen.</string>
+    <string name="tab_label_margin_small">Klein</string>
+    <string name="tab_label_margin_small_normal">Iets klein</string>
+    <string name="tab_label_margin_normal">Normaal</string>
+    <string name="tab_label_margin_normal_large">Iets groot</string>
+    <string name="tab_label_margin_large">Groot</string>
     <string name="file_not_supported_short">niet ondersteund</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer voor titel</string>
     <string name="song_number_corner">Hoek</string>
     <string name="song_number_corner_off">Uit</string>
+    <string name="song_number_offset_needs_corner">Kies hierboven een hoek om het nummer vrij te plaatsen</string>
+    <string name="song_number_offset_x">Verschuiving X %</string>
+    <string name="song_number_offset_y">Verschuiving Y %</string>
+    <string name="song_section_label">Sectielabel</string>
+    <string name="song_section_label_enabled">Huidige sectie tonen (Couplet, Refrein…)</string>
+    <string name="song_section_label_font_size">Lettergrootte</string>
+    <string name="song_section_label_color">Kleur</string>
     <string name="fullscreen_display">Volledig scherm weergave</string>
     <string name="display_mode_label">Weergavemodus:</string>
     <string name="display_mode_one_verse">1 vers</string>
@@ -2161,6 +2184,7 @@
     <string name="browser_source_fps">Max. FPS</string>
     <string name="browser_source_website_snapshot_tooltip">Spiegelt de website die op de hoofduitvoer wordt getoond — alleen live zolang het tabblad Web of een uitvoervenster deze weergeeft</string>
     <string name="tooltip_stt_settings">STT-weergave-instellingen</string>
+    <string name="tooltip_dictionary_settings">Weergave-instellingen woordenboek</string>
     <string name="presentation_builds_counter">Stap %1$d van %2$d</string>
     <string name="presentation_animate_keynote">Keynote-presentaties animeren</string>
     <string name="presentation_focus_lost">Toetsenbordfocus verloren — klik hier om pijltjestoetsen en clicker weer in te schakelen</string>
@@ -2174,6 +2198,7 @@
     <string name="instance_link_controlling_host">Bestuurt %1$s</string>
     <string name="instance_link_primary_badge">Primair — %1$d volger(s) verbonden</string>
     <string name="stt_settings_dialog_title">STT-weergave-instellingen</string>
+    <string name="dictionary_settings_dialog_title">Weergave-instellingen woordenboek</string>
     <string name="update_dialog_channel_stable">Stabiele release</string>
     <string name="update_dialog_channel_prerelease">Pre-release</string>
     <string name="atem_section_background_uploads">Achtergrond-uploads</string>
@@ -2556,6 +2581,24 @@
     <string name="customize_marker">Markering</string>
     <string name="customize_bilingual">Tweetalig</string>
     <string name="customize_no_preview">Geen voorbeeld voor dit onderdeel</string>
+    <string name="output_profile_none">Geen</string>
+    <string name="output_profile_new">Nieuw profiel</string>
+    <string name="output_profile_create_default">Standaardprofiel maken</string>
+    <string name="output_profile_create_default_tooltip">Een nieuw profiel toevoegen met de fabrieksstandaardstijl van de app, als reserve om op terug te vallen</string>
+    <string name="output_profile_duplicate">Dupliceren</string>
+    <string name="output_profile_rename">Naam wijzigen</string>
+    <string name="output_profile_delete">Verwijderen</string>
+    <string name="output_profile_delete_confirm">\"%1$s\" verwijderen? Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="output_profile_delete_blocked">Kan \"%1$s\" niet verwijderen — het wordt nog gebruikt door: %2$s</string>
+    <string name="output_profile_usage_count">Gebruikt door %1$d uitvoer(en)</string>
+    <string name="output_profile_name_hint">Profielnaam</string>
+    <string name="output_profile_picker_tooltip">Uitvoerprofiel</string>
+    <string name="output_profile_swap_menu_tooltip">Uitvoerprofiel wisselen</string>
+    <string name="output_profile_new_name_default">Nieuw profiel</string>
+    <string name="output_profile_display_mode">Weergavemodus</string>
+    <string name="output_profile_content">Inhoud</string>
+    <string name="output_profile_empty_state">Maak een profiel om het te gaan opmaken</string>
+    <string name="output_profile_preview_resolution_tooltip">Alleen de vorm van het voorbeeld — stelt de werkelijke resolutie van de uitvoer niet in</string>
     <string name="customize_bible">Bijbel</string>
     <string name="customize_songs">Liederen</string>
     <string name="customize_lower_third_vertical_hint">Een strook aan de zijkant in plaats van een balk onderaan.</string>
@@ -2572,6 +2615,9 @@
     <string name="customize_group_card">Kaart</string>
     <string name="customize_group_background">Schermachtergrond</string>
     <string name="customize_group_background_lower_third">Lower Third achtergrond</string>
+    <string name="customize_background_source">Achtergrond</string>
+    <string name="customize_background_follow">Tabblad Achtergrond volgen</string>
+    <string name="customize_background_own">Aangepast</string>
     <string name="customize_background_type">Type</string>
     <string name="customize_background_image">Afbeelding</string>
     <string name="customize_background_video">Video</string>
@@ -2821,6 +2867,7 @@
     <string name="remote_api_calendar_enroll">De kalender vanaf dit apparaat plannen</string>
     <string name="remote_api_calendar_enroll_code">Code %1$s — sta alleen toe als de telefoon dezelfde code toont</string>
     <string name="calendar_enroll_qr_title">Scannen met de telefoon</string>
+    <string name="calendar_enroll_invite_failed">Kan geen uitnodiging maken — deze computer kan de relay niet bereiken.</string>
     <string name="calendar_enroll_qr_body">Scan deze code met de telefoon die je zojuist hebt toegestaan om af te ronden.</string>
     <string name="remote_api_calendar_enroll_detail">Een telefoon of tablet wil overal vandaan diensten in de kalender plannen.</string>
     <string name="remote_activity_calendar_enroll">Aangemeld om de kalender te plannen</string>
@@ -2841,6 +2888,7 @@
     <string name="calendar_sync_status_unauthorized">De relay accepteert deze computer niet meer. Koppel opnieuw om door te gaan.</string>
     <string name="calendar_sync_status_other_desktop">Een andere computer synchroniseert deze kalender. Deze is gestopt met verzenden totdat je een van beide ontkoppelt.</string>
     <string name="calendar_sync_enroll_hint">Een telefoon toevoegen: verbind hem zoals gewoonlijk met deze computer (Serverinstellingen → QR-code), open dan Kalender in de app en tik op Aanmelden. Je wordt hier om toestemming gevraagd.</string>
+    <string name="calendar_sync_invite">Telefoon uitnodigen…</string>
     <string name="calendar_sync_sync_now">Nu synchroniseren</string>
     <string name="calendar_sync_unpair">Opnieuw beginnen met een nieuwe sleutel</string>
     <string name="calendar_sync_devices">Aangemelde telefoons</string>

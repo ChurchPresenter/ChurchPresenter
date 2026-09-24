@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">के हुन्छ</string>
     <string name="calendar_ministry_who">को, वा टिप्पणी</string>
     <string name="calendar_cloud_sync">क्लाउड र मोबाइल उपकरणहरूसँग सिंक गर्नुहोस्</string>
+    <string name="calendar_cloud_invite">फोनलाई निमन्त्रणा</string>
     <string name="calendar_cloud_sync_sub">रिलेमार्फत यो पात्रोलाई फोनहरूसँग मिलाएर राख्छ। बन्द हुँदा यसको केही पनि यो कम्प्युटरबाट बाहिर जाँदैन</string>
     <string name="calendar_settings_export">निर्यात</string>
     <string name="calendar_export_note">हरेक निर्यात गरिएको PDF सुरु हुने शीर्षभाग। कुनै फिल्ड समावेश नगर्न त्यसलाई खाली छोड्नुहोस्।</string>

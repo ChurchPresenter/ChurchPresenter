@@ -47,6 +47,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import org.churchpresenter.calendar.model.clockText
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raisedHover
 
 /** The selected day's heading — `Sunday, 20 September 2026`, in the machine's own locale. */
 private val DAY_HEADING: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
@@ -122,28 +124,26 @@ fun DayPane(
 
 @Composable
 internal fun AddServiceButton(onClick: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
+    val accent = elevationPalette().accent
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .height(CalendarMetrics.addServiceButtonHeight)
-            .clip(CalendarMetrics.buttonRadius)
-            .background(scheme.primary)
-            .clickable(onClick = onClick)
+            .raisedKey(CalendarMetrics.buttonRadius, accent, onClick = onClick)
             .padding(horizontal = 11.dp),
     ) {
         Icon(
             Icons.Filled.Add,
             contentDescription = null,
-            tint = scheme.onPrimary,
+            tint = accent.ink,
             modifier = Modifier.size(13.dp),
         )
         Text(
             text = stringResource(Res.string.calendar_add_service),
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
             fontWeight = FontWeight.Bold,
-            color = scheme.onPrimary,
+            color = accent.ink,
         )
     }
 }
@@ -173,16 +173,18 @@ private fun ServiceChip(
 ) {
     val scheme = MaterialTheme.colorScheme
     val kind = ServiceKind.from(service.kind)
-    val background = if (isSelected) scheme.primaryContainer else scheme.surfaceVariant.copy(alpha = 0.55f)
-    val border = if (isSelected) scheme.primary else scheme.outlineVariant
+    val palette = elevationPalette()
+    // A raised key, lit in the selected fill while it is the service being shown.
+    val fill = if (isSelected) palette.selected else palette.key
+    val ink = fill.ink
+    val meta = fill.ink.copy(alpha = META_ALPHA)
+    val border = fill.ink.copy(alpha = DIVIDER_ALPHA)
     val shape = RoundedCornerShape(CalendarMetrics.chipRadius)
 
     Row(
         modifier = Modifier
             .height(CalendarMetrics.serviceChipHeight)
-            .clip(shape)
-            .background(background)
-            .border(1.dp, border, shape),
+            .raisedHover(shape, fill, palette, lift = 2.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -203,6 +205,7 @@ private fun ServiceChip(
                     text = service.name,
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    color = ink,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -214,7 +217,7 @@ private fun ServiceChip(
                         text = clockText(service.startTime, LocalUse24HourClock.current) +
                             " \u00b7 " + itemCountLabel(service.contentItems().size),
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
-                        color = scheme.onSurfaceVariant,
+                        color = meta,
                         maxLines = 1,
                     )
                     // A series member says so in its meta line, the way the design marks it, so
@@ -223,13 +226,13 @@ private fun ServiceChip(
                         Icon(
                             Icons.Filled.Repeat,
                             contentDescription = null,
-                            tint = scheme.onSurfaceVariant,
+                            tint = meta,
                             modifier = Modifier.size(REPEAT_MARK),
                         )
                         Text(
                             text = repeatLabel(ServiceRepeat.from(service.repeat)),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp),
-                            color = scheme.onSurfaceVariant,
+                            color = meta,
                             maxLines = 1,
                         )
                     }
@@ -248,7 +251,7 @@ private fun ServiceChip(
                 Icon(
                     Icons.Filled.Edit,
                     contentDescription = stringResource(Res.string.calendar_edit_service),
-                    tint = scheme.onSurfaceVariant,
+                    tint = ink,
                     modifier = Modifier.size(13.dp),
                 )
             }
@@ -257,4 +260,6 @@ private fun ServiceChip(
 }
 
 private val EDIT_TAIL_WIDTH = 26.dp
+private const val META_ALPHA = 0.8f
+private const val DIVIDER_ALPHA = 0.18f
 private val REPEAT_MARK = 9.dp

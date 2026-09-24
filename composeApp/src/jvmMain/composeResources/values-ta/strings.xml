@@ -39,6 +39,7 @@
     <string name="service_schedule">ஆராதனை அட்டவணை:</string>
     <string name="songs">பாடல்கள்</string>
     <string name="song">பாடல்</string>
+    <string name="output_profiles_tab">சுயவிவரங்கள்</string>
     <string name="bible">வேதாகமம்</string>
     <string name="pictures">படங்கள்</string>
     <string name="presentation">விளக்கக்காட்சி</string>
@@ -356,6 +357,7 @@
     <string name="word_wrap">சொல் மடக்கம்</string>
     <string name="show_on_first_page_only">முதல் பக்கத்தில் மட்டும் காட்டு</string>
     <string name="position_on_screen">திரையில் இடம்:</string>
+    <string name="position_showing_at">காட்டப்படும் இடம்</string>
     <string name="top_left">மேல் இடது</string>
     <string name="top_right">மேல் வலது</string>
     <string name="bottom_left">கீழ் இடது</string>
@@ -678,6 +680,7 @@
     <string name="tooltip_presentation_remote">தொலைக் கட்டுப்பாட்டைத் திற</string>
     <string name="tooltip_qa_remote">பகிர்வு &amp; தொலை அணுகல்</string>
     <string name="tooltip_stt_settings">STT காட்சி அமைப்புகள்</string>
+    <string name="tooltip_dictionary_settings">அகராதி காட்சி அமைப்புகள்</string>
     <string name="tooltip_send_to_stage_monitor">மேடைத் திரைக்கு அனுப்பு</string>
     <string name="tooltip_hide_from_stage_monitor">அறிவிப்பை மறை</string>
     <string name="tooltip_add_label">சிட்டையைச் சேர்</string>
@@ -722,6 +725,7 @@
     <string name="loop">சுழற்சி</string>
     <string name="loop_on">சுழற்சி இயக்கத்தில்</string>
     <string name="loop_off">சுழற்சி நிறுத்தம்</string>
+    <string name="output_scale_mode">அளவீடு: %1$s</string>
     <string name="transition_duration">மாற்ற நேரம்:</string>
     <string name="unit_s">வி</string>
     <string name="unit_ms">மிவி</string>
@@ -794,6 +798,10 @@
     <string name="windows_count_label">சாளரங்கள் (1-3)</string>
     <string name="window_position">சாளர இடம்</string>
     <string name="text_margins">உரை ஓரங்கள்</string>
+    <string name="content_region">உள்ளடக்கப் பகுதி</string>
+    <string name="content_region_width">அகலம் %</string>
+    <string name="content_region_x_offset">X இடப்பெயர்ச்சி %</string>
+    <string name="content_region_y_offset">Y இடப்பெயர்ச்சி %</string>
     <string name="end_of_song_spacing">பாடல் முடிவு (*) இடைவெளி</string>
     <string name="auto_fit">தானியங்கி</string>
     <string name="auto_fit_checkbox_tooltip">எழுத்து அளவை அதிகபட்சமாகக் கொண்டு, உரையைத் திரைக்குத் தானாகப் பொருத்தும்</string>
@@ -1120,6 +1128,8 @@
     <string name="web_engine_unavailable_body">உலாவி இயந்திரத்தைத் தொடங்க முடியவில்லை. Microsoft Visual C++ Redistributable (x64) ஐ நிறுவி பயன்பாட்டை மீண்டும் தொடங்கவும்.</string>
     <string name="web_engine_unavailable_macos_title">இணைய உலாவிக்கு புதிய macOS தேவை</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter இன் உலாவி இயந்திரம் இந்த macOS பதிப்பை இனி ஆதரிக்காது. இணையத் தாவலையும் உலாவி மூலங்களையும் பயன்படுத்த macOS 12 (Monterey) அல்லது அதற்குப் பிந்தையதற்குப் புதுப்பிக்கவும்.</string>
+    <string name="web_engine_unavailable_windows_title">இணைய உலாவிக்கு Windows 10 அல்லது பிந்தைய பதிப்பு தேவை</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenter இன் உலாவி இயந்திரம் இந்த Windows பதிப்பை இனி ஆதரிக்காது. இணையத் தாவலையும் உலாவி மூலங்களையும் பயன்படுத்த Windows 10 அல்லது அதற்குப் பிந்தையதற்குப் புதுப்பிக்கவும்.</string>
     <string name="web_live_badge">நேரலை</string>
     <string name="web_type_to_page_label">பக்கத்தில் தட்டச்சு</string>
     <string name="web_type_to_page_placeholder">முதலில் நேரலைப் பக்கத்தில் ஓர் உள்ளீட்டைச் சொடுக்கவும்</string>
@@ -1669,12 +1679,26 @@
     <string name="tab_label_style_text">உரை மட்டும்</string>
     <string name="tab_label_style_icons_and_text">ஐகான்களும் உரையும்</string>
     <string name="tab_label_style_icons">ஐகான்கள் மட்டும்</string>
+    <string name="tab_label_style_button_hint">தாவல் லேபிள்கள்: உரை, ஐகான்கள் அல்லது இரண்டும். மாற்ற கிளிக் செய்யவும்.</string>
+    <string name="tab_label_margin_hint">தாவல் இடைவெளி: ஒவ்வொரு தாவலுக்கும் எவ்வளவு இடம். மாற்ற கிளிக் செய்யவும்.</string>
+    <string name="tab_label_margin_small">சிறியது</string>
+    <string name="tab_label_margin_small_normal">நடுத்தர-சிறியது</string>
+    <string name="tab_label_margin_normal">இயல்பானது</string>
+    <string name="tab_label_margin_normal_large">நடுத்தர-பெரியது</string>
+    <string name="tab_label_margin_large">பெரியது</string>
     <string name="file_not_supported_short">ஆதரிக்கப்படவில்லை</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">தலைப்புக்கு முன் எண்</string>
     <string name="song_number_corner">மூலை</string>
     <string name="song_number_corner_off">நிறுத்தம்</string>
+    <string name="song_number_offset_needs_corner">எண்ணை விருப்பப்படி நிலைநிறுத்த மேலே ஒரு மூலையைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="song_number_offset_x">இடப்பெயர்ச்சி X %</string>
+    <string name="song_number_offset_y">இடப்பெயர்ச்சி Y %</string>
+    <string name="song_section_label">பகுதி லேபிள்</string>
+    <string name="song_section_label_enabled">தற்போதைய பகுதியைக் காட்டு (சரணம், பல்லவி…)</string>
+    <string name="song_section_label_font_size">எழுத்து அளவு</string>
+    <string name="song_section_label_color">நிறம்</string>
     <string name="fullscreen_display">முழுத்திரைக் காட்சி</string>
     <string name="display_mode_label">காட்சிப் பயன்முறை:</string>
     <string name="display_mode_one_verse">1 பத்தி</string>
@@ -1916,6 +1940,7 @@
     <string name="stt_opacity">ஒளிபுகாநிலை:</string>
     <string name="stt_position">இடம்</string>
     <string name="stt_settings_dialog_title">STT காட்சி அமைப்புகள்</string>
+    <string name="dictionary_settings_dialog_title">அகராதி காட்சி அமைப்புகள்</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI அறிக்கை</string>
@@ -2578,6 +2603,24 @@
     <string name="customize_marker">குறி</string>
     <string name="customize_bilingual">இருமொழி</string>
     <string name="customize_no_preview">இந்தப் பிரிவுக்கு முன்னோட்டம் இல்லை</string>
+    <string name="output_profile_none">எதுவுமில்லை</string>
+    <string name="output_profile_new">புதிய சுயவிவரம்</string>
+    <string name="output_profile_create_default">இயல்புநிலைச் சுயவிவரத்தை உருவாக்கு</string>
+    <string name="output_profile_create_default_tooltip">பயன்பாட்டின் தொழிற்சாலை இயல்புநிலை வடிவமைப்புடன் புதிய சுயவிவரத்தைச் சேர்க்கவும் — திரும்பிச் செல்ல ஒரு காப்பாக</string>
+    <string name="output_profile_duplicate">நகலெடு</string>
+    <string name="output_profile_rename">மறுபெயரிடு</string>
+    <string name="output_profile_delete">நீக்கு</string>
+    <string name="output_profile_delete_confirm">"%1$s" ஐ நீக்கவா? இதைச் செயல்தவிர்க்க முடியாது.</string>
+    <string name="output_profile_delete_blocked">"%1$s" ஐ நீக்க முடியாது — இது இன்னும் பயன்படுத்தப்படுகிறது: %2$s</string>
+    <string name="output_profile_usage_count">%1$d வெளியீடுகளால் பயன்படுத்தப்படுகிறது</string>
+    <string name="output_profile_name_hint">சுயவிவரப் பெயர்</string>
+    <string name="output_profile_picker_tooltip">வெளியீட்டுச் சுயவிவரம்</string>
+    <string name="output_profile_swap_menu_tooltip">வெளியீட்டுச் சுயவிவரத்தை மாற்று</string>
+    <string name="output_profile_new_name_default">புதிய சுயவிவரம்</string>
+    <string name="output_profile_display_mode">காட்சிப் பயன்முறை</string>
+    <string name="output_profile_content">உள்ளடக்கம்</string>
+    <string name="output_profile_empty_state">வடிவமைக்கத் தொடங்க ஒரு சுயவிவரத்தை உருவாக்கவும்</string>
+    <string name="output_profile_preview_resolution_tooltip">முன்னோட்ட வடிவம் மட்டுமே — வெளியீட்டின் உண்மையான தெளிவுத்திறனை அமைக்காது</string>
     <string name="customize_bible">வேதாகமம்</string>
     <string name="customize_songs">பாடல்கள்</string>
     <string name="customize_lower_third_vertical_hint">கீழே பட்டைக்குப் பதிலாக ஓரத்தில் ஒரு பட்டை.</string>
@@ -2594,6 +2637,9 @@
     <string name="customize_group_card">அட்டை</string>
     <string name="customize_group_background">திரையின் பின்னணி</string>
     <string name="customize_group_background_lower_third">கீழ்ப்பட்டைப் பின்னணி</string>
+    <string name="customize_background_source">பின்னணி</string>
+    <string name="customize_background_follow">பின்னணித் தாவலைப் பின்பற்று</string>
+    <string name="customize_background_own">தனிப்பயன்</string>
     <string name="customize_background_type">வகை</string>
     <string name="customize_background_image">படம்</string>
     <string name="customize_background_video">காணொளி</string>
@@ -2844,6 +2890,7 @@
     <string name="remote_api_calendar_enroll">இந்தச் சாதனத்திலிருந்து நாட்காட்டியைத் திட்டமிடு</string>
     <string name="remote_api_calendar_enroll_code">குறியீடு %1$s — தொலைபேசி இதே குறியீட்டைக் காட்டினால் மட்டும் அனுமதிக்கவும்</string>
     <string name="calendar_enroll_qr_title">தொலைபேசியால் ஸ்கேன் செய்யவும்</string>
+    <string name="calendar_enroll_invite_failed">அழைப்பை உருவாக்க முடியவில்லை — இந்தக் கணினியால் ரிலேயை அடைய முடியவில்லை.</string>
     <string name="calendar_enroll_qr_body">முடிக்க, நீங்கள் இப்போது அனுமதித்த தொலைபேசியால் இந்தக் குறியீட்டை ஸ்கேன் செய்யவும்.</string>
     <string name="remote_api_calendar_enroll_detail">ஒரு தொலைபேசி அல்லது டேப்லெட் எங்கிருந்தும் நாட்காட்டியில் சேவைகளைத் திட்டமிட விரும்புகிறது.</string>
     <string name="remote_activity_calendar_enroll">நாட்காட்டியைத் திட்டமிடப் பதிவு செய்யப்பட்டது</string>
@@ -2864,6 +2911,7 @@
     <string name="calendar_sync_status_unauthorized">ரிலே இந்தக் கணினியை இனி ஏற்கவில்லை. தொடர மீண்டும் இணைக்கவும்.</string>
     <string name="calendar_sync_status_other_desktop">மற்றொரு கணினி இந்த நாட்காட்டியை ஒத்திசைக்கிறது. ஒன்றின் இணைப்பை நீக்கும் வரை இது அனுப்புவதை நிறுத்தியுள்ளது.</string>
     <string name="calendar_sync_enroll_hint">தொலைபேசியைச் சேர்க்க: வழக்கம்போல இந்தக் கணினியுடன் இணைக்கவும் (சேவையக அமைப்புகள் → QR குறியீடு), பிறகு செயலியில் நாட்காட்டியைத் திறந்து பதிவு செய் என்பதைத் தட்டவும். இங்கே அனுமதி கேட்கப்படும்.</string>
+    <string name="calendar_sync_invite">தொலைபேசியை அழை…</string>
     <string name="calendar_sync_sync_now">இப்போது ஒத்திசை</string>
     <string name="calendar_sync_unpair">புதிய விசையுடன் மீண்டும் தொடங்கு</string>
     <string name="calendar_sync_devices">பதிவு செய்யப்பட்ட தொலைபேசிகள்</string>

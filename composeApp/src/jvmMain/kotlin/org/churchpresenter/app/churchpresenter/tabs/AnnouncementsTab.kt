@@ -46,7 +46,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.layout.onSizeChanged
@@ -63,19 +62,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.Text
@@ -162,8 +158,6 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
@@ -181,10 +175,18 @@ import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.LocalContentColor
 
-private const val POSITION_GRID_COLUMNS = 3
-private const val POSITION_TILE_ASPECT_ABBREV = 1.5f
-private const val POSITION_TILE_ASPECT_FULL = 3f
+private val STEP_KEY_HEIGHT = 20.dp
+private val STEP_KEY_WIDTH = 40.dp
+private val STEP_GAP = 3.dp
+private val WELL_WIDTH = 46.dp
+private val WELL_HEIGHT = 36.dp
 private const val HOURS_PER_HALF_DAY = 12
 private const val HOUR_WRAP_OFFSET = 11
 private const val HOURS_PER_DAY = 24
@@ -341,8 +343,7 @@ fun AnnouncementsTab(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 BasicTextField(
@@ -520,8 +521,22 @@ fun AnnouncementsTab(
                         } else {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                 ColorPickerField(label = stringResource(Res.string.announcement_background_color_label), color = viewModel.backgroundColor, onColorChange = { viewModel.setBackgroundColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.weight(1f))
-                                OutlinedButton(onClick = { viewModel.setBackgroundColor("transparent"); viewModel.saveToSettings(onSettingsChange) }, shape = RoundedCornerShape(8.dp)) {
-                                    Text(stringResource(Res.string.transparent_default), style = MaterialTheme.typography.labelMedium)
+                                KeyButton(
+                                    onClick = {
+                                        viewModel.setBackgroundColor("transparent")
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    // Compact, so the color field beside it keeps its width.
+                                    contentPadding = PaddingValues(horizontal = 10.dp),
+                                    modifier = Modifier.height(42.dp)
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.transparent_default),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
                                 }
                             }
                         }
@@ -529,54 +544,14 @@ fun AnnouncementsTab(
 
                     // Position on screen
                     SectionLabel(stringResource(Res.string.position_on_screen))
-                    BoxWithConstraints(modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth()) {
-                        val useAbbrev = maxWidth / 3 < 80.dp
-                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                            positions.chunked(POSITION_GRID_COLUMNS).forEach { rowItems ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
-                                ) {
-                                    rowItems.forEach { (posConst, posLabel) ->
-                                        val isSelected = viewModel.position == posConst
-                                        val displayLabel = if (useAbbrev)
-                                            posLabel.split(" ").joinToString("") { it.first().toString() }
-                                        else posLabel
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(if (useAbbrev) POSITION_TILE_ASPECT_ABBREV else POSITION_TILE_ASPECT_FULL)
-                                                .clip(RoundedCornerShape(3.dp))
-                                                .background(
-                                                    if (isSelected) MaterialTheme.colorScheme.primary
-                                                    else MaterialTheme.colorScheme.surfaceVariant
-                                                )
-                                                .border(
-                                                    BorderStroke(
-                                                        1.dp,
-                                                        if (isSelected) MaterialTheme.colorScheme.primary
-                                                        else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-                                                    ),
-                                                    RoundedCornerShape(3.dp)
-                                                )
-                                                .clickable {
-                                                    viewModel.setPosition(posConst)
-                                                    viewModel.saveToSettings(onSettingsChange)
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = displayLabel,
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                                        else MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    ScreenPositionPicker(
+                        positions = positions,
+                        selected = viewModel.position,
+                        onSelect = { posConst ->
+                            viewModel.setPosition(posConst)
+                            viewModel.saveToSettings(onSettingsChange)
+                        },
+                    )
 
                     // ── TIMER section ──────────────────────────────────────
                     Column(
@@ -599,34 +574,24 @@ fun AnnouncementsTab(
                         fun displayHour(hour24: Int): Int =
                             if (use24Hour) hour24 else ((hour24 + HOUR_WRAP_OFFSET) % HOURS_PER_HALF_DAY) + 1
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            SegmentedButton(
-                                items = listOf(
-                                    SegmentedButtonItem(Constants.TIMER_MODE_DURATION, timerLabel),
-                                    SegmentedButtonItem(Constants.TIMER_MODE_COUNT_UP, timerModeDurationLabel),
-                                    SegmentedButtonItem(Constants.TIMER_MODE_CLOCK, timerModeClockLabel),
-                                    SegmentedButtonItem(Constants.TIMER_MODE_CLOCK_DISPLAY, timerModeClockDisplayLabel)
-                                ),
-                                selectedValue = viewModel.timerMode,
-                                onValueChange = { mode ->
-                                    // Switching modes makes whatever was ticking on presenterManager stale
-                                    // (it's counting down/up for a mode that's no longer selected) — stop it,
-                                    // and release live status so the new mode starts as preview-only again.
-                                    presenterManager?.pauseAnnouncementTimer(0)
-                                    presenterManager?.setAnnouncementTickerLive(false)
-                                    viewModel.setTimerMode(mode)
-                                    viewModel.saveToSettings(onSettingsChange)
-                                },
-                                buttonWidth = 76.dp,
-                                buttonHeight = 28.dp,
-                                fontSize = 9.sp,
-                                compactColumns = 2
-                            )
-                        }
+                        TimerModeTrack(
+                            modes = listOf(
+                                Constants.TIMER_MODE_DURATION to timerLabel,
+                                Constants.TIMER_MODE_COUNT_UP to timerModeDurationLabel,
+                                Constants.TIMER_MODE_CLOCK to timerModeClockLabel,
+                                Constants.TIMER_MODE_CLOCK_DISPLAY to timerModeClockDisplayLabel,
+                            ),
+                            selected = viewModel.timerMode,
+                            onSelect = { mode ->
+                                // Switching modes makes whatever was ticking on presenterManager stale
+                                // (it's counting down/up for a mode that's no longer selected) — stop it,
+                                // and release live status so the new mode starts as preview-only again.
+                                presenterManager?.pauseAnnouncementTimer(0)
+                                presenterManager?.setAnnouncementTickerLive(false)
+                                viewModel.setTimerMode(mode)
+                                viewModel.saveToSettings(onSettingsChange)
+                            },
+                        )
 
                         // Countdown / count-up / live clock display
                         Text(
@@ -657,11 +622,11 @@ fun AnnouncementsTab(
 
                         // Steppers
                         val sepColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                        val sepStyle = MaterialTheme.typography.displaySmall
-                        // separator aligns with the center of the number field (after 28dp button + 4dp gap)
+                        val sepStyle = MaterialTheme.typography.titleLarge
+                        // separator aligns with the center of the number well (after the + key and its gap)
                         val sepBox: @Composable () -> Unit = {
                             Box(
-                                modifier = Modifier.padding(top = 28.dp + 4.dp).height(64.dp),
+                                modifier = Modifier.padding(top = STEP_KEY_HEIGHT + STEP_GAP).height(WELL_HEIGHT),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(":", style = sepStyle, color = sepColor)
@@ -676,7 +641,7 @@ fun AnnouncementsTab(
                             LaunchedEffect(viewModel.timerSeconds) { secText = "%02d".format(viewModel.timerSeconds) }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                                 verticalAlignment = Alignment.Top
                             ) {
                                 TimerColumn(hrText, hrLabel,
@@ -706,7 +671,7 @@ fun AnnouncementsTab(
                             LaunchedEffect(viewModel.targetSecond) { tSecText = "%02d".format(viewModel.targetSecond) }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                                 verticalAlignment = Alignment.Top
                             ) {
                                 TimerColumn(tHrText, hrLabel,
@@ -878,8 +843,7 @@ fun AnnouncementsTab(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 BasicTextField(
@@ -1224,6 +1188,44 @@ private fun SectionLabel(text: String) {
     }
 }
 
+/** The four timer types in one sunken track, two to a row. */
+@Composable
+private fun TimerModeTrack(
+    modes: List<Pair<String, String>>,
+    selected: String,
+    onSelect: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .sunken(RoundedCornerShape(10.dp), elevationPalette())
+            .padding(3.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        modes.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                row.forEach { (mode, label) ->
+                    SegmentTrackItem(
+                        selected = mode == selected,
+                        onClick = { onSelect(mode) },
+                        modifier = Modifier.weight(1f).height(30.dp),
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (mode == selected) FontWeight.Bold else FontWeight.SemiBold,
+                            color = LocalContentColor.current,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One unit of the time picker: a raised + key, the digits in a sunken well, a raised - key, the unit. */
 @Composable
 private fun TimerColumn(
     value: String,
@@ -1232,79 +1234,76 @@ private fun TimerColumn(
     onDecrement: () -> Unit,
     onValueChange: (String) -> Unit
 ) {
-    val buttonColor = MaterialTheme.colorScheme.surfaceVariant
-    val buttonShape = RoundedCornerShape(10.dp)
+    val keyShape = RoundedCornerShape(9.dp)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(STEP_GAP)
     ) {
-        Button(
+        KeyButton(
             onClick = onIncrement,
-            modifier = Modifier.height(28.dp).widthIn(min = 48.dp),
-            shape = buttonShape,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = buttonColor,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            modifier = Modifier.height(STEP_KEY_HEIGHT).width(STEP_KEY_WIDTH),
+            shape = keyShape,
+            contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Add, contentDescription = null)
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(12.dp))
         }
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            textStyle = MaterialTheme.typography.displaySmall.copy(
+            textStyle = MaterialTheme.typography.titleLarge.copy(
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.SemiBold,
+                fontFeatureSettings = "tnum",
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             singleLine = true,
             modifier = Modifier
-                .size(68.dp, 64.dp)
-                .background(buttonColor, buttonShape)
-                .padding(horizontal = 4.dp),
+                .size(WELL_WIDTH, WELL_HEIGHT)
+                .sunken(RoundedCornerShape(10.dp), elevationPalette())
+                .padding(horizontal = 2.dp),
             decorationBox = { inner ->
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { inner() }
             }
         )
-        Button(
+        KeyButton(
             onClick = onDecrement,
-            modifier = Modifier.height(28.dp).widthIn(min = 48.dp),
-            shape = buttonShape,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = buttonColor,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            modifier = Modifier.height(STEP_KEY_HEIGHT).width(STEP_KEY_WIDTH),
+            shape = keyShape,
+            contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Remove, contentDescription = null)
+            Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(12.dp))
         }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
     }
 }
 
 @Composable
 private fun AmPmToggle(isPm: Boolean, onToggle: () -> Unit) {
-    val buttonColor = MaterialTheme.colorScheme.surfaceVariant
-    val buttonShape = RoundedCornerShape(10.dp)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(STEP_GAP)
     ) {
-        Spacer(Modifier.height(28.dp))
-        Box(
-            modifier = Modifier
-                .size(52.dp, 64.dp)
-                .background(buttonColor, buttonShape)
-                .clickable(onClick = onToggle),
-            contentAlignment = Alignment.Center
+        Spacer(Modifier.height(STEP_KEY_HEIGHT))
+        KeyButton(
+            onClick = onToggle,
+            modifier = Modifier.size(40.dp, WELL_HEIGHT),
+            shape = RoundedCornerShape(10.dp),
+            contentPadding = PaddingValues(0.dp),
         ) {
             Text(
                 text = stringResource(if (isPm) Res.string.timer_pm else Res.string.timer_am),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                softWrap = false,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(STEP_KEY_HEIGHT))
     }
 }

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -99,7 +99,7 @@ internal fun PanelResizeHandle(
             GripDots(dotColor, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             GripDots(dotColor, Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp))
         }
-        IconButton(onClick = onToggleCollapsed, modifier = Modifier.wrapContentHeight()) {
+        KeyIconButton(onClick = onToggleCollapsed, modifier = Modifier.wrapContentHeight()) {
             Icon(
                 painter = icon,
                 contentDescription = contentDescription,

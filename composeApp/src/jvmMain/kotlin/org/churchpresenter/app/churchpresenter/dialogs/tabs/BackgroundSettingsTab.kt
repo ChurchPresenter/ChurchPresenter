@@ -35,13 +35,13 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -891,7 +891,7 @@ private fun TooltipIconButton(
         },
         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
     ) {
-        IconButton(onClick = onClick) {
+        KeyIconButton(onClick = onClick) {
             Icon(icon, contentDescription = tooltip)
         }
     }
@@ -1243,7 +1243,7 @@ private fun QuickBackgroundPanelFooter(onCancel: () -> Unit, onConfirm: () -> Un
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextButton(
+        GhostButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
@@ -1251,7 +1251,7 @@ private fun QuickBackgroundPanelFooter(onCancel: () -> Unit, onConfirm: () -> Un
             Text(stringResource(Res.string.cancel))
         }
         Spacer(Modifier.width(8.dp))
-        Button(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+        RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
             Text(stringResource(Res.string.ok))
         }
     }

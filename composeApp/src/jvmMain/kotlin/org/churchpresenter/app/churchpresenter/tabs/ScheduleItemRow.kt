@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
@@ -82,6 +81,11 @@ import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemPaletteIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.RaisedFill
+import androidx.compose.ui.graphics.lerp
 private const val PALETTE_SIZE = 4
 private const val GRADIENT_MIDPOINT = 0.35f
 
@@ -275,8 +279,22 @@ internal fun ScheduleItemRow(
                 .fillMaxWidth()
                 .testTag(SCHEDULE_ROW_CARD_TAG)
                 .hoverable(interactionSource)
-                .clip(CARD_SHAPE)
-                .background(cardBg, CARD_SHAPE)
+                // Raised off the list in its own color: a touch lighter along the top, a soft
+                // shadow, lifted further while selected and a step more under the pointer.
+                .raised(
+                    CARD_SHAPE,
+                    RaisedFill(
+                        top = lerp(cardBg, Color.White, CARD_TOP_LIFT),
+                        bottom = cardBg,
+                        ink = MaterialTheme.colorScheme.onSurface,
+                        highlight = Color.Transparent,
+                        glow = Color.Black,
+                    ),
+                    elevationPalette(),
+                    hovered = hovered,
+                    lift = if (isSelected) CARD_LIFT_SELECTED else CARD_LIFT,
+                    moves = false,
+                )
                 .border(1.dp, cardBorder, CARD_SHAPE)
         ) {
             Row(
@@ -585,12 +603,10 @@ private fun ScheduleRowNoteEditor(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(7.dp))
-            .border(
-                width = 1.dp,
-                color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(7.dp)
+            .sunken(
+                RoundedCornerShape(7.dp),
+                elevationPalette(),
+                rim = if (noteFieldFocused) MaterialTheme.colorScheme.primary else Color.Unspecified
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -663,3 +679,7 @@ internal fun ScheduleItemContent(
     ScheduleRowDetailLine(item = item, density = density)
     ScheduleRowKindChips(item = item, density = density)
 }
+
+private val CARD_LIFT = 2.dp
+private val CARD_LIFT_SELECTED = 4.dp
+private const val CARD_TOP_LIFT = 0.05f

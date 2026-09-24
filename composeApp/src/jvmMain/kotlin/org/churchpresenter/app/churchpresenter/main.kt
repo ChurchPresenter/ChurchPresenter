@@ -2168,6 +2168,16 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                             },
                                         ),
                                     ),
+                                    // The invite QR belongs to the calendar window, so opening it
+                                    // keeps the calendar in front.
+                                    dialogs = {
+                                        calendarEnrollQr?.let { invite ->
+                                            CalendarEnrollQrDialog(
+                                                invite = invite,
+                                                onDismiss = { calendarEnrollQr = null },
+                                            )
+                                        }
+                                    },
                                     onClose = { showCalendarWindow = false }
                                 )
                             }
@@ -2218,9 +2228,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onDismiss = { pendingUpdateResult = null }
                             )
 
-                            calendarEnrollQr?.let { invite ->
-                                CalendarEnrollQrDialog(invite = invite, onDismiss = { calendarEnrollQr = null })
-                            }
 
                             val currentRemote = remoteEventQueue.firstOrNull()
                             val currentClientId = currentRemote?.first?.clientId ?: ""

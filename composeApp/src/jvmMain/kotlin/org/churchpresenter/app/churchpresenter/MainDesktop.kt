@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -56,7 +56,7 @@ import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.material3.Checkbox
+import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -95,6 +95,8 @@ import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.app.churchpresenter.composables.PanelResizeHandle
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
+import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
@@ -1145,11 +1147,11 @@ fun MainDesktop(
                             // != DISCONNECTED (not just CONNECTED/CONNECTING) so the operator can
                             // stop an ERROR-state retry loop without reopening the dialog.
                             if (canDisconnectInstanceLink(instanceLinkConnectionStatus)) {
-                                TextButton(onClick = onInstanceLinkDisconnect) {
+                                GhostButton(onClick = onInstanceLinkDisconnect) {
                                     Text(stringResource(Res.string.menu_disconnect), style = MaterialTheme.typography.labelSmall)
                                 }
                             } else {
-                                TextButton(onClick = onInstanceLinkConnect) {
+                                GhostButton(onClick = onInstanceLinkConnect) {
                                     Text(stringResource(Res.string.connect), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
@@ -1500,12 +1502,13 @@ fun MainDesktop(
                         // Tab visibility dropdown button
                         var showTabVisibilityMenu by remember { mutableStateOf(false) }
                         Box {
-                            TooltipIconButton(
+                            ToolbarKey(
                                 painter = rememberVectorPainter(Icons.Default.Tune),
                                 text = stringResource(Res.string.tab_visibility),
                                 onClick = { showTabVisibilityMenu = true },
-                                buttonSize = 36.dp,
-                                iconTint = MaterialTheme.colorScheme.onSurface
+                                style = ToolbarKeyStyle.PANEL_TOGGLE,
+                                open = showTabVisibilityMenu,
+                                buttonSize = 40.dp,
                             )
                             DropdownMenu(
                                 expanded = showTabVisibilityMenu,
@@ -1523,7 +1526,7 @@ fun MainDesktop(
                                             }
                                         },
                                         leadingIcon = {
-                                            Checkbox(
+                                            RaisedCheckbox(
                                                 checked = isVisible,
                                                 onCheckedChange = null,
                                                 enabled = !isOnlyVisible
@@ -1534,19 +1537,19 @@ fun MainDesktop(
                                 }
                             }
                         }
-                        TooltipIconButton(
+                        ToolbarKey(
                             painter = rememberVectorPainter(Icons.Default.Wallpaper),
                             text = stringResource(Res.string.background),
                             onClick = onShowBackgroundSettings,
-                            buttonSize = 36.dp,
-                            iconTint = MaterialTheme.colorScheme.onSurface
+                            style = ToolbarKeyStyle.PANEL_TOGGLE,
+                            buttonSize = 40.dp,
                         )
-                        TooltipIconButton(
+                        ToolbarKey(
                             painter = painterResource(Res.drawable.ic_settings),
                             text = stringResource(Res.string.tooltip_settings),
                             onClick = onShowSettings,
-                            buttonSize = 36.dp,
-                            iconTint = MaterialTheme.colorScheme.onSurface
+                            style = ToolbarKeyStyle.PANEL_TOGGLE,
+                            buttonSize = 40.dp,
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
@@ -2153,12 +2156,13 @@ private fun ScheduleSidebarCompanionPanel(
 private fun PreviewSettingsButton(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
     Box {
         var open by remember { mutableStateOf(false) }
-        TooltipIconButton(
+        ToolbarKey(
             painter = painterResource(Res.drawable.ic_settings),
             text = stringResource(Res.string.tooltip_preview_settings),
             onClick = { open = true },
-            buttonSize = 36.dp,
-            iconTint = if (open) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            style = ToolbarKeyStyle.PANEL_TOGGLE,
+            open = open,
+            buttonSize = 40.dp,
         )
         PreviewGroupsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
     }

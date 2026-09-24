@@ -59,6 +59,8 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /** The panel is a fixed slab: the names it lists are long and must not resize as they are filtered. */
 internal val FONT_PANEL_WIDTH = 378.dp
@@ -81,8 +83,7 @@ internal fun FontSearchRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(28.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .sunken(RoundedCornerShape(6.dp), elevationPalette())
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

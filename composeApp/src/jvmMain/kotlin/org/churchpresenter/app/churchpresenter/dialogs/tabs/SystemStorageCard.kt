@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -420,7 +420,7 @@ private fun StorageRow(
             }
         }
         StoragePathField(folder.path, status, modifier = Modifier.weight(1f))
-        Button(
+        RaisedButton(
             onClick = {
                 scope.launch {
                     fileManager.chooseDirectory(currentDirectory = folder.path)?.let(folder.onPathChange)
@@ -438,7 +438,7 @@ private fun StorageRow(
         }
         val useDefault = folder.onUseDefault
         if (useDefault != null) {
-            Button(
+            RaisedButton(
                 onClick = useDefault,
                 enabled = !folder.isDefault,
                 modifier = Modifier.height(CONTROL_HEIGHT),
@@ -455,7 +455,7 @@ private fun StorageRow(
                 )
             }
         } else {
-            Button(
+            RaisedButton(
                 onClick = { if (folder.path.isNotEmpty()) onSetAll(folder.path) },
                 enabled = folder.path.isNotEmpty(),
                 modifier = Modifier.height(CONTROL_HEIGHT),

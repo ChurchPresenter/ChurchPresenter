@@ -7,7 +7,6 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
@@ -30,14 +29,14 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -75,11 +74,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.output_scale_mode
@@ -95,8 +91,6 @@ import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.ic_subtitles
 import churchpresenter.composeapp.generated.resources.ic_volume_off
@@ -125,7 +119,6 @@ import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
 import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.media_url_placeholder
-import churchpresenter.composeapp.generated.resources.media_volume
 import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
@@ -133,8 +126,6 @@ import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.stop
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
@@ -181,13 +172,18 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.extension
 import kotlinx.coroutines.launch
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
-private const val MENU_OFFSET_X = 100
-private const val MENU_OFFSET_Y = 60
 private const val HANDLE_VISIBLE_ALPHA = 0.01f
 
 /** Upper bound of the loop-count field; 0 means repeat forever. */
 private const val MAX_LOOP_COUNT = 99
+private const val DISABLED_TRANSPORT_ALPHA = 0.38f
+private val TRANSPORT_KEY_SIZE = 30.dp
+private val PLAY_KEY_SIZE = 38.dp
+private val VOLUME_SLIDER_WIDTH = 150.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -254,7 +250,6 @@ fun MediaTab(
 
     val viewModel = LocalMediaViewModel.current ?: return
     val focusRequester = remember { FocusRequester() }
-    var volumeExpanded by remember { mutableStateOf(false) }
     var showSubtitleSettingsDialog by remember { mutableStateOf(false) }
 
     val localFileLabel = stringResource(Res.string.media_local_file)
@@ -347,7 +342,7 @@ fun MediaTab(
 
             when (selectedSourceType) {
                 Constants.MEDIA_TYPE_LOCAL -> {
-                    Button(
+                    RaisedButton(
                         onClick = {
                             scope.launch {
                                 val f = FileChooser.platformInstance.chooseSingle(
@@ -394,8 +389,7 @@ fun MediaTab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -415,7 +409,7 @@ fun MediaTab(
                             )
                         }
                     }
-                    Button(
+                    RaisedButton(
                         onClick = {
                             if (urlInput.isNotBlank()) {
                                 if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
@@ -524,7 +518,7 @@ fun MediaTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
+                    KeyIconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
                         Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     }
                 }
@@ -533,32 +527,24 @@ fun MediaTab(
                         val isPinned = path in RecentMediaFiles.pinned
                         val isActive = viewModel.isLoaded && viewModel.mediaUrl == path
                         val displayName = if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://")) path else java.io.File(path).name
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .height(26.dp)
-                                    .background(if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent, RoundedCornerShape(6.dp))
-                                    .border(1.dp, if (isActive) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
-                                    .clickable {
-                                        val ext = java.io.File(path).extension.lowercase()
-                                        val type = when {
-                                            path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
-                                            ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
-                                            else -> Constants.MEDIA_TYPE_LOCAL
-                                        }
-                                        if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
-                                        viewModel.loadMedia(path, type)
-                                        RecentMediaFiles.add(path)
-                                    }
-                                    .padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(displayName, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f), maxLines = 1)
-                            }
-                            IconButton(onClick = { RecentMediaFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star), contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin), modifier = Modifier.size(12.dp), tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))
-                            }
-                        }
+                        RecentChip(
+                            name = displayName,
+                            isActive = isActive,
+                            isPinned = isPinned,
+                            onOpen = {
+                                val ext = java.io.File(path).extension.lowercase()
+                                val type = when {
+                                    path.startsWith("http://") || path.startsWith("https://") ||
+                                        path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
+                                    ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
+                                    else -> Constants.MEDIA_TYPE_LOCAL
+                                }
+                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                viewModel.loadMedia(path, type)
+                                RecentMediaFiles.add(path)
+                            },
+                            onTogglePin = { RecentMediaFiles.togglePin(path) },
+                        )
                     }
                 }
             }
@@ -581,20 +567,34 @@ fun MediaTab(
             // One tint for every transport control, so the enabled/disabled ramp cannot drift
             // between the rewind, stop, forward and volume buttons.
             val transportTint = MaterialTheme.colorScheme.onSurface
-                .copy(alpha = if (viewModel.isLoaded) 0.7f else 0.3f)
+                .copy(alpha = if (viewModel.isLoaded) 1f else DISABLED_TRANSPORT_ALPHA)
+            val keyColors = IconButtonDefaults.iconButtonColors(
+                containerColor = Color.Transparent,
+                contentColor = transportTint,
+                disabledContentColor = transportTint,
+            )
+            val litKeyColors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContentColor = transportTint,
+            )
 
-            // Transport (inner gap 4dp)
+            // Transport: raised keys, Play the biggest and lit
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.seekBackward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
+                    RaisedIconButton(
+                        onClick = { viewModel.seekBackward() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = keyColors
+                    ) {
                         Icon(
                             painterResource(Res.drawable.ic_fast_rewind),
                             contentDescription = stringResource(Res.string.media_seek_backward),
                             modifier = Modifier.size(16.dp),
-                            tint = transportTint,
                         )
                     }
                 }
@@ -602,15 +602,12 @@ fun MediaTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    FilledIconButton(
+                    RaisedIconButton(
                         onClick = { viewModel.togglePlayPause() },
                         enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(38.dp),
+                        modifier = Modifier.size(PLAY_KEY_SIZE),
                         shape = CircleShape,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                        colors = litKeyColors
                     ) {
                         Icon(
                             painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
@@ -623,12 +620,16 @@ fun MediaTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.stop), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.stop() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
+                    RaisedIconButton(
+                        onClick = { viewModel.stop() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = keyColors
+                    ) {
                         Icon(
                             painterResource(Res.drawable.ic_stop),
                             contentDescription = stringResource(Res.string.stop),
                             modifier = Modifier.size(16.dp),
-                            tint = transportTint,
                         )
                     }
                 }
@@ -636,12 +637,16 @@ fun MediaTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.seekForward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
+                    RaisedIconButton(
+                        onClick = { viewModel.seekForward() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = keyColors
+                    ) {
                         Icon(
                             painterResource(Res.drawable.ic_fast_forward),
                             contentDescription = stringResource(Res.string.media_seek_forward),
                             modifier = Modifier.size(16.dp),
-                            tint = transportTint,
                         )
                     }
                 }
@@ -667,24 +672,11 @@ fun MediaTab(
                         offset = DpOffset(0.dp, 4.dp)
                     )
                 ) {
-                    IconButton(
+                    RaisedIconButton(
                         onClick = { viewModel.toggleLooping() },
                         enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = if (viewModel.isLooping) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                Color.Transparent
-                            },
-                            contentColor = if (viewModel.isLooping) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                transportTint
-                            },
-                            // transportTint already carries the disabled alpha ramp.
-                            disabledContentColor = transportTint,
-                        )
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = if (viewModel.isLooping) litKeyColors else keyColors
                     ) {
                         // TooltipArea is a hover popup and contributes no semantics, so without
                         // this the button would have no name at all.
@@ -729,23 +721,11 @@ fun MediaTab(
                     offset = DpOffset(0.dp, 4.dp)
                 )
             ) {
-                IconButton(
+                RaisedIconButton(
                     onClick = { onSettingsChange { s -> s.copy(mediaScaleMode = scaleMode.next()) } },
                     enabled = viewModel.isLoaded,
-                    modifier = Modifier.size(30.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (scaled) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            Color.Transparent
-                        },
-                        contentColor = if (scaled) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            transportTint
-                        },
-                        disabledContentColor = transportTint,
-                    )
+                    modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                    colors = if (scaled) litKeyColors else keyColors
                 ) {
                     Icon(
                         scaleMode.icon,
@@ -772,23 +752,11 @@ fun MediaTab(
                         offset = DpOffset(0.dp, 4.dp)
                     )
                 ) {
-                    IconButton(
+                    RaisedIconButton(
                         onClick = { subtitlesExpanded = true },
                         enabled = viewModel.isLoaded && !viewModel.isAudioFile,
-                        modifier = Modifier.size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = if (subtitlesShowing) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                Color.Transparent
-                            },
-                            contentColor = if (subtitlesShowing) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                transportTint
-                            },
-                            disabledContentColor = transportTint,
-                        )
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = if (subtitlesShowing) litKeyColors else keyColors
                     ) {
                         Icon(
                             painterResource(Res.drawable.ic_subtitles),
@@ -847,48 +815,39 @@ fun MediaTab(
             // Divider
             Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-            // Volume
-            Box {
+            // Volume: a mute key with the slider beside it, both always in the bar
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                val muteLabel = stringResource(
+                    if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
+                )
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltip = { TransportTooltip(muteLabel) },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { volumeExpanded = !volumeExpanded }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
+                    RaisedIconButton(
+                        onClick = { viewModel.toggleMute() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                        colors = keyColors
+                    ) {
                         Icon(
                             painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
-                            contentDescription = stringResource(Res.string.media_volume),
-                            modifier = Modifier.size(16.dp),
-                            tint = transportTint
+                            contentDescription = muteLabel,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
-                if (volumeExpanded) {
-                    Popup(
-                        alignment = Alignment.BottomCenter,
-                        offset = IntOffset(MENU_OFFSET_X, MENU_OFFSET_Y),
-                        onDismissRequest = { volumeExpanded = false },
-                        properties = PopupProperties(focusable = true)
-                    ) {
-                        Surface(shape = RoundedCornerShape(8.dp), tonalElevation = 8.dp, shadowElevation = 8.dp) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                                IconButton(onClick = { viewModel.toggleMute() }, modifier = Modifier.size(24.dp)) {
-                                    Icon(
-                                        painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
-                                        contentDescription = stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute),
-                                        modifier = Modifier.size(18.dp),
-                                    )
-                                }
-                                SlimSlider(
-                                    value = if (viewModel.isMuted) 0f else viewModel.volume,
-                                    onValueChange = { viewModel.setVolume(it) },
-                                    valueRange = 0f..1f,
-                                    modifier = Modifier.width(160.dp),
-                                    trailingLabel = "${(viewModel.effectiveVolume * 100).toInt()}%"
-                                )
-                            }
-                        }
-                    }
-                }
+                SlimSlider(
+                    value = if (viewModel.isMuted) 0f else viewModel.volume,
+                    onValueChange = { viewModel.setVolume(it) },
+                    valueRange = 0f..1f,
+                    enabled = viewModel.isLoaded,
+                    modifier = Modifier.width(VOLUME_SLIDER_WIDTH),
+                    trailingLabel = "${(viewModel.effectiveVolume * 100).toInt()}%"
+                )
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

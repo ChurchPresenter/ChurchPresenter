@@ -10,15 +10,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -72,6 +71,21 @@ import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.toStyleZone
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.SegmentTrack
+import org.churchpresenter.theme.components.SegmentTrackItem
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.raised
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
 
 private const val VARIANT_CARD_WIDTH = 132
 private const val BEZEL_ALPHA = 0.38f
@@ -109,21 +123,17 @@ internal fun StageMonitorLayoutPicker(
 ) {
     val counts = StageMonitorLayout.zoneCounts()
     val activeCount = layout.slots.size
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(30.dp)) {
-        counts.forEachIndexed { index, count ->
-            SegmentedButton(
+    SegmentTrack(modifier = Modifier.fillMaxWidth().height(34.dp)) {
+        counts.forEach { count ->
+            SegmentTrackItem(
                 selected = count == activeCount,
                 onClick = { StageMonitorLayout.withZoneCount(count).firstOrNull()?.let(onPick) },
-                shape = segmentedItemShape(index = index, count = counts.size),
-                colors = SegmentedButtonDefaults.colors(
-                    activeContainerColor = MaterialTheme.colorScheme.primary,
-                    activeContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                icon = {},
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
                 Text(
                     stringResource(Res.string.stage_monitor_zone_count, count),
                     style = MaterialTheme.typography.labelSmall,
+                    color = LocalContentColor.current,
                     maxLines = 1,
                 )
             }
@@ -152,15 +162,30 @@ private fun LayoutVariantCard(
     screenAspect: Float,
     onPick: () -> Unit,
 ) {
-    val border = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-    Column(
+    val palette = elevationPalette()
+    val shape = RoundedCornerShape(8.dp)
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    val accent = MaterialTheme.colorScheme.primary
+    // A raised key like every other button. The chosen one lifts higher with an accent ring, its
+    // zones turn to the accent and a tick sits in its corner -- which layout is on reads at a glance.
+    Box(
         modifier = Modifier
             .width(VARIANT_CARD_WIDTH.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(if (selected) 2.dp else 1.dp, border, RoundedCornerShape(8.dp))
-            .clickable(onClick = onPick)
-            .padding(6.dp),
+            .raised(
+                shape,
+                palette.key,
+                palette,
+                pressed = pressed,
+                hovered = hovered,
+                lift = if (selected) SELECTED_CARD_LIFT else CARD_LIFT,
+                ring = if (selected) accent else Color.Unspecified,
+            )
+            .clickable(interactionSource = interaction, indication = null, onClick = onPick),
+    ) {
+    Column(
+        modifier = Modifier.padding(6.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         TvScreenBox(
@@ -169,7 +194,11 @@ private fun LayoutVariantCard(
             bezelColor = stageMonitorBezelColor(),
             screenColor = Color.Black,
         ) {
-            LayoutMiniature(variant = variant, modifier = Modifier.fillMaxSize())
+            LayoutMiniature(
+                variant = variant,
+                modifier = Modifier.fillMaxSize(),
+                zoneColor = if (selected) accent else Color.White.copy(alpha = CELL_ALPHA),
+            )
         }
         Text(
             text = layoutLabel(variant),
@@ -180,6 +209,25 @@ private fun LayoutVariantCard(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+    if (selected) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(TICK_INSET)
+                .size(TICK_SIZE)
+                .clip(CircleShape)
+                .background(accent),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(TICK_ICON),
+            )
+        }
+    }
     }
 }
 
@@ -195,6 +243,8 @@ private fun LayoutVariantCard(
 internal fun LayoutMiniature(
     variant: StageMonitorLayout,
     modifier: Modifier = Modifier,
+    /** The zones' color: white, or the accent on the chosen layout's card. */
+    zoneColor: Color = Color.White.copy(alpha = CELL_ALPHA),
 ) {
     Column(
         modifier = modifier.padding(3.dp),
@@ -211,7 +261,7 @@ internal fun LayoutMiniature(
                             .weight(cell.weight)
                             .fillMaxSize()
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color.White.copy(alpha = CELL_ALPHA)),
+                            .background(zoneColor),
                     )
                 }
             }
@@ -291,3 +341,9 @@ internal fun metronomePositionLabel(position: MetronomePosition): String = when 
 @Composable
 internal fun stageMonitorBezelColor(): Color =
     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = BEZEL_ALPHA)
+
+private val CARD_LIFT = 3.dp
+private val SELECTED_CARD_LIFT = 6.dp
+private val TICK_SIZE = 16.dp
+private val TICK_ICON = 11.dp
+private val TICK_INSET = 4.dp

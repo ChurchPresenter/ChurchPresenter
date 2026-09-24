@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -148,7 +148,7 @@ private fun CycleButton(
         },
         modifier = Modifier.fillMaxWidth(),
     ) {
-        OutlinedButton(
+        KeyButton(
             onClick = onClick,
             modifier = modifier.fillMaxWidth().height(34.dp),
             shape = RoundedCornerShape(8.dp),

@@ -28,18 +28,26 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.theme.ElevationPalette
+import org.churchpresenter.theme.elevationPalette
+import kotlin.math.abs
 
 private const val DISABLED_ALPHA = 0.5f
-private const val HANDLE_VISIBLE_ALPHA = 0.01f
+private const val HANDLE_REST_SCALE = 0.85f
+private const val KNOB_SHADOW_ALPHA = 0.3f
+private const val KNOB_EDGE_ALPHA = 0.2f
+private val KNOB_RADIUS = 7.dp
+private val HAIRLINE = 0.5.dp
 
 /**
- * A slim, modern slider matching the media seek bar: a 5px rounded track with a teal (theme
- * `primary`) gradient fill for the selected portion, and a white handle that fades and scales in
- * only on hover or drag, so the bar stays clean at rest. Tap or drag anywhere on the track to set
- * the value.
+ * A slim slider in the elevated look: a sunken 6dp track with an accent gradient fill for the
+ * selected portion, and a raised knob that grows a little on hover or drag. Tap or drag anywhere on
+ * the track to set the value.
  *
  * The current value is shown as a numeric label at the trailing (right) end — pass [trailingLabel]
  * formatted for the unit (e.g. "80%", "45°", "1.5s"). Leave it null to omit (e.g. when a text field
@@ -59,19 +67,18 @@ fun SlimSlider(
     val end = valueRange.endInclusive
     val span = (end - start).takeIf { it != 0f } ?: 1f
     val fraction = ((value - start) / span).coerceIn(0f, 1f)
+    // Where the fill starts: zero, when the range runs either side of it -- a curve at 0% is an
+    // empty bar, not a half-full one -- and the range's start otherwise.
+    val originFraction = ((0f.coerceIn(start, end) - start) / span).coerceIn(0f, 1f)
 
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     var dragging by remember { mutableStateOf(false) }
     val active = enabled && (hovered || dragging)
-    val handleAlpha by animateFloatAsState(if (active) 1f else 0f, label = "slimHandleAlpha")
-    val handleScale by animateFloatAsState(if (active) 1f else 0.35f, label = "slimHandleScale")
+    val handleScale by animateFloatAsState(if (active) 1f else HANDLE_REST_SCALE, label = "slimHandleScale")
 
-    val primary = MaterialTheme.colorScheme.primary
-    val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
-    val playedStart = primary.copy(alpha = 0.65f)
     // Hoisted for the Canvas below, which cannot read the theme itself.
-    val handleColor = MaterialTheme.colorScheme.onPrimary
+    val palette = elevationPalette()
 
     // `pointerInput` below keeps the block it was given until one of its keys changes, so the block
     // holds whichever lambda was passed on the composition that created it. A caller whose lambda
@@ -115,24 +122,7 @@ fun SlimSlider(
             contentAlignment = Alignment.CenterStart
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val trackH = 5.dp.toPx()
-                val cy = size.height / 2f
-                val top = cy - trackH / 2f
-                val radius = CornerRadius(trackH / 2f, trackH / 2f)
-                drawRoundRect(color = trackColor, topLeft = Offset(0f, top), size = Size(size.width, trackH), cornerRadius = radius)
-                if (fraction > 0f) {
-                    val playedW = size.width * fraction
-                    drawRoundRect(
-                        brush = Brush.horizontalGradient(listOf(playedStart, primary), startX = 0f, endX = playedW.coerceAtLeast(trackH)),
-                        topLeft = Offset(0f, top),
-                        size = Size(playedW, trackH),
-                        cornerRadius = radius
-                    )
-                }
-                if (handleAlpha > HANDLE_VISIBLE_ALPHA) {
-                    val hx = (size.width * fraction).coerceIn(0f, size.width)
-                    drawCircle(color = handleColor.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
-                }
+                drawElevatedSlider(originFraction, fraction, handleScale, palette)
             }
         }
         if (trailingLabel != null) {
@@ -146,4 +136,68 @@ fun SlimSlider(
             )
         }
     }
+}
+
+/**
+ * The sunken track, its accent fill between [originFraction] and [fraction], and the raised knob
+ * at [fraction].
+ */
+private fun DrawScope.drawElevatedSlider(
+    originFraction: Float,
+    fraction: Float,
+    handleScale: Float,
+    palette: ElevationPalette,
+) {
+    val trackH = 6.dp.toPx()
+    val cy = size.height / 2f
+    val top = cy - trackH / 2f
+    val radius = CornerRadius(trackH / 2f, trackH / 2f)
+    // The sunken track: the well's gradient, darkest along its top edge.
+    drawRoundRect(
+        brush = Brush.verticalGradient(
+            listOf(palette.wellShadow, palette.wellTop, palette.wellBottom),
+            startY = top,
+            endY = top + trackH
+        ),
+        topLeft = Offset(0f, top),
+        size = Size(size.width, trackH),
+        cornerRadius = radius
+    )
+    if (fraction != originFraction) {
+        val fillStart = size.width * minOf(originFraction, fraction)
+        val playedW = size.width * abs(fraction - originFraction)
+        drawRoundRect(
+            brush = Brush.horizontalGradient(
+                listOf(palette.accent.bottom, palette.accent.top),
+                startX = fillStart,
+                endX = fillStart + playedW.coerceAtLeast(trackH)
+            ),
+            topLeft = Offset(fillStart, top),
+            size = Size(playedW, trackH),
+            cornerRadius = radius
+        )
+    }
+    // The raised knob: a soft drop shadow, then a top-lit disc with a hairline edge.
+    val hx = (size.width * fraction).coerceIn(0f, size.width)
+    val knobR = KNOB_RADIUS.toPx() * handleScale
+    drawCircle(
+        color = palette.dropShadow.copy(alpha = KNOB_SHADOW_ALPHA),
+        radius = knobR + 1.dp.toPx(),
+        center = Offset(hx, cy + 1.dp.toPx())
+    )
+    drawCircle(
+        brush = Brush.verticalGradient(
+            listOf(palette.key.top, palette.key.bottom),
+            startY = cy - knobR,
+            endY = cy + knobR
+        ),
+        radius = knobR,
+        center = Offset(hx, cy)
+    )
+    drawCircle(
+        color = palette.dropShadow.copy(alpha = KNOB_EDGE_ALPHA),
+        radius = knobR,
+        center = Offset(hx, cy),
+        style = Stroke(HAIRLINE.toPx())
+    )
 }

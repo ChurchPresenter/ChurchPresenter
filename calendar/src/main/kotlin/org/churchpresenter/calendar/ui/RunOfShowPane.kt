@@ -100,6 +100,8 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.History
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.elevationPalette
 
 private const val ROW_ALPHA = 0.45f
 private const val BADGE_ALPHA = 0.18f
@@ -112,7 +114,6 @@ private val GRIP_WIDTH = 8.dp
 private val GRIP_HEIGHT = 14.dp
 private const val GRIP_ROWS = 3
 private const val GRIP_ALPHA = 0.5f
-private const val CHIP_TINT = 0.16f
 
 /**
  * A service's run of show: one row per [ScheduleItem], in order, each with its expected clock time
@@ -417,24 +418,31 @@ private fun TimingChips(
 
 @Composable
 private fun RowChip(text: String, icon: ImageVector?, tone: Color, onClick: () -> Unit) {
+    // A raised key: the danger key when the tone is the error red (whose raw red is under 4.5:1 on
+    // a dark key), the neutral key otherwise with the tone kept on the icon.
+    val palette = elevationPalette()
+    val fill = if (tone == MaterialTheme.colorScheme.error) palette.danger else palette.key
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = Modifier
             .height(CalendarMetrics.rowAction)
-            .clip(CalendarMetrics.smallRadius)
-            .background(tone.copy(alpha = CHIP_TINT))
-            .clickable(onClick = onClick)
+            .raisedKey(CalendarMetrics.smallRadius, fill, onClick = onClick)
             .padding(horizontal = 6.dp),
     ) {
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = tone, modifier = Modifier.size(9.dp))
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = if (fill == palette.danger) fill.ink else tone,
+                modifier = Modifier.size(9.dp),
+            )
         }
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
             fontWeight = FontWeight.Bold,
-            color = tone,
+            color = fill.ink,
             maxLines = 1,
             softWrap = false,
         )
@@ -453,9 +461,13 @@ private fun RowAction(
         Box(
             Modifier
                 .size(CalendarMetrics.rowAction)
-                .clip(CalendarMetrics.smallRadius)
-                .background(scheme.surface.copy(alpha = if (enabled) 1f else 0f))
-                .clickable(enabled = enabled, onClick = onClick),
+                .then(
+                    if (enabled) {
+                        Modifier.raisedKey(CalendarMetrics.smallRadius, elevationPalette().key, onClick = onClick)
+                    } else {
+                        Modifier.clip(CalendarMetrics.smallRadius).clickable(enabled = false, onClick = onClick)
+                    }
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -666,7 +678,7 @@ private fun DurationControl(seconds: Int?, onChange: (Int?) -> Unit) {
     }
 }
 
-/** The dashed full-width control that ends the list, as in the design. */
+/** The full-width sunken well that ends the list — a click or a drop adds an item. */
 @Composable
 private fun AddItemButton(onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
@@ -677,9 +689,7 @@ private fun AddItemButton(onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(top = 4.dp)
             .height(32.dp)
-            .clip(CalendarMetrics.rowRadius)
-            .background(scheme.surfaceVariant.copy(alpha = ROW_ALPHA * 0.6f))
-            .border(1.dp, scheme.outlineVariant, CalendarMetrics.rowRadius)
+            .sunken(CalendarMetrics.rowRadius, elevationPalette())
             .clickable(onClick = onClick),
     ) {
         Icon(Icons.Filled.Add, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(13.dp))
@@ -745,17 +755,14 @@ fun NoServicesPane(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .height(CalendarMetrics.addServiceButtonHeight)
-                        .clip(CalendarMetrics.buttonRadius)
-                        .background(scheme.surfaceVariant.copy(alpha = ROW_ALPHA))
-                        .border(1.dp, scheme.outlineVariant, CalendarMetrics.buttonRadius)
-                        .clickable(onClick = onCopyLast)
+                        .raisedKey(CalendarMetrics.buttonRadius, elevationPalette().key, onClick = onCopyLast)
                         .padding(horizontal = 13.dp),
                 ) {
                     Text(
                         text = stringResource(Res.string.calendar_copy_last, copyLabel),
                         style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
                         fontWeight = FontWeight.Bold,
-                        color = scheme.onSurfaceVariant,
+                        color = elevationPalette().key.ink,
                         // The label carries a service name somebody typed, so it has no natural
                         // length limit — cap it rather than let one long name stretch the button
                         // past the pane.

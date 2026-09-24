@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -421,7 +421,7 @@ internal fun STTSettingsDialogContent(
                 }
 
                 Spacer(Modifier.height(4.dp))
-                Button(
+                RaisedButton(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     shape = RoundedCornerShape(6.dp),
                     onClick = onDismiss,

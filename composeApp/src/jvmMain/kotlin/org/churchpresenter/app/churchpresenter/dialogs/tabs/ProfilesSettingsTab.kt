@@ -20,9 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material.icons.Icons
@@ -206,7 +206,7 @@ private fun ProfilesRail(
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        OutlinedButton(onClick = onNew, modifier = Modifier.fillMaxWidth()) {
+        KeyButton(onClick = onNew, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.width(16.dp))
             Spacer(modifier = Modifier.width(6.dp))
             Text(stringResource(Res.string.output_profile_new), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -249,7 +249,7 @@ private fun RailIconTextButton(
     label: String,
     onClick: () -> Unit,
 ) {
-    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+    KeyButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Icon(icon, contentDescription = null, modifier = Modifier.width(16.dp))
         Spacer(modifier = Modifier.width(6.dp))
         Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
@@ -293,7 +293,7 @@ private fun ProfileRailRow(
                 )
             }
         }
-        IconButton(onClick = onDuplicate, modifier = Modifier.width(28.dp)) {
+        KeyIconButton(onClick = onDuplicate, modifier = Modifier.width(28.dp)) {
             Icon(
                 Icons.Filled.ContentCopy,
                 contentDescription = stringResource(Res.string.output_profile_duplicate),
@@ -301,7 +301,7 @@ private fun ProfileRailRow(
                 tint = ink,
             )
         }
-        IconButton(onClick = onRequestDelete, modifier = Modifier.width(28.dp)) {
+        KeyIconButton(onClick = onRequestDelete, modifier = Modifier.width(28.dp)) {
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(Res.string.output_profile_delete),

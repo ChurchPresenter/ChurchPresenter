@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,7 +28,7 @@ import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -91,6 +91,7 @@ import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.font.FontWeight
 
 // Values must equal each tab's own position in SettingsTabStrip's row: PrimaryScrollableTabRow's
 // selectedTabIndex/tabIndicatorOffset key off *position*, so a value that outruns its row slot
@@ -393,7 +394,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextButton(
+        GhostButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(
@@ -405,7 +406,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onApply,
             colors = ButtonDefaults.buttonColors(
@@ -418,7 +419,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(
+        RaisedButton(
             shape = RoundedCornerShape(6.dp),
             onClick = onOk,
             colors = ButtonDefaults.buttonColors(
@@ -451,5 +452,9 @@ private fun SettingsTab(
         labelStyle = labelStyle,
         labelMargin = labelMargin,
         onClick = { onSelect(index) },
+        // The main window's tab labels, so the two tab rows read as one family.
+        textStyle = MaterialTheme.typography.titleSmall.copy(
+            fontWeight = if (selectedIndex == index) FontWeight.SemiBold else FontWeight.Normal
+        ),
     )
 }

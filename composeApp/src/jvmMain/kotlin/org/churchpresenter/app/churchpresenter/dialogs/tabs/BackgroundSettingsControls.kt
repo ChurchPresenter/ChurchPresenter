@@ -79,6 +79,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import kotlin.math.roundToInt
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
 
 /** The one editor, for whichever surface the rail has open. */
 @Composable
@@ -196,8 +198,7 @@ internal fun BackgroundTypeRow(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                .sunken(RoundedCornerShape(8.dp), elevationPalette())
                 .padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)

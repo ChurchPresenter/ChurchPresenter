@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -146,7 +146,7 @@ internal fun RowScope.SongLyricsPanel(
         val dialogOpen = dialogs.editing != null || dialogs.creatingNew || dialogs.deleting != null
         val showBackToLive = isPresenting && live.songId != null && currentSong?.songId != live.songId
         if (showBackToLive && !dialogOpen) {
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 onClick = {

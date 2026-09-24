@@ -329,6 +329,7 @@
     <string name="calendar_ministry_what">ມີຫຍັງເກີດຂຶ້ນ</string>
     <string name="calendar_ministry_who">ໃຜ ຫຼື ໝາຍເຫດ</string>
     <string name="calendar_cloud_sync">ຊິງຄ໌ກັບຄລາວ ແລະ ອຸປະກອນມືຖື</string>
+    <string name="calendar_cloud_invite">ເຊີນໂທລະສັບ</string>
     <string name="calendar_cloud_sync_sub">ຮັກສາປະຕິທິນນີ້ໃຫ້ກົງກັບໂທລະສັບຜ່ານຣີເລ. ເມື່ອປິດ ຈະບໍ່ມີສິ່ງໃດອອກຈາກຄອມພິວເຕີເຄື່ອງນີ້</string>
     <string name="calendar_settings_export">ສົ່ງອອກ</string>
     <string name="calendar_export_note">ຫົວເຈ້ຍທີ່ຢູ່ຕົ້ນ PDF ທຸກໄຟລ໌ທີ່ສົ່ງອອກ ປ່ອຍຊ່ອງໃດຫວ່າງໄວ້ຖ້າບໍ່ຕ້ອງການສະແດງ</string>

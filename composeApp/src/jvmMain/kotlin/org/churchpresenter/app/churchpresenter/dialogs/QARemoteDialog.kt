@@ -3,8 +3,6 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,15 +22,15 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
+import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
@@ -110,8 +107,10 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.sunken
+import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 
-private const val POSITION_GRID_COLUMNS = 3
 
 @Composable
 fun QARemoteDialog(
@@ -271,7 +270,7 @@ internal fun QARemoteContent(
                             )
                         }
                         Spacer(Modifier.height(8.dp))
-                        Button(
+                        RaisedButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = { copyText(submissionUrl) },
                             colors = ButtonDefaults.buttonColors(
@@ -302,7 +301,7 @@ internal fun QARemoteContent(
 
                         when (tunnelStatus) {
                             TunnelStatus.Idle -> {
-                                Button(
+                                RaisedButton(
                                     onClick = onStartTunnel,
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(6.dp)
@@ -328,7 +327,7 @@ internal fun QARemoteContent(
 
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
                                     val isLocal = qaDisplayUrl.isEmpty() || qaDisplayUrl == serverUrl
-                                    Button(
+                                    RaisedButton(
                                         onClick = { onQaDisplayUrlChanged(serverUrl) },
                                         modifier = Modifier.weight(1f),
                                         colors = if (isLocal) ButtonDefaults.buttonColors(
@@ -342,7 +341,7 @@ internal fun QARemoteContent(
                                     ) {
                                         Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall)
                                     }
-                                    Button(
+                                    RaisedButton(
                                         onClick = { onQaDisplayUrlChanged(tunnelUrl) },
                                         modifier = Modifier.weight(1f),
                                         colors = if (!isLocal) ButtonDefaults.buttonColors(
@@ -359,7 +358,7 @@ internal fun QARemoteContent(
                                 }
 
                                 Spacer(Modifier.height(8.dp))
-                                Button(
+                                RaisedButton(
                                     onClick = {
                                         onStopTunnel()
                                         onQaDisplayUrlChanged(serverUrl)
@@ -382,7 +381,7 @@ internal fun QARemoteContent(
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 )
-                                Button(
+                                RaisedButton(
                                     onClick = onStartTunnel,
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(6.dp)
@@ -428,7 +427,7 @@ internal fun QARemoteContent(
                             )
                         }
                         Spacer(Modifier.height(8.dp))
-                        Button(
+                        RaisedButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = { copyText(adminQrUrl.ifEmpty { adminDisplayUrl }) },
                             colors = ButtonDefaults.buttonColors(
@@ -463,8 +462,7 @@ internal fun QARemoteContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(42.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                                .sunken(RoundedCornerShape(8.dp), elevationPalette()),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -483,7 +481,7 @@ internal fun QARemoteContent(
                                     }
                                 )
                             }
-                            FilledIconButton(
+                            RaisedIconButton(
                                 onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
                                 modifier = Modifier.size(30.dp),
                                 shape = RoundedCornerShape(5.dp),
@@ -526,23 +524,13 @@ internal fun QARemoteContent(
                             Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
                             Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
                         )
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
-                            positions.chunked(POSITION_GRID_COLUMNS).forEach { rowItems ->
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    rowItems.forEach { (posConst, posLabel) ->
-                                        val isSelected = qaSettings.position == posConst
-                                        Box(
-                                            modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
-                                                .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                                                .clickable { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) } },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        ScreenPositionPicker(
+                            positions = positions,
+                            selected = qaSettings.position,
+                            onSelect = { posConst ->
+                                onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) }
+                            },
+                        )
                     }
 
                     // ── Right: Text & Background ─────────────────────
@@ -588,7 +576,7 @@ internal fun QARemoteContent(
                             val bgIsTransparent = qaSettings.backgroundColor.equals("transparent", ignoreCase = true)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
                                 if (bgIsTransparent) {
-                                    OutlinedButton(
+                                    KeyButton(
                                         onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(6.dp),
@@ -596,7 +584,7 @@ internal fun QARemoteContent(
                                     ) { Text(stringResource(Res.string.qa_background_color) + " · " + stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
                                 } else {
                                     ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.weight(1f))
-                                    OutlinedButton(
+                                    KeyButton(
                                         onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } },
                                         shape = RoundedCornerShape(6.dp)
                                     ) { Text(stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
@@ -628,7 +616,7 @@ internal fun QARemoteContent(
             }
 
             Spacer(Modifier.height(16.dp))
-            Button(
+            RaisedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(

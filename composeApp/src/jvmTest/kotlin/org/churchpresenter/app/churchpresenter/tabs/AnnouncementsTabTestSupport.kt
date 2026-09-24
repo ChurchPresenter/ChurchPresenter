@@ -16,6 +16,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -217,5 +218,11 @@ internal fun ComposeUiTest.typeAnnouncement(text: String) {
 /** Clicks a labelled control and settles the frame. */
 internal fun ComposeUiTest.clickLabel(label: String) {
     onNodeWithText(label).performClick()
+    waitForIdle()
+}
+
+/** Clicks one of the nine spots on the position screen, which carry their name as a description. */
+internal fun ComposeUiTest.clickPosition(name: String) {
+    onNodeWithContentDescription(name).performClick()
     waitForIdle()
 }

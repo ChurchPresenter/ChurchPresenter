@@ -1,8 +1,6 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -26,7 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -93,6 +91,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
+import org.churchpresenter.theme.elevationPalette
 
 /**
  * The Calendar Manager.
@@ -545,26 +544,23 @@ private fun HeaderButton(
     onClick: () -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
-    val scheme = MaterialTheme.colorScheme
+    val key = elevationPalette().key
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(7.dp),
         modifier = Modifier
             .height(HEADER_BUTTON)
-            .clip(CalendarMetrics.buttonRadius)
-            .background(scheme.surfaceVariant.copy(alpha = 0.5f))
-            .border(1.dp, scheme.outlineVariant, CalendarMetrics.buttonRadius)
-            .clickable(onClick = onClick)
+            .raisedKey(CalendarMetrics.buttonRadius, key, onClick = onClick)
             .padding(horizontal = 12.dp),
     ) {
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
+            Icon(icon, contentDescription = null, tint = key.ink, modifier = Modifier.size(13.dp))
         }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
             fontWeight = FontWeight.SemiBold,
-            color = scheme.onSurfaceVariant,
+            color = key.ink,
             maxLines = 1,
             softWrap = false,
         )
@@ -574,8 +570,8 @@ private fun HeaderButton(
 /**
  * The window's bottom bar: what the automation will do, then Close and Load into Schedule.
  *
- * The two are deliberately unalike. Load is the primary action and is filled with it; Close is the
- * quiet bordered one beside it, so the pair does not read as two equal choices.
+ * The two are deliberately unalike. Load is the primary action, raised in the accent; Close is the
+ * neutral key beside it, so the pair does not read as two equal choices.
  */
 @Composable
 private fun Footer(status: String, onLoad: (() -> Unit)?, onClose: (() -> Unit)?) {
@@ -603,27 +599,26 @@ private fun Footer(status: String, onLoad: (() -> Unit)?, onClose: (() -> Unit)?
             )
         }
         if (onLoad == null) return@Row
+        val accent = elevationPalette().accent
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier
                 .height(CalendarMetrics.addServiceButtonHeight)
-                .clip(CalendarMetrics.buttonRadius)
-                .background(scheme.primary)
-                .clickable(onClick = onLoad)
+                .raisedKey(CalendarMetrics.buttonRadius, accent, onClick = onLoad)
                 .padding(horizontal = 13.dp),
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.PlaylistAdd,
                 contentDescription = null,
-                tint = scheme.onPrimary,
+                tint = accent.ink,
                 modifier = Modifier.size(15.dp),
             )
             Text(
                 text = stringResource(Res.string.calendar_load_into_schedule),
                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.5.sp),
                 fontWeight = FontWeight.Bold,
-                color = scheme.onPrimary,
+                color = accent.ink,
             )
         }
     }
@@ -672,7 +667,7 @@ private fun RecoveryBanner(source: CalendarSource, onDismiss: () -> Unit) {
                 color = scheme.onErrorContainer,
             )
         }
-        TextButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_dismiss)) }
+        GhostButton(onClick = onDismiss) { Text(stringResource(Res.string.calendar_dismiss)) }
     }
 }
 

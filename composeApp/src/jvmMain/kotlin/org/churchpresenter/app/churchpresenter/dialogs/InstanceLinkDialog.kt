@@ -11,13 +11,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -409,7 +409,7 @@ internal fun InstanceLinkDialogContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (connectionStatus != InstanceLinkStatus.DISCONNECTED) {
-                        TextButton(shape = RoundedCornerShape(6.dp), onClick = onDisconnect) {
+                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDisconnect) {
                             Text(
                                 stringResource(Res.string.menu_disconnect),
                                 style = MaterialTheme.typography.labelLarge
@@ -418,7 +418,7 @@ internal fun InstanceLinkDialogContent(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
 
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(
                             stringResource(Res.string.cancel),
                             style = MaterialTheme.typography.labelLarge
@@ -430,7 +430,7 @@ internal fun InstanceLinkDialogContent(
                     // Always available, including with no host yet: turning autoConnect back off, or
                     // switching role, is a legitimate edit on its own and must not require a live
                     // connection to persist.
-                    TextButton(
+                    GhostButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             onSave(edited())
@@ -445,10 +445,10 @@ internal fun InstanceLinkDialogContent(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Button(
+                    RaisedButton(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
-                            if (portText.toIntOrNull() == null) return@Button
+                            if (portText.toIntOrNull() == null) return@RaisedButton
                             onConnect(edited())
                             onDismiss()
                         },

@@ -39,6 +39,7 @@
     <string name="service_schedule">Kjøreplan:</string>
     <string name="songs">Sanger</string>
     <string name="song">Sang</string>
+    <string name="output_profiles_tab">Profiler</string>
     <string name="bible">Bibel</string>
     <string name="pictures">Bilder</string>
     <string name="presentation">Presentasjon</string>
@@ -351,6 +352,7 @@
     <string name="word_wrap">Tekstbryting</string>
     <string name="show_on_first_page_only">Vis bare på første side</string>
     <string name="position_on_screen">Plassering på skjermen:</string>
+    <string name="position_showing_at">Vises ved</string>
     <string name="top_left">Øverst til venstre</string>
     <string name="top_right">Øverst til høyre</string>
     <string name="bottom_left">Nederst til venstre</string>
@@ -671,6 +673,7 @@
     <string name="tooltip_presentation_remote">Åpne fjernkontroll</string>
     <string name="tooltip_qa_remote">Deling og fjerntilgang</string>
     <string name="tooltip_stt_settings">Visningsinnstillinger for STT</string>
+    <string name="tooltip_dictionary_settings">Visningsinnstillinger for ordbok</string>
     <string name="tooltip_send_to_stage_monitor">Send til scenemonitor</string>
     <string name="tooltip_hide_from_stage_monitor">Skjul kunngjøringen</string>
     <string name="tooltip_add_label">Legg til etikett</string>
@@ -715,6 +718,7 @@
     <string name="loop">Gjenta</string>
     <string name="loop_on">Gjenta: på</string>
     <string name="loop_off">Gjenta: av</string>
+    <string name="output_scale_mode">Skala: %1$s</string>
     <string name="transition_duration">Overgangstid:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -787,6 +791,10 @@
     <string name="windows_count_label">Vinduer (1-3)</string>
     <string name="window_position">Vindusplassering</string>
     <string name="text_margins">Tekstmarger</string>
+    <string name="content_region">Innholdsområde</string>
+    <string name="content_region_width">Bredde %</string>
+    <string name="content_region_x_offset">X-forskyvning %</string>
+    <string name="content_region_y_offset">Y-forskyvning %</string>
     <string name="end_of_song_spacing">Avstand ved sangslutt (*)</string>
     <string name="auto_fit">Auto</string>
     <string name="auto_fit_checkbox_tooltip">Tilpass teksten til skjermen automatisk, med skriftstørrelsen som øvre grense</string>
@@ -1115,6 +1123,8 @@
     <string name="web_engine_unavailable_body">Nettlesermotoren kunne ikke startes. Installer Microsoft Visual C++ Redistributable (x64) og start programmet på nytt.</string>
     <string name="web_engine_unavailable_macos_title">Nettleseren krever en nyere macOS</string>
     <string name="web_engine_unavailable_macos_body">Nettlesermotoren i ChurchPresenter støtter ikke denne macOS-versjonen lenger. Oppdater til macOS 12 (Monterey) eller nyere for å bruke Nett-fanen og Browser Source.</string>
+    <string name="web_engine_unavailable_windows_title">Nettleseren krever Windows 10 eller nyere</string>
+    <string name="web_engine_unavailable_windows_body">ChurchPresenters nettlesermotor støtter ikke lenger denne versjonen av Windows. Oppdater til Windows 10 eller nyere for å bruke Nett-fanen og nettleserkilder.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Skriv til siden</string>
     <string name="web_type_to_page_placeholder">Klikk først i et felt på den live siden</string>
@@ -1664,12 +1674,26 @@
     <string name="tab_label_style_text">Kun tekst</string>
     <string name="tab_label_style_icons_and_text">Ikoner og tekst</string>
     <string name="tab_label_style_icons">Kun ikoner</string>
+    <string name="tab_label_style_button_hint">Faneetiketter: tekst, ikoner eller begge. Klikk for å endre.</string>
+    <string name="tab_label_margin_hint">Faneavstand: hvor mye plass hver fane får. Klikk for å endre.</string>
+    <string name="tab_label_margin_small">Liten</string>
+    <string name="tab_label_margin_small_normal">Litt liten</string>
+    <string name="tab_label_margin_normal">Normal</string>
+    <string name="tab_label_margin_normal_large">Litt stor</string>
+    <string name="tab_label_margin_large">Stor</string>
     <string name="file_not_supported_short">støttes ikke</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Nummer før tittel</string>
     <string name="song_number_corner">Hjørne</string>
     <string name="song_number_corner_off">Av</string>
+    <string name="song_number_offset_needs_corner">Velg et hjørne ovenfor for å plassere nummeret fritt</string>
+    <string name="song_number_offset_x">Forskyvning X %</string>
+    <string name="song_number_offset_y">Forskyvning Y %</string>
+    <string name="song_section_label">Avsnittsetikett</string>
+    <string name="song_section_label_enabled">Vis gjeldende avsnitt (Vers, Refreng…)</string>
+    <string name="song_section_label_font_size">Skriftstørrelse</string>
+    <string name="song_section_label_color">Farge</string>
     <string name="fullscreen_display">Fullskjermvisning</string>
     <string name="display_mode_label">Visningsmodus:</string>
     <string name="display_mode_one_verse">1 vers</string>
@@ -1911,6 +1935,7 @@
     <string name="stt_opacity">Dekkevne:</string>
     <string name="stt_position">Plassering</string>
     <string name="stt_settings_dialog_title">Visningsinnstillinger for STT</string>
+    <string name="dictionary_settings_dialog_title">Visningsinnstillinger for ordbok</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI-rapport</string>
@@ -2573,6 +2598,24 @@
     <string name="customize_marker">Markør</string>
     <string name="customize_bilingual">Tospråklig</string>
     <string name="customize_no_preview">Ingen forhåndsvisning for denne delen</string>
+    <string name="output_profile_none">Ingen</string>
+    <string name="output_profile_new">Ny profil</string>
+    <string name="output_profile_create_default">Opprett standardprofil</string>
+    <string name="output_profile_create_default_tooltip">Legg til en ny profil med appens fabrikkstandardstil, som en reserve å falle tilbake på</string>
+    <string name="output_profile_duplicate">Dupliser</string>
+    <string name="output_profile_rename">Gi nytt navn</string>
+    <string name="output_profile_delete">Slett</string>
+    <string name="output_profile_delete_confirm">Slette «%1$s»? Dette kan ikke angres.</string>
+    <string name="output_profile_delete_blocked">Kan ikke slette «%1$s» — den brukes fortsatt av: %2$s</string>
+    <string name="output_profile_usage_count">Brukes av %1$d utgang(er)</string>
+    <string name="output_profile_name_hint">Profilnavn</string>
+    <string name="output_profile_picker_tooltip">Utgangsprofil</string>
+    <string name="output_profile_swap_menu_tooltip">Bytt utgangsprofil</string>
+    <string name="output_profile_new_name_default">Ny profil</string>
+    <string name="output_profile_display_mode">Visningsmodus</string>
+    <string name="output_profile_content">Innhold</string>
+    <string name="output_profile_empty_state">Opprett en profil for å begynne å style den</string>
+    <string name="output_profile_preview_resolution_tooltip">Kun forhåndsvisningens form — endrer ikke utgangens faktiske oppløsning</string>
     <string name="customize_bible">Bibel</string>
     <string name="customize_songs">Sanger</string>
     <string name="customize_lower_third_vertical_hint">En stripe langs siden i stedet for et bånd nederst.</string>
@@ -2589,6 +2632,9 @@
     <string name="customize_group_card">Kort</string>
     <string name="customize_group_background">Skjermbakgrunn</string>
     <string name="customize_group_background_lower_third">Bakgrunn for nedre tredjedel</string>
+    <string name="customize_background_source">Bakgrunn</string>
+    <string name="customize_background_follow">Følg Bakgrunn-fanen</string>
+    <string name="customize_background_own">Egendefinert</string>
     <string name="customize_background_type">Type</string>
     <string name="customize_background_image">Bilde</string>
     <string name="customize_background_video">Video</string>
@@ -2838,6 +2884,7 @@
     <string name="remote_api_calendar_enroll">Planlegg kalenderen fra denne enheten</string>
     <string name="remote_api_calendar_enroll_code">Kode %1$s — tillat bare hvis telefonen viser samme kode</string>
     <string name="calendar_enroll_qr_title">Skann med telefonen</string>
+    <string name="calendar_enroll_invite_failed">Kunne ikke opprette en invitasjon — denne datamaskinen fikk ikke kontakt med reléet.</string>
     <string name="calendar_enroll_qr_body">Skann denne koden med telefonen du nettopp tillot for å fullføre.</string>
     <string name="remote_api_calendar_enroll_detail">En telefon eller et nettbrett vil planlegge gudstjenester i kalenderen fra hvor som helst.</string>
     <string name="remote_activity_calendar_enroll">Registrert for å planlegge kalenderen</string>
@@ -2858,6 +2905,7 @@
     <string name="calendar_sync_status_unauthorized">Reléet godtar ikke lenger denne datamaskinen. Par på nytt for å fortsette.</string>
     <string name="calendar_sync_status_other_desktop">En annen datamaskin synkroniserer denne kalenderen. Denne har sluttet å sende til du kobler fra én av dem.</string>
     <string name="calendar_sync_enroll_hint">Slik legger du til en telefon: koble den til denne datamaskinen som vanlig (Serverinnstillinger → QR-kode), åpne deretter Kalender i appen og trykk Registrer. Du blir bedt om å tillate den her.</string>
+    <string name="calendar_sync_invite">Inviter en telefon…</string>
     <string name="calendar_sync_sync_now">Synkroniser nå</string>
     <string name="calendar_sync_unpair">Start på nytt med en ny nøkkel</string>
     <string name="calendar_sync_devices">Registrerte telefoner</string>

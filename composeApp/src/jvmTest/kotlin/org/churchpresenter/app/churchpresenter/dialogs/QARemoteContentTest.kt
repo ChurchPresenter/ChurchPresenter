@@ -463,7 +463,8 @@ class QARemoteContentTest {
             "BC" to Constants.BOTTOM_CENTER,
             "BR" to Constants.BOTTOM_RIGHT,
         ).forEach { (label, constant) ->
-            onNodeWithText(label).performClick()
+            // The tiles are spots on a mini-screen now; their names are what they are called by.
+            onNodeWithContentDescription(label).performClick()
             waitForIdle()
             assertEquals(constant, h.settings.position, "clicking \"$label\" must select $constant")
         }

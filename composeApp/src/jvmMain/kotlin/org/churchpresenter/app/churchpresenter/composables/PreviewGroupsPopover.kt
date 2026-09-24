@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,11 +8,9 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -55,6 +52,11 @@ import org.churchpresenter.settings.updatePreviewGroup
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.RaisedSwitch
+import org.churchpresenter.theme.components.SegmentTrack
+import org.churchpresenter.theme.components.SegmentTrackItem
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.ui.text.font.FontWeight
 
 /** Test handles for the switches, which carry no text of their own. */
 internal const val TAG_SHOW_LABELS = "preview_show_labels"
@@ -140,7 +142,7 @@ fun PreviewGroupsPopover(
 private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
+        RaisedSwitch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
     }
 }
 
@@ -161,7 +163,7 @@ private fun GroupEditor(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(end = 6.dp),
             )
-            Switch(
+            RaisedSwitch(
                 checked = group.hidden,
                 onCheckedChange = { hide -> onChange(proj.updatePreviewGroup(group.id) { it.copy(hidden = hide) }) },
                 modifier = Modifier.scale(HIDE_SWITCH_SCALE).testTag(hideGroupTag(group.id)),
@@ -174,25 +176,23 @@ private fun GroupEditor(
                 buttonSize = 28.dp,
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        // One segmented control: the shapes share a sunken track and the chosen one is raised.
+        SegmentTrack {
             PreviewGroupShape.entries.forEach { shape ->
                 val selected = shape == group.shape
-                Text(
-                    text = shape.title(),
-                    fontSize = 11.sp,
-                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .background(
-                            if (selected) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            RoundedCornerShape(4.dp),
-                        )
-                        .clickable { onChange(proj.updatePreviewGroup(group.id) { it.copy(shape = shape) }) }
-                        .padding(horizontal = 6.dp, vertical = 3.dp),
-                )
+                SegmentTrackItem(
+                    selected = selected,
+                    onClick = { onChange(proj.updatePreviewGroup(group.id) { it.copy(shape = shape) }) },
+                ) {
+                    Text(
+                        text = shape.title(),
+                        fontSize = 11.sp,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        color = LocalContentColor.current,
+                        maxLines = 1,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                    )
+                }
             }
         }
         group.members.forEachIndexed { index, key ->
