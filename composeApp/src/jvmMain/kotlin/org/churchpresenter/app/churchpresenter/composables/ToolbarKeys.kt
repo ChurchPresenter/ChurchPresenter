@@ -35,7 +35,6 @@ import org.churchpresenter.theme.raisedHover
 import org.churchpresenter.theme.flatDisabled
 
 private const val DISABLED_INK_ALPHA = 0.35f
-private const val HOVER_TINT_ALPHA = 0.07f
 private val KEY_INSET = 2.dp
 private val KEY_RADIUS = 8.dp
 private val OPEN_DOT = 4.dp
@@ -94,7 +93,6 @@ fun ToolbarKey(
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
         val pressed by interaction.collectIsPressedAsState()
-        val hoverTint = MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_TINT_ALPHA)
         val raisedToggle = style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed)
         val surface = when {
             !enabled && style == ToolbarKeyStyle.RAISED -> Modifier.flatDisabled(shape, palette)
@@ -102,7 +100,8 @@ fun ToolbarKey(
             style == ToolbarKeyStyle.RAISED ->
                 Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)
             raisedToggle -> Modifier.raisedHover(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
-            hovered -> Modifier.clip(shape).background(hoverTint)
+            // Flat at rest; under the pointer it rises into its own key, so one icon lifts, not the row.
+            hovered -> Modifier.raised(shape, palette.key, palette, pressed = pressed, hovered = true, lift = 2.dp)
             else -> Modifier.clip(shape)
         }
         Box(

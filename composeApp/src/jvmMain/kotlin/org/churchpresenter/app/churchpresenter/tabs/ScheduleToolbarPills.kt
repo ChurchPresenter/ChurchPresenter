@@ -245,7 +245,7 @@ private fun ToolbarButton(
     buttonSize: Dp = 26.dp,
     iconSize: Dp = 14.dp,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    style: ToolbarKeyStyle = ToolbarKeyStyle.RAISED,
+    style: ToolbarKeyStyle = ToolbarKeyStyle.FLAT,
 ) {
     ToolbarKey(
         painter = painter,

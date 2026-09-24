@@ -97,8 +97,8 @@ fun elevationPalette(): ElevationPalette {
             // cards sit on the container shades, and a key lightened from `surface` came out level
             // with them.
             key = RaisedFill(
-                top = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.22f),
-                bottom = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.12f),
+                top = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.14f),
+                bottom = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.06f),
                 ink = scheme.onSurface,
                 highlight = Color.White.copy(alpha = 0.14f),
                 glow = Color.Black,
@@ -124,7 +124,7 @@ fun elevationPalette(): ElevationPalette {
                 highlight = Color.White.copy(alpha = 0.07f),
                 glow = scheme.error,
             ),
-            keyEdge = Color.White.copy(alpha = 0.10f),
+            keyEdge = Color.White.copy(alpha = 0.07f),
             dropShadow = Color.Black,
             disabledFill = lerp(surface, Color.White, fraction = 0.04f),
             disabledInk = scheme.onSurface.copy(alpha = 0.38f),
@@ -333,16 +333,12 @@ fun Modifier.raisedHover(
 }
 
 /**
- * A dropdown's closed field: a raised key rather than a sunken well, so what opens a list reads as
- * something to press and what takes typing reads as something to type into. It lifts under the
- * pointer like a button and carries the accent rim while its menu is [open].
+ * A dropdown's closed field: the same sunken well as the text fields, a half-strength accent rim
+ * under the pointer and the full accent rim while its menu is [open].
  */
 fun Modifier.dropdownField(shape: Shape, open: Boolean = false): Modifier = composed {
     val palette = elevationPalette()
     this
-        .raisedHover(shape, palette.key, palette)
-        .then(
-            if (open) Modifier.border(RING_WIDTH, MaterialTheme.colorScheme.primary.copy(alpha = RING_ALPHA), shape)
-            else Modifier
-        )
+        .sunken(shape, palette, rim = if (open) MaterialTheme.colorScheme.primary else Color.Unspecified)
+        .hoverOutline(shape)
 }

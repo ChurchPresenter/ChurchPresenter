@@ -139,6 +139,6 @@ class ElevationTest {
         )
         onNodeWithTag("hovered").captureToImage()
         val flat = onNodeWithTag("flat").captureToImage().toPixelMap()
-        assertEquals(flat[2, 2], flat[27, 27], "a disabled control is one flat fill")
+        assertEquals(0.4f, flat[15, 15].alpha, 0.02f, "a disabled control is drawn at 40%")
     }
 }
