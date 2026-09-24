@@ -29,7 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun BibleCustomizePane(
     element: CustomizeElement,
-    /** Which entry of the ordered stack is being styled -- see [CustomizeTranslationChips]. */
+    /** Which entry of the ordered stack is being styled, or [ALL_TRANSLATIONS] -- see [CustomizeTranslationChips]. */
     translationIndex: Int,
     settings: AppSettings,
     /** This profile's own Bible selection, which decides whether an arrangement control applies. */
@@ -42,15 +42,20 @@ internal fun BibleCustomizePane(
     val bs = settings.bibleSettings
     val stack = bs.translationList()
     // A shelf with nothing configured still has a Bible style to edit, and an index left over from
-    // a longer stack must not read off the end.
-    val index = translationIndex.coerceIn(0, (stack.size - 1).coerceAtLeast(0))
-    val t = stack.getOrNull(index) ?: BibleTranslationSettings()
+    // a longer stack must not read off the end. Under All the controls show the first translation.
+    val index = effectiveTranslationIndex(translationIndex, stack.size)
+    val all = index == ALL_TRANSLATIONS
+    val t = stack.getOrNull(if (all) 0 else index) ?: BibleTranslationSettings()
 
     // Writes the selected entry alone, through the same `updateTranslation` the global tab uses,
-    // so both edit the stack by one path.
+    // so both edit the stack by one path -- or, under All, every entry by that same path.
     fun updateEntry(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
         onSettingsChange { s ->
-            s.copy(bibleSettings = s.bibleSettings.updateTranslation(index, transform))
+            val bible = s.bibleSettings
+            s.copy(
+                bibleSettings = if (all) bible.updateEveryTranslation(transform)
+                else bible.updateTranslation(index, transform),
+            )
         }
     }
 
@@ -72,7 +77,15 @@ internal fun BibleCustomizePane(
             element = styleElement,
             onElementChange = {},
             style = t.elementStyle(styleElement, target),
-            onStyleChange = { edited -> updateEntry { it.withElementStyle(styleElement, target, edited) } },
+            onStyleChange = { edited ->
+                // Under All only the property that changed is written, so each translation keeps
+                // everything else it had of its own.
+                val shown = t.elementStyle(styleElement, target)
+                updateEntry {
+                    val next = if (all) it.elementStyle(styleElement, target).withChangesFrom(shown, edited) else edited
+                    it.withElementStyle(styleElement, target, next)
+                }
+            },
             onTranslationChange = { transform -> updateEntry(transform) },
             onReset = {
                 updateEntry { it.withElementStyle(styleElement, target, defaultElementStyle(styleElement, target)) }

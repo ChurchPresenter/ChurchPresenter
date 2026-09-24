@@ -15,6 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +56,10 @@ fun TextOutlineDialog(
     onChange: (TextOutline) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // Edits land in a draft and reach the output only on Apply or OK, so a colour tried and
+    // abandoned leaves nothing behind.
+    var applied by remember { mutableStateOf(outline) }
+    var draft by remember { mutableStateOf(outline) }
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -87,8 +95,8 @@ fun TextOutlineDialog(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     LabeledCheckbox(
-                        checked = outline.enabled,
-                        onCheckedChange = { onChange(outline.copy(enabled = it)) },
+                        checked = draft.enabled,
+                        onCheckedChange = { draft = draft.copy(enabled = it) },
                         label = stringResource(Res.string.outline_show),
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -99,19 +107,32 @@ fun TextOutlineDialog(
                     ) {
                         ColorPickerField(
                             label = stringResource(Res.string.color).removeSuffix(":"),
-                            color = outline.color,
-                            onColorChange = { onChange(outline.copy(color = it)) },
+                            color = draft.color,
+                            onColorChange = { draft = draft.copy(color = it) },
                             modifier = Modifier.weight(1f),
                         )
                         NumberSettingsTextField(
                             label = stringResource(Res.string.text_outline_width),
-                            initialText = outline.width,
-                            onValueChange = { onChange(outline.copy(width = it)) },
+                            initialText = draft.width,
+                            onValueChange = { draft = draft.copy(width = it) },
                             range = TextOutline.WIDTH_RANGE,
                             modifier = Modifier.width(WIDTH_FIELD_WIDTH),
                         )
                     }
                 }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                StyleDialogButtons(
+                    changed = draft != applied,
+                    onCancel = onDismiss,
+                    onApply = {
+                        onChange(draft)
+                        applied = draft
+                    },
+                    onOk = {
+                        onChange(draft)
+                        onDismiss()
+                    },
+                )
             }
         }
     }

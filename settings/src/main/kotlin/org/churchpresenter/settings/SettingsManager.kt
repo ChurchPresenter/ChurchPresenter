@@ -108,7 +108,62 @@ class SettingsManager {
         10 to ::migrateSparseOutputOverrides,
         12 to ::migrateOutputProfiles,
         13 to ::migrateDictionaryToGlobal,
+        14 to ::migrateStylingIntoProfiles,
+        15 to ::migrateScaleModesIntoProfiles,
     )
+
+    /**
+     * Schema version 15. Fit/Fill/Stretch is set per profile now rather than once for the install,
+     * so each profile is given the document's current picture and media scaling and every output
+     * keeps drawing exactly what it did. A profile that already carries its own keeps it.
+     */
+    private fun migrateScaleModesIntoProfiles(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"]?.jsonObject ?: return raw
+        val profiles = projection["outputProfiles"]?.jsonArray ?: return raw
+        val seeds = listOfNotNull(
+            root["pictureSettings"]?.jsonObject?.get("scaleMode")?.let { "pictureScaleMode" to it },
+            root["mediaScaleMode"]?.let { "mediaScaleMode" to it },
+        )
+        if (seeds.isEmpty()) return raw
+        val seeded = profiles.map { element ->
+            val profile = element as? JsonObject ?: return@map element
+            JsonObject(profile + seeds.filter { (key, _) -> key !in profile })
+        }
+        val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(seeded)))
+        return JsonObject(root + ("projectionSettings" to newProjection)).toString()
+    }
+
+    /** The document-level looks [migrateStylingIntoProfiles] hands to every profile. */
+    private val stylingMovedIntoProfiles = listOf("sttSettings", "dictionarySettings", "qaSettings", "mediaSettings")
+
+    /**
+     * Schema version 14. Captions, the dictionary card, Q&A and video subtitles are styled per
+     * profile now, as Bible and Songs are, rather than once for the install from their own tabs.
+     *
+     * Each profile is given the document's current copy of each, so every output draws exactly what
+     * it drew before the move. A profile that already carries one -- written by a build that had
+     * this, then opened by one that briefly did not -- keeps its own.
+     *
+     * The document keeps its copies too: resolution still reads the install-wide keys from them
+     * ([STT_GLOBAL_KEYS], [QA_GLOBAL_KEYS]), and they are what a document downgraded to an older
+     * build falls back on.
+     */
+    private fun migrateStylingIntoProfiles(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"]?.jsonObject ?: return raw
+        val profiles = projection["outputProfiles"]?.jsonArray ?: return raw
+        val seeded = profiles.map { element ->
+            val profile = element as? JsonObject ?: return@map element
+            JsonObject(
+                profile + stylingMovedIntoProfiles
+                    .filter { it !in profile }
+                    .mapNotNull { key -> root[key]?.let { key to it } },
+            )
+        }
+        val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(seeded)))
+        return JsonObject(root + ("projectionSettings" to newProjection)).toString()
+    }
 
     /**
      * Lifts a profile's own dictionary styling back onto the document, which now owns it alone.

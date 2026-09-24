@@ -32,6 +32,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -106,7 +110,11 @@ fun TextBackdropDialog(
     onChange: (TextBackdrop) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val mode = backdrop.mode
+    // Edits land in a draft and reach the output only on Apply or OK, as in the outline dialog.
+    var applied by remember { mutableStateOf(backdrop) }
+    var draft by remember { mutableStateOf(backdrop) }
+    val setDraft: (TextBackdrop) -> Unit = { draft = it }
+    val mode = draft.mode
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -128,7 +136,7 @@ fun TextBackdropDialog(
                         }
                     }
                     Spacer(Modifier.height(8.dp))
-                    BackdropModeRow(backdrop) { onChange(backdrop.withMode(it)) }
+                    BackdropModeRow(draft) { draft = draft.withMode(it) }
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 if (mode == TextBackdropMode.OFF) {
@@ -142,7 +150,7 @@ fun TextBackdropDialog(
                     Column(Modifier.padding(SECTION_PADDING)) {
                         SectionLabel(stringResource(Res.string.backdrop_presets))
                         Spacer(Modifier.height(7.dp))
-                        BackdropPresetRow(current = backdrop, onPick = onChange)
+                        BackdropPresetRow(current = draft, onPick = setDraft)
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     // No height cap: the dialog is as tall as the fields the chosen mode has, so
@@ -154,10 +162,23 @@ fun TextBackdropDialog(
                             .padding(SECTION_PADDING),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        if (mode.drawsFill) FillFields(backdrop, onChange)
-                        if (mode.drawsBorder) BorderFields(backdrop, onChange)
+                        if (mode.drawsFill) FillFields(draft, setDraft)
+                        if (mode.drawsBorder) BorderFields(draft, setDraft)
                     }
                 }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                StyleDialogButtons(
+                    changed = draft != applied,
+                    onCancel = onDismiss,
+                    onApply = {
+                        onChange(draft)
+                        applied = draft
+                    },
+                    onOk = {
+                        onChange(draft)
+                        onDismiss()
+                    },
+                )
             }
         }
     }

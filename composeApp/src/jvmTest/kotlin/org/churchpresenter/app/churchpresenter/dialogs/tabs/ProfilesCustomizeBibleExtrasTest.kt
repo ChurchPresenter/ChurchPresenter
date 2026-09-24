@@ -168,6 +168,8 @@ class ProfilesCustomizeBibleExtrasTest {
             waitForIdle()
             onNodeWithText("Both").performClick()
             waitForIdle()
+            onNodeWithText("OK").performClick()
+            waitForIdle()
 
             val stored = get().storedTranslation().textBackdrop
             assertTrue(stored.lineBackground && stored.border, "the dialog must write through the pane")

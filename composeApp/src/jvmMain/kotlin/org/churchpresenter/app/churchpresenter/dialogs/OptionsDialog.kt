@@ -340,6 +340,7 @@ private fun SettingsTabContent(
         TAB_PROFILES -> ProfilesSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,
+            onIdentify = onIdentifyScreen,
         )
         TAB_BACKGROUND -> BackgroundSettingsTab(
             settings = settings,

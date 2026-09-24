@@ -108,6 +108,8 @@ class DictionarySettingsTabBackdropTest {
         clickCaret(word)
         onNodeWithText("Border").performClick()
         waitForIdle()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
 
         val stored = get().dictionarySettings.wordBackdrop
         assertTrue(stored.border)
@@ -133,6 +135,8 @@ class DictionarySettingsTabBackdropTest {
         clickCaret(reference)
         onNodeWithText("Both").performClick()
         waitForIdle()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
 
         val stored = get().dictionarySettings.referenceBackdrop
         assertTrue(stored.lineBackground && stored.border)
@@ -144,6 +148,8 @@ class DictionarySettingsTabBackdropTest {
         clickChip(word)
         clickCaret(reference)
         onNodeWithText("Border").performClick()
+        waitForIdle()
+        onNodeWithText("OK").performClick()
         waitForIdle()
 
         val settings = get().dictionarySettings

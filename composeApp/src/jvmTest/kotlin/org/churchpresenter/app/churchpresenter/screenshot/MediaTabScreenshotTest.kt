@@ -12,6 +12,7 @@ import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.mediaButton
 import org.churchpresenter.app.churchpresenter.tabs.mediaTab
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
@@ -110,13 +111,13 @@ class MediaTabScreenshotTest {
     @Test
     fun `scaled to fill, the button lit`() = shoot(
         "scale_fill",
-        settings = { it.copy(mediaScaleMode = OutputScaleMode.FILL) },
+        settings = { it.withMediaScaleEverywhere(OutputScaleMode.FILL) },
     ) { vm -> loadVideo(vm) }
 
     @Test
     fun `scaled to stretch`() = shoot(
         "scale_stretch",
-        settings = { it.copy(mediaScaleMode = OutputScaleMode.STRETCH) },
+        settings = { it.withMediaScaleEverywhere(OutputScaleMode.STRETCH) },
     ) { vm -> loadVideo(vm) }
 
     @Test

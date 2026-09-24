@@ -123,6 +123,8 @@ class TextStyleButtonsOutlineTest {
         waitForIdle()
         onNode(isToggleable() and hasText("Show outline")).performClick()
         waitForIdle()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
         assertTrue(get().enabled, "what the dialog changes must reach the caller")
     }
 

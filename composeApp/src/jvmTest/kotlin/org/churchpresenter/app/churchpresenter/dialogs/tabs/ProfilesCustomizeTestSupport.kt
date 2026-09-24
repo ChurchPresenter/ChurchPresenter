@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -49,6 +51,7 @@ private const val DIALOG_HEIGHT = 900f
  */
 internal fun profilesTab(
     initial: AppSettings,
+    onIdentify: () -> Unit = {},
     block: SkikoComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) {
     lateinit var doc: MutableState<AppSettings>
@@ -64,6 +67,7 @@ internal fun profilesTab(
             ProfilesSettingsTab(
                 settings = state.value,
                 onSettingsChange = { update -> state.value = update(state.value) },
+                onIdentify = onIdentify,
             )
         }
         block { doc.value }
@@ -146,7 +150,8 @@ internal fun SkikoComposeUiTest.openBackgroundSurface(
 
 /** Clicks "Custom" on the open surface's follow row. */
 internal fun SkikoComposeUiTest.takeOverBackground() {
-    onNodeWithText(BACKGROUND_OWN).performScrollTo().performClick()
+    // Not the preview column's "Custom" shape, which carries the same word.
+    onNode(hasText(BACKGROUND_OWN) and !hasTestTag(previewShapeTag("CUSTOM"))).performScrollTo().performClick()
     waitForIdle()
 }
 

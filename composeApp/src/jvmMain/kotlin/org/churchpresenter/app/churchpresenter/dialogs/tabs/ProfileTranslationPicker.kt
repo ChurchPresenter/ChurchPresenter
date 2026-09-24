@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
@@ -50,13 +48,15 @@ import churchpresenter.composeapp.generated.resources.content_bible_translations
 import churchpresenter.composeapp.generated.resources.content_bible_translations_count_enabled
 import churchpresenter.composeapp.generated.resources.content_bible_translations_more
 import churchpresenter.composeapp.generated.resources.song_language_primary
-import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import org.jetbrains.compose.resources.stringResource
 
 /**
- * Which translations -- or which of a song's languages -- a profile actually puts on screen.
+ * Which of a song's languages a profile actually puts on screen -- the Songs half of the Profiles
+ * tab's Sources row. (It picked Bible translations too, until the Bible source became an ordered
+ * list: see [BibleSourcePicker].)
  *
  * Recovered from the per-output Content Outputs dialog the Output Profiles refactor deleted. That
  * dialog was the only thing that ever wrote `bibleTranslations`/`songTranslations`, so when it went
@@ -65,9 +65,6 @@ import org.churchpresenter.theme.sunken
  * unchanged bar its home -- it was always self-contained -- and now hangs off the profile's own
  * content row rather than an output's table cell.
  */
-
-/** Dimmed rather than hidden while the category is off, so the picker stays readable. */
-private const val DIMMED_ALPHA = 0.55f
 
 /** One translation as the picker lists it: its code, its name, and how much of the Bible it holds. */
 internal data class TranslationChoiceDisplay(
@@ -92,9 +89,9 @@ private fun ContentOutputsSectionHeader(text: String, modifier: Modifier = Modif
 /**
  * The test tags of one translation picker.
  *
- * Per-picker rather than constant because two of them are drawn -- the Bible's translations and the
- * song's languages -- and a tag that named neither matched both, which `onNodeWithTag` can only
- * report as "expected 1 node, found 2".
+ * Per-picker rather than constant so a second picker can be drawn beside the first without its tags
+ * colliding. The song languages are the only one now: the Bible source became an ordered list of
+ * its own ([BibleSourcePicker]).
  */
 internal class TranslationPickerTags(private val prefix: String) {
     /** The collapsed trigger segment that opens the picker. */
@@ -107,7 +104,6 @@ internal class TranslationPickerTags(private val prefix: String) {
     fun row(index: Int) = "contentOutputs_${prefix}Row_$index"
 
     companion object {
-        val BIBLE = TranslationPickerTags("bibleTranslation")
         val SONG = TranslationPickerTags("songLanguage")
     }
 }
@@ -116,8 +112,8 @@ internal class TranslationPickerTags(private val prefix: String) {
 internal fun ContentTranslationCell(
     modifier: Modifier,
     label: String,
-    /** Which picker this is, so the two on the dialog are separately addressable in a test. */
-    tags: TranslationPickerTags = TranslationPickerTags.BIBLE,
+    /** Which picker this is, so it is addressable in a test by tag rather than by its changing caption. */
+    tags: TranslationPickerTags,
     /** What the open panel calls the thing being picked -- translations, or song languages. */
     headerText: String,
     /**
@@ -156,6 +152,8 @@ internal fun ContentTranslationCell(
      * callback exists so callers can apply both fields in a single `assignment.copy(...)`.
      */
     onShowAndSelect: (List<Int>) -> Unit,
+    /** What the closed field reads while the category is off -- "Songs off". */
+    offText: String,
 ) {
     // Which translations this output actually shows, as positions that exist in the stack it is being
     // shown against. Everything below counts, labels, ticks and writes from this rather than from
@@ -201,16 +199,14 @@ internal fun ContentTranslationCell(
     }
 
     Box(modifier = modifier) {
-        TranslationPickerTrigger(
+        SourceField(
             label = label,
-            showing = showing,
-            primaryLabel = primaryLabel,
-            secondaryLabel = secondaryLabel,
-            headerText = headerText,
-            allTranslationsSelected = allTranslationsSelected,
-            dividerColor = dividerColor,
-            tag = tags.trigger,
-            onOpen = { dropdownOpen = true },
+            value = if (showing && primaryLabel.isNotEmpty()) primaryLabel else offText,
+            sub = if (showing) secondaryLabel.ifEmpty { headerText } else "",
+            open = dropdownOpen,
+            dimmed = !showing,
+            onClick = { dropdownOpen = true },
+            modifier = Modifier.testTag(tags.trigger),
         )
 
         DropdownMenu(
@@ -269,106 +265,6 @@ internal fun ContentTranslationCell(
 
 /** How wide the open checklist is: room for a code, a name and a tick without crowding. */
 private val MENU_WIDTH = 320.dp
-
-/** The collapsed button: what is on, summarised, and a chevron that opens the checklist. */
-@Composable
-private fun TranslationPickerTrigger(
-    label: String,
-    showing: Boolean,
-    primaryLabel: String,
-    secondaryLabel: String,
-    headerText: String,
-    allTranslationsSelected: Boolean,
-    dividerColor: Color,
-    tag: String,
-    onOpen: () -> Unit,
-) {
-    // Collapsed trigger: the left segment is a status indicator only (on/off lives on the
-    // master row's checkbox inside the dropdown below); the whole rest of the button opens
-    // that dropdown, regardless of whether Bible content is currently on or off, so a
-    // translation can be picked before switching it on.
-    val triggerShape = RoundedCornerShape(10.dp)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .alpha(if (showing) 1f else DIMMED_ALPHA)
-            .clip(triggerShape)
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                softWrap = false,
-            )
-        }
-        Box(modifier = Modifier.fillMaxHeight().width(1.dp).background(dividerColor))
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                // Always clickable, even with zero translations configured: the master on/off
-                // row now lives inside this dropdown (not on the collapsed trigger), so gating
-                // this on translations.isNotEmpty() would leave no way at all to reach it in
-                // that case.
-                .clickable { onOpen() }
-                // Tagged rather than found by caption: this segment's text is a derived summary
-                // ("All Bibles", a code, "+N more") that changes with the selection, and a
-                // single-selection caption repeats the code its own menu row shows.
-                .testTag(tag)
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            // fill = true (the default): the label column claims all the leftover width so
-            // the chevron lands flush against the button's trailing edge instead of sitting
-            // right after however wide the label happens to be.
-            Column(modifier = Modifier.weight(1f)) {
-                if (primaryLabel.isNotEmpty()) {
-                    Text(
-                        text = primaryLabel,
-                        style = MaterialTheme.typography.labelMedium,
-                        // Monospace suits a file-stem code like "kjv1769" but not a plain
-                        // phrase like "All Bibles".
-                        fontFamily = if (allTranslationsSelected) FontFamily.Default else FontFamily.Monospace,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                if (secondaryLabel.isNotEmpty()) {
-                    Text(
-                        text = secondaryLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-            Icon(
-                imageVector = Icons.Filled.ArrowDropDown,
-                // Otherwise unlabelled when there's nothing configured to name (primary/
-                // secondary text both blank) -- this is also what tests target to open the
-                // dropdown in that case.
-                contentDescription = headerText,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-    }
-}
 
 /** The checklist's own title, with Select-all and Clear beside it. */
 @Composable

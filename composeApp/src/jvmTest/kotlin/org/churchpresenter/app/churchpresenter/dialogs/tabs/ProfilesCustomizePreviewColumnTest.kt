@@ -2,8 +2,6 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -106,23 +104,21 @@ class ProfilesCustomizePreviewColumnTest {
     }
 
     /**
-     * The resolution the preview is drawn at, which is the profile's own.
+     * The shape the preview is drawn at, which is the profile's own.
      *
      * A simulated output has no monitor to take its size from, so the operator picks it -- and the
      * shape it picks is what decides whether the band stacks its parallel text, via
      * `isLowerThirdVertical`. It is a stored setting rather than a view of one.
      */
     @Test
-    fun `picking a preview resolution stores it on the profile`() {
+    fun `picking a preview shape stores it on the profile`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onAllNodesWithText("1920×1080").onLast().performClick()
-            waitForIdle()
-            onNodeWithText("1280×720", substring = true).performClick()
+            onNodeWithTag(previewShapeTag(PreviewShapePreset.STANDARD.name)).performClick()
             waitForIdle()
 
-            assertEquals(1280, get().profile().previewWidth)
-            assertEquals(720, get().profile().previewHeight)
+            assertEquals(1440, get().profile().previewWidth)
+            assertEquals(1080, get().profile().previewHeight)
         }
     }
 
@@ -132,9 +128,7 @@ class ProfilesCustomizePreviewColumnTest {
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
             assertEquals(false, get().profile().isLowerThirdVertical, "it starts landscape")
 
-            onAllNodesWithText("1920×1080").onLast().performClick()
-            waitForIdle()
-            onNodeWithText("1080×1920", substring = true).performClick()
+            onNodeWithTag(previewShapeTag(PreviewShapePreset.PORTRAIT.name)).performClick()
             waitForIdle()
 
             // Derived from the shape rather than chosen: a portrait band has no width to split.

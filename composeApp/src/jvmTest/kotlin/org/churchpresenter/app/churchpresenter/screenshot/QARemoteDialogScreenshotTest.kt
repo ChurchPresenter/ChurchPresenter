@@ -25,10 +25,6 @@ import kotlin.test.Test
  *
  * Shot through `QARemoteContent` for the same reason as the presentation remote: a `DialogWindow` is
  * an OS window and cannot be photographed headless, and the content is `internal` so it can be.
- *
- * `availableFonts` is passed empty rather than read from `GraphicsEnvironment`: the installed set
- * differs from machine to machine, and a font list in the image would make these recordings differ
- * by whose laptop recorded them.
  */
 class QARemoteDialogScreenshotTest {
 
@@ -60,7 +56,6 @@ class QARemoteDialogScreenshotTest {
                             onStopTunnel = {},
                             qaSettings = current.qaSettings,
                             onSettingsChange = { transform -> current = transform(current) },
-                            availableFonts = emptyList(),
                             onDismiss = {},
                         )
                     }
@@ -114,24 +109,15 @@ class QARemoteDialogScreenshotTest {
     fun `the tunnel failed`() =
         shoot("tunnel_error", tunnelStatus = TunnelStatus.Error("cloudflared exited: no route to host"))
 
-    // ── How the QR and the questions look on the projector ──────────────────────────────────────
+    // ── The QR code's message ───────────────────────────────────────────────────────────────────
+    //
+    // How the QR and the questions look on screen is styled per profile now, and shot with the
+    // Profiles tab (`profilesTab/style_qa`). What stays here is the one line of text the code's
+    // link page shows, which is the install's.
 
     @Test
-    fun `the styling controls`() = shoot("styling", qaSettings = QASettings(qrCodeMessage = "Scan to ask a question"))
-
-    @Test
-    fun `styling carrying non-default values`() = shoot(
-        "styling_customised",
-        qaSettings = QASettings(
-            qrCodeMessage = "Scan to ask a question",
-            qrForegroundColor = "#1B2A5B",
-            qrBackgroundColor = "#FFD54F",
-            qrBackgroundOpacity = 80,
-            textColor = "#FFD54F",
-            bold = true,
-            italic = true,
-        ),
-    )
+    fun `the QR code's message`() =
+        shoot("qr_message", qaSettings = QASettings(qrCodeMessage = "Scan to ask a question"))
 
     private companion object {
         const val SECTION = "qaRemoteDialog"

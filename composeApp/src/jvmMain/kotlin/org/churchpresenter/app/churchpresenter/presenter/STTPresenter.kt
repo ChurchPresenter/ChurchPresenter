@@ -112,13 +112,17 @@ fun STTPresenter(
         delayMs = dripSpeed
     )
 
-    // Build text — pass ALL segments, no filtering by maxSegments
+    // Only the newest [STTSettings.maxSegments] of them (0 keeps every one): how much of the
+    // running transcript this output keeps is set per profile. `maxLines` still trims whatever is
+    // left to what fits.
+    val keptTranscription = keepNewest(dripTranscription, sttSettings.maxSegments)
+    val keptTranslation = keepNewest(dripTranslation, sttSettings.maxSegments)
     val transcriptionText = buildDisplayText(
-        dripTranscription, inProgressText, sttSettings.showInProgress,
+        keptTranscription, inProgressText, sttSettings.showInProgress,
         highlightedWords, sttSettings.showWordHighlighting, textColor
     )
     val translationText = buildDisplayText(
-        dripTranslation, inProgressTranslation, sttSettings.showTranslationInProgress,
+        keptTranslation, inProgressTranslation, sttSettings.showTranslationInProgress,
         highlightedWords, sttSettings.showWordHighlighting, translationColor
     )
 
@@ -343,3 +347,7 @@ internal fun sttPositionToAlignment(position: String): Alignment = when (positio
     Constants.MIDDLE -> Alignment.Center
     else -> Alignment.BottomCenter
 }
+
+/** The last [count] of [segments], or all of them when [count] is 0 or less. */
+internal fun <T> keepNewest(segments: List<T>, count: Int): List<T> =
+    if (count > 0) segments.takeLast(count) else segments

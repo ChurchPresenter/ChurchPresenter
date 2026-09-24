@@ -41,11 +41,16 @@ internal enum class CustomizeElement {
 /**
  * The elements [pane] offers, in chip order.
  *
- * The Stage Monitor has none: its pane is a zone layout picker rather than a set of styled
- * elements, so it keeps the whole column and shows no chips at all.
+ * The whole-form categories ([isWholeForm]) have none: each is one form of its own rather than a
+ * set of styled elements, so it keeps the whole column and shows no chips at all.
  */
 internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = when (pane) {
-    CustomizePane.STAGE_MONITOR -> emptyList()
+    CustomizePane.STAGE_MONITOR,
+    CustomizePane.CAPTIONS,
+    CustomizePane.SUBTITLES,
+    CustomizePane.QA,
+    CustomizePane.DICTIONARY,
+    -> emptyList()
     CustomizePane.BIBLE -> listOf(CustomizeElement.BIBLE_TEXT, CustomizeElement.BIBLE_REFERENCE)
     // No "Slide" entry: everything that belonged to the slide rather than to one thing drawn on it
     // -- the margins, the fades, the band height, the word wrap, the vertical alignment, the

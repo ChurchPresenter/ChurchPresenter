@@ -61,14 +61,13 @@
     <ID>LongMethod:PresenterWindows.kt$@Composable internal fun PresenterWindows( screens: Array&lt;GraphicsDevice&gt;, presenterManager: PresenterManager, mediaViewModel: MediaViewModel, appSettings: AppSettings, identifyingScreen: Boolean, serverUrl: String = "", qaDisplayUrl: String = "", sttManager: STTManager, defaultScreenDevice: () -&gt; GraphicsDevice? = { GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice }, )</ID>
     <ID>LongMethod:ProjectionBrowserSourceCard.kt$@Composable internal fun BrowserSourceOutputsCard( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, companionServer: CompanionServer, onIdentifyBrowserSource: (Int) -&gt; Unit, )</ID>
     <ID>LongMethod:ProjectionScreenAssignmentCard.kt$@Composable internal fun ScreenAssignmentCard( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onIdentifyScreen: () -&gt; Unit, scenes: List&lt;Scene&gt;, screenDevicesAll: List&lt;DetectedScreen&gt;, detectedScreens: Int, devWindowCount: Int, devWindowedFallback: Boolean, presenterWindowCount: Int, numScreens: Int, screenAssignments: List&lt;ScreenAssignment&gt;, displayOptions: List&lt;DisplayOption&gt;, noneLabel: String, )</ID>
-    <ID>LongMethod:QARemoteDialog.kt$@Composable internal fun QARemoteContent( serverUrl: String, qaDisplayUrl: String, onQaDisplayUrlChanged: (String) -&gt; Unit, apiKeyEnabled: Boolean, apiKey: String, tunnelStatus: TunnelStatus, tunnelUrl: String, onStartTunnel: () -&gt; Unit, onStopTunnel: () -&gt; Unit, qaSettings: QASettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, availableFonts: List&lt;String&gt;, scrollState: ScrollState = rememberScrollState(), copyText: (String) -&gt; Unit = {}, onDismiss: () -&gt; Unit )</ID>
+    <ID>LongMethod:QARemoteDialog.kt$@Composable internal fun QARemoteContent( serverUrl: String, qaDisplayUrl: String, onQaDisplayUrlChanged: (String) -&gt; Unit, apiKeyEnabled: Boolean, apiKey: String, tunnelStatus: TunnelStatus, tunnelUrl: String, onStartTunnel: () -&gt; Unit, onStopTunnel: () -&gt; Unit, qaSettings: QASettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, scrollState: ScrollState = rememberScrollState(), copyText: (String) -&gt; Unit = {}, onDismiss: () -&gt; Unit )</ID>
     <ID>LongMethod:QATab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun QATab( modifier: Modifier = Modifier, qaManager: QAManager, presenterManager: PresenterManager, serverUrl: String, presenting: (Presenting) -&gt; Unit, appSettings: AppSettings = AppSettings(), onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit = {}, tunnelStatus: TunnelStatus = TunnelStatus.Idle, tunnelUrl: String = "", onStartTunnel: () -&gt; Unit = {}, onStopTunnel: () -&gt; Unit = {}, qaDisplayUrl: String = "", onQaDisplayUrlChanged: (String) -&gt; Unit = {}, )</ID>
     <ID>LongMethod:QATab.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun QuestionRow( question: Question, isDisplayed: Boolean, isHistory: Boolean = false, onApprove: () -&gt; Unit, onDeny: () -&gt; Unit, onMarkDone: () -&gt; Unit = {}, onEdit: (String) -&gt; Unit, onDisplay: () -&gt; Unit, onDelete: () -&gt; Unit, )</ID>
     <ID>LongMethod:RemoteActivityToast.kt$@Composable private fun RemoteActivityToast( notification: RemoteActivityNotification, remaining: Int, isInstanceLinkFollower: Boolean = false, onDismiss: () -&gt; Unit, onDismissAll: () -&gt; Unit, onBlockForSession: () -&gt; Unit, )</ID>
     <ID>LongMethod:RemoteApply.kt$internal fun executeProjectItem( item: ScheduleItem, scheduleActions: ScheduleActions, presenterManager: PresenterManager, statisticsManager: StatisticsManager? = null )</ID>
     <ID>LongMethod:RemoteEventDialog.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun RemoteEventDialogContent( event: RemoteEvent, actionLabel: String, typeIcon: ImageVector, typeAccent: Color, bodyTitle: String, remaining: Int, showAllowPermanently: Boolean, isClientKnownAllowed: Boolean, isClientKnownBlocked: Boolean, isInstanceLinkFollower: Boolean, onAllow: () -&gt; Unit, onAllowForSession: () -&gt; Unit, onAllowPermanently: () -&gt; Unit, onBlockForSession: () -&gt; Unit, onBlockPermanently: () -&gt; Unit, onDeny: () -&gt; Unit, )</ID>
     <ID>LongMethod:STTPresenter.kt$@Composable fun STTPresenter( modifier: Modifier = Modifier, segments: List&lt;STTSegment&gt;, inProgressText: String, translationSegments: List&lt;STTSegment&gt;, inProgressTranslation: String, highlightedWords: List&lt;HighlightedWord&gt;, sttSettings: STTSettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, )</ID>
-    <ID>LongMethod:STTSettingsDialog.kt$@Composable internal fun STTSettingsDialogContent( appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, onDismiss: () -&gt; Unit, availableFonts: List&lt;String&gt;, )</ID>
     <ID>LongMethod:STTTab.kt$@Composable fun STTTab( modifier: Modifier = Modifier, sttManager: STTManager, presenterManager: PresenterManager, presenting: (Presenting) -&gt; Unit, appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, )</ID>
     <ID>LongMethod:SceneCanvas.kt$@Composable fun SceneCanvas( modifier: Modifier = Modifier, scene: Scene, selectedSourceId: String?, onSourceSelected: (String?) -&gt; Unit, onTransformChanged: (sourceId: String, SourceTransform) -&gt; Unit, isInteractive: Boolean = true, activeTool: String = "select", drawingStrokeColor: String = "#FFFFFF", drawingFillColor: String = "#00000000", drawingStrokeWidth: Float = 3f, onShapeDrawn: ((SceneSource.ShapeSource) -&gt; Unit)? = null )</ID>
     <ID>LongMethod:SceneDeviceEditors.kt$@Composable internal fun CameraProperties( source: SceneSource.CameraSource, onUpdate: (SceneSource) -&gt; Unit, /** * The cameras to offer, or null to ask this machine. * * A test passes a list: enumeration reports whatever hardware the recording machine happens to * have, so the committed image of this panel said "MacBook Pro Camera" on one and "Capture * screen 0" on another. Same seam, same reason, as `SongBackgroundLibrary`'s. */ devices: List&lt;CameraDevice&gt;? = null, )</ID>
@@ -882,52 +881,26 @@
     <ID>MaxLineLength:QAPresenter.kt$else</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$.</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(150.dp))</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Image(bitmap = submissionQR, contentDescription = stringResource(Res.string.qa_submit_questions), modifier = Modifier.size(150.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Row</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_admin_panel), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_qr_code_shows), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_styling_qr_group), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_styling_text_group), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$bold = qaSettings.bold</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$if</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onBoldChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(bold = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } }</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onColorChange = { c -&gt; onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadowColor = c)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onItalicChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(italic = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onOpacityChange = { v -&gt; onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadowOpacity = v)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onSizeChange = { v -&gt; onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(shadowSize = v)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onUnderlineChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(underline = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } }</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } }</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$shadowColor = qaSettings.shadowColor</ID>
     <ID>MaxLineLength:QARemoteDialog.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:QATab.kt$"[${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(q.timestamp))}] [${q.status}] ${q.text}"</ID>
     <ID>MaxLineLength:QATab.kt$0 -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
@@ -987,41 +960,13 @@
     <ID>MaxLineLength:RemoteEventDialog.kt$RemoteEventPresentation$*</ID>
     <ID>MaxLineLength:RemoteEventDialog.kt$style = MaterialTheme.typography.labelSmall</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$.</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$ColorPickerField(label = stringResource(Res.string.stt_background_color), color = sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$ColorPickerField(label = stringResource(Res.string.stt_text_color), color = sttSettings.textColor, onColorChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(textColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$ColorPickerField(label = stringResource(Res.string.stt_translation_color), color = sttSettings.translationTextColor, onColorChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it)) } }, modifier = Modifier.fillMaxWidth())</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$FontSettingsDropdown(label = stringResource(Res.string.stt_font), value = sttSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$NumberSettingsTextField(label = stringResource(Res.string.stt_size), initialText = sttSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) } })</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$Row</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(stringResource(Res.string.stt_display_styling), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$Text(stringResource(Res.string.stt_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$bold = sttSettings.bold</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onBoldChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(bold = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(dripFeedEnabled = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onColorChange = { c -&gt; onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadowColor = c)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onItalicChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(italic = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onOpacityChange = { v -&gt; onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadowOpacity = v)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onShadowChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadow = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onSizeChange = { v -&gt; onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(shadowSize = v)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onUnderlineChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(underline = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(displayMode = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(layout = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { v -&gt; v.toIntOrNull()?.let { p -&gt; onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$shadowColor = sttSettings.shadowColor</ID>
     <ID>MaxLineLength:STTTab.kt$IconButton</ID>
     <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>

@@ -3,6 +3,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +51,8 @@ class QARemoteContentControlsTest {
         qaDisplayUrl: String = "",
         tunnelStatus: TunnelStatus = TunnelStatus.Idle,
         tunnelUrl: String = "",
+        /** The Q&A form the Profiles tab draws instead, where how a question looks moved to. */
+        display: Boolean = false,
         block: ComposeUiTest.(get: () -> QASettings, qaDisplayUrlChanges: () -> List<String>) -> Unit,
     ) = runComposeUiTest {
         var current = qaSettings
@@ -54,6 +60,16 @@ class QARemoteContentControlsTest {
         setContent {
             MaterialTheme {
                 var state by remember { mutableStateOf(AppSettings(qaSettings = current)) }
+                if (display) {
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        QADisplaySettings(
+                            appSettings = state,
+                            onSettingsChange = { transform -> state = transform(state); current = state.qaSettings },
+                            availableFonts = emptyList(),
+                        )
+                    }
+                    return@MaterialTheme
+                }
                 QARemoteContent(
                     serverUrl = serverUrl,
                     qaDisplayUrl = qaDisplayUrl,
@@ -66,7 +82,6 @@ class QARemoteContentControlsTest {
                     onStopTunnel = {},
                     qaSettings = state.qaSettings,
                     onSettingsChange = { transform -> state = transform(state); current = state.qaSettings },
-                    availableFonts = emptyList(),
                     onDismiss = {},
                 )
             }
@@ -114,7 +129,7 @@ class QARemoteContentControlsTest {
     }
 
     @Test
-    fun `a font size outside 8 to 200 is not stored`() = qaRemoteTab { get, _ ->
+    fun `a font size outside 8 to 200 is not stored`() = qaRemoteTab(display = true) { get, _ ->
         retypeNumberField(showing = 48, to = 400)
         assertEquals(48, get().fontSize, "400 is above the 8..200 range")
         retypeNumberField(showing = 400, to = 200)
@@ -124,7 +139,7 @@ class QARemoteContentControlsTest {
     // ── Style toggle and shadow-detail independence ─────────────────────────────────────────────────
 
     @Test
-    fun `the style buttons toggle bold italic and underline independently`() = qaRemoteTab { get, _ ->
+    fun `the style buttons toggle bold italic and underline independently`() = qaRemoteTab(display = true) { get, _ ->
         onNodeWithText("B").performClick()
         waitForIdle()
         assertEquals(true, get().bold)
@@ -147,7 +162,8 @@ class QARemoteContentControlsTest {
     }
 
     @Test
-    fun `the shadow toggle reveals its detail row and clearing it hides the row again`() = qaRemoteTab { get, _ ->
+    fun `the shadow toggle reveals its detail row and clearing it hides the row again`() =
+        qaRemoteTab(display = true) { get, _ ->
         assertEquals(false, get().shadow, "no shadow out of the box")
         onAllNodesWithText("SIZE (%)").assertCountEquals(0)
 
@@ -166,6 +182,7 @@ class QARemoteContentControlsTest {
     @Test
     fun `the shadow colour size and opacity fields store independently`() =
         qaRemoteTab(
+            display = true,
             qaSettings = QASettings(shadow = true, shadowColor = "#654321", shadowSize = 120, shadowOpacity = 60),
         ) { get, _ ->
             recolor(fromHex = "#654321", toHex = "#0F0F0F")
@@ -183,7 +200,8 @@ class QARemoteContentControlsTest {
     // ── Opacity sliders ──────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `dragging the QR opacity slider to zero leaves the background opacity alone`() = qaRemoteTab { get, _ ->
+    fun `dragging the QR opacity slider to zero leaves the background opacity alone`() =
+        qaRemoteTab(display = true) { get, _ ->
         val reading = dragOpacitySliderToEnd(ordinal = 0, toRight = false)
         assertEquals(0, reading)
         assertEquals(0, get().qrBackgroundOpacity, "dragging to the far left must store 0")
@@ -191,7 +209,8 @@ class QARemoteContentControlsTest {
     }
 
     @Test
-    fun `dragging the background opacity slider to zero leaves the QR opacity alone`() = qaRemoteTab { get, _ ->
+    fun `dragging the background opacity slider to zero leaves the QR opacity alone`() =
+        qaRemoteTab(display = true) { get, _ ->
         val reading = dragOpacitySliderToEnd(ordinal = 1, toRight = false)
         assertEquals(0, reading)
         assertEquals(0, get().backgroundOpacity, "dragging to the far left must store 0")

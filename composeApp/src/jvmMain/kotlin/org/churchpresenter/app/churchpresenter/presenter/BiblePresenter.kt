@@ -200,15 +200,19 @@ fun BiblePresenter(
     // position against a list with a hole in it hands the screen a different translation than the
     // one it was assigned, and does it silently: a critical-text module that stops at Mark 16:8
     // would flip that screen to the next language for exactly those verses.
-    val assignedFileNames = bibleTranslations.mapNotNull { translationStack.getOrNull(it)?.fileName }.toSet()
+    //
+    // Drawn in the profile's own order, not the stack's: the Profiles tab lets a profile put its
+    // translations in whatever order its room reads them, and the list it stores is that order.
+    val assignedFileNames = bibleTranslations.mapNotNull { translationStack.getOrNull(it)?.fileName }.distinct()
     fun versesForOutput(verses: List<SelectedVerse>): List<SelectedVerse> = when {
         bibleTranslations.isEmpty() -> verses
         // Verses relayed from a linked instance or the companion server carry no translation
         // identity, so position is all there is to match on for those.
         verses.none { it.translationFileName.isNotBlank() } ->
-            verses.filterIndexed { index, _ -> index in bibleTranslations }
+            bibleTranslations.distinct().mapNotNull { verses.getOrNull(it) }
                 .ifEmpty { verses.take(1) }
         else -> verses.filter { it.translationFileName in assignedFileNames }
+            .sortedBy { assignedFileNames.indexOf(it.translationFileName) }
             .ifEmpty { verses.take(1) }
     }
     val effectiveVerses = versesForOutput(selectedVerses)

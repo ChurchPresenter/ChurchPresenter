@@ -186,6 +186,8 @@ class TextStyleButtonsBackdropTest {
         waitForIdle()
         onNodeWithText("Border").performClick()
         waitForIdle()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
         assertTrue(get().border, "what the dialog changes must reach the caller")
         assertFalse(get().lineBackground)
     }
@@ -207,6 +209,8 @@ class TextStyleButtonsBackdropTest {
         waitForIdle()
         // The built-ins in order: black bar, soft shade, thin outline, rounded plate.
         onAllNodesWithText("Aa")[0].performClick()
+        waitForIdle()
+        onNodeWithText("OK").performClick()
         waitForIdle()
         assertEquals(24, get().lineBackgroundHeight, "the black bar's own height")
         assertEquals(100, get().lineBackgroundOpacity)

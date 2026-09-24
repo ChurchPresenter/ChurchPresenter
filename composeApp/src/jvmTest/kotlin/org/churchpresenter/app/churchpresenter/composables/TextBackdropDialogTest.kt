@@ -66,7 +66,13 @@ class TextBackdropDialogTest {
                 )
             }
         }
-        block({ current }, { dismissals })
+        // What the dialog has *committed*: edits sit in its draft until Apply or OK, so the
+        // reader presses Apply first -- a no-op when nothing changed.
+        block({
+            onNodeWithText("Apply").performClick()
+            waitForIdle()
+            current
+        }, { dismissals })
     }
 
     /**

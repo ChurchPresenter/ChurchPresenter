@@ -29,10 +29,17 @@ class ProfilesCustomizeElementsTest {
         Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
     )
 
-    /** Two translations and both song languages, so nothing is hidden for want of a second one. */
+    /**
+     * Two translations, both song languages and the look-ahead on, so nothing is hidden for want of
+     * a second one -- or because its content is switched off, which takes its chip away.
+     */
     private fun doc(mode: String) = profileDocument(
         mode = mode,
-        profile = OutputProfile(songMode = Constants.SONG_LANG_BOTH, bibleMode = Constants.SONG_LANG_BOTH),
+        profile = OutputProfile(
+            songMode = Constants.SONG_LANG_BOTH,
+            bibleMode = Constants.SONG_LANG_BOTH,
+            songLookAhead = true,
+        ),
         bible = BibleSettings(
             translations = listOf(
                 BibleTranslationSettings(fileName = "kjv.spb"),
