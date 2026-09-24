@@ -40,9 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.hoverOutline
+import org.churchpresenter.theme.dropdownField
 
 @Composable
 fun DropdownSelector(
@@ -60,8 +58,7 @@ fun DropdownSelector(
 
     Box(
         modifier = sizeModifier
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverOutline(RoundedCornerShape(8.dp))
+            .dropdownField(RoundedCornerShape(8.dp), open = expanded)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 expanded = true
             }
@@ -172,8 +169,7 @@ fun DropdownSelector(
         Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
-                .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverOutline(RoundedCornerShape(8.dp))
+                .dropdownField(RoundedCornerShape(8.dp), open = expanded.value)
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                     expanded.value = true
                 }

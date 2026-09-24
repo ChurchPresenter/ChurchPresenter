@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.raisedHover
+import org.churchpresenter.theme.flatDisabled
 
 private const val DISABLED_INK_ALPHA = 0.35f
 private const val HOVER_TINT_ALPHA = 0.07f
@@ -96,6 +97,7 @@ fun ToolbarKey(
         val hoverTint = MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_TINT_ALPHA)
         val raisedToggle = style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed)
         val surface = when {
+            !enabled && style == ToolbarKeyStyle.RAISED -> Modifier.flatDisabled(shape, palette)
             !enabled -> Modifier.clip(shape)
             style == ToolbarKeyStyle.RAISED ->
                 Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)

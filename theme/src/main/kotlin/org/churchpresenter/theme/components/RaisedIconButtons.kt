@@ -75,7 +75,12 @@ fun KeyIconButton(
             .then(surface),
         contentAlignment = Alignment.Center,
     ) {
-        val ink = if (enabled) colors.contentColor else colors.disabledContentColor
+        val ink = when {
+            enabled -> colors.contentColor
+            // A filled one is dimmed whole by its disabled surface; a flat one only by its ink.
+            filled -> colors.contentColor
+            else -> colors.disabledContentColor
+        }
         CompositionLocalProvider(LocalContentColor provides ink, content = content)
     }
 }
@@ -132,7 +137,7 @@ fun RaisedIconButton(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val ink = if (enabled) colors.contentColor else colors.disabledContentColor
+        val ink = colors.contentColor
         CompositionLocalProvider(LocalContentColor provides ink, content = content)
     }
 }

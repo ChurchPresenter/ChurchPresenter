@@ -19,10 +19,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.rememberScrollState
@@ -30,7 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.VerticalScrollbar
-import org.churchpresenter.theme.hoverOutline
+import org.churchpresenter.theme.dropdownField
 
 /** The chevron points down when closed and is turned over, not spun, when open. */
 private const val CHEVRON_FLIPPED_DEGREES = 180f
@@ -51,12 +47,7 @@ fun LottieDropdown(
         modifier = modifier
             .height(Tokens.FieldHeight)
             // The app's sunken field; the accent rim while its menu is open.
-            .sunken(
-                Tokens.FieldShape,
-                elevationPalette(),
-                rim = if (expanded) MaterialTheme.colorScheme.primary else Color.Unspecified,
-            )
-            .hoverOutline(Tokens.FieldShape)
+            .dropdownField(Tokens.FieldShape, open = expanded)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

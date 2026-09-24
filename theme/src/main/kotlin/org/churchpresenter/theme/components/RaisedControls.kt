@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,11 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.flatDisabled
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.RING_ALPHA
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.hoverable
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 
 /**
  * `Button` in the elevated look: a raised key in its container color, top-lit, with a drop shadow
@@ -70,7 +76,8 @@ fun RaisedButton(
         enabled = enabled,
         shape = shape,
         fill = palette.tinted(colors.containerColor, colors.contentColor),
-        ink = if (enabled) colors.contentColor else colors.disabledContentColor,
+        // Disabled dims the whole control to 40%, label included; dimming the label too made it vanish.
+        ink = colors.contentColor,
         border = border,
         contentPadding = contentPadding,
         interactionSource = interactionSource,
@@ -109,11 +116,7 @@ fun KeyButton(
         enabled = enabled,
         shape = shape,
         fill = resolved ?: if (filled) palette.tinted(colors.containerColor, colors.contentColor) else palette.key,
-        ink = when {
-            !enabled -> colors.disabledContentColor
-            resolved != null -> resolved.ink
-            else -> colors.contentColor
-        },
+        ink = resolved?.ink ?: colors.contentColor,
         border = border,
         contentPadding = contentPadding,
         interactionSource = interactionSource,
@@ -204,12 +207,17 @@ private fun RaisedButtonSurface(
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
+    val focused by interaction.collectIsFocusedAsState()
+    val focusRing = MaterialTheme.colorScheme.primary.copy(alpha = RING_ALPHA)
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .then(
                 if (enabled) {
-                    Modifier.raised(shape, fill, palette, pressed, hovered)
+                    Modifier.raised(
+                        shape, fill, palette, pressed, hovered,
+                        ring = if (focused) focusRing else Color.Unspecified,
+                    )
                 } else {
                     Modifier.flatDisabled(shape, palette)
                 }
@@ -254,6 +262,18 @@ fun RaisedSwitch(
     val palette = elevationPalette()
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val knobOffset by animateDpAsState(if (checked) SWITCH_TRAVEL else 0.dp)
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    // The design's switch states: the track brightens under the pointer, the knob swells a touch
+    // and gives when pressed.
+    val knobScale by animateFloatAsState(
+        when {
+            pressed -> KNOB_PRESS_SCALE
+            hovered -> KNOB_HOVER_SCALE
+            else -> 1f
+        }
+    )
+    val lit = if (hovered && enabled && onCheckedChange != null) TRACK_HOVER_BRIGHTEN else 0f
     val trackShape = CircleShape
     val toggle = if (onCheckedChange != null) {
         Modifier.toggleable(
@@ -271,6 +291,7 @@ fun RaisedSwitch(
         modifier = modifier
             .then(if (onCheckedChange != null) Modifier.minimumInteractiveComponentSize() else Modifier)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .then(if (onCheckedChange != null && enabled) Modifier.hoverable(interaction) else Modifier)
             .then(toggle),
         contentAlignment = Alignment.Center,
     ) {
@@ -281,10 +302,21 @@ fun RaisedSwitch(
                     if (checked) {
                         Modifier
                             .clip(trackShape)
-                            .background(Brush.verticalGradient(listOf(palette.accent.bottom, palette.accent.top)))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        lerp(palette.accent.bottom, Color.White, lit),
+                                        lerp(palette.accent.top, Color.White, lit),
+                                    )
+                                )
+                            )
                             .border(1.dp, palette.wellBorder, trackShape)
                     } else {
-                        Modifier.sunken(trackShape, palette)
+                        Modifier.sunken(
+                            trackShape,
+                            palette,
+                            fill = if (lit > 0f) lerp(palette.wellBottom, Color.White, lit) else Color.Unspecified,
+                        )
                     }
                 ),
             contentAlignment = Alignment.CenterStart,
@@ -293,6 +325,10 @@ fun RaisedSwitch(
                 modifier = Modifier
                     .offset(x = SWITCH_INSET + knobOffset)
                     .size(SWITCH_KNOB)
+                    .graphicsLayer {
+                        scaleX = knobScale
+                        scaleY = knobScale
+                    }
                     .raised(CircleShape, knobFill(palette, checked), palette, lift = 2.dp)
             )
         }
@@ -308,6 +344,9 @@ private fun knobFill(palette: ElevationPalette, checked: Boolean): RaisedFill {
 }
 
 private const val DISABLED_ALPHA = 0.45f
+private const val KNOB_HOVER_SCALE = 1.06f
+private const val KNOB_PRESS_SCALE = 0.94f
+private const val TRACK_HOVER_BRIGHTEN = 0.12f
 private const val GHOST_PRESS_ALPHA = 0.6f
 private const val GHOST_HOVER_ALPHA = 0.08f
 private val BUTTON_RADIUS = 10.dp

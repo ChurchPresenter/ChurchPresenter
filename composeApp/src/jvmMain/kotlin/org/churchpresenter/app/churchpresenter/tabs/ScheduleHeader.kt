@@ -99,7 +99,6 @@ import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.raisedHover
 
 private const val MENU_OFFSET_DP = 8
 private const val DASH_ON_PX = 6f
@@ -294,11 +293,9 @@ private fun scheduleToolbarButtonLabel(button: ScheduleToolbarButton): String = 
 /** The toolbar: one raised strip, its icons flat inside it. */
 @Composable
 internal fun PillGroup(content: @Composable () -> Unit) {
-    val palette = elevationPalette()
+    // A plain row: each button in it is its own raised key, rather than the strip rising as one.
     FlowRow(
-        modifier = Modifier
-            .raisedHover(RoundedCornerShape(8.dp), palette.key, palette, lift = 2.dp)
-            .padding(2.dp),
+        modifier = Modifier.padding(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp)

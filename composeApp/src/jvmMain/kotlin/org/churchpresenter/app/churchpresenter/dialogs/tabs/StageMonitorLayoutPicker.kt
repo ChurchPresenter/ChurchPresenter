@@ -80,6 +80,12 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
 
 private const val VARIANT_CARD_WIDTH = 132
 private const val BEZEL_ALPHA = 0.38f
@@ -161,15 +167,25 @@ private fun LayoutVariantCard(
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
-    Column(
+    val accent = MaterialTheme.colorScheme.primary
+    // A raised key like every other button. The chosen one lifts higher with an accent ring, its
+    // zones turn to the accent and a tick sits in its corner -- which layout is on reads at a glance.
+    Box(
         modifier = Modifier
             .width(VARIANT_CARD_WIDTH.dp)
-            // A raised key like every other button: it lifts under the pointer and presses in. The
-            // chosen card keeps its accent border.
-            .raised(shape, palette.key, palette, pressed = pressed, hovered = hovered)
-            .then(if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
-            .clickable(interactionSource = interaction, indication = null, onClick = onPick)
-            .padding(6.dp),
+            .raised(
+                shape,
+                palette.key,
+                palette,
+                pressed = pressed,
+                hovered = hovered,
+                lift = if (selected) SELECTED_CARD_LIFT else CARD_LIFT,
+                ring = if (selected) accent else Color.Unspecified,
+            )
+            .clickable(interactionSource = interaction, indication = null, onClick = onPick),
+    ) {
+    Column(
+        modifier = Modifier.padding(6.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         TvScreenBox(
@@ -178,7 +194,11 @@ private fun LayoutVariantCard(
             bezelColor = stageMonitorBezelColor(),
             screenColor = Color.Black,
         ) {
-            LayoutMiniature(variant = variant, modifier = Modifier.fillMaxSize())
+            LayoutMiniature(
+                variant = variant,
+                modifier = Modifier.fillMaxSize(),
+                zoneColor = if (selected) accent else Color.White.copy(alpha = CELL_ALPHA),
+            )
         }
         Text(
             text = layoutLabel(variant),
@@ -189,6 +209,25 @@ private fun LayoutVariantCard(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+    if (selected) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(TICK_INSET)
+                .size(TICK_SIZE)
+                .clip(CircleShape)
+                .background(accent),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(TICK_ICON),
+            )
+        }
+    }
     }
 }
 
@@ -204,6 +243,8 @@ private fun LayoutVariantCard(
 internal fun LayoutMiniature(
     variant: StageMonitorLayout,
     modifier: Modifier = Modifier,
+    /** The zones' color: white, or the accent on the chosen layout's card. */
+    zoneColor: Color = Color.White.copy(alpha = CELL_ALPHA),
 ) {
     Column(
         modifier = modifier.padding(3.dp),
@@ -220,7 +261,7 @@ internal fun LayoutMiniature(
                             .weight(cell.weight)
                             .fillMaxSize()
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color.White.copy(alpha = CELL_ALPHA)),
+                            .background(zoneColor),
                     )
                 }
             }
@@ -300,3 +341,9 @@ internal fun metronomePositionLabel(position: MetronomePosition): String = when 
 @Composable
 internal fun stageMonitorBezelColor(): Color =
     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = BEZEL_ALPHA)
+
+private val CARD_LIFT = 3.dp
+private val SELECTED_CARD_LIFT = 6.dp
+private val TICK_SIZE = 16.dp
+private val TICK_ICON = 11.dp
+private val TICK_INSET = 4.dp

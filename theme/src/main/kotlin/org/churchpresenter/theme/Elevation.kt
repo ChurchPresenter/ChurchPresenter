@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
@@ -96,8 +97,8 @@ fun elevationPalette(): ElevationPalette {
             // cards sit on the container shades, and a key lightened from `surface` came out level
             // with them.
             key = RaisedFill(
-                top = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.14f),
-                bottom = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.06f),
+                top = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.22f),
+                bottom = lerp(scheme.surfaceContainerHighest, Color.White, fraction = 0.12f),
                 ink = scheme.onSurface,
                 highlight = Color.White.copy(alpha = 0.14f),
                 glow = Color.Black,
@@ -123,7 +124,7 @@ fun elevationPalette(): ElevationPalette {
                 highlight = Color.White.copy(alpha = 0.07f),
                 glow = scheme.error,
             ),
-            keyEdge = Color.White.copy(alpha = 0.07f),
+            keyEdge = Color.White.copy(alpha = 0.10f),
             dropShadow = Color.Black,
             disabledFill = lerp(surface, Color.White, fraction = 0.04f),
             disabledInk = scheme.onSurface.copy(alpha = 0.38f),
@@ -222,6 +223,8 @@ fun Modifier.raised(
      * segment, a tick, a card -- which only brightens.
      */
     moves: Boolean = true,
+    /** A 2dp ring drawn over the edge -- keyboard focus, or a picker that is open or chosen. */
+    ring: Color = Color.Unspecified,
 ): Modifier {
     val elevation = when {
         pressed -> 0.dp
@@ -269,17 +272,23 @@ fun Modifier.raised(
         .then(
             if (palette.keyEdge.alpha > 0f) Modifier.border(HAIRLINE, palette.keyEdge, shape) else Modifier
         )
+        .then(if (ring.isSpecified) Modifier.border(RING_WIDTH, ring, shape) else Modifier)
 }
 
-/** A control that cannot be used: flat, dimmed, no shadow. */
+/** A control that cannot be used: the neutral key, flat and at 40% -- the whole control, label too. */
 fun Modifier.flatDisabled(shape: Shape, palette: ElevationPalette): Modifier = this
+    .alpha(DISABLED_OPACITY)
     .clip(shape)
-    .background(palette.disabledFill)
+    .background(Brush.verticalGradient(listOf(palette.key.top, palette.key.bottom)))
 
 private val INNER_SHADOW_DEPTH = 4.dp
 private val RAISED_LIFT = 3.dp
 private val HOVER_EXTRA_LIFT = 3.dp
-private const val HOVER_BRIGHTEN = 0.06f
+private const val HOVER_BRIGHTEN = 0.08f
+private const val DISABLED_OPACITY = 0.4f
+private val RING_WIDTH = 2.dp
+/** How strong a focus or open ring is drawn. */
+const val RING_ALPHA = 0.55f
 private val PRESS_SHIFT = 1.dp
 private val HAIRLINE = 0.5.dp
 private const val FILL_WELL_SHADE = 0.08f
@@ -321,4 +330,19 @@ fun Modifier.raisedHover(
     this
         .hoverable(interaction)
         .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = lift)
+}
+
+/**
+ * A dropdown's closed field: a raised key rather than a sunken well, so what opens a list reads as
+ * something to press and what takes typing reads as something to type into. It lifts under the
+ * pointer like a button and carries the accent rim while its menu is [open].
+ */
+fun Modifier.dropdownField(shape: Shape, open: Boolean = false): Modifier = composed {
+    val palette = elevationPalette()
+    this
+        .raisedHover(shape, palette.key, palette)
+        .then(
+            if (open) Modifier.border(RING_WIDTH, MaterialTheme.colorScheme.primary.copy(alpha = RING_ALPHA), shape)
+            else Modifier
+        )
 }

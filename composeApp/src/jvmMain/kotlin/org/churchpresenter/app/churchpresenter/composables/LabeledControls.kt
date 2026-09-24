@@ -22,6 +22,9 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 
+/** The design's gap between a checkbox or radio and its label; the box used to touch the text. */
+private val CONTROL_LABEL_GAP = 8.dp
+
 /**
  * A checkbox, radio button or switch together with its label, where **the label is part of the
  * control**.
@@ -58,7 +61,7 @@ fun LabeledCheckbox(
     color: Color = Color.Unspecified,
     supporting: String? = null,
     controlModifier: Modifier = Modifier,
-    spacing: Dp = 0.dp,
+    spacing: Dp = CONTROL_LABEL_GAP,
     controlAtEnd: Boolean = false,
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -113,7 +116,7 @@ fun LabeledRadioButton(
     color: Color = Color.Unspecified,
     supporting: String? = null,
     controlModifier: Modifier = Modifier,
-    spacing: Dp = 0.dp,
+    spacing: Dp = CONTROL_LABEL_GAP,
     controlAtEnd: Boolean = false,
 ) {
     val interaction = remember { MutableInteractionSource() }
