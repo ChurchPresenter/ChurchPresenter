@@ -60,13 +60,17 @@ private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBack
     val shift = backdrop.lineBackgroundOffset.sp.toPx() * scale
     val radiusPx = backdrop.lineBackgroundRadius.sp.toPx() * scale
     val radius = CornerRadius(radiusPx, radiusPx)
+    // One pair of edges for every band, or null to let each line keep its own. The union of the
+    // lines that have text, so it reads correctly whichever way the paragraph is aligned.
+    val shared = if (backdrop.lineBackgroundUniformWidth) layout.drawnLineExtent() else null
     for (line in 0 until layout.lineCount) {
-        val textLeft = layout.getLineLeft(line)
-        val textRight = layout.getLineRight(line)
         // Measured *before* the horizontal grow, on purpose. A blank line is zero wide, and growing
         // it would paint a band twice the grow wide with no text on it — a mark floating between two
-        // verses. What decides whether a line gets a band is the text, not the band's own size.
-        if (textRight - textLeft <= 0f) continue
+        // verses. What decides whether a line gets a band is the text on it, not the band's width —
+        // which is why this reads the line's own extent even when the width is shared.
+        if (layout.getLineRight(line) - layout.getLineLeft(line) <= 0f) continue
+        val textLeft = shared?.first ?: layout.getLineLeft(line)
+        val textRight = shared?.second ?: layout.getLineRight(line)
         val left = textLeft - growX
         val right = textRight + growX
         val top = layout.getLineTop(line) - grow + shift
@@ -134,6 +138,26 @@ internal fun DrawScope.drawBlockBacking(bounds: Rect, backdrop: TextBackdrop, sc
         cornerRadius = radius,
         style = Stroke(width = stroke),
     )
+}
+
+/**
+ * The leftmost left and rightmost right across every line that has text, or null when none has.
+ *
+ * What "as wide as the widest line" means in practice. Taking the union rather than the widest
+ * line's own pair is what makes it right under any alignment: centred text has a symmetric union, so
+ * the bands come out centred too; left-aligned text shares its left edge and the bands end together.
+ */
+private fun TextLayoutResult.drawnLineExtent(): Pair<Float, Float>? {
+    var left = Float.MAX_VALUE
+    var right = -Float.MAX_VALUE
+    for (line in 0 until lineCount) {
+        val lineLeft = getLineLeft(line)
+        val lineRight = getLineRight(line)
+        if (lineRight - lineLeft <= 0f) continue
+        if (lineLeft < left) left = lineLeft
+        if (lineRight > right) right = lineRight
+    }
+    return if (right > left) left to right else null
 }
 
 /** A stored `#RRGGBB` at a stored 0-100 opacity. */

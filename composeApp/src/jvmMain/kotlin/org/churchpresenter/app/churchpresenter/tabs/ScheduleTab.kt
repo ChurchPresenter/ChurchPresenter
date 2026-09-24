@@ -3,6 +3,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,9 +27,9 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.GhostButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +40,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.graphicsLayer
@@ -77,7 +83,9 @@ import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DragItemGeometry
+import org.churchpresenter.app.churchpresenter.utils.carriesFileList
 import org.churchpresenter.app.churchpresenter.utils.dragDropTarget
+import org.churchpresenter.app.churchpresenter.utils.fileListOrNull
 import org.churchpresenter.app.churchpresenter.utils.scheduleCanZoomIn
 import org.churchpresenter.app.churchpresenter.utils.scheduleCanZoomOut
 import org.churchpresenter.app.churchpresenter.utils.scheduleDensityFor
@@ -87,15 +95,32 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.awt.datatransfer.DataFlavor
-import java.awt.dnd.DnDConstants
-import java.awt.dnd.DropTarget
-import java.awt.dnd.DropTargetAdapter
-import java.awt.dnd.DropTargetDropEvent
 import java.io.File
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
+
+/**
+ * `awtTransferable` is the one part of a drop a test cannot reach, so it is all these two do — the
+ * reading itself is `carriesFileList`/`fileListOrNull`, which a test drives with a stand-in
+ * `Transferable`. Both swallow: a drag whose data cannot be read is simply a drag this panel does
+ * not take, and there is nothing to tell the operator at that point.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Suppress("SwallowedException")
+private fun DragAndDropEvent.carriesFiles(): Boolean = try {
+    awtTransferable.carriesFileList()
+} catch (_: Exception) {
+    false
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Suppress("SwallowedException")
+private fun DragAndDropEvent.droppedFiles(): List<File>? = try {
+    awtTransferable.fileListOrNull()
+} catch (_: Exception) {
+    null
+}
 
 /** How often the live row's behind/ahead badge is re-reckoned. */
 private const val DRIFT_TICK_MS = 1_000L
@@ -104,8 +129,19 @@ private const val FALLBACK_DRAG_ITEM_HEIGHT = 50f
 private const val DRAGGED_ITEM_ALPHA = 0.35f
 private const val DRAG_TARGET_Z_INDEX = 5f
 private const val DRAGGED_ITEM_Z_INDEX = 10f
+
 private const val DRAGGED_ITEM_SCALE = 1.04f
 private const val DRAGGED_ITEM_ELEVATION = 20f
+
+/** Above the rows, below the row being reordered — a file drop and a reorder never overlap. */
+private const val FILE_DROP_OVERLAY_Z_INDEX = 5f
+
+/** Enough tint to read as a target without hiding the schedule underneath it. */
+private const val FILE_DROP_SCRIM_ALPHA = 0.16f
+private val FILE_DROP_BORDER = 3.dp
+private val FILE_DROP_CALLOUT_ELEVATION = 6.dp
+private val FILE_DROP_CALLOUT_PADDING_H = 20.dp
+private val FILE_DROP_CALLOUT_PADDING_V = 14.dp
 
 data class ScheduleTabActions(
     val newSchedule: () -> Unit = {},
@@ -356,10 +392,36 @@ fun ScheduleTab(
 
         val viewModelState = rememberUpdatedState(viewModel)
         var listHeightPx by remember { mutableStateOf(0) }
+
+        // True while a file from outside the app is being dragged over this panel.
+        var fileDragOver by remember { mutableStateOf(false) }
+        val fileDropTarget = remember {
+            object : DragAndDropTarget {
+                override fun onEntered(event: DragAndDropEvent) { fileDragOver = true }
+                override fun onExited(event: DragAndDropEvent) { fileDragOver = false }
+                override fun onEnded(event: DragAndDropEvent) { fileDragOver = false }
+
+                override fun onDrop(event: DragAndDropEvent): Boolean {
+                    fileDragOver = false
+                    val files = event.droppedFiles() ?: return false
+                    handleDroppedFiles(files, viewModelState.value)
+                    return true
+                }
+            }
+        }
+
         Box(
             modifier = Modifier.weight(1f).fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .onSizeChanged { listHeightPx = it.height }
+                // Compose's own target, scoped to this panel. An AWT `DropTarget` reached for a
+                // window by hand instead, which is not reliably the one holding this composable and
+                // never received an event; the Compose target is attached to the node, so it cannot
+                // be aimed at the wrong window.
+                .dragAndDropTarget(
+                    shouldStartDragAndDrop = { it.carriesFiles() },
+                    target = fileDropTarget,
+                )
         ) {
             val listState = rememberLazyListState()
 
@@ -462,36 +524,7 @@ fun ScheduleTab(
                     }
                 }
 
-            DisposableEffect(Unit) {
-                val awtWindow = java.awt.Window.getWindows().firstOrNull { it.isShowing }
-                val dropTarget = awtWindow?.let { win ->
-                    DropTarget(win, DnDConstants.ACTION_COPY, object : DropTargetAdapter() {
-                        override fun drop(event: DropTargetDropEvent) {
-                            event.acceptDrop(DnDConstants.ACTION_COPY)
-                            try {
-                                val transferable = event.transferable
-                                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                                    @Suppress("UNCHECKED_CAST")
-                                    val files = transferable.getTransferData(DataFlavor.javaFileListFlavor) as List<File>
-                                    val vm = viewModelState.value
-                                    handleDroppedFiles(files, vm)
-                                }
-                                event.dropComplete(true)
-                            } catch (_: Exception) {
-                                event.dropComplete(false)
-                            }
-                        }
-                    }, true)
-                }
-                onDispose {
-                    if (dropTarget != null) {
-                        awtWindow.dropTarget = null
-                    }
-                }
-            }
-
-            if (scheduleItems.isEmpty()) {
-
+            if (scheduleItems.isEmpty() && !fileDragOver) {
                 Text(
                     text = stringResource(Res.string.schedule_drop_hint),
                     style = MaterialTheme.typography.bodyMedium,
@@ -599,6 +632,43 @@ fun ScheduleTab(
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onError
                     )
+                }
+            }
+
+            // Drawn over the rows rather than instead of them, which is what makes this work on a
+            // schedule that already has content — the hint below only ever appeared on an empty one,
+            // so by the time anyone had a service to add to there was no affordance at all.
+            if (fileDragOver) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .zIndex(FILE_DROP_OVERLAY_Z_INDEX)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = FILE_DROP_SCRIM_ALPHA),
+                            CARD_SHAPE,
+                        )
+                        .border(FILE_DROP_BORDER, MaterialTheme.colorScheme.primary, CARD_SHAPE),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // A solid callout rather than text straight onto the scrim: over a schedule that
+                    // already has rows, translucent text on translucent wash is unreadable exactly
+                    // when it matters most.
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        shape = CARD_SHAPE,
+                        shadowElevation = FILE_DROP_CALLOUT_ELEVATION,
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.schedule_drop_hint),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(
+                                horizontal = FILE_DROP_CALLOUT_PADDING_H,
+                                vertical = FILE_DROP_CALLOUT_PADDING_V,
+                            ),
+                        )
+                    }
                 }
             }
 

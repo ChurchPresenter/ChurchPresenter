@@ -108,6 +108,7 @@
     <string name="backdrop_height_offset">Height offset</string>
     <string name="backdrop_width_offset">Width offset</string>
     <string name="backdrop_fill_radius">Corner radius</string>
+    <string name="backdrop_fill_uniform_width">Same width for every line</string>
     <string name="backdrop_vertical_offset">Vertical offset</string>
     <string name="backdrop_border_color">Border color</string>
     <string name="backdrop_border_width">Thickness</string>
