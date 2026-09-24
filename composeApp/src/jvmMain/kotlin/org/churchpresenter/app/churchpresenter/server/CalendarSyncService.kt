@@ -22,6 +22,9 @@ import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.CalendarSyncSettings
@@ -82,6 +85,7 @@ class CalendarSyncService(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** How long a song usually runs here -- the app's duration log -- for the catalog the phones plan with. */
     private val typicalSeconds: (SongItem) -> Int? = { null },
+    private val usage: UsageEventStore = UsageEvents,
 ) {
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
@@ -184,7 +188,8 @@ class CalendarSyncService(
      * are. The relay forgets a device that never checks in within its first minutes, so a code that
      * was photographed or never scanned dies by itself; the phone that does scan it names itself.
      */
-    suspend fun invitePhone(): CalendarEnrollment? = enroll(UUID.randomUUID().toString(), deviceName = "")
+    suspend fun invitePhone(): CalendarEnrollment? =
+        enroll(UUID.randomUUID().toString(), deviceName = "")?.also { usage.record(UsageEvent.CALENDAR_PHONE_INVITED) }
 
     /** Registers with the relay when sync is on and this desktop never has; nothing to do otherwise. */
     suspend fun registerIfNeeded(): Boolean = lock.withLock {

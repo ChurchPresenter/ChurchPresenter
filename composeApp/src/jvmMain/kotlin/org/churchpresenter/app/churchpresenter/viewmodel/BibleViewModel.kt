@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +40,7 @@ class BibleViewModel(
 
     dispatcher: CoroutineDispatcher = Dispatchers.Main,
     internal val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    internal val usage: UsageEventStore = UsageEvents,
 ) {
 
     data class LoadedTranslation(val fileName: String, val bible: Bible)

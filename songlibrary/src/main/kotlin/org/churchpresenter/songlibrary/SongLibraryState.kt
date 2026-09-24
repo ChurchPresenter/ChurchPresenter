@@ -54,6 +54,7 @@ val OPTIONAL_COLUMNS: List<SongField> = listOf(
 @Suppress("TooManyFunctions")
 class SongLibraryState(
     private val root: File,
+    private val onUsage: (usage: SongLibraryUsage, count: Int) -> Unit = { _, _ -> },
     /**
      * How long a song usually stays on screen, in seconds, or null until it has been measured.
      *
@@ -148,6 +149,11 @@ class SongLibraryState(
         refresh()
     }
 
+    fun bulkEdit(fields: Map<SongField, String>) {
+        onUsage(SongLibraryUsage.BULK_EDIT, 1)
+        editAll(fields)
+    }
+
     fun editAll(fields: Map<SongField, String>) {
         edits.editAll(selected.toList(), fields)
         refresh()
@@ -206,6 +212,7 @@ class SongLibraryState(
         val edited = edits.songs
         val outcome = withContext(io) { library.save(original, edited) }
         if (outcome.errors.isEmpty()) edits.markSaved()
+        if (outcome.saved > 0) onUsage(SongLibraryUsage.SONGS_SAVED, outcome.saved)
         // A rename moves the file the edits are keyed on, so what is on screen has to be re-read.
         adopt(withContext(io) { library.load() })
         lastOutcome = outcome
@@ -257,6 +264,7 @@ class SongLibraryState(
         io: CoroutineDispatcher = Dispatchers.IO,
     ): SaveOutcome = writing {
         val outcome = withContext(io) { library.delete(songs) }
+        if (outcome.saved > 0) onUsage(SongLibraryUsage.SONGS_DELETED, outcome.saved)
         edits.remove(songs.map { it.sourceFile })
         selected = selected - songs.map { it.sourceFile }.toSet()
         refresh()
@@ -270,6 +278,7 @@ class SongLibraryState(
         io: CoroutineDispatcher = Dispatchers.IO,
     ): Boolean = writing {
         if (!withContext(io) { library.createSongbook(name) }) return@writing false
+        onUsage(SongLibraryUsage.SONGBOOK_CREATED, 1)
         if (assignSelected) editAll(mapOf(SongField.SONGBOOK to name))
         true
     }
@@ -291,3 +300,5 @@ class SongLibraryState(
         isDirty = edits.isDirty
     }
 }
+
+enum class SongLibraryUsage { SONGS_SAVED, BULK_EDIT, SONGBOOK_CREATED, SONGS_DELETED }

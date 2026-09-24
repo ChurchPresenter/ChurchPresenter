@@ -73,6 +73,7 @@ import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.app.churchpresenter.lottieBandPath
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.diagnostics.CrashReporter
@@ -409,6 +410,9 @@ fun BibleTab(
             }
             if (isSplitScreenBible(translationCount, outputs)) {
                 UsageEvents.record(UsageEvent.BIBLE_SPLIT_SCREEN)
+            }
+            if (lottieBandPath(appSettings, Presenting.BIBLE) != null) {
+                UsageEvents.record(UsageEvent.BIBLE_LOTTIE_BAND)
             }
         }
         if (primaryVerse != null && statisticsManager != null) {
