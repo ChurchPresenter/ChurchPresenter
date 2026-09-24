@@ -57,7 +57,7 @@ class CompanionServerCalendarEnrollTest {
     }
 
     @Test
-    fun `an approved phone is told where the relay is and nothing else`() = runBlocking<Unit> {
+    fun `an approved phone is handed its whole enrollment, so there is nothing left to scan`() = runBlocking<Unit> {
         val pending = async { withTimeout(5_000) { server.onCalendarEnroll.first() } }
         val reply = async { enroll("phone-1", """{"deviceName":"Anna's ‮iPhone","code":"48-29 13"}""") }
 
@@ -65,14 +65,21 @@ class CompanionServerCalendarEnrollTest {
         assertEquals("phone-1", request.clientId)
         assertEquals("Anna's iPhone", request.deviceName)
         assertEquals("482913", request.code)
-        val reply1 = CalendarEnrollReply("https://relay.example", "inst-1")
+        val reply1 = CalendarEnrollment(
+            relayUrl = "https://relay.example/",
+            instanceId = "inst-1",
+            deviceId = "phone-1",
+            deviceToken = "devicetoken-1",
+            instanceKey = "instancekey-1",
+        ).asReply()
         request.decision.complete(CalendarEnrollDecision.Approved(reply1))
 
         val response = reply.await()
         assertEquals(HttpStatusCode.OK, response.status)
         val text = response.bodyAsText()
-        assertTrue("relay.example" in text && "inst-1" in text)
-        assertTrue("token" !in text && "key" !in text)
+        assertTrue("\"relayUrl\":\"https://relay.example\"" in text, text)
+        assertTrue("inst-1" in text && "phone-1" in text, text)
+        assertTrue("devicetoken-1" in text && "instancekey-1" in text, text)
     }
 
     @Test

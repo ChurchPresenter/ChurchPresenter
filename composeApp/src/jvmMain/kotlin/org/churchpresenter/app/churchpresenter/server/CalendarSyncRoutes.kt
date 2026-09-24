@@ -22,13 +22,23 @@ private const val CODE_DIGITS = 6
 @Serializable
 internal data class CalendarEnrollBody(val deviceName: String = "", val code: String = "")
 
-/** What the phone gets back: where the relay is and which instance. The rest comes by QR. */
+/**
+ * What the phone gets back once the operator allows it: everything the QR would have carried, so
+ * that Allow is the last step. The operator comparing the code on the phone with the one in their
+ * prompt is what makes this safe; a second step to scan the same thing added nothing to that.
+ */
 @Serializable
-data class CalendarEnrollReply(val relayUrl: String, val instanceId: String)
+data class CalendarEnrollReply(
+    val relayUrl: String,
+    val instanceId: String,
+    val deviceId: String,
+    val deviceToken: String,
+    val instanceKey: String,
+)
 
 /** How a phone's request to be enrolled ended, each answered differently so the phone can say why. */
 sealed class CalendarEnrollDecision {
-    /** The operator allowed it and the desktop is registered: here is where to go. */
+    /** The operator allowed it and the desktop is registered: here is where to go, and the keys to get in. */
     data class Approved(val reply: CalendarEnrollReply) : CalendarEnrollDecision()
 
     /** The operator refused, the device is blocked, or nobody answered in time. */
@@ -40,6 +50,10 @@ sealed class CalendarEnrollDecision {
     /** Allowed, but the desktop could not register with the relay or enroll the phone. */
     data object RelayFailed : CalendarEnrollDecision()
 }
+
+/** An enrollment as the phone that asked for it over the LAN receives it. */
+fun CalendarEnrollment.asReply(): CalendarEnrollReply =
+    CalendarEnrollReply(relayUrl.trimEnd('/'), instanceId, deviceId, deviceToken, instanceKey)
 
 /** A phone asking to be enrolled with the calendar relay; [decision] is the answer once the operator has decided. */
 data class PendingCalendarEnroll(
