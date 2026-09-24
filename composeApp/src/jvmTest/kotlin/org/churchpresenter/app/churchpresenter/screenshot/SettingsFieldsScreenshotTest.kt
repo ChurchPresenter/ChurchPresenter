@@ -5,17 +5,20 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
@@ -98,13 +101,17 @@ class SettingsFieldsScreenshotTest {
     /** A fixed font list, not the machine's: the installed set differs from box to box. */
     @Test
     fun `a font picker closed`() = field("font_picker") {
-        FontSettingsDropdown(label = "Font", value = "Georgia", fonts = FONTS, onValueChange = {})
+        PinnedFaces {
+            FontSettingsDropdown(label = "Font", value = "Georgia", fonts = FONTS, onValueChange = {})
+        }
     }
 
     /**
      * The field doubles as a search box, and it opens with the current pick still in it — which
      * filters the menu down to that one row. Clearing it is what a user's first keystroke does, and
      * it is the only way to see the list this component exists for.
+     *
+     * The names are **not** drawn in their own faces here; see [PinnedFaces].
      */
     @Test
     fun `a font picker open, each name in its own font`() = captureComponent(
@@ -117,10 +124,25 @@ class SettingsFieldsScreenshotTest {
             waitForIdle()
         },
     ) {
-        Box(Modifier.width(220.dp)) {
-            FontSettingsDropdown(label = "Font", value = "Georgia", fonts = FONTS, onValueChange = {})
+        PinnedFaces {
+            Box(Modifier.width(220.dp)) {
+                FontSettingsDropdown(label = "Font", value = "Georgia", fonts = FONTS, onValueChange = {})
+            }
         }
     }
+
+    /**
+     * Draws every font name in one face instead of its own.
+     *
+     * The picker's whole point is showing each font in itself, and the app still does -- but that
+     * makes the picture depend on which fonts the machine has, and a box missing one of [FONTS]
+     * renders that row in a fallback. Pinning the resolver is what takes the host's font book out
+     * of these three images; the feature is untouched, and the cost is that the picture no longer
+     * demonstrates it.
+     */
+    @Composable
+    private fun PinnedFaces(content: @Composable () -> Unit) =
+        CompositionLocalProvider(LocalFontPreviewFace provides { FontFamily.Default }, content = content)
 
     // ── NumberSettingsTextField ─────────────────────────────────────────────────────────────────
 

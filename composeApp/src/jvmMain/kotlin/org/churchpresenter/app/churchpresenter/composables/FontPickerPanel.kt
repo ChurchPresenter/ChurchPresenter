@@ -55,7 +55,6 @@ import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_warning
 import org.churchpresenter.app.churchpresenter.utils.FontCategory
 import org.churchpresenter.app.churchpresenter.utils.FontFace
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -218,7 +217,7 @@ internal fun FontFamilyRow(
             text = face.name,
             style = MaterialTheme.typography.bodySmall.copy(
                 fontSize = 13.sp,
-                fontFamily = remember(face.name) { systemFontFamilyOrDefault(face.name) },
+                fontFamily = LocalFontPreviewFace.current(face.name),
             ),
             color = if (selected || highlighted) {
                 MaterialTheme.colorScheme.onSurface
@@ -268,7 +267,7 @@ internal fun categoryLabel(category: FontCategory): String = when (category) {
  */
 @Composable
 internal fun FontPreviewPane(face: FontFace, measured: Boolean, lines: List<String>) {
-    val family = remember(face.name) { systemFontFamilyOrDefault(face.name) }
+    val family = LocalFontPreviewFace.current(face.name)
     val missing = remember(face, lines, measured) {
         if (!measured) emptyList() else lines.flatMap { missingScripts(it, face) }.distinct()
     }
