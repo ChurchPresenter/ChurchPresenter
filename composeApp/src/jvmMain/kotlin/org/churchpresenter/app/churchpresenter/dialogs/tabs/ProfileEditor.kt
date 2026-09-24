@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -153,7 +154,12 @@ internal fun ProfileEditor(
     // rather than nested under it, so its top edge lines up with the profile list's own. The stage
     // monitor draws its own preview inside its pane and gets no column here.
     Row(modifier = modifier) {
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surfaceContainer),
+        ) {
             ProfileHeader(
                 profile = profile,
                 usedBy = usedBy,
@@ -192,7 +198,7 @@ internal fun ProfileEditor(
         }
         // Every category draws its picture beside the controls, bar the stage monitor, whose own
         // tab already draws its zone layout at full size.
-        if (pane != null && pane != CustomizePane.STAGE_MONITOR) {
+        if (pane != CustomizePane.STAGE_MONITOR) {
             VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             CompositionLocalProvider(LocalOutputStyleScope provides scope) {
                 CustomizePreviewColumn(

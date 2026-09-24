@@ -184,6 +184,12 @@ data class CalendarBibleBook(
     val bookId: Int,
     val name: String,
     val verseCounts: List<Int>,
+    /**
+     * What the picker's tiles call it. Many translations title a book in full -- "Книга пророка
+     * Исаии" -- which a tile cuts to "Книга прор…"; the host passes the app's short name instead.
+     * Display only: the rows the picker makes still carry [name], which is what the Bible knows.
+     */
+    val shortName: String = name,
 ) {
     val chapterCount: Int get() = verseCounts.size
 

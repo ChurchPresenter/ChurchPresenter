@@ -88,6 +88,8 @@ fun RaisedCheckbox(
     enabled: Boolean = true,
     colors: CheckboxColors = CheckboxDefaults.colors(),
     interactionSource: MutableInteractionSource? = null,
+    /** The clear box's edge in place of the well's own, for a box standing in a sunken well itself. */
+    uncheckedRim: Color = Color.Unspecified,
 ) {
     val palette = elevationPalette()
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
@@ -129,7 +131,7 @@ fun RaisedCheckbox(
                     if (checked) {
                         Modifier.raised(shape, fill, palette, hovered = hovered, lift = 2.dp, moves = false)
                     } else {
-                        Modifier.sunken(shape, palette, rim = if (hovered) hoverRim else Color.Unspecified)
+                        Modifier.sunken(shape, palette, rim = if (hovered) hoverRim else uncheckedRim)
                     }
                 ),
         ) {

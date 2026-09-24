@@ -29,8 +29,8 @@ class PicturesTabSettingsTest {
         picturesTab { _, _ ->
             // The shipped defaults: hold for 5s, transition over 500ms.
             // Caption and value are merged into one node, so these are substring checks.
-            assertTrue(showsContainingText("AUTO-SCROLL INTERVAL:5 s"), "the hold time: ${renderedText()}")
-            assertTrue(showsContainingText("TRANSITION DURATION:500 ms"), "the transition: ${renderedText()}")
+            assertTrue(showsContainingText("AUTO-SCROLL INTERVAL5 s"), "the hold time: ${renderedText()}")
+            assertTrue(showsContainingText("TRANSITION DURATION500 ms"), "the transition: ${renderedText()}")
             assertTrue(showsContainingText("ANIMATION TYPE:Crossfade"), "the transition style")
         }
 

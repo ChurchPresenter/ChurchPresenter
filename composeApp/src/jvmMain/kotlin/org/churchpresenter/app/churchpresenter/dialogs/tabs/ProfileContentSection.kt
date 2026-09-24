@@ -313,6 +313,8 @@ private fun ContentCheckRow(label: String, checked: Boolean, onCheckedChange: (B
             onCheckedChange = null,
             interactionSource = interaction,
             modifier = Modifier.size(16.dp),
+            // The card these stand in is a well already, so the box's own well edge vanished into it.
+            uncheckedRim = MaterialTheme.colorScheme.outline,
         )
         Text(
             text = label,
