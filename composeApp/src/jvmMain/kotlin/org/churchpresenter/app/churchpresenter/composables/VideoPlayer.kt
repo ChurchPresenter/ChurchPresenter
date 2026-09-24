@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.diagnostics.CrashReporter
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
@@ -64,6 +65,9 @@ private const val VLC_OPT_SUB_FILE = ":sub-file="
 /** The media option that hands VLC an external subtitle file, or nothing when there is none. */
 internal fun subtitleMediaOptions(subtitleUrl: String): Array<String> =
     if (subtitleUrl.isBlank()) emptyArray() else arrayOf(VLC_OPT_SUB_FILE + subtitleUrl)
+
+/** VLC's own "draw no subtitles" track. Its list carries it as an entry; we filter it out below. */
+private const val VLC_SUBTITLE_TRACK_DISABLED = -1
 
 /** The subtitle tracks VLC lists for the playing media, without its own "Disable" entry (id -1). */
 private fun MediaPlayer.subtitleTracks(): List<SubtitleTrack> =
@@ -488,6 +492,14 @@ fun VideoPlayer(
             override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
                 if (newLength > 0) viewModel.setDuration(newLength)
             }
+            // The embedded tracks were listed only by the software player, so a file opened
+            // through this one offered an empty Subtitles menu however many tracks it carried.
+            override fun mediaPlayerReady(mediaPlayer: MediaPlayer) {
+                viewModel.setSubtitleTracks(mediaPlayer.subtitleTracks())
+            }
+            override fun elementaryStreamAdded(mediaPlayer: MediaPlayer, type: TrackType, id: Int) {
+                if (type == TrackType.TEXT) viewModel.setSubtitleTracks(mediaPlayer.subtitleTracks())
+            }
             override fun playing(mediaPlayer: MediaPlayer) {
                 if (!viewModel.isPlaying) {
                     if (!firstFrameCaptured.value) {
@@ -851,12 +863,14 @@ private fun MediaPlayer.playSoftware(
 /**
  * Applies the view model's chosen subtitle track live, without reloading the media.
  *
- * Skipped entirely when the app is rendering the subtitles itself (`subtitleCues` non-empty) --
- * VLC was never handed that file, so it has no track for it to select.
+ * VLC only ever hears about its own tracks. The app-drawn sidecar file
+ * (`MediaViewModel.SUBTITLES_SIDECAR`) has no VLC track behind it, so choosing it -- or turning
+ * subtitles off -- is sent to VLC as its "Disable" track, and `MediaPresenter` does the rest by
+ * reading `activeSubtitleCue`. Without that, picking an embedded track and then the sidecar file
+ * left VLC still burning the embedded one into the frame underneath.
  */
 @Composable
 internal fun SubtitleTrackSync(viewModel: MediaViewModel, mp: MediaPlayer, gate: PlayerReleaseGate) {
-    if (viewModel.subtitleCues.isNotEmpty()) return
     // Keyed on the resolved selection alone, not on `subtitleTracks` too: that list is reassigned
     // once per embedded track VLC reports (`elementaryStreamAdded` fires per track), and keying on
     // it re-sent the *same* selection to VLC on every one of those -- `setTrack` is not a no-op
@@ -866,9 +880,11 @@ internal fun SubtitleTrackSync(viewModel: MediaViewModel, mp: MediaPlayer, gate:
     // (see `setSubtitleTracks`) the moment there's something to resolve it with.
     LaunchedEffect(viewModel.selectedSubtitleTrack) {
         val track = viewModel.selectedSubtitleTrack
-        if (track != MediaViewModel.SUBTITLES_UNDECIDED) {
-            SwingUtilities.invokeLater { gate.ifLive { mp.subpictures().setTrack(track) } }
-        }
+        if (track == MediaViewModel.SUBTITLES_UNDECIDED) return@LaunchedEffect
+        // Anything that is not one of VLC's own tracks means "draw nothing", which for VLC is its
+        // "Disable" entry, id -1 -- and that is exactly what SUBTITLES_OFF already is.
+        val vlcTrack = if (track >= 0) track else VLC_SUBTITLE_TRACK_DISABLED
+        SwingUtilities.invokeLater { gate.ifLive { mp.subpictures().setTrack(vlcTrack) } }
     }
 }
 
@@ -912,6 +928,12 @@ fun SoftwareVideoPlayer(
     // even slow-starting or portrait/rotated videos have time to deliver their first frame.
     val firstFrameCaptured = remember { mutableStateOf(false) }
 
+    // What the load effect below last opened it for, so it can tell a genuinely new file or a loop
+    // restart (both begin at zero) from the same file being re-opened only because a subtitle VLC
+    // has to burn in itself was chosen (resume where the operator was).
+    val loadedUrl = remember { mutableStateOf("") }
+    val loadedLoopVersion = remember { mutableIntStateOf(-1) }
+
     ConvertFramesOffRenderThread(frameVersion, bufferedImageHolder, currentFrame)
 
     // Native-handle lifetime guard and the deferred pause it protects — see PlayerReleaseGate.
@@ -954,8 +976,20 @@ fun SoftwareVideoPlayer(
 
     // Load media when the URL changes, and again on every loop restart: once VLC has reached the
     // end of a file it is in the Ended state, where setTime()/play() alone will not start it over.
-    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion, viewModel.subtitleUrl) {
+    //
+    // Keyed on `vlcSubtitleReloadVersion` and NOT on `subtitleUrl`: choosing a subtitle used to
+    // restart the video from zero and blank every output, and for an SRT/WebVTT -- the common case,
+    // which the app draws itself -- that reload changed nothing about this call. Only a format the
+    // parser does not read needs the media opened again, and that is the one thing that bumps the
+    // version. Where a reload is unavoidable, `resumeAtMs` below puts playback back where it was.
+    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion, viewModel.vlcSubtitleReloadVersion) {
         val url = viewModel.mediaUrl
+        // A reload forced by a subtitle format VLC has to burn in itself must not lose the
+        // operator's place mid-service; a new file and a loop restart both begin at zero.
+        val sameLoad = url == loadedUrl.value && viewModel.loopRestartVersion == loadedLoopVersion.intValue
+        val resumeAtMs = if (sameLoad) viewModel.currentPosition.coerceAtLeast(0L) else 0L
+        loadedUrl.value = url
+        loadedLoopVersion.intValue = viewModel.loopRestartVersion
         firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
         SharedVideoOutput.frame.value = null  // clear stale frame while new media loads
         mp.controls().stop()
@@ -990,6 +1024,7 @@ fun SoftwareVideoPlayer(
         // disables the audio track outright.
         mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl, viewModel.subtitleCues.isNotEmpty())
         // Auto-pause is handled by the playing() event listener above.
+        if (resumeAtMs > 0) mp.controls().setTime(resumeAtMs)
     }
 
     SubtitleTrackSync(viewModel, mp, gate)

@@ -746,7 +746,7 @@ fun MediaTab(
             // Subtitles: off, one of the tracks VLC found, or a file of the operator's own.
             var subtitlesExpanded by remember { mutableStateOf(false) }
             val subtitlesLabel = stringResource(Res.string.media_subtitles)
-            val subtitlesShowing = viewModel.selectedSubtitleTrack >= 0
+            val subtitlesShowing = viewModel.subtitlesVisible
             val subtitleFilesLabel = stringResource(Res.string.media_subtitles_files)
             val subtitleFileTitle = stringResource(Res.string.media_subtitles_load_file)
             Box {
@@ -802,8 +802,11 @@ fun MediaTab(
                         onClick = {
                             subtitlesExpanded = false
                             scope.launch {
+                                // The video's own folder, where a subtitle for it almost always
+                                // sits, rather than the top of the media library.
+                                val beside = runCatching { Path(viewModel.mediaUrl).parent }.getOrNull()
                                 val f = FileChooser.platformInstance.chooseSingle(
-                                    path = Path(appSettings.mediaStorageDirectory),
+                                    path = beside ?: Path(appSettings.mediaStorageDirectory),
                                     title = subtitleFileTitle,
                                     filters = listOf(
                                         FileNameExtensionFilter(subtitleFilesLabel, "srt", "vtt", "ass", "ssa", "sub")

@@ -135,9 +135,34 @@ class MediaViewModel {
     private val _subtitleUrl = mutableStateOf("")
     val subtitleUrl: String get() = _subtitleUrl.value
 
-    /** The tracks VLC reports for the loaded media, external file included. Filled by the player. */
-    private val _subtitleTracks = mutableStateOf<List<SubtitleTrack>>(emptyList())
-    val subtitleTracks: List<SubtitleTrack> get() = _subtitleTracks.value
+    /**
+     * Bumped only when VLC itself has to be re-handed the subtitle file, which costs a reload.
+     *
+     * Loading a subtitle used to restart the video from the beginning, because `subtitleUrl` was a
+     * key on the player's load effect -- and for an SRT/WebVTT that reload achieved nothing at all,
+     * since `softwarePlayOptions` omits `:sub-file=` when the app draws the cues itself, so the
+     * option array was byte-identical either side of it. Only a format the parser does not read
+     * ('.ass', '.ssa', '.sub') genuinely needs the media opened again.
+     */
+    private val _vlcSubtitleReloadVersion = mutableIntStateOf(0)
+    val vlcSubtitleReloadVersion: Int get() = _vlcSubtitleReloadVersion.intValue
+
+    /** The tracks VLC reports for the loaded media. Filled by the player. */
+    private val _vlcSubtitleTracks = mutableStateOf<List<SubtitleTrack>>(emptyList())
+
+    /**
+     * The app-drawn sidecar file as a track of its own, or null when there is none.
+     *
+     * VLC never hears about an SRT/WebVTT the app parses itself, so it reports no track for it and
+     * the menu had nothing to list -- the file was showing on screen while the Subtitles button sat
+     * unlit and the list sat empty. Carrying it here gives it the same identity every other track
+     * has, which is what lets [SUBTITLES_OFF] turn it off.
+     */
+    private val _sidecarSubtitleTrack = mutableStateOf<SubtitleTrack?>(null)
+
+    /** Every track the operator can choose: the app-drawn file first, then VLC's own. */
+    val subtitleTracks: List<SubtitleTrack>
+        get() = listOfNotNull(_sidecarSubtitleTrack.value) + _vlcSubtitleTracks.value
 
     /**
      * The VLC track id being shown, [SUBTITLES_OFF] for none, or [SUBTITLES_UNDECIDED] until the
@@ -145,6 +170,16 @@ class MediaViewModel {
      */
     private val _selectedSubtitleTrack = mutableIntStateOf(SUBTITLES_UNDECIDED)
     val selectedSubtitleTrack: Int get() = _selectedSubtitleTrack.intValue
+
+    /**
+     * Whether some subtitle track is on, which is what lights the Media tab's Subtitles key.
+     *
+     * Not `selectedSubtitleTrack >= 0`: [SUBTITLES_SIDECAR] is negative like the other two
+     * sentinels, and an app-drawn file is very much showing.
+     */
+    val subtitlesVisible: Boolean
+        get() = _selectedSubtitleTrack.intValue != SUBTITLES_OFF &&
+            _selectedSubtitleTrack.intValue != SUBTITLES_UNDECIDED
 
     /**
      * The cues parsed from [subtitleUrl] when it is an SRT/WebVTT file -- rendered by the app
@@ -156,28 +191,53 @@ class MediaViewModel {
     private val _subtitleCues = mutableStateOf<List<SubtitleCue>>(emptyList())
     val subtitleCues: List<SubtitleCue> get() = _subtitleCues.value
 
-    /** The cue, if any, whose window contains the current playback position. Reads both
-     *  [subtitleCues] and [currentPosition] as Compose state, so a composable reading this
-     *  recomposes as playback advances. */
+    /**
+     * The cue, if any, whose window contains the current playback position -- nothing at all once
+     * the operator has turned subtitles off.
+     *
+     * Reads [subtitleCues], [currentPosition] and [selectedSubtitleTrack] as Compose state, so a
+     * composable reading this recomposes as playback advances and the moment the choice changes.
+     * The selection check is what makes "Off" work for an app-drawn file: `SubtitleTrackSync` only
+     * ever reaches VLC, which was never handed this file, so nothing else here is listening.
+     */
     val activeSubtitleCue: SubtitleCue?
-        get() = SubtitleCueParser.activeCueAt(_subtitleCues.value, _currentPosition.value)
+        get() {
+            if (_selectedSubtitleTrack.intValue != SUBTITLES_SIDECAR) return null
+            return SubtitleCueParser.activeCueAt(_subtitleCues.value, _currentPosition.value)
+        }
 
     /**
-     * Points the media at an external subtitle file. Blank clears it. The media has to be loaded
-     * again for VLC to pick the file up, which the player does when this value changes.
+     * Points the media at an external subtitle file. Blank clears it.
+     *
+     * A file the app can parse itself becomes the [SUBTITLES_SIDECAR] track and is selected at
+     * once -- the operator picked it, so they want to see it -- and the media is **not** reloaded:
+     * VLC is not handed the file at all in that case, so there is nothing for it to pick up. A
+     * format the parser does not read ([subtitleCues] stays empty) does need VLC re-handed the
+     * file, which [vlcSubtitleReloadVersion] is for.
      */
     fun setSubtitleFile(path: String) {
         _subtitleUrl.value = path
-        _subtitleTracks.value = emptyList()
-        _selectedSubtitleTrack.intValue = SUBTITLES_UNDECIDED
-        _subtitleCues.value = if (path.isBlank()) emptyList() else SubtitleCueParser.parseSubtitleFile(File(path))
+        _vlcSubtitleTracks.value = emptyList()
+        val cues = if (path.isBlank()) emptyList() else SubtitleCueParser.parseSubtitleFile(File(path))
+        _subtitleCues.value = cues
+        if (cues.isNotEmpty()) {
+            _sidecarSubtitleTrack.value = SubtitleTrack(SUBTITLES_SIDECAR, File(path).name)
+            _selectedSubtitleTrack.intValue = SUBTITLES_SIDECAR
+        } else {
+            _sidecarSubtitleTrack.value = null
+            _selectedSubtitleTrack.intValue = SUBTITLES_UNDECIDED
+            // Only a file VLC has to burn in itself costs a reload, and only when there is one.
+            if (path.isNotBlank()) _vlcSubtitleReloadVersion.intValue++
+        }
     }
 
     /** Called by the player once VLC has listed the tracks; [SUBTITLES_UNDECIDED] resolves here. */
     fun setSubtitleTracks(tracks: List<SubtitleTrack>) {
-        _subtitleTracks.value = tracks
+        _vlcSubtitleTracks.value = tracks
         val selected = _selectedSubtitleTrack.intValue
-        val stillValid = selected == SUBTITLES_OFF || tracks.any { it.id == selected }
+        val stillValid = selected == SUBTITLES_OFF ||
+            selected == SUBTITLES_SIDECAR && _sidecarSubtitleTrack.value != null ||
+            tracks.any { it.id == selected }
         _selectedSubtitleTrack.intValue = when {
             selected != SUBTITLES_UNDECIDED && stillValid -> selected
             // A file the operator chose is the one they want to see; embedded tracks start hidden.
@@ -345,6 +405,14 @@ class MediaViewModel {
     companion object {
         const val SUBTITLES_OFF = -1
         const val SUBTITLES_UNDECIDED = -2
+
+        /**
+         * The app-drawn SRT/WebVTT sidecar file, which has no VLC track id because VLC was never
+         * handed it. Negative, like the two above, so it can never collide with one of VLC's own
+         * (`subtitleTracks()` in `VideoPlayer` drops everything below zero, including VLC's -1
+         * "Disable" entry).
+         */
+        const val SUBTITLES_SIDECAR = -3
     }
 
     internal fun deriveTitleFromUrl(url: String): String {
