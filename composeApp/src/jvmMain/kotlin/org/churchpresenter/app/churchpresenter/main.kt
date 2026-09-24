@@ -185,6 +185,7 @@ import org.churchpresenter.settings.isDue
 import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown
 import org.churchpresenter.settings.stampingInstall
+import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.getString
 import java.awt.Dimension
@@ -2095,6 +2096,9 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 )
                             }
                             if (showCalendarWindow) {
+                                // The app's own short book names, in the display language, for the
+                                // picker's tiles -- by canonical id, 1 to 66.
+                                val shortBookNames = BibleBookNames.getBookResourceIds().map { stringResource(it) }
                                 CalendarWindow(
                                     theme = theme,
                                     appDataDirectory = calendarFolder,
@@ -2162,6 +2166,8 @@ private fun ApplicationScope.ChurchPresenterApp(
                                                     CalendarBibleBook(
                                                         bookId = bible.getBookId(index),
                                                         name = bible.getBooks().getOrElse(index) { "" },
+                                                        shortName = shortBookNames.getOrNull(bible.getBookId(index) - 1)
+                                                            ?: bible.getBooks().getOrElse(index) { "" },
                                                         verseCounts = (1..bible.getChapterCount(index)).map { chapter ->
                                                             bible.getVerseCountForChapter(index, chapter)
                                                         },
