@@ -56,3 +56,11 @@ internal val REMOTE_EVENT_DIALOG_HEIGHT_QUEUED: Dp = 330.dp
 
 internal val SHARE_STORY_DIALOG_WIDTH: Dp = 930.dp
 internal val SHARE_STORY_DIALOG_HEIGHT: Dp = 470.dp
+
+/**
+ * `CustomizeThemeDialog` — two columns, controls beside the preview, so the six optional colours fit
+ * without the window growing past a laptop screen. The content measures 617dp at the default text
+ * size and 678dp at Extra large; the rest is the title bar and a little slack.
+ */
+internal val CUSTOMIZE_THEME_DIALOG_WIDTH: Dp = 940.dp
+internal val CUSTOMIZE_THEME_DIALOG_HEIGHT: Dp = 720.dp

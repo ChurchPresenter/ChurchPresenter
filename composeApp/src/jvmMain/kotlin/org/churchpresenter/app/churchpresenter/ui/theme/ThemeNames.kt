@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.ui.theme
 
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.custom_theme
 import churchpresenter.composeapp.generated.resources.dark_theme
 import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
@@ -46,5 +47,6 @@ fun themeDisplayName(mode: ThemeMode): String = stringResource(
         ThemeMode.SLATE -> Res.string.slate_theme
         ThemeMode.SAND -> Res.string.sand_theme
         ThemeMode.PLUM -> Res.string.plum_theme
+        ThemeMode.CUSTOM -> Res.string.custom_theme
     }
 )

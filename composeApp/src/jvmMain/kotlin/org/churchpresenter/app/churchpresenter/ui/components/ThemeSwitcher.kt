@@ -109,5 +109,6 @@ private fun themeIcon(mode: ThemeMode): String = when (mode) {
     ThemeMode.SLATE -> "🪨"
     ThemeMode.SAND -> "🏜"
     ThemeMode.PLUM -> "🍇"
+    ThemeMode.CUSTOM -> "🎨"
 }
 

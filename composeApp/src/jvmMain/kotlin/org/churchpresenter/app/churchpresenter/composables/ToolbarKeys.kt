@@ -7,9 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +36,7 @@ private const val DISABLED_INK_ALPHA = 0.35f
 private val KEY_INSET = 2.dp
 private val KEY_RADIUS = 8.dp
 private val OPEN_DOT = 4.dp
+private val OPEN_DOT_INSET = 3.dp
 
 /** How a [ToolbarKey] sits in its toolbar. */
 enum class ToolbarKeyStyle {
@@ -118,24 +117,24 @@ fun ToolbarKey(
                 .then(surface),
             contentAlignment = Alignment.Center,
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Image(
-                    painter = painter,
-                    contentDescription = text,
-                    modifier = Modifier.size(iconSize),
-                    colorFilter = ColorFilter.tint(if (enabled) tint else tint.copy(alpha = DISABLED_INK_ALPHA)),
+            // The icon is the key's only laid-out child, so it is centred on its own. The open dot is
+            // an overlay pinned to the bottom edge: stacked under the icon in a Column it was always
+            // measured, transparent or not, and pushed every panel toggle's icon ~3dp above centre.
+            Image(
+                painter = painter,
+                contentDescription = text,
+                modifier = Modifier.size(iconSize),
+                colorFilter = ColorFilter.tint(if (enabled) tint else tint.copy(alpha = DISABLED_INK_ALPHA)),
+            )
+            if (style == ToolbarKeyStyle.PANEL_TOGGLE && open) {
+                Box(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = OPEN_DOT_INSET)
+                        .size(OPEN_DOT)
+                        .clip(CircleShape)
+                        .background(palette.accent.bottom)
                 )
-                if (style == ToolbarKeyStyle.PANEL_TOGGLE) {
-                    Box(
-                        Modifier
-                            .size(OPEN_DOT)
-                            .clip(CircleShape)
-                            .background(if (open) palette.accent.bottom else Color.Transparent)
-                    )
-                }
             }
         }
     }

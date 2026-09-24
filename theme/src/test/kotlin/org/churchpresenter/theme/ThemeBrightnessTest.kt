@@ -28,8 +28,13 @@ class ThemeBrightnessTest {
     }
 
     @Test
+    fun `custom defers too, because its base is the user's choice`() {
+        assertNull(ThemeMode.CUSTOM.isLightTheme(), "custom is whichever base was picked with the accent")
+    }
+
+    @Test
     fun `every other theme states which it is`() {
-        ThemeMode.entries.filter { it != ThemeMode.SYSTEM }.forEach { mode ->
+        presets().forEach { mode ->
             assertNotNull(mode.isLightTheme(), "$mode must declare a brightness")
         }
     }
@@ -37,7 +42,7 @@ class ThemeBrightnessTest {
     @Test
     fun `the claim matches the palette it actually paints`() {
         // The classification is written by hand; this is what stops it drifting from the colours.
-        ThemeMode.entries.filter { it != ThemeMode.SYSTEM }.forEach { mode ->
+        presets().forEach { mode ->
             val background = colorSchemeFor(mode).background
             val actuallyLight = luminance(background) > 0.5
             assertEquals(
@@ -56,4 +61,7 @@ class ThemeBrightnessTest {
         assertEquals(light, dark, "the wizard draws these as two even blocks; $light light vs $dark dark")
         assertTrue(light >= 6, "there should be at least two rows of three in each section")
     }
+
+    /** The fixed palettes — everything but the two modes that resolve to a palette at run time. */
+    private fun presets() = ThemeMode.entries.filter { it != ThemeMode.SYSTEM && it != ThemeMode.CUSTOM }
 }

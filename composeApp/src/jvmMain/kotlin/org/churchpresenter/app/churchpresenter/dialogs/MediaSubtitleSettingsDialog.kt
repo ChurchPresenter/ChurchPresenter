@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -90,39 +91,41 @@ fun MediaSubtitleSettingsDialog(
         title = stringResource(Res.string.media_subtitle_settings),
         resizable = false
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+        ProvideUiFontScale {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
             ) {
-                Text(
-                    text = stringResource(Res.string.media_subtitle_settings_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                SubtitleStyleSettings(
-                    settings = appSettings,
-                    onSettingsChange = onSettingsChange,
-                    onFontPickerExpandedChange = { fontPickerOpen = it },
-                )
-
-                RaisedButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    shape = RoundedCornerShape(6.dp),
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(stringResource(Res.string.close))
+                    Text(
+                        text = stringResource(Res.string.media_subtitle_settings_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    SubtitleStyleSettings(
+                        settings = appSettings,
+                        onSettingsChange = onSettingsChange,
+                        onFontPickerExpandedChange = { fontPickerOpen = it },
+                    )
+
+                    RaisedButton(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(stringResource(Res.string.close))
+                    }
                 }
             }
         }

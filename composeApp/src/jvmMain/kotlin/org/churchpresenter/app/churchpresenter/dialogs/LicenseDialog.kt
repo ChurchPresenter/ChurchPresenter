@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.license_decline_button
 import churchpresenter.composeapp.generated.resources.license_prompt
 import churchpresenter.composeapp.generated.resources.license_title
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -102,7 +103,9 @@ fun LicenseDialog(
         onDecline
     ) {
         MacMenuBarActivationFix()
-        LicenseDialogContent(licenseText = licenseText, onAccept = onAccept, onDecline = onDecline)
+        ProvideUiFontScale {
+            LicenseDialogContent(licenseText = licenseText, onAccept = onAccept, onDecline = onDecline)
+        }
     }
 }
 

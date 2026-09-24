@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.TEXT_GROWTH_SCALE
@@ -55,6 +56,9 @@ import kotlin.test.Test
  * only one of the six that now scrolls; it is kept in this suite anyway, because "opens showing all
  * of itself" is the property worth holding, and the scrollbar is the floor under that rather than a
  * substitute for it.
+ *
+ * `CustomizeThemeDialog` is here for the same reason: its controls scroll only as a fallback, and the
+ * growth case is not hypothetical for it — its own Extra large text size is the same 1.3x.
  */
 class DialogViewportTest {
 
@@ -207,6 +211,15 @@ class DialogViewportTest {
     }
 
     @Test
+    fun `CustomizeTheme content fits its 940x720 window`() =
+        fits(CUSTOMIZE_THEME_DIALOG_WIDTH, CUSTOMIZE_THEME_DIALOG_HEIGHT) { customizeThemeContent() }
+
+    @Test
+    fun `CustomizeTheme content still fits at its own Extra large text size`() =
+        // The window's own largest offered size is the same 1.3x this suite already grows text by.
+        fitsWhenTextGrows(CUSTOMIZE_THEME_DIALOG_WIDTH, CUSTOMIZE_THEME_DIALOG_HEIGHT) { customizeThemeContent() }
+
+    @Test
     fun `RemoteEvent content still fits when its text grows`() =
         fitsWhenTextGrows(REMOTE_EVENT_DIALOG_WIDTH, REMOTE_EVENT_DIALOG_HEIGHT_QUEUED) {
             remoteEventContent(remaining = 4, title = "Amazing Grace")
@@ -233,5 +246,22 @@ private fun remoteEventContent(remaining: Int, title: String) {
         onBlockForSession = {},
         onBlockPermanently = {},
         onDeny = {},
+    )
+}
+
+@Composable
+private fun customizeThemeContent() {
+    CustomizeThemeContent(
+        currentTheme = ThemeMode.DARK,
+        initial = ThemeCustomizationChoice(
+            useCustomColors = true,
+            accentHex = "#3F7FBF",
+            dark = true,
+            fontFamily = "",
+            fontScale = 1f,
+        ),
+        previewDensity = LocalDensity.current,
+        onApply = {},
+        onDismiss = {},
     )
 }

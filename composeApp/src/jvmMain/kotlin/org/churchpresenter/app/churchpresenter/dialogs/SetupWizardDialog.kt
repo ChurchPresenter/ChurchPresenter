@@ -383,7 +383,7 @@ private fun footerStatus(step: Int): String = when (step) {
         Language.entries.size,
         Language.entries.size,
     )
-    STEP_APPEARANCE -> stringResource(Res.string.setup_theme_count, ThemeMode.entries.size)
+    STEP_APPEARANCE -> stringResource(Res.string.setup_theme_count, ThemeMode.entries.count { it != ThemeMode.CUSTOM })
     STEP_MEDIA -> if (isVlcAvailable) stringResource(Res.string.setup_media_ready) else ""
     else -> ""
 }
@@ -547,7 +547,7 @@ private fun AppearanceStep(selectedTheme: ThemeMode, onThemeSelected: (ThemeMode
     // it under either heading would claim it is one of them.
     ThemeSection(
         heading = stringResource(Res.string.setup_theme_section_system),
-        themes = ThemeMode.entries.filter { it.isLightTheme() == null },
+        themes = listOf(ThemeMode.SYSTEM),
         selectedTheme = selectedTheme,
         onThemeSelected = onThemeSelected,
     )

@@ -12,6 +12,7 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,7 +59,9 @@ fun AddWebsiteDialog(
         title = stringResource(Res.string.website_dialog_title),
         resizable = false
     ) {
-        AddWebsiteDialogContent(onDismiss = onDismiss, onConfirm = onConfirm)
+        ProvideUiFontScale {
+            AddWebsiteDialogContent(onDismiss = onDismiss, onConfirm = onConfirm)
+        }
     }
 }
 

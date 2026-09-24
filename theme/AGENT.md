@@ -43,7 +43,9 @@ Corollaries:
 | File | Owns |
 |---|---|
 | `Theme.kt` | The nine `ColorScheme`s (Light, Warm, Ocean, Rose light; Dark, Studio, Midnight, Forest, Mocha dark), `AppTypography`, the shape scale, `colorSchemeFor(mode, systemDark)` and the `ChurchPresenterTheme` composable that also provides the scrollbar style |
-| `ThemeManager.kt` | `ThemeMode` (the nine palettes plus `SYSTEM`), `ThemeManager`, `LocalThemeManager`/`ProvideThemeManager`/`rememberThemeManager`, and `themeFromSettings(saved)` |
+| `ThemeManager.kt` | `ThemeMode` (the fixed palettes plus `SYSTEM` and `CUSTOM`), `ThemeManager`, `LocalThemeManager`/`ProvideThemeManager`/`rememberThemeManager`, and `themeFromSettings(saved)` |
+| `ThemeCustomization.kt` | `ThemeCustomization` (accent, light/dark base, the optional background/text/secondary/selection/success/warning/error colours, UI font family, UI font scale), `LocalThemeCustomization`, `customColorScheme(custom)` — the HSL-generated palette behind `ThemeMode.CUSTOM` — `customSemanticColorsFor(custom)` and `UI_FONT_SCALES` |
+| `UiFontScale.kt` | `ProvideUiFontScale` — the UI text size as a font scale on `LocalDensity`, applied once per window |
 | `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, staged…) derived per scheme — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
 
@@ -51,6 +53,28 @@ Corollaries:
 listing palettes (schedule-label presets, the theme switcher) skips it. `themeFromSettings` matches
 against `ThemeMode.entries` rather than a hand-written `when`, so it cannot fall behind the enum:
 keep it that way when adding a mode.
+
+`ThemeMode.CUSTOM` is not a fixed palette either: `customColorScheme` generates it from the colours
+in `LocalThemeCustomization`, which the app supplies from its settings — this module still reads
+none. Anything listing *presets* skips it as it skips `SYSTEM`.
+
+The generator's guarantees are what make an operator's five-minutes-before-service pick safe, and
+`ThemeCustomizationTest` holds them across every 15° of hue, muted and saturated, on both bases:
+- **Accent, secondary and background** keep only their hue and saturation; every lightness is fixed
+  per role in `DarkTones`/`LightTones`, so the settings layers always step apart by the
+  `ThemeSurfaceRampTest` margins. Background saturation is capped for the same reason.
+- **Text** keeps its hue and is stepped lighter or darker until it clears 4.5:1 on every surface.
+- **Selection, success, warning and error** are fills, used exactly as picked, with black or white
+  on them — whichever reads. A button's label is picked the same way (light or dark of its hue), since
+  a yellow or cyan accent is bright even at the fixed lightness.
+- Unpicked error and status colours, and the tooltip pair, come from the Light or Dark preset.
+
+`ChurchPresenterTheme` applies the customization's font family (through the typography) and its font
+scale — through `ProvideUiFontScale`, on `LocalDensity`, so hard-coded `sp` sizes scale too — to
+every theme. Each window starts from the display's density, so a dialog that opens its own window
+without going through the theme wraps its body in `ProvideUiFontScale`; a second call in the same
+window is a no-op, so nesting never scales twice. **Output windows never call it**: the audience's
+screen does not follow the operator's text size.
 
 Adding a theme means: a `ColorScheme` in `Theme.kt`, an entry in `ThemeMode`, a branch in
 `colorSchemeFor`, and whatever `SemanticColorsTest`/`ThemeSurfaceRampTest` assert about ramps and

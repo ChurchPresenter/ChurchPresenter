@@ -12,6 +12,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -126,6 +127,25 @@ val AppTypography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     )
+)
+
+/** This typography with every style set in [family] instead — the user's chosen UI font. */
+fun Typography.withFontFamily(family: FontFamily): Typography = copy(
+    displayLarge = displayLarge.copy(fontFamily = family),
+    displayMedium = displayMedium.copy(fontFamily = family),
+    displaySmall = displaySmall.copy(fontFamily = family),
+    headlineLarge = headlineLarge.copy(fontFamily = family),
+    headlineMedium = headlineMedium.copy(fontFamily = family),
+    headlineSmall = headlineSmall.copy(fontFamily = family),
+    titleLarge = titleLarge.copy(fontFamily = family),
+    titleMedium = titleMedium.copy(fontFamily = family),
+    titleSmall = titleSmall.copy(fontFamily = family),
+    bodyLarge = bodyLarge.copy(fontFamily = family),
+    bodyMedium = bodyMedium.copy(fontFamily = family),
+    bodySmall = bodySmall.copy(fontFamily = family),
+    labelLarge = labelLarge.copy(fontFamily = family),
+    labelMedium = labelMedium.copy(fontFamily = family),
+    labelSmall = labelSmall.copy(fontFamily = family),
 )
 
 /*
@@ -519,9 +539,10 @@ private val PlumColorScheme = darkColorScheme(
  * Answered here rather than by a list the settings screens keep, so a theme added above is sorted
  * correctly by every picker without each one being remembered. [ThemeMode.SYSTEM] is neither — it
  * is whichever the machine is set to — and is the reason this returns null rather than a boolean.
+ * [ThemeMode.CUSTOM] is neither too: its base is whatever the user picked alongside the accent.
  */
 fun ThemeMode.isLightTheme(): Boolean? = when (this) {
-    ThemeMode.SYSTEM -> null
+    ThemeMode.SYSTEM, ThemeMode.CUSTOM -> null
     ThemeMode.LIGHT, ThemeMode.WARM, ThemeMode.OCEAN, ThemeMode.ROSE, ThemeMode.SLATE, ThemeMode.SAND -> true
     ThemeMode.DARK, ThemeMode.MIDNIGHT, ThemeMode.FOREST, ThemeMode.MOCHA, ThemeMode.STUDIO, ThemeMode.PLUM -> false
 }
@@ -532,9 +553,13 @@ fun ThemeMode.isLightTheme(): Boolean? = when (this) {
  * Lets one theme's colours be offered inside another — the schedule-label presets show every
  * theme's own accent so an operator on Dark can still colour a section Ocean-blue or Forest-green.
  * [ThemeMode.SYSTEM] is not a palette of its own; it resolves to Light or Dark, so callers listing
- * palettes skip it.
+ * palettes skip it. [ThemeMode.CUSTOM] is generated from [custom]; callers listing presets skip it too.
  */
-fun colorSchemeFor(themeMode: ThemeMode, systemDark: Boolean = true): ColorScheme = when (themeMode) {
+fun colorSchemeFor(
+    themeMode: ThemeMode,
+    systemDark: Boolean = true,
+    custom: ThemeCustomization = ThemeCustomization(),
+): ColorScheme = when (themeMode) {
     ThemeMode.LIGHT -> LightColorScheme
     ThemeMode.DARK -> DarkColorScheme
     ThemeMode.SYSTEM -> if (systemDark) DarkColorScheme else LightColorScheme
@@ -548,19 +573,30 @@ fun colorSchemeFor(themeMode: ThemeMode, systemDark: Boolean = true): ColorSchem
     ThemeMode.SLATE -> SlateColorScheme
     ThemeMode.SAND -> SandColorScheme
     ThemeMode.PLUM -> PlumColorScheme
+    ThemeMode.CUSTOM -> customColorScheme(custom)
 }
 
 @Composable
 fun ChurchPresenterTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
+    customization: ThemeCustomization = LocalThemeCustomization.current,
     content: @Composable () -> Unit
 ) {
     val systemDark = isSystemInDarkTheme()
-    val colorScheme = colorSchemeFor(themeMode, systemDark)
-
+    val colorScheme = remember(themeMode, systemDark, customization) {
+        colorSchemeFor(themeMode, systemDark, customization)
+    }
+    val semanticColors = remember(colorScheme, themeMode, customization) {
+        semanticColorsFor(colorScheme).let {
+            if (themeMode == ThemeMode.CUSTOM) customSemanticColors(it, customization) else it
+        }
+    }
+    val typography = remember(customization.fontFamily) {
+        customization.fontFamily?.let(AppTypography::withFontFamily) ?: AppTypography
+    }
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography,
+        typography = typography,
         shapes = Shapes(
             extraSmall = RoundedCornerShape(4.dp),
             small = RoundedCornerShape(6.dp),
@@ -570,7 +606,7 @@ fun ChurchPresenterTheme(
         )
     ) {
         CompositionLocalProvider(
-            LocalSemanticColors provides semanticColorsFor(colorScheme),
+            LocalSemanticColors provides semanticColors,
             LocalScrollbarStyle provides ScrollbarStyle(
                 minimalHeight = 16.dp,
                 thickness = 5.dp,
@@ -580,7 +616,7 @@ fun ChurchPresenterTheme(
                 hoverColor = colorScheme.onSurface.copy(alpha = 0.45f)
             )
         ) {
-            content()
+            ProvideUiFontScale(customization.fontScale, content)
         }
     }
 }

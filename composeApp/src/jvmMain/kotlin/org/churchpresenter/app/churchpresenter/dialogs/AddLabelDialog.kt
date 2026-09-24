@@ -12,6 +12,7 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -79,14 +80,16 @@ fun AddLabelDialog(
         title = stringResource(if (isEdit) Res.string.edit_label else Res.string.add_label),
         resizable = false
     ) {
-        AddLabelDialogContent(
-            onDismiss = onDismiss,
-            onConfirm = onConfirm,
-            existingText = existingText,
-            existingTextColor = existingTextColor,
-            existingBackgroundColor = existingBackgroundColor,
-            isEdit = isEdit
-        )
+        ProvideUiFontScale {
+            AddLabelDialogContent(
+                onDismiss = onDismiss,
+                onConfirm = onConfirm,
+                existingText = existingText,
+                existingTextColor = existingTextColor,
+                existingBackgroundColor = existingBackgroundColor,
+                isEdit = isEdit
+            )
+        }
     }
 }
 

@@ -160,7 +160,8 @@ class NavigationTopBarTest {
                 continue
             }
             for (itemIndex in 0 until menu.itemCount) {
-                menu.getItem(itemIndex).doClick()
+                // A separator is a null item in a JMenu.
+                menu.getItem(itemIndex)?.doClick()
             }
         }
     }
@@ -306,17 +307,25 @@ class NavigationTopBarTest {
     fun `view menu selects the radio button matching the current theme`() {
         // From the enum, not a copy of it. The menu itself used to be ten rows written out by
         // hand; a test that lists them again would go stale the same way and for the same reason.
-        val themesInOrder = ThemeMode.entries
-        for ((selectedIndex, selectedTheme) in themesInOrder.withIndex()) {
+        // The presets come first; then a separator and Customize Theme…, with Custom's own radio row
+        // between them only while it is the theme in use (or once one has been saved).
+        val presets = ThemeMode.entries.filter { it != ThemeMode.CUSTOM }
+        for ((selectedIndex, selectedTheme) in presets.withIndex()) {
             navigationTopBar(currentTheme = selectedTheme) {
                 val view = getMenu(4)
                 assertEquals("View", view.text)
-                assertEquals(themesInOrder.size, view.itemCount)
-                for (i in 0 until view.itemCount) {
+                assertEquals(presets.size + 2, view.itemCount)
+                for (i in presets.indices) {
                     val item = view.getItem(i) as JRadioButtonMenuItem
                     assertEquals(i == selectedIndex, item.isSelected, "theme=$selectedTheme index=$i")
                 }
             }
+        }
+        navigationTopBar(currentTheme = ThemeMode.CUSTOM) {
+            val view = getMenu(4)
+            assertEquals(presets.size + 3, view.itemCount)
+            presets.indices.forEach { i -> assertFalse((view.getItem(i) as JRadioButtonMenuItem).isSelected) }
+            assertTrue((view.getItem(presets.size + 1) as JRadioButtonMenuItem).isSelected, "Custom is ticked")
         }
     }
 
@@ -324,11 +333,12 @@ class NavigationTopBarTest {
     fun `view menu invokes theme callback for every radio button`() {
         // The order is the enum's; the labels are asserted to be non-blank and distinct rather
         // than re-listed here, which would be a third copy of the same table.
+        val presets = ThemeMode.entries.filter { it != ThemeMode.CUSTOM }
         val invoked = mutableListOf<ThemeMode>()
         navigationTopBar(theme = { invoked.add(it) }) {
             val view = getMenu(4)
             val labels = mutableListOf<String>()
-            for (index in ThemeMode.entries.indices) {
+            for (index in presets.indices) {
                 val item = view.getItem(index)
                 assertTrue(item.text.isNotBlank(), "every theme row must be labelled")
                 labels.add(item.text)
@@ -336,7 +346,7 @@ class NavigationTopBarTest {
             }
             assertEquals(labels.size, labels.toSet().size, "two rows sharing a label: $labels")
         }
-        assertEquals(ThemeMode.entries.toList(), invoked, "every row must report its own theme")
+        assertEquals(presets, invoked, "every row must report its own theme")
     }
 
     @Test
