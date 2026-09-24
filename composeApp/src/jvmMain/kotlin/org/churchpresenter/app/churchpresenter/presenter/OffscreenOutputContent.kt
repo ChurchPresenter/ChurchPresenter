@@ -26,6 +26,8 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.contentScale
@@ -78,13 +80,17 @@ internal fun OffscreenOutputContent(
             LocalMediaViewModel provides mediaViewModel
         ) {
             val globalSettings by appSettingsState
-            val screenAssignment by screenAssignmentState
-            // What THIS output renders with: the same per-output override resolution the presenter
-            // windows do in PresenterOutputContent. An output with no override of its own gets the
-            // global instance straight back, so nothing recomposes that did not before.
+            val rawScreenAssignment by screenAssignmentState
+            // The profile this output is assigned to -- everything about how it looks and what it
+            // shows. Everything below reads this, never the raw assignment.
+            val profile = remember(globalSettings.projectionSettings, rawScreenAssignment) {
+                globalSettings.projectionSettings.profileFor(rawScreenAssignment) ?: OutputProfile()
+            }
+            // What THIS output renders with: the same profile resolution the presenter windows do
+            // in PresenterOutputContent.
             // Remembered for the reason the presenter windows remember theirs: the merge decodes.
-            val appSettings = remember(globalSettings, screenAssignment) {
-                globalSettings.resolvedFor(screenAssignment)
+            val appSettings = remember(globalSettings, profile) {
+                globalSettings.resolvedFor(profile)
             }
             val effectiveMode by effectiveModeState
             val isIdentifying = when (context.kind) {
@@ -92,14 +98,14 @@ internal fun OffscreenOutputContent(
                     presenterManager.browserSourceIdentifying.value.contains(outputIndex)
                 OffscreenOutputKind.NDI -> presenterManager.ndiIdentifying.value.contains(outputIndex)
             }
-            val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
-            val isLowerThird = screenAssignment.isLowerThird
-            val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+            val isLowerThirdVertical = profile.isLowerThirdVertical
+            val isLowerThird = profile.isLowerThird
+            val isStageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
             val outputRole = Constants.OUTPUT_ROLE_NORMAL
             // General per-output background toggle — same field/logic as native output
             // (main.kt). showBibleBackground/showSongsBackground below are an additional
             // layer on top of this, not a replacement for it.
-            val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
+            val showBg = if (isLowerThird) profile.showLowerThirdBackground else profile.showFullscreenBackground
 
             if (isIdentifying) {
                 Box(
@@ -112,9 +118,9 @@ internal fun OffscreenOutputContent(
                         // renamed output shows the operator's own name instead.
                         text = when (context.kind) {
                             OffscreenOutputKind.BROWSER_SOURCE ->
-                                screenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}")
+                                rawScreenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}")
                             OffscreenOutputKind.NDI ->
-                                screenAssignment.ndiLabelOr("NDI Output ${outputIndex + 1}")
+                                rawScreenAssignment.ndiLabelOr("NDI Output ${outputIndex + 1}")
                         },
                         style = TextStyle(
                             color = Color.White,
@@ -128,7 +134,7 @@ internal fun OffscreenOutputContent(
                 StageMonitorScreen(
                     sm = appSettings.stageMonitorSettings,
                     presentingMode = effectiveMode,
-                    showChords = screenAssignment.showChords,
+                    showChords = profile.showChords,
                     currentLyricSection = presenterManager.displayedLyricSection.value,
                     allLyricSections = presenterManager.allLyricSections.value,
                     songDisplaySectionIndex = presenterManager.songDisplaySectionIndex.value,
@@ -168,7 +174,7 @@ internal fun OffscreenOutputContent(
                         targetState = effectiveMode,
                         animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
                     ) { mode ->
-                        val showsContent = showsContentFor(mode, screenAssignment)
+                        val showsContent = showsContentFor(mode, profile)
                         if (mode != Presenting.NONE && showsContent) {
                             CompositionLocalProvider(
                                 LocalLottieBandClock provides presenterManager.lottieBandClock,
@@ -183,9 +189,9 @@ internal fun OffscreenOutputContent(
                                     isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = outputRole,
                                     transitionAlpha = presenterManager.bibleTransitionAlpha.value,
-                                    showBackground = showBg && screenAssignment.showBibleBackground,
+                                    showBackground = showBg && profile.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                                    bibleTranslations = screenAssignment.bibleTranslations,
+                                    bibleTranslations = profile.bibleTranslations,
                                 )
                                 Presenting.LYRICS -> SongPresenter(
                                     lyricSection = presenterManager.displayedLyricSection.value,
@@ -195,13 +201,13 @@ internal fun OffscreenOutputContent(
                                     outputRole = outputRole,
                                     transitionAlpha = presenterManager.songTransitionAlpha.value,
                                     displayLineIndex = presenterManager.songDisplayLineIndex.value,
-                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                    lookAheadEnabled = profile.songLookAhead,
                                     allLyricSections = presenterManager.allLyricSections.value,
                                     displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
-                                    showBackground = showBg && screenAssignment.showSongsBackground,
+                                    showBackground = showBg && profile.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
-                                    languageOverride = screenAssignment.songMode,
-                                    languageSelection = screenAssignment.songTranslations,
+                                    languageOverride = profile.songMode,
+                                    languageSelection = profile.songTranslations,
                                 )
                                 Presenting.PICTURES -> PicturePresenter(
                                     imagePath = presenterManager.displayedImagePath.value,
@@ -252,7 +258,7 @@ internal fun OffscreenOutputContent(
                                             modifier = Modifier.fillMaxSize(),
                                             transitionAlpha = presenterManager.mediaTransitionAlpha.value,
                                             outputRole = outputRole,
-                                            showSubtitles = screenAssignment.showSubtitles,
+                                            showSubtitles = profile.showSubtitles,
                                             mediaSettings = appSettings.mediaSettings,
                                             contentScale = appSettings.mediaScaleMode.contentScale,
                                         )

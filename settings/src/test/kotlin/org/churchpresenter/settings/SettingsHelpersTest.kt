@@ -21,12 +21,16 @@ class ProjectionSettingsTest {
 
     private fun assignment(display: Int) = ScreenAssignment(targetDisplay = display)
 
+    /** A never-configured slot's shape: identity fields at their class default, following the one
+     *  factory profile a fresh [ProjectionSettings] ships with. */
+    private fun defaultAssignment() = ScreenAssignment(activeProfileId = DEFAULT_OUTPUT_PROFILE_ID)
+
     // ── Reading an output ───────────────────────────────────────────────────────
 
     @Test
     fun `an output that was never configured reads as the default`() {
         assertEquals(
-            ScreenAssignment(),
+            defaultAssignment(),
             ProjectionSettings().getAssignment(0),
             "a machine with more screens than the settings file knew about must still start",
         )
@@ -37,21 +41,21 @@ class ProjectionSettingsTest {
         val settings = ProjectionSettings().withAssignment(0, assignment(2))
 
         assertEquals(
-            ScreenAssignment(),
+            defaultAssignment(),
             settings.getAssignment(9),
             "a stale settings file can name an output this machine no longer has",
         )
-        assertEquals(ScreenAssignment(), settings.getAssignment(-1))
+        assertEquals(defaultAssignment(), settings.getAssignment(-1))
     }
 
     @Test
     fun `a browser source index outside the list reads as the default too`() {
         val settings = ProjectionSettings().addBrowserSourceOutput()
 
-        assertEquals(ScreenAssignment(), settings.getBrowserSourceOutput(4))
-        assertEquals(ScreenAssignment(), settings.getBrowserSourceOutput(-1))
+        assertEquals(defaultAssignment(), settings.getBrowserSourceOutput(4))
+        assertEquals(defaultAssignment(), settings.getBrowserSourceOutput(-1))
         assertEquals(
-            ScreenAssignment(),
+            defaultAssignment(),
             ProjectionSettings().getBrowserSourceOutput(0),
             "browser sources start empty, so reading one before any is added is the ordinary case",
         )
@@ -73,7 +77,7 @@ class ProjectionSettingsTest {
         assertEquals(4, settings.screenAssignments.size)
         assertEquals(7, settings.getAssignment(3).targetDisplay)
         assertTrue(
-            (0..2).all { settings.getAssignment(it) == ScreenAssignment() },
+            (0..2).all { settings.getAssignment(it) == defaultAssignment() },
             "the outputs in between are unconfigured, not broken",
         )
     }
@@ -196,7 +200,7 @@ class ProjectionSettingsTest {
 
     @Test
     fun `reading an ndi output that is not there gives a default rather than throwing`() {
-        assertEquals(ScreenAssignment(), ProjectionSettings().getNdiOutput(4))
+        assertEquals(defaultAssignment(), ProjectionSettings().getNdiOutput(4))
     }
 
     @Test

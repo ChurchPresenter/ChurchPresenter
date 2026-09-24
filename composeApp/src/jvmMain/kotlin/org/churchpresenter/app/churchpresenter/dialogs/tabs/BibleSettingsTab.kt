@@ -5,92 +5,53 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_bible_translation
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.bible_block_and_transition
 import churchpresenter.composeapp.generated.resources.bible_cross_references_enable
-import churchpresenter.composeapp.generated.resources.bible_editing
+import churchpresenter.composeapp.generated.resources.bible_custom_abbreviation
+import churchpresenter.composeapp.generated.resources.bible_custom_name
 import churchpresenter.composeapp.generated.resources.bible_miscellaneous
 import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.bible_translation
-import churchpresenter.composeapp.generated.resources.bible_translation_divider
-import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bible_translations
-import churchpresenter.composeapp.generated.resources.bilingual_layout
-import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.fade_in
-import churchpresenter.composeapp.generated.resources.fade_out
-import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.left
-import churchpresenter.composeapp.generated.resources.lower_third_size
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.move_translation_down
 import churchpresenter.composeapp.generated.resources.move_translation_up
 import churchpresenter.composeapp.generated.resources.none
-import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.remove
-import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.scanning_directory
-import churchpresenter.composeapp.generated.resources.text_margins
-import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.LocalSegmentedButtonTone
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ScanningRow
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonTone
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollColumn
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderListing
-import org.churchpresenter.app.churchpresenter.composables.rememberBiblePreviewVerses
 import org.churchpresenter.app.churchpresenter.composables.rememberDropdownWidthFor
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.bible.defaultTranslationAbbreviation
+import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.moveBibleTranslation
@@ -98,70 +59,35 @@ import org.churchpresenter.settings.removeBibleTranslation
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
-
-/** The rail is a fixed column of cards; the styling side takes whatever is left. */
-private val RAIL_MIN_WIDTH = 300.dp
-private val RAIL_MAX_WIDTH = 360.dp
 
 /** [ActionIconButton]'s own default size, which the reorder buttons take and their gaps stand in for. */
 private val REORDER_BUTTON_SIZE = 34.dp
 
-private const val MARGIN_MAX = 500
-private const val SPACING_MAX = 200
-private const val TRANSITION_MIN_MS = 100f
-private const val TRANSITION_MAX_MS = 2000f
-private const val TRANSITION_STEP_MS = 50f
+/** Past two translations every row keeps three button slots, a gap standing in for a missing one. */
+private const val REORDER_SLOTS_PADDED = 3
 
-private val TARGET_BUTTON_WIDTH = 110.dp
-
-/** The gap between a layout row's caption and the segmented button under it. */
-private val LAYOUT_ROW_CAPTION_GAP = 8.dp
-
-/** Tracking on the small uppercase scope word, which needs air to read as a label and not a word. */
-private val SCOPE_LETTER_SPACING = 0.9.sp
-
-/** Between one block of the Miscellaneous section and the next, against 8.dp inside a block. */
-private val MISC_BLOCK_GAP = 11.dp
-
-/** Between two checkboxes, which carry 2.dp of their own padding on top of it. */
-private val MISC_CHECKBOX_GAP = 5.dp
+/** A picker narrower than this is not worth showing a name in. */
+private val PICKER_MIN_WIDTH = 120.dp
 
 /** The gap between a slot's picker and the buttons beside it. */
 private val ROW_GAP = 6.dp
 
-/** Past two translations every row keeps three button slots, a gap standing in for a missing one. */
-private const val REORDER_SLOTS_PADDED = 3
-
-/** A picker narrower than this is not worth showing a name in; the rail has a minimum width anyway. */
-private val PICKER_MIN_WIDTH = 120.dp
-
-/** Six chips do not fit one line beside anything else, so past three they wrap onto a second. */
-private val CHIP_WIDTH = 82.dp
-private const val CHIP_COMPACT_COLUMNS = 3
-
 /**
  * The Bible tab of the settings dialog.
  *
- * The stack can hold up to [Constants.MAX_BIBLE_TRANSLATIONS] translations, each with a full
- * appearance profile of its own: verse and reference, full screen and lower third. Laid out as four
- * copies of every control that is an unreadable amount of scrolling, so the tab instead keeps one
- * set of controls and three selectors above them -- which translation, which output, which element
- * -- and shows what the current selection actually looks like in the preview between them.
- *
- * The rail on the left holds what belongs to the stack as a whole rather than to any one
- * translation: which Bibles are in it and in what order, how they are spaced, how the block sits on
- * the screen and how it arrives.
+ * Content only: which Bibles are in the stack and in what order, and the two flags
+ * ([org.churchpresenter.settings.BibleSettings.splitBrowseMode]/
+ * [org.churchpresenter.settings.BibleSettings.crossReferencesEnabled]) that decide what the live
+ * Bible tab itself offers, rather than how anything looks. Everything about how a translation is
+ * styled -- font, colour, margins, transitions, bilingual layout and the rest -- moved to the
+ * Profiles tab with the rest of an output's appearance; a profile styles the stack this tab builds,
+ * it does not choose what is in it.
  */
 @Composable
 fun BibleSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    presenterManager: PresenterManager? = null,
-    /** Where the Bible band generator saves; null hides its button and leaves the picker. */
-    bibleLowerThirdsDir: File? = null,
 ) {
-    val availableFonts = rememberSystemFonts()
     // Null while the folder is still being read. Walking it and reading a header out of every module
     // used to happen inline here, so the whole dialog waited on it before painting once per open.
     val listing = rememberBibleFolderListing(settings.bibleSettings.storageDirectory)
@@ -170,109 +96,31 @@ fun BibleSettingsTab(
     // re-labels every picker on the next frame without walking the Bible folder again.
     val bibleFileDisplayNames = listing?.namesWith(settings.bibleSettings.customNames()).orEmpty()
 
-    var target by remember { mutableStateOf(BibleStyleTarget.FULL_SCREEN) }
-    var element by remember { mutableStateOf(BibleStyleElement.TEXT) }
-    var selected by remember { mutableStateOf(0) }
-
-    val translations = settings.bibleSettings.translationList()
-    // Removing the last translation, or the one being edited, must not leave the panel pointed past
-    // the end of the stack -- so the selection is clamped on read rather than fixed up on delete.
-    val selectedIndex = selected.coerceIn(0, (translations.size - 1).coerceAtLeast(0))
-
-    // The rail scrolls on its own rather than the tab scrolling as a whole. Four cards do not fit
-    // the dialog's height on a 1366x768 laptop, and when the whole Row scrolled they took the
-    // styling side down with them -- the preview and the controls it illustrates ended up below the
-    // fold on a tab that had room for both.
     val scrollState = rememberScrollState()
-    // The Bible and Song tabs fill the selected segment with the accent, matching the song
-    // editor's pane tabs. The provider covers the whole tab, so the rail, the typography panels
-    // and the shared preview rows all agree without threading a colour through any of them.
-    CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+    Box(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp),
+    ) {
+        Box(modifier = Modifier.widthIn(max = 420.dp).fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(end = SettingsScrollbarGutter),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Box(modifier = Modifier.widthIn(min = RAIL_MIN_WIDTH, max = RAIL_MAX_WIDTH).fillMaxHeight()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .verticalScroll(scrollState)
-                        .padding(end = SettingsScrollbarGutter),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    LeftRail(
-                        settings = settings,
-                        onSettingsChange = onSettingsChange,
-                        bibleLowerThirdsDir = bibleLowerThirdsDir,
-                        bibleFilesInDirectory = bibleFilesInDirectory,
-                        bibleFileDisplayNames = bibleFileDisplayNames,
-                        scanning = listing == null,
-                        selectedIndex = selectedIndex,
-                        onSelect = { selected = it },
-                    )
-                }
-                SettingsScrollbar(scrollState)
-                }
-                StylePane(
+                TranslationsSection(
                     settings = settings,
                     onSettingsChange = onSettingsChange,
-                    translations = translations,
-                    selectedIndex = selectedIndex,
-                    onSelect = { selected = it },
-                    target = target,
-                    onTargetChange = { target = it },
-                    element = element,
-                    onElementChange = { element = it },
+                    bibleFilesInDirectory = bibleFilesInDirectory,
+                    bibleFileDisplayNames = bibleFileDisplayNames,
                     moduleTitles = listing?.titles.orEmpty(),
-                    availableFonts = availableFonts,
-                    presenterManager = presenterManager,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    scanning = listing == null,
                 )
+                MiscellaneousSection(settings, onSettingsChange)
             }
+            SettingsScrollbar(scrollState)
         }
     }
-}
-
-/** Everything that belongs to the stack rather than to one translation in it. */
-@Composable
-private fun LeftRail(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    bibleLowerThirdsDir: File?,
-    bibleFilesInDirectory: List<String>,
-    bibleFileDisplayNames: Map<String, String>,
-    scanning: Boolean,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-) {
-    TranslationsSection(
-        settings = settings,
-        onSettingsChange = onSettingsChange,
-        bibleFilesInDirectory = bibleFilesInDirectory,
-        bibleFileDisplayNames = bibleFileDisplayNames,
-        scanning = scanning,
-        selectedIndex = selectedIndex,
-        onSelect = onSelect,
-    )
-    MiscellaneousSection(settings, onSettingsChange)
-    BlockAndTransitionSection(settings, onSettingsChange)
-    LowerThirdHeightSection(
-        percent = settings.bibleSettings.lowerThirdHeightPercent,
-        onPercentChange = { percent ->
-            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdHeightPercent = percent)) }
-        },
-    )
-    LowerThirdAnimationSection(settings, onSettingsChange, bibleLowerThirdsDir)
-    MarginsSection(settings, onSettingsChange)
-    ContentRegionSection(
-        region = settings.bibleSettings.contentRegion,
-        onRegionChange = { region ->
-            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(contentRegion = region)) }
-        },
-    )
 }
 
 /** Which Bibles are in the stack, in what order, and the picker that adds the next one. */
@@ -282,9 +130,9 @@ private fun TranslationsSection(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
+    /** Each module's own header title, with no rename applied -- what a blank name box falls back to. */
+    moduleTitles: Map<String, String>,
     scanning: Boolean,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
 ) {
     val noneStr = stringResource(Res.string.none)
     val translations = settings.bibleSettings.translationList()
@@ -305,11 +153,6 @@ private fun TranslationsSection(
     ) {
         // One width for every picker in the stack, so the reorder and delete buttons beside them
         // form a straight column instead of stepping in and out with each Bible's name length.
-        //
-        // Capped at what the rail actually has left, though: the measured width runs to 280dp on a
-        // name like "King James Version (1769)", and 280dp plus three 34dp buttons is wider than the
-        // rail -- which the Row answered by squeezing the last child, so the delete button came out
-        // a sliver. The buttons are fixed-size and cannot give, so the picker is what yields.
         val measured = rememberDropdownWidthFor(bibleDisplayOptions + addTranslationLabel)
         val buttonSlots = when {
             translations.size > 2 -> REORDER_SLOTS_PADDED
@@ -318,54 +161,52 @@ private fun TranslationsSection(
         }
         val reserved = (REORDER_BUTTON_SIZE + ROW_GAP) * buttonSlots
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val pickerWidth = minOf(measured, (maxWidth - reserved).coerceAtLeast(PICKER_MIN_WIDTH))
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            translations.forEachIndexed { index, translation ->
-                TranslationRow(
-                    index = index,
-                    translation = translation,
-                    translations = translations,
-                    bibleFilesInDirectory = bibleFilesInDirectory,
-                    bibleFileDisplayNames = bibleFileDisplayNames,
-                    pickerWidth = pickerWidth,
-                    noneStr = noneStr,
-                    onSettingsChange = onSettingsChange,
-                    onSelect = onSelect,
-                    selectedIndex = selectedIndex,
-                )
-            }
-            val unselectedFiles = bibleFilesInDirectory.filter { candidate ->
-                translations.none { it.fileName == candidate }
-            }
-            // Hidden at the cap as well as when nothing is left to add: `addTranslation` refuses past
-            // it, and a picker that answers a selection by doing nothing is worse than no picker.
-            // Until the folder has been read there is nothing to offer yet — say so, because an
-            // absent picker otherwise reads as "this folder holds no other translations".
-            if (scanning) {
-                ScanningRow(stringResource(Res.string.scanning_directory))
-            } else if (unselectedFiles.isNotEmpty() && translations.size < Constants.MAX_BIBLE_TRANSLATIONS) {
-                DropdownSettingsField(
-                    width = pickerWidth,
-                    label = addTranslationLabel,
-                    value = addTranslationLabel,
-                    options = listOf(addTranslationLabel) +
-                        unselectedFiles.map { bibleFileDisplayNames[it] ?: it },
-                    onValueChange = { displayName ->
-                        if (displayName != addTranslationLabel) {
-                            val fileName = bibleFileDisplayNames.entries
-                                .find { it.value == displayName }?.key ?: displayName
-                            onSettingsChange { app ->
-                                app.copy(bibleSettings = app.bibleSettings.addTranslation(fileName))
+            val pickerWidth = minOf(measured, (maxWidth - reserved).coerceAtLeast(PICKER_MIN_WIDTH))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                translations.forEachIndexed { index, translation ->
+                    TranslationRow(
+                        index = index,
+                        translation = translation,
+                        translations = translations,
+                        bibleFilesInDirectory = bibleFilesInDirectory,
+                        bibleFileDisplayNames = bibleFileDisplayNames,
+                        moduleTitle = moduleTitles[translation.fileName].orEmpty(),
+                        pickerWidth = pickerWidth,
+                        noneStr = noneStr,
+                        onSettingsChange = onSettingsChange,
+                    )
+                }
+                val unselectedFiles = bibleFilesInDirectory.filter { candidate ->
+                    translations.none { it.fileName == candidate }
+                }
+                // Hidden at the cap as well as when nothing is left to add: `addTranslation` refuses
+                // past it, and a picker that answers a selection by doing nothing is worse than no
+                // picker. Until the folder has been read there is nothing to offer yet — say so,
+                // because an absent picker otherwise reads as "this folder holds no other translations".
+                if (scanning) {
+                    ScanningRow(stringResource(Res.string.scanning_directory))
+                } else if (unselectedFiles.isNotEmpty() && translations.size < Constants.MAX_BIBLE_TRANSLATIONS) {
+                    DropdownSettingsField(
+                        width = pickerWidth,
+                        label = addTranslationLabel,
+                        value = addTranslationLabel,
+                        options = listOf(addTranslationLabel) +
+                            unselectedFiles.map { bibleFileDisplayNames[it] ?: it },
+                        onValueChange = { displayName ->
+                            if (displayName != addTranslationLabel) {
+                                val fileName = bibleFileDisplayNames.entries
+                                    .find { it.value == displayName }?.key ?: displayName
+                                onSettingsChange { app ->
+                                    app.copy(bibleSettings = app.bibleSettings.addTranslation(fileName))
+                                }
                             }
-                            onSelect(translations.size)
-                        }
-                    }
-                )
+                        },
+                    )
+                }
             }
-        }
         }
     }
 }
@@ -378,11 +219,10 @@ private fun TranslationRow(
     translations: List<BibleTranslationSettings>,
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
-    pickerWidth: androidx.compose.ui.unit.Dp,
+    moduleTitle: String,
+    pickerWidth: Dp,
     noneStr: String,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onSelect: (Int) -> Unit,
-    selectedIndex: Int,
 ) {
     // Every Bible except the ones other slots already hold. The stack is keyed by file name, so
     // picking a duplicate used to collapse two slots into one and take the other's fonts and colors
@@ -392,6 +232,7 @@ private fun TranslationRow(
             candidate == translation.fileName || translations.none { it.fileName == candidate }
         }
         .map { fileName -> bibleFileDisplayNames[fileName] ?: fileName }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(ROW_GAP)) {
         DropdownSettingsField(
             width = pickerWidth,
@@ -414,7 +255,6 @@ private fun TranslationRow(
                         )
                     }
                 }
-                if (fileName.isNotEmpty()) onSelect(index)
             },
         )
         // The first row has no "up" and the last no "down", so from three rows up a gap has to
@@ -441,511 +281,113 @@ private fun TranslationRow(
             Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
         }
         ActionIconButton(
-            onClick = {
-                onSettingsChange { app -> app.removeBibleTranslation(index) }
-                if (selectedIndex >= index) onSelect((selectedIndex - 1).coerceAtLeast(0))
-            },
+            onClick = { onSettingsChange { app -> app.removeBibleTranslation(index) } },
             tooltipText = stringResource(Res.string.remove),
             painter = painterResource(Res.drawable.ic_delete),
         )
     }
-}
-
-/**
- * The settings that belong to the stack as a whole rather than to any one translation in it.
- *
- * Spacing and the divider are about how the translations sit against each other; split browse and
- * cross references are about the Bible tab. Too mixed a set to name for any one of them.
- */
-/**
- * One shape's translation arrangement: a caption, then Left/Right against Top/Bottom.
- *
- * A vertical band ignores it and always stacks, having no width to split -- `BiblePresenter` routes
- * it to the stacked branch regardless, exactly as it did before this setting existed.
- */
-@Composable
-private fun BibleLayoutRow(label: String, selected: String, onSelect: (String) -> Unit) {
-    // Caption above rather than beside: the pane is narrow enough that a label plus two segments
-    // overflows, and the overflow clips the second segment off the right edge.
-    Column(
-        verticalArrangement = Arrangement.spacedBy(LAYOUT_ROW_CAPTION_GAP),
-    ) {
-        // Which output shape this row is for, then what it sets. Two runs rather than one string:
-        // both rows say "Bilingual layout" and only the scope tells them apart, so the scope is the
-        // half that carries the accent and the setting name is the half that repeats.
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Text(
-                text = label.removeSuffix(":").uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = SCOPE_LETTER_SPACING,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(Res.string.bilingual_layout).removeSuffix(":"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        // A `FlowRow` of individual buttons rather than `SegmentedButton` (Song's own picker,
-        // [BilingualLayoutButtons]): at the rail's ~330dp usable width, eight buttons need to wrap,
-        // and every way of making `SegmentedButton` itself wrap -- its own `compactColumns`, and a
-        // hand-split into two stacked rows -- corrupted a *later*, unrelated sibling two rows of
-        // it down this same scrollable rail: the transition duration slider measured to zero size
-        // on its very next frame. That happened only when this row was called twice back to back
-        // (full screen, then lower third) and produced more than one row of buttons; a `FlowRow`
-        // wraps on its own single measure pass rather than nesting another nested layout to do it,
-        // and does not reproduce it.
-        BilingualLayoutFlowButtons(selected = selected, onSelect = onSelect)
+    TranslationIdentityRow(
+        index = index,
+        translation = translation,
+        moduleTitle = moduleTitle,
+        onSettingsChange = onSettingsChange,
+    )
     }
 }
 
+/**
+ * What this church calls the translation, as against what its `.spb` header calls it.
+ *
+ * Here rather than on the Profiles tab because these two are **global**: `withSparseBibleOverride`
+ * pins them to the document, so a profile could never carry its own. They had drifted into the
+ * styling panel's header and became unreachable when that header stopped being drawn -- which left
+ * no way at all to rename a module or fix the abbreviation printed beside a verse.
+ *
+ * Both boxes stand empty until something is typed, and both show the module's own value as their
+ * placeholder: blank means "keep using that", so the placeholder is the live value rather than a
+ * hint about one.
+ */
+@Composable
+private fun TranslationIdentityRow(
+    index: Int,
+    translation: BibleTranslationSettings,
+    moduleTitle: String,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    fun edit(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
+        onSettingsChange { app ->
+            app.copy(bibleSettings = app.bibleSettings.updateTranslation(index, transform))
+        }
+    }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(ROW_GAP),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = IDENTITY_ROW_INSET),
+    ) {
+        SettingsTextField(
+            value = translation.customName,
+            onValueChange = { typed -> edit { it.copy(customName = typed) } },
+            label = stringResource(Res.string.bible_custom_name),
+            placeholder = { Text(moduleTitle.ifBlank { translation.fileName.substringBeforeLast('.') }) },
+            modifier = Modifier.weight(1f),
+            fillWidth = true,
+        )
+        SettingsTextField(
+            value = translation.customAbbreviation,
+            onValueChange = { typed -> edit { it.copy(customAbbreviation = typed) } },
+            label = stringResource(Res.string.bible_custom_abbreviation),
+            // The module's own abbreviation, which is exactly what a blank box falls back to on
+            // screen -- so the placeholder is the live value rather than a hint about one.
+            placeholder = { Text(defaultTranslationAbbreviation(moduleTitle, translation.fileName)) },
+            modifier = Modifier.width(ABBREVIATION_FIELD_WIDTH),
+            fillWidth = true,
+        )
+    }
+}
+
+/** Indented under its own slot's picker, so the pair reads as belonging to the row above. */
+private val IDENTITY_ROW_INSET = 4.dp
+
+/** Wide enough for the longest abbreviation anyone writes; the name beside it takes the rest. */
+private val ABBREVIATION_FIELD_WIDTH = 96.dp
+
+/**
+ * The two flags that decide what the live Bible tab itself offers -- content, not appearance, so
+ * they stay here rather than moving to the Profiles tab with everything else this section used to
+ * carry (translation spacing, bilingual layout, long-verse splitting, the divider -- all styling,
+ * now on the Profiles tab's Bible pane).
+ */
 @Composable
 private fun MiscellaneousSection(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     SettingsSection(title = stringResource(Res.string.bible_miscellaneous)) {
-        // The section is a stack of separated blocks rather than a flush list: a caption belongs to
-        // the control under it, so the gap inside a block has to read as smaller than the gap
-        // between blocks. `SettingsSection`'s own column has no arrangement, hence this one.
-        Column(verticalArrangement = Arrangement.spacedBy(MISC_BLOCK_GAP)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.bible_translation_spacing),
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            LabeledCheckbox(
+                checked = settings.bibleSettings.splitBrowseMode,
+                onCheckedChange = { enabled ->
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitBrowseMode = enabled)) }
+                },
+                controlModifier = Modifier.size(24.dp),
+                label = stringResource(Res.string.bible_split_browse_mode),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                // Pushes the field to the right edge, so the numeric controls of the section line
-                // up with each other instead of each sitting wherever its label ends.
-                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurface,
             )
-            NumberSettingsTextField(
-                label = stringResource(Res.string.pixels_short),
-                initialText = settings.bibleSettings.multiTranslationSpacing,
-                onValueChange = { value ->
-                    onSettingsChange { app ->
-                        app.copy(bibleSettings = app.bibleSettings.copy(multiTranslationSpacing = value))
-                    }
-                },
-                range = 0..SPACING_MAX,
-            )
-        }
-        // Where two or more translations sit relative to each other, per output shape. Two
-        // controls rather than one because the two shapes have always disagreed -- a full screen
-        // stacks, a band splits 50/50 -- and both of those defaults are kept.
-        key("fullScreen") {
-            BibleLayoutRow(
-                label = stringResource(Res.string.full_screen),
-                selected = settings.bibleSettings.bilingualLayout,
-                onSelect = { value ->
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayout = value)) }
-                },
-            )
-        }
-        key("lowerThird") {
-            BibleLayoutRow(
-                label = stringResource(Res.string.lower_third_size),
-                selected = settings.bibleSettings.bilingualLayoutLowerThird,
-                onSelect = { value ->
+            LabeledCheckbox(
+                checked = settings.bibleSettings.crossReferencesEnabled,
+                onCheckedChange = { enabled ->
                     onSettingsChange { s ->
-                        s.copy(bibleSettings = s.bibleSettings.copy(bilingualLayoutLowerThird = value))
+                        s.copy(bibleSettings = s.bibleSettings.copy(crossReferencesEnabled = enabled))
                     }
                 },
-            )
-        }
-        LongVerseSplitSlider(settings, onSettingsChange)
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-        // The plain on/off flags, kept together below the rule -- everything above it is a value.
-        Column(verticalArrangement = Arrangement.spacedBy(MISC_CHECKBOX_GAP)) {
-        LabeledCheckbox(
-            checked = settings.bibleSettings.multiTranslationDivider,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s ->
-                    s.copy(bibleSettings = s.bibleSettings.copy(multiTranslationDivider = enabled))
-                }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.bible_translation_divider),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        LabeledCheckbox(
-            checked = settings.bibleSettings.splitBrowseMode,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitBrowseMode = enabled)) }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.bible_split_browse_mode),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        LabeledCheckbox(
-            checked = settings.bibleSettings.crossReferencesEnabled,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(crossReferencesEnabled = enabled)) }
-            },
-            controlModifier = Modifier.size(24.dp),
-            label = stringResource(Res.string.bible_cross_references_enable),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        }
-        }
-    }
-}
-
-/** Where the block sits on the screen, and how it arrives and leaves. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun BlockAndTransitionSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    SettingsSection(title = stringResource(Res.string.bible_block_and_transition)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.vertical_alignment).removeSuffix(":"),
+                controlModifier = Modifier.size(24.dp),
+                label = stringResource(Res.string.bible_cross_references_enable),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
-            VerticalAlignmentButtons(
-                selectedAlignment = settings.bibleSettings.verticalAlignment,
-                onAlignmentChange = { value ->
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(verticalAlignment = value)) }
-                },
-                topValue = Constants.TOP,
-                middleValue = Constants.MIDDLE,
-                bottomValue = Constants.BOTTOM
-            )
-        }
-        val msSuffix = stringResource(Res.string.milliseconds_suffix)
-        ControlColumn(stringResource(Res.string.transition_duration), Modifier.fillMaxWidth()) {
-            SlimSlider(
-                value = settings.bibleSettings.transitionDuration,
-                onValueChange = { rawValue ->
-                    val snapped = (rawValue / TRANSITION_STEP_MS).toInt() * TRANSITION_STEP_MS
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(transitionDuration = snapped)) }
-                },
-                valueRange = TRANSITION_MIN_MS..TRANSITION_MAX_MS,
-                modifier = Modifier.fillMaxWidth(),
-                trailingLabel = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix"
-            )
-        }
-        // Wraps rather than one hard row: "Fade In / Fade Out / Crossfade" is three short
-        // labels in English and three long ones in most translations -- in Russian the first
-        // two took the whole width and squeezed the third into a single-character column,
-        // which drew its label vertically.
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            LabeledCheckbox(
-                checked = settings.bibleSettings.fadeIn,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeIn = it)) }
-                },
-                controlModifier = Modifier.size(24.dp),
-                label = stringResource(Res.string.fade_in),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            LabeledCheckbox(
-                checked = settings.bibleSettings.fadeOut,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeOut = it)) }
-                },
-                controlModifier = Modifier.size(24.dp),
-                label = stringResource(Res.string.fade_out),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            LabeledCheckbox(
-                checked = settings.bibleSettings.crossfade,
-                onCheckedChange = {
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(crossfade = it)) }
-                },
-                controlModifier = Modifier.size(24.dp),
-                label = stringResource(Res.string.animation_crossfade),
-                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-    }
-}
-
-/**
- * The four margins, as a plain grid.
- *
- * The screen mock-up this replaced showed where the margins were; the live preview above shows what
- * they do to the text, which is the same information and rather more of it.
- */
-@Composable
-private fun MarginsSection(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-) {
-    SettingsSection(title = stringResource(Res.string.text_margins)) {
-        val bible = settings.bibleSettings
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ControlColumn(stringResource(Res.string.top), Modifier.weight(1f)) {
-                    NumberSettingsTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        initialText = bible.marginTop,
-                        onValueChange = { value ->
-                            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginTop = value)) }
-                        },
-                        range = 0..MARGIN_MAX,
-                    )
-                }
-                ControlColumn(stringResource(Res.string.left), Modifier.weight(1f)) {
-                    NumberSettingsTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        initialText = bible.marginLeft,
-                        onValueChange = { value ->
-                            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginLeft = value)) }
-                        },
-                        range = 0..MARGIN_MAX,
-                    )
-                }
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ControlColumn(stringResource(Res.string.right), Modifier.weight(1f)) {
-                    NumberSettingsTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        initialText = bible.marginRight,
-                        onValueChange = { value ->
-                            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginRight = value)) }
-                        },
-                        range = 0..MARGIN_MAX,
-                    )
-                }
-                ControlColumn(stringResource(Res.string.bottom), Modifier.weight(1f)) {
-                    NumberSettingsTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        initialText = bible.marginBottom,
-                        onValueChange = { value ->
-                            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginBottom = value)) }
-                        },
-                        range = 0..MARGIN_MAX,
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** The output switch, the translation chips, the preview and the controls under it. */
-@Composable
-private fun StylePane(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    translations: List<BibleTranslationSettings>,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-    target: BibleStyleTarget,
-    onTargetChange: (BibleStyleTarget) -> Unit,
-    element: BibleStyleElement,
-    onElementChange: (BibleStyleElement) -> Unit,
-    moduleTitles: Map<String, String>,
-    availableFonts: List<String>,
-    presenterManager: PresenterManager?,
-    modifier: Modifier = Modifier,
-) {
-    val textMeasurer = rememberTextMeasurer()
-    // Three real verses per module, in one scan each, so every block of the preview quotes its own
-    // translation at whichever of the three sample lengths is selected.
-    val previewVerses = rememberBiblePreviewVerses(
-        settings.bibleSettings.storageDirectory,
-        translations.map { it.fileName },
-        BIBLE_PREVIEW_TARGETS.values.toList(),
-    )
-    var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
-    var previewOnScreen by remember { mutableStateOf(false) }
-    val sampleVerses = bibleSampleVerses(translations, previewVerses, sampleSlot, moduleTitles)
-    // Somewhere to put it. Not gated on the *mode* of that output: the preview switches every live
-    // one to whichever the tab is styling for its duration, so a hall with a single full-screen
-    // projector can still be shown what its lower third would look like. `hasAnyOpenOutput` counts a
-    // single-monitor dev machine's dev-fallback window too -- see its own doc comment.
-    val hasOutputForTarget = hasAnyOpenOutput(settings)
-    OnScreenPreviewEffect(
-        active = previewOnScreen && sampleVerses.isNotEmpty(),
-        settings = settings,
-        presenterManager = presenterManager,
-        outputs = PreviewOutputState(lowerThird = target.isLowerThird),
-        contentKey = sampleVerses,
-    ) { manager ->
-        manager.setSelectedVerses(sampleVerses)
-        manager.setDisplayedVerses(sampleVerses)
-        manager.setPresentingMode(Presenting.BIBLE)
-    }
-    // Scrolls, with the bar down its edge that the rail beside it already has. The panel below the
-    // preview is a whole form and grew a row when the shadow controls stopped sharing one with the
-    // text transform; without this its last rows are simply unreachable on a window short enough --
-    // not merely below the fold but with nothing to scroll, which is how a test reaching for the
-    // shadow checkbox found "no parent layout with a Scroll SemanticsAction".
-    SettingsScrollColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        TargetSwitchRow(
-            settings = settings,
-            translations = translations,
-            selectedIndex = selectedIndex,
-            onSelect = onSelect,
-            target = target,
-            onTargetChange = onTargetChange,
-            moduleTitles = moduleTitles,
-        )
-        BiblePreviewWithOutputPicker(
-            settings = settings,
-            onSettingsChange = onSettingsChange,
-            target = target,
-            selectedVerses = sampleVerses,
-        )
-        SettingsPreviewSampleRow(
-            slot = sampleSlot,
-            onSlotChange = { sampleSlot = it },
-            onScreen = previewOnScreen,
-            onScreenChange = { previewOnScreen = it },
-            onScreenEnabled = presenterManager != null && hasOutputForTarget && sampleVerses.isNotEmpty(),
-        )
-        // An `if`, not an early `return@Column`. Returning out of a composable content lambda skips
-        // the rest of its group without closing it, and the slot table then carries state across
-        // into whatever composes there next -- which is how the controls below ended up wired to a
-        // previous selection's state.
-        val translation = translations.getOrNull(selectedIndex)
-        if (translation == null) return@SettingsScrollColumn
-        val style = translation.elementStyle(element, target)
-        val verses = presenterManager?.selectedVerses?.value.orEmpty()
-        val canMeasure = presenterManager != null &&
-            presenterManager.presentingMode.value == Presenting.BIBLE &&
-            verses.firstOrNull()?.verseText?.isNotBlank() == true &&
-            settings.projectionSettings.screenAssignments.any {
-                if (target.isLowerThird) it.isLowerThird else it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN
-            }
-        fun update(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
-            onSettingsChange { app ->
-                app.copy(bibleSettings = app.bibleSettings.updateTranslation(selectedIndex, transform))
-            }
-        }
-        SettingsSection(title = stringResource(Res.string.bible_editing)) {
-            // Keyed on what the panel is pointed at: the controls below are one set standing for
-            // four stored profiles, and without this Compose keeps the subtree across a switch and
-            // hands each control the state of whichever control held its slot before.
-            key(selectedIndex, element, target) {
-            BibleTypographyPanel(
-                translation = translation,
-                moduleTitle = moduleTitles[translation.fileName].orEmpty(),
-                element = element,
-                onElementChange = onElementChange,
-                style = style,
-                onStyleChange = { edited -> update { it.withElementStyle(element, target, edited) } },
-                onTranslationChange = { transform -> update(transform) },
-                onReset = { update { it.withElementStyle(element, target, defaultElementStyle(element, target)) } },
-                availableFonts = availableFonts,
-                // Auto-fit measures a verse, so it is offered on the verse and not on its reference.
-                autoFit = if (element == BibleStyleElement.TEXT && presenterManager != null) {
-                    {
-                        val fitted = autoFitFontSize(
-                            textMeasurer = textMeasurer,
-                            settings = settings,
-                            verses = verses,
-                            translation = translation,
-                            target = target,
-                        )
-                        update { it.withElementStyle(element, target, style.copy(fontSize = fitted)) }
-                    }
-                } else {
-                    null
-                },
-                autoFitEnabled = canMeasure,
-            )
-            }
-        }
-    }
-}
-
-/**
- * Which output is being styled, which translation, and what that output actually is -- all on one
- * row, as the design has it.
- *
- * The chips take whatever the row has left and fold onto a second line of their own when that is
- * not enough for all [Constants.MAX_BIBLE_TRANSLATIONS] of them, rather than squeezing until their
- * abbreviations truncate. At the dialog's full width all six still sit beside the switch.
- */
-@Composable
-private fun TargetSwitchRow(
-    settings: AppSettings,
-    translations: List<BibleTranslationSettings>,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-    target: BibleStyleTarget,
-    onTargetChange: (BibleStyleTarget) -> Unit,
-    moduleTitles: Map<String, String>,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        SegmentedButton(
-            items = listOf(
-                SegmentedButtonItem(BibleStyleTarget.FULL_SCREEN, stringResource(Res.string.full_screen)),
-                SegmentedButtonItem(BibleStyleTarget.LOWER_THIRD, stringResource(Res.string.lower_third_size)),
-            ),
-            selectedValue = target,
-            onValueChange = onTargetChange,
-            buttonWidth = TARGET_BUTTON_WIDTH,
-            buttonHeight = 34.dp,
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        )
-        if (translations.size > 1) {
-            Text(
-                text = stringResource(Res.string.bible_editing),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            SegmentedButton(
-                items = translations.mapIndexed { index, translation ->
-                    val abbreviation = translation.customAbbreviation.ifBlank {
-                        defaultTranslationAbbreviation(
-                            moduleTitles[translation.fileName].orEmpty(),
-                            translation.fileName,
-                        )
-                    }
-                    SegmentedButtonItem(index, "${index + 1} · $abbreviation")
-                },
-                selectedValue = selectedIndex,
-                onValueChange = onSelect,
-                buttonWidth = CHIP_WIDTH,
-                buttonHeight = 34.dp,
-                fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                compactColumns = CHIP_COMPACT_COLUMNS,
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = scopeNote(settings, target),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-        )
     }
 }

@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -25,14 +26,19 @@ import kotlin.test.assertTrue
 class AnnouncementsTabStageMonitorTest {
 
     private val separateMainScreen = ProjectionSettings(
+        outputProfiles = listOf(
+            OutputProfile(id = "main", displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+            OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+        ),
         screenAssignments = listOf(
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
-            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+            ScreenAssignment(activeProfileId = "main"),
+            ScreenAssignment(activeProfileId = "stage"),
         ),
     )
 
     private val onlyStageMonitorScreen = ProjectionSettings(
-        screenAssignments = listOf(ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)),
+        outputProfiles = listOf(OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)),
+        screenAssignments = listOf(ScreenAssignment(activeProfileId = "stage")),
     )
 
     @Test

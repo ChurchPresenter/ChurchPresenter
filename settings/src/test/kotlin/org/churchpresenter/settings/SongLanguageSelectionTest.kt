@@ -47,12 +47,12 @@ class SongLanguageSelectionTest {
     }
 
     @Test
-    fun `an assignment resolves through the same rule`() {
-        val assignment = ScreenAssignment(songMode = Constants.SONG_LANG_THIRD)
-        assertEquals(listOf(2), assignment.songLanguages(available = 4))
+    fun `a profile resolves through the same rule`() {
+        val profile = OutputProfile(songMode = Constants.SONG_LANG_THIRD)
+        assertEquals(listOf(2), profile.songLanguages(available = 4))
         assertEquals(
             listOf(1, 3),
-            assignment.copy(songTranslations = listOf(1, 3)).songLanguages(available = 4),
+            profile.copy(songTranslations = listOf(1, 3)).songLanguages(available = 4),
         )
     }
 }

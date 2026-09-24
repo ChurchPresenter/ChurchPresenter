@@ -3,11 +3,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,12 +22,8 @@ import churchpresenter.composeapp.generated.resources.bible_preview_sample_book
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_long
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_short
-import churchpresenter.composeapp.generated.resources.preview_output_partial_translations_warning
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputWarning
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
@@ -38,7 +31,6 @@ import org.churchpresenter.bible.VerseTarget
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 private const val EMPTY_NOTE_ALPHA = 0.45f
@@ -103,52 +95,6 @@ internal fun bibleSampleVerses(
     }
 }
 
-/**
- * Which output the Bible preview stands for, and the preview itself.
- *
- * Split out of `StylePane` to keep it under the method-length gate: a rig can carry several
- * differently-shaped outputs at once, so the operator says which; the picker draws nothing until
- * there is more than one to choose between.
- *
- * A second warning, below the picker's own, covers a narrower case than "is Bible on at all": the
- * selected output may carry only some of the stack's translations (`ScreenAssignment.bibleTranslations`
- * -- empty means all of them). Comparing that count against the full stack rather than diffing the
- * actual indices: an output naming positions past the end of a stack that has since shrunk is not a
- * disagreement worth a warning, only a real subset is.
- */
-@Composable
-internal fun BiblePreviewWithOutputPicker(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    target: BibleStyleTarget,
-    selectedVerses: List<SelectedVerse>,
-) {
-    val previewOutput = rememberPreviewOutput(settings, Constants.PREVIEW_TAB_BIBLE, Presenting.BIBLE)
-    PreviewOutputPicker(
-        settings = settings,
-        tabId = Constants.PREVIEW_TAB_BIBLE,
-        mode = Presenting.BIBLE,
-        onSettingsChange = onSettingsChange,
-    )
-    val translationCount = settings.bibleSettings.translationList().size
-    val shownCount = previewOutput.assignment.bibleTranslations
-        .let { if (it.isEmpty()) translationCount else it.count { position -> position in 0 until translationCount } }
-    if (translationCount >= 2 && shownCount < translationCount) {
-        PreviewOutputWarning(stringResource(Res.string.preview_output_partial_translations_warning))
-    }
-    // Centred and capped rather than filling the pane: see SETTINGS_PREVIEW_MAX_HEIGHT.
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        BiblePreviewPanel(
-            settings = settings,
-            target = target,
-            output = previewOutput.size,
-            selectedVerses = selectedVerses,
-            modifier = Modifier.width(
-                minOf(maxWidth, SETTINGS_PREVIEW_MAX_HEIGHT * previewOutput.size.aspectRatio),
-            ),
-        )
-    }
-}
 
 /**
  * What the configured styling puts on screen -- drawn by [BiblePresenter] itself.
@@ -169,19 +115,23 @@ internal fun BiblePreviewPanel(
     target: BibleStyleTarget,
     /**
      * The output this preview stands for, in its own pixels -- the caller's decision, not this
-     * panel's: the global Bible tab asks the operator which output to preview (see
-     * `rememberPreviewOutput`/`PreviewOutputPicker`), while a per-output Customize dialog already
-     * knows exactly which one it is editing and must not guess a different one.
+     * panel's. The Profiles tab's stage panel picks a fixed representative size; it is not tied to
+     * one output's real size.
      */
     output: PreviewOutputSize,
     /** What each translation quotes -- see [bibleSampleVerses]. */
     selectedVerses: List<SelectedVerse>,
     modifier: Modifier = Modifier,
+    /**
+     * Whether this band stacks its parallel translations rather than setting them side by side.
+     *
+     * The caller's profile answers it, not the document: read as "does *any* output happen to be
+     * portrait" a landscape band previewed as a stacked one because some unrelated screen was
+     * portrait, which is a picture of an output that does not exist.
+     */
+    vertical: Boolean = false,
 ) {
     val bible = settings.bibleSettings
-    // Which lower third the outputs are actually set up for: the bottom band and the right-hand
-    // strip are different shapes, and previewing the wrong one misreports where the text sits.
-    val vertical = settings.projectionSettings.screenAssignments.any { it.isLowerThirdVertical }
 
     Box(
         modifier = modifier
@@ -200,6 +150,14 @@ internal fun BiblePreviewPanel(
         } else {
             ScaledPresenterBox(output) {
                 BiblePresenter(
+                    // The region the output confines its text to, applied exactly as
+                    // `PresenterModeContent` applies it. Left off, the CONTENT REGION controls
+                    // moved the screen and not the picture of it.
+                    modifier = if (target.isLowerThird) {
+                        Modifier
+                    } else {
+                        Modifier.contentRegion(bible.contentRegion)
+                    },
                     selectedVerses = selectedVerses,
                     appSettings = settings,
                     isLowerThird = target.isLowerThird,

@@ -8,97 +8,12 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * What one physical output is asked to show.
+ * What one physical output's own identity is: its key channel and its Browser Source/NDI naming.
  *
- * Every projector, capture card and browser source gets one of these, and six derived properties on
- * it decide what actually renders there: whether Bible and song text appear at all, whether the
- * output is a full screen or a lower-third band, and whether it is half of a fill+key pair driving
- * a hardware keyer.
- *
- * They are one-liners, which is exactly why they are worth pinning — they are read at render time
- * rather than stored, so a change to what counts as "off" or as "keyed" silently changes what an
- * output does, and the only symptom is a screen showing the wrong thing during a service.
+ * Everything about *what* an output shows or *how* it looks -- content, display mode -- now lives
+ * on the [OutputProfile] it follows (see `OutputProfileTest.kt`), never on the assignment itself.
  */
 class ScreenAssignmentTest {
-
-    // ── Whether text appears on this output ─────────────────────────────────────
-
-    @Test
-    fun `an output shows bible and songs by default`() {
-        val output = ScreenAssignment()
-
-        assertTrue(output.showBible, "a newly detected screen shows the service, not nothing")
-        assertTrue(output.showSongs)
-    }
-
-    @Test
-    fun `switching a kind of content off hides it`() {
-        val output = ScreenAssignment(
-            bibleMode = Constants.SONG_LANG_OFF,
-            songMode = Constants.SONG_LANG_OFF,
-        )
-
-        assertFalse(output.showBible)
-        assertFalse(output.showSongs)
-    }
-
-    @Test
-    fun `every language mode other than off still shows`() {
-        // "off" is the only mode that hides; the rest choose which language to render.
-        listOf(Constants.SONG_LANG_BOTH, Constants.SONG_LANG_PRIMARY, "secondary").forEach { mode ->
-            assertTrue(ScreenAssignment(bibleMode = mode).showBible, "bibleMode=$mode should still show")
-            assertTrue(ScreenAssignment(songMode = mode).showSongs, "songMode=$mode should still show")
-        }
-    }
-
-    @Test
-    fun `the two kinds of content are switched independently`() {
-        val bibleOnly = ScreenAssignment(songMode = Constants.SONG_LANG_OFF)
-
-        assertTrue(bibleOnly.showBible, "an overflow screen can carry the reading without the lyrics")
-        assertFalse(bibleOnly.showSongs)
-    }
-
-    // ── Full screen or a band across the bottom ─────────────────────────────────
-
-    @Test
-    fun `an output is full screen by default`() {
-        val output = ScreenAssignment()
-
-        assertFalse(output.isLowerThird)
-        assertFalse(output.isLowerThirdVertical)
-    }
-
-    @Test
-    fun `both band orientations count as a lower third`() {
-        val horizontal = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
-        val vertical = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL)
-
-        assertTrue(horizontal.isLowerThird)
-        assertTrue(vertical.isLowerThird, "a vertical band is still a band; layout branches on this")
-    }
-
-    @Test
-    fun `only the vertical band reports as vertical`() {
-        assertFalse(ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL).isLowerThirdVertical)
-        assertTrue(ScreenAssignment(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL).isLowerThirdVertical)
-    }
-
-    @Test
-    fun `a stage monitor is not a lower third`() {
-        val stage = ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
-
-        assertFalse(stage.isLowerThird, "the stage monitor has its own layout entirely")
-        assertFalse(stage.isLowerThirdVertical)
-    }
-
-    @Test
-    fun `an unrecognised display mode falls back to full screen`() {
-        // A settings file from a newer build could name a mode this one has never heard of.
-        val unknown = ScreenAssignment(displayMode = "some_future_mode")
-
-        assertFalse(unknown.isLowerThird, "an unknown mode must render something rather than nothing")
-    }
 
     // ── Fill and key ────────────────────────────────────────────────────────────
 
@@ -147,20 +62,6 @@ class ScreenAssignmentTest {
     fun `the auto sentinel is not a key target either`() {
         // -1 means "resolve at runtime" for the main target; as a key target it is still not a device.
         assertFalse(ScreenAssignment(keyTargetDisplay = -1).hasKeyOutput)
-    }
-
-    @Test
-    fun `a key channel is independent of what the output shows`() {
-        val keyedBandWithoutSongs = ScreenAssignment(
-            keyTargetDisplay = 2,
-            displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-            songMode = Constants.SONG_LANG_OFF,
-        )
-
-        assertTrue(keyedBandWithoutSongs.hasKeyOutput)
-        assertTrue(keyedBandWithoutSongs.isLowerThird)
-        assertFalse(keyedBandWithoutSongs.showSongs)
-        assertTrue(keyedBandWithoutSongs.showBible, "these four decisions are made separately")
     }
 }
 

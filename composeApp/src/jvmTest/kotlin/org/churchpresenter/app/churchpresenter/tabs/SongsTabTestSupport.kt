@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.SongSettings
@@ -195,9 +196,10 @@ internal fun songsTab(
                 if (!stageMonitor) it
                 else it.copy(
                     projectionSettings = it.projectionSettings.copy(
-                        screenAssignments = listOf(
-                            ScreenAssignment(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+                        outputProfiles = listOf(
+                            OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
                         ),
+                        screenAssignments = listOf(ScreenAssignment(activeProfileId = "stage")),
                     ),
                 )
             }

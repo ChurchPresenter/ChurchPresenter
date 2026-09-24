@@ -6,7 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -29,12 +29,12 @@ class PresenterModeBackgroundOverrideTest {
         mode: Presenting,
         manager: PresenterManager,
         override: Boolean?,
-        assignment: ScreenAssignment = ScreenAssignment(),
+        profile: OutputProfile = OutputProfile(),
         showBg: Boolean = true,
     ): @Composable () -> Unit = {
         PresenterModeContent(
             mode = mode,
-            screenAssignment = assignment,
+            profile = profile,
             presenterManager = manager,
             appSettings = AppSettings(),
             mediaViewModel = MediaViewModel(),

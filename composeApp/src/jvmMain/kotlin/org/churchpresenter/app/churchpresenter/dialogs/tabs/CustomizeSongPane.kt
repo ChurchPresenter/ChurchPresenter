@@ -141,6 +141,23 @@ internal fun SongCustomizePane(
                     onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v)) }
                 },
             )
+            // How the languages sit against each other, on the same terms as the alignment above:
+            // one value for the song, written straight onto `SongSettings`, and drawn on the lyrics
+            // because the lyrics are what carry a second language. One value serves both shapes,
+            // exactly as `SongPresenter` reads it -- a vertical band ignores side-by-side and stacks
+            // regardless, having no width to split.
+            //
+            // Gated on this profile's language mode and nothing else: how many languages a song
+            // actually has is a property of the song, read at render time, so settings cannot know
+            // it. A profile narrowed to one language has nothing to arrange.
+            if (songMode == Constants.SONG_LANG_BOTH) {
+                BilingualLayoutRow(
+                    selected = song.bilingualLayout,
+                    onSelect = { v ->
+                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = v)) }
+                    },
+                )
+            }
         }
     }
 }

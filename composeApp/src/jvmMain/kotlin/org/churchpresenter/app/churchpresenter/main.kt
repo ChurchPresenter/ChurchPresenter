@@ -209,7 +209,7 @@ import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import java.nio.file.Files
 
 private const val MILLIS_PER_MINUTE = 60_000L
-private const val OPTIONS_TAB_BACKGROUND = 3
+private const val OPTIONS_TAB_BACKGROUND = 2
 private const val UPDATE_CHECK_DELAY_MS = 5_000L
 private const val STORY_PROMPT_DELAY_MS = 8_000L
 
@@ -1907,7 +1907,6 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 settingsManager = settingsManager,
                                 companionServer = companionServer,
                                 remoteClientManager = remoteClientManager,
-                                presenterManager = presenterManager,
                                 calendarSync = calendarSync,
                                 onDismiss = { showOptionsDialog = false; dialogDismissSignal++ },
                                 onSave = { updated ->

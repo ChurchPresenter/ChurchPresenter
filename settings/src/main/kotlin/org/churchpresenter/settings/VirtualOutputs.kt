@@ -24,24 +24,25 @@ import org.churchpresenter.settings.utils.Constants
 private fun List<ScreenAssignment>.withOutputAt(
     index: Int,
     assignment: ScreenAssignment,
+    fallbackProfileId: String,
 ): List<ScreenAssignment> {
     val mutable = toMutableList()
-    while (mutable.size <= index) mutable.add(ScreenAssignment())
+    while (mutable.size <= index) mutable.add(ScreenAssignment(activeProfileId = fallbackProfileId))
     mutable[index] = assignment
     return mutable
 }
 
 /** The Browser Source output at [index], or a default one for a slot never configured. */
 fun ProjectionSettings.getBrowserSourceOutput(index: Int): ScreenAssignment =
-    browserSourceOutputs.getOrElse(index) { ScreenAssignment() }
+    browserSourceOutputs.getOrElse(index) { ScreenAssignment(activeProfileId = fallbackProfileId) }
 
 /** [assignment] as the Browser Source output at [index]. */
 fun ProjectionSettings.withBrowserSourceOutput(index: Int, assignment: ScreenAssignment): ProjectionSettings =
-    copy(browserSourceOutputs = browserSourceOutputs.withOutputAt(index, assignment))
+    copy(browserSourceOutputs = browserSourceOutputs.withOutputAt(index, assignment, fallbackProfileId))
 
 /** One more Browser Source output, at the end. */
 fun ProjectionSettings.addBrowserSourceOutput(): ProjectionSettings =
-    copy(browserSourceOutputs = browserSourceOutputs + ScreenAssignment())
+    copy(browserSourceOutputs = browserSourceOutputs + ScreenAssignment(activeProfileId = fallbackProfileId))
 
 /** Removes the Browser Source output at [index], renumbering the ones after it. */
 fun ProjectionSettings.removeBrowserSourceOutput(index: Int): ProjectionSettings =
@@ -50,15 +51,15 @@ fun ProjectionSettings.removeBrowserSourceOutput(index: Int): ProjectionSettings
 
 /** The NDI output at [index], or a default one for a slot never configured. */
 fun ProjectionSettings.getNdiOutput(index: Int): ScreenAssignment =
-    ndiOutputs.getOrElse(index) { ScreenAssignment() }
+    ndiOutputs.getOrElse(index) { ScreenAssignment(activeProfileId = fallbackProfileId) }
 
 /** [assignment] as the NDI output at [index]. */
 fun ProjectionSettings.withNdiOutput(index: Int, assignment: ScreenAssignment): ProjectionSettings =
-    copy(ndiOutputs = ndiOutputs.withOutputAt(index, assignment))
+    copy(ndiOutputs = ndiOutputs.withOutputAt(index, assignment, fallbackProfileId))
 
 /** One more NDI output, at the end. */
 fun ProjectionSettings.addNdiOutput(): ProjectionSettings =
-    copy(ndiOutputs = ndiOutputs + ScreenAssignment())
+    copy(ndiOutputs = ndiOutputs + ScreenAssignment(activeProfileId = fallbackProfileId))
 
 /** Removes the NDI output at [index], renumbering the ones after it. */
 fun ProjectionSettings.removeNdiOutput(index: Int): ProjectionSettings =

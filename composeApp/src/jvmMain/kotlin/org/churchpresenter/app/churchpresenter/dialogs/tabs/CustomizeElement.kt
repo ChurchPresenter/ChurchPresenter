@@ -2,13 +2,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_group_card
-import churchpresenter.composeapp.generated.resources.customize_group_definition
 import churchpresenter.composeapp.generated.resources.customize_group_reference
 import churchpresenter.composeapp.generated.resources.customize_group_verse_text
-import churchpresenter.composeapp.generated.resources.customize_group_word
-import churchpresenter.composeapp.generated.resources.dictionary_settings_kjv_usage
-import churchpresenter.composeapp.generated.resources.dictionary_settings_reference_text
 import churchpresenter.composeapp.generated.resources.song_element_look_ahead
 import churchpresenter.composeapp.generated.resources.song_element_lyrics
 import churchpresenter.composeapp.generated.resources.song_element_next_section
@@ -38,11 +33,6 @@ internal enum class CustomizeElement {
     SONG_LOOK_AHEAD,
     SONG_NEXT_SECTION,
     SONG_TITLE_SLIDE,
-    DICTIONARY_WORD,
-    DICTIONARY_REFERENCE,
-    DICTIONARY_DEFINITION,
-    DICTIONARY_KJV,
-    DICTIONARY_CARD,
     BACKGROUND_DEFAULT,
     BACKGROUND_BIBLE,
     BACKGROUND_SONG,
@@ -61,20 +51,18 @@ internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = wh
     // -- the margins, the fades, the band height, the word wrap, the vertical alignment, the
     // end-of-song marker -- now sits on the strip beneath the preview, where the picture it moves is
     // in the same glance. The chip drew four sections, three of which the strip already carried.
+    // Lyrics lead, as the Bible's verse text does: the first chip is also the one the pane opens on
+    // (see [ProfileEditor]'s `element` default), and the lyrics are what an operator is
+    // overwhelmingly here to style. Opening on the title slide also hid the arrangement control,
+    // which belongs to the lyrics and is deliberately absent on a title slide -- so the one setting
+    // this pane had just gained could not be found without guessing which chip held it.
     CustomizePane.SONGS -> listOf(
-        CustomizeElement.SONG_TITLE_SLIDE,
         CustomizeElement.SONG_LYRICS,
+        CustomizeElement.SONG_TITLE_SLIDE,
         CustomizeElement.SONG_TITLE,
         CustomizeElement.SONG_NUMBER,
         CustomizeElement.SONG_LOOK_AHEAD,
         CustomizeElement.SONG_NEXT_SECTION,
-    )
-    CustomizePane.DICTIONARY -> listOf(
-        CustomizeElement.DICTIONARY_WORD,
-        CustomizeElement.DICTIONARY_REFERENCE,
-        CustomizeElement.DICTIONARY_DEFINITION,
-        CustomizeElement.DICTIONARY_KJV,
-        CustomizeElement.DICTIONARY_CARD,
     )
     CustomizePane.BACKGROUND -> listOf(
         CustomizeElement.BACKGROUND_DEFAULT,
@@ -93,11 +81,6 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.SONG_LOOK_AHEAD -> stringResource(Res.string.song_element_look_ahead)
     CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.song_element_next_section)
     CustomizeElement.SONG_TITLE_SLIDE -> stringResource(Res.string.song_target_title_slide)
-    CustomizeElement.DICTIONARY_WORD -> stringResource(Res.string.customize_group_word)
-    CustomizeElement.DICTIONARY_REFERENCE -> stringResource(Res.string.dictionary_settings_reference_text)
-    CustomizeElement.DICTIONARY_DEFINITION -> stringResource(Res.string.customize_group_definition)
-    CustomizeElement.DICTIONARY_KJV -> stringResource(Res.string.dictionary_settings_kjv_usage)
-    CustomizeElement.DICTIONARY_CARD -> stringResource(Res.string.customize_group_card)
     // Named for the surface this output actually writes. Which of the pair that is follows from
     // the output's own shape rather than from anything chosen here -- but the chip still has to
     // say which, because the title it produces names it: hardcoding the full-screen scope made a

@@ -13,6 +13,7 @@ import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.OBSSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ServerSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -256,7 +257,7 @@ class MainLogicTest {
 
     @Test
     fun `a configured browser source output is used`() {
-        val configured = ScreenAssignment(displayMode = "browser_source")
+        val configured = ScreenAssignment(browserSourceName = "custom")
         assertEquals(configured, virtualOutputAt(listOf(configured), 0))
     }
 
@@ -959,14 +960,14 @@ class MainLogicTest {
 
     @Test
     fun `each layout has its own background switch`() {
-        val lowerThird = ScreenAssignment(
+        val lowerThird = OutputProfile(
             displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
             showLowerThirdBackground = false,
             showFullscreenBackground = true,
         )
         assertFalse(showsOutputBackground(lowerThird), "the fullscreen switch must not stand in for it")
 
-        val fullscreen = ScreenAssignment(
+        val fullscreen = OutputProfile(
             displayMode = Constants.DISPLAY_MODE_FULLSCREEN,
             showLowerThirdBackground = false,
             showFullscreenBackground = true,

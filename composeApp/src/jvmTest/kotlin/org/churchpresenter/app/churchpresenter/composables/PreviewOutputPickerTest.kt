@@ -17,6 +17,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
@@ -34,10 +35,10 @@ class PreviewOutputPickerTest {
 
     private val tab = "bible"
 
-    /** `showBible` is derived from `bibleMode`, so routing Bible away means switching that off. */
+    /** `showBible` is derived from the assigned profile's `bibleMode`, one of two fixed profiles. */
     private fun screen(shows: Boolean = true, target: Int = 0, name: String = "") = ScreenAssignment(
         targetDisplay = target,
-        bibleMode = if (shows) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF,
+        activeProfileId = if (shows) "shows" else "off",
         screenName = name,
     )
 
@@ -48,6 +49,10 @@ class PreviewOutputPickerTest {
         stored: Map<String, String> = emptyMap(),
     ) = AppSettings(
         projectionSettings = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "shows", bibleMode = Constants.SONG_LANG_BOTH),
+                OutputProfile(id = "off", bibleMode = Constants.SONG_LANG_OFF),
+            ),
             screenAssignments = screens,
             browserSourceOutputs = browserSources,
             ndiOutputs = ndi,

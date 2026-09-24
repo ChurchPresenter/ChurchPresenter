@@ -38,7 +38,6 @@ import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -56,8 +55,8 @@ class OptionsContentTest {
     @BeforeTest
     fun isolateHome() {
         // Pin the JVM-wide log path to the real test home before swapping user.home below: this test
-        // builds a PresenterManager and a CompanionServer, whose Instance Link paths log, and
-        // InstanceLinkLogger keeps whatever user.home pointed at the first time anything logged.
+        // builds a CompanionServer, whose Instance Link paths log, and InstanceLinkLogger keeps
+        // whatever user.home pointed at the first time anything logged.
         TestSingletons.latchToTestHome()
         realHome = System.getProperty("user.home")
         home = Files.createTempDirectory("cp-options-test").toFile()
@@ -96,7 +95,6 @@ class OptionsContentTest {
                     settingsManager = SettingsManager(),
                     companionServer = CompanionServer(),
                     remoteClientManager = RemoteClientManager(),
-                    presenterManager = PresenterManager(),
                     onDismiss = { result.dismissed++ },
                     onSave = { result.saved = it },
                     obsManager = obsManager,
@@ -122,8 +120,8 @@ class OptionsContentTest {
     @Test
     fun `every settings tab is shown without an OBS connection`() = dialog {
         listOf(
-            "System", "Bible", "Song", "Background", "Projection",
-            "Server", "Stage Monitor", "ATEM", "Dictionary", "Companion Satellite",
+            "System", "Bible", "Profiles", "Background", "Projection",
+            "Server", "ATEM", "Companion Satellite",
         ).forEach { tab(it).assertExists() }
         onNodeWithText("OBS").assertDoesNotExist()
     }
@@ -192,7 +190,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `initialTab opens directly on that tab`() = dialog(initialTab = 3) {
+    // Two, not three: the Song tab this branch removed used to sit at 2, so Background moved down.
+    fun `initialTab opens directly on that tab`() = dialog(initialTab = 2) {
         tab("Background").assertIsSelected()
     }
 
@@ -230,7 +229,7 @@ class OptionsContentTest {
     @Test
     fun `every tab renders its own settings content when selected`() = dialog {
         listOf(
-            "System", "Song", "Background", "Projection", "Server", "ATEM",
+            "System", "Background", "Projection", "Server", "ATEM",
         ).forEach { label ->
             onNode(hasText(label) and hasClickAction()).performClick()
             onNode(hasText(label) and hasClickAction()).assertIsSelected()
@@ -250,28 +249,20 @@ class OptionsContentTest {
     @Test
     fun `toggling a checkbox on the Bible tab feeds back into saved settings`() = dialog(initialTab = 1) { result ->
         // The checkbox and its label are siblings, so the label is not clickable -- the toggleable
-        // node is what has to be pressed.
+        // node is what has to be pressed. Index 0 is split browse mode, the first of the tab's two
+        // remaining content flags.
         onAllNodes(isToggleable())[0].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
         assertEquals(
-            !AppSettings().bibleSettings.multiTranslationDivider,
-            result.saved?.bibleSettings?.multiTranslationDivider,
+            !AppSettings().bibleSettings.splitBrowseMode,
+            result.saved?.bibleSettings?.splitBrowseMode,
         )
     }
 
     @Test
-    fun `toggling the title slide checkbox on the Song tab feeds back into saved settings`() =
-        dialog(initialTab = 2) { result ->
-        onNodeWithTag("song_titleSlideEnabled").performScrollTo().performClick()
-        onNodeWithText("Apply").performClick()
-
-        assertEquals(!AppSettings().songSettings.titleSlideEnabled, result.saved?.songSettings?.titleSlideEnabled)
-    }
-
-    @Test
     fun `changing the background type dropdown on the Background tab feeds back into saved settings`() =
-        dialog(initialTab = 3) { result ->
+        dialog(initialTab = 2) { result ->
         // The tab opens on the Default surface, whose type segments sit in the editor beside the
         // rail. "Image" names exactly one of them; the rail rows carry their own type as a meta
         // line, so the segment is the only *clickable* node reading it on its own.
@@ -298,7 +289,7 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 7) { result ->
+    fun `editing the host field on the ATEM tab feeds back into saved settings`() = dialog(initialTab = 6) { result ->
         onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("test-atem-host")
         onNodeWithText("Apply").performClick()
 
@@ -307,7 +298,7 @@ class OptionsContentTest {
 
     @Test
     fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() =
-        dialog(initialTab = 9) { result ->
+        dialog(initialTab = 7) { result ->
         onNodeWithText("+ Add Connection").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -316,7 +307,7 @@ class OptionsContentTest {
 
     @Test
     fun `the OBS and Companion Satellite tabs feed control changes back into saved settings`() = dialog(
-        initialTab = 9,
+        initialTab = 7,
         obsManager = OBSWebSocketManager(),
     ) { result ->
         onAllNodes(isToggleable())[0].performScrollTo().performClick() // OBS tab: "Connect to OBS Studio"
@@ -372,7 +363,6 @@ class OptionsContentTest {
                 settingsManager = SettingsManager(),
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
-                presenterManager = PresenterManager(),
                 onDismiss = {},
             )
         }
@@ -388,7 +378,6 @@ class OptionsContentTest {
                 settingsManager = SettingsManager(),
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
-                presenterManager = PresenterManager(),
                 onDismiss = {},
                 onSave = {},
                 onIdentifyScreen = {},
@@ -411,7 +400,6 @@ class OptionsContentTest {
                 settingsManager = SettingsManager(),
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
-                presenterManager = PresenterManager(),
                 onDismiss = {},
                 onSave = {},
                 onIdentifyScreen = {},

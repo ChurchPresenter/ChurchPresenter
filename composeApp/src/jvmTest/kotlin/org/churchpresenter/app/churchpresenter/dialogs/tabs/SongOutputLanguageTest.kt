@@ -1,14 +1,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Language is stored per output as [ScreenAssignment.songMode], not in `SongSettings`.
+ * Language is stored per profile as `OutputProfile.songMode`, not in `SongSettings`.
  *
  * `SongPresenter` reads the song-level language fields only when given no `languageOverride`, and
  * every live call site passes that output's own mode -- so these accessors are what makes the
@@ -17,10 +17,10 @@ import kotlin.test.assertEquals
 class SongOutputLanguageTest {
 
     private fun screen(mode: String, displayMode: String = Constants.DISPLAY_MODE_FULLSCREEN) =
-        ScreenAssignment(displayMode = displayMode, songMode = mode)
+        OutputProfile(displayMode = displayMode, songMode = mode)
 
-    private fun settingsOf(vararg screens: ScreenAssignment) =
-        AppSettings(projectionSettings = ProjectionSettings(screenAssignments = screens.toList()))
+    private fun settingsOf(vararg screens: OutputProfile) =
+        AppSettings(projectionSettings = ProjectionSettings(outputProfiles = screens.toList()))
 
     private val lowerThird = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
 
@@ -42,8 +42,8 @@ class SongOutputLanguageTest {
             screen(Constants.SONG_LANG_BOTH, lowerThird),
         ).withSongLanguage(SongStyleTarget.FULL_SCREEN, Constants.SONG_LANG_SECONDARY)
 
-        assertEquals(Constants.SONG_LANG_SECONDARY, settings.projectionSettings.screenAssignments[0].songMode)
-        assertEquals(Constants.SONG_LANG_BOTH, settings.projectionSettings.screenAssignments[1].songMode)
+        assertEquals(Constants.SONG_LANG_SECONDARY, settings.projectionSettings.outputProfiles[0].songMode)
+        assertEquals(Constants.SONG_LANG_BOTH, settings.projectionSettings.outputProfiles[1].songMode)
     }
 
     @Test
@@ -55,7 +55,7 @@ class SongOutputLanguageTest {
 
         assertEquals(
             listOf(Constants.SONG_LANG_PRIMARY, Constants.SONG_LANG_PRIMARY),
-            settings.projectionSettings.screenAssignments.map { it.songMode },
+            settings.projectionSettings.outputProfiles.map { it.songMode },
         )
     }
 
@@ -69,8 +69,8 @@ class SongOutputLanguageTest {
             screen(Constants.SONG_LANG_BOTH),
         ).withSongLanguage(SongStyleTarget.FULL_SCREEN, Constants.SONG_LANG_PRIMARY)
 
-        assertEquals(Constants.SONG_LANG_OFF, settings.projectionSettings.screenAssignments[0].songMode)
-        assertEquals(Constants.SONG_LANG_PRIMARY, settings.projectionSettings.screenAssignments[1].songMode)
+        assertEquals(Constants.SONG_LANG_OFF, settings.projectionSettings.outputProfiles[0].songMode)
+        assertEquals(Constants.SONG_LANG_PRIMARY, settings.projectionSettings.outputProfiles[1].songMode)
     }
 
     @Test
@@ -114,7 +114,7 @@ class SongOutputLanguageTest {
 
         assertEquals(
             listOf(Constants.SONG_LANG_PRIMARY, Constants.SONG_LANG_PRIMARY),
-            settings.projectionSettings.screenAssignments.map { it.songMode },
+            settings.projectionSettings.outputProfiles.map { it.songMode },
         )
         assertEquals(false, settings.songIsBilingual)
     }
@@ -129,7 +129,7 @@ class SongOutputLanguageTest {
         assertEquals(true, settings.songIsBilingual)
         assertEquals(
             listOf(Constants.SONG_LANG_BOTH, Constants.SONG_LANG_BOTH),
-            settings.projectionSettings.screenAssignments.map { it.songMode },
+            settings.projectionSettings.outputProfiles.map { it.songMode },
         )
     }
 

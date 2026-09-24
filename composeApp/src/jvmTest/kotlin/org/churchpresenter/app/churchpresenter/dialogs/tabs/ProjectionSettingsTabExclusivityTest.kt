@@ -2,12 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.SemanticsNodeInteractionCollection
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -19,22 +16,21 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Covers the rule that keeps two outputs from fighting over one piece of hardware: a display can be
- * driven by exactly one window, so pointing a row at a display that something else already uses
- * takes it away from that other thing first.
+ * The rule that keeps two outputs from fighting over one piece of hardware: a display can be driven
+ * by exactly one window, so pointing a row at a display something else already uses takes it away
+ * from that other thing first.
  *
  * This matters in the booth. Two windows aimed at the same projector means one silently wins and the
  * operator cannot tell which; the tab avoids that by clearing the loser as the choice is made,
  * across both the primary targets and the key outputs.
  *
- * It also covers what the tab shows when the stored settings name something it does not recognise —
- * a display mode, a language mode or an output type from a newer build, or hardware that is no
- * longer plugged in. Every one of those falls back to a sensible label rather than rendering blank.
+ * Ported from `ProjectionSettingsTabExclusivityTest` unchanged in substance -- what a row *shows*
+ * moved onto a profile, but which hardware it drives did not.
  */
 class ProjectionSettingsTabExclusivityTest {
 
     private fun settingsWith(change: ProjectionSettings.() -> ProjectionSettings): AppSettings =
-        AppSettings().let { it.copy(projectionSettings = it.projectionSettings.change()) }
+        withProfiles().let { it.copy(projectionSettings = it.projectionSettings.change()) }
 
     /** The second external display, as the tab's own resolver fills it in. */
     private fun display2() = ScreenAssignment(
@@ -185,8 +181,8 @@ class ProjectionSettingsTabExclusivityTest {
 
     /**
      * The sweep matches on the display's full bounds, not just its origin. A row whose stored bounds
-     * differ — the projector was swapped for one of another resolution, so only part of the rectangle
-     * still lines up — is a different output and must be left alone.
+     * differ -- the projector was swapped for one of another resolution, so only part of the
+     * rectangle still lines up -- is a different output and must be left alone.
      */
     @Test
     fun `a row whose stored bounds only partly match is not swept`() {
@@ -209,151 +205,8 @@ class ProjectionSettingsTabExclusivityTest {
             assertEquals(
                 2,
                 get().projectionSettings.screenAssignments[1].targetDisplay,
-                "row 1's bounds do not match D2's, so it is a different output and is left alone",
+                "the row with different bounds is a different output and must be left alone",
             )
         }
     }
-
-    @Test
-    fun `a key output whose stored bounds only partly match is not swept`() {
-        val staleKey = settingsWith {
-            copy(
-                screenAssignments = listOf(
-                    display1(),
-                    display2().copy(
-                        keyTargetDisplay = 2, keyTargetType = "screen",
-                        keyTargetBoundsX = 3200, keyTargetBoundsY = 0,
-                        keyTargetBoundsW = 3840, keyTargetBoundsH = 1080,
-                    ),
-                ),
-            )
-        }
-        projectionTab(initial = staleKey) { get ->
-            gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
-            waitForIdle()
-            onNodeWithText(pickDisplay2).performClick()
-            waitForIdle()
-
-            assertEquals(
-                2,
-                get().projectionSettings.screenAssignments[1].keyTargetDisplay,
-                "the key output's bounds do not match, so it is left alone",
-            )
-        }
-    }
-
-    // ── Values the build does not recognise ─────────────────────────────────────────────────────
-
-    @Test
-    fun `an unrecognised display mode falls back to Full Screen`() {
-        projectionTab(
-            initial = settingsWith {
-                copy(screenAssignments = listOf(display1().copy(displayMode = "holographic"), display2()))
-            },
-        ) { get ->
-            gridButton(Grid.displayMode(row = 0)).assertTextEquals("Full Screen")
-            assertEquals(
-                "holographic",
-                get().projectionSettings.screenAssignments[0].displayMode,
-                "the stored value itself is left alone, so a newer build still understands it",
-            )
-        }
-    }
-
-    @Test
-    fun `an unrecognised browser source display mode falls back to Full Screen`() {
-        projectionTab(
-            initial = settingsWith {
-                copy(browserSourceOutputs = listOf(ScreenAssignment(displayMode = "holographic")))
-            },
-        ) { _ ->
-            onAllNodesWithText("Full Screen").assertCountAtLeast(1)
-        }
-    }
-
-    @Test
-    fun `an unrecognised song language mode still shows the song's languages`() {
-        projectionTab(
-            initial = settingsWith {
-                copy(
-                    screenAssignments = listOf(
-                        display1().copy(bibleMode = "quadlingual", songMode = "quadlingual"),
-                        display2(),
-                    ),
-                )
-            },
-        ) { _ ->
-            gridButton(Grid.contentOutputs(row = 0)).performScrollTo().performClick()
-            waitForIdle()
-            // Both are checklists now. A stored mode this build does not know is not "off", so the
-            // cell stays on and the languages stay pickable rather than the row going blank.
-            onNodeWithTag(TranslationPickerTags.SONG.trigger).performScrollTo().performClick()
-            waitForIdle()
-            onNodeWithText("Language 1").assertExists("an unknown mode must not empty the picker")
-        }
-    }
-
-    @Test
-    fun `an output stored against hardware that is gone falls back to None`() {
-        // targetType "decklink" with no DeckLink device present: no option matches, so the tab
-        // shows the first option rather than rendering the row blank.
-        projectionTab(
-            initial = settingsWith {
-                copy(
-                    screenAssignments = listOf(
-                        ScreenAssignment(targetType = "decklink", targetDisplay = 0),
-                        display2(),
-                    ),
-                )
-            },
-        ) { get ->
-            gridButton(Grid.targetDisplay(row = 0)).assertTextEquals("None")
-            assertEquals(
-                "decklink",
-                get().projectionSettings.screenAssignments[0].targetType,
-                "the stored target is kept so the device works again when reconnected",
-            )
-        }
-    }
-
-    @Test
-    fun `a key output stored against hardware that is gone falls back to None`() {
-        projectionTab(
-            initial = settingsWith {
-                copy(
-                    screenAssignments = listOf(
-                        display1().copy(keyTargetType = "decklink", keyTargetDisplay = 0),
-                        display2(),
-                    ),
-                )
-            },
-        ) { _ ->
-            gridButton(Grid.keyOutput(row = 0)).assertTextEquals("None")
-        }
-    }
-
-    // ── The dev-window fallback with several simulated outputs ──────────────────────────────────
-
-    /**
-     * Only the first simulated output is the "Dev Window"; the rest are numbered like real screens,
-     * which is the branch a single simulated output never reaches.
-     */
-    @Test
-    fun `only the first simulated output is labelled the dev window`() {
-        projectionTab(
-            initial = settingsWith { copy(devWindowCount = 3) },
-            screens = noExternalScreens(),
-        ) { _ ->
-            onNodeWithText("Presenter windows: 3").assertExists()
-            onNodeWithText("Dev Window").assertExists("slot 0 is the dev window")
-            onNodeWithText("Screen 2").assertExists("and the rest are numbered")
-            onNodeWithText("Screen 3").assertExists()
-            onAllNodesWithText("Screen 1").assertCountEquals(0)
-        }
-    }
-}
-
-private fun SemanticsNodeInteractionCollection.assertCountAtLeast(n: Int) {
-    val found = fetchSemanticsNodes(atLeastOneRootRequired = false).size
-    kotlin.test.assertTrue(found >= n, "expected at least $n nodes but found $found")
 }

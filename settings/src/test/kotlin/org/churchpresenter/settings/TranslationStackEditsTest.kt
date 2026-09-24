@@ -5,15 +5,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Removing and reordering translations, with every output's selection carried along.
+ * Removing and reordering translations, with every profile's selection carried along.
  *
- * An output names what it shows by position in the stack, so an edit to the stack moves the ground
+ * A profile names what it shows by position in the stack, so an edit to the stack moves the ground
  * under every selection. Left alone they point at whatever slid into that position — delete the
- * first of `[KJV, RST, NIV]` and the screen pinned to position 1 goes from Russian to NIV, silently,
+ * first of `[KJV, RST, NIV]` and the profile pinned to position 1 goes from Russian to NIV, silently,
  * which on a Sunday morning is a room full of people reading the wrong language.
  *
- * The stack is `[kjv, rst, niv]` throughout, with two outputs so it is visible that both a screen
- * and a browser source are covered.
+ * The stack is `[kjv, rst, niv]` throughout, with two profiles so it is visible that more than one
+ * is covered.
  */
 class TranslationStackEditsTest {
 
@@ -26,15 +26,15 @@ class TranslationStackEditsTest {
             listOf("kjv.spb", "rst.spb", "niv.spb").map { BibleTranslationSettings(fileName = it) },
         ),
         projectionSettings = ProjectionSettings(
-            screenAssignments = listOf(
-                ScreenAssignment(bibleMode = screenMode, bibleTranslations = screenSelection),
+            outputProfiles = listOf(
+                OutputProfile(id = "screen", bibleMode = screenMode, bibleTranslations = screenSelection),
+                OutputProfile(id = "browser", bibleTranslations = browserSelection),
             ),
-            browserSourceOutputs = listOf(ScreenAssignment(bibleTranslations = browserSelection)),
         ),
     )
 
-    private fun AppSettings.screen() = projectionSettings.screenAssignments.single()
-    private fun AppSettings.browserSource() = projectionSettings.browserSourceOutputs.single()
+    private fun AppSettings.screen() = projectionSettings.outputProfiles.first { it.id == "screen" }
+    private fun AppSettings.browserSource() = projectionSettings.outputProfiles.first { it.id == "browser" }
     private fun AppSettings.stack() = bibleSettings.translationList().map { it.fileName }
 
     // ── Removing ────────────────────────────────────────────────────────────────────────────────

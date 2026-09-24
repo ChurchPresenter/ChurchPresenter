@@ -4,6 +4,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
@@ -12,7 +13,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.churchpresenter.settings.backgroundOverrideOf
 
 class LottieBandLogicTest {
 
@@ -37,14 +37,17 @@ class LottieBandLogicTest {
 
         val overridden = AppSettings(
             projectionSettings = ProjectionSettings(
-                screenAssignments = listOf(
-                    ScreenAssignment(),
-                    ScreenAssignment(
-                        backgroundOverride = backgroundOverrideOf(
-                            BackgroundSettings(),
-                            BackgroundSettings(songLowerThirdBackground = lottie("/mine.json")),
-                        ),
+                outputProfiles = listOf(
+                    OutputProfile(id = "default", name = "Default"),
+                    OutputProfile(
+                        id = "mine",
+                        name = "Mine",
+                        backgroundSettings = BackgroundSettings(songLowerThirdBackground = lottie("/mine.json")),
                     ),
+                ),
+                screenAssignments = listOf(
+                    ScreenAssignment(activeProfileId = "default"),
+                    ScreenAssignment(activeProfileId = "mine"),
                 ),
             ),
         )

@@ -3,25 +3,25 @@ package org.churchpresenter.settings
 import org.churchpresenter.settings.utils.Constants
 
 /**
- * Editing the translation stack, with every output's selection carried along.
+ * Editing the translation stack, with every profile's selection carried along.
  *
- * An output names the translations it shows by **position** in the stack
- * ([ScreenAssignment.bibleTranslations]), so removing or reordering a translation moves the ground
+ * A profile names the translations it shows by **position** in the stack
+ * ([OutputProfile.bibleTranslations]), so removing or reordering a translation moves the ground
  * under every one of those selections. Editing only [BibleSettings] leaves them pointing at whatever
- * has since slid into that position: delete the first of `[KJV, RST, NIV]` and the screen pinned to
+ * has since slid into that position: delete the first of `[KJV, RST, NIV]` and the profile pinned to
  * position 1 goes from Russian to NIV, silently, in the middle of a service.
  *
  * These are the only correct way to remove or reorder — they update the stack and rewrite the
  * selections in the same step. [BibleSettings.removeTranslation] and
  * [BibleSettings.moveTranslation] remain for the stack alone; call them directly only where no
- * output selection can exist.
+ * profile selection can exist.
  *
  * Position, rather than a stable file name, is what the settings store; changing that is a migration
  * this does not attempt. Keeping the positions honest through an edit is the cheaper half of the
  * problem and covers what an operator actually does.
  */
 
-/** Removes the translation at [index], and drops it from every output that named it. */
+/** Removes the translation at [index], and drops it from every profile that named it. */
 fun AppSettings.removeBibleTranslation(index: Int): AppSettings {
     val stack = bibleSettings.translationList()
     if (index !in stack.indices) return this
@@ -35,7 +35,7 @@ fun AppSettings.removeBibleTranslation(index: Int): AppSettings {
         }
 }
 
-/** Moves the translation at [index] by [offset], and follows it in every output that named it. */
+/** Moves the translation at [index] by [offset], and follows it in every profile that named it. */
 fun AppSettings.moveBibleTranslation(index: Int, offset: Int): AppSettings {
     val stack = bibleSettings.translationList()
     val target = index + offset
@@ -84,27 +84,26 @@ fun AppSettings.withInstalledBible(fileName: String): AppSettings =
     }
 
 /**
- * Rewrites every output's stored positions through [newPositionOf]; null means that translation is
- * gone. Covers browser sources as well as screens — the same shape, driven by the same UI.
+ * Rewrites every profile's stored positions through [newPositionOf]; null means that translation is
+ * gone.
  */
 private fun AppSettings.remapOutputTranslations(newPositionOf: (Int) -> Int?): AppSettings =
     copy(
         projectionSettings = projectionSettings.copy(
-            screenAssignments = projectionSettings.screenAssignments.map { it.remapped(newPositionOf) },
-            browserSourceOutputs = projectionSettings.browserSourceOutputs.map { it.remapped(newPositionOf) },
+            outputProfiles = projectionSettings.outputProfiles.map { it.remapped(newPositionOf) },
         ),
     )
 
-private fun ScreenAssignment.remapped(newPositionOf: (Int) -> Int?): ScreenAssignment {
+private fun OutputProfile.remapped(newPositionOf: (Int) -> Int?): OutputProfile {
     // An empty selection means "all of them", which stays true whatever the stack does.
     if (bibleTranslations.isEmpty()) return this
     val remapped = bibleTranslations.mapNotNull(newPositionOf).distinct().sorted()
     if (remapped == bibleTranslations) return this
     return if (remapped.isEmpty()) {
-        // Every translation this output named has gone. Letting the selection fall empty would read
-        // as "all of them" and put three languages on a screen deliberately narrowed to one, so its
-        // scripture switches off instead: nothing shown rather than the wrong thing shown, and one
-        // click to put back.
+        // Every translation this profile named has gone. Letting the selection fall empty would
+        // read as "all of them" and put three languages on a screen deliberately narrowed to one,
+        // so its scripture switches off instead: nothing shown rather than the wrong thing shown,
+        // and one click to put back.
         copy(bibleMode = Constants.SONG_LANG_OFF, bibleTranslations = emptyList())
     } else {
         copy(bibleTranslations = remapped)

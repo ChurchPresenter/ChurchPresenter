@@ -83,7 +83,10 @@ import org.churchpresenter.app.churchpresenter.utils.pairLabel
 import org.churchpresenter.app.churchpresenter.utils.availableSongColumns
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.utils.isDualLanguagePresentation
+import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
+import org.churchpresenter.settings.profileFor
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong
 import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
@@ -234,7 +237,8 @@ fun SongsTab(
                 // Bilingual worship actually happening, rather than merely being configured. Sits
                 // under the same "different song went live" guard so a service counts songs, not
                 // section changes.
-                val outputs = appSettings.projectionSettings.screenAssignments
+                val proj = appSettings.projectionSettings
+                val outputs = proj.screenAssignments.filter { it.isLiveOutput() }.mapNotNull { proj.profileFor(it) }
                 if (isDualLanguagePresentation(song, outputs)) {
                     UsageEvents.record(UsageEvent.SONG_DUAL_LANGUAGE)
                 }
@@ -641,9 +645,7 @@ fun SongsTab(
 
     // The metronome tempo is only ever read by the stage monitor, so the field that sets it is
     // offered only when there is one configured.
-    val hasStageMonitorScreen = appSettings.projectionSettings.screenAssignments.any {
-        it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-    }
+    val hasStageMonitorScreen = stageMonitorScreenIndices(appSettings.projectionSettings).isNotEmpty()
 
     // Edit Song Dialog — pure UI dialog state is fine here
     EditSongDialog(

@@ -97,6 +97,3 @@ internal fun SettingsCardBadge(text: String, container: Color, content: Color) {
             .padding(horizontal = 9.dp, vertical = 3.dp),
     )
 }
-
-/** Keeps the card content from stretching to an unreadable width on a large display. */
-internal val SettingsCardMaxWidth = 1080.dp
