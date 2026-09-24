@@ -4,10 +4,12 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.CueFeed
 import org.churchpresenter.calendar.FiredCue
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import java.io.File
 import java.nio.file.Files
 import java.time.LocalTime
 import kotlin.test.Test
@@ -21,7 +23,7 @@ class AppPathsTest {
     fun `the run of show can be exported as a pdf`() {
         val target = Files.createTempFile("run-of-show", ".pdf").toFile()
         try {
-            val host = CalendarHost(chooseExportFile = { target }, pdfFont = { null })
+            val host = CalendarHost(chooseExportFile = { _, _ -> target }, pdfFont = { null })
 
             withCalendar(documentWith(service()), host = host) {
                 awaitText("Amazing Grace")
@@ -37,9 +39,37 @@ class AppPathsTest {
     }
 
     @Test
+    fun `the next export opens in the folder the last one went to`() {
+        val exports = Files.createTempDirectory("exports").toFile()
+        val offered = mutableListOf<File?>()
+        try {
+            val host = CalendarHost(
+                chooseExportFile = { _, folder ->
+                    offered += folder
+                    File(exports, "run-${offered.size}.pdf")
+                },
+                pdfFont = { null },
+            )
+
+            withCalendar(documentWith(service()), host = host) { folder ->
+                awaitText("Amazing Grace")
+                clickFirst("Export PDF")
+                waitUntil("the first export was written") { File(exports, "run-1.pdf").length() > 0 }
+                clickFirst("Export PDF")
+                waitUntil("the second export was written") { File(exports, "run-2.pdf").length() > 0 }
+
+                assertEquals(listOf(null, exports), offered, "nothing to go on the first time, then the last folder")
+                assertEquals(exports.path, CalendarStore(folder).load().document.preferences.pdfExport.lastFolder)
+            }
+        } finally {
+            exports.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `an export nobody chose a file for writes nothing`() {
         var asked = false
-        val host = CalendarHost(chooseExportFile = { asked = true; null })
+        val host = CalendarHost(chooseExportFile = { _, _ -> asked = true; null })
 
         withCalendar(documentWith(service()), host = host) {
             awaitText("Amazing Grace")
