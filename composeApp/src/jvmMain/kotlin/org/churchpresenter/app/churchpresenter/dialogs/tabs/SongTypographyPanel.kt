@@ -120,12 +120,13 @@ internal fun SongTypographyPanel(
      * nothing.
      */
     numberInCorner: Boolean = false,
+    blockAlignment: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // Two rows, for the reason the Bible panel's twin is: the colour and the faces, then the
-        // font and its size. All three cells on one flowing row came to more than the pane, so it
-        // wrapped wherever it ran out and stranded the size box away from the font it sizes.
-        SongColorControl(style, onStyleChange)
+        // The colour and the faces, then the font and its size, on one flowing row. The font and its
+        // size are one cell, for the reason the Bible panel's twin is: as two, the row wrapped
+        // wherever it ran out and stranded the size box away from the font it sizes.
+        //
         // Flowing rather than a hard row, for the reason the Bible panel's twin is: these cells are
         // fixed-size, so a row too narrow for them clips the last one instead of shrinking it -- and
         // a clipped control keeps its semantics, so a click aimed at it lands on nothing at all.
@@ -135,30 +136,25 @@ internal fun SongTypographyPanel(
             verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
             itemVerticalAlignment = Alignment.Top,
         ) {
-            SongFontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
-            SongSizeControl(element, style, onStyleChange)
+            SongColorControl(style, onStyleChange, showChordColor = element.hasChordColor)
+            Row(horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP), verticalAlignment = Alignment.Top) {
+                SongFontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
+                SongSizeControl(element, style, onStyleChange)
+            }
         }
-        Row(
+        // Flowing, like the font row above: alignment and the transform share it, which is more
+        // than a narrow column holds, and a clipped last cell is a control nobody can reach.
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP),
-            verticalAlignment = Alignment.Bottom,
+            verticalArrangement = Arrangement.spacedBy(CONTROL_GAP),
+            itemVerticalAlignment = Alignment.Bottom,
         ) {
             // Alignment sits here rather than beside Size: with the Auto box in that row as well,
             // the four cells came to more than the pane and it was clipped off the end.
             SongAlignmentControl(style, onStyleChange)
-            // Chords are drawn over the lyrics and nowhere else, so only the lyrics carry one. The
-            // field and both writers have always been here; this is the control that was missing,
-            // which left the colour settable by nothing and stuck at its default.
-            if (element.hasChordColor) {
-                ControlColumn(stringResource(Res.string.song_chord_color), labelInsideControl = true) {
-                    ColorPickerField(
-                        label = stringResource(Res.string.song_chord_color),
-                        color = style.chordColor,
-                        onColorChange = { onStyleChange(style.copy(chordColor = it)) },
-                        modifier = Modifier.width(COLOR_SWATCH_WIDTH),
-                    )
-                }
-            }
+            blockAlignment?.invoke()
+            SongTransformControl(style, onStyleChange)
             // A cornered number is drawn over the slide and never in the row this control places.
             val cornered = element == SongStyleElement.NUMBER && numberInCorner
             if (element.hasPosition && !onTitleSlide && !cornered) {
@@ -217,10 +213,8 @@ internal fun SongTypographyPanel(
                 )
             }
         }
-        SongTransformControl(style, onStyleChange)
-        // A row of its own. The transform's four segments are 96dp each, so beside them the shadow
-        // cell had nothing left in a narrow column -- the per-output Customize dialog's is 430dp --
-        // and its three fields were crushed to their padding the moment the box was ticked.
+        // A row of its own: beside anything else the shadow cell had nothing left in a narrow
+        // column and its three fields were crushed to their padding the moment the box was ticked.
         SongShadowControl(style, onStyleChange, Modifier.fillMaxWidth())
     }
 }
@@ -229,6 +223,7 @@ internal fun SongTypographyPanel(
 private fun SongColorControl(
     style: SongElementStyle,
     onStyleChange: (SongElementStyle) -> Unit,
+    showChordColor: Boolean,
     modifier: Modifier = Modifier,
 ) = ControlColumn(stringResource(Res.string.color), modifier, labelInsideControl = true) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -238,6 +233,16 @@ private fun SongColorControl(
             onColorChange = { onStyleChange(style.copy(color = it)) },
             modifier = Modifier.width(COLOR_SWATCH_WIDTH),
         )
+        // Chords are drawn over the lyrics and nowhere else, so only the lyrics carry one, beside
+        // the text color it is read against.
+        if (showChordColor) {
+            ColorPickerField(
+                label = stringResource(Res.string.song_chord_color),
+                color = style.chordColor,
+                onColorChange = { onStyleChange(style.copy(chordColor = it)) },
+                modifier = Modifier.width(COLOR_SWATCH_WIDTH),
+            )
+        }
         // The shadow button is off here: shadow has a labelled control of its own below, and two
         // buttons both reading "S" in one row would be indistinguishable.
         TextStyleButtons(

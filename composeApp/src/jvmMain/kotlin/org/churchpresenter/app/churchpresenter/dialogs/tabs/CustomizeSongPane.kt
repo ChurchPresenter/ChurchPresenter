@@ -128,20 +128,29 @@ internal fun SongCustomizePane(
                 availableFonts = fonts,
                 onTitleSlide = titleSlideView,
                 numberInCorner = song.numberCorner(target.isLowerThird) != Constants.NONE,
-            )
-        }
-        // Where the lyric block sits on the slide -- one value for the song rather than one per
-        // element, so it is written straight onto `SongSettings` rather than into a profile. Only
-        // the lyrics carry it: the look-ahead and the next section sit under the line they follow,
-        // and the title slide has its own control above.
-        if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
-            BlockVerticalAlignmentRow(
-                selected = song.lyricsAlignment,
-                onSelect = { v ->
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v)) }
+                // Where the lyric block sits on the slide, beside the horizontal alignment -- one
+                // value for the song rather than one per element, so it is written straight onto
+                // `SongSettings` rather than into a profile. Only the lyrics carry it: the
+                // look-ahead and the next section sit under the line they follow, and the title
+                // slide has its own control above.
+                blockAlignment = if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
+                    {
+                        BlockVerticalAlignmentControl(
+                            selected = song.lyricsAlignment,
+                            onSelect = { v ->
+                                onSettingsChange { s ->
+                                    s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v))
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    null
                 },
             )
-            // How the languages sit against each other, on the same terms as the alignment above:
+        }
+        if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
+            // How the languages sit against each other, on the same terms as the vertical alignment:
             // one value for the song, written straight onto `SongSettings`, and drawn on the lyrics
             // because the lyrics are what carry a second language. One value serves both shapes,
             // exactly as `SongPresenter` reads it -- a vertical band ignores side-by-side and stacks

@@ -26,16 +26,14 @@ import org.jetbrains.compose.resources.stringResource
  * resolves the five grid values and both presenters honour them, so a stack of three or four
  * translations had no way to ask for the shape it needed. It was `BilingualLayoutButtons` in the old
  * Song tab's rail.
+ *
+ * One row, each segment as wide as its own label: at the longest label's width, all seven would each
+ * be as wide as "Left / Right" and run off the pane.
  */
 @Composable
 internal fun BilingualLayoutRow(selected: String, onSelect: (String) -> Unit) {
     CustomizeRow(stringResource(Res.string.customize_bilingual)) {
-        ChoiceControl(
-            options = bilingualLayoutOptions(),
-            selected = selected,
-            maxPerRow = BILINGUAL_LAYOUTS_PER_ROW,
-            onSelect = onSelect,
-        )
+        ChoiceControl(options = bilingualLayoutOptions(), selected = selected, fitEachLabel = true, onSelect = onSelect)
     }
 }
 
@@ -49,6 +47,3 @@ private fun bilingualLayoutOptions(): List<Pair<String, String>> = listOf(
     Constants.BILINGUAL_GRID_4X1 to stringResource(Res.string.bilingual_grid_4x1),
     Constants.BILINGUAL_GRID_2X2 to stringResource(Res.string.bilingual_grid_2x2),
 )
-
-/** Seven segments do not fit the pane's width in one row; four and three reads evenly. */
-private const val BILINGUAL_LAYOUTS_PER_ROW = 4

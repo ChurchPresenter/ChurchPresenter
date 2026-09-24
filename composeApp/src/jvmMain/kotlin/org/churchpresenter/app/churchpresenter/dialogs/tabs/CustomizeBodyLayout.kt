@@ -1,6 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -130,7 +134,7 @@ internal fun CustomizeControls(
  */
 @Composable
 internal fun CustomizePreviewColumn(
-    pane: CustomizePane,
+    pane: CustomizePane?,
     element: CustomizeElement?,
     draft: AppSettings,
     profile: OutputProfile,
@@ -176,7 +180,7 @@ internal fun CustomizePreviewColumn(
         // reached them did, leaving every preview stuck on MEDIUM.
         // Only where there is sample text to lengthen: the caption, subtitle, question and card
         // samples are one fixed piece each.
-        if (!pane.isWholeForm) Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)) {
+        if (pane != null && !pane.isWholeForm) Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)) {
             ChoiceControl(
                 options = listOf(
                     PreviewSampleSlot.SHORT.name to stringResource(Res.string.preview_sample_short),
@@ -205,16 +209,29 @@ internal fun CustomizePreviewColumn(
             contentAlignment = Alignment.Center,
         ) {
             val output = OutputSize(profile.previewWidth, profile.previewHeight)
-            CustomizeStagePanel(
-                pane = pane,
-                element = element,
-                settings = draft,
-                profile = profile,
-                output = output,
-                slot = slot,
-                modifier = Modifier.width(minOf(maxWidth, STAGE_MAX_HEIGHT * output.aspectRatio)),
-            )
+            val stageWidth = Modifier.width(minOf(maxWidth, STAGE_MAX_HEIGHT * output.aspectRatio))
+            // Everything hidden still draws the screen, empty, so the column keeps its place rather
+            // than the editor jumping to fill it.
+            if (pane == null) {
+                Box(
+                    modifier = stageWidth
+                        .aspectRatio(output.aspectRatio)
+                        .background(Color(PREVIEW_BACKGROUND), RoundedCornerShape(6.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
+                )
+            } else {
+                CustomizeStagePanel(
+                    pane = pane,
+                    element = element,
+                    settings = draft,
+                    profile = profile,
+                    output = output,
+                    slot = slot,
+                    modifier = stageWidth,
+                )
+            }
         }
+        if (pane == null) return@Column
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         // Scrolls, and takes what the picture left. These rows come and go with the category and
         // the chip -- Songs on a lyric slide draws five of them, the dictionary one -- so the block
