@@ -20,7 +20,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.settings.AppSettings
@@ -61,6 +61,15 @@ internal fun projectionTab(
     ndiStatus: NdiRuntimeStatus = NdiRuntimeStatus.NotInstalled,
     /** Pinned to the state a packaged app is in, for the same reason. */
     ffmpegStatus: FfmpegStatus = PINNED_FFMPEG,
+    /**
+     * Whether the Audio Output card believes VLC is installed, and what it lists when it is.
+     *
+     * Pinned rather than read, like everything above. The default is "VLC present, no devices",
+     * which is the one state that draws the same picture on a developer's machine and on CI: the
+     * card renders its dropdown, and the dropdown holds nothing but the system default.
+     */
+    vlcInstalled: Boolean = true,
+    audioDevices: List<VlcAudioDevice> = emptyList(),
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -76,6 +85,8 @@ internal fun projectionTab(
                 ndiStatus = { ndiStatus },
                 ndiReceiverCount = { 0 },
                 ffmpegProbe = { ffmpegStatus },
+                vlcProbe = { vlcInstalled },
+                audioDeviceProbe = { audioDevices },
             )
         }
     }
@@ -93,20 +104,28 @@ internal fun withProfiles(vararg names: String = arrayOf("Main", "Foyer")): AppS
 /** The ffmpeg every packaged app has: present, and the copy that shipped with it. */
 internal val PINNED_FFMPEG = FfmpegStatus(available = true, path = "/app/ffmpeg", bundled = true)
 
-/** The label beside the dropdown. Composed only once the probe has answered. */
+/** The label beside the dropdown. Composed only once the device probe has answered. */
 private const val AUDIO_DEVICE_LABEL = "Output device"
 
+/** What the card draws instead when it was told VLC is absent. Composed synchronously. */
+private const val VLC_REQUIRED = "VLC media player is required for media playback"
+
 /**
- * Waits for the audio device dropdown to appear.
+ * Waits for the Audio Output card to settle, whichever of its two states it is headed for.
  *
- * The card asks VLC for its device list on `Dispatchers.IO`, which is why `waitForIdle` does not
- * cover it. This waits on the row's own label -- a positive signal that lands as soon as the probe
- * returns, never on a timeout. Where VLC is absent the card composes a message instead and there is
- * nothing to wait for.
+ * The card runs its device probe on `Dispatchers.IO`, which is why `waitForIdle` does not cover it.
+ * Exactly one of these two ever appears -- the dropdown's label once the probe answers, or the
+ * "VLC required" message -- so waiting for either is a positive signal in both states and never
+ * ends by the timeout expiring.
+ *
+ * It used to short-circuit on `isVlcAvailable`, which read the machine running the suite. That is
+ * the bug this whole seam exists to remove, so the host's VLC is no longer consulted here either.
  */
 internal fun ComposeUiTest.awaitAudioDevices() {
-    if (!isVlcAvailable) return
-    waitUntil { onAllNodesWithText(AUDIO_DEVICE_LABEL).fetchSemanticsNodes(false).isNotEmpty() }
+    waitUntil {
+        onAllNodesWithText(AUDIO_DEVICE_LABEL).fetchSemanticsNodes(false).isNotEmpty() ||
+            onAllNodesWithText(VLC_REQUIRED).fetchSemanticsNodes(false).isNotEmpty()
+    }
 }
 
 // ── Screen fixtures ─────────────────────────────────────────────────────────────────────────────

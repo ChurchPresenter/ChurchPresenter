@@ -104,16 +104,25 @@ class NdiFrameCacheTest {
         val preview = source()
         val output = source().copy(id = "n2", transform = source().transform)
 
-        cache.acquire(preview)
-        cache.acquire(output)
-        waitFor("the shared receiver") { lib.receivers.size == 1 }
+        val previewFlows = cache.acquire(preview)
+        val outputFlows = cache.acquire(output)
+        // Waits for the connection to be *established*, not merely for the receiver to appear in
+        // the fake's map. `openReceiver` registers it there partway through `capture`, before
+        // `open()` has returned and before `connected` is set — so releasing on the map alone
+        // releases a half-open connection, and what happens next depends on the interleaving.
+        // `connected` is the signal that the acquire has finished. (Issue #610.)
+        waitFor("the shared receiver to connect") { previewFlows.connected.value && lib.receivers.size == 1 }
 
         cache.release(preview)
         assertTrue(cache.isConnected(output), "the second layer is still drawing it")
+        assertTrue(outputFlows.connected.value, "and its own flow still says it is connected")
         assertTrue(lib.receiversDestroyed.isEmpty(), "the sender must not see the stream dropped")
 
         cache.release(output)
         waitFor("the connection to close") { lib.receivers.isEmpty() }
+        // Asserted after a positive signal rather than instead of one: the map emptying is the
+        // release landing, and this says the receiver was closed rather than merely forgotten.
+        assertTrue(lib.receiversDestroyed.isNotEmpty(), "the last layer going must close the receiver")
     }
 
     @Test
