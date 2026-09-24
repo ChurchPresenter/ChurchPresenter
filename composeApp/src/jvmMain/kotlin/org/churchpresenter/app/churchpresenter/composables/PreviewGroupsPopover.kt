@@ -146,7 +146,7 @@ fun PreviewGroupsPopover(
 private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     Row(
-        modifier = Modifier.toggleRow(checked, onChange, interaction),
+        modifier = Modifier.toggleRow(checked, onChange, interaction).testTag(tag),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -155,7 +155,7 @@ private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (B
             checked = checked,
             onCheckedChange = null,
             interactionSource = interaction,
-            modifier = Modifier.minimumInteractiveComponentSize().testTag(tag),
+            modifier = Modifier.minimumInteractiveComponentSize(),
         )
     }
 }
