@@ -1,5 +1,8 @@
 package org.churchpresenter.theme.components
 
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,11 +12,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.theme.HOVER_TINT_ALPHA
 import org.churchpresenter.theme.elevationPalette
 
 /**
@@ -47,10 +54,18 @@ fun SunkenOutlinedTextField(
     colors: TextFieldColors? = null,
 ) {
     val palette = elevationPalette()
+    val hover = remember { MutableInteractionSource() }
+    val hovered by hover.collectIsHoveredAsState()
+    // The container is drawn over anything behind the field, so the hover tint goes into its color.
+    val well = if (hovered) {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_TINT_ALPHA).compositeOver(palette.wellBottom)
+    } else {
+        palette.wellBottom
+    }
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier.hoverable(hover),
         enabled = enabled,
         readOnly = readOnly,
         textStyle = textStyle,
@@ -70,8 +85,8 @@ fun SunkenOutlinedTextField(
         minLines = minLines,
         shape = shape,
         colors = colors ?: OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = palette.wellBottom,
-            unfocusedContainerColor = palette.wellBottom,
+            focusedContainerColor = well,
+            unfocusedContainerColor = well,
             disabledContainerColor = palette.wellBottom,
             unfocusedBorderColor = palette.wellBorder,
             focusedBorderColor = MaterialTheme.colorScheme.primary,

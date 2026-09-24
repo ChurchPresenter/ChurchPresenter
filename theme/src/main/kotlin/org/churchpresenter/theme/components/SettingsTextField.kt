@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.ElevationPalette
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 private val FieldShape = RoundedCornerShape(8.dp)
@@ -146,6 +147,7 @@ private fun LabelledField(
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(IntrinsicSize.Max))
             .then(if (o.singleLine) Modifier.height(42.dp) else Modifier.heightIn(min = 42.dp))
             .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor)
+            .hoverTint(FieldShape)
             .padding(horizontal = 9.dp, vertical = 4.dp)
     ) {
         Text(
@@ -204,7 +206,8 @@ private fun PlainField(value: String, onValueChange: (String) -> Unit, chrome: F
         modifier = Modifier
             .fillMaxWidth()
             .then(if (o.singleLine) Modifier.height(28.dp) else Modifier.padding(vertical = 5.dp))
-            .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor),
+            .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor)
+            .hoverTint(FieldShape),
         enabled = o.input.enabled,
         readOnly = o.input.readOnly,
         singleLine = o.singleLine,

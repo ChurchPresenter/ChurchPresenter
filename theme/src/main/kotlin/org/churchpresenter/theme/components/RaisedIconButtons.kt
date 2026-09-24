@@ -137,7 +137,7 @@ fun RaisedIconButton(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val ink = colors.contentColor
+        val ink = if (enabled) colors.contentColor else colors.disabledContentColor
         CompositionLocalProvider(LocalContentColor provides ink, content = content)
     }
 }

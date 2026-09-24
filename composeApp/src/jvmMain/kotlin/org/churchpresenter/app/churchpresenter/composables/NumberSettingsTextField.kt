@@ -43,6 +43,7 @@ import churchpresenter.composeapp.generated.resources.increment
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 @Composable
@@ -63,7 +64,8 @@ fun NumberSettingsTextField(
                 RoundedCornerShape(8.dp),
                 elevationPalette(),
                 rim = if (isError) MaterialTheme.colorScheme.error else Color.Unspecified
-            ),
+            )
+            .hoverTint(RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(

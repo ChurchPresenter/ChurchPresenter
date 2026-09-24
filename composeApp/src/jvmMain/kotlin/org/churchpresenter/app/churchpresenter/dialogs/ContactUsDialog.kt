@@ -62,6 +62,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 private const val SENT_CONFIRMATION_MS = 1500L
@@ -291,6 +292,7 @@ internal fun ContactUsDialogContent(
                                 .fillMaxWidth()
                                 .height(140.dp)
                                 .sunken(RoundedCornerShape(6.dp), elevationPalette())
+                                .hoverTint(RoundedCornerShape(6.dp))
                                 .padding(horizontal = 9.dp, vertical = 7.dp),
                             textStyle = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 12.sp,

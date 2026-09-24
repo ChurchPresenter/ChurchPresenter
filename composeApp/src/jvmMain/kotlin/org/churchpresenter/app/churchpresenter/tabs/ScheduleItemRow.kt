@@ -81,6 +81,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemPaletteIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
@@ -607,7 +608,8 @@ private fun ScheduleRowNoteEditor(
                 RoundedCornerShape(7.dp),
                 elevationPalette(),
                 rim = if (noteFieldFocused) MaterialTheme.colorScheme.primary else Color.Unspecified
-            ),
+            )
+            .hoverTint(RoundedCornerShape(7.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         BasicTextField(

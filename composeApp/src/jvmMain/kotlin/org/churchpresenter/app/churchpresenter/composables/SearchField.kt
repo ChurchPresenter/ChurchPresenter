@@ -25,6 +25,7 @@ import churchpresenter.composeapp.generated.resources.search_clear
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 /**
@@ -53,7 +54,8 @@ fun SearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

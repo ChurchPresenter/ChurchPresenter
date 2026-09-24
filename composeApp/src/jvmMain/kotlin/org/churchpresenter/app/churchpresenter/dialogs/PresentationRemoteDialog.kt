@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -170,19 +173,27 @@ internal fun PresentationRemoteDialogContent(
 
                 Spacer(Modifier.height(12.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                val remoteEnabled = settings.presentationRemoteSettings.remoteControlEnabled
+                val setRemoteEnabled: (Boolean) -> Unit = { enabled ->
+                    onSettingsChange { s ->
+                        s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled))
+                    }
+                }
+                val remoteInteraction = remember { MutableInteractionSource() }
+                Row(
+                    modifier = Modifier.fillMaxWidth().toggleRow(remoteEnabled, setRemoteEnabled, remoteInteraction),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         stringResource(Res.string.presentation_remote_enable),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
                     RaisedSwitch(
-                        checked = settings.presentationRemoteSettings.remoteControlEnabled,
-                        onCheckedChange = { enabled ->
-                            onSettingsChange { s ->
-                                s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled))
-                            }
-                        }
+                        checked = remoteEnabled,
+                        onCheckedChange = null,
+                        interactionSource = remoteInteraction,
+                        modifier = Modifier.minimumInteractiveComponentSize(),
                     )
                 }
 

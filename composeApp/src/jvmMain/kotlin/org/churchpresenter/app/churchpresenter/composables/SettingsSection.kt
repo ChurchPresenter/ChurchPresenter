@@ -29,6 +29,11 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.theme.components.RaisedSwitch
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.interaction.MutableInteractionSource
 
 @Composable
 fun SettingsSection(
@@ -136,6 +141,46 @@ fun SettingRow(
         )
         Box(modifier = Modifier.weight(1f)) {
             content()
+        }
+    }
+}
+
+/**
+ * A [SettingRow] whose content is one switch: the label and the switch are a single toggle, so a
+ * click on the label flips it and hovering the label lights the switch.
+ */
+@Composable
+fun SettingSwitchRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    width: Dp = 120.dp,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            modifier = Modifier.toggleRow(checked, onCheckedChange, interaction),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.width(width)
+            )
+            RaisedSwitch(
+                checked = checked,
+                onCheckedChange = null,
+                interactionSource = interaction,
+                modifier = Modifier.minimumInteractiveComponentSize(),
+            )
         }
     }
 }

@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -140,9 +144,19 @@ fun PreviewGroupsPopover(
 
 @Composable
 private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    val interaction = remember { MutableInteractionSource() }
+    Row(
+        modifier = Modifier.toggleRow(checked, onChange, interaction),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        RaisedSwitch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag))
+        RaisedSwitch(
+            checked = checked,
+            onCheckedChange = null,
+            interactionSource = interaction,
+            modifier = Modifier.minimumInteractiveComponentSize().testTag(tag),
+        )
     }
 }
 

@@ -17,7 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
-import org.churchpresenter.theme.components.RaisedCheckbox
+import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
@@ -457,8 +457,13 @@ private fun CompanionPlacementBlock(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        RaisedCheckbox(checked = checked, onCheckedChange = onCheckedChange)
-        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.width(100.dp))
+        LabeledCheckbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            label = label,
+            modifier = Modifier.width(156.dp),
+            spacing = 8.dp,
+        )
         if (checked) {
             SettingsTextField(
                 value = rowsText,

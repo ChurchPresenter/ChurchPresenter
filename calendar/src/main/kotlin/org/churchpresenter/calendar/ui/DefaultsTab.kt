@@ -1,5 +1,8 @@
 package org.churchpresenter.calendar.ui
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.runtime.Composable
@@ -100,14 +103,23 @@ internal fun DefaultsTab(
         isValid = { parseDuration(it) != null },
         onCommit = { parseDuration(it)?.let { secs -> onChange(preferences.copy(defaultSermonSeconds = secs)) } },
     )
-    SettingCard {
+    val autoLoadInteraction = remember { MutableInteractionSource() }
+    SettingCard(
+        modifier = Modifier.toggleRow(
+            checked = preferences.autoLoadService,
+            onCheckedChange = { onChange(preferences.copy(autoLoadService = it)) },
+            interaction = autoLoadInteraction,
+        ),
+    ) {
         CardText(
             title = stringResource(Res.string.calendar_auto_load),
             subtitle = stringResource(Res.string.calendar_auto_load_sub),
         )
         RaisedSwitch(
             checked = preferences.autoLoadService,
-            onCheckedChange = { onChange(preferences.copy(autoLoadService = it)) },
+            onCheckedChange = null,
+            interactionSource = autoLoadInteraction,
+            modifier = Modifier.minimumInteractiveComponentSize(),
         )
     }
     // Only while it is on: a lead for a thing that does not happen is a control with nothing to
@@ -126,12 +138,19 @@ internal fun DefaultsTab(
         )
     }
     if (cloudSync != null) {
-        SettingCard {
+        val syncInteraction = remember { MutableInteractionSource() }
+        val syncOn = cloudSync.enabled()
+        SettingCard(modifier = Modifier.toggleRow(syncOn, cloudSync.setEnabled, syncInteraction)) {
             CardText(
                 title = stringResource(Res.string.calendar_cloud_sync),
                 subtitle = stringResource(Res.string.calendar_cloud_sync_sub),
             )
-            RaisedSwitch(checked = cloudSync.enabled(), onCheckedChange = cloudSync.setEnabled)
+            RaisedSwitch(
+                checked = syncOn,
+                onCheckedChange = null,
+                interactionSource = syncInteraction,
+                modifier = Modifier.minimumInteractiveComponentSize(),
+            )
         }
     }
 }

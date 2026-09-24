@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +37,7 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingSwitchRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -73,12 +73,11 @@ fun DictionarySettingsTab(
             ) {
             // Word section
             SettingsSection(title = stringResource(Res.string.dictionary_settings_word_text)) {
-                SettingRow(label = stringResource(Res.string.show)) {
-                    RaisedSwitch(
-                        checked = ds.showWord,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
-                    )
-                }
+                SettingSwitchRow(
+                    label = stringResource(Res.string.show),
+                    checked = ds.showWord,
+                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
@@ -148,12 +147,11 @@ fun DictionarySettingsTab(
 
             // Definition section
             SettingsSection(title = stringResource(Res.string.dictionary_settings_definition_text)) {
-                SettingRow(label = stringResource(Res.string.show)) {
-                    RaisedSwitch(
-                        checked = ds.showDefinition,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
-                    )
-                }
+                SettingSwitchRow(
+                    label = stringResource(Res.string.show),
+                    checked = ds.showDefinition,
+                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
@@ -207,12 +205,11 @@ fun DictionarySettingsTab(
             ) {
                 // Reference & Transliteration
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_reference_text)) {
-                    SettingRow(label = stringResource(Res.string.show)) {
-                        RaisedSwitch(
-                            checked = ds.showReference,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
-                        )
-                    }
+                    SettingSwitchRow(
+                        label = stringResource(Res.string.show),
+                        checked = ds.showReference,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
@@ -285,12 +282,11 @@ fun DictionarySettingsTab(
 
                 // KJV Usage
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_kjv_usage)) {
-                    SettingRow(label = stringResource(Res.string.show)) {
-                        RaisedSwitch(
-                            checked = ds.showKjvUsage,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
-                        )
-                    }
+                    SettingSwitchRow(
+                        label = stringResource(Res.string.show),
+                        checked = ds.showKjvUsage,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
@@ -314,18 +310,16 @@ fun DictionarySettingsTab(
 
                 // Transitions
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_transitions)) {
-                    SettingRow(label = stringResource(Res.string.fade_in)) {
-                        RaisedSwitch(
-                            checked = ds.fadeIn,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }
-                        )
-                    }
-                    SettingRow(label = stringResource(Res.string.fade_out)) {
-                        RaisedSwitch(
-                            checked = ds.fadeOut,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }
-                        )
-                    }
+                    SettingSwitchRow(
+                        label = stringResource(Res.string.fade_in),
+                        checked = ds.fadeIn,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }
+                    )
+                    SettingSwitchRow(
+                        label = stringResource(Res.string.fade_out),
+                        checked = ds.fadeOut,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }
+                    )
 
                     SettingRow(stringResource(Res.string.transition_duration).removeSuffix(":")) {
                         Row(

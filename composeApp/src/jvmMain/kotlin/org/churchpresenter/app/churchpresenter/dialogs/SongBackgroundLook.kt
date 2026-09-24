@@ -53,6 +53,7 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 @Composable
@@ -190,6 +191,7 @@ private fun YourColor(background: SongBackground, onChange: (SongBackground) -> 
         Row(
             modifier = Modifier.fillMaxWidth().height(27.dp)
                 .sunken(RoundedCornerShape(7.dp), elevationPalette())
+                .hoverTint(RoundedCornerShape(7.dp))
                 .padding(start = 8.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),

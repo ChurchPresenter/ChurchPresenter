@@ -83,6 +83,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.foundation.layout.width
 import java.awt.Cursor
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 @Composable
@@ -220,7 +221,8 @@ internal fun BibleSearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -129,6 +132,7 @@ import churchpresenter.composeapp.generated.resources.server_host_label
 import churchpresenter.composeapp.generated.resources.server_host_note
 import churchpresenter.composeapp.generated.resources.server_url_label
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingSwitchRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -334,12 +338,24 @@ private fun ServerEnableRow(isRunning: Boolean, onEnable: (Boolean) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = stringResource(Res.string.enable_server),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        RaisedSwitch(checked = isRunning, onCheckedChange = onEnable)
+        val interaction = remember { MutableInteractionSource() }
+        Row(
+            modifier = Modifier.toggleRow(isRunning, onEnable, interaction),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.enable_server),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            RaisedSwitch(
+                checked = isRunning,
+                onCheckedChange = null,
+                interactionSource = interaction,
+                modifier = Modifier.minimumInteractiveComponentSize(),
+            )
+        }
         Text(
             text = if (isRunning) stringResource(Res.string.server_running)
                    else stringResource(Res.string.server_stopped),
@@ -465,16 +481,15 @@ private fun ApiKeySection(
     copyText: (String) -> Unit,
 ) {
     // ── API Key protection toggle ─────────────────────────────────
-    SettingRow(label = stringResource(Res.string.api_key_protection)) {
-        RaisedSwitch(
-            checked = settings.serverSettings.apiKeyEnabled,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s ->
-                    s.copy(serverSettings = s.serverSettings.copy(apiKeyEnabled = enabled))
-                }
+    SettingSwitchRow(
+        label = stringResource(Res.string.api_key_protection),
+        checked = settings.serverSettings.apiKeyEnabled,
+        onCheckedChange = { enabled ->
+            onSettingsChange { s ->
+                s.copy(serverSettings = s.serverSettings.copy(apiKeyEnabled = enabled))
             }
-        )
-    }
+        }
+    )
     Text(
         text = stringResource(Res.string.browser_source_note_in_server_settings),
         style = MaterialTheme.typography.labelSmall,
@@ -524,16 +539,15 @@ private fun ApiKeySection(
 @Composable
 private fun FileUploadSection(settings: AppSettings, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
     // ── Allow File Upload toggle ──────────────────────────────────
-    SettingRow(label = stringResource(Res.string.allow_file_upload)) {
-        RaisedSwitch(
-            checked = settings.serverSettings.fileUploadEnabled,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s ->
-                    s.copy(serverSettings = s.serverSettings.copy(fileUploadEnabled = enabled))
-                }
+    SettingSwitchRow(
+        label = stringResource(Res.string.allow_file_upload),
+        checked = settings.serverSettings.fileUploadEnabled,
+        onCheckedChange = { enabled ->
+            onSettingsChange { s ->
+                s.copy(serverSettings = s.serverSettings.copy(fileUploadEnabled = enabled))
             }
-        )
-    }
+        }
+    )
     Text(
         text = stringResource(Res.string.allow_file_upload_description),
         style = MaterialTheme.typography.bodySmall,

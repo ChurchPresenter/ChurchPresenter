@@ -143,6 +143,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 
 private const val SORT_BY_VOTES = 3
@@ -427,7 +428,8 @@ fun QATab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette()),
+                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                            .hoverTint(RoundedCornerShape(8.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -976,6 +978,7 @@ private fun QuestionRow(
                     .fillMaxWidth()
                     .padding(start = 50.dp, top = 4.dp)
                     .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                    .hoverTint(RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 BasicTextField(

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import kotlin.math.roundToInt
 
@@ -71,6 +72,7 @@ fun ColorPickerField(
             .heightIn(min = 42.dp)
             // The same sunken well as every field it sits beside in a settings form.
             .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .hoverTint(RoundedCornerShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
         verticalArrangement = Arrangement.Center

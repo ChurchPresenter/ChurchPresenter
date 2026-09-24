@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -125,16 +128,20 @@ internal fun CalendarSyncCardContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         HorizontalDivider()
+        val setEnabled: (Boolean) -> Unit = { on ->
+            onSettingsChange { it.copy(calendarSync = it.calendarSync.copy(enabled = on)) }
+        }
+        val interaction = remember { MutableInteractionSource() }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().toggleRow(current.enabled, setEnabled, interaction),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             RaisedSwitch(
                 checked = current.enabled,
-                onCheckedChange = { on ->
-                    onSettingsChange { it.copy(calendarSync = it.calendarSync.copy(enabled = on)) }
-                },
+                onCheckedChange = null,
+                interactionSource = interaction,
+                modifier = Modifier.minimumInteractiveComponentSize(),
             )
             Text(stringResource(Res.string.calendar_sync_enable), style = MaterialTheme.typography.bodyMedium)
         }

@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
@@ -315,6 +316,29 @@ fun Modifier.hoverOutline(shape: Shape): Modifier = composed {
 private const val HOVER_RIM_ALPHA = 0.55f
 
 /**
+ * Material's hover state layer over a sunken field -- the tint a plain `clickable` gives the
+ * Pictures and Presentation interval boxes -- for fields whose click has no indication or that are
+ * text inputs. Goes after [sunken], so it lies over the well and under the text.
+ */
+fun Modifier.hoverTint(shape: Shape): Modifier = composed {
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val tint = MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_TINT_ALPHA)
+    this
+        .hoverable(interaction)
+        .then(
+            if (hovered) {
+                Modifier.drawBehind { drawOutline(shape.createOutline(size, layoutDirection, this), tint) }
+            } else {
+                Modifier
+            }
+        )
+}
+
+/** How strong the hover state layer over a field is: Material's hovered state-layer opacity. */
+const val HOVER_TINT_ALPHA = 0.08f
+
+/**
  * [raised], tracking the pointer itself: for a hand-built button whose click handler does not share
  * an interaction source, so it still lifts under the pointer like every other button.
  */
@@ -340,5 +364,6 @@ fun Modifier.dropdownField(shape: Shape, open: Boolean = false): Modifier = comp
     val palette = elevationPalette()
     this
         .sunken(shape, palette, rim = if (open) MaterialTheme.colorScheme.primary else Color.Unspecified)
+        .hoverTint(shape)
         .hoverOutline(shape)
 }

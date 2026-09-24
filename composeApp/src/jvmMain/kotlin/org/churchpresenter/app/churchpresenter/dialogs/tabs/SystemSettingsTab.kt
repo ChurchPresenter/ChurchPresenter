@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.theme.components.toggleRow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -161,8 +164,12 @@ private fun GeneralToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 11.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleRow(checked, onCheckedChange, interaction)
+            .padding(vertical = 11.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -181,7 +188,12 @@ private fun GeneralToggleRow(
                 )
             }
         }
-        RaisedSwitch(checked = checked, onCheckedChange = onCheckedChange)
+        RaisedSwitch(
+            checked = checked,
+            onCheckedChange = null,
+            interactionSource = interaction,
+            modifier = Modifier.minimumInteractiveComponentSize(),
+        )
     }
 }
 
