@@ -7,10 +7,12 @@ import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.decodeFromString
 import org.churchpresenter.settings.AppSettings.Companion.CURRENT_SETTINGS_VERSION
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.bilingualGrid
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -23,6 +25,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import kotlinx.serialization.json.jsonPrimitive
 
 /** The key the band height is stored under, in all three of its homes. */
@@ -30,8 +34,21 @@ private const val LOWER_THIRD_HEIGHT_KEY = "lowerThirdHeightPercent"
 
 private const val VERSION_HIDDEN_TABS = 5
 
+/** The preview shape a profile migrated from the old vertical lower-third mode is given. */
+private const val PORTRAIT_PREVIEW_WIDTH = 1080
+private const val PORTRAIT_PREVIEW_HEIGHT = 1920
+
+/** How many translations the old lower-third band drew when its grid had two cells or fewer. */
+private const val LEGACY_BAND_TRANSLATIONS = 2
+
 /** The Schedule toolbar gained a Calendar button that starts hidden. */
 private const val VERSION_CALENDAR_BUTTON = 11
+
+/** A quick-tray tile's lower-third half may inherit the output's band — see [SettingsManager]. */
+private const val VERSION_QUICK_BACKGROUND_INHERITS = 17
+
+/** What the tray's old constructor seeded both halves of a tile with: opaque black, nothing else. */
+private val SEEDED_BLACK = SongBackground(type = SongBackgroundType.COLOR, color = "#000000")
 
 /** The three placement-field prefixes used throughout companionSatelliteConnections[] entries
  * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
@@ -106,8 +123,15 @@ class SettingsManager {
         8 to ::migrateLowerThirdHeight,
         9 to ::migrateSongNumberCorner,
         10 to ::migrateSparseOutputOverrides,
+        // Also version 12, and before the profiles are made: they are copies of these two sections,
+        // so they must be copies of what the outputs were actually drawing.
+        12 to ::migrateRepairedSongAndBible,
         12 to ::migrateOutputProfiles,
-        13 to ::migrateDictionaryToGlobal,
+        // Also version 12, after the profiles exist, so theirs are rewritten along with the document's.
+        12 to ::migrateBibleArrangementAsDrawn,
+        // Version 13 lifted a profile's dictionary styling onto the document while the dictionary was
+        // briefly one per install. Profiles own it again, so the step is gone: all it could still do
+        // is overwrite the document's copy with one screen's.
         14 to ::migrateStylingIntoProfiles,
         15 to ::migrateScaleModesIntoProfiles,
         16 to ::migrateTitleSlideNumberStyle,
@@ -246,30 +270,6 @@ class SettingsManager {
         return JsonObject(root + ("projectionSettings" to newProjection)).toString()
     }
 
-    /**
-     * Lifts a profile's own dictionary styling back onto the document, which now owns it alone.
-     *
-     * The dictionary's look moved out of [OutputProfile] and off the settings dialog entirely: it
-     * is edited from the gear on the Dictionary tab now, the way the STT tab has always styled
-     * itself, and there is one of it per install rather than one per output. A document written
-     * while profiles still carried their own would otherwise lose that styling silently on the next
-     * load -- the field is gone from the type, so the decoder simply drops the key.
-     *
-     * The first profile that differs from the document wins. There is no merging to be done between
-     * several: they are alternatives, and the document's own copy is what every output that never
-     * customized it was already showing.
-     */
-    private fun migrateDictionaryToGlobal(raw: String): String {
-        val root = parseSettingsRoot(raw) ?: return raw
-        val profiles = root["projectionSettings"]?.jsonObject?.get("outputProfiles")?.jsonArray ?: return raw
-        val documentCopy = root["dictionarySettings"]?.jsonObject
-        val lifted = profiles
-            .mapNotNull { (it as? JsonObject)?.get("dictionarySettings") as? JsonObject }
-            .firstOrNull { it != documentCopy }
-            ?: return raw
-        return JsonObject(root + ("dictionarySettings" to lifted)).toString()
-    }
-
     fun loadSettings(): AppSettings {
         cachedSettings?.let { return it }
         pruneBackupsOnce()
@@ -336,6 +336,9 @@ class SettingsManager {
             // a button nobody asked for.
             settings = settings.copy(hiddenScheduleButtons = settings.hiddenScheduleButtons + "CALENDAR")
         }
+        if (fromVersion < VERSION_QUICK_BACKGROUND_INHERITS) {
+            settings = migrateQuickBackgroundLowerThird(settings)
+        }
         // The primary/secondary-bible output shorthand ("primary"/"secondary" bibleMode, converted
         // to a position in the stack) used to be migrated here as a typed, per-[ScreenAssignment]
         // step gated on `fromVersion < 6`. An output no longer carries `bibleMode` at all -- that
@@ -365,7 +368,70 @@ class SettingsManager {
         copy(
             bibleSettings = bibleSettings.migrateTranslations(),
             songSettings = songSettings.migrateSongNumberStyle().migrateElementPositions(),
+            projectionSettings = projectionSettings.copy(
+                outputProfiles = projectionSettings.outputProfiles.map(::repairedProfile),
+            ),
         )
+
+    /**
+     * The invariants [repaired] keeps on the document, kept on one profile's copy too -- an output
+     * draws from its profile, so a title position the document has had fixed but a profile has not
+     * is a title missing from that screen.
+     *
+     * Not [migrateSongNumberStyle]: that is a one-time carry of the title's look onto a number that
+     * predates having its own, and [migrateRepairedSongAndBible] has already done it to the document
+     * every profile was copied from. Run again here it would read a profile's own title styling as
+     * that same old state and restyle a number the operator left plain.
+     */
+    private fun repairedProfile(profile: OutputProfile): OutputProfile =
+        profile.copy(
+            bibleSettings = profile.bibleSettings.migrateTranslations(),
+            songSettings = profile.songSettings.migrateElementPositions(),
+        )
+
+    /**
+     * Schema version 12, first half. Writes [repaired]'s song and Bible fixes into the stored
+     * document, so the profiles [migrateOutputProfiles] copies from it -- and the title-slide number
+     * version 16 seeds from its song-number fields -- start from what the outputs actually drew.
+     *
+     * [repaired] only ever ran on the decoded document; before profiles that was enough, because
+     * every output drew from the document. Copied raw, a profile would keep a title position the
+     * presenter cannot place (so the title vanishes) and a song number that no longer inherits the
+     * title's look.
+     *
+     * Only the keys the repair actually changes are written back, so the legacy keys later steps
+     * still read are left exactly where they are.
+     */
+    private fun migrateRepairedSongAndBible(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val song = root["songSettings"] as? JsonObject
+        val bible = root["bibleSettings"] as? JsonObject
+        var updated = root
+        if (song != null) {
+            updated = JsonObject(
+                updated + ("songSettings" to repairedSection(song, SongSettings.serializer()) {
+                    it.migrateSongNumberStyle().migrateElementPositions()
+                }),
+            )
+        }
+        if (bible != null) {
+            updated = JsonObject(
+                updated + ("bibleSettings" to repairedSection(bible, BibleSettings.serializer()) {
+                    it.migrateTranslations()
+                }),
+            )
+        }
+        return updated.toString()
+    }
+
+    /** [section] with only the fields [repair] changes rewritten, every other key left as stored. */
+    private fun <T> repairedSection(section: JsonObject, serializer: KSerializer<T>, repair: (T) -> T): JsonObject {
+        val decoded = jsonFormat.decodeFromJsonElement(serializer, section)
+        val before = jsonFormat.encodeToJsonElement(serializer, decoded).jsonObject
+        val after = jsonFormat.encodeToJsonElement(serializer, repair(decoded)).jsonObject
+        val changed = after.filter { (key, value) -> before[key] != value }
+        return if (changed.isEmpty()) section else JsonObject(section + changed)
+    }
 
     /** Reads the document's schema version without decoding it; absent or unparseable means 0
      * (pre-versioning), which runs the full migration chain — the pre-versioning behaviour. */
@@ -446,6 +512,35 @@ class SettingsManager {
             result = result.copy(hiddenTabs = result.hiddenTabs + "STT")
         }
         return result
+    }
+
+    /**
+     * Schema version 17. A quick-tray tile's lower-third half goes back to inheriting the output's
+     * band, where the tray's old constructor had seeded it opaque black.
+     *
+     * The fix that let a tile's band inherit changed the constructor and said so plainly: *"tiles
+     * already saved keep whatever they hold."* They do, and that is the whole of the report that
+     * followed it — every tile an operator had made before the update still carried a black band, so
+     * picking one still painted every lower third solid black, a keyed transparent one included.
+     * A fix to a constructor cannot reach data that is already on disk.
+     *
+     * **Only the seeded value is reset.** The editor of the day offered no Inherit switch on that
+     * half, so a tile holding exactly what the constructor produced -- an opaque black colour and
+     * nothing else -- is one nobody chose. Anything else is a choice and is left alone: a tile whose
+     * band is a picture, a gradient, a dimmed black or any other colour comes through untouched.
+     * A black band that *was* wanted is two clicks to set again, now that the switch exists.
+     */
+    private fun migrateQuickBackgroundLowerThird(settings: AppSettings): AppSettings {
+        if (settings.quickBackgrounds.none { it.lowerThirdBackground == SEEDED_BLACK }) return settings
+        return settings.copy(
+            quickBackgrounds = settings.quickBackgrounds.map { tile ->
+                if (tile.lowerThirdBackground == SEEDED_BLACK) {
+                    tile.copy(lowerThirdBackground = SongBackground())
+                } else {
+                    tile
+                }
+            },
+        )
     }
 
     /** One screen assignment with showBible/showSongs turned into modes, or null if untouched. */
@@ -795,9 +890,7 @@ class SettingsManager {
         "bibleOverride" to "bibleSettings",
         "backgroundOverride" to "backgroundSettings",
         "stageMonitorOverride" to "stageMonitorSettings",
-        // No `dictionaryOverride`: a profile has no dictionary styling to carry any more, so an old
-        // per-output dictionary customization has nowhere to land. The document's own copy is what
-        // every output that never customized it already showed, and is now what all of them show.
+        "dictionaryOverride" to "dictionarySettings",
     )
 
     /** What used to live directly on an assignment and now lives on its profile instead. */
@@ -836,16 +929,125 @@ class SettingsManager {
         return buildJsonObject {
             put("id", JsonPrimitive(id))
             put("name", JsonPrimitive("Migrated — $label"))
-            outputProfileOwnKeys.forEach { key ->
-                (normalizedBibleFields[key] ?: assignment[key])?.let { put(key, it) }
-            }
-            outputProfileOverrideCategories.forEach { (overrideKey, globalKey) ->
+            val resolved = outputProfileOverrideCategories.associate { (overrideKey, globalKey) ->
                 val override = assignment[overrideKey] as? JsonObject
                 val global = globalTree(globalKey)
-                val resolved = if (override != null && override.isNotEmpty()) mergeObjects(global, override) else global
-                put(globalKey, resolved)
+                globalKey to if (override != null && override.isNotEmpty()) mergeObjects(global, override) else global
+            }
+            val bandTranslations = bandDrawnTranslations(
+                assignment + normalizedBibleFields,
+                resolved.getValue("bibleSettings"),
+                bibleStackSize(globalTree("bibleSettings")),
+            )
+            outputProfileOwnKeys.forEach { key ->
+                val value = if (key == "bibleTranslations" && bandTranslations != null) {
+                    JsonArray(bandTranslations.map { JsonPrimitive(it) })
+                } else {
+                    normalizedBibleFields[key] ?: assignment[key]
+                }
+                value?.let { put(key, it) }
+            }
+            resolved.forEach { (globalKey, tree) -> put(globalKey, tree) }
+            // A profile's background copy is only drawn for the surfaces it names as overridden;
+            // every other one follows the Background tab. So the surfaces the old override touched
+            // are named, and exactly those keep drawing the screen's own.
+            val backgroundKeys = (assignment["backgroundOverride"] as? JsonObject)?.keys.orEmpty()
+            val overridden = BackgroundSurface.entries.filter { surface ->
+                surface.fieldKeys.any { it in backgroundKeys }
+            }
+            if (overridden.isNotEmpty()) {
+                put("backgroundOverrides", JsonArray(overridden.map { JsonPrimitive(it.name) }))
+            }
+            // Vertical is read off the profile's shape now, not its mode. A document still carrying
+            // the old mode is given a portrait shape so its band keeps stacking.
+            val displayMode = (assignment["displayMode"] as? JsonPrimitive)?.contentOrNull
+            if (displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL) {
+                put("previewWidth", JsonPrimitive(PORTRAIT_PREVIEW_WIDTH))
+                put("previewHeight", JsonPrimitive(PORTRAIT_PREVIEW_HEIGHT))
             }
         }
+    }
+
+    /**
+     * Schema version 12, last. A full-screen Bible arrangement that is a grid becomes top/bottom,
+     * which is what it drew.
+     *
+     * The full screen read `bilingualLayout` as "side by side or not" until profiles, so 2x2, 1x3,
+     * 3x1, 1x4 and 4x1 all drew as a plain stack. It honours the grid now; an install upgraded as it
+     * stood would see its scripture rearranged. The lower third's own arrangement is left alone -- the
+     * band already drew its grids.
+     */
+    private fun migrateBibleArrangementAsDrawn(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        fun asDrawn(bible: JsonObject): JsonObject {
+            val layout = (bible["bilingualLayout"] as? JsonPrimitive)?.contentOrNull
+            if (layout !in fullScreenGridLayouts) return bible
+            return JsonObject(bible + ("bilingualLayout" to JsonPrimitive(Constants.BILINGUAL_TOP_BOTTOM)))
+        }
+        var updated = root
+        (root["bibleSettings"] as? JsonObject)?.let { updated = JsonObject(updated + ("bibleSettings" to asDrawn(it))) }
+        val projection = root["projectionSettings"] as? JsonObject
+        val profiles = projection?.get("outputProfiles") as? JsonArray
+        if (projection != null && profiles != null) {
+            val rewritten = profiles.map { element ->
+                val profile = element as? JsonObject ?: return@map element
+                val bible = profile["bibleSettings"] as? JsonObject ?: return@map element
+                JsonObject(profile + ("bibleSettings" to asDrawn(bible)))
+            }
+            updated = JsonObject(
+                updated + ("projectionSettings" to JsonObject(projection + ("outputProfiles" to JsonArray(rewritten)))),
+            )
+        }
+        return updated.toString()
+    }
+
+    private val fullScreenGridLayouts = setOf(
+        Constants.BILINGUAL_GRID_2X2, Constants.BILINGUAL_GRID_1X3, Constants.BILINGUAL_GRID_3X1,
+        Constants.BILINGUAL_GRID_1X4, Constants.BILINGUAL_GRID_4X1,
+    )
+
+    /** How many translations the stored Bible stack holds -- the legacy pair counts when the list is empty. */
+    private fun bibleStackSize(bible: JsonObject): Int {
+        val list = (bible["translations"] as? JsonArray)?.size ?: 0
+        if (list > 0) return list
+        return listOf("primaryBible", "secondaryBible").count {
+            (bible[it] as? JsonPrimitive)?.contentOrNull?.isNotBlank() == true
+        }
+    }
+
+    /**
+     * The translations a lower-third output's band actually drew before profiles, when that is fewer
+     * than it was set to show -- or null when it drew them all.
+     *
+     * The old band laid its translations out in `bilingualLayoutLowerThird`'s grid only when that grid
+     * had more than two cells (and was not a vertical strip), up to [Constants.MAX_BIBLE_TRANSLATIONS];
+     * every other band was the two-translation layout, and drew the first two. Anything past that was
+     * dropped without a word. The band draws every visible translation now, so an output upgraded as
+     * it stood would suddenly show three or four where it showed two. Pinning the profile to the ones
+     * it drew keeps the screen as it was.
+     */
+    private fun bandDrawnTranslations(
+        assignment: Map<String, JsonElement>,
+        bible: JsonObject,
+        stackSize: Int,
+    ): List<Int>? {
+        val displayMode = (assignment["displayMode"] as? JsonPrimitive)?.contentOrNull
+        val vertical = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
+        val lowerThird = vertical || displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
+        val bibleOff = (assignment["bibleMode"] as? JsonPrimitive)?.contentOrNull == Constants.SONG_LANG_OFF
+        if (!lowerThird || bibleOff) return null
+        val chosen = (assignment["bibleTranslations"] as? JsonArray)
+            ?.mapNotNull { (it as? JsonPrimitive)?.intOrNull }
+            .orEmpty()
+        val visible = if (chosen.isEmpty()) (0 until stackSize).toList() else chosen.filter { it in 0 until stackSize }
+        val bandLayout = (bible["bilingualLayoutLowerThird"] as? JsonPrimitive)?.contentOrNull.orEmpty()
+        val (rows, cols) = bilingualGrid(bandLayout)
+        val cells = if (!vertical && rows * cols > LEGACY_BAND_TRANSLATIONS) {
+            (rows * cols).coerceAtMost(Constants.MAX_BIBLE_TRANSLATIONS)
+        } else {
+            LEGACY_BAND_TRANSLATIONS
+        }
+        return if (visible.size > cells) visible.take(cells) else null
     }
 
     /** [assignment] with its behavioral fields dropped and [profileId] assigned in their place. */

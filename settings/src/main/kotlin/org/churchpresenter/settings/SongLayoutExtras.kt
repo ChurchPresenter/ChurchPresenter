@@ -38,4 +38,11 @@ data class SongLayoutExtras(
      * [SongTitleSlideNumber].
      */
     val titleSlideNumber: SongTitleSlideNumber = SongTitleSlideNumber(),
+    /**
+     * Where the title slide's other five elements sit -- see [SongTitleSlideOffsets].
+     *
+     * The number is not among them: [titleSlideNumber] above already carries its own corner and
+     * nudge, which is a richer placement than an offset and the one that slide's number wants.
+     */
+    val titleSlideOffsets: SongTitleSlideOffsets = SongTitleSlideOffsets(),
 )

@@ -99,15 +99,9 @@ class PresenterFullScreenScreenshotTest {
     fun `a verse on a line backdrop`() = shoot("bible_text_backdrop") {
         BiblePresenter(
             selectedVerses = listOf(verse()),
-            appSettings = withBibleTextBackdrop(
-                // Not black: the presenter's own background is black, so a black band is a picture
-                // of nothing and would have reviewed as "the backdrop does not draw".
-                TextBackdrop(
-                    lineBackground = true,
-                    lineBackgroundColor = "#1B3A6B",
-                    lineBackgroundOpacity = 85,
-                ),
-            ),
+            // Not black: the presenter's own background is black, so a black band is a picture of
+            // nothing and would have reviewed as "the backdrop does not draw".
+            appSettings = withBibleTextBackdrop(LINE_PLATE),
         )
     }
 
@@ -115,14 +109,94 @@ class PresenterFullScreenScreenshotTest {
     fun `a verse in a bordered box`() = shoot("bible_text_backdrop_border") {
         BiblePresenter(
             selectedVerses = listOf(verse()),
-            appSettings = withBibleTextBackdrop(
-                centred = true,
-                backdrop = TextBackdrop(
-                    border = true,
-                    borderColor = "#FFD54F",
-                    borderWidth = 6,
-                    borderPadding = 18,
-                    borderRadius = 12,
+            appSettings = withBibleTextBackdrop(BORDER_BOX),
+        )
+    }
+
+    // Two of them, because the pair share one `translationBlock` and a plate drawn per line reads
+    // quite differently stacked than it does alone -- and because the fit search that sizes them
+    // measures text without its backdrop, so a stack is where a plate is most likely to overrun.
+
+    @Test
+    fun `two translations on a plate`() = shoot("bible_two_translations_backdrop") {
+        BiblePresenter(
+            selectedVerses = listOf(verse(), verseRu()),
+            appSettings = twoTranslationsWith(LINE_PLATE),
+        )
+    }
+
+    @Test
+    fun `two translations in a bordered box`() = shoot("bible_two_translations_border") {
+        BiblePresenter(
+            selectedVerses = listOf(verse(), verseRu()),
+            appSettings = twoTranslationsWith(BORDER_BOX),
+        )
+    }
+
+    @Test
+    fun `bilingual lyrics on a plate`() = shoot("song_bilingual_backdrop") {
+        SongPresenter(
+            lyricSection = song(secondary = SECONDARY_LINES),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
+        )
+    }
+
+    @Test
+    fun `bilingual lyrics in a bordered box`() = shoot("song_bilingual_border") {
+        SongPresenter(
+            lyricSection = song(secondary = SECONDARY_LINES),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = BORDER_BOX)),
+        )
+    }
+
+    /**
+     * Lyrics on a plate with **one width for every line** — issue #643.
+     *
+     * Its own picture because it is the one backdrop setting that reaches song lyrics through a
+     * different painter from everything else. Lyrics are the app's only block whose lines are
+     * separate `Text`s, so each line used to be asked on its own what the widest line was and
+     * answered "me"; the setting did nothing here while working everywhere text is one `Text`.
+     * A ragged three-line verse is the sample, because a squared-off one says nothing.
+     */
+    @Test
+    fun `lyrics on a plate of one width`() = shoot("song_backdrop_uniform") {
+        SongPresenter(
+            lyricSection = song(lines = RAGGED_LINES),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    lyricsBackdrop = LINE_PLATE.copy(lineBackgroundUniformWidth = true),
+                ),
+            ),
+        )
+    }
+
+    /** The same verse with each band on its own line's width, so the pair reads as one statement. */
+    @Test
+    fun `lyrics on a plate per line`() = shoot("song_backdrop_ragged") {
+        SongPresenter(
+            lyricSection = song(lines = RAGGED_LINES),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
+        )
+    }
+
+    /**
+     * The gap the backdrop-clipping audit named, and the reason it went unnoticed for so long: every
+     * bordered picture in the set used the **default centred** alignment, and every left-aligned
+     * picture carried no backdrop. No image anywhere paired the two — which is precisely the
+     * configuration the clipping bug needed, because centred text is narrower than its box and the
+     * plate had somewhere to go.
+     *
+     * The Bible's own bordered shots are already left-aligned, that being its default. The lyrics'
+     * are not: songs centre by default, which is why they looked right while the Bible did not.
+     */
+    @Test
+    fun `lyrics aligned left in a bordered box`() = shoot("song_lyrics_border_left") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    lyricsBackdrop = BORDER_BOX,
+                    lyricsHorizontalAlignment = Constants.LEFT,
                 ),
             ),
         )
@@ -132,7 +206,7 @@ class PresenterFullScreenScreenshotTest {
     fun `a verse with an outline on its glyphs`() = shoot("bible_text_outline") {
         BiblePresenter(
             selectedVerses = listOf(verse()),
-            appSettings = withBibleTextOutline(TextOutline(width = 6, color = "#101820")),
+            appSettings = withBibleTextOutline(TextOutline(enabled = true, width = 6, color = "#101820")),
         )
     }
 
@@ -142,7 +216,9 @@ class PresenterFullScreenScreenshotTest {
             lyricSection = song(),
             appSettings = AppSettings(
                 songSettings = SongSettings(
-                    outlines = SongSettings().outlines.copy(lyrics = TextOutline(width = 6, color = "#101820")),
+                    outlines = SongSettings().outlines.copy(
+                        lyrics = TextOutline(enabled = true, width = 6, color = "#101820"),
+                    ),
                 ),
             ),
         )
@@ -168,7 +244,7 @@ class PresenterFullScreenScreenshotTest {
                     color = "#FFD54F",
                     bold = true,
                     italic = true,
-                    outline = TextOutline(width = 4, color = "#101820"),
+                    outline = TextOutline(enabled = true, width = 4, color = "#101820"),
                     horizontalAlignment = Constants.LEFT,
                     offset = ElementOffset(xPercent = 0, yPercent = 12),
                 ),
@@ -1083,6 +1159,26 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
+    /**
+     * The dictionary card's badge in a bordered box — the worst of the clipped surfaces after the
+     * captions, and the one the audit could only guess at.
+     *
+     * Its `.verticalScroll` is the innermost modifier, so the viewport is the content's own box on the
+     * vertical axis while `clipScrollableContainer` inflates the clip sideways. The plate therefore
+     * lost its **top and bottom**, the opposite pair from the Bible's, and lost both rather than one:
+     * `DictionaryBackdropBorderRenderTest` scores 0 horizontal strokes against the bug.
+     */
+    @Test
+    fun `a Strong's entry in a bordered box`() = shoot("dictionary_entry_border") {
+        DictionaryPresenter(
+            entry = strongs(),
+            dictionarySettings = DictionarySettings(
+                referenceBackdrop = BORDER_BOX,
+                wordBackdrop = BORDER_BOX,
+            ),
+        )
+    }
+
     // ── Canvas scenes ───────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -1091,15 +1187,9 @@ class PresenterFullScreenScreenshotTest {
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
     /** The Bible stack with [backdrop] behind the primary's verse text on a full screen. */
-    private fun withBibleTextBackdrop(backdrop: TextBackdrop, centred: Boolean = false) = AppSettings(
+    private fun withBibleTextBackdrop(backdrop: TextBackdrop) = AppSettings(
         bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
-            listOf(
-                BibleTranslationSettings(
-                    fileName = KJV,
-                    textBackdrop = backdrop,
-                    textHorizontalAlignment = if (centred) Constants.CENTER else Constants.LEFT,
-                ),
-            ),
+            listOf(BibleTranslationSettings(fileName = KJV, textBackdrop = backdrop)),
         ),
     )
 
@@ -1269,6 +1359,20 @@ class PresenterFullScreenScreenshotTest {
 
 
     /** [count] translations configured, which is what puts the presenter in multi-translation mode. */
+    /**
+     * Two translations, each drawing its verse text on [backdrop].
+     *
+     * On every entry, not just the first: the backdrop is stored per translation, so setting it on
+     * one alone is a plate behind one language and nothing behind the other.
+     */
+    private fun twoTranslationsWith(backdrop: TextBackdrop) = AppSettings(
+        bibleSettings = BibleSettings(
+            translations = TRANSLATION_FILES.take(2).map {
+                BibleTranslationSettings(fileName = it, textBackdrop = backdrop)
+            },
+        ),
+    )
+
     private fun translations(count: Int) = AppSettings(
         bibleSettings = BibleSettings(
             translations = TRANSLATION_FILES.take(count).map { BibleTranslationSettings(fileName = it) },
@@ -1449,6 +1553,29 @@ class PresenterFullScreenScreenshotTest {
             "The LORD is my shepherd; I shall not want. He maketh me to lie down in green " +
                 "pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth " +
                 "me in the paths of righteousness for his name's sake."
+
+        /** A band behind each line, hugging the text. */
+/** Three lines, no two the same width — what "one width for every line" has to be judged on. */
+        val RAGGED_LINES = listOf(
+            "Amazing grace how sweet the sound",
+            "That saved",
+            "a wretch like me",
+        )
+
+                val LINE_PLATE = TextBackdrop(
+            lineBackground = true,
+            lineBackgroundColor = "#1B3A6B",
+            lineBackgroundOpacity = 85,
+        )
+
+        /** A box around the block. Deliberately no fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
 
         const val KJV = "kjv.spb"
 

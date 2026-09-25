@@ -38,8 +38,12 @@ fun BottomAlignedText(
 ) {
     // The painter goes on the content text in both branches, never on the invisible reference
     // below: that one exists to measure a fixed number of lines, and banding it would paint a
-    // block of empty lines behind the captions.
-    val painter = rememberTextBackdropPainter(backdrop)
+    // block of empty lines behind the captions. The *room* does go on both -- see the reference.
+    //
+    // [scaleFactor] reaches the painter for the same reason it reaches the outline: the caller has
+    // already scaled the font size it passes, and a backdrop's measurements are in those same
+    // units, so a plate drawn at 1x against half-size text comes out twice as heavy as it was set.
+    val painter = rememberTextBackdropPainter(backdrop, scaleFactor)
     if (maxLines <= 0) {
         OutlinedText(
             text = text,
@@ -48,7 +52,7 @@ fun BottomAlignedText(
             color = Color.Unspecified,
             fontSize = TextUnit.Unspecified,
             style = style,
-            modifier = modifier.fillMaxWidth().then(painter.modifier),
+            modifier = modifier.fillMaxWidth().backdropRoom(backdrop, scaleFactor).then(painter.modifier),
             onTextLayout = painter::onTextLayout,
         )
         return
@@ -59,11 +63,14 @@ fun BottomAlignedText(
 
     Layout(
         content = {
-            // Invisible reference: measures exact height of maxLines lines
+            // Invisible reference: measures exact height of maxLines lines -- plus the room the
+            // plate needs, because that height becomes the clip. Without it a full N lines of text
+            // measures taller than the clip the moment a backdrop is on, and the branch below
+            // reads that as overflow and shifts the first line off the top.
             Text(
                 text = referenceText,
                 style = style,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().backdropRoom(backdrop, scaleFactor),
                 maxLines = maxLines
             )
             // Actual content: measured unconstrained. One measurable either way -- an outlined
@@ -75,7 +82,7 @@ fun BottomAlignedText(
                 color = Color.Unspecified,
                 fontSize = TextUnit.Unspecified,
                 style = style,
-                modifier = Modifier.fillMaxWidth().then(painter.modifier),
+                modifier = Modifier.fillMaxWidth().backdropRoom(backdrop, scaleFactor).then(painter.modifier),
                 onTextLayout = painter::onTextLayout,
             )
         },

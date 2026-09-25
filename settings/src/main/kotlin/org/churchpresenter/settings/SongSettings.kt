@@ -535,22 +535,32 @@ fun SongSettings.translationStyle(
 }
 
 /**
- * Puts the title's and the number's position back onto the two values the presenter draws.
+ * Puts the title's and the number's position back onto the two values the presenter draws, keeping
+ * what the screen showed.
  *
  * [titlePosition] used to be a vertical alignment -- `Top`, `Middle`, `Bottom` -- and was renamed
  * in place, for a while still defaulting to `Middle`, without its stored value ever being
  * rewritten; so a file from that time says `Middle` to this day.
- * The old dropdown read anything but `BelowVerse` as "above" and so kept working; the presenter
- * matches the value against the two rows it draws, and a title whose position is neither is drawn
- * on neither, whatever its Show setting says. Idempotent: a value already on one of the two is
- * left as it is.
+ * The presenter has only ever matched the value against the two rows it draws, so a title
+ * positioned on neither was drawn on neither, whatever its Show setting said -- an install left on
+ * the default showed no title at all. So such an element is placed above the verse **and switched
+ * off**: reading it as "above" and leaving it on, as the old dropdown did, put a title on every one
+ * of those installs the first time they upgraded.
+ *
+ * Idempotent: an element already on one of the two rows is left exactly as it is, Show included.
  */
 fun SongSettings.migrateElementPositions(): SongSettings {
-    fun aboveUnlessBelow(value: String) = if (value == Constants.BELOW_VERSE) value else Constants.ABOVE_VERSE
+    fun drawn(position: String) = position == Constants.ABOVE_VERSE || position == Constants.BELOW_VERSE
+    fun position(value: String) = if (drawn(value)) value else Constants.ABOVE_VERSE
+    fun display(position: String, value: String) = if (drawn(position)) value else Constants.NONE
     return copy(
-        titlePosition = aboveUnlessBelow(titlePosition),
-        titleLowerThirdPosition = aboveUnlessBelow(titleLowerThirdPosition),
-        songNumberPosition = aboveUnlessBelow(songNumberPosition),
-        songNumberLowerThirdPosition = aboveUnlessBelow(songNumberLowerThirdPosition),
+        titlePosition = position(titlePosition),
+        titleDisplay = display(titlePosition, titleDisplay),
+        titleLowerThirdPosition = position(titleLowerThirdPosition),
+        titleLowerThirdDisplay = display(titleLowerThirdPosition, titleLowerThirdDisplay),
+        songNumberPosition = position(songNumberPosition),
+        showNumber = display(songNumberPosition, showNumber),
+        songNumberLowerThirdPosition = position(songNumberLowerThirdPosition),
+        showNumberLowerThird = display(songNumberLowerThirdPosition, showNumberLowerThird),
     )
 }

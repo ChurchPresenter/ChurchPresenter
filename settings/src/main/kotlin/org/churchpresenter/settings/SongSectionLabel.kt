@@ -40,6 +40,10 @@ data class SongSectionLabel(
     val offset: ElementOffset? = null,
 ) {
     companion object {
-        val FONT_SIZE_RANGE = 8..150
+        /**
+         * Matches the Bible and song body text, and the announcements text that always allowed it:
+         * one ceiling across every element rather than 150 here and 200 there.
+         */
+        val FONT_SIZE_RANGE = 8..200
     }
 }

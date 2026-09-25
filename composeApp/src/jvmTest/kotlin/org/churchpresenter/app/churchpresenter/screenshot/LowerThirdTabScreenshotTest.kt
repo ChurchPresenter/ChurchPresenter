@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
@@ -282,6 +284,25 @@ class LowerThirdTabScreenshotTest {
 
     @Test
     fun `a half-width panel`() = shoot("medium_panel", width = 760.dp) { selectPreset("Welcome") }
+
+    /** A portrait output: the preview shrinks to the panel's height rather than running over it. */
+    @Test
+    fun `a portrait output`() = shoot(
+        "portrait_output",
+        settings = { s ->
+            s.copy(
+                projectionSettings = s.projectionSettings.copy(
+                    browserSourceOutputs = listOf(
+                        ScreenAssignment(browserSourceWidth = 1080, browserSourceHeight = 1920),
+                    ),
+                    previewOutputSelections = mapOf(
+                        Constants.PREVIEW_TAB_LOWER_THIRD to
+                            Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, 0),
+                    ),
+                ),
+            )
+        },
+    ) { selectPreset("Welcome") }
 
     // ── Driving ─────────────────────────────────────────────────────────────────────────────────
 

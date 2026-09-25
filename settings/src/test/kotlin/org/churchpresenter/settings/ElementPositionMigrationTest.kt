@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
  *
  * `titlePosition` was once a vertical alignment and for a while defaulted to `Middle`; a file from
  * then still says so, and a title positioned on neither row is drawn on neither. [migrateElementPositions]
- * reads it the way the old dropdown did: anything but below is above.
+ * places it above and switches it off, so the screen keeps showing what it showed.
  */
 class ElementPositionMigrationTest {
 
@@ -35,11 +35,15 @@ class ElementPositionMigrationTest {
     }
 
     @Test
-    fun `a stale Middle becomes above the verse`() {
+    fun `a stale Middle becomes above the verse and stays hidden, as it drew`() {
         val migrated = SongSettings(
+            titleDisplay = Constants.FIRST_PAGE,
             titlePosition = Constants.MIDDLE,
+            titleLowerThirdDisplay = Constants.EVERY_PAGE,
             titleLowerThirdPosition = Constants.MIDDLE,
+            showNumber = Constants.FIRST_PAGE,
             songNumberPosition = Constants.TOP,
+            showNumberLowerThird = Constants.FIRST_PAGE,
             songNumberLowerThirdPosition = Constants.BOTTOM,
         ).migrateElementPositions()
 
@@ -47,6 +51,24 @@ class ElementPositionMigrationTest {
         assertEquals(Constants.ABOVE_VERSE, migrated.titleLowerThirdPosition)
         assertEquals(Constants.ABOVE_VERSE, migrated.songNumberPosition)
         assertEquals(Constants.ABOVE_VERSE, migrated.songNumberLowerThirdPosition)
+        assertEquals(Constants.NONE, migrated.titleDisplay)
+        assertEquals(Constants.NONE, migrated.titleLowerThirdDisplay)
+        assertEquals(Constants.NONE, migrated.showNumber)
+        assertEquals(Constants.NONE, migrated.showNumberLowerThird)
+    }
+
+    @Test
+    fun `a title already above the verse keeps its show setting`() {
+        val chosen = SongSettings(titlePosition = Constants.ABOVE_VERSE, titleDisplay = Constants.EVERY_PAGE)
+
+        assertEquals(chosen, chosen.migrateElementPositions())
+    }
+
+    @Test
+    fun `repairing twice changes nothing more`() {
+        val once = SongSettings(titlePosition = Constants.MIDDLE).migrateElementPositions()
+
+        assertEquals(once, once.migrateElementPositions())
     }
 
     @Test
@@ -69,5 +91,6 @@ class ElementPositionMigrationTest {
         )
 
         assertEquals(Constants.ABOVE_VERSE, settings.songSettings.titlePosition)
+        assertEquals(Constants.NONE, settings.songSettings.titleDisplay)
     }
 }

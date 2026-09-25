@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The Pictures tab's scale button: it names the mode every profile is in, and one click moves them
+ * The Pictures tab's scale button: it names the mode every output is in, and one click moves them
  * all to the next.
  *
  * The harness applies a write to the settings the tab was composed with and does not recompose, so
@@ -21,7 +21,7 @@ class PicturesTabScaleTest {
     private fun clickingFrom(mode: OutputScaleMode, label: String, next: OutputScaleMode) = picturesTab(
         settings = { it.withPictureScaleEverywhere(mode) },
     ) { _, reports ->
-        pictureButton("Picture scale on every profile: $label").performClick()
+        pictureButton("Picture scale on every output: $label").performClick()
         waitForIdle()
 
         // Scaling is per profile; the button is the shortcut that moves every one of them.
@@ -43,6 +43,6 @@ class PicturesTabScaleTest {
     @Test
     fun `without saved settings the button reads fit`() = picturesTab { _, _ ->
         // A tab composed with no settings at all still has to say what the output is doing.
-        pictureButton("Picture scale on every profile: Fit").assertExists()
+        pictureButton("Picture scale on every output: Fit").assertExists()
     }
 }
