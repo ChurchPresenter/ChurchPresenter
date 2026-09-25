@@ -99,15 +99,9 @@ class PresenterFullScreenScreenshotTest {
     fun `a verse on a line backdrop`() = shoot("bible_text_backdrop") {
         BiblePresenter(
             selectedVerses = listOf(verse()),
-            appSettings = withBibleTextBackdrop(
-                // Not black: the presenter's own background is black, so a black band is a picture
-                // of nothing and would have reviewed as "the backdrop does not draw".
-                TextBackdrop(
-                    lineBackground = true,
-                    lineBackgroundColor = "#1B3A6B",
-                    lineBackgroundOpacity = 85,
-                ),
-            ),
+            // Not black: the presenter's own background is black, so a black band is a picture of
+            // nothing and would have reviewed as "the backdrop does not draw".
+            appSettings = withBibleTextBackdrop(LINE_PLATE),
         )
     }
 
@@ -115,16 +109,43 @@ class PresenterFullScreenScreenshotTest {
     fun `a verse in a bordered box`() = shoot("bible_text_backdrop_border") {
         BiblePresenter(
             selectedVerses = listOf(verse()),
-            appSettings = withBibleTextBackdrop(
-                centred = true,
-                backdrop = TextBackdrop(
-                    border = true,
-                    borderColor = "#FFD54F",
-                    borderWidth = 6,
-                    borderPadding = 18,
-                    borderRadius = 12,
-                ),
-            ),
+            appSettings = withBibleTextBackdrop(BORDER_BOX),
+        )
+    }
+
+    // Two of them, because the pair share one `translationBlock` and a plate drawn per line reads
+    // quite differently stacked than it does alone -- and because the fit search that sizes them
+    // measures text without its backdrop, so a stack is where a plate is most likely to overrun.
+
+    @Test
+    fun `two translations on a plate`() = shoot("bible_two_translations_backdrop") {
+        BiblePresenter(
+            selectedVerses = listOf(verse(), verseRu()),
+            appSettings = twoTranslationsWith(LINE_PLATE),
+        )
+    }
+
+    @Test
+    fun `two translations in a bordered box`() = shoot("bible_two_translations_border") {
+        BiblePresenter(
+            selectedVerses = listOf(verse(), verseRu()),
+            appSettings = twoTranslationsWith(BORDER_BOX),
+        )
+    }
+
+    @Test
+    fun `bilingual lyrics on a plate`() = shoot("song_bilingual_backdrop") {
+        SongPresenter(
+            lyricSection = song(secondary = SECONDARY_LINES),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
+        )
+    }
+
+    @Test
+    fun `bilingual lyrics in a bordered box`() = shoot("song_bilingual_border") {
+        SongPresenter(
+            lyricSection = song(secondary = SECONDARY_LINES),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = BORDER_BOX)),
         )
     }
 
@@ -1091,15 +1112,9 @@ class PresenterFullScreenScreenshotTest {
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
     /** The Bible stack with [backdrop] behind the primary's verse text on a full screen. */
-    private fun withBibleTextBackdrop(backdrop: TextBackdrop, centred: Boolean = false) = AppSettings(
+    private fun withBibleTextBackdrop(backdrop: TextBackdrop) = AppSettings(
         bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
-            listOf(
-                BibleTranslationSettings(
-                    fileName = KJV,
-                    textBackdrop = backdrop,
-                    textHorizontalAlignment = if (centred) Constants.CENTER else Constants.LEFT,
-                ),
-            ),
+            listOf(BibleTranslationSettings(fileName = KJV, textBackdrop = backdrop)),
         ),
     )
 
@@ -1269,6 +1284,20 @@ class PresenterFullScreenScreenshotTest {
 
 
     /** [count] translations configured, which is what puts the presenter in multi-translation mode. */
+    /**
+     * Two translations, each drawing its verse text on [backdrop].
+     *
+     * On every entry, not just the first: the backdrop is stored per translation, so setting it on
+     * one alone is a plate behind one language and nothing behind the other.
+     */
+    private fun twoTranslationsWith(backdrop: TextBackdrop) = AppSettings(
+        bibleSettings = BibleSettings(
+            translations = TRANSLATION_FILES.take(2).map {
+                BibleTranslationSettings(fileName = it, textBackdrop = backdrop)
+            },
+        ),
+    )
+
     private fun translations(count: Int) = AppSettings(
         bibleSettings = BibleSettings(
             translations = TRANSLATION_FILES.take(count).map { BibleTranslationSettings(fileName = it) },
@@ -1449,6 +1478,22 @@ class PresenterFullScreenScreenshotTest {
             "The LORD is my shepherd; I shall not want. He maketh me to lie down in green " +
                 "pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth " +
                 "me in the paths of righteousness for his name's sake."
+
+        /** A band behind each line, hugging the text. */
+        val LINE_PLATE = TextBackdrop(
+            lineBackground = true,
+            lineBackgroundColor = "#1B3A6B",
+            lineBackgroundOpacity = 85,
+        )
+
+        /** A box around the block. Deliberately no fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
 
         const val KJV = "kjv.spb"
 

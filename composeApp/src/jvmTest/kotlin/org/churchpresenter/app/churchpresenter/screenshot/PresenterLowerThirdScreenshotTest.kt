@@ -21,6 +21,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.core.models.songs.SongItem
@@ -325,6 +326,44 @@ class PresenterLowerThirdScreenshotTest {
     @Test
     fun `a scripture band in two translations`() =
         shootBible("bible_two_translations", listOf(verse(), verseRu()), translations(2))
+
+    // ── The backdrop behind band text ───────────────────────────────────────────────────────────
+    //
+    // The band had no picture of either form of backdrop, which is the output where they matter
+    // most: a lower third is transparent above the band, so a plate behind the text is what keeps it
+    // readable over a moving camera feed. Both forms, one and two translations, because the two
+    // translations share one `translationBlock` and a plate drawn per line looks quite different
+    // stacked than it does alone.
+
+    @Test
+    fun `a scripture band on a plate`() =
+        shootBible("bible_backdrop", listOf(verse()), bibleBackdrop(LINE_PLATE))
+
+    @Test
+    fun `a scripture band in a bordered box`() =
+        shootBible("bible_backdrop_border", listOf(verse()), bibleBackdrop(BORDER_BOX))
+
+    @Test
+    fun `two translations on a plate`() =
+        shootBible("bible_two_translations_backdrop", listOf(verse(), verseRu()), bibleBackdrop(LINE_PLATE, 2))
+
+    @Test
+    fun `two translations in a bordered box`() =
+        shootBible("bible_two_translations_border", listOf(verse(), verseRu()), bibleBackdrop(BORDER_BOX, 2))
+
+    @Test
+    fun `lyrics on a plate`() = shootSong("song_backdrop", song(), songBackdrop(LINE_PLATE))
+
+    @Test
+    fun `lyrics in a bordered box`() = shootSong("song_backdrop_border", song(), songBackdrop(BORDER_BOX))
+
+    @Test
+    fun `bilingual lyrics on a plate`() =
+        shootSong("song_bilingual_backdrop", song(secondary = SECONDARY_LINES), songBackdrop(LINE_PLATE))
+
+    @Test
+    fun `bilingual lyrics in a bordered box`() =
+        shootSong("song_bilingual_border", song(secondary = SECONDARY_LINES), songBackdrop(BORDER_BOX))
 
     @Test
     fun `a long passage in the band`() = shootBible("bible_long", listOf(verse(text = LONG_PASSAGE)))
@@ -683,6 +722,26 @@ class PresenterLowerThirdScreenshotTest {
         ),
     )
 
+    /**
+     * [count] translations, each drawing its verse text on [backdrop].
+     *
+     * The backdrop is per translation rather than per Bible, so a stack has to be given it on every
+     * entry -- setting it on the first alone is a plate behind one language and nothing behind the
+     * other, which is a state worth having a picture of but not this one.
+     */
+    private fun bibleBackdrop(backdrop: TextBackdrop, count: Int = 1) = AppSettings(
+        bibleSettings = BibleSettings(
+            translations = TRANSLATION_FILES.take(count).map {
+                BibleTranslationSettings(fileName = it, lowerThirdTextBackdrop = backdrop)
+            },
+        ),
+    )
+
+    /** The lyrics on [backdrop], for the band. */
+    private fun songBackdrop(backdrop: TextBackdrop) = AppSettings(
+        songSettings = SongSettings(lyricsLowerThirdBackdrop = backdrop),
+    )
+
     private fun translations(count: Int) = AppSettings(
         bibleSettings = BibleSettings(
             translations = TRANSLATION_FILES.take(count).map { BibleTranslationSettings(fileName = it) },
@@ -726,6 +785,27 @@ class PresenterLowerThirdScreenshotTest {
 
     private companion object {
         const val SECTION = "presenterLowerThird"
+
+        /**
+         * A band behind each line, hugging the text -- the readable-over-camera case.
+         *
+         * Not near-black: the band this is drawn on is black, so a dark plate is a picture of
+         * nothing. The same trap the full-screen suite fell into first time round.
+         */
+        val LINE_PLATE = TextBackdrop(
+            lineBackground = true,
+            lineBackgroundColor = "#1B3A6B",
+            lineBackgroundOpacity = 90,
+        )
+
+        /** A box around the block. Deliberately no fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
 
         const val KJV = "kjv.spb"
 

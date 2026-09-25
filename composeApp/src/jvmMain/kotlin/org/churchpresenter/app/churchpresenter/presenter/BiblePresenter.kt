@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.app.churchpresenter.composables.backdropRoom
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -865,7 +866,7 @@ fun BiblePresenter(
                             OutlinedText(
                                 text = itemRefText(item, buildRefText(verse, item)),
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
-                                    .then(itemRefPainter.modifier),
+                                    .backdropRoom(item.referenceBackdropFor(isLowerThird)).then(itemRefPainter.modifier),
                                 outline = item.referenceOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 color = refColor,
@@ -880,7 +881,7 @@ fun BiblePresenter(
                             OutlinedText(
                                 text = itemText(item, verse.verseText),
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
-                                    .then(itemTextPainter.modifier),
+                                    .backdropRoom(item.textBackdropFor(isLowerThird)).then(itemTextPainter.modifier),
                                 outline = item.textOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 color = textColor,
@@ -1324,7 +1325,9 @@ fun BiblePresenter(
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .backdropRoom(t0.referenceBackdropFor(isLowerThird))
+                                            .then(pRefPainter.modifier),
                                         outline = t0.referenceOutlineFor(isLowerThird),
                                         scaleFactor = scaleFactor,
                                         textAlign = primaryBibleReferenceHorizontalAlignment,
@@ -1337,7 +1340,9 @@ fun BiblePresenter(
                                     )
                                 }
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .backdropRoom(t0.textBackdropFor(isLowerThird))
+                                        .then(pTextPainter.modifier),
                                     outline = t0.textOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
                                     textAlign = primaryBibleHorizontalAlignment,
@@ -1350,7 +1355,9 @@ fun BiblePresenter(
                                 )
                                 if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                     OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .backdropRoom(t0.referenceBackdropFor(isLowerThird))
+                                            .then(pRefPainter.modifier),
                                         outline = t0.referenceOutlineFor(isLowerThird),
                                         scaleFactor = scaleFactor,
                                         textAlign = primaryBibleReferenceHorizontalAlignment,
@@ -1367,7 +1374,9 @@ fun BiblePresenter(
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .backdropRoom(t1.referenceBackdropFor(isLowerThird))
+                                            .then(sRefPainter.modifier),
                                         outline = t1.referenceOutlineFor(isLowerThird),
                                         scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
@@ -1380,7 +1389,9 @@ fun BiblePresenter(
                                     )
                                 }
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .backdropRoom(t1.textBackdropFor(isLowerThird))
+                                        .then(sTextPainter.modifier),
                                     outline = t1.textOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
                                     textAlign = secondaryBibleHorizontalAlignment,
@@ -1393,7 +1404,9 @@ fun BiblePresenter(
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                     OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .backdropRoom(t1.referenceBackdropFor(isLowerThird))
+                                            .then(sRefPainter.modifier),
                                         outline = t1.referenceOutlineFor(isLowerThird),
                                         scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
@@ -1484,7 +1497,9 @@ fun BiblePresenter(
                         ) {
                             if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .backdropRoom(t0.referenceBackdropFor(isLowerThird))
+                                        .then(pRefPainter.modifier),
                                     outline = t0.referenceOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
@@ -1497,7 +1512,9 @@ fun BiblePresenter(
                                 )
                             }
                             OutlinedText(
-                                modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
+                                modifier = Modifier.fillMaxWidth()
+                                    .backdropRoom(t0.textBackdropFor(isLowerThird))
+                                    .then(pTextPainter.modifier),
                                 outline = t0.textOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 textAlign = primaryBibleHorizontalAlignment,
@@ -1510,7 +1527,9 @@ fun BiblePresenter(
                             )
                             if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .backdropRoom(t0.referenceBackdropFor(isLowerThird))
+                                        .then(pRefPainter.modifier),
                                     outline = t0.referenceOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
                                     textAlign = primaryBibleReferenceHorizontalAlignment,
@@ -1525,7 +1544,9 @@ fun BiblePresenter(
                             if (showSecondary) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .backdropRoom(t1.referenceBackdropFor(isLowerThird))
+                                            .then(sRefPainter.modifier),
                                         outline = t1.referenceOutlineFor(isLowerThird),
                                         scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
@@ -1538,7 +1559,9 @@ fun BiblePresenter(
                                     )
                                 }
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .backdropRoom(t1.textBackdropFor(isLowerThird))
+                                        .then(sTextPainter.modifier),
                                     outline = t1.textOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
                                     textAlign = secondaryBibleHorizontalAlignment,
@@ -1551,7 +1574,9 @@ fun BiblePresenter(
                                 )
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                                     OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
+                                        modifier = Modifier.fillMaxWidth()
+                                            .backdropRoom(t1.referenceBackdropFor(isLowerThird))
+                                            .then(sRefPainter.modifier),
                                         outline = t1.referenceOutlineFor(isLowerThird),
                                         scaleFactor = scaleFactor,
                                         textAlign = secondaryBibleReferenceHorizontalAlignment,
