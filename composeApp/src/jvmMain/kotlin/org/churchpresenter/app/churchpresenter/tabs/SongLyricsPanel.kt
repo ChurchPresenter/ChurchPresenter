@@ -1,5 +1,12 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.languageDisplayOrder
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.songLanguageName
+import churchpresenter.composeapp.generated.resources.song_language_order_label
+import churchpresenter.composeapp.generated.resources.song_language_order_subtitle
+import churchpresenter.composeapp.generated.resources.move_language_up
+import churchpresenter.composeapp.generated.resources.move_language_down
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -112,6 +119,8 @@ internal fun RowScope.SongLyricsPanel(
     onAddToSchedule: ((Int, String, String, String) -> Unit)?,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
+    /** Moves one of the selected song's [available] languages in the install's Display order. */
+    onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit = { _, _, _ -> },
 ) {
     val density = LocalDensity.current
     // Right panel — Lyrics display (fixed width, resizable via drag handle)
@@ -130,6 +139,8 @@ internal fun RowScope.SongLyricsPanel(
             onAddToSchedule = onAddToSchedule,
             onPresenting = onPresenting,
             sendToPresenter = sendToPresenter,
+            songSettings = appSettings.songSettings,
+            onMoveLanguage = onMoveLanguage,
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
@@ -223,6 +234,8 @@ private fun LyricsActionBar(
     onAddToSchedule: ((Int, String, String, String) -> Unit)?,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
+    songSettings: SongSettings,
+    onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit,
 ) {
     val editSongStr    = stringResource(Res.string.edit_song)
     val goLiveStr      = stringResource(Res.string.go_live)
@@ -237,6 +250,23 @@ private fun LyricsActionBar(
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
     ) {
+        // The order a song's languages are shown in, on every output showing more than one -- only
+        // while there is more than one to order.
+        val languages = currentSong?.let { 1 + it.extraTranslations().size } ?: 0
+        if (languages > 1) {
+            OrderSelector(
+                label = stringResource(Res.string.song_language_order_label),
+                entries = songSettings.languageDisplayOrder()
+                    .filter { it < languages }
+                    .map { slot -> OrderEntry(slot.toString(), songLanguageName(songSettings, slot)) },
+                subtitle = stringResource(Res.string.song_language_order_subtitle),
+                moveUpLabel = stringResource(Res.string.move_language_up),
+                moveDownLabel = stringResource(Res.string.move_language_down),
+                onMove = { index, offset -> onMoveLanguage(languages, index, offset) },
+                modifier = Modifier.widthIn(min = 127.dp, max = 174.dp),
+            )
+        }
+
         if (currentSong != null) {
             ActionIconButton(
                 onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },

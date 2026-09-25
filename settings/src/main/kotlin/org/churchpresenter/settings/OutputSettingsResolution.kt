@@ -15,7 +15,7 @@ import kotlinx.serialization.json.JsonObject
 val SONG_GLOBAL_KEYS = setOf(
     "storageDirectory", "songFiles", "colWidthNumber", "colWidthTitle", "colWidthSongbook",
     "colWidthTune", "colWidthPlayCount", "colWidthAuthor", "colWidthComposer",
-    "lyricsPanelWidthDp", "editorShowChords",
+    "lyricsPanelWidthDp", "editorShowChords", "languageNames", "languageOrder",
 )
 
 /**
