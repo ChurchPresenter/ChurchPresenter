@@ -16,14 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -101,10 +99,12 @@ fun STTTab(
     var urlInput by remember(sttSettings.serverUrl) { mutableStateOf(sttSettings.serverUrl.ifEmpty { "http://" }) }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier.fillMaxSize().padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Connection controls on the top card.
+        Column(
+            modifier = Modifier.fillMaxWidth().searchBarCard(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
         // Connection row
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -207,7 +207,15 @@ fun STTTab(
             )
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+        }
+        // The live transcript on its own card.
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth()
+                .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                .bibleListCard()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
 
         // Live preview area
         Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
@@ -226,11 +234,7 @@ fun STTTab(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                    RoundedCornerShape(8.dp)
-                )
-                .padding(8.dp)
+                .padding(top = 4.dp)
         ) {
             if (!connected) {
                 Text(
@@ -321,6 +325,7 @@ fun STTTab(
                 }
             }
         }
+    }
     }
 
     if (showSettingsDialog) {

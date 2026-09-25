@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -38,7 +40,6 @@ import androidx.compose.material3.ButtonDefaults
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.IconButtonDefaults
 import org.churchpresenter.theme.components.GhostButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
@@ -248,9 +249,15 @@ fun QATab(
 
     Column(modifier = modifier.fillMaxSize()) {
         // ── Question List ────────────────────────────────
+        // Every control sits in the same card as the questions they act on.
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth()
+                .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 4.dp)
+                .bibleListCard()
+        ) {
             // Top bar: session + clear
             Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, top = 10.dp, end = 12.dp, bottom = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -383,7 +390,7 @@ fun QATab(
             )
             val filterItemsWithCount = filterLabels.mapIndexed { i, label -> "$label (${filterCounts[i]})" }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -595,7 +602,11 @@ fun QATab(
                     }
                 }
 
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 6.dp, top = 6.dp, end = 6.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
                     items(filteredQuestions.distinctBy { it.id }, key = { it.id }) { question ->
                         QuestionRow(
                             question = question,
@@ -632,10 +643,10 @@ fun QATab(
                                 }
                             }
                         )
-                        HorizontalDivider()
                     }
                 }
             }
+            } // end card
 
         // ── Clear All Confirmation Dialog ─────────────────────────────
         if (showClearConfirm) {
@@ -731,7 +742,9 @@ private fun QuestionRow(
     onDisplay: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val bgColor = if (isDisplayed) MaterialTheme.semantic.successContainer.copy(alpha = 0.35f) else Color.Transparent
+    val (hover, hovered) = rememberRowHover()
+    val bgColor = if (isDisplayed) MaterialTheme.semantic.successContainer.copy(alpha = 0.35f)
+    else bibleRowColors(selected = false, hovered = hovered).background
     val statusColor = when (question.status) {
         QuestionStatus.PENDING -> MaterialTheme.colorScheme.tertiary
         QuestionStatus.APPROVED -> MaterialTheme.colorScheme.inverseSurface
@@ -768,8 +781,10 @@ private fun QuestionRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(BibleListRowShape)
             .background(bgColor)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .hoverable(hover)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(statusColor))

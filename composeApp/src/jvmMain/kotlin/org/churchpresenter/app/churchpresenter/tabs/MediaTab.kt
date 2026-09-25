@@ -37,7 +37,6 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import org.churchpresenter.theme.components.RaisedIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -317,523 +316,529 @@ fun MediaTab(
                 } else false
             }
     ) {
-        // ── Source bar ────────────────────────────────────────────────
-        // FlowRow rather than Row: Media carries a source-type SegmentedButton that neither the
-        // Pictures nor the Presentation bar has, so at a narrow panel width the fixed content
-        // overruns 48.dp of a single line and the action buttons would be clipped off the right
-        // edge. Wrapping degrades instead. At any ordinary width this renders exactly the 48.dp
-        // single-line bar those two tabs use.
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
-            // heightIn box, so the controls sat high in the bar instead of centred in it.
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
-        ) {
-            SegmentedButton(
-                items = sourceTypeItems,
-                selectedValue = selectedSourceType,
-                onValueChange = { selectedSourceType = it },
-                buttonWidth = 90.dp,
-                buttonHeight = 32.dp,
-                fontSize = MaterialTheme.typography.labelSmall.fontSize
-            )
+        Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
+            // ── Source bar ────────────────────────────────────────────────
+            // FlowRow rather than Row: Media carries a source-type SegmentedButton that neither the
+            // Pictures nor the Presentation bar has, so at a narrow panel width the fixed content
+            // overruns 48.dp of a single line and the action buttons would be clipped off the right
+            // edge. Wrapping degrades instead. At any ordinary width this renders exactly the 48.dp
+            // single-line bar those two tabs use.
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
+                // heightIn box, so the controls sat high in the bar instead of centred in it.
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+            ) {
+                SegmentedButton(
+                    items = sourceTypeItems,
+                    selectedValue = selectedSourceType,
+                    onValueChange = { selectedSourceType = it },
+                    buttonWidth = 90.dp,
+                    buttonHeight = 32.dp,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                )
 
-            when (selectedSourceType) {
-                Constants.MEDIA_TYPE_LOCAL -> {
-                    RaisedButton(
-                        onClick = {
-                            scope.launch {
-                                val f = FileChooser.platformInstance.chooseSingle(
-                                    path = Path(appSettings.mediaStorageDirectory),
-                                    title = selectFileLabel,
-                                    filters = listOf(FileNameExtensionFilter(mediaFilesLabel, "mp4","mov","avi","mkv","wmv","flv","webm","m4v","mp3","wav","flac","aac","ogg","wma","m4a","aiff","opus")),
-                                    selectDirectory = false
-                                )
-                                if (f != null) {
-                                    val ext = f.extension.lowercase()
-                                    val type = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
-                                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
-                                    viewModel.loadMedia(f.absolutePathString(), type)
-                                    RecentMediaFiles.add(f.absolutePathString())
-                                }
-                            }
-                        },
-                        modifier = Modifier.height(32.dp),
-                        shape = RoundedCornerShape(7.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-                    ) {
-                        Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
-                        Spacer(Modifier.width(7.dp))
-                        Text(stringResource(Res.string.media_select_file), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
-                    }
-                    Text(
-                        text = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL) viewModel.mediaTitle
-                               else stringResource(Res.string.media_no_source),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL)
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Constants.MEDIA_TYPE_URL -> {
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                            .hoverTint(RoundedCornerShape(8.dp)),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            BasicTextField(
-                                value = urlInput,
-                                onValueChange = { urlInput = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                                singleLine = true,
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                decorationBox = { innerTextField ->
-                                    if (urlInput.isEmpty()) {
-                                        Text(stringResource(Res.string.media_url_placeholder), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                when (selectedSourceType) {
+                    Constants.MEDIA_TYPE_LOCAL -> {
+                        RaisedButton(
+                            onClick = {
+                                scope.launch {
+                                    val f = FileChooser.platformInstance.chooseSingle(
+                                        path = Path(appSettings.mediaStorageDirectory),
+                                        title = selectFileLabel,
+                                        filters = listOf(FileNameExtensionFilter(mediaFilesLabel, "mp4","mov","avi","mkv","wmv","flv","webm","m4v","mp3","wav","flac","aac","ogg","wma","m4a","aiff","opus")),
+                                        selectDirectory = false
+                                    )
+                                    if (f != null) {
+                                        val ext = f.extension.lowercase()
+                                        val type = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                                        if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                        viewModel.loadMedia(f.absolutePathString(), type)
+                                        RecentMediaFiles.add(f.absolutePathString())
                                     }
-                                    innerTextField()
                                 }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            shape = RoundedCornerShape(7.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+                        ) {
+                            Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                            Spacer(Modifier.width(7.dp))
+                            Text(stringResource(Res.string.media_select_file), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
+                        }
+                        Text(
+                            text = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL) viewModel.mediaTitle
+                                   else stringResource(Res.string.media_no_source),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL)
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Constants.MEDIA_TYPE_URL -> {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(42.dp)
+                                .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                                .hoverTint(RoundedCornerShape(8.dp)),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                                BasicTextField(
+                                    value = urlInput,
+                                    onValueChange = { urlInput = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                    singleLine = true,
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    decorationBox = { innerTextField ->
+                                        if (urlInput.isEmpty()) {
+                                            Text(stringResource(Res.string.media_url_placeholder), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        }
+                                        innerTextField()
+                                    }
+                                )
+                            }
+                        }
+                        RaisedButton(
+                            onClick = {
+                                if (urlInput.isNotBlank()) {
+                                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                    val url = urlInput.trim()
+                                    viewModel.loadMedia(url, Constants.MEDIA_TYPE_URL)
+                                    RecentMediaFiles.add(url)
+                                }
+                            },
+                            enabled = urlInput.isNotBlank(),
+                            modifier = Modifier.height(32.dp),
+                            shape = RoundedCornerShape(7.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+                        ) {
+                            Text(stringResource(Res.string.media_load), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
+                        }
+                    }
+                }
+                // The "now playing" label travels with the two action buttons as one group, so the
+                // status and the controls it describes wrap together rather than splitting across
+                // lines at a narrow width.
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (viewModel.isLoaded) {
+                        Text(
+                            text = stringResource(Res.string.media_now_playing),
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    if (onSavePreset != null) {
+                        SavePresetButton(
+                            onClick = { onSavePreset(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
+                            enabled = viewModel.isLoaded,
+                            tooltipText = stringResource(Res.string.save_preset)
+                        )
+                    }
+                    if (onAddToSchedule != null) {
+                        AddToScheduleButton(
+                            onClick = {
+                                onAddToSchedule(
+                                    viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType, viewModel.subtitleUrl
+                                )
+                            },
+                            enabled = viewModel.isLoaded,
+                            tooltipText = stringResource(Res.string.add_to_schedule)
+                        )
+                    }
+                    if (presenterManager != null) {
+                        GoLiveButton(
+                            onClick = {
+                                presenterManager.setPresentingMode(Presenting.MEDIA)
+                                presenterManager.setShowPresenterWindow(true)
+                                presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
+                                viewModel.play()
+                                wentLive(
+                                    ScheduleItem.MediaItem(
+                                        id = java.util.UUID.randomUUID().toString(),
+                                        mediaUrl = viewModel.mediaUrl,
+                                        mediaTitle = viewModel.mediaTitle,
+                                        mediaType = viewModel.mediaType,
+                                        subtitleUrl = viewModel.subtitleUrl,
+                                    )
+                                )
+                                onInstanceLinkSendProject?.invoke(
+                                    ScheduleItem.MediaItem(
+                                        id = java.util.UUID.randomUUID().toString(),
+                                        mediaUrl = viewModel.mediaUrl,
+                                        mediaTitle = viewModel.mediaTitle,
+                                        mediaType = viewModel.mediaType,
+                                        subtitleUrl = viewModel.subtitleUrl
+                                    )
+                                )
+                            },
+                            enabled = viewModel.isLoaded,
+                            tooltipText = stringResource(Res.string.go_live)
+                        )
+                    }
+                }
+            }
+
+            // ── Recent files bar ──────────────────────────────────────────
+            val recentOrdered = RecentMediaFiles.pinned +
+                RecentMediaFiles.paths.filter { it !in RecentMediaFiles.pinned }
+            if (recentOrdered.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(stringResource(Res.string.recent), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        KeyIconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
+                            Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        }
+                    }
+                    LazyRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        lazyItems(recentOrdered) { path ->
+                            val isPinned = path in RecentMediaFiles.pinned
+                            val isActive = viewModel.isLoaded && viewModel.mediaUrl == path
+                            val displayName = if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://")) path else java.io.File(path).name
+                            RecentChip(
+                                name = displayName,
+                                isActive = isActive,
+                                isPinned = isPinned,
+                                onOpen = {
+                                    val ext = java.io.File(path).extension.lowercase()
+                                    val type = when {
+                                        path.startsWith("http://") || path.startsWith("https://") ||
+                                            path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
+                                        ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
+                                        else -> Constants.MEDIA_TYPE_LOCAL
+                                    }
+                                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                    viewModel.loadMedia(path, type)
+                                    RecentMediaFiles.add(path)
+                                },
+                                onTogglePin = { RecentMediaFiles.togglePin(path) },
                             )
                         }
                     }
-                    RaisedButton(
-                        onClick = {
-                            if (urlInput.isNotBlank()) {
-                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
-                                val url = urlInput.trim()
-                                viewModel.loadMedia(url, Constants.MEDIA_TYPE_URL)
-                                RecentMediaFiles.add(url)
-                            }
-                        },
-                        enabled = urlInput.isNotBlank(),
-                        modifier = Modifier.height(32.dp),
-                        shape = RoundedCornerShape(7.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-                    ) {
-                        Text(stringResource(Res.string.media_load), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
-                    }
                 }
             }
-            // The "now playing" label travels with the two action buttons as one group, so the
-            // status and the controls it describes wrap together rather than splitting across
-            // lines at a narrow width.
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (viewModel.isLoaded) {
-                    Text(
-                        text = stringResource(Res.string.media_now_playing),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                if (onSavePreset != null) {
-                    SavePresetButton(
-                        onClick = { onSavePreset(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
-                        enabled = viewModel.isLoaded,
-                        tooltipText = stringResource(Res.string.save_preset)
-                    )
-                }
-                if (onAddToSchedule != null) {
-                    AddToScheduleButton(
-                        onClick = {
-                            onAddToSchedule(
-                                viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType, viewModel.subtitleUrl
-                            )
-                        },
-                        enabled = viewModel.isLoaded,
-                        tooltipText = stringResource(Res.string.add_to_schedule)
-                    )
-                }
-                if (presenterManager != null) {
-                    GoLiveButton(
-                        onClick = {
-                            presenterManager.setPresentingMode(Presenting.MEDIA)
-                            presenterManager.setShowPresenterWindow(true)
-                            presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
-                            viewModel.play()
-                            wentLive(
-                                ScheduleItem.MediaItem(
-                                    id = java.util.UUID.randomUUID().toString(),
-                                    mediaUrl = viewModel.mediaUrl,
-                                    mediaTitle = viewModel.mediaTitle,
-                                    mediaType = viewModel.mediaType,
-                                    subtitleUrl = viewModel.subtitleUrl,
-                                )
-                            )
-                            onInstanceLinkSendProject?.invoke(
-                                ScheduleItem.MediaItem(
-                                    id = java.util.UUID.randomUUID().toString(),
-                                    mediaUrl = viewModel.mediaUrl,
-                                    mediaTitle = viewModel.mediaTitle,
-                                    mediaType = viewModel.mediaType,
-                                    subtitleUrl = viewModel.subtitleUrl
-                                )
-                            )
-                        },
-                        enabled = viewModel.isLoaded,
-                        tooltipText = stringResource(Res.string.go_live)
-                    )
-                }
-            }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        // ── Recent files bar ──────────────────────────────────────────
-        val recentOrdered = RecentMediaFiles.pinned + RecentMediaFiles.paths.filter { it !in RecentMediaFiles.pinned }
-        if (recentOrdered.isNotEmpty()) {
-            Row(
+            // ── Playback controls bar ─────────────────────────────────────
+            FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .heightIn(min = 52.dp)
+                    .padding(horizontal = 16.dp, vertical = 5.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
+                // heightIn box, so the controls sat high in the bar instead of centred in it.
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
             ) {
-                Text(stringResource(Res.string.recent), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    KeyIconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                        Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                    }
-                }
-                LazyRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    lazyItems(recentOrdered) { path ->
-                        val isPinned = path in RecentMediaFiles.pinned
-                        val isActive = viewModel.isLoaded && viewModel.mediaUrl == path
-                        val displayName = if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://")) path else java.io.File(path).name
-                        RecentChip(
-                            name = displayName,
-                            isActive = isActive,
-                            isPinned = isPinned,
-                            onOpen = {
-                                val ext = java.io.File(path).extension.lowercase()
-                                val type = when {
-                                    path.startsWith("http://") || path.startsWith("https://") ||
-                                        path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
-                                    ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
-                                    else -> Constants.MEDIA_TYPE_LOCAL
-                                }
-                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
-                                viewModel.loadMedia(path, type)
-                                RecentMediaFiles.add(path)
-                            },
-                            onTogglePin = { RecentMediaFiles.togglePin(path) },
-                        )
-                    }
-                }
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        }
+                // One tint for every transport control, so the enabled/disabled ramp cannot drift
+                // between the rewind, stop, forward and volume buttons.
+                val transportTint = MaterialTheme.colorScheme.onSurface
+                    .copy(alpha = if (viewModel.isLoaded) 1f else DISABLED_TRANSPORT_ALPHA)
+                val keyColors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = transportTint,
+                    disabledContentColor = transportTint,
+                )
+                val litKeyColors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContentColor = transportTint,
+                )
 
-        // ── Playback controls bar ─────────────────────────────────────
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp, vertical = 5.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
-            // heightIn box, so the controls sat high in the bar instead of centred in it.
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
-        ) {
-            // One tint for every transport control, so the enabled/disabled ramp cannot drift
-            // between the rewind, stop, forward and volume buttons.
-            val transportTint = MaterialTheme.colorScheme.onSurface
-                .copy(alpha = if (viewModel.isLoaded) 1f else DISABLED_TRANSPORT_ALPHA)
-            val keyColors = IconButtonDefaults.iconButtonColors(
-                containerColor = Color.Transparent,
-                contentColor = transportTint,
-                disabledContentColor = transportTint,
-            )
-            val litKeyColors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                disabledContentColor = transportTint,
-            )
-
-            // Transport: raised keys, Play the biggest and lit
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.seekBackward() },
-                        enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                        colors = keyColors
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.ic_fast_rewind),
-                            contentDescription = stringResource(Res.string.media_seek_backward),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                }
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.togglePlayPause() },
-                        enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(PLAY_KEY_SIZE),
-                        shape = CircleShape,
-                        colors = litKeyColors
-                    ) {
-                        Icon(
-                            painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                            modifier = Modifier.size(15.dp),
-                        )
-                    }
-                }
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.stop), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.stop() },
-                        enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                        colors = keyColors
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.ic_stop),
-                            contentDescription = stringResource(Res.string.stop),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                }
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.seekForward() },
-                        enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                        colors = keyColors
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.ic_fast_forward),
-                            contentDescription = stringResource(Res.string.media_seek_forward),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                }
-            }
-
-            // (Elapsed / total time now flank the seek bar below, so the combined time is
-            // no longer shown here.)
-
-            // Divider
-            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-            // Loop: the button arms it, and the count beside it says how many repeats to play.
-            // The count only appears while looping is on, so the bar stays as it was otherwise.
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                val loopLabel = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)
-                TooltipArea(
-                    tooltip = { TransportTooltip(loopLabel) },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(
-                        anchor = Alignment.BottomCenter,
-                        offset = DpOffset(0.dp, 4.dp)
-                    )
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.toggleLooping() },
-                        enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                        colors = if (viewModel.isLooping) litKeyColors else keyColors
-                    ) {
-                        // TooltipArea is a hover popup and contributes no semantics, so without
-                        // this the button would have no name at all.
-                        Icon(
-                            painterResource(Res.drawable.ic_refresh),
-                            contentDescription = loopLabel,
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                }
-                if (viewModel.isLooping) {
-                    val loopCountHint = stringResource(Res.string.media_loop_count_tooltip)
+                // Transport: raised keys, Play the biggest and lit
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     TooltipArea(
-                        tooltip = { TransportTooltip(loopCountHint) },
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        RaisedIconButton(
+                            onClick = { viewModel.seekBackward() },
+                            enabled = viewModel.isLoaded,
+                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                            colors = keyColors
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_fast_rewind),
+                                contentDescription = stringResource(Res.string.media_seek_backward),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        RaisedIconButton(
+                            onClick = { viewModel.togglePlayPause() },
+                            enabled = viewModel.isLoaded,
+                            modifier = Modifier.size(PLAY_KEY_SIZE),
+                            shape = CircleShape,
+                            colors = litKeyColors
+                        ) {
+                            Icon(
+                                painterResource(
+                                    if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                                ),
+                                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                                modifier = Modifier.size(15.dp),
+                            )
+                        }
+                    }
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.stop), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        RaisedIconButton(
+                            onClick = { viewModel.stop() },
+                            enabled = viewModel.isLoaded,
+                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                            colors = keyColors
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_stop),
+                                contentDescription = stringResource(Res.string.stop),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        RaisedIconButton(
+                            onClick = { viewModel.seekForward() },
+                            enabled = viewModel.isLoaded,
+                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                            colors = keyColors
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_fast_forward),
+                                contentDescription = stringResource(Res.string.media_seek_forward),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                }
+
+                // (Elapsed / total time now flank the seek bar below, so the combined time is
+                // no longer shown here.)
+
+                // Divider
+                Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+                // Loop: the button arms it, and the count beside it says how many repeats to play.
+                // The count only appears while looping is on, so the bar stays as it was otherwise.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val loopLabel = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)
+                    TooltipArea(
+                        tooltip = { TransportTooltip(loopLabel) },
                         tooltipPlacement = TooltipPlacement.ComponentRect(
                             anchor = Alignment.BottomCenter,
                             offset = DpOffset(0.dp, 4.dp)
                         )
                     ) {
-                        NumberSettingsTextField(
-                            // Wide enough for the longest of the translated labels
-                            // ("SCHLEIFEN", "TAKRORLAR") before it starts ellipsizing.
-                            modifier = Modifier.width(96.dp),
-                            label = stringResource(Res.string.media_loop_count),
-                            initialText = viewModel.loopCount,
-                            range = 0..MAX_LOOP_COUNT,
-                            onValueChange = { viewModel.setLoopCount(it) }
-                        )
+                        RaisedIconButton(
+                            onClick = { viewModel.toggleLooping() },
+                            enabled = viewModel.isLoaded,
+                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                            colors = if (viewModel.isLooping) litKeyColors else keyColors
+                        ) {
+                            // TooltipArea is a hover popup and contributes no semantics, so without
+                            // this the button would have no name at all.
+                            Icon(
+                                painterResource(Res.drawable.ic_refresh),
+                                contentDescription = loopLabel,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                    if (viewModel.isLooping) {
+                        val loopCountHint = stringResource(Res.string.media_loop_count_tooltip)
+                        TooltipArea(
+                            tooltip = { TransportTooltip(loopCountHint) },
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            )
+                        ) {
+                            NumberSettingsTextField(
+                                // Wide enough for the longest of the translated labels
+                                // ("SCHLEIFEN", "TAKRORLAR") before it starts ellipsizing.
+                                modifier = Modifier.width(96.dp),
+                                label = stringResource(Res.string.media_loop_count),
+                                initialText = viewModel.loopCount,
+                                range = 0..MAX_LOOP_COUNT,
+                                onValueChange = { viewModel.setLoopCount(it) }
+                            )
+                        }
                     }
                 }
-            }
 
-            // Scale: each click moves Fit → Fill → Stretch on every profile at once -- see the
-            // Pictures tab's button, which works the same way.
-            val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
-            val scaleMode = shared ?: OutputScaleMode.FIT
-            val scaled = shared != OutputScaleMode.FIT
-            val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.MEDIA)
-            TooltipArea(
-                tooltip = { TransportTooltip(scaleLabel) },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp)
-                )
-            ) {
-                RaisedIconButton(
-                    onClick = {
-                        val next = if (shared == null) scaleMode else scaleMode.next()
-                        onSettingsChange { s -> s.withMediaScaleEverywhere(next) }
-                    },
-                    enabled = viewModel.isLoaded,
-                    modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                    colors = if (scaled) litKeyColors else keyColors
-                ) {
-                    Icon(
-                        scaleMode.icon,
-                        contentDescription = scaleLabel,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-            }
-
-            // Divider
-            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-            // Subtitles: off, one of the tracks VLC found, or a file of the operator's own.
-            var subtitlesExpanded by remember { mutableStateOf(false) }
-            val subtitlesLabel = stringResource(Res.string.media_subtitles)
-            val subtitlesShowing = viewModel.subtitlesVisible
-            val subtitleFilesLabel = stringResource(Res.string.media_subtitles_files)
-            val subtitleFileTitle = stringResource(Res.string.media_subtitles_load_file)
-            Box {
+                // Scale: each click moves Fit → Fill → Stretch on every profile at once -- see the
+                // Pictures tab's button, which works the same way.
+                val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
+                val scaleMode = shared ?: OutputScaleMode.FIT
+                val scaled = shared != OutputScaleMode.FIT
+                val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.MEDIA)
                 TooltipArea(
-                    tooltip = { TransportTooltip(subtitlesLabel) },
+                    tooltip = { TransportTooltip(scaleLabel) },
                     tooltipPlacement = TooltipPlacement.ComponentRect(
                         anchor = Alignment.BottomCenter,
                         offset = DpOffset(0.dp, 4.dp)
                     )
                 ) {
                     RaisedIconButton(
-                        onClick = { subtitlesExpanded = true },
-                        enabled = viewModel.isLoaded && !viewModel.isAudioFile,
+                        onClick = {
+                            val next = if (shared == null) scaleMode else scaleMode.next()
+                            onSettingsChange { s -> s.withMediaScaleEverywhere(next) }
+                        },
+                        enabled = viewModel.isLoaded,
                         modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                        colors = if (subtitlesShowing) litKeyColors else keyColors
+                        colors = if (scaled) litKeyColors else keyColors
                     ) {
                         Icon(
-                            painterResource(Res.drawable.ic_subtitles),
-                            contentDescription = subtitlesLabel,
+                            scaleMode.icon,
+                            contentDescription = scaleLabel,
                             modifier = Modifier.size(16.dp),
                         )
                     }
                 }
-                DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
-                    SubtitleMenuItems(
-                        viewModel = viewModel,
-                        profiles = appSettings.projectionSettings.outputProfiles,
-                        loadFileLabel = subtitleFileTitle,
-                        onLoadFile = {
-                            subtitlesExpanded = false
-                            scope.launch {
-                                // The video's own folder, where a subtitle for it almost always
-                                // sits, rather than the top of the media library.
-                                val beside = runCatching { Path(viewModel.mediaUrl).parent }.getOrNull()
-                                val f = FileChooser.platformInstance.chooseSingle(
-                                    path = beside ?: Path(appSettings.mediaStorageDirectory),
-                                    title = subtitleFileTitle,
-                                    filters = listOf(
-                                        FileNameExtensionFilter(subtitleFilesLabel, "srt", "vtt", "ass", "ssa", "sub")
-                                    ),
-                                    selectDirectory = false
-                                )
-                                // Added, not substituted: a second file is a second language.
-                                if (f != null) viewModel.addSubtitleFile(f.absolutePathString())
-                            }
-                        },
-                    )
-                }
-            }
 
-            // Divider
-            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                // Divider
+                Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-            // Volume: a mute key with the slider beside it, both always in the bar
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                val muteLabel = stringResource(
-                    if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
-                )
-                TooltipArea(
-                    tooltip = { TransportTooltip(muteLabel) },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.toggleMute() },
-                        enabled = viewModel.isLoaded,
-                        modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                        colors = keyColors
+                // Subtitles: off, one of the tracks VLC found, or a file of the operator's own.
+                var subtitlesExpanded by remember { mutableStateOf(false) }
+                val subtitlesLabel = stringResource(Res.string.media_subtitles)
+                val subtitlesShowing = viewModel.subtitlesVisible
+                val subtitleFilesLabel = stringResource(Res.string.media_subtitles_files)
+                val subtitleFileTitle = stringResource(Res.string.media_subtitles_load_file)
+                Box {
+                    TooltipArea(
+                        tooltip = { TransportTooltip(subtitlesLabel) },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(
+                            anchor = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 4.dp)
+                        )
                     ) {
-                        Icon(
-                            painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
-                            contentDescription = muteLabel,
-                            modifier = Modifier.size(16.dp)
+                        RaisedIconButton(
+                            onClick = { subtitlesExpanded = true },
+                            enabled = viewModel.isLoaded && !viewModel.isAudioFile,
+                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                            colors = if (subtitlesShowing) litKeyColors else keyColors
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_subtitles),
+                                contentDescription = subtitlesLabel,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                    DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
+                        SubtitleMenuItems(
+                            viewModel = viewModel,
+                            profiles = appSettings.projectionSettings.outputProfiles,
+                            loadFileLabel = subtitleFileTitle,
+                            onLoadFile = {
+                                subtitlesExpanded = false
+                                scope.launch {
+                                    // The video's own folder, where a subtitle for it almost always
+                                    // sits, rather than the top of the media library.
+                                    val beside = runCatching { Path(viewModel.mediaUrl).parent }.getOrNull()
+                                    val f = FileChooser.platformInstance.chooseSingle(
+                                        path = beside ?: Path(appSettings.mediaStorageDirectory),
+                                        title = subtitleFileTitle,
+                                        filters = listOf(
+                                            FileNameExtensionFilter(
+                                                subtitleFilesLabel, "srt", "vtt", "ass", "ssa", "sub",
+                                            )
+                                        ),
+                                        selectDirectory = false
+                                    )
+                                    // Added, not substituted: a second file is a second language.
+                                    if (f != null) viewModel.addSubtitleFile(f.absolutePathString())
+                                }
+                            },
                         )
                     }
                 }
-                SlimSlider(
-                    value = if (viewModel.isMuted) 0f else viewModel.volume,
-                    onValueChange = { viewModel.setVolume(it) },
-                    valueRange = 0f..1f,
-                    enabled = viewModel.isLoaded,
-                    modifier = Modifier.width(VOLUME_SLIDER_WIDTH),
-                    trailingLabel = "${(viewModel.effectiveVolume * 100).toInt()}%"
-                )
+
+                // Divider
+                Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+                // Volume: a mute key with the slider beside it, both always in the bar
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    val muteLabel = stringResource(
+                        if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
+                    )
+                    TooltipArea(
+                        tooltip = { TransportTooltip(muteLabel) },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        RaisedIconButton(
+                            onClick = { viewModel.toggleMute() },
+                            enabled = viewModel.isLoaded,
+                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
+                            colors = keyColors
+                        ) {
+                            Icon(
+                                painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
+                                contentDescription = muteLabel,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    SlimSlider(
+                        value = if (viewModel.isMuted) 0f else viewModel.volume,
+                        onValueChange = { viewModel.setVolume(it) },
+                        valueRange = 0f..1f,
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.width(VOLUME_SLIDER_WIDTH),
+                        trailingLabel = "${(viewModel.effectiveVolume * 100).toInt()}%"
+                    )
+                }
             }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
+        // Seek bar and preview share one card.
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth()
+                .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                .bibleListCard()
+        ) {
         // ── Seek bar ──────────────────────────────────────────────────
         if (viewModel.duration > 0) {
             MediaSeekBar(
@@ -870,9 +875,13 @@ fun MediaTab(
                 tabId = Constants.PREVIEW_TAB_MEDIA,
                 mode = Presenting.MEDIA,
                 onSettingsChange = onSettingsChange,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp),
             )
-            Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 18.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.weight(1f).fillMaxWidth()
+                    .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
+                contentAlignment = Alignment.TopCenter,
+            ) {
                 Box(
                     modifier = Modifier
                         .aspectRatio(previewOutput.size.aspectRatio)
@@ -899,6 +908,7 @@ fun MediaTab(
                 }
             }
         }
+        } // end card
     }
 }
 

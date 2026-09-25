@@ -558,8 +558,7 @@ fun ScheduleTab(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize()
-                    .padding(horizontal = 8.dp)
-                    .padding(top = 6.dp, bottom = 10.dp, end = 4.dp)
+                    .padding(start = 4.dp, top = 6.dp, bottom = 10.dp)
             ) {
 
                 itemsIndexed(rows, key = { _, item -> item.id }) { index, item ->

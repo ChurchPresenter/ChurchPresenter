@@ -134,7 +134,8 @@ internal fun ScheduleHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            // Flush against the splitter on the right, like every other panel's cards.
+            .topBarCard(end = 0.dp)
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

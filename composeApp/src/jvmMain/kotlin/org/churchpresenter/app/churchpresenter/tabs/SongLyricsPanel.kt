@@ -39,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.app.churchpresenter.composables.SectionLabelRow
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
@@ -122,6 +121,7 @@ internal fun RowScope.SongLyricsPanel(
         modifier = Modifier
             .width(with(density) { lyricsPanelPx.toDp() })
             .fillMaxHeight()
+            .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
             .bibleListCard()
     ) {
         val currentSong = filteredSongs.getOrNull(selectedSongIndex)

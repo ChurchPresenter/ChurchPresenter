@@ -272,8 +272,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             // Bible's search-row inset (BibleSearchRow.kt), so the two tabs' top bars sit on the
             // same margins instead of Songs starting 8.dp further left and 6.dp higher.
             modifier = Modifier.fillMaxWidth()
-                .heightIn(min = SongsTopBarMinHeight)
-                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp),
+                .searchBarCard(end = 0.dp)
+                .heightIn(min = SongsTopBarMinHeight),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
             itemVerticalAlignment = Alignment.CenterVertically
@@ -390,8 +390,6 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
 
         }
 
-        Spacer(Modifier.height(8.dp))
-
         // Shared horizontal scroll state for header + song list
         val hScrollState = rememberScrollState()
 
@@ -403,7 +401,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
         }
 
         // The header and the list share one card.
-        Column(modifier = Modifier.weight(1f).fillMaxWidth().bibleListCard()) {
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 4.dp, bottom = 4.dp).bibleListCard()) {
         // Column header row — scrolls horizontally with the song list
         // Wrapped in a Box so the right-click DropdownMenu can anchor here
         Box(

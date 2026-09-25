@@ -85,6 +85,19 @@ internal fun bibleListCardFill(): Color {
     return if (isDarkScheme(scheme)) scheme.surfaceContainer else scheme.surface
 }
 
+private const val INSET_SHADE_DARK = 0.18f
+private const val INSET_SHADE_LIGHT = 0.04f
+
+/** A section grouped inside a card: a shade darker than the card around it. */
+@Composable
+@ReadOnlyComposable
+internal fun bibleInsetFill(): Color =
+    lerp(
+        bibleListCardFill(),
+        Color.Black,
+        if (isDarkScheme(MaterialTheme.colorScheme)) INSET_SHADE_DARK else INSET_SHADE_LIGHT,
+    )
+
 /** The rounded panel a list sits in. */
 internal fun Modifier.bibleListCard(): Modifier = composed {
     val scheme = MaterialTheme.colorScheme

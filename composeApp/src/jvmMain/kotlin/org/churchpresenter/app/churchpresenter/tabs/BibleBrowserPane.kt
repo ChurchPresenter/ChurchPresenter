@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -113,7 +111,7 @@ internal fun ColumnScope.BibleBrowserPane(
     footer: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-        Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp, end = 4.dp)) {
 
             BookAndChapterCards(
                 books = books,
@@ -193,7 +191,6 @@ internal fun ColumnScope.BibleBrowserPane(
                 }
                 }
 
-                Spacer(Modifier.height(8.dp))
                 footer()
             }
 
