@@ -6,7 +6,7 @@ import java.time.LocalDate
 private const val MAX_BOX_CHARS = 256 * 1024
 
 /** Seals and opens the records the relay carries. */
-class Sealing(private val envelope: Envelope, private val instanceId: String) {
+class Sealing(private val envelope: Envelope, internal val instanceId: String) {
 
     private val json = Json {
         ignoreUnknownKeys = true
