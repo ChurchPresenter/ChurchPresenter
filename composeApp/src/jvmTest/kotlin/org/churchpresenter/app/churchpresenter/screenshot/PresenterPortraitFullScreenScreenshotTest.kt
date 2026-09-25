@@ -22,6 +22,8 @@ import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
@@ -660,6 +662,83 @@ class PresenterPortraitFullScreenScreenshotTest {
         BiblePresenter(selectedVerses = listOf(verse()), appSettings = bibleSettings(textFontSize = 160))
     }
 
+    // ── The backdrop and the stroke, in portrait ────────────────────────────────────────────────
+    //
+    // Neither portrait suite had a single text-backdrop or outline state. That is the worst gap of
+    // the set: a plate is drawn outside the text's own box on purpose and is only cut off when an
+    // ancestor clips *and* the text fills that box — and a narrow frame is what makes a line of
+    // scripture fill it. Landscape leaves slack at the end of a line; portrait does not.
+
+    @Test
+    fun `a verse on a plate`() = shoot("bible_text_backdrop") {
+        BiblePresenter(selectedVerses = listOf(verse()), appSettings = withBibleTextBackdrop(LINE_PLATE))
+    }
+
+    @Test
+    fun `a verse in a bordered box`() = shoot("bible_text_backdrop_border") {
+        BiblePresenter(selectedVerses = listOf(verse()), appSettings = withBibleTextBackdrop(BORDER_BOX))
+    }
+
+    /**
+     * Two translations bordered, which is the state that made the clipping unmistakable on a wide
+     * screen: the English box lost its left edge and the Russian one — being wider — lost both and
+     * drew as two horizontal rules with nothing joining them. Narrower here, so worse.
+     */
+    @Test
+    fun `two translations in a bordered box`() = shoot("bible_two_translations_border") {
+        BiblePresenter(
+            selectedVerses = listOf(verse(), verseRu()),
+            appSettings = withBibleTextBackdrop(BORDER_BOX, count = 2),
+        )
+    }
+
+    @Test
+    fun `lyrics on a plate`() = shoot("song_backdrop") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
+        )
+    }
+
+    @Test
+    fun `lyrics in a bordered box`() = shoot("song_backdrop_border") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = BORDER_BOX)),
+        )
+    }
+
+    /** Left-aligned *and* bordered: the pairing no image anywhere made before this batch. */
+    @Test
+    fun `lyrics aligned left in a bordered box`() = shoot("song_lyrics_border_left") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    lyricsBackdrop = BORDER_BOX,
+                    lyricsHorizontalAlignment = Constants.LEFT,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `a verse with an outline on its glyphs`() = shoot("bible_text_outline") {
+        BiblePresenter(selectedVerses = listOf(verse()), appSettings = withBibleTextOutline(GLYPH_STROKE))
+    }
+
+    @Test
+    fun `lyrics with an outline on their glyphs`() = shoot("song_lyrics_outline") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    outlines = SongSettings().outlines.copy(lyrics = GLYPH_STROKE),
+                ),
+            ),
+        )
+    }
+
     // ── Songs: the broadcast outputs ────────────────────────────────────────────────────────────
 
     // Shot against coloured text on a coloured ground: the default white-on-black slide rasterises
@@ -1200,6 +1279,22 @@ class PresenterPortraitFullScreenScreenshotTest {
         ),
     )
 
+    /** The Bible stack with [backdrop] behind each of [count] translations' verse text. */
+    private fun withBibleTextBackdrop(backdrop: TextBackdrop, count: Int = 1) = AppSettings(
+        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
+            listOf(KJV, "rst.spb").take(count).map {
+                BibleTranslationSettings(fileName = it, textBackdrop = backdrop)
+            },
+        ),
+    )
+
+    /** The same, for the stroke around the verse's glyphs. */
+    private fun withBibleTextOutline(outline: TextOutline) = AppSettings(
+        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
+            listOf(BibleTranslationSettings(fileName = KJV, textOutline = outline)),
+        ),
+    )
+
     private fun verse(
         number: Int = 16,
         text: String = "For God so loved the world, that he gave his only begotten Son.",
@@ -1394,6 +1489,25 @@ class PresenterPortraitFullScreenScreenshotTest {
             "The LORD is my shepherd; I shall not want. He maketh me to lie down in green " +
                 "pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth " +
                 "me in the paths of righteousness for his name's sake."
+
+        /** A band behind each line. Not near-black: a dark plate on a dark slide shows nothing. */
+        val LINE_PLATE = TextBackdrop(
+            lineBackground = true,
+            lineBackgroundColor = "#1B3A6B",
+            lineBackgroundOpacity = 85,
+        )
+
+        /** A box around the block. No fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
+
+        /** `enabled` defaults to false, and without it `isVisible` is false and nothing is stroked. */
+        val GLYPH_STROKE = TextOutline(enabled = true, width = 6, color = "#101820")
 
         const val KJV = "kjv.spb"
 
