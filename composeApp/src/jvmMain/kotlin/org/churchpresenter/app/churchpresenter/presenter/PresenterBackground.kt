@@ -8,6 +8,7 @@
  */
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -304,7 +306,12 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
  * The wash's colour (or null for nothing) and whether it is painted behind the band too — see
  * [resolveAboveBand].
  */
-internal data class AboveBand(val fill: Color?, val fillsBehindBand: Boolean)
+internal data class AboveBand(
+    val fill: Color?,
+    val fillsBehindBand: Boolean,
+    /** The picture, clip or camera drawn there instead of [fill]; null for a colour or nothing. */
+    val media: ResolvedBackground? = null,
+)
 
 /**
  * What to wash over the part of a lower-third output the band does not cover, or null for nothing,
@@ -321,6 +328,10 @@ internal data class AboveBand(val fill: Color?, val fillsBehindBand: Boolean)
  * surface can carry a picture of its own while still taking the shared wash above it. Reading the
  * band's type instead would have made "has its own picture" silently mean "loses the wash".
  *
+ * `Image`, `Video` and `Camera` come back as [AboveBand.media] with no fill, and only when there is
+ * something to draw — a picture or clip that is gone, or no device chosen, is nothing rather than a
+ * black rectangle over two thirds of the output.
+ *
  * `Transparent` at the end of the chain returns a null fill rather than [Color.Transparent]:
  * nothing is drawn there at all, which is what a Browser Source or NDI alpha output needs in order
  * to key. [AboveBand.fillsBehindBand] follows the same defer chain independently of the colour, so
@@ -331,10 +342,28 @@ internal fun resolveAboveBand(settings: BackgroundSettings, config: BackgroundCo
     val fillsBehindBand =
         if (defers) settings.defaultLowerThirdAboveBandFillsBehindBand else config.aboveBandFillsBehindBand
     val type = if (defers) settings.defaultLowerThirdAboveBandType else config.aboveBandType
-    if (type != Constants.BACKGROUND_COLOR) return AboveBand(null, fillsBehindBand)
-    val hex = if (defers) settings.defaultLowerThirdAboveBandColor else config.aboveBandColor
-    val opacity = if (defers) settings.defaultLowerThirdAboveBandOpacity else config.aboveBandOpacity
-    return AboveBand(parseHexColor(hex).copy(alpha = opacity.coerceIn(0f, 1f)), fillsBehindBand)
+    val opacity = (if (defers) settings.defaultLowerThirdAboveBandOpacity else config.aboveBandOpacity)
+        .coerceIn(0f, 1f)
+    return when (type) {
+        Constants.BACKGROUND_COLOR -> {
+            val hex = if (defers) settings.defaultLowerThirdAboveBandColor else config.aboveBandColor
+            AboveBand(parseHexColor(hex).copy(alpha = opacity), fillsBehindBand)
+        }
+        Constants.BACKGROUND_IMAGE, Constants.BACKGROUND_VIDEO, Constants.BACKGROUND_CAMERA -> {
+            val media = ResolvedBackground(
+                type = type,
+                imagePath = if (defers) settings.defaultLowerThirdAboveBandImage else config.aboveBandImage,
+                videoPath = if (defers) settings.defaultLowerThirdAboveBandVideo else config.aboveBandVideo,
+                color = Color.Black,
+                opacity = opacity,
+                camera = if (defers) settings.defaultLowerThirdAboveBandCamera else config.aboveBandCamera,
+            )
+            val drawable = media.usesVideo || media.usesCamera ||
+                (type == Constants.BACKGROUND_IMAGE && media.imagePath.isNotEmpty())
+            AboveBand(null, fillsBehindBand, media.takeIf { drawable })
+        }
+        else -> AboveBand(null, fillsBehindBand)
+    }
 }
 
 /**
@@ -364,18 +393,30 @@ internal fun resolveAboveBand(settings: BackgroundSettings, config: BackgroundCo
  * band would be wrong for that specific setup.
  */
 @Composable
-internal fun BoxScope.AboveBandFill(fill: Color?, bandFraction: Float, fillsBehindBand: Boolean) {
-    if (fill == null) return
-    if (fillsBehindBand) {
-        Box(modifier = Modifier.fillMaxSize().background(fill))
+internal fun BoxScope.AboveBandFill(above: AboveBand, bandFraction: Float, show: Boolean = true) {
+    if (!show || (above.fill == null && above.media == null)) return
+    val area = if (above.fillsBehindBand) {
+        Modifier.fillMaxSize()
     } else {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight((1f - bandFraction + ABOVE_BAND_OVERLAP_FRACTION).coerceAtMost(1f))
-                .align(Alignment.TopCenter)
-                .background(fill)
-        )
+        Modifier
+            .fillMaxWidth()
+            .fillMaxHeight((1f - bandFraction + ABOVE_BAND_OVERLAP_FRACTION).coerceAtMost(1f))
+            .align(Alignment.TopCenter)
+    }
+    above.fill?.let { Box(modifier = area.background(it)) }
+    above.media?.let { media ->
+        Box(modifier = area.clipToBounds()) {
+            val bitmap = rememberBackgroundBitmap(media, isLowerThird = false)
+            if (bitmap != null) {
+                Image(
+                    painter = BitmapPainter(bitmap),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().alpha(media.opacity),
+                )
+            }
+            BandMediaLayers(media)
+        }
     }
 }
 

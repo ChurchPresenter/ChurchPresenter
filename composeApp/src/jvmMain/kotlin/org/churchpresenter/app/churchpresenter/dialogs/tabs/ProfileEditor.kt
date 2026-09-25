@@ -41,6 +41,7 @@ import churchpresenter.composeapp.generated.resources.output_profile_delete_bloc
 import churchpresenter.composeapp.generated.resources.output_profile_delete_confirm
 import churchpresenter.composeapp.generated.resources.output_profile_display_mode
 import churchpresenter.composeapp.generated.resources.output_profile_nothing_to_style
+import churchpresenter.composeapp.generated.resources.output_profile_placement
 import churchpresenter.composeapp.generated.resources.output_profile_scale
 import churchpresenter.composeapp.generated.resources.output_profile_songs_off
 import churchpresenter.composeapp.generated.resources.output_profile_sources
@@ -259,6 +260,12 @@ private fun ProfileSetup(
         if (!stageMonitor && (profile.showPictures || profile.showMedia)) {
             SetupRow(stringResource(Res.string.output_profile_scale)) {
                 ProfileScaleRow(profile, onProfileChange)
+            }
+        }
+        // A lower third only: on a full screen there is nowhere else for the content to go.
+        if (profile.isLowerThird && profile.placeableShown().isNotEmpty()) {
+            SetupRow(stringResource(Res.string.output_profile_placement)) {
+                ProfilePlacementRow(profile, onProfileChange)
             }
         }
     }

@@ -23,15 +23,19 @@ internal const val QUICK_BACKGROUND_SLOTS = 10
 internal fun quickBackgroundLabel(entry: QuickBackground): String = songBackgroundName(entry.background)
 
 /**
- * A new tray entry, opaque black until the panel says otherwise.
+ * A new tray entry: an opaque black full screen, and a lower third that inherits.
  *
- * Never [SongBackgroundType.INHERIT]: a quick background exists to override, and one that inherited
- * would be a tile that does nothing when pressed.
+ * The full-screen half is never [SongBackgroundType.INHERIT] — a quick background exists to
+ * override, and one that inherited there would be a tile that does nothing when pressed. The
+ * lower-third half starts inheriting so that picking a tile leaves each output's own lower-third
+ * band as configured; seeding it black as well painted every band solid black the moment a tile
+ * was picked.
  */
-internal fun newQuickBackground(): QuickBackground {
-    val black = SongBackground(type = SongBackgroundType.COLOR, color = "#000000")
-    return QuickBackground(id = UUID.randomUUID().toString(), background = black, lowerThirdBackground = black)
-}
+internal fun newQuickBackground(): QuickBackground = QuickBackground(
+    id = UUID.randomUUID().toString(),
+    background = SongBackground(type = SongBackgroundType.COLOR, color = "#000000"),
+    lowerThirdBackground = SongBackground(),
+)
 
 /** Which tray slot [keyEvent] asks for, or null when it asks for none. */
 internal fun quickBackgroundSlotFor(shortcuts: ShortcutMap, keyEvent: KeyEvent): Int? =

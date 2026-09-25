@@ -9,6 +9,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.SongSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** Which part of the output each surface paints, and how tall its band is. */
@@ -76,6 +77,37 @@ class BackgroundScopesTest {
             val offers = Constants.BACKGROUND_LOTTIE in it.typeOptions()
             val isContentBand = it == BackgroundScope.BIBLE_LOWER_THIRD || it == BackgroundScope.SONG_LOWER_THIRD
             assertEquals(isContentBand, offers, "$it offers Lottie")
+        }
+    }
+
+    @Test
+    fun `above the band offers a picture, a clip and a camera but never a gradient or a Lottie`() {
+        BackgroundScope.entries.forEach {
+            val offered = it.aboveBandTypeOptions()
+            val media = listOf(Constants.BACKGROUND_IMAGE, Constants.BACKGROUND_VIDEO, Constants.BACKGROUND_CAMERA)
+            media.forEach { type -> assertTrue(type in offered, "$it offers $type above the band") }
+            assertFalse(Constants.BACKGROUND_GRADIENT in offered, "$it offers no gradient above the band")
+            assertFalse(Constants.BACKGROUND_LOTTIE in offered, "$it offers no Lottie above the band")
+        }
+    }
+
+    /** The same hand-copying hazard as the band's camera above, for the Default Lower Third's flat fields. */
+    @Test
+    fun `what is above the band survives being written to a surface and read back`() {
+        val camera = CameraDeviceRef(devicePath = "avfoundation://1", deviceName = "Logitech BRIO")
+        val config = BackgroundConfig(
+            aboveBandType = Constants.BACKGROUND_VIDEO,
+            aboveBandImage = "/pictures/hall.jpg",
+            aboveBandVideo = "/clips/loop.mp4",
+            aboveBandCamera = camera,
+        )
+
+        BackgroundScope.entries.filter { it.lowerThird }.forEach { scope ->
+            val read = BackgroundSettings().withConfigFor(scope, config).configFor(scope)
+
+            assertEquals("/pictures/hall.jpg", read.aboveBandImage, "$scope keeps its picture")
+            assertEquals("/clips/loop.mp4", read.aboveBandVideo, "$scope keeps its clip")
+            assertEquals(camera, read.aboveBandCamera, "$scope keeps its camera")
         }
     }
 }

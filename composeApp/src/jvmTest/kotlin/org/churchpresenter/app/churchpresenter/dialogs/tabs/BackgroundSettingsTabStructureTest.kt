@@ -81,14 +81,11 @@ class BackgroundSettingsTabStructureTest {
     fun `every surface offers the five types that stand on their own`() = backgroundTab { _ ->
         Surface.entries.forEach { surface ->
             openSurface(surface)
-            listOf(TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA).forEach {
-                assertEquals(1, controlsCount(it), "${surface.name} must offer $it")
-            }
-            // A lower third also carries the wash's own type row, which offers a Color and a
-            // Transparent of its own — deliberately the same two words, since it is the same
-            // choice one rectangle up. See BackgroundAboveBandSectionTest.
+            // A lower third also carries the area above the band's own type row, which offers all
+            // five of its own — deliberately the same words, since it is the same choice one
+            // rectangle up. See BackgroundAboveBandSectionTest.
             val rows = if (surface.title.contains("Lower Third")) 2 else 1
-            listOf(TypeLabel.COLOR, TypeLabel.TRANSPARENT).forEach {
+            listOf(TypeLabel.COLOR, TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA, TypeLabel.TRANSPARENT).forEach {
                 assertEquals(rows, controlsCount(it), "${surface.name} must offer $it")
             }
         }
