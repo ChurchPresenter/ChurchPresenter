@@ -1,10 +1,13 @@
 package org.churchpresenter.calendar.sync
 
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.storedInstant
 import org.churchpresenter.core.models.songs.SongItem
+import java.security.MessageDigest
 import java.time.Instant
 import java.time.LocalDate
 
@@ -34,6 +37,11 @@ class PairedDevice(val id: String, val name: String, val pairedAt: String, val l
  * the [Resolver], merge it into the local file as a shared folder would, save, push the merged
  * picture back.
  *
+ * The push is skipped when it would only repeat the last one: nothing arrived from the relay and
+ * the unsealed picture hashes the same as what [pushed] remembers for this instance. A timer round
+ * then costs the relay one read and no writes. It still pushes at least once a day, so any
+ * drift between the two sides heals and the relay keeps seeing this desktop.
+ *
  * [onSaved] is called after every write of `calendar.json` — see `CalendarFileWatcher.savedHere`.
  */
 class SyncCoordinator(
@@ -46,7 +54,10 @@ class SyncCoordinator(
     private val today: () -> LocalDate = LocalDate::now,
     private val now: () -> Instant = Instant::now,
     private val onSaved: () -> Unit = {},
+    /** What was last pushed; without one, every round pushes. */
+    private val pushed: PushedStateStore? = null,
 ) {
+    private val json = Json { encodeDefaults = true; explicitNulls = false; classDiscriminator = "type" }
 
     /** Pull, merge, save and push. Retries the push when the relay moved on mid-round. */
     fun sync(token: String, cursor: Long): SyncOutcome {
@@ -60,7 +71,7 @@ class SyncCoordinator(
                 return merged.outcome(changes.rev, devices, otherDesktop = changes.lastDesktopInstall)
             }
             try {
-                val rev = push(token, changes.rev, merged.document)
+                val rev = push(token, changes.rev, merged.document, relayChanged = merged.arrived > 0)
                 return merged.outcome(rev, devices)
             } catch (_: RelayFailure.Conflict) {
                 since = changes.rev
@@ -89,7 +100,7 @@ class SyncCoordinator(
     /** Pushes the local file as it stands; a phone edit in the meantime turns this into a full [sync]. */
     fun pushLocal(token: String, cursor: Long): SyncOutcome = try {
         SyncOutcome(
-            cursor = push(token, cursor, store.load().document),
+            cursor = push(token, cursor, store.load().document, relayChanged = false),
             phoneChanges = 0,
             unresolvedRows = 0,
             droppedRows = 0,
@@ -98,14 +109,46 @@ class SyncCoordinator(
         sync(token, cursor)
     }
 
-    private fun push(token: String, ifRev: Long, document: CalendarDocument): Long {
-        val presets = presetStore?.load()?.presets.orEmpty()
+    /**
+     * The picture as it stands, unless it is what was last pushed and nothing has come from the
+     * relay since — then the relay already holds it, and [ifRev] is where it stands.
+     */
+    private fun push(token: String, ifRev: Long, document: CalendarDocument, relayChanged: Boolean): Long {
+        val services = Projection.services(document, today())
+        val tombstones = Projection.tombstones(document)
+        val presets = PresetIndex(Projection.presets(presetStore?.load()?.presets.orEmpty()))
+        val hash = fingerprint(services, tombstones, presets)
+        val at = now()
+        if (!relayChanged && alreadyPushed(hash, at)) return ifRev
         val state = StateRequest(
-            records = Projection.services(document, today()).map(sealing::seal),
-            tombstones = Projection.tombstones(document),
-            presetsBox = sealing.sealPresets(PresetIndex(Projection.presets(presets))),
+            records = services.map(sealing::seal),
+            tombstones = tombstones,
+            presetsBox = sealing.sealPresets(presets),
         )
-        return client.putState(token, state, ifRev)
+        val rev = client.putState(token, state, ifRev)
+        pushed?.save(PushedState(instanceId = sealing.instanceId, hash = hash, at = at.toString()))
+        return rev
+    }
+
+    /** Whether [hash] went to this instance within the last day. */
+    private fun alreadyPushed(hash: String, at: Instant): Boolean {
+        val last = pushed?.load() ?: return false
+        if (last.instanceId != sealing.instanceId || last.hash != hash) return false
+        val lastAt = runCatching { Instant.parse(last.at) }.getOrNull() ?: return false
+        return lastAt.plusMillis(REPUSH_AFTER_MS) > at
+    }
+
+    /** A hash of the unsealed state: equal exactly when a push would carry the same picture. */
+    private fun fingerprint(
+        services: List<RemoteService>,
+        tombstones: List<RemoteTombstone>,
+        presets: PresetIndex,
+    ): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(json.encodeToString(ListSerializer(RemoteService.serializer()), services).toByteArray())
+        digest.update(json.encodeToString(ListSerializer(RemoteTombstone.serializer()), tombstones).toByteArray())
+        digest.update(json.encodeToString(PresetIndex.serializer(), presets).toByteArray())
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     /** What the relay sent, rebuilt and merged into the local file. */
@@ -116,6 +159,9 @@ class SyncCoordinator(
         var unresolved = 0
         var dropped = 0
         var unreadable = 0
+        // Everything on the relay that is not ours to ignore, whether or not it opens or merges:
+        // the relay no longer holds what this desktop last pushed, so the next push is not a repeat.
+        val arrived = changes.records.count { !it.id.startsWith(CATALOG_PREFIX) } + changes.tombstones.size
         val services = changes.records.mapNotNull { record ->
             // The songbooks are ours (see CatalogSync); they come back only because a pull is
             // everything since the cursor, and the cursor is never moved past them on purpose.
@@ -143,7 +189,7 @@ class SyncCoordinator(
             store.save(merged)
             onSaved()
         }
-        return Absorbed(merged, phoneChanges, unresolved, dropped, unreadable)
+        return Absorbed(merged, phoneChanges, unresolved, dropped, unreadable, arrived)
     }
 
     private class Absorbed(
@@ -152,6 +198,8 @@ class SyncCoordinator(
         val unresolved: Int,
         val dropped: Int,
         val unreadable: Int,
+        /** Records and tombstones the pull carried, songbooks aside. */
+        val arrived: Int,
     ) {
         fun outcome(cursor: Long, devices: List<PairedDevice>, otherDesktop: String = "") =
             SyncOutcome(cursor, phoneChanges, unresolved, dropped, otherDesktop, devices, unreadable)
@@ -163,6 +211,7 @@ class SyncCoordinator(
             unresolved + next.unresolved,
             dropped + next.dropped,
             unreadable + next.unreadable,
+            arrived + next.arrived,
         )
     }
 
@@ -171,5 +220,8 @@ class SyncCoordinator(
 
         /** 2,000 rows a page: far beyond the 5,500 the relay holds, so this only stops a runaway. */
         const val MAX_PAGES = 50
+
+        /** How long an unchanged picture goes without being pushed again. */
+        const val REPUSH_AFTER_MS = 24L * 60L * 60L * 1_000L
     }
 }
