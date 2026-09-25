@@ -81,6 +81,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
@@ -1205,11 +1206,13 @@ fun LowerThirdTab(
             )
             Box(modifier = Modifier.fillMaxWidth().weight(1f).padding(16.dp), contentAlignment = Alignment.Center) {
                 Box(
-                    // fillMaxSize first, so the ratio narrows the filled box rather than being
-                    // overridden by it -- the two were the other way round.
+                    // The ratio alone, against the loose area around it: it takes the largest box of
+                    // that shape that fits both ways. A fillMaxSize in front pins the minimum to the
+                    // whole area, so a portrait output kept the full width and ran off the top and
+                    // bottom, over the tab bar.
                     modifier = Modifier
-                        .fillMaxSize()
                         .aspectRatio(previewOutput.size.aspectRatio)
+                        .testTag(LOWER_THIRD_PREVIEW_TAG)
                         .background(Color.Black, RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
@@ -1226,6 +1229,9 @@ fun LowerThirdTab(
         }
     }
 }
+
+/** The preview box, which has to fit the panel whatever the output's shape. */
+internal const val LOWER_THIRD_PREVIEW_TAG = "lower_third_preview"
 
 @Composable
 private fun atemSlotLabel(index: Int, slots: List<AtemMediaSlot>): String {
