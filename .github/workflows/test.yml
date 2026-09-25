@@ -35,8 +35,7 @@ on:
   push:
     branches: [main]
   # Draft pull requests run nothing; `ready_for_review` is what runs the checks once one is marked
-  # ready. The job-level `if` below does the skipping -- a skipped `test` never blocks, and a draft
-  # cannot be merged anyway.
+  # ready. The first step of `test` decides, from the PR's live state -- see the note there.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
@@ -52,6 +51,8 @@ permissions:
   # `contents` deliberately stays read-only.
   checks: write
   pull-requests: write
+  # For a draft's run to cancel itself -- see the first step of `test`.
+  actions: write
 
 concurrency:
   # A newer push to the same branch makes an in-flight run redundant. With `push` back to main only,
@@ -66,12 +67,33 @@ concurrency:
 
 jobs:
   test:
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     # The suite takes ~14 minutes. Without a timeout a test that hangs instead of failing holds
     # the runner until GitHub's 6-hour default kills it, so the deadline is the failure signal.
     timeout-minutes: 60
     steps:
+      # A draft runs nothing -- and must not leave behind a `test` that counts as passing. A skipped
+      # job does count: #634 was opened as a draft and marked ready five seconds later, the `opened`
+      # run (still saying draft) was queued after the `ready_for_review` one, skipped `test`,
+      # cancelled the real run as the newer member of the concurrency group, and auto-merge merged
+      # it with no suite run at all. So a draft cancels its own run instead: a cancelled `test`
+      # blocks the merge, and the only `test` that can pass is one that ran the suite.
+      #
+      # Asked of the API rather than read from the event, whose draft flag can be stale -- a late
+      # `opened` sees the PR is ready by now and runs. `ready_for_review` is taken at its word.
+      # Fails open: if the lookup or the cancel does not work, the suite runs.
+      - name: Stop if the pull request is still a draft
+        if: github.event_name == 'pull_request' && github.event.action != 'ready_for_review'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)" = "true" ]; then
+            gh run cancel "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" || true
+            # The cancel lands asynchronously; wait for it rather than let the next step start.
+            sleep 120
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
 
