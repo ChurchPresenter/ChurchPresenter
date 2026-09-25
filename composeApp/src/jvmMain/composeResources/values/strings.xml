@@ -853,10 +853,10 @@
          to exist here; the translations are managed separately and are not ours to delete. -->
     <string name="output_scale_mode">Scale: %1$s</string>
     <string name="output_scale_mode_mixed">Scale differs by profile — click to set every profile to %1$s</string>
-    <string name="picture_scale_mode_all">Picture scale on every profile: %1$s</string>
-    <string name="media_scale_mode_all">Video scale on every profile: %1$s</string>
-    <string name="picture_scale_mode_mixed_all">Picture scale differs by profile — click to set every profile to %1$s</string>
-    <string name="media_scale_mode_mixed_all">Video scale differs by profile — click to set every profile to %1$s</string>
+    <string name="picture_scale_mode_all">Picture scale on every output: %1$s</string>
+    <string name="media_scale_mode_all">Video scale on every output: %1$s</string>
+    <string name="picture_scale_mode_mixed_all">Picture scale differs by profile — click to set every output to %1$s</string>
+    <string name="media_scale_mode_mixed_all">Video scale differs by profile — click to set every output to %1$s</string>
     <string name="transition_duration">Transition Duration:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>

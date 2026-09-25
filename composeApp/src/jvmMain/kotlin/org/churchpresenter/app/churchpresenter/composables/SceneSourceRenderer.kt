@@ -248,7 +248,9 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
                 overflow = TextOverflow.Ellipsis,
                 fillWidth = false,
-                modifier = Modifier.padding(4.dp).then(painter.modifier),
+                modifier = Modifier.padding(4.dp)
+                    .backdropRoom(source.backdrop, fontScale)
+                    .then(painter.modifier),
                 onTextLayout = painter::onTextLayout,
             )
         }
@@ -1193,7 +1195,9 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 textAlign = align,
                 lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth().then(versePainter.modifier),
+                modifier = Modifier.fillMaxWidth()
+                    .backdropRoom(source.backdrop, fontScale)
+                    .then(versePainter.modifier),
                 onTextLayout = versePainter::onTextLayout,
             )
             if (source.referenceText.isNotEmpty()) {
@@ -1215,7 +1219,9 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                         letterSpacing = trackingOf(source.letterSpacing),
                     ),
                     textAlign = align,
-                    modifier = Modifier.fillMaxWidth().then(refPainter.modifier),
+                    modifier = Modifier.fillMaxWidth()
+                        .backdropRoom(source.referenceBackdrop, fontScale)
+                        .then(refPainter.modifier),
                     onTextLayout = refPainter::onTextLayout,
                 )
             }

@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.app.churchpresenter.composables.backdropRoom
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -164,17 +165,20 @@ internal fun BibleTranslationSettings.referenceOutlineFor(lowerThird: Boolean): 
  * (above or below) stops applying to whichever of the pair has one -- there is no "above" left to be
  * when the two are placed independently.
  *
- * **Always null on a band**, which is the scope `contentRegion` has too: the lower third's layout is
- * band-relative throughout and the control is not offered for it. That is what keeps the band's two
- * hand-rolled layouts -- the side-by-side pair and the single column, each with its own fit search --
- * on exactly the path they have always taken.
+ * **The band has its own pair now.** This returned null for a band while only the two grid searches
+ * knew how to account for a positioned half; the band's two hand-rolled layouts -- the side-by-side
+ * pair and the single column -- have since been given the same `stacked`/`positioned` split, so
+ * there is no longer a path that would place an element the fit search had measured into the stack.
+ * That split is the whole of it: an offset honoured at draw time only would let a half grow past the
+ * band and be clipped, and one measured into the sum would shrink the stack for height the half no
+ * longer occupies.
  */
 internal fun BibleTranslationSettings.textOffsetFor(lowerThird: Boolean): ElementOffset? =
-    if (lowerThird) null else textOffset
+    if (lowerThird) lowerThirdTextOffset else textOffset
 
-/** [textOffsetFor]'s reference twin, with the same band rule. */
+/** [textOffsetFor]'s reference twin, per output in the same way. */
 internal fun BibleTranslationSettings.referenceOffsetFor(lowerThird: Boolean): ElementOffset? =
-    if (lowerThird) null else referenceOffset
+    if (lowerThird) lowerThirdReferenceOffset else referenceOffset
 
 internal fun buildRefText(verse: SelectedVerse, translation: BibleTranslationSettings): String {
     val label = if (translation.showAbbreviation) {
@@ -864,8 +868,9 @@ fun BiblePresenter(
                         val reference: @Composable (Boolean) -> Unit = { fill ->
                             OutlinedText(
                                 text = itemRefText(item, buildRefText(verse, item)),
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
-                                    .then(itemRefPainter.modifier),
+                                    .backdropRoom(item.referenceBackdropFor(isLowerThird)).then(itemRefPainter.modifier),
                                 outline = item.referenceOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 color = refColor,
@@ -879,8 +884,9 @@ fun BiblePresenter(
                         val verseText: @Composable (Boolean) -> Unit = { fill ->
                             OutlinedText(
                                 text = itemText(item, verse.verseText),
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
-                                    .then(itemTextPainter.modifier),
+                                    .backdropRoom(item.textBackdropFor(isLowerThird)).then(itemTextPainter.modifier),
                                 outline = item.textOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 color = textColor,
@@ -1232,6 +1238,14 @@ fun BiblePresenter(
                         val halfConstraint = Constraints(maxWidth = halfWidth.coerceAtLeast(1))
                         // Use 90% of available height as safety margin for line spacing/shadow/padding offsets
                         val availH = (constraints.maxHeight * 0.90f).toInt()
+                        // Which of the four halves have left their column. Read once: the fit search
+                        // below and the layout after it have to agree about this, and a search that
+                        // measured a half into the stack the layout then floats solves for a box
+                        // nothing is drawn in.
+                        val pTextOffset = t0.textOffsetFor(isLowerThird)
+                        val pRefOffset = t0.referenceOffsetFor(isLowerThird)
+                        val sTextOffset = t1.textOffsetFor(isLowerThird)
+                        val sRefOffset = t1.referenceOffsetFor(isLowerThird)
 
                         val primaryRefText = buildRefText(primary, t0)
                         val secondaryRefText = buildRefText(sec, t1)
@@ -1270,7 +1284,25 @@ fun BiblePresenter(
                             ),
                             constraints = halfConstraint,
                         ).size.height
-                        val needsScaling = (initialPRefH + initialPH > availH) || (initialSRefH + initialSH > availH)
+                        // Stacked halves add up; a positioned one is checked against the cell on its
+                        // own. Both are needed, and for the reasons the grid searches record: summing
+                        // a positioned half shrinks the stack for height it no longer occupies, and
+                        // leaving it out of the search altogether lets it grow past the band and be
+                        // clipped -- which is what an offset applied only at draw time would do.
+                        fun halfFits(
+                            refH: Int,
+                            textH: Int,
+                            refOffset: ElementOffset?,
+                            textOffset: ElementOffset?,
+                        ): Boolean {
+                            val stacked = (if (refOffset == null) refH else 0) +
+                                (if (textOffset == null) textH else 0)
+                            return stacked <= availH &&
+                                (refOffset == null || refH <= availH) &&
+                                (textOffset == null || textH <= availH)
+                        }
+                        val needsScaling = !halfFits(initialPRefH, initialPH, pRefOffset, pTextOffset) ||
+                            !halfFits(initialSRefH, initialSH, sRefOffset, sTextOffset)
 
                         val matchedScale = if (needsScaling) {
                             binarySearchFitScale { scale ->
@@ -1306,7 +1338,8 @@ fun BiblePresenter(
                                     ),
                                     constraints = halfConstraint,
                                 ).size.height
-                                (pRefH + pH <= availH) && (sRefH + sH <= availH)
+                                halfFits(pRefH, pH, pRefOffset, pTextOffset) &&
+                                    halfFits(sRefH, sH, sRefOffset, sTextOffset)
                             }
                         } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
@@ -1316,96 +1349,97 @@ fun BiblePresenter(
                         val scaledPrimaryRefSize = scaledPrimaryReferenceSize * matchedScale
                         val scaledSecondaryRefSize = scaledSecondaryReferenceSize * matchedScale
 
+                        // Each element through one lambda, drawn either filling its half or sized to
+                        // itself -- see [BandElement], which is also what decides stacked from
+                        // floated. The reference's above/below setting becomes the order of the list.
+                        val pRef = BandElement(pRefOffset) { fill ->
+                            OutlinedText(
+                                fillWidth = fill,
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .backdropRoom(t0.referenceBackdropFor(isLowerThird))
+                                    .then(pRefPainter.modifier),
+                                outline = t0.referenceOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                textAlign = primaryBibleReferenceHorizontalAlignment,
+                                fontFamily = primaryBibleReferenceFontStyle,
+                                fontSize = scaledPrimaryRefSize,
+                                text = prText(primaryRefText),
+                                color = primaryBibleReferenceTextColor,
+                                style = primaryReferenceTextStyleScaled,
+                                onTextLayout = pRefPainter::onTextLayout,
+                            )
+                        }
+                        val pVerse = BandElement(pTextOffset) { fill ->
+                            OutlinedText(
+                                fillWidth = fill,
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .backdropRoom(t0.textBackdropFor(isLowerThird))
+                                    .then(pTextPainter.modifier),
+                                outline = t0.textOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                textAlign = primaryBibleHorizontalAlignment,
+                                fontFamily = primaryBibleFontStyle,
+                                fontSize = matchedBibleSize,
+                                text = pText(primary.verseText),
+                                color = primaryBibleTextColor,
+                                style = primaryBibleTextStyleScaled,
+                                onTextLayout = pTextPainter::onTextLayout,
+                            )
+                        }
+                        val sRef = BandElement(sRefOffset) { fill ->
+                            OutlinedText(
+                                fillWidth = fill,
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .backdropRoom(t1.referenceBackdropFor(isLowerThird))
+                                    .then(sRefPainter.modifier),
+                                outline = t1.referenceOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                textAlign = secondaryBibleReferenceHorizontalAlignment,
+                                fontFamily = secondaryBibleReferenceFontStyle,
+                                fontSize = scaledSecondaryRefSize,
+                                text = srText(secondaryRefText),
+                                color = secondaryBibleReferenceTextColor,
+                                style = secondaryReferenceTextStyleScaled,
+                                onTextLayout = sRefPainter::onTextLayout,
+                            )
+                        }
+                        val sVerse = BandElement(sTextOffset) { fill ->
+                            OutlinedText(
+                                fillWidth = fill,
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .backdropRoom(t1.textBackdropFor(isLowerThird))
+                                    .then(sTextPainter.modifier),
+                                outline = t1.textOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                textAlign = secondaryBibleHorizontalAlignment,
+                                fontFamily = secondaryBibleFontStyle,
+                                fontSize = matchedBibleSize,
+                                text = sText(sec.verseText),
+                                color = secondaryBibleTextColor,
+                                style = secondaryBibleTextStyleScaled,
+                                onTextLayout = sTextPainter::onTextLayout,
+                            )
+                        }
                         Row(
                             modifier = Modifier.fillMaxSize(),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             // Left half: primary bible
-                            Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
+                            BibleBandHalf(
                                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
-                                        outline = t0.referenceOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        textAlign = primaryBibleReferenceHorizontalAlignment,
-                                        fontFamily = primaryBibleReferenceFontStyle,
-                                        fontSize = scaledPrimaryRefSize,
-                                        text = prText(primaryRefText),
-                                        color = primaryBibleReferenceTextColor,
-                                        style = primaryReferenceTextStyleScaled,
-                                        onTextLayout = pRefPainter::onTextLayout,
-                                    )
+                                    listOf(pRef, pVerse)
+                                } else {
+                                    listOf(pVerse, pRef)
                                 }
-                                OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
-                                    outline = t0.textOutlineFor(isLowerThird),
-                                    scaleFactor = scaleFactor,
-                                    textAlign = primaryBibleHorizontalAlignment,
-                                    fontFamily = primaryBibleFontStyle,
-                                    fontSize = matchedBibleSize,
-                                    text = pText(primary.verseText),
-                                    color = primaryBibleTextColor,
-                                    style = primaryBibleTextStyleScaled,
-                                    onTextLayout = pTextPainter::onTextLayout,
-                                )
-                                if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
-                                        outline = t0.referenceOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        textAlign = primaryBibleReferenceHorizontalAlignment,
-                                        fontFamily = primaryBibleReferenceFontStyle,
-                                        fontSize = scaledPrimaryRefSize,
-                                        text = prText(primaryRefText),
-                                        color = primaryBibleReferenceTextColor,
-                                        style = primaryReferenceTextStyleScaled,
-                                        onTextLayout = pRefPainter::onTextLayout,
-                                    )
-                                }
-                            }
+                            )
                             // Right half: secondary bible
-                            Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
+                            BibleBandHalf(
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
-                                        outline = t1.referenceOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        textAlign = secondaryBibleReferenceHorizontalAlignment,
-                                        fontFamily = secondaryBibleReferenceFontStyle,
-                                        fontSize = scaledSecondaryRefSize,
-                                        text = srText(secondaryRefText),
-                                        color = secondaryBibleReferenceTextColor,
-                                        style = secondaryReferenceTextStyleScaled,
-                                        onTextLayout = sRefPainter::onTextLayout,
-                                    )
+                                    listOf(sRef, sVerse)
+                                } else {
+                                    listOf(sVerse, sRef)
                                 }
-                                OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
-                                    outline = t1.textOutlineFor(isLowerThird),
-                                    scaleFactor = scaleFactor,
-                                    textAlign = secondaryBibleHorizontalAlignment,
-                                    fontFamily = secondaryBibleFontStyle,
-                                    fontSize = matchedBibleSize,
-                                    text = sText(sec.verseText),
-                                    color = secondaryBibleTextColor,
-                                    style = secondaryBibleTextStyleScaled,
-                                    onTextLayout = sTextPainter::onTextLayout,
-                                )
-                                if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
-                                        outline = t1.referenceOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        textAlign = secondaryBibleReferenceHorizontalAlignment,
-                                        fontFamily = secondaryBibleReferenceFontStyle,
-                                        fontSize = scaledSecondaryRefSize,
-                                        text = srText(secondaryRefText),
-                                        color = secondaryBibleReferenceTextColor,
-                                        style = secondaryReferenceTextStyleScaled,
-                                        onTextLayout = sRefPainter::onTextLayout,
-                                    )
-                                }
-                            }
+                            )
                         }
                     }
                 } else {
@@ -1424,6 +1458,26 @@ fun BiblePresenter(
                         val secondaryRefText = secondary?.let { buildRefText(it, t1) } ?: ""
 
                         val maxH = constraints.maxHeight
+                        // Which of this column's elements have left it. As in the pair above, read
+                        // once and used by both the search and the layout.
+                        val colPTextOffset = t0.textOffsetFor(isLowerThird)
+                        val colPRefOffset = t0.referenceOffsetFor(isLowerThird)
+                        val colSTextOffset = if (showSecondary) t1.textOffsetFor(isLowerThird) else null
+                        val colSRefOffset = if (showSecondary) t1.referenceOffsetFor(isLowerThird) else null
+                        // The stacked elements add up; each positioned one is checked against the band
+                        // by itself. A second language that is not shown contributes nothing either
+                        // way, which is what its zero heights below already said.
+                        fun columnFits(pRefH: Int, pH: Int, sRefH: Int, sH: Int): Boolean {
+                            val stacked = (if (colPRefOffset == null) pRefH else 0) +
+                                (if (colPTextOffset == null) pH else 0) +
+                                (if (colSRefOffset == null) sRefH else 0) +
+                                (if (colSTextOffset == null) sH else 0)
+                            return stacked <= maxH &&
+                                (colPRefOffset == null || pRefH <= maxH) &&
+                                (colPTextOffset == null || pH <= maxH) &&
+                                (colSRefOffset == null || sRefH <= maxH) &&
+                                (colSTextOffset == null || sH <= maxH)
+                        }
                         // The reference lines scale with the verse rather than staying at full size.
                         // Held fixed, they were a floor the search could not get under: a band whose
                         // references alone overfill it had no fitting scale to find, so the text ran off
@@ -1469,7 +1523,7 @@ fun BiblePresenter(
                                     constraints = widthConstraint,
                                 ).size.height
                             } else 0
-                            pRefH + pH + sRefH + sH <= maxH
+                            columnFits(pRefH, pH, sRefH, sH)
                         }
                         val fittedPrimaryRefSize = scaledPrimaryReferenceSize * fitScale
                         val fittedSecondaryRefSize = scaledSecondaryReferenceSize * fitScale
@@ -1478,26 +1532,32 @@ fun BiblePresenter(
                         // Use the smaller so both primary and secondary display at the same visual size
                         val matchedFittedSize = if (showSecondary && fittedSecondaryBibleSize.value < fittedPrimaryBibleSize.value) fittedSecondaryBibleSize else fittedPrimaryBibleSize
 
-                        Column(
-                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                            verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
-                        ) {
-                            if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
-                                    outline = t0.referenceOutlineFor(isLowerThird),
-                                    scaleFactor = scaleFactor,
-                                    textAlign = primaryBibleReferenceHorizontalAlignment,
-                                    fontFamily = primaryBibleReferenceFontStyle,
-                                    fontSize = fittedPrimaryRefSize,
-                                    text = prText(buildRefText(primary, t0)),
-                                    color = primaryBibleReferenceTextColor,
-                                    style = primaryReferenceTextStyleScaled,
-                                    onTextLayout = pRefPainter::onTextLayout,
-                                )
-                            }
+                        // One lambda per element, as in the pair above: drawn either filling the
+                        // band's width or sized to itself, so a stacked and a positioned element
+                        // cannot come apart.
+                        val colPRef = BandElement(colPRefOffset) { fill ->
                             OutlinedText(
-                                modifier = Modifier.fillMaxWidth().then(pTextPainter.modifier),
+                                fillWidth = fill,
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .backdropRoom(t0.referenceBackdropFor(isLowerThird))
+                                    .then(pRefPainter.modifier),
+                                outline = t0.referenceOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                textAlign = primaryBibleReferenceHorizontalAlignment,
+                                fontFamily = primaryBibleReferenceFontStyle,
+                                fontSize = fittedPrimaryRefSize,
+                                text = prText(primaryRefText),
+                                color = primaryBibleReferenceTextColor,
+                                style = primaryReferenceTextStyleScaled,
+                                onTextLayout = pRefPainter::onTextLayout,
+                            )
+                        }
+                        val colPVerse = BandElement(colPTextOffset) { fill ->
+                            OutlinedText(
+                                fillWidth = fill,
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .backdropRoom(t0.textBackdropFor(isLowerThird))
+                                    .then(pTextPainter.modifier),
                                 outline = t0.textOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 textAlign = primaryBibleHorizontalAlignment,
@@ -1508,37 +1568,38 @@ fun BiblePresenter(
                                 style = primaryBibleTextStyleScaled,
                                 onTextLayout = pTextPainter::onTextLayout,
                             )
-                            if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                        }
+                        val primaryElements = if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                            listOf(colPRef, colPVerse)
+                        } else {
+                            listOf(colPVerse, colPRef)
+                        }
+                        val secondaryElements = if (!showSecondary) {
+                            emptyList()
+                        } else {
+                            val colSRef = BandElement(colSRefOffset) { fill ->
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(pRefPainter.modifier),
-                                    outline = t0.referenceOutlineFor(isLowerThird),
+                                    fillWidth = fill,
+                                    modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                        .backdropRoom(t1.referenceBackdropFor(isLowerThird))
+                                        .then(sRefPainter.modifier),
+                                    outline = t1.referenceOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
-                                    textAlign = primaryBibleReferenceHorizontalAlignment,
-                                    fontFamily = primaryBibleReferenceFontStyle,
-                                    fontSize = fittedPrimaryRefSize,
-                                    text = prText(buildRefText(primary, t0)),
-                                    color = primaryBibleReferenceTextColor,
-                                    style = primaryReferenceTextStyleScaled,
-                                    onTextLayout = pRefPainter::onTextLayout,
+                                    textAlign = secondaryBibleReferenceHorizontalAlignment,
+                                    fontFamily = secondaryBibleReferenceFontStyle,
+                                    fontSize = fittedSecondaryRefSize,
+                                    text = srText(secondaryRefText),
+                                    color = secondaryBibleReferenceTextColor,
+                                    style = secondaryReferenceTextStyleScaled,
+                                    onTextLayout = sRefPainter::onTextLayout,
                                 )
                             }
-                            if (showSecondary) {
-                                if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
-                                        outline = t1.referenceOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        textAlign = secondaryBibleReferenceHorizontalAlignment,
-                                        fontFamily = secondaryBibleReferenceFontStyle,
-                                        fontSize = fittedSecondaryRefSize,
-                                        text = srText(buildRefText(secondary, t1)),
-                                        color = secondaryBibleReferenceTextColor,
-                                        style = secondaryReferenceTextStyleScaled,
-                                        onTextLayout = sRefPainter::onTextLayout,
-                                    )
-                                }
+                            val colSVerse = BandElement(colSTextOffset) { fill ->
                                 OutlinedText(
-                                    modifier = Modifier.fillMaxWidth().then(sTextPainter.modifier),
+                                    fillWidth = fill,
+                                    modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                        .backdropRoom(t1.textBackdropFor(isLowerThird))
+                                        .then(sTextPainter.modifier),
                                     outline = t1.textOutlineFor(isLowerThird),
                                     scaleFactor = scaleFactor,
                                     textAlign = secondaryBibleHorizontalAlignment,
@@ -1549,22 +1610,18 @@ fun BiblePresenter(
                                     style = secondaryBibleTextStyleScaled,
                                     onTextLayout = sTextPainter::onTextLayout,
                                 )
-                                if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    OutlinedText(
-                                        modifier = Modifier.fillMaxWidth().then(sRefPainter.modifier),
-                                        outline = t1.referenceOutlineFor(isLowerThird),
-                                        scaleFactor = scaleFactor,
-                                        textAlign = secondaryBibleReferenceHorizontalAlignment,
-                                        fontFamily = secondaryBibleReferenceFontStyle,
-                                        fontSize = fittedSecondaryRefSize,
-                                        text = srText(buildRefText(secondary, t1)),
-                                        color = secondaryBibleReferenceTextColor,
-                                        style = secondaryReferenceTextStyleScaled,
-                                        onTextLayout = sRefPainter::onTextLayout,
-                                    )
-                                }
+                            }
+                            if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                listOf(colSRef, colSVerse)
+                            } else {
+                                listOf(colSVerse, colSRef)
                             }
                         }
+                        BibleBandColumn(
+                            elements = primaryElements + secondaryElements,
+                            verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top,
+                            stackAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment,
+                        )
                     }
                 }
             }

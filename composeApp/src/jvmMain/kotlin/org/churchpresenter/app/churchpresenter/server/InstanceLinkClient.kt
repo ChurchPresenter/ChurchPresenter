@@ -54,8 +54,21 @@ private const val DECADE = 10
 private const val REPORT_INTERVAL_WIDEN_AT_100 = 100
 private const val REPORT_INTERVAL_WIDEN_AT_1000 = 1000
 
-/** The [classifyConnectFailure] buckets that mean "the primary is not up yet", not "something broke". */
-private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns", "ping_timeout")
+/**
+ * The [classifyConnectFailure] buckets that mean "the primary is not up yet", not "something broke".
+ *
+ * `timeout` joined them after one stored address produced **767 reports from three churches in
+ * seventeen days**, every one of them a first failure. Whether an absent primary refuses the
+ * connection or never answers it is a property of the network between the two machines — a host
+ * that is switched off times out where one that is merely not running the app refuses — and not
+ * something the operator did differently. Filing the first of those as a defect and throttling the
+ * other was a distinction with nothing behind it.
+ *
+ * It is also why the first-failure report was worth so little here: `consecutiveFailures` lives in
+ * `connectLoop`, so every restart of the link begins a fresh count, and a follower pointed at an
+ * address that never answers reports its "first" failure again on each one.
+ */
+private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns", "ping_timeout", "timeout")
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
 

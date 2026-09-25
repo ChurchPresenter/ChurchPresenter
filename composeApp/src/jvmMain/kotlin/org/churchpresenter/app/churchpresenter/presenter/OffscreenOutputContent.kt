@@ -184,6 +184,11 @@ internal fun OffscreenOutputContent(
                             LowerThirdLayout(mode, profile, appSettings, showBg) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(
+                                    modifier = if (isLowerThird) {
+                                        Modifier
+                                    } else {
+                                        Modifier.contentRegion(appSettings.bibleSettings.contentRegion)
+                                    },
                                     selectedVerses = presenterManager.displayedVerses.value,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
@@ -195,6 +200,11 @@ internal fun OffscreenOutputContent(
                                     bibleTranslations = profile.bibleTranslations,
                                 )
                                 Presenting.LYRICS -> SongPresenter(
+                                    modifier = if (isLowerThird) {
+                                        Modifier
+                                    } else {
+                                        Modifier.contentRegion(appSettings.songSettings.layoutExtras.contentRegion)
+                                    },
                                     lyricSection = presenterManager.displayedLyricSection.value,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,

@@ -18,6 +18,8 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
+import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
@@ -444,6 +446,87 @@ class PresenterPortraitLowerThirdScreenshotTest {
     fun `the scripture band mid-crossfade`() =
         shootBible("bible_crossfade", listOf(verse()), transitionAlpha = 0.4f)
 
+    // ── The backdrop and the stroke, in portrait ────────────────────────────────────────────────
+    //
+    // Neither portrait suite had a single text-backdrop or outline state, and portrait is where the
+    // clipping bug bit hardest: a plate is drawn outside the text's own box, and it is only cut off
+    // when an ancestor clips *and* the text fills that box — which is exactly what a narrow frame
+    // makes a line of scripture do. Landscape text has slack at the end of a line; portrait does not.
+
+    @Test
+    fun `a scripture band on a plate`() =
+        shootBible("bible_backdrop", listOf(verse()), bibleBackdrop(LINE_PLATE))
+
+    @Test
+    fun `a scripture band in a bordered box`() =
+        shootBible("bible_backdrop_border", listOf(verse()), bibleBackdrop(BORDER_BOX))
+
+    /** Two translations bordered, which is where the full-screen bug was first unmistakable. */
+    @Test
+    fun `two translations in a bordered box`() =
+        shootBible("bible_two_translations_border", listOf(verse(), verseRu()), bibleBackdrop(BORDER_BOX, 2))
+
+    @Test
+    fun `lyrics on a plate`() = shootSong("song_backdrop", song(), songBackdrop(LINE_PLATE))
+
+    @Test
+    fun `lyrics in a bordered box`() = shootSong("song_backdrop_border", song(), songBackdrop(BORDER_BOX))
+
+    /** Left-aligned *and* bordered: the pairing no image anywhere made before this batch. */
+    @Test
+    fun `lyrics aligned left in a bordered box`() = shootSong(
+        "song_border_left",
+        song(),
+        AppSettings(
+            songSettings = SongSettings(
+                lyricsLowerThirdBackdrop = BORDER_BOX,
+                lyricsLowerThirdHorizontalAlignment = Constants.LEFT,
+            ),
+        ),
+    )
+
+    /**
+     * The vertical strip, bordered — two translations, which is the only way this state exists.
+     *
+     * `isLowerThirdVertical` is *purely a text-stacking flag*: both presenters draw the same band
+     * geometry either way and use it only to stack parallel translations instead of setting them
+     * side by side. So a vertical shot of **one** translation is byte-for-byte the horizontal one,
+     * and a first cut of this test was exactly that — caught by the duplicate-hash check AGENT.md
+     * prescribes (md5 every PNG in a section and look for a repeat), which exists for precisely this:
+     * two captures coming out byte-identical mean the state was never reached. Stacked and bordered
+     * is the narrowest box the app draws, and so the least room a plate ever has to reach into.
+     */
+    @Test
+    fun `the vertical strip in a bordered box`() = shootBible(
+        "bible_vertical_border",
+        listOf(verse(), verseRu()),
+        bibleBackdrop(BORDER_BOX, 2),
+        vertical = true,
+    )
+
+    @Test
+    fun `scripture stroked in the band`() = shootBible(
+        "bible_outline",
+        listOf(verse()),
+        bibleOutline(GLYPH_STROKE),
+        overlayPhoto = true,
+    )
+
+    @Test
+    fun `lyrics stroked in the band`() = shootSong(
+        "song_outline",
+        song(),
+        songSettings().copy(
+            songSettings = songSettings().songSettings.copy(
+                outlines = songSettings().songSettings.outlines.copy(lyricsLowerThird = GLYPH_STROKE),
+            ),
+            backgroundSettings = BackgroundSettings(
+                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
+            ),
+        ),
+        overlayPhoto = true,
+    )
+
     // ── The intro slide ─────────────────────────────────────────────────────────────────────────
 
     /** The slide a song opens on, in the band: number and title on one line, the credits under. */
@@ -685,6 +768,33 @@ class PresenterPortraitLowerThirdScreenshotTest {
         ),
     )
 
+    /** [count] translations, each drawing its verse text on [backdrop], for the band. */
+    private fun bibleBackdrop(backdrop: TextBackdrop, count: Int = 1) = AppSettings(
+        bibleSettings = BibleSettings(
+            translations = listOf(KJV, "rst.spb").take(count).map {
+                BibleTranslationSettings(fileName = it, lowerThirdTextBackdrop = backdrop)
+            },
+        ),
+    )
+
+    /** The lyrics on [backdrop], for the band. */
+    private fun songBackdrop(backdrop: TextBackdrop) = AppSettings(
+        songSettings = SongSettings(lyricsLowerThirdBackdrop = backdrop),
+    )
+
+    /**
+     * [outline] around the band's verse glyphs, over a transparent band so the stroke has the
+     * photograph behind it rather than black — on the opaque band a dark stroke shows nothing.
+     */
+    private fun bibleOutline(outline: TextOutline) = AppSettings(
+        bibleSettings = BibleSettings(
+            translations = listOf(BibleTranslationSettings(fileName = KJV, lowerThirdTextOutline = outline)),
+        ),
+        backgroundSettings = BackgroundSettings(
+            bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_TRANSPARENT),
+        ),
+    )
+
     private fun verse(
         text: String = "For God so loved the world, that he gave his only begotten Son.",
         fileName: String = KJV,
@@ -722,6 +832,25 @@ class PresenterPortraitLowerThirdScreenshotTest {
 
     private companion object {
         const val SECTION = "presenterPortraitLowerThird"
+
+        /** A band behind each line. Not near-black: the band it sits on is black. */
+        val LINE_PLATE = TextBackdrop(
+            lineBackground = true,
+            lineBackgroundColor = "#1B3A6B",
+            lineBackgroundOpacity = 90,
+        )
+
+        /** A box around the block. No fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
+
+        /** `enabled` defaults to false, and without it `isVisible` is false and nothing is stroked. */
+        val GLYPH_STROKE = TextOutline(enabled = true, width = 6, color = "#101820")
 
         const val KJV = "kjv.spb"
 

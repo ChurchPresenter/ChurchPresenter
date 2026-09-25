@@ -36,6 +36,17 @@ private const val RELEASE_SAMPLE_RATE = 0.2
 internal const val EXIT_CODE_FATAL_CRASH = 70
 
 /**
+ * The AWT clipboard peers, which throw when the OS will not hand the clipboard over.
+ *
+ * The shared superclass covers every platform's peer; the Windows one is named as well because it
+ * is the only platform that refuses, and naming it is what says so to whoever reads this next.
+ */
+private val CLIPBOARD_PEERS = setOf(
+    "sun.awt.datatransfer.SunClipboard",
+    "sun.awt.windows.WClipboard",
+)
+
+/**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
  * and whether it is a release.
  *
@@ -198,6 +209,13 @@ object CrashReporter {
         }
 
         setUncaughtHandler { thread, throwable ->
+            if (isRecoverableInteraction(throwable)) {
+                // Logged where a crash would be, so it is still there to find, but neither reported
+                // as a crash nor allowed to reach the exit below.
+                writeLocalLog(throwable, context = "Thread: ${thread.name} (recovered)", fatal = false)
+                throwable.printStackTrace()
+                return@setUncaughtHandler
+            }
             // Record what failed before anything else can go wrong: the next run reads this to
             // decide whether the crash-loop guard should blame video backgrounds for it.
             writeCrashKind(classifyCrash(throwable))
@@ -667,6 +685,39 @@ object CrashReporter {
         options.addInAppInclude("org.churchpresenter")
         options.beforeSend = crashAttachingBeforeSend()
     }
+
+    /**
+     * Whether [throwable] is a platform refusal the event thread carries straight on from, so
+     * ending the process over it would be the more damaging of the two outcomes.
+     *
+     * **Deliberately one case, not a class of them.** The exit this guards was added for #518,
+     * where a dead event thread left every audience-facing output frozen rather than closing, and
+     * that argument holds for anything that genuinely breaks the thread. What it does not cover is
+     * Windows declining the clipboard: `WClipboard.openClipboard0` throws
+     * `IllegalStateException("cannot open system clipboard")` when another process is holding it
+     * open, which a clipboard manager, a remote-desktop session or Office does routinely and for
+     * milliseconds at a time. The throw arrives here because it comes out of Compose's own
+     * `TextFieldSelectionManager.copy` — there is no frame of ours in it to catch — and the event
+     * thread is entirely healthy afterwards: the copy simply did not happen, and Ctrl+C works on
+     * the next press.
+     *
+     * So the old behaviour was that a failed copy in a text field **quit the app**, in the middle
+     * of a service, on a machine where something else happened to touch the clipboard first
+     * (Sentry CHURCH-PRESENTER-DESKTOP-42, two churches).
+     *
+     * Widen this only for something with the same two properties: a named platform condition, and
+     * a thread that demonstrably survives it.
+     *
+     * Matched on the **frame it was thrown from**, not on its wording. The type alone cannot do it
+     * — the JDK throws a bare `IllegalStateException`, and recovering from every one of those would
+     * be the opposite of what #518 asked for — and this module's rule against reading messages is
+     * there because an OS phrases its own errors in the user's language. The clipboard peer is the
+     * classification: nothing else in the app throws from `SunClipboard`, and a package name is the
+     * same in all thirty-four locales.
+     */
+    internal fun isRecoverableInteraction(throwable: Throwable): Boolean =
+        throwable is IllegalStateException &&
+            throwable.stackTrace.any { frame -> frame.className in CLIPBOARD_PEERS }
 
     /**
      * Scrubs PII from every outgoing event, then attaches the most recent local crash-report file
