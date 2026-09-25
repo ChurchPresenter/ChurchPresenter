@@ -2866,13 +2866,9 @@
     <string name="media_subtitles_off">Vypnuté</string>
     <string name="media_subtitles_load_file">Načítať súbor titulkov…</string>
     <string name="media_subtitles_files">Súbory titulkov</string>
-    <string name="remote_api_calendar_enroll">Plánovať kalendár z tohto zariadenia</string>
-    <string name="remote_api_calendar_enroll_code">Kód %1$s — povoľte len vtedy, keď telefón ukazuje rovnaký kód</string>
     <string name="calendar_enroll_qr_title">Naskenovať telefónom</string>
     <string name="calendar_enroll_invite_failed">Pozvánku sa nepodarilo vytvoriť — tento počítač sa nemohol spojiť s relé.</string>
     <string name="calendar_enroll_qr_body">Dokončite naskenovaním tohto kódu telefónom, ktorý ste práve povolili.</string>
-    <string name="remote_api_calendar_enroll_detail">Telefón alebo tablet chce plánovať bohoslužby v kalendári odkiaľkoľvek.</string>
-    <string name="remote_activity_calendar_enroll">Zaregistrované na plánovanie kalendára</string>
     <string name="start_outputs_hidden">Spúšťať so skrytými výstupnými obrazovkami</string>
     <string name="start_outputs_hidden_hint">Výstupy zostanú pri spustení vypnuté, kým nestlačíte tlačidlo zobrazenia v bočnom paneli</string>
     <string name="calendar_sync_title">Kalendár na telefónoch a tabletoch</string>
@@ -2889,7 +2885,6 @@
     <string name="calendar_sync_status_timed_out">Relé pri spustení neodpovedalo včas; zmeny z telefónov z tohto týždňa môžu chýbať</string>
     <string name="calendar_sync_status_unauthorized">Relé už tento počítač neprijíma. Pokračujte novým spárovaním.</string>
     <string name="calendar_sync_status_other_desktop">Tento kalendár synchronizuje iný počítač. Tento prestal odosielať, kým jeden z nich neodpárujete.</string>
-    <string name="calendar_sync_enroll_hint">Pridanie telefónu: pripojte ho k tomuto počítaču ako zvyčajne (Nastavenia servera → QR kód), potom v aplikácii otvorte Kalendár a ťuknite na Zaregistrovať. Tu budete požiadaní o povolenie.</string>
     <string name="calendar_sync_invite">Pozvať telefón…</string>
     <string name="calendar_sync_sync_now">Synchronizovať teraz</string>
     <string name="calendar_sync_unpair">Začať odznova s novým kľúčom</string>

@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Izslēgts</string>
     <string name="media_subtitles_load_file">Ielādēt subtitru failu…</string>
     <string name="media_subtitles_files">Subtitru faili</string>
-    <string name="remote_api_calendar_enroll">Plānot kalendāru no šīs ierīces</string>
-    <string name="remote_api_calendar_enroll_code">Kods %1$s — atļaujiet tikai tad, ja tālrunī redzams tas pats kods</string>
     <string name="calendar_enroll_qr_title">Skenēt ar tālruni</string>
     <string name="calendar_enroll_invite_failed">Neizdevās izveidot uzaicinājumu — šis dators nevarēja sasniegt releju.</string>
     <string name="calendar_enroll_qr_body">Lai pabeigtu, skenējiet šo kodu ar tikko atļauto tālruni.</string>
-    <string name="remote_api_calendar_enroll_detail">Tālrunis vai planšetdators vēlas plānot dievkalpojumus kalendārā no jebkuras vietas.</string>
-    <string name="remote_activity_calendar_enroll">Reģistrēts kalendāra plānošanai</string>
     <string name="start_outputs_hidden">Sākt ar paslēptiem izvades ekrāniem</string>
     <string name="start_outputs_hidden_hint">Izvades paliek izslēgtas palaišanas brīdī, līdz sānjoslā nospiežat rādīšanas pogu</string>
     <string name="calendar_sync_title">Kalendārs tālruņos un planšetdatoros</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Relejs palaišanas brīdī neatbildēja laikā; šīs nedēļas izmaiņas no tālruņiem var trūkt</string>
     <string name="calendar_sync_status_unauthorized">Relejs vairs nepieņem šo datoru. Lai turpinātu, savienojiet pārī vēlreiz.</string>
     <string name="calendar_sync_status_other_desktop">Cits dators sinhronizē šo kalendāru. Šis ir pārtraucis sūtīšanu, līdz atvienosiet vienu no tiem.</string>
-    <string name="calendar_sync_enroll_hint">Lai pievienotu tālruni: savienojiet to ar šo datoru kā parasti (Servera iestatījumi → QR kods), pēc tam lietotnē atveriet Kalendāru un pieskarieties Reģistrēt. Šeit jums tiks lūgts to atļaut.</string>
     <string name="calendar_sync_invite">Uzaicināt tālruni…</string>
     <string name="calendar_sync_sync_now">Sinhronizēt tagad</string>
     <string name="calendar_sync_unpair">Sākt no jauna ar jaunu atslēgu</string>

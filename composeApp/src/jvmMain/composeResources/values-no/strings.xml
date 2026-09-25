@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Av</string>
     <string name="media_subtitles_load_file">Last inn undertekstfil…</string>
     <string name="media_subtitles_files">Undertekstfiler</string>
-    <string name="remote_api_calendar_enroll">Planlegg kalenderen fra denne enheten</string>
-    <string name="remote_api_calendar_enroll_code">Kode %1$s — tillat bare hvis telefonen viser samme kode</string>
     <string name="calendar_enroll_qr_title">Skann med telefonen</string>
     <string name="calendar_enroll_invite_failed">Kunne ikke opprette en invitasjon — denne datamaskinen fikk ikke kontakt med reléet.</string>
     <string name="calendar_enroll_qr_body">Skann denne koden med telefonen du nettopp tillot for å fullføre.</string>
-    <string name="remote_api_calendar_enroll_detail">En telefon eller et nettbrett vil planlegge gudstjenester i kalenderen fra hvor som helst.</string>
-    <string name="remote_activity_calendar_enroll">Registrert for å planlegge kalenderen</string>
     <string name="start_outputs_hidden">Start med utgangsskjermene skjult</string>
     <string name="start_outputs_hidden_hint">Utgangene forblir av ved oppstart til du trykker på visningsknappen i sidepanelet</string>
     <string name="calendar_sync_title">Kalender på telefoner og nettbrett</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Reléet svarte ikke i tide ved oppstart; ukens endringer fra telefoner kan mangle</string>
     <string name="calendar_sync_status_unauthorized">Reléet godtar ikke lenger denne datamaskinen. Par på nytt for å fortsette.</string>
     <string name="calendar_sync_status_other_desktop">En annen datamaskin synkroniserer denne kalenderen. Denne har sluttet å sende til du kobler fra én av dem.</string>
-    <string name="calendar_sync_enroll_hint">Slik legger du til en telefon: koble den til denne datamaskinen som vanlig (Serverinnstillinger → QR-kode), åpne deretter Kalender i appen og trykk Registrer. Du blir bedt om å tillate den her.</string>
     <string name="calendar_sync_invite">Inviter en telefon…</string>
     <string name="calendar_sync_sync_now">Synkroniser nå</string>
     <string name="calendar_sync_unpair">Start på nytt med en ny nøkkel</string>

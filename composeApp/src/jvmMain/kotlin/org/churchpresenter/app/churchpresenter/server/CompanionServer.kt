@@ -452,12 +452,6 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    /** Emitted when a phone on the LAN asks to plan the calendar through the relay. */
-    val onCalendarEnroll = MutableSharedFlow<PendingCalendarEnroll>(
-        extraBufferCapacity = 8,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-
     /** Emitted when a device authenticates against the presentation remote for the first time this session. */
     val onPresentationRemoteConnect = MutableSharedFlow<PendingConnectionRequest>(
         extraBufferCapacity = 8,
@@ -999,7 +993,6 @@ class CompanionServer {
                     presentations._slideBytes, json, scope
                 )
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)
-                calendarSyncRoutes(this@CompanionServer, json)
                 mediaAndAssetRoutes(
                     this@CompanionServer, PictureLibrary.DEVICE_UPLOADS_FOLDER_ID, _backgroundSettings,
                     _fileUploadEnabled, pictures.catalog, pictures.catalogs, pictures.files,

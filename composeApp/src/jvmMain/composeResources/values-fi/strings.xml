@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Pois</string>
     <string name="media_subtitles_load_file">Lataa tekstitystiedosto…</string>
     <string name="media_subtitles_files">Tekstitystiedostot</string>
-    <string name="remote_api_calendar_enroll">Suunnittele kalenteria tältä laitteelta</string>
-    <string name="remote_api_calendar_enroll_code">Koodi %1$s — salli vain, jos puhelin näyttää saman koodin</string>
     <string name="calendar_enroll_qr_title">Skannaa puhelimella</string>
     <string name="calendar_enroll_invite_failed">Kutsua ei voitu luoda — tämä tietokone ei tavoittanut välitintä.</string>
     <string name="calendar_enroll_qr_body">Skannaa tämä koodi juuri sallimallasi puhelimella viimeistelläksesi.</string>
-    <string name="remote_api_calendar_enroll_detail">Puhelin tai tabletti haluaa suunnitella tilaisuuksia kalenteriin mistä tahansa.</string>
-    <string name="remote_activity_calendar_enroll">Rekisteröity suunnittelemaan kalenteria</string>
     <string name="start_outputs_hidden">Käynnistä ulostulonäytöt piilotettuina</string>
     <string name="start_outputs_hidden_hint">Ulostulot pysyvät pois päältä käynnistyksessä, kunnes painat sivupalkin näyttöpainiketta</string>
     <string name="calendar_sync_title">Kalenteri puhelimissa ja tableteissa</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Välitin ei vastannut ajoissa käynnistyksessä; tämän viikon muutokset puhelimista saattavat puuttua</string>
     <string name="calendar_sync_status_unauthorized">Välitin ei enää hyväksy tätä tietokonetta. Muodosta pari uudelleen jatkaaksesi.</string>
     <string name="calendar_sync_status_other_desktop">Toinen tietokone synkronoi tätä kalenteria. Tämä on lopettanut lähettämisen, kunnes purat toisen parituksen.</string>
-    <string name="calendar_sync_enroll_hint">Puhelimen lisääminen: yhdistä se tähän tietokoneeseen tavalliseen tapaan (Palvelinasetukset → QR-koodi), avaa sitten sovelluksessa Kalenteri ja napauta Rekisteröi. Sinua pyydetään sallimaan se täällä.</string>
     <string name="calendar_sync_invite">Kutsu puhelin…</string>
     <string name="calendar_sync_sync_now">Synkronoi nyt</string>
     <string name="calendar_sync_unpair">Aloita alusta uudella avaimella</string>

@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Nonaktif</string>
     <string name="media_subtitles_load_file">Muat berkas subtitel…</string>
     <string name="media_subtitles_files">Berkas subtitel</string>
-    <string name="remote_api_calendar_enroll">Rencanakan kalender dari perangkat ini</string>
-    <string name="remote_api_calendar_enroll_code">Kode %1$s — izinkan hanya jika ponsel menampilkan kode yang sama</string>
     <string name="calendar_enroll_qr_title">Pindai dengan ponsel</string>
     <string name="calendar_enroll_invite_failed">Tidak dapat membuat undangan — komputer ini tidak dapat menjangkau relay.</string>
     <string name="calendar_enroll_qr_body">Pindai kode ini dengan ponsel yang baru saja Anda izinkan untuk menyelesaikan.</string>
-    <string name="remote_api_calendar_enroll_detail">Sebuah ponsel atau tablet ingin merencanakan ibadah di kalender dari mana saja.</string>
-    <string name="remote_activity_calendar_enroll">Terdaftar untuk merencanakan kalender</string>
     <string name="start_outputs_hidden">Mulai dengan layar keluaran tersembunyi</string>
     <string name="start_outputs_hidden_hint">Keluaran tetap mati saat diluncurkan sampai Anda menekan tombol tampilan di bilah sisi</string>
     <string name="calendar_sync_title">Kalender di ponsel &amp; tablet</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Relai tidak menjawab tepat waktu saat mulai; perubahan minggu ini dari ponsel mungkin hilang</string>
     <string name="calendar_sync_status_unauthorized">Relai tidak lagi menerima komputer ini. Pasangkan lagi untuk melanjutkan.</string>
     <string name="calendar_sync_status_other_desktop">Komputer lain sedang menyinkronkan kalender ini. Komputer ini berhenti mengirim sampai Anda melepaskan pasangan salah satunya.</string>
-    <string name="calendar_sync_enroll_hint">Untuk menambahkan ponsel: sambungkan ke komputer ini seperti biasa (Pengaturan server → kode QR), lalu buka Kalender di aplikasi dan ketuk Daftar. Anda akan diminta mengizinkannya di sini.</string>
     <string name="calendar_sync_invite">Undang ponsel…</string>
     <string name="calendar_sync_sync_now">Sinkronkan sekarang</string>
     <string name="calendar_sync_unpair">Mulai ulang dengan kunci baru</string>

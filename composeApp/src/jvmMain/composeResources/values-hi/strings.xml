@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">बंद</string>
     <string name="media_subtitles_load_file">उपशीर्षक फ़ाइल लोड करें…</string>
     <string name="media_subtitles_files">उपशीर्षक फ़ाइलें</string>
-    <string name="remote_api_calendar_enroll">इस डिवाइस से कैलेंडर की योजना बनाएँ</string>
-    <string name="remote_api_calendar_enroll_code">कोड %1$s — केवल तभी अनुमति दें जब फ़ोन यही कोड दिखाए</string>
     <string name="calendar_enroll_qr_title">फ़ोन से स्कैन करें</string>
     <string name="calendar_enroll_invite_failed">आमंत्रण नहीं बनाया जा सका — यह कंप्यूटर रिले तक नहीं पहुँच सका।</string>
     <string name="calendar_enroll_qr_body">पूरा करने के लिए इस कोड को उस फ़ोन से स्कैन करें जिसे आपने अभी अनुमति दी है।</string>
-    <string name="remote_api_calendar_enroll_detail">एक फ़ोन या टैबलेट कहीं से भी कैलेंडर में सेवाओं की योजना बनाना चाहता है।</string>
-    <string name="remote_activity_calendar_enroll">कैलेंडर की योजना बनाने के लिए पंजीकृत</string>
     <string name="start_outputs_hidden">आउटपुट स्क्रीन छिपाकर शुरू करें</string>
     <string name="start_outputs_hidden_hint">जब तक आप साइडबार में डिस्प्ले बटन नहीं दबाते, आउटपुट लॉन्च पर बंद रहते हैं</string>
     <string name="calendar_sync_title">फ़ोन और टैबलेट पर कैलेंडर</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">स्टार्टअप पर रिले ने समय पर जवाब नहीं दिया; इस सप्ताह के फ़ोन से बदलाव गायब हो सकते हैं</string>
     <string name="calendar_sync_status_unauthorized">रिले अब इस कंप्यूटर को स्वीकार नहीं करता। जारी रखने के लिए फिर से पेयर करें।</string>
     <string name="calendar_sync_status_other_desktop">एक और कंप्यूटर इस कैलेंडर को सिंक कर रहा है। जब तक आप किसी एक को अनपेयर नहीं करते, यह कंप्यूटर भेजना बंद कर चुका है।</string>
-    <string name="calendar_sync_enroll_hint">फ़ोन जोड़ने के लिए: इसे हमेशा की तरह इस कंप्यूटर से कनेक्ट करें (सर्वर सेटिंग्स → QR कोड), फिर ऐप में कैलेंडर खोलें और पंजीकरण पर टैप करें। यहाँ आपसे अनुमति माँगी जाएगी।</string>
     <string name="calendar_sync_invite">फ़ोन आमंत्रित करें…</string>
     <string name="calendar_sync_sync_now">अभी सिंक करें</string>
     <string name="calendar_sync_unpair">नई कुंजी के साथ फिर से शुरू करें</string>

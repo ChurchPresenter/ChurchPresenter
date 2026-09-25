@@ -2864,13 +2864,9 @@
     <string name="media_subtitles_off">Uit</string>
     <string name="media_subtitles_load_file">Ondertitelbestand laden…</string>
     <string name="media_subtitles_files">Ondertitelbestanden</string>
-    <string name="remote_api_calendar_enroll">De kalender vanaf dit apparaat plannen</string>
-    <string name="remote_api_calendar_enroll_code">Code %1$s — sta alleen toe als de telefoon dezelfde code toont</string>
     <string name="calendar_enroll_qr_title">Scannen met de telefoon</string>
     <string name="calendar_enroll_invite_failed">Kan geen uitnodiging maken — deze computer kan de relay niet bereiken.</string>
     <string name="calendar_enroll_qr_body">Scan deze code met de telefoon die je zojuist hebt toegestaan om af te ronden.</string>
-    <string name="remote_api_calendar_enroll_detail">Een telefoon of tablet wil overal vandaan diensten in de kalender plannen.</string>
-    <string name="remote_activity_calendar_enroll">Aangemeld om de kalender te plannen</string>
     <string name="start_outputs_hidden">Starten met verborgen uitvoerschermen</string>
     <string name="start_outputs_hidden_hint">De uitvoer blijft bij het opstarten uit totdat je op de weergaveknop in de zijbalk drukt</string>
     <string name="calendar_sync_title">Kalender op telefoons &amp; tablets</string>
@@ -2887,7 +2883,6 @@
     <string name="calendar_sync_status_timed_out">De relay antwoordde bij het opstarten niet op tijd; de wijzigingen van telefoons van deze week ontbreken mogelijk</string>
     <string name="calendar_sync_status_unauthorized">De relay accepteert deze computer niet meer. Koppel opnieuw om door te gaan.</string>
     <string name="calendar_sync_status_other_desktop">Een andere computer synchroniseert deze kalender. Deze is gestopt met verzenden totdat je een van beide ontkoppelt.</string>
-    <string name="calendar_sync_enroll_hint">Een telefoon toevoegen: verbind hem zoals gewoonlijk met deze computer (Serverinstellingen → QR-code), open dan Kalender in de app en tik op Aanmelden. Je wordt hier om toestemming gevraagd.</string>
     <string name="calendar_sync_invite">Telefoon uitnodigen…</string>
     <string name="calendar_sync_sync_now">Nu synchroniseren</string>
     <string name="calendar_sync_unpair">Opnieuw beginnen met een nieuwe sleutel</string>

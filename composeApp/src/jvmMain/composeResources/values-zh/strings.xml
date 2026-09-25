@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">关闭</string>
     <string name="media_subtitles_load_file">加载字幕文件…</string>
     <string name="media_subtitles_files">字幕文件</string>
-    <string name="remote_api_calendar_enroll">从此设备规划日历</string>
-    <string name="remote_api_calendar_enroll_code">代码 %1$s — 仅当手机显示相同代码时才允许</string>
     <string name="calendar_enroll_qr_title">用手机扫描</string>
     <string name="calendar_enroll_invite_failed">无法创建邀请——这台电脑无法连接到中继。</string>
     <string name="calendar_enroll_qr_body">用刚才允许的手机扫描此码以完成。</string>
-    <string name="remote_api_calendar_enroll_detail">一部手机或平板想要随时随地在日历中规划聚会。</string>
-    <string name="remote_activity_calendar_enroll">已注册以规划日历</string>
     <string name="start_outputs_hidden">启动时隐藏输出屏幕</string>
     <string name="start_outputs_hidden_hint">启动时输出保持关闭，直到你按下侧边栏中的显示按钮</string>
     <string name="calendar_sync_title">手机和平板上的日历</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">启动时中继未及时响应；本周来自手机的更改可能缺失</string>
     <string name="calendar_sync_status_unauthorized">中继不再接受这台电脑。请重新配对以继续。</string>
     <string name="calendar_sync_status_other_desktop">另一台电脑正在同步此日历。在你取消其中一台的配对之前，这台电脑已停止推送。</string>
-    <string name="calendar_sync_enroll_hint">添加手机：像往常一样将其连接到这台电脑（服务器设置 → 二维码），然后在应用中打开日历并点按注册。系统会在此处请求你的许可。</string>
     <string name="calendar_sync_invite">邀请手机…</string>
     <string name="calendar_sync_sync_now">立即同步</string>
     <string name="calendar_sync_unpair">使用新密钥重新开始</string>

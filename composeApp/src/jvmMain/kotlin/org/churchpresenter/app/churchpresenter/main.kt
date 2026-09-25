@@ -47,7 +47,6 @@ import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll_code
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
@@ -130,12 +129,9 @@ import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
-import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
-import org.churchpresenter.app.churchpresenter.server.asReply
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
 import org.churchpresenter.app.churchpresenter.server.CalendarInvite
 import org.churchpresenter.app.churchpresenter.server.asInvite
-import org.churchpresenter.app.churchpresenter.dialogs.enrollCodeText
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
@@ -200,7 +196,6 @@ import org.churchpresenter.app.churchpresenter.server.remoteAccessDecision
 import org.churchpresenter.app.churchpresenter.server.addScheduleItem
 import org.churchpresenter.app.churchpresenter.server.batchEventSummary
 import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
-import org.churchpresenter.app.churchpresenter.server.RemoteAccess
 import org.churchpresenter.app.churchpresenter.server.RemoteApproval
 import org.churchpresenter.app.churchpresenter.server.remoteApproval
 import org.churchpresenter.app.churchpresenter.server.executeProjectItem
@@ -1096,59 +1091,6 @@ private fun ApplicationScope.ChurchPresenterApp(
                                             outcome.event, add, { pending.decision.complete(false) },
                                         ))
                                     }
-                                }
-                            }
-
-                            // A phone asking to plan the calendar through the relay: blocked devices
-                            // are refused, everyone else is asked, and on Allow the desktop shows the
-                            // enrollment as a QR for the phone to scan. The reply over the WiFi says
-                            // only where to go; the token and the key never cross the network.
-                            val enrollCodeFormat = stringResource(Res.string.remote_api_calendar_enroll_code)
-                            LaunchedEffect(Unit) {
-                                companionServer.onCalendarEnroll.collect { pending ->
-                                    // Sync off means no relay, so there is nothing to enroll into.
-                                    if (!appSettings.calendarSync.enabled) {
-                                        pending.decision.complete(CalendarEnrollDecision.SyncOff)
-                                        return@collect
-                                    }
-                                    val clientId = pending.clientId
-                                    val access = remoteAccessDecision(
-                                        clientId,
-                                        remoteClientManager.allowedClients, remoteClientManager.blockedClients,
-                                        sessionAllowedClients, sessionBlockedClients,
-                                    )
-                                    if (access == RemoteAccess.AUTO_REJECT) {
-                                        pending.decision.complete(CalendarEnrollDecision.Denied)
-                                        return@collect
-                                    }
-                                    val enroll: () -> Unit = {
-                                        coroutineScope.launch {
-                                            // The phone stopped waiting (or was refused) while this prompt
-                                            // sat in the queue.
-                                            if (pending.decision.isCompleted) return@launch
-                                            val enrollment = calendarSync.enroll(clientId, pending.deviceName)
-                                            pending.decision.complete(
-                                                if (enrollment == null) {
-                                                    CalendarEnrollDecision.RelayFailed
-                                                } else {
-                                                    UsageEvents.record(UsageEvent.CALENDAR_PHONE_ADDED)
-                                                    calendarEnrollQr = CalendarInvite.Ready(enrollment)
-                                                    CalendarEnrollDecision.Approved(enrollment.asReply())
-                                                },
-                                            )
-                                        }
-                                    }
-                                    remoteEventQueue.add(Triple(
-                                        RemoteEvent(
-                                            type = RemoteEventType.CALENDAR_ENROLL,
-                                            title = pending.deviceName,
-                                            detail = enrollCodeText(pending.code, enrollCodeFormat),
-                                            clientId = clientId,
-                                            clientLabel = remoteClientManager.getLabel(clientId),
-                                        ),
-                                        enroll,
-                                        { pending.decision.complete(CalendarEnrollDecision.Denied) },
-                                    ))
                                 }
                             }
 

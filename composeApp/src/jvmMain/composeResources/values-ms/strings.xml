@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Mati</string>
     <string name="media_subtitles_load_file">Muatkan fail sari kata…</string>
     <string name="media_subtitles_files">Fail sari kata</string>
-    <string name="remote_api_calendar_enroll">Rancang kalendar dari peranti ini</string>
-    <string name="remote_api_calendar_enroll_code">Kod %1$s — benarkan hanya jika telefon memaparkan kod yang sama</string>
     <string name="calendar_enroll_qr_title">Imbas dengan telefon</string>
     <string name="calendar_enroll_invite_failed">Tidak dapat mencipta jemputan — komputer ini tidak dapat mencapai relay.</string>
     <string name="calendar_enroll_qr_body">Imbas kod ini dengan telefon yang baru anda benarkan untuk selesai.</string>
-    <string name="remote_api_calendar_enroll_detail">Sebuah telefon atau tablet mahu merancang ibadat dalam kalendar dari mana-mana sahaja.</string>
-    <string name="remote_activity_calendar_enroll">Didaftar untuk merancang kalendar</string>
     <string name="start_outputs_hidden">Mula dengan skrin output tersembunyi</string>
     <string name="start_outputs_hidden_hint">Output kekal mati semasa pelancaran sehingga anda menekan butang paparan di bar sisi</string>
     <string name="calendar_sync_title">Kalendar pada telefon &amp; tablet</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Relai tidak menjawab tepat pada masanya semasa permulaan; perubahan minggu ini daripada telefon mungkin hilang</string>
     <string name="calendar_sync_status_unauthorized">Relai tidak lagi menerima komputer ini. Pasangkan semula untuk meneruskan.</string>
     <string name="calendar_sync_status_other_desktop">Komputer lain sedang menyegerakkan kalendar ini. Komputer ini berhenti menghantar sehingga anda menyahpasang salah satunya.</string>
-    <string name="calendar_sync_enroll_hint">Untuk menambah telefon: sambungkannya ke komputer ini seperti biasa (Tetapan pelayan → kod QR), kemudian buka Kalendar dalam aplikasi dan ketik Daftar. Anda akan diminta membenarkannya di sini.</string>
     <string name="calendar_sync_invite">Jemput telefon…</string>
     <string name="calendar_sync_sync_now">Segerakkan sekarang</string>
     <string name="calendar_sync_unpair">Mula semula dengan kunci baharu</string>

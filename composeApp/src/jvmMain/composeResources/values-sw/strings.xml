@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Zima</string>
     <string name="media_subtitles_load_file">Pakia faili ya manukuu…</string>
     <string name="media_subtitles_files">Faili za manukuu</string>
-    <string name="remote_api_calendar_enroll">Panga kalenda kutoka kifaa hiki</string>
-    <string name="remote_api_calendar_enroll_code">Msimbo %1$s — ruhusu tu ikiwa simu inaonyesha msimbo uleule</string>
     <string name="calendar_enroll_qr_title">Changanua kwa simu</string>
     <string name="calendar_enroll_invite_failed">Haikuweza kuunda mwaliko — kompyuta hii haikuweza kufikia relei.</string>
     <string name="calendar_enroll_qr_body">Changanua msimbo huu kwa simu uliyoiruhusu sasa hivi ili kukamilisha.</string>
-    <string name="remote_api_calendar_enroll_detail">Simu au kompyuta kibao inataka kupanga ibada kwenye kalenda kutoka popote.</string>
-    <string name="remote_activity_calendar_enroll">Imesajiliwa kupanga kalenda</string>
     <string name="start_outputs_hidden">Anza huku skrini za matokeo zikiwa zimefichwa</string>
     <string name="start_outputs_hidden_hint">Matokeo hubaki yamezimwa wakati wa kuanza hadi ubonyeze kitufe cha kuonyesha kwenye upau wa kando</string>
     <string name="calendar_sync_title">Kalenda kwenye simu na kompyuta kibao</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Relei haikujibu kwa wakati wakati wa kuanza; mabadiliko ya wiki hii kutoka simu huenda yakakosekana</string>
     <string name="calendar_sync_status_unauthorized">Relei haikubali tena kompyuta hii. Oanisha tena ili kuendelea.</string>
     <string name="calendar_sync_status_other_desktop">Kompyuta nyingine inasawazisha kalenda hii. Hii imeacha kutuma hadi utenganishe mojawapo.</string>
-    <string name="calendar_sync_enroll_hint">Kuongeza simu: iunganishe na kompyuta hii kama kawaida (Mipangilio ya seva → msimbo wa QR), kisha fungua Kalenda kwenye programu na uguse Jisajili. Utaombwa kuiruhusu hapa.</string>
     <string name="calendar_sync_invite">Alika simu…</string>
     <string name="calendar_sync_sync_now">Sawazisha sasa</string>
     <string name="calendar_sync_unpair">Anza upya na ufunguo mpya</string>

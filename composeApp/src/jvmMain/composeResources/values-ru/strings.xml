@@ -2839,13 +2839,9 @@
     <string name="media_subtitles_off">Выкл.</string>
     <string name="media_subtitles_load_file">Загрузить файл субтитров…</string>
     <string name="media_subtitles_files">Файлы субтитров</string>
-    <string name="remote_api_calendar_enroll">Планировать календарь с этого устройства</string>
-    <string name="remote_api_calendar_enroll_code">Код %1$s — разрешайте только если телефон показывает тот же код</string>
     <string name="calendar_enroll_qr_title">Отсканируйте телефоном</string>
     <string name="calendar_enroll_invite_failed">Не удалось создать приглашение — этот компьютер не смог связаться с ретранслятором.</string>
     <string name="calendar_enroll_qr_body">Чтобы завершить, отсканируйте этот код телефоном, который вы только что разрешили.</string>
-    <string name="remote_api_calendar_enroll_detail">Телефон или планшет хочет планировать служения в календаре откуда угодно.</string>
-    <string name="remote_activity_calendar_enroll">Зарегистрирован для планирования календаря</string>
     <string name="start_outputs_hidden">Запускать со скрытыми экранами вывода</string>
     <string name="start_outputs_hidden_hint">Выводы остаются выключенными при запуске, пока вы не нажмёте кнопку показа на боковой панели</string>
     <string name="calendar_sync_title">Календарь на телефонах и планшетах</string>
@@ -2862,7 +2858,6 @@
     <string name="calendar_sync_status_timed_out">Ретранслятор не ответил вовремя при запуске; изменения с телефонов за эту неделю могут отсутствовать</string>
     <string name="calendar_sync_status_unauthorized">Ретранслятор больше не принимает этот компьютер. Создайте пару заново, чтобы продолжить.</string>
     <string name="calendar_sync_status_other_desktop">Другой компьютер синхронизирует этот календарь. Этот прекратил отправку, пока вы не разорвёте пару с одним из них.</string>
-    <string name="calendar_sync_enroll_hint">Чтобы добавить телефон: подключите его к этому компьютеру как обычно (Настройки сервера → QR-код), затем откройте Календарь в приложении и нажмите Зарегистрировать. Здесь вас попросят разрешить это.</string>
     <string name="calendar_sync_invite">Пригласить телефон…</string>
     <string name="calendar_sync_sync_now">Синхронизировать сейчас</string>
     <string name="calendar_sync_unpair">Начать заново с новым ключом</string>

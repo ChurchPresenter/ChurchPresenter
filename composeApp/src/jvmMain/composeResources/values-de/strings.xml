@@ -2837,13 +2837,9 @@
     <string name="media_subtitles_off">Aus</string>
     <string name="media_subtitles_load_file">Untertiteldatei laden…</string>
     <string name="media_subtitles_files">Untertiteldateien</string>
-    <string name="remote_api_calendar_enroll">Den Kalender von diesem Gerät aus planen</string>
-    <string name="remote_api_calendar_enroll_code">Code %1$s — nur erlauben, wenn das Telefon denselben Code anzeigt</string>
     <string name="calendar_enroll_qr_title">Mit dem Telefon scannen</string>
     <string name="calendar_enroll_invite_failed">Einladung konnte nicht erstellt werden — dieser Computer konnte das Relay nicht erreichen.</string>
     <string name="calendar_enroll_qr_body">Scanne diesen Code mit dem soeben erlaubten Telefon, um abzuschließen.</string>
-    <string name="remote_api_calendar_enroll_detail">Ein Telefon oder Tablet möchte Gottesdienste im Kalender von überall aus planen.</string>
-    <string name="remote_activity_calendar_enroll">Zum Planen des Kalenders angemeldet</string>
     <string name="start_outputs_hidden">Mit ausgeblendeten Ausgabebildschirmen starten</string>
     <string name="start_outputs_hidden_hint">Die Ausgaben bleiben beim Start aus, bis du in der Seitenleiste auf die Anzeige-Schaltfläche klickst</string>
     <string name="calendar_sync_title">Kalender auf Telefonen &amp; Tablets</string>
@@ -2860,7 +2856,6 @@
     <string name="calendar_sync_status_timed_out">Das Relay hat beim Start nicht rechtzeitig geantwortet; die Änderungen von Telefonen dieser Woche fehlen möglicherweise</string>
     <string name="calendar_sync_status_unauthorized">Das Relay akzeptiert diesen Computer nicht mehr. Kopple ihn erneut, um fortzufahren.</string>
     <string name="calendar_sync_status_other_desktop">Ein anderer Computer synchronisiert diesen Kalender. Dieser hat aufgehört zu senden, bis du einen von beiden entkoppelst.</string>
-    <string name="calendar_sync_enroll_hint">So fügst du ein Telefon hinzu: Verbinde es wie gewohnt mit diesem Computer (Servereinstellungen → QR-Code), öffne dann in der App den Kalender und tippe auf Anmelden. Du wirst hier um Erlaubnis gebeten.</string>
     <string name="calendar_sync_invite">Telefon einladen…</string>
     <string name="calendar_sync_sync_now">Jetzt synchronisieren</string>
     <string name="calendar_sync_unpair">Mit einem neuen Schlüssel neu beginnen</string>

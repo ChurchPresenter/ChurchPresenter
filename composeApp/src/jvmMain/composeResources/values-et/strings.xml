@@ -2869,13 +2869,9 @@
     <string name="media_subtitles_off">Väljas</string>
     <string name="media_subtitles_load_file">Laadi subtiitrifail…</string>
     <string name="media_subtitles_files">Subtiitrifailid</string>
-    <string name="remote_api_calendar_enroll">Planeeri kalendrit sellest seadmest</string>
-    <string name="remote_api_calendar_enroll_code">Kood %1$s — luba ainult siis, kui telefon näitab sama koodi</string>
     <string name="calendar_enroll_qr_title">Skanni telefoniga</string>
     <string name="calendar_enroll_invite_failed">Kutset ei õnnestunud luua — see arvuti ei jõudnud releeni.</string>
     <string name="calendar_enroll_qr_body">Lõpetamiseks skanni see kood telefoniga, mille just lubasid.</string>
-    <string name="remote_api_calendar_enroll_detail">Telefon või tahvelarvuti soovib kalendris teenistusi planeerida ükskõik kust.</string>
-    <string name="remote_activity_calendar_enroll">Registreeritud kalendrit planeerima</string>
     <string name="start_outputs_hidden">Käivita väljundekraanid peidetuna</string>
     <string name="start_outputs_hidden_hint">Väljundid jäävad käivitamisel välja, kuni vajutad külgribal kuvamisnuppu</string>
     <string name="calendar_sync_title">Kalender telefonides ja tahvelarvutites</string>
@@ -2892,7 +2888,6 @@
     <string name="calendar_sync_status_timed_out">Relee ei vastanud käivitamisel õigel ajal; selle nädala muudatused telefonidest võivad puududa</string>
     <string name="calendar_sync_status_unauthorized">Relee ei aktsepteeri seda arvutit enam. Jätkamiseks seo uuesti.</string>
     <string name="calendar_sync_status_other_desktop">Teine arvuti sünkroonib seda kalendrit. See arvuti on saatmise lõpetanud, kuni ühe neist lahti seod.</string>
-    <string name="calendar_sync_enroll_hint">Telefoni lisamiseks: ühenda see selle arvutiga nagu tavaliselt (Serveri seaded → QR-kood), seejärel ava rakenduses Kalender ja puuduta Registreeri. Siin küsitakse sinult luba.</string>
     <string name="calendar_sync_invite">Kutsu telefon…</string>
     <string name="calendar_sync_sync_now">Sünkrooni kohe</string>
     <string name="calendar_sync_unpair">Alusta uue võtmega otsast</string>

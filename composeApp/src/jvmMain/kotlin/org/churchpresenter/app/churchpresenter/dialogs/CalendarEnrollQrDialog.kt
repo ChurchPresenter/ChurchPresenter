@@ -128,15 +128,7 @@ internal fun CalendarInviteFailedContent(status: CalendarSyncStatus, onDismiss: 
     }
 }
 
-/**
- * `Code 482 913 — allow only if…` — the phone's code as the approval prompt shows it, split for
- * reading aloud. [format] is `remote_api_calendar_enroll_code`, resolved by the caller where a
- * composable can, because the prompt is built inside a flow collector.
- */
-fun enrollCodeText(code: String, format: String): String = format.format(code.chunked(CODE_GROUP).joinToString(" "))
-
 private const val DARK_LUMINANCE = 0.5f
-private const val CODE_GROUP = 3
 private const val QR_PX = 512
 private const val QR_LIFETIME_MS = 120_000L
 private val QR_DP = 300.dp

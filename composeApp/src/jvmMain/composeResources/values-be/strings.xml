@@ -2836,13 +2836,9 @@
     <string name="media_subtitles_off">Выкл.</string>
     <string name="media_subtitles_load_file">Загрузіць файл субцітраў…</string>
     <string name="media_subtitles_files">Файлы субцітраў</string>
-    <string name="remote_api_calendar_enroll">Планаваць каляндар з гэтай прылады</string>
-    <string name="remote_api_calendar_enroll_code">Код %1$s — дазваляйце толькі калі тэлефон паказвае той самы код</string>
     <string name="calendar_enroll_qr_title">Адскануйце тэлефонам</string>
     <string name="calendar_enroll_invite_failed">Не ўдалося стварыць запрашэнне — гэты камп’ютар не змог звязацца з рэтранслятарам.</string>
     <string name="calendar_enroll_qr_body">Каб завяршыць, адскануйце гэты код тэлефонам, які вы толькі што дазволілі.</string>
-    <string name="remote_api_calendar_enroll_detail">Тэлефон або планшэт хоча планаваць служэнні ў календары адкуль заўгодна.</string>
-    <string name="remote_activity_calendar_enroll">Зарэгістраваны для планавання календара</string>
     <string name="start_outputs_hidden">Запускаць са схаванымі экранамі вываду</string>
     <string name="start_outputs_hidden_hint">Вывады застаюцца выключанымі пры запуску, пакуль вы не націснеце кнопку паказу на бакавой панэлі</string>
     <string name="calendar_sync_title">Каляндар на тэлефонах і планшэтах</string>
@@ -2859,7 +2855,6 @@
     <string name="calendar_sync_status_timed_out">Рэтранслятар не адказаў своечасова пры запуску; змены з тэлефонаў за гэты тыдзень могуць адсутнічаць</string>
     <string name="calendar_sync_status_unauthorized">Рэтранслятар больш не прымае гэты камп’ютар. Стварыце пару зноў, каб працягнуць.</string>
     <string name="calendar_sync_status_other_desktop">Іншы камп’ютар сінхранізуе гэты каляндар. Гэты спыніў адпраўку, пакуль вы не разарвяце пару з адным з іх.</string>
-    <string name="calendar_sync_enroll_hint">Каб дадаць тэлефон: падключыце яго да гэтага камп’ютара як звычайна (Налады сервера → QR-код), потым адкрыйце Каляндар у дадатку і націсніце Зарэгістраваць. Тут вас папросяць дазволіць гэта.</string>
     <string name="calendar_sync_invite">Запрасіць тэлефон…</string>
     <string name="calendar_sync_sync_now">Сінхранізаваць зараз</string>
     <string name="calendar_sync_unpair">Пачаць нанова з новым ключом</string>

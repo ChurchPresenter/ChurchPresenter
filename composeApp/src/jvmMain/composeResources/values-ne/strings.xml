@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">बन्द</string>
     <string name="media_subtitles_load_file">उपशीर्षक फाइल लोड गर्नुहोस्…</string>
     <string name="media_subtitles_files">उपशीर्षक फाइलहरू</string>
-    <string name="remote_api_calendar_enroll">यस उपकरणबाट पात्रो योजना गर्नुहोस्</string>
-    <string name="remote_api_calendar_enroll_code">कोड %1$s — फोनले उही कोड देखाएमा मात्र अनुमति दिनुहोस्</string>
     <string name="calendar_enroll_qr_title">फोनले स्क्यान गर्नुहोस्</string>
     <string name="calendar_enroll_invite_failed">निमन्त्रणा बनाउन सकिएन — यो कम्प्युटर रिलेसम्म पुग्न सकेन।</string>
     <string name="calendar_enroll_qr_body">पूरा गर्न यो कोड भर्खर अनुमति दिएको फोनले स्क्यान गर्नुहोस्।</string>
-    <string name="remote_api_calendar_enroll_detail">एक फोन वा ट्याब्लेटले जहाँबाट पनि पात्रोमा सेवाहरू योजना गर्न चाहन्छ।</string>
-    <string name="remote_activity_calendar_enroll">पात्रो योजना गर्न दर्ता भयो</string>
     <string name="start_outputs_hidden">आउटपुट स्क्रिनहरू लुकाएर सुरु गर्नुहोस्</string>
     <string name="start_outputs_hidden_hint">साइडबारमा प्रदर्शन बटन नथिचेसम्म आउटपुटहरू सुरुमा बन्द रहन्छन्</string>
     <string name="calendar_sync_title">फोन र ट्याब्लेटमा पात्रो</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">सुरुमा रिलेले समयमै जवाफ दिएन; यस हप्ताका फोनहरूबाटका परिवर्तनहरू छुटेको हुन सक्छ</string>
     <string name="calendar_sync_status_unauthorized">रिलेले अब यो कम्प्युटर स्वीकार गर्दैन। जारी राख्न फेरि जोडा बनाउनुहोस्।</string>
     <string name="calendar_sync_status_other_desktop">अर्को कम्प्युटरले यो पात्रो सिंक गरिरहेको छ। तपाईंले एउटाको जोडा नहटाएसम्म यसले पठाउन रोकेको छ।</string>
-    <string name="calendar_sync_enroll_hint">फोन थप्न: सधैंझैं यसलाई यो कम्प्युटरसँग जोड्नुहोस् (सर्भर सेटिङ → QR कोड), त्यसपछि एपमा पात्रो खोली दर्ता थिच्नुहोस्। यहाँ तपाईंलाई अनुमति दिन सोधिनेछ।</string>
     <string name="calendar_sync_invite">फोनलाई निमन्त्रणा…</string>
     <string name="calendar_sync_sync_now">अहिले सिंक गर्नुहोस्</string>
     <string name="calendar_sync_unpair">नयाँ कुञ्जीसँग फेरि सुरु गर्नुहोस्</string>

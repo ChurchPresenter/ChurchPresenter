@@ -144,7 +144,7 @@ class CompanionServerRefusalTest {
             "/api/schedule",
         )
         val posts = listOf(
-            "/api/bible/select", "/api/calendar/enroll", "/api/songs/1/select",
+            "/api/bible/select", "/api/songs/1/select",
             "/api/lowerthirds/x/run", "/api/lowerthirds/x/show", "/api/lowerthirds/hide",
             "/api/atem/clip/x", "/api/atem/still/x", "/api/atem/key/on", "/api/atem/key/off",
             "/api/pictures/select", "/api/pictures/upload",

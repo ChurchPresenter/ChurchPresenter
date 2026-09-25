@@ -2836,13 +2836,9 @@
     <string name="media_subtitles_off">Wył.</string>
     <string name="media_subtitles_load_file">Wczytaj plik napisów…</string>
     <string name="media_subtitles_files">Pliki napisów</string>
-    <string name="remote_api_calendar_enroll">Planuj kalendarz z tego urządzenia</string>
-    <string name="remote_api_calendar_enroll_code">Kod %1$s — zezwól tylko wtedy, gdy telefon pokazuje ten sam kod</string>
     <string name="calendar_enroll_qr_title">Zeskanuj telefonem</string>
     <string name="calendar_enroll_invite_failed">Nie można utworzyć zaproszenia — ten komputer nie może połączyć się z przekaźnikiem.</string>
     <string name="calendar_enroll_qr_body">Aby zakończyć, zeskanuj ten kod telefonem, który właśnie dopuszczono.</string>
-    <string name="remote_api_calendar_enroll_detail">Telefon lub tablet chce planować nabożeństwa w kalendarzu z dowolnego miejsca.</string>
-    <string name="remote_activity_calendar_enroll">Zarejestrowano do planowania kalendarza</string>
     <string name="start_outputs_hidden">Uruchamiaj z ukrytymi ekranami wyjściowymi</string>
     <string name="start_outputs_hidden_hint">Wyjścia pozostają wyłączone przy starcie, dopóki nie naciśniesz przycisku wyświetlania na pasku bocznym</string>
     <string name="calendar_sync_title">Kalendarz na telefonach i tabletach</string>
@@ -2859,7 +2855,6 @@
     <string name="calendar_sync_status_timed_out">Przekaźnik nie odpowiedział na czas przy starcie; mogą brakować zmian z telefonów z tego tygodnia</string>
     <string name="calendar_sync_status_unauthorized">Przekaźnik nie akceptuje już tego komputera. Sparuj ponownie, aby kontynuować.</string>
     <string name="calendar_sync_status_other_desktop">Inny komputer synchronizuje ten kalendarz. Ten przestał wysyłać, dopóki nie rozparujesz jednego z nich.</string>
-    <string name="calendar_sync_enroll_hint">Aby dodać telefon: połącz go z tym komputerem jak zwykle (Ustawienia serwera → kod QR), następnie otwórz Kalendarz w aplikacji i dotknij Zarejestruj. Zostaniesz tutaj poproszony o zgodę.</string>
     <string name="calendar_sync_invite">Zaproś telefon…</string>
     <string name="calendar_sync_sync_now">Synchronizuj teraz</string>
     <string name="calendar_sync_unpair">Zacznij od nowa z nowym kluczem</string>

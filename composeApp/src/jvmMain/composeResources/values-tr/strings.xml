@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Kapalı</string>
     <string name="media_subtitles_load_file">Altyazı dosyası yükle…</string>
     <string name="media_subtitles_files">Altyazı dosyaları</string>
-    <string name="remote_api_calendar_enroll">Takvimi bu cihazdan planla</string>
-    <string name="remote_api_calendar_enroll_code">Kod %1$s — yalnızca telefon aynı kodu gösteriyorsa izin verin</string>
     <string name="calendar_enroll_qr_title">Telefonla tarayın</string>
     <string name="calendar_enroll_invite_failed">Davet oluşturulamadı — bu bilgisayar röleye ulaşamadı.</string>
     <string name="calendar_enroll_qr_body">Bitirmek için bu kodu az önce izin verdiğiniz telefonla tarayın.</string>
-    <string name="remote_api_calendar_enroll_detail">Bir telefon veya tablet, takvimdeki hizmetleri her yerden planlamak istiyor.</string>
-    <string name="remote_activity_calendar_enroll">Takvimi planlamak üzere kaydedildi</string>
     <string name="start_outputs_hidden">Çıkış ekranları gizli olarak başlat</string>
     <string name="start_outputs_hidden_hint">Kenar çubuğundaki görüntüleme düğmesine basana kadar çıkışlar açılışta kapalı kalır</string>
     <string name="calendar_sync_title">Telefon ve tabletlerde takvim</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Röle açılışta zamanında yanıt vermedi; bu haftanın telefonlardan gelen değişiklikleri eksik olabilir</string>
     <string name="calendar_sync_status_unauthorized">Röle artık bu bilgisayarı kabul etmiyor. Devam etmek için yeniden eşleştirin.</string>
     <string name="calendar_sync_status_other_desktop">Bu takvimi başka bir bilgisayar eşitliyor. Birinin eşleştirmesini kaldırana kadar bu bilgisayar göndermeyi durdurdu.</string>
-    <string name="calendar_sync_enroll_hint">Telefon eklemek için: onu her zamanki gibi bu bilgisayara bağlayın (Sunucu ayarları → QR kodu), ardından uygulamada Takvim’i açıp Kaydol’a dokunun. Burada izin vermeniz istenecek.</string>
     <string name="calendar_sync_invite">Telefon davet et…</string>
     <string name="calendar_sync_sync_now">Şimdi eşitle</string>
     <string name="calendar_sync_unpair">Yeni bir anahtarla baştan başla</string>

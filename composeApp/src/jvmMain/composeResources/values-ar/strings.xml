@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">إيقاف</string>
     <string name="media_subtitles_load_file">تحميل ملف ترجمة…</string>
     <string name="media_subtitles_files">ملفات الترجمة</string>
-    <string name="remote_api_calendar_enroll">تخطيط التقويم من هذا الجهاز</string>
-    <string name="remote_api_calendar_enroll_code">الرمز %1$s — اسمح فقط إذا كان الهاتف يعرض الرمز نفسه</string>
     <string name="calendar_enroll_qr_title">امسح بالهاتف</string>
     <string name="calendar_enroll_invite_failed">تعذّر إنشاء دعوة — لم يتمكن هذا الكمبيوتر من الوصول إلى المُرحِّل.</string>
     <string name="calendar_enroll_qr_body">امسح هذا الرمز بالهاتف الذي سمحت به للتو لإنهاء العملية.</string>
-    <string name="remote_api_calendar_enroll_detail">يريد هاتف أو جهاز لوحي تخطيط الخدمات في التقويم من أي مكان.</string>
-    <string name="remote_activity_calendar_enroll">تم التسجيل لتخطيط التقويم</string>
     <string name="start_outputs_hidden">البدء مع إخفاء شاشات الإخراج</string>
     <string name="start_outputs_hidden_hint">تبقى المخرجات مطفأة عند التشغيل حتى تضغط زر العرض في الشريط الجانبي</string>
     <string name="calendar_sync_title">التقويم على الهواتف والأجهزة اللوحية</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">لم يستجب المُرحِّل في الوقت المناسب عند التشغيل؛ قد تكون تغييرات هذا الأسبوع من الهواتف مفقودة</string>
     <string name="calendar_sync_status_unauthorized">لم يعد المُرحِّل يقبل هذا الحاسوب. أعد الاقتران للمتابعة.</string>
     <string name="calendar_sync_status_other_desktop">حاسوب آخر يزامن هذا التقويم. توقف هذا الحاسوب عن الإرسال حتى تفصل اقتران أحدهما.</string>
-    <string name="calendar_sync_enroll_hint">لإضافة هاتف: صِله بهذا الحاسوب كالمعتاد (إعدادات الخادم ← رمز QR)، ثم افتح التقويم في التطبيق واضغط تسجيل. سيُطلب منك السماح به هنا.</string>
     <string name="calendar_sync_invite">دعوة هاتف…</string>
     <string name="calendar_sync_sync_now">مزامنة الآن</string>
     <string name="calendar_sync_unpair">البدء من جديد بمفتاح جديد</string>

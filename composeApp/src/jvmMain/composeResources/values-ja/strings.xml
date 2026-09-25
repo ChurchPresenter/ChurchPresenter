@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">オフ</string>
     <string name="media_subtitles_load_file">字幕ファイルを読み込む…</string>
     <string name="media_subtitles_files">字幕ファイル</string>
-    <string name="remote_api_calendar_enroll">このデバイスからカレンダーを計画する</string>
-    <string name="remote_api_calendar_enroll_code">コード %1$s — 電話に同じコードが表示されている場合のみ許可してください</string>
     <string name="calendar_enroll_qr_title">電話でスキャン</string>
     <string name="calendar_enroll_invite_failed">招待を作成できませんでした — このコンピューターからリレーに接続できません。</string>
     <string name="calendar_enroll_qr_body">完了するには、今許可した電話でこのコードをスキャンしてください。</string>
-    <string name="remote_api_calendar_enroll_detail">電話またはタブレットが、どこからでもカレンダーの礼拝を計画しようとしています。</string>
-    <string name="remote_activity_calendar_enroll">カレンダーを計画するために登録済み</string>
     <string name="start_outputs_hidden">出力画面を非表示で起動</string>
     <string name="start_outputs_hidden_hint">サイドバーの表示ボタンを押すまで、起動時に出力はオフのままです</string>
     <string name="calendar_sync_title">電話とタブレットのカレンダー</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">起動時にリレーが時間内に応答しませんでした。今週の電話からの変更が欠けている可能性があります</string>
     <string name="calendar_sync_status_unauthorized">リレーがこのコンピューターを受け付けなくなりました。続けるには再度ペアリングしてください。</string>
     <string name="calendar_sync_status_other_desktop">別のコンピューターがこのカレンダーを同期しています。どちらかのペアリングを解除するまで、このコンピューターは送信を停止します。</string>
-    <string name="calendar_sync_enroll_hint">電話を追加するには: いつも通りこのコンピューターに接続し（サーバー設定 → QR コード）、アプリでカレンダーを開いて「登録」をタップします。ここで許可を求められます。</string>
     <string name="calendar_sync_invite">電話を招待…</string>
     <string name="calendar_sync_sync_now">今すぐ同期</string>
     <string name="calendar_sync_unpair">新しいキーでやり直す</string>

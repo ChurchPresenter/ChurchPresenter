@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">ປິດ</string>
     <string name="media_subtitles_load_file">ໂຫຼດໄຟລ໌ຄຳບັນຍາຍ…</string>
     <string name="media_subtitles_files">ໄຟລ໌ຄຳບັນຍາຍ</string>
-    <string name="remote_api_calendar_enroll">ວາງແຜນປະຕິທິນຈາກອຸປະກອນນີ້</string>
-    <string name="remote_api_calendar_enroll_code">ລະຫັດ %1$s — ອະນຸຍາດສະເພາະເມື່ອໂທລະສັບສະແດງລະຫັດດຽວກັນ</string>
     <string name="calendar_enroll_qr_title">ສະແກນດ້ວຍໂທລະສັບ</string>
     <string name="calendar_enroll_invite_failed">ບໍ່ສາມາດສ້າງຄຳເຊີນໄດ້ — ຄອມພິວເຕີນີ້ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບ relay ໄດ້.</string>
     <string name="calendar_enroll_qr_body">ສະແກນລະຫັດນີ້ດ້ວຍໂທລະສັບທີ່ທ່ານຫາກໍອະນຸຍາດເພື່ອສຳເລັດ.</string>
-    <string name="remote_api_calendar_enroll_detail">ໂທລະສັບ ຫຼື ແທັບເລັດຕ້ອງການວາງແຜນພິທີໃນປະຕິທິນຈາກທຸກບ່ອນ.</string>
-    <string name="remote_activity_calendar_enroll">ລົງທະບຽນເພື່ອວາງແຜນປະຕິທິນແລ້ວ</string>
     <string name="start_outputs_hidden">ເລີ່ມໂດຍເຊື່ອງໜ້າຈໍຜົນອອກ</string>
     <string name="start_outputs_hidden_hint">ຜົນອອກຈະປິດຢູ່ເມື່ອເປີດໂປຣແກຣມຈົນກວ່າທ່ານຈະກົດປຸ່ມສະແດງຜົນໃນແຖບຂ້າງ</string>
     <string name="calendar_sync_title">ປະຕິທິນໃນໂທລະສັບ ແລະ ແທັບເລັດ</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">ຣີເລບໍ່ຕອບກັບທັນເວລາເມື່ອເລີ່ມຕົ້ນ; ການປ່ຽນແປງຈາກໂທລະສັບໃນອາທິດນີ້ອາດຈະຂາດຫາຍ</string>
     <string name="calendar_sync_status_unauthorized">ຣີເລບໍ່ຍອມຮັບຄອມພິວເຕີເຄື່ອງນີ້ອີກຕໍ່ໄປ. ຈັບຄູ່ອີກຄັ້ງເພື່ອສືບຕໍ່.</string>
     <string name="calendar_sync_status_other_desktop">ຄອມພິວເຕີເຄື່ອງອື່ນກຳລັງຊິງຄ໌ປະຕິທິນນີ້. ເຄື່ອງນີ້ຢຸດສົ່ງຈົນກວ່າທ່ານຈະຍົກເລີກການຈັບຄູ່ເຄື່ອງໃດເຄື່ອງໜຶ່ງ.</string>
-    <string name="calendar_sync_enroll_hint">ການເພີ່ມໂທລະສັບ: ເຊື່ອມຕໍ່ກັບຄອມພິວເຕີເຄື່ອງນີ້ຕາມປົກກະຕິ (ການຕັ້ງຄ່າເຊີບເວີ → ລະຫັດ QR), ຈາກນັ້ນເປີດປະຕິທິນໃນແອັບ ແລ້ວແຕະລົງທະບຽນ. ທ່ານຈະຖືກຖາມໃຫ້ອະນຸຍາດຢູ່ບ່ອນນີ້.</string>
     <string name="calendar_sync_invite">ເຊີນໂທລະສັບ…</string>
     <string name="calendar_sync_sync_now">ຊິງຄ໌ດຽວນີ້</string>
     <string name="calendar_sync_unpair">ເລີ່ມໃໝ່ດ້ວຍກະແຈໃໝ່</string>

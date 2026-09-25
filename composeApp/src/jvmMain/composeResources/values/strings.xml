@@ -1989,12 +1989,9 @@
     <string name="remote_api_project">Project (Go Live)</string>
     <string name="remote_api_presentation_connect">Connect to Presentation Remote</string>
     <string name="remote_api_presentation_connect_detail">A phone or tablet wants to browse and control your presentation slides.</string>
-    <string name="remote_api_calendar_enroll">Plan the calendar from this device</string>
-    <string name="remote_api_calendar_enroll_code">Code %1$s — allow only if the phone shows the same code</string>
     <string name="calendar_enroll_qr_title">Scan with the phone</string>
     <string name="calendar_enroll_invite_failed">Could not create an invite — this computer could not reach the relay.</string>
     <string name="calendar_enroll_qr_body">Scan this code with the ChurchPresenter app to enroll the phone. It works for 15 minutes, from anywhere.</string>
-    <string name="remote_api_calendar_enroll_detail">A phone or tablet wants to plan services in the calendar from anywhere.</string>
     <string name="remote_api_qa_add">Q&amp;A: Add Question</string>
     <string name="remote_api_qa_edit">Q&amp;A: Edit Question</string>
     <string name="remote_api_qa_delete">Q&amp;A: Delete Question</string>
@@ -2016,7 +2013,6 @@
     <string name="remote_activity_removed_from_schedule">Removed from Schedule</string>
     <string name="remote_activity_projected">Projected (Go Live)</string>
     <string name="remote_activity_presentation_connect">Connected to Presentation Remote</string>
-    <string name="remote_activity_calendar_enroll">Enrolled to plan the calendar</string>
     <string name="remote_activity_presentation_connect_detail">Now connected</string>
     <string name="remote_activity_qa_admin_connect">Connected to Q&amp;A Admin</string>
     <string name="remote_activity_qa_admin_connect_detail">Now connected</string>
@@ -3128,7 +3124,7 @@
     <string name="calendar_sync_status_timed_out">The relay did not answer in time at startup; this week’s changes from phones may be missing</string>
     <string name="calendar_sync_status_unauthorized">The relay no longer accepts this computer. Pair again to continue.</string>
     <string name="calendar_sync_status_other_desktop">Another computer is syncing this calendar. This one has stopped pushing until you unpair one of them.</string>
-    <string name="calendar_sync_enroll_hint">To add a phone, press Invite a phone and let its owner scan the code — no need to be at church. A phone on this network can also ask from its Calendar screen; you will be asked to allow it here.</string>
+    <string name="calendar_sync_enroll_hint">To add a phone, press Invite a phone and let its owner scan the code — no need to be at church.</string>
     <string name="calendar_sync_invite">Invite a phone…</string>
     <string name="calendar_sync_sync_now">Sync now</string>
     <string name="calendar_sync_unpair">Start over with a new key</string>

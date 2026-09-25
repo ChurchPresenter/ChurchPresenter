@@ -2864,13 +2864,9 @@
     <string name="media_subtitles_off">Désactivé</string>
     <string name="media_subtitles_load_file">Charger un fichier de sous-titres…</string>
     <string name="media_subtitles_files">Fichiers de sous-titres</string>
-    <string name="remote_api_calendar_enroll">Planifier le calendrier depuis cet appareil</string>
-    <string name="remote_api_calendar_enroll_code">Code %1$s — n’autorisez que si le téléphone affiche le même code</string>
     <string name="calendar_enroll_qr_title">Scanner avec le téléphone</string>
     <string name="calendar_enroll_invite_failed">Impossible de créer une invitation — cet ordinateur n'a pas pu joindre le relais.</string>
     <string name="calendar_enroll_qr_body">Scannez ce code avec le téléphone que vous venez d’autoriser pour terminer.</string>
-    <string name="remote_api_calendar_enroll_detail">Un téléphone ou une tablette souhaite planifier des services dans le calendrier depuis n’importe où.</string>
-    <string name="remote_activity_calendar_enroll">Inscrit pour planifier le calendrier</string>
     <string name="start_outputs_hidden">Démarrer avec les écrans de sortie masqués</string>
     <string name="start_outputs_hidden_hint">Les sorties restent éteintes au lancement jusqu’à ce que vous appuyiez sur le bouton d’affichage dans la barre latérale</string>
     <string name="calendar_sync_title">Calendrier sur téléphones &amp; tablettes</string>
@@ -2887,7 +2883,6 @@
     <string name="calendar_sync_status_timed_out">Le relais n’a pas répondu à temps au démarrage ; les modifications de cette semaine depuis les téléphones sont peut-être absentes</string>
     <string name="calendar_sync_status_unauthorized">Le relais n’accepte plus cet ordinateur. Associez-le à nouveau pour continuer.</string>
     <string name="calendar_sync_status_other_desktop">Un autre ordinateur synchronise ce calendrier. Celui-ci a cessé d’envoyer jusqu’à ce que vous dissociiez l’un des deux.</string>
-    <string name="calendar_sync_enroll_hint">Pour ajouter un téléphone : connectez-le à cet ordinateur comme d’habitude (Paramètres du serveur → QR code), puis ouvrez Calendrier dans l’application et touchez Inscrire. Il vous sera demandé de l’autoriser ici.</string>
     <string name="calendar_sync_invite">Inviter un téléphone…</string>
     <string name="calendar_sync_sync_now">Synchroniser maintenant</string>
     <string name="calendar_sync_unpair">Recommencer avec une nouvelle clé</string>

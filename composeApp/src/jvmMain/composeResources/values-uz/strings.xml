@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">O‘chirilgan</string>
     <string name="media_subtitles_load_file">Subtitr faylini yuklash…</string>
     <string name="media_subtitles_files">Subtitr fayllari</string>
-    <string name="remote_api_calendar_enroll">Taqvimni ushbu qurilmadan rejalashtirish</string>
-    <string name="remote_api_calendar_enroll_code">Kod %1$s — faqat telefon xuddi shu kodni ko‘rsatsa ruxsat bering</string>
     <string name="calendar_enroll_qr_title">Telefon bilan skanerlang</string>
     <string name="calendar_enroll_invite_failed">Taklif yaratib boʻlmadi — bu kompyuter relega ulana olmadi.</string>
     <string name="calendar_enroll_qr_body">Yakunlash uchun ushbu kodni hozirgina ruxsat bergan telefoningiz bilan skanerlang.</string>
-    <string name="remote_api_calendar_enroll_detail">Telefon yoki planshet taqvimdagi xizmatlarni istalgan joydan rejalashtirmoqchi.</string>
-    <string name="remote_activity_calendar_enroll">Taqvimni rejalashtirish uchun ro‘yxatdan o‘tdi</string>
     <string name="start_outputs_hidden">Chiqish ekranlari yashirin holda ishga tushirish</string>
     <string name="start_outputs_hidden_hint">Yon paneldagi ko‘rsatish tugmasini bosmaguningizcha chiqishlar ishga tushganda o‘chiq qoladi</string>
     <string name="calendar_sync_title">Telefon va planshetlardagi taqvim</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Rele ishga tushishda o‘z vaqtida javob bermadi; bu haftadagi telefonlardan kelgan o‘zgarishlar yetishmasligi mumkin</string>
     <string name="calendar_sync_status_unauthorized">Rele endi bu kompyuterni qabul qilmaydi. Davom etish uchun qayta juftlang.</string>
     <string name="calendar_sync_status_other_desktop">Bu taqvimni boshqa kompyuter sinxronlamoqda. Ulardan birini ajratmaguningizcha bu kompyuter yuborishni to‘xtatdi.</string>
-    <string name="calendar_sync_enroll_hint">Telefon qo‘shish uchun: uni odatdagidek ushbu kompyuterga ulang (Server sozlamalari → QR kod), so‘ng ilovada Taqvimni ochib, Ro‘yxatdan o‘tish tugmasini bosing. Bu yerda ruxsat so‘raladi.</string>
     <string name="calendar_sync_invite">Telefonni taklif qilish…</string>
     <string name="calendar_sync_sync_now">Hozir sinxronlash</string>
     <string name="calendar_sync_unpair">Yangi kalit bilan qaytadan boshlash</string>

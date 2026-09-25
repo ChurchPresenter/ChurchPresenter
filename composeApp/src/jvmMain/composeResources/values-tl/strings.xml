@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">Naka-off</string>
     <string name="media_subtitles_load_file">Mag-load ng subtitle file…</string>
     <string name="media_subtitles_files">Mga subtitle file</string>
-    <string name="remote_api_calendar_enroll">Planuhin ang kalendaryo mula sa device na ito</string>
-    <string name="remote_api_calendar_enroll_code">Code %1$s — payagan lang kung pareho ang code na ipinapakita ng telepono</string>
     <string name="calendar_enroll_qr_title">I-scan gamit ang telepono</string>
     <string name="calendar_enroll_invite_failed">Hindi makagawa ng imbitasyon — hindi maabot ng computer na ito ang relay.</string>
     <string name="calendar_enroll_qr_body">I-scan ang code na ito gamit ang teleponong kapapayag mo lang para matapos.</string>
-    <string name="remote_api_calendar_enroll_detail">Gustong magplano ng mga serbisyo sa kalendaryo ng isang telepono o tablet mula saanman.</string>
-    <string name="remote_activity_calendar_enroll">Naka-enroll para magplano ng kalendaryo</string>
     <string name="start_outputs_hidden">Magsimula nang nakatago ang mga output screen</string>
     <string name="start_outputs_hidden_hint">Nananatiling naka-off ang mga output sa pag-launch hanggang pindutin mo ang display button sa sidebar</string>
     <string name="calendar_sync_title">Kalendaryo sa mga telepono at tablet</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">Hindi sumagot ang relay sa oras sa startup; maaaring kulang ang mga pagbabago mula sa mga telepono ngayong linggo</string>
     <string name="calendar_sync_status_unauthorized">Hindi na tinatanggap ng relay ang computer na ito. Ipares muli para magpatuloy.</string>
     <string name="calendar_sync_status_other_desktop">May ibang computer na nagsi-sync ng kalendaryong ito. Tumigil ito sa pagpapadala hanggang tanggalin mo ang pagpapares ng isa sa kanila.</string>
-    <string name="calendar_sync_enroll_hint">Para magdagdag ng telepono: ikonekta ito sa computer na ito gaya ng dati (Mga setting ng server → QR code), pagkatapos buksan ang Kalendaryo sa app at i-tap ang Mag-enroll. Hihilingin sa iyo dito na payagan ito.</string>
     <string name="calendar_sync_invite">Mag-imbita ng telepono…</string>
     <string name="calendar_sync_sync_now">I-sync ngayon</string>
     <string name="calendar_sync_unpair">Magsimula ulit gamit ang bagong key</string>

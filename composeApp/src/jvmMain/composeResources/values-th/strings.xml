@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">ปิด</string>
     <string name="media_subtitles_load_file">โหลดไฟล์คำบรรยาย…</string>
     <string name="media_subtitles_files">ไฟล์คำบรรยาย</string>
-    <string name="remote_api_calendar_enroll">วางแผนปฏิทินจากอุปกรณ์นี้</string>
-    <string name="remote_api_calendar_enroll_code">รหัส %1$s — อนุญาตเฉพาะเมื่อโทรศัพท์แสดงรหัสเดียวกัน</string>
     <string name="calendar_enroll_qr_title">สแกนด้วยโทรศัพท์</string>
     <string name="calendar_enroll_invite_failed">สร้างคำเชิญไม่ได้ — คอมพิวเตอร์เครื่องนี้เชื่อมต่อรีเลย์ไม่ได้</string>
     <string name="calendar_enroll_qr_body">สแกนรหัสนี้ด้วยโทรศัพท์ที่คุณเพิ่งอนุญาตเพื่อดำเนินการให้เสร็จ</string>
-    <string name="remote_api_calendar_enroll_detail">โทรศัพท์หรือแท็บเล็ตต้องการวางแผนพิธีในปฏิทินจากที่ใดก็ได้</string>
-    <string name="remote_activity_calendar_enroll">ลงทะเบียนเพื่อวางแผนปฏิทินแล้ว</string>
     <string name="start_outputs_hidden">เริ่มโดยซ่อนหน้าจอเอาต์พุต</string>
     <string name="start_outputs_hidden_hint">เอาต์พุตจะปิดอยู่เมื่อเปิดโปรแกรมจนกว่าคุณจะกดปุ่มแสดงผลในแถบด้านข้าง</string>
     <string name="calendar_sync_title">ปฏิทินบนโทรศัพท์และแท็บเล็ต</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">รีเลย์ไม่ตอบกลับทันเวลาเมื่อเริ่มต้น การเปลี่ยนแปลงจากโทรศัพท์ในสัปดาห์นี้อาจหายไป</string>
     <string name="calendar_sync_status_unauthorized">รีเลย์ไม่ยอมรับคอมพิวเตอร์เครื่องนี้อีกต่อไป จับคู่อีกครั้งเพื่อดำเนินการต่อ</string>
     <string name="calendar_sync_status_other_desktop">คอมพิวเตอร์อีกเครื่องกำลังซิงค์ปฏิทินนี้ เครื่องนี้หยุดส่งจนกว่าคุณจะยกเลิกการจับคู่เครื่องใดเครื่องหนึ่ง</string>
-    <string name="calendar_sync_enroll_hint">การเพิ่มโทรศัพท์: เชื่อมต่อกับคอมพิวเตอร์เครื่องนี้ตามปกติ (การตั้งค่าเซิร์ฟเวอร์ → รหัส QR) จากนั้นเปิดปฏิทินในแอปแล้วแตะลงทะเบียน คุณจะถูกขอให้อนุญาตที่นี่</string>
     <string name="calendar_sync_invite">เชิญโทรศัพท์…</string>
     <string name="calendar_sync_sync_now">ซิงค์เดี๋ยวนี้</string>
     <string name="calendar_sync_unpair">เริ่มใหม่ด้วยคีย์ใหม่</string>

@@ -2887,13 +2887,9 @@
     <string name="media_subtitles_off">அணை</string>
     <string name="media_subtitles_load_file">வசன கோப்பை ஏற்று…</string>
     <string name="media_subtitles_files">வசன கோப்புகள்</string>
-    <string name="remote_api_calendar_enroll">இந்தச் சாதனத்திலிருந்து நாட்காட்டியைத் திட்டமிடு</string>
-    <string name="remote_api_calendar_enroll_code">குறியீடு %1$s — தொலைபேசி இதே குறியீட்டைக் காட்டினால் மட்டும் அனுமதிக்கவும்</string>
     <string name="calendar_enroll_qr_title">தொலைபேசியால் ஸ்கேன் செய்யவும்</string>
     <string name="calendar_enroll_invite_failed">அழைப்பை உருவாக்க முடியவில்லை — இந்தக் கணினியால் ரிலேயை அடைய முடியவில்லை.</string>
     <string name="calendar_enroll_qr_body">முடிக்க, நீங்கள் இப்போது அனுமதித்த தொலைபேசியால் இந்தக் குறியீட்டை ஸ்கேன் செய்யவும்.</string>
-    <string name="remote_api_calendar_enroll_detail">ஒரு தொலைபேசி அல்லது டேப்லெட் எங்கிருந்தும் நாட்காட்டியில் சேவைகளைத் திட்டமிட விரும்புகிறது.</string>
-    <string name="remote_activity_calendar_enroll">நாட்காட்டியைத் திட்டமிடப் பதிவு செய்யப்பட்டது</string>
     <string name="start_outputs_hidden">வெளியீட்டுத் திரைகள் மறைந்த நிலையில் தொடங்கு</string>
     <string name="start_outputs_hidden_hint">பக்கப்பட்டியில் காட்சி பொத்தானை அழுத்தும் வரை வெளியீடுகள் தொடக்கத்தில் அணைந்தே இருக்கும்</string>
     <string name="calendar_sync_title">தொலைபேசிகள் மற்றும் டேப்லெட்டுகளில் நாட்காட்டி</string>
@@ -2910,7 +2906,6 @@
     <string name="calendar_sync_status_timed_out">தொடக்கத்தில் ரிலே சரியான நேரத்தில் பதிலளிக்கவில்லை; இந்த வாரத்தின் தொலைபேசி மாற்றங்கள் இல்லாமல் போகலாம்</string>
     <string name="calendar_sync_status_unauthorized">ரிலே இந்தக் கணினியை இனி ஏற்கவில்லை. தொடர மீண்டும் இணைக்கவும்.</string>
     <string name="calendar_sync_status_other_desktop">மற்றொரு கணினி இந்த நாட்காட்டியை ஒத்திசைக்கிறது. ஒன்றின் இணைப்பை நீக்கும் வரை இது அனுப்புவதை நிறுத்தியுள்ளது.</string>
-    <string name="calendar_sync_enroll_hint">தொலைபேசியைச் சேர்க்க: வழக்கம்போல இந்தக் கணினியுடன் இணைக்கவும் (சேவையக அமைப்புகள் → QR குறியீடு), பிறகு செயலியில் நாட்காட்டியைத் திறந்து பதிவு செய் என்பதைத் தட்டவும். இங்கே அனுமதி கேட்கப்படும்.</string>
     <string name="calendar_sync_invite">தொலைபேசியை அழை…</string>
     <string name="calendar_sync_sync_now">இப்போது ஒத்திசை</string>
     <string name="calendar_sync_unpair">புதிய விசையுடன் மீண்டும் தொடங்கு</string>

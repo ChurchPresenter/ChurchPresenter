@@ -2865,13 +2865,9 @@
     <string name="media_subtitles_off">Desligado</string>
     <string name="media_subtitles_load_file">Carregar ficheiro de legendas…</string>
     <string name="media_subtitles_files">Ficheiros de legendas</string>
-    <string name="remote_api_calendar_enroll">Planear o calendário a partir deste dispositivo</string>
-    <string name="remote_api_calendar_enroll_code">Código %1$s — permita apenas se o telemóvel mostrar o mesmo código</string>
     <string name="calendar_enroll_qr_title">Digitalizar com o telemóvel</string>
     <string name="calendar_enroll_invite_failed">Não foi possível criar um convite — este computador não conseguiu contactar o relay.</string>
     <string name="calendar_enroll_qr_body">Digitalize este código com o telemóvel que acabou de permitir para concluir.</string>
-    <string name="remote_api_calendar_enroll_detail">Um telemóvel ou tablet quer planear cultos no calendário a partir de qualquer lugar.</string>
-    <string name="remote_activity_calendar_enroll">Inscrito para planear o calendário</string>
     <string name="start_outputs_hidden">Iniciar com os ecrãs de saída ocultos</string>
     <string name="start_outputs_hidden_hint">As saídas ficam desligadas no arranque até premir o botão de exibição na barra lateral</string>
     <string name="calendar_sync_title">Calendário em telemóveis e tablets</string>
@@ -2888,7 +2884,6 @@
     <string name="calendar_sync_status_timed_out">O relay não respondeu a tempo no arranque; as alterações desta semana feitas nos telemóveis podem estar em falta</string>
     <string name="calendar_sync_status_unauthorized">O relay já não aceita este computador. Emparelhe novamente para continuar.</string>
     <string name="calendar_sync_status_other_desktop">Outro computador está a sincronizar este calendário. Este deixou de enviar até que desemparelhe um deles.</string>
-    <string name="calendar_sync_enroll_hint">Para adicionar um telemóvel: ligue-o a este computador como habitualmente (Definições do servidor → código QR), depois abra Calendário na app e toque em Inscrever. Ser-lhe-á pedido que o permita aqui.</string>
     <string name="calendar_sync_invite">Convidar um telefone…</string>
     <string name="calendar_sync_sync_now">Sincronizar agora</string>
     <string name="calendar_sync_unpair">Recomeçar com uma nova chave</string>

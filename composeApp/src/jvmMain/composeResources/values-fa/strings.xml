@@ -2881,13 +2881,9 @@
     <string name="media_subtitles_off">خاموش</string>
     <string name="media_subtitles_load_file">بارگذاری فایل زیرنویس…</string>
     <string name="media_subtitles_files">فایل‌های زیرنویس</string>
-    <string name="remote_api_calendar_enroll">برنامه‌ریزی تقویم از این دستگاه</string>
-    <string name="remote_api_calendar_enroll_code">کد %1$s — فقط در صورتی اجازه دهید که تلفن همین کد را نشان دهد</string>
     <string name="calendar_enroll_qr_title">با تلفن اسکن کنید</string>
     <string name="calendar_enroll_invite_failed">ایجاد دعوت‌نامه ممکن نشد — این رایانه نتوانست به رله دسترسی پیدا کند.</string>
     <string name="calendar_enroll_qr_body">برای پایان، این کد را با تلفنی که هم‌اکنون اجازه دادید اسکن کنید.</string>
-    <string name="remote_api_calendar_enroll_detail">یک تلفن یا تبلت می‌خواهد خدمات را از هر جا در تقویم برنامه‌ریزی کند.</string>
-    <string name="remote_activity_calendar_enroll">برای برنامه‌ریزی تقویم ثبت‌نام شد</string>
     <string name="start_outputs_hidden">شروع با صفحه‌های خروجی پنهان</string>
     <string name="start_outputs_hidden_hint">خروجی‌ها هنگام راه‌اندازی خاموش می‌مانند تا دکمهٔ نمایش را در نوار کناری بزنید</string>
     <string name="calendar_sync_title">تقویم روی تلفن‌ها و تبلت‌ها</string>
@@ -2904,7 +2900,6 @@
     <string name="calendar_sync_status_timed_out">رله هنگام راه‌اندازی به‌موقع پاسخ نداد؛ تغییرات این هفته از تلفن‌ها ممکن است موجود نباشد</string>
     <string name="calendar_sync_status_unauthorized">رله دیگر این رایانه را نمی‌پذیرد. برای ادامه دوباره جفت کنید.</string>
     <string name="calendar_sync_status_other_desktop">رایانهٔ دیگری این تقویم را همگام می‌کند. این رایانه تا زمانی که جفت‌شدن یکی از آن‌ها را لغو کنید ارسال را متوقف کرده است.</string>
-    <string name="calendar_sync_enroll_hint">برای افزودن تلفن: آن را مانند همیشه به این رایانه وصل کنید (تنظیمات سرور ← کد QR)، سپس تقویم را در برنامه باز کرده و ثبت‌نام را بزنید. اینجا از شما خواسته می‌شود اجازه دهید.</string>
     <string name="calendar_sync_invite">دعوت از تلفن…</string>
     <string name="calendar_sync_sync_now">همگام‌سازی اکنون</string>
     <string name="calendar_sync_unpair">شروع دوباره با کلید جدید</string>
