@@ -291,6 +291,35 @@ class CalendarSyncServiceTest {
     }
 
     @Test
+    fun `starting over empties the old instance and revokes every phone before forgetting it`() = runBlocking<Unit> {
+        val service = service()
+        service.enroll("phone-1", "")
+        service.enroll("phone-2", "Ben")
+        val calls = relay.calls.size
+
+        assertTrue(service.unpair())
+
+        assertTrue(relay.enrolled.isEmpty(), "no phone's token opens the old instance any more")
+        val after = relay.calls.drop(calls)
+        assertTrue(after.any { it.startsWith("PUT") && it.endsWith("/state") }, "its records are emptied")
+        assertFalse(settings.isPaired)
+    }
+
+    @Test
+    fun `a relay that cannot be reached keeps the pairing, so the old instance can still be emptied`() =
+        runBlocking<Unit> {
+            val service = service()
+            service.syncOnStartup()
+            relay.relayDown = true
+
+            assertFalse(service.unpair())
+
+            assertTrue(settings.isPaired)
+            assertEquals("", settings.rotatedAt, "a refused start-over does not use up the week")
+            assertIs<CalendarSyncStatus.Failed>(service.status.value)
+        }
+
+    @Test
     fun `starting over is refused within a week of the last time, and allowed after it`() = runBlocking<Unit> {
         var clock = Instant.parse("2026-09-24T12:00:00Z")
         val service = service(now = { clock })

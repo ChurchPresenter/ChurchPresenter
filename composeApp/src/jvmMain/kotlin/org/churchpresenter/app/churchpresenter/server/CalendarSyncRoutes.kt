@@ -23,22 +23,22 @@ private const val CODE_DIGITS = 6
 internal data class CalendarEnrollBody(val deviceName: String = "", val code: String = "")
 
 /**
- * What the phone gets back once the operator allows it: everything the QR would have carried, so
- * that Allow is the last step. The operator comparing the code on the phone with the one in their
- * prompt is what makes this safe; a second step to scan the same thing added nothing to that.
+ * What the phone gets back once the operator allows it: where its calendar lives, and nothing that
+ * opens it. The device token and the instance key go only in the QR the desktop then shows on its
+ * own screen -- this reply crosses the Companion server's plain HTTP on a WiFi whose password the
+ * whole congregation knows, and carrying them here handed a permanent key to anyone listening.
+ * A phone that gets no token and no key here scans the QR, which every phone already does.
  */
 @Serializable
 data class CalendarEnrollReply(
     val relayUrl: String,
     val instanceId: String,
     val deviceId: String,
-    val deviceToken: String,
-    val instanceKey: String,
 )
 
 /** How a phone's request to be enrolled ended, each answered differently so the phone can say why. */
 sealed class CalendarEnrollDecision {
-    /** The operator allowed it and the desktop is registered: here is where to go, and the keys to get in. */
+    /** The operator allowed it and the desktop is registered; the keys are on the desktop's screen, as a QR. */
     data class Approved(val reply: CalendarEnrollReply) : CalendarEnrollDecision()
 
     /** The operator refused, the device is blocked, or nobody answered in time. */
@@ -51,9 +51,8 @@ sealed class CalendarEnrollDecision {
     data object RelayFailed : CalendarEnrollDecision()
 }
 
-/** An enrollment as the phone that asked for it over the LAN receives it. */
-fun CalendarEnrollment.asReply(): CalendarEnrollReply =
-    CalendarEnrollReply(relayUrl.trimEnd('/'), instanceId, deviceId, deviceToken, instanceKey)
+/** An enrollment as the phone that asked for it over the LAN receives it: without its secrets. */
+fun CalendarEnrollment.asReply(): CalendarEnrollReply = CalendarEnrollReply(relayUrl.trimEnd('/'), instanceId, deviceId)
 
 /** A phone asking to be enrolled with the calendar relay; [decision] is the answer once the operator has decided. */
 data class PendingCalendarEnroll(

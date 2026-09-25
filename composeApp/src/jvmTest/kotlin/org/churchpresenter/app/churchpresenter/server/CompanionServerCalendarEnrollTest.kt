@@ -21,6 +21,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** `POST /api/calendar/enroll`: the one LAN call a phone makes to join the calendar relay. */
@@ -57,7 +58,8 @@ class CompanionServerCalendarEnrollTest {
     }
 
     @Test
-    fun `an approved phone is handed its whole enrollment, so there is nothing left to scan`() = runBlocking<Unit> {
+    fun `an approved phone is told where to go, and never handed the token or the key over the WiFi`() =
+        runBlocking<Unit> {
         val pending = async { withTimeout(5_000) { server.onCalendarEnroll.first() } }
         val reply = async { enroll("phone-1", """{"deviceName":"Anna's ‮iPhone","code":"48-29 13"}""") }
 
@@ -79,7 +81,7 @@ class CompanionServerCalendarEnrollTest {
         val text = response.bodyAsText()
         assertTrue("\"relayUrl\":\"https://relay.example\"" in text, text)
         assertTrue("inst-1" in text && "phone-1" in text, text)
-        assertTrue("devicetoken-1" in text && "instancekey-1" in text, text)
+        assertFalse("devicetoken-1" in text || "instancekey-1" in text, "those go only in the QR: $text")
     }
 
     @Test

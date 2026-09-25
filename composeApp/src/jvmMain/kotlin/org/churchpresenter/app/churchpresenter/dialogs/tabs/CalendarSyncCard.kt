@@ -94,7 +94,7 @@ internal fun CalendarSyncCard(
         devices = devices,
         labelFor = labelFor,
         onSyncNow = { scope.launch { sync.syncNow() } },
-        onUnpair = { sync.unpair() },
+        onUnpair = { scope.launch { sync.unpair() } },
         onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
         onInvite = { scope.launch { invite = sync.invitePhone().asInvite(sync) } },
     )

@@ -1100,8 +1100,9 @@ private fun ApplicationScope.ChurchPresenterApp(
                             }
 
                             // A phone asking to plan the calendar through the relay: blocked devices
-                            // are refused, everyone else is asked, and on Allow the phone is handed
-                            // its enrollment in the reply -- no QR to scan afterwards.
+                            // are refused, everyone else is asked, and on Allow the desktop shows the
+                            // enrollment as a QR for the phone to scan. The reply over the WiFi says
+                            // only where to go; the token and the key never cross the network.
                             val enrollCodeFormat = stringResource(Res.string.remote_api_calendar_enroll_code)
                             LaunchedEffect(Unit) {
                                 companionServer.onCalendarEnroll.collect { pending ->
@@ -1131,6 +1132,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                                     CalendarEnrollDecision.RelayFailed
                                                 } else {
                                                     UsageEvents.record(UsageEvent.CALENDAR_PHONE_ADDED)
+                                                    calendarEnrollQr = CalendarInvite.Ready(enrollment)
                                                     CalendarEnrollDecision.Approved(enrollment.asReply())
                                                 },
                                             )

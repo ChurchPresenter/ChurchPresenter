@@ -18,6 +18,7 @@ import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.sync.HttpRelayTransport
 import org.churchpresenter.calendar.sync.EnrollRequest
 import org.churchpresenter.calendar.sync.RelayFailure
+import org.churchpresenter.calendar.sync.retire
 import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
@@ -220,13 +221,25 @@ class CalendarSyncService(
     }
 
     /**
-     * Forgets the pairing on this side; the next enrollment registers a fresh instance with a fresh
-     * key. At most once a week -- see [CalendarSyncSettings.nextRotationAt] -- and false when refused.
+     * "Start over": empties this instance at the relay and revokes its phones (see
+     * [CalendarRelayAccess.retire]), then forgets the pairing; the next enrollment registers a fresh
+     * instance with a fresh key. At most once a week -- see [CalendarSyncSettings.nextRotationAt].
+     * False when refused, or when the relay could not be emptied: then nothing is forgotten, since
+     * forgetting would leave the old instance readable with no way left to empty it.
      */
-    fun unpair(): Boolean {
+    suspend fun unpair(): Boolean = lock.withLock {
         val current = settings()
         val at = now()
-        if (current.nextRotationAt(at) != null) return false
+        if (current.nextRotationAt(at) != null) return@withLock false
+        if (current.isPaired) {
+            try {
+                withContext(io) { relay.withClientKey { relay.client().retire(relay.token) } }
+            } catch (e: RelayFailure) {
+                _status.value = failure(e)
+                return@withLock false
+            }
+        }
+        _devices.value = emptyList()
         saveSettings(
             current.copy(
                 instanceId = "", desktopToken = "", instanceKey = "", cursor = 0L, lastSyncAt = "",
@@ -234,7 +247,7 @@ class CalendarSyncService(
             ),
         )
         _status.value = CalendarSyncStatus.Unpaired
-        return true
+        true
     }
 
     private suspend fun round(work: (SyncCoordinator) -> SyncOutcome): Boolean = lock.withLock {
