@@ -425,6 +425,8 @@ fun CalendarWindow(
      */
     dialogs: @Composable () -> Unit = {},
     mainWindow: AwtWindow? = null,
+    /** Raised by one to open the new-service sheet on the Schedule tab's rows -- see `CalendarApp`. */
+    newServiceFromSchedule: Int = 0,
     onClose: () -> Unit,
 ) {
     LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_OPENED) }
@@ -477,6 +479,7 @@ fun CalendarWindow(
         }
         AppWindowRoot(theme = theme) {
             CalendarApp(
+                newServiceFromSchedule = newServiceFromSchedule,
                 storeFolder = appDataDirectory,
                 songFolder = File(songStorageDirectory).takeIf { it.isDirectory },
                 host = ownedHost,

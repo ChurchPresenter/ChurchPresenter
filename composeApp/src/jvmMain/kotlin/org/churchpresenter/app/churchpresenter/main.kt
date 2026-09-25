@@ -147,9 +147,10 @@ import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.calendar.CalendarBibleBook
+import org.churchpresenter.app.churchpresenter.server.calendarBibleBooks
 import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.seedCalendarFolder
 import org.churchpresenter.calendar.CueRunner
@@ -904,6 +905,8 @@ private fun ApplicationScope.ChurchPresenterApp(
     var converterInitialTab by remember { mutableStateOf(ConverterTab.BIBLES) }
     var showSongLibraryWindow by remember { mutableStateOf(false) }
     var showCalendarWindow by remember { mutableStateOf(false) }
+    // Raised to have the Calendar Manager open a new service on the Schedule tab's rows.
+    var calendarNewServiceFromSchedule by remember { mutableStateOf(0) }
     // What the Schedule tab holds right now, mirrored here from the same callback that feeds the
     // Companion server. The Calendar Manager reads it to decide whether "load" would discard
     // anything, and to copy a live-built service back onto a date.
@@ -1340,6 +1343,10 @@ private fun ApplicationScope.ChurchPresenterApp(
                             // go-live on a cue row and the Calendar Manager's ▶ all fire through it.
                             val cueHost = CalendarHost(
                                 loadIntoSchedule = loadFromCalendar,
+                                // What the auto-loader asks before it loads: without it every
+                                // Schedule looks empty, so a service loads again each minute of
+                                // its window and rows built by hand are cleared with it.
+                                currentSchedule = { currentScheduleItems },
                                 projectItem = projectFromCalendar,
                                 blankOutputs = {
                                     presenterManager.requestClearDisplay()
@@ -1399,6 +1406,33 @@ private fun ApplicationScope.ChurchPresenterApp(
                             // background thread, so it works with the Calendar window closed.
                             val calendarFolder =
                                 remember(appSettings.calendarStorageDirectory) { appSettings.calendarFolder() }
+                            // Kept here rather than inside its loop so the Schedule tab can read what it
+                            // is about to load, and load it early.
+                            val serviceAutoLoader = remember(calendarFolder) {
+                                val store = CalendarStore(calendarFolder)
+                                ServiceAutoLoader(
+                                    document = { withContext(Dispatchers.IO) { store.load().document } },
+                                    host = cueHost.copy(
+                                        loadIntoSchedule = { items, timing, replace, armed, startTime ->
+                                            UsageEvents.record(UsageEvent.CALENDAR_AUTO_LOADED)
+                                            loadFromCalendar(items, timing, replace, armed, startTime)
+                                        },
+                                    ),
+                                    save = { document -> withContext(Dispatchers.IO) { store.save(document) } },
+                                )
+                            }
+                            val upcomingServiceLoad by serviceAutoLoader.upcoming.collectAsState()
+                            val scheduleService by serviceAutoLoader.scheduleService.collectAsState()
+                            // A row added, removed or cleared changes what the notice and the save
+                            // button say at once, not at the loader's next minute.
+                            LaunchedEffect(serviceAutoLoader, currentScheduleItems) { serviceAutoLoader.refresh() }
+                            // And a service added or edited in the Calendar Manager -- or synced
+                            // from a phone -- changes them as soon as it is saved.
+                            LaunchedEffect(serviceAutoLoader, calendarFolder) {
+                                CalendarFileWatcher(calendarFolder).run(
+                                    onChanged = { serviceAutoLoader.refresh(reread = true) },
+                                )
+                            }
                             var calendarSyncWasOn by remember { mutableStateOf(appSettings.calendarSync.enabled) }
                             LaunchedEffect(appSettings.calendarSync.enabled) {
                                 val on = appSettings.calendarSync.enabled
@@ -1413,16 +1447,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 // auto-loader looks, so it loads this week's plan.
                                 calendarSync.syncOnStartup()
                                 launch { calendarSync.run() }
-                                val store = CalendarStore(calendarFolder)
-                                ServiceAutoLoader(
-                                    document = { withContext(Dispatchers.IO) { store.load().document } },
-                                    host = cueHost.copy(
-                                        loadIntoSchedule = { items, timing, replace, armed, startTime ->
-                                            UsageEvents.record(UsageEvent.CALENDAR_AUTO_LOADED)
-                                            loadFromCalendar(items, timing, replace, armed, startTime)
-                                        },
-                                    ),
-                                ).run()
+                                serviceAutoLoader.run()
                             }
 
                             LaunchedEffect(Unit) {
@@ -1683,6 +1708,20 @@ private fun ApplicationScope.ChurchPresenterApp(
                             MainDesktop(
                                 hostWindow = window,
                                 onPresentCue = fireScheduleCue,
+                                upcomingServiceLoad = upcomingServiceLoad,
+                                onLoadServiceNow = { replace ->
+                                    upcomingServiceLoad?.let { upcoming ->
+                                        coroutineScope.launch { serviceAutoLoader.loadNow(upcoming.serviceId, replace) }
+                                    }
+                                },
+                                scheduleService = scheduleService,
+                                onSaveScheduleToCalendar = {
+                                    coroutineScope.launch { serviceAutoLoader.saveScheduleToService() }
+                                },
+                                onAddScheduleToCalendar = {
+                                    calendarNewServiceFromSchedule++
+                                    showCalendarWindow = true
+                                },
                                 onRowWentLive = { item -> liveDurationLog.wentLive(item) },
                                 typicalSongSeconds = { song ->
                                     liveDurationLog.median(
@@ -2122,6 +2161,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                                     calendarEnrollQr = calendarSync.invitePhone().asInvite(calendarSync)
                                                 }
                                             },
+                                            nextSyncAt = { calendarSync.nextPullAt.value?.toEpochMilli() },
                                         ),
                                         // How long a row runs by itself, so a plan does not have
                                         // to be timed by hand: a clip's own duration, read from
@@ -2162,19 +2202,9 @@ private fun ApplicationScope.ChurchPresenterApp(
                                         // book / chapter / verse grids offer exactly what this
                                         // translation actually has.
                                         bibleBooks = {
-                                            primaryBibleForInstanceLink?.let { bible ->
-                                                (0 until bible.getBookCount()).map { index ->
-                                                    CalendarBibleBook(
-                                                        bookId = bible.getBookId(index),
-                                                        name = bible.getBooks().getOrElse(index) { "" },
-                                                        shortName = shortBookNames.getOrNull(bible.getBookId(index) - 1)
-                                                            ?: bible.getBooks().getOrElse(index) { "" },
-                                                        verseCounts = (1..bible.getChapterCount(index)).map { chapter ->
-                                                            bible.getVerseCountForChapter(index, chapter)
-                                                        },
-                                                    )
-                                                }
-                                            }.orEmpty()
+                                            primaryBibleForInstanceLink
+                                                ?.let { bible -> calendarBibleBooks(bible, shortBookNames) }
+                                                .orEmpty()
                                         },
                                         // The pre-flight check's fix for a moved file: the app's own
                                         // chooser, opened where the row still thinks the file is.
@@ -2251,6 +2281,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                             )
                                         }
                                     },
+                                    newServiceFromSchedule = calendarNewServiceFromSchedule,
                                     onClose = { showCalendarWindow = false }
                                 )
                             }

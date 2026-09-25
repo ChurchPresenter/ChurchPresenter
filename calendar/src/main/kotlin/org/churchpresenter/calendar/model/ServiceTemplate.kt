@@ -1,5 +1,7 @@
 package org.churchpresenter.calendar.model
 
+import org.churchpresenter.core.models.schedule.ScheduleItem
+
 /**
  * What a new service starts out holding.
  *
@@ -22,5 +24,14 @@ sealed interface ServiceTemplate {
     /** A template the user saved with **Template** in the run-of-show header. */
     data class Saved(val template: SavedTemplate) : ServiceTemplate {
         override val id: String get() = template.id
+    }
+
+    /**
+     * The rows in the app's Schedule tab now: a run of show built there by hand, put on the
+     * calendar. They keep their ids -- see `CalendarState.addService` -- so the Schedule is that
+     * service from then on, and offers to save what is changed there back into it.
+     */
+    data class FromSchedule(val items: List<ScheduleItem>) : ServiceTemplate {
+        override val id: String = "schedule"
     }
 }

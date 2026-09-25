@@ -142,6 +142,11 @@ fun CalendarApp(
      * merging reload calls `CalendarState.reloadMerging` itself, which is what the watch calls.
      */
     watchStoreFolder: Boolean = true,
+    /**
+     * Raised by one each time the app asks for the Schedule tab to become a new service: the window
+     * opens the new-service sheet on today, starting from the Schedule's rows. 0 asks for nothing.
+     */
+    newServiceFromSchedule: Int = 0,
     io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     // The watcher is made first so the state can tell it which writes were this window's own.
@@ -169,6 +174,13 @@ fun CalendarApp(
     LaunchedEffect(songFolder) { state.loadSongsAsync(io) }
 
     val dialogs = remember { CalendarDialogState() }
+    LaunchedEffect(newServiceFromSchedule) {
+        if (newServiceFromSchedule > 0) {
+            state.select(today)
+            dialogs.startFromSchedule = true
+            dialogs.creatingService = true
+        }
+    }
     // Fetched when the picker is first opened, not up front and not per recomposition. The host's
     // CalendarHost is rebuilt by the app on every recomposition, so keying an effect on it would
     // re-walk every chapter of every book each time; and at first composition the Bible may not be
@@ -269,10 +281,19 @@ private fun CalendarBody(
             // Only while the cloud sync is on: an invite to a relay this computer is not talking
             // to would be a code that leads nowhere.
             onInvite = host.cloudSync?.takeIf { it.enabled() }?.invitePhone,
+            nextSyncAt = host.cloudSync?.takeIf { it.enabled() }?.nextSyncAt,
             onSettings = dialogs::openSettings,
         )
         HorizontalDivider()
         RecoveryBanner(source = state.source, onDismiss = state::acknowledgeSource)
+        val preferences = state.document.preferences
+        var autoLoadNoteDismissed by remember { mutableStateOf(false) }
+        if (!preferences.autoLoadService && !autoLoadNoteDismissed) {
+            AutoLoadOffBanner(
+                onTurnOn = { state.updatePreferences(preferences.copy(autoLoadService = true)) },
+                onDismiss = { autoLoadNoteDismissed = true },
+            )
+        }
 
         Row(Modifier.fillMaxSize().weight(1f)) {
             val service = state.selectedService
@@ -472,6 +493,7 @@ private fun Header(
     onExport: ((PdfAudience) -> Unit)?,
     exportAudience: PdfAudience,
     onInvite: (() -> Unit)?,
+    nextSyncAt: (() -> Long?)?,
     onSettings: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -531,6 +553,9 @@ private fun Header(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        if (nextSyncAt != null) {
+            SyncCountdown(nextSyncAt)
+        }
         if (onExport != null) {
             ExportSplitButton(audience = exportAudience, height = HEADER_BUTTON, onExport = onExport)
         }

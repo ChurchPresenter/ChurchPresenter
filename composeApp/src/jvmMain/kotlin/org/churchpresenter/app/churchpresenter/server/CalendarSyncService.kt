@@ -92,6 +92,10 @@ class CalendarSyncService(
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
 
+    /** When the timer in [run] next pulls from the relay, or null while no timer is running. */
+    private val _nextPullAt = MutableStateFlow<Instant?>(null)
+    val nextPullAt: StateFlow<Instant?> = _nextPullAt.asStateFlow()
+
     private val _devices = MutableStateFlow<List<PairedDevice>>(emptyList())
     val devices: StateFlow<List<PairedDevice>> = _devices.asStateFlow()
 
@@ -129,12 +133,17 @@ class CalendarSyncService(
             // The songbooks straight away -- the startup round did not wait for them -- then with
             // every pull; a library that has not changed costs a hash and nothing else.
             pushCatalog()
-            while (coroutineContext.isActive) {
-                delay(pullIntervalMs)
-                if (registerIfNeeded()) {
-                    syncNow()
-                    pushCatalog()
+            try {
+                while (coroutineContext.isActive) {
+                    _nextPullAt.value = now().plusMillis(pullIntervalMs)
+                    delay(pullIntervalMs)
+                    if (registerIfNeeded()) {
+                        syncNow()
+                        pushCatalog()
+                    }
                 }
+            } finally {
+                _nextPullAt.value = null
             }
         }
     }
