@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Kutsu puhelin…</string>
     <string name="calendar_sync_sync_now">Synkronoi nyt</string>
     <string name="calendar_sync_unpair">Aloita alusta uudella avaimella</string>
+    <string name="calendar_sync_unpair_available_on">Aloittaa alusta voi kerran viikossa — käytettävissä taas %1$s.</string>
     <string name="calendar_sync_devices">Rekisteröidyt puhelimet</string>
     <string name="calendar_sync_no_devices">Puhelimia ei ole vielä rekisteröity.</string>
     <string name="calendar_sync_devices_hint">Nimeä puhelimen omistaja yllä kohdassa Etäasiakkaat; nimi näkyy täällä.</string>

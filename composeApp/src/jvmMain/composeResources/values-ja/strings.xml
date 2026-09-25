@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">電話を招待…</string>
     <string name="calendar_sync_sync_now">今すぐ同期</string>
     <string name="calendar_sync_unpair">新しいキーでやり直す</string>
+    <string name="calendar_sync_unpair_available_on">やり直しは週に1回までです — %1$s に再び利用できます。</string>
     <string name="calendar_sync_devices">登録済みの電話</string>
     <string name="calendar_sync_no_devices">登録済みの電話はまだありません。</string>
     <string name="calendar_sync_devices_hint">上のリモートクライアントで電話の所有者に名前を付けると、ここに表示されます。</string>

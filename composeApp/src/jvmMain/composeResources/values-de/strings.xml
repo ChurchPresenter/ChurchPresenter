@@ -2864,6 +2864,7 @@
     <string name="calendar_sync_invite">Telefon einladen…</string>
     <string name="calendar_sync_sync_now">Jetzt synchronisieren</string>
     <string name="calendar_sync_unpair">Mit einem neuen Schlüssel neu beginnen</string>
+    <string name="calendar_sync_unpair_available_on">Neu beginnen ist einmal pro Woche möglich — wieder verfügbar am %1$s.</string>
     <string name="calendar_sync_devices">Angemeldete Telefone</string>
     <string name="calendar_sync_no_devices">Noch keine Telefone angemeldet.</string>
     <string name="calendar_sync_devices_hint">Gib dem Besitzer eines Telefons oben unter Remote-Clients einen Namen; er erscheint hier.</string>

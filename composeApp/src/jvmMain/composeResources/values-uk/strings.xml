@@ -2863,6 +2863,7 @@
     <string name="calendar_sync_invite">Запросити телефон…</string>
     <string name="calendar_sync_sync_now">Синхронізувати зараз</string>
     <string name="calendar_sync_unpair">Почати заново з новим ключем</string>
+    <string name="calendar_sync_unpair_available_on">Почати заново можна раз на тиждень — знову буде доступно %1$s.</string>
     <string name="calendar_sync_devices">Зареєстровані телефони</string>
     <string name="calendar_sync_no_devices">Ще немає зареєстрованих телефонів.</string>
     <string name="calendar_sync_devices_hint">Назвіть власника телефону вище в розділі Віддалені клієнти; ім’я з’явиться тут.</string>

@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">फ़ोन आमंत्रित करें…</string>
     <string name="calendar_sync_sync_now">अभी सिंक करें</string>
     <string name="calendar_sync_unpair">नई कुंजी के साथ फिर से शुरू करें</string>
+    <string name="calendar_sync_unpair_available_on">फिर से शुरू करना सप्ताह में एक बार संभव है — %1$s को फिर उपलब्ध होगा।</string>
     <string name="calendar_sync_devices">पंजीकृत फ़ोन</string>
     <string name="calendar_sync_no_devices">अभी तक कोई फ़ोन पंजीकृत नहीं है।</string>
     <string name="calendar_sync_devices_hint">ऊपर रिमोट क्लाइंट्स में फ़ोन के मालिक का नाम दें; नाम यहाँ दिखेगा।</string>

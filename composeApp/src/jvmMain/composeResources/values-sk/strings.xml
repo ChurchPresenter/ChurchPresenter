@@ -2893,6 +2893,7 @@
     <string name="calendar_sync_invite">Pozvať telefón…</string>
     <string name="calendar_sync_sync_now">Synchronizovať teraz</string>
     <string name="calendar_sync_unpair">Začať odznova s novým kľúčom</string>
+    <string name="calendar_sync_unpair_available_on">Začať odznova sa dá raz za týždeň — znova dostupné %1$s.</string>
     <string name="calendar_sync_devices">Zaregistrované telefóny</string>
     <string name="calendar_sync_no_devices">Zatiaľ nie sú zaregistrované žiadne telefóny.</string>
     <string name="calendar_sync_devices_hint">Pomenujte majiteľa telefónu vyššie v časti Vzdialení klienti; meno sa zobrazí tu.</string>

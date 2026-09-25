@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">เชิญโทรศัพท์…</string>
     <string name="calendar_sync_sync_now">ซิงค์เดี๋ยวนี้</string>
     <string name="calendar_sync_unpair">เริ่มใหม่ด้วยคีย์ใหม่</string>
+    <string name="calendar_sync_unpair_available_on">เริ่มใหม่ได้สัปดาห์ละครั้ง — ใช้ได้อีกครั้งในวันที่ %1$s</string>
     <string name="calendar_sync_devices">โทรศัพท์ที่ลงทะเบียน</string>
     <string name="calendar_sync_no_devices">ยังไม่มีโทรศัพท์ที่ลงทะเบียน</string>
     <string name="calendar_sync_devices_hint">ตั้งชื่อเจ้าของโทรศัพท์ภายใต้ไคลเอนต์ระยะไกลด้านบน ชื่อจะแสดงที่นี่</string>
