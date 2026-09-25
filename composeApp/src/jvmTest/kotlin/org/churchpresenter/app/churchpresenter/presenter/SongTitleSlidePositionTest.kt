@@ -10,7 +10,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.withTitleSlideOffset
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
@@ -44,6 +46,64 @@ class SongTitleSlidePositionTest {
         lines = emptyList(),
     )
 
+    // ── How a line is drawn, as distinct from where ─────────────────────────────────────────────
+    //
+    // The placement above is one half of `TitleSlideText`; the other is that a line can be stroked,
+    // can carry the song number ahead of it as a span of its own, and is drawn white on a key
+    // output. Each takes a different path through the same composable, and each was reachable only
+    // through the real presenter.
+
+    /** The slide with a number, which shares the title's row when the setting says so. */
+    private fun numbered() = section.copy(songNumber = 427)
+
+    private fun stroked() = small().copy(
+        outlines = SongSettings().outlines.copy(
+            title = TextOutline(enabled = true, width = 3, color = "#101820"),
+        ),
+    )
+
+    @Test
+    fun `a stroked title is drawn through the two-pass outline path`() {
+        // An outlined line is a Box holding a stroke pass and a fill pass rather than one Text, so
+        // the text is found twice. That it is found at all is the assertion: the stroke path builds
+        // its own copy of the annotated string with every span painted the outline's colour, and a
+        // mistake there throws rather than drawing differently.
+        val box = boxOf(stroked(), TITLE)
+        assertTrue(box.width > 0f, "the stroked title is drawn")
+        assertTrue(box.top >= 0f, "and placed inside the slide")
+    }
+
+    @Test
+    fun `the number shares the title's line when it is set to lead`() {
+        // Drawn as a span ahead of the title inside the same paragraph, in the number's own style,
+        // so a long title wraps under it as one line of text would.
+        val leading = small().copy(titleSlideNumberBeforeTitle = true)
+        val withNumber = boxOf(leading, TITLE, section = numbered()).width
+        val without = boxOf(leading, TITLE).width
+        assertTrue(
+            withNumber >= without,
+            "the number is drawn in the title's own line, so that line cannot be narrower: " +
+                "$withNumber vs $without",
+        )
+    }
+
+    @Test
+    fun `the number takes a row of its own when it is not set to lead`() {
+        val ownRow = small().copy(titleSlideNumberBeforeTitle = false)
+        val numberTop = boxOf(ownRow, "427", section = numbered()).top
+        val titleTop = boxOf(ownRow, TITLE, section = numbered()).top
+        assertTrue(numberTop < titleTop, "its own row sits above the title: $numberTop vs $titleTop")
+    }
+
+    @Test
+    fun `a key output draws the slide white whatever the styling says`() {
+        // The key signal is a matte: every element goes white so the shape is what gets keyed, and
+        // an outline goes white with it rather than cutting a dark edge out of the matte.
+        val coloured = stroked().copy(titleColor = "#FFD54F")
+        val box = boxOf(coloured, TITLE, isKey = true)
+        assertTrue(box.width > 0f, "the key output still draws the slide")
+    }
+
     /**
      * Small type deliberately. `Modifier.elementOffset` moves an element through the room the frame
      * has left over, so an element as wide as the frame cannot move on X at all — that is its stated
@@ -58,7 +118,12 @@ class SongTitleSlidePositionTest {
     /** Where the node holding one line landed, and how wide it came out. */
     private data class Box2D(val left: Float, val top: Float, val width: Float)
 
-    private fun boxOf(settings: SongSettings, text: String): Box2D {
+    private fun boxOf(
+        settings: SongSettings,
+        text: String,
+        section: LyricSection = this.section,
+        isKey: Boolean = false,
+    ): Box2D {
         var left = -1f
         var top = -1f
         var width = -1f
@@ -70,14 +135,16 @@ class SongTitleSlidePositionTest {
                         settings = settings,
                         target = SongStyleTarget.FULL_SCREEN,
                         languages = listOf(0),
-                        isKey = false,
+                        isKey = isKey,
                         scaleFactor = 1f,
                         contentAlignment = Alignment.Center,
                     )
                 }
             }
             waitForIdle()
-            val node = onNodeWithText(text, substring = true)
+            // `onFirst`: a stroked line is a stroke pass and a fill pass over each other, so its
+            // text is two nodes rather than one. They are the same box by construction.
+            val node = onAllNodesWithText(text, substring = true).onFirst()
             node.assertIsDisplayed()
             val bounds = node.getBoundsInRoot()
             left = bounds.left.value

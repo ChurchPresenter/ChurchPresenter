@@ -81,6 +81,19 @@ internal data class OrderedSourceTags(
  * their words and their test tags, and the songs went without a reorder for exactly as long as
  * this was Bible-only code.
  */
+/**
+ * One source as a picker lists it: its code, its name, and how much of the Bible it holds.
+ *
+ * Moved here from `ProfileTranslationPicker.kt` when that file was deleted. It was the only thing
+ * in it anything still used — the picker it was written for was superseded by this one and had sat
+ * unreferenced since, 619 lines of it.
+ */
+internal data class TranslationChoiceDisplay(
+    val code: String,
+    val title: String,
+    val portion: String,
+)
+
 @Composable
 internal fun OrderedSourcePicker(
     items: List<TranslationChoiceDisplay>,
