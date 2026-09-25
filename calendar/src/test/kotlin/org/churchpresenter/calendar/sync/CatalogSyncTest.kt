@@ -66,6 +66,18 @@ class CatalogSyncTest {
     }
 
     @Test
+    fun `after Start over the new instance is sent every songbook, though nothing changed`() {
+        assertEquals(2, sync().push("desk-token"))
+        now = now.plusSeconds(60)
+
+        val fresh = Sealing(envelope, "inst-new")
+        val pushedAgain = CatalogSync(store, client, fresh, { songs }, seconds, { today }, { now }).push("desk-token")
+
+        assertEquals(2, pushedAgain, "the new instance's relay holds none of them")
+        assertEquals("inst-new", store.load().instanceId)
+    }
+
+    @Test
     fun `a changed book is written again, but not within a day of its last push`() {
         sync().push("desk-token")
         songs = songs + SongItem(number = "43", title = "How Great Thou Art", songbook = "Hymnal")

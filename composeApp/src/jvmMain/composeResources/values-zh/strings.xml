@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">邀请手机…</string>
     <string name="calendar_sync_sync_now">立即同步</string>
     <string name="calendar_sync_unpair">使用新密钥重新开始</string>
+    <string name="calendar_sync_unpair_available_on">每周只能重新开始一次 — 将于 %1$s 再次可用。</string>
     <string name="calendar_sync_devices">已注册的手机</string>
     <string name="calendar_sync_no_devices">尚无已注册的手机。</string>
     <string name="calendar_sync_devices_hint">在上方的远程客户端中为手机的主人命名；名称会显示在这里。</string>

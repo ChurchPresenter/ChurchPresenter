@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Pozovi telefon…</string>
     <string name="calendar_sync_sync_now">Sinkroniziraj sada</string>
     <string name="calendar_sync_unpair">Počni ispočetka s novim ključem</string>
+    <string name="calendar_sync_unpair_available_on">Ispočetka se može krenuti jednom tjedno — ponovno dostupno %1$s.</string>
     <string name="calendar_sync_devices">Prijavljeni telefoni</string>
     <string name="calendar_sync_no_devices">Još nema prijavljenih telefona.</string>
     <string name="calendar_sync_devices_hint">Imenujte vlasnika telefona iznad pod Udaljeni klijenti; ime se prikazuje ovdje.</string>

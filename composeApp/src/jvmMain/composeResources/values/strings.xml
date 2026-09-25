@@ -3132,6 +3132,7 @@
     <string name="calendar_sync_invite">Invite a phone…</string>
     <string name="calendar_sync_sync_now">Sync now</string>
     <string name="calendar_sync_unpair">Start over with a new key</string>
+    <string name="calendar_sync_unpair_available_on">Starting over is allowed once a week — available again on %1$s.</string>
     <string name="calendar_sync_devices">Enrolled phones</string>
     <string name="calendar_sync_no_devices">No phones enrolled yet.</string>
     <string name="calendar_sync_devices_hint">Name a phone’s owner under Remote Clients above; the name shows here.</string>

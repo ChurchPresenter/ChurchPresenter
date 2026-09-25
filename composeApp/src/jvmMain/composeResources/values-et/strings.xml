@@ -2896,6 +2896,7 @@
     <string name="calendar_sync_invite">Kutsu telefon…</string>
     <string name="calendar_sync_sync_now">Sünkrooni kohe</string>
     <string name="calendar_sync_unpair">Alusta uue võtmega otsast</string>
+    <string name="calendar_sync_unpair_available_on">Otsast alustada saab kord nädalas — uuesti saadaval %1$s.</string>
     <string name="calendar_sync_devices">Registreeritud telefonid</string>
     <string name="calendar_sync_no_devices">Ühtegi telefoni pole veel registreeritud.</string>
     <string name="calendar_sync_devices_hint">Anna telefoni omanikule nimi ülal jaotises Kaugkliendid; nimi kuvatakse siin.</string>

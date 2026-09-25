@@ -21,6 +21,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
+import java.time.Instant
 import java.time.ZoneId
 import java.util.Locale
 import kotlin.test.Test
@@ -46,6 +47,7 @@ class CalendarSyncCardScreenshotTest {
     private val paired = AppSettings(
         calendarSync = CalendarSyncSettings(
             enabled = true,
+            relayUrl = "https://relay.example",
             instanceId = "3f7c1a9e-2b4d-4e6f-8a1b-2c3d4e5f6a7b",
             desktopToken = "tok",
             instanceKey = "k".repeat(43),
@@ -83,9 +85,17 @@ class CalendarSyncCardScreenshotTest {
                 onRevoke = {},
                 zone = ZONE,
                 locale = LOCALE,
+                now = Instant.parse(AT),
             )
         }
     }
+
+    @Test
+    fun `starting over again waits for the week to end`() = card(
+        "rotation_locked",
+        settings = paired.copy(calendarSync = paired.calendarSync.copy(rotatedAt = "2026-09-18T10:30:00Z")),
+        status = CalendarSyncStatus.Synced(AT, outcome()),
+    )
 
     @Test
     fun `switched off`() = card("off", settings = AppSettings(), status = CalendarSyncStatus.Off)
@@ -192,7 +202,7 @@ class CalendarSyncCardScreenshotTest {
         Box(Modifier.size(400.dp, 540.dp)) {
             CalendarEnrollQrContent(
                 enrollment = CalendarEnrollment(
-                    relayUrl = "https://sync.churchpresenter.org",
+                    relayUrl = "https://relay.example",
                     instanceId = "3f7c1a9e-2b4d-4e6f-8a1b-2c3d4e5f6a7b",
                     deviceId = "9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d",
                     deviceToken = "d".repeat(43),

@@ -13,9 +13,14 @@ import java.time.LocalDate
 @Serializable
 data class PushedCatalogPart(val hash: String, val at: String, val keepUntil: String)
 
-/** Every catalog part on the relay, by record id, as this desktop last wrote it. */
+/**
+ * Every catalog part on the relay, by record id, as this desktop last wrote it -- for the instance
+ * [instanceId]. After "Start over" the desktop is a new instance whose relay holds nothing, so a
+ * memory of another instance's parts is no memory at all: without the id, an unchanged library
+ * was never pushed to the new one and every phone's song list stayed empty.
+ */
 @Serializable
-data class CatalogSyncState(val pushed: Map<String, PushedCatalogPart> = emptyMap())
+data class CatalogSyncState(val instanceId: String = "", val pushed: Map<String, PushedCatalogPart> = emptyMap())
 
 /** `catalog-sync.json` beside `calendar.json`: the memory that keeps an unchanged library costing nothing. */
 class CatalogSyncStore(private val folder: File) {
@@ -65,7 +70,8 @@ class CatalogSync(
         val library = songs()
         if (library.isEmpty()) return 0
         val records = Projection.catalog(library, seconds)
-        val state = store.load()
+        val loaded = store.load()
+        val state = loaded.takeIf { it.instanceId == sealing.instanceId } ?: CatalogSyncState(sealing.instanceId)
         val next = state.pushed.toMutableMap()
         val at = now()
         var changed = 0
@@ -83,7 +89,9 @@ class CatalogSync(
             next.remove(gone)
             changed++
         }
-        if (next != state.pushed) store.save(CatalogSyncState(next))
+        if (next != state.pushed || loaded.instanceId != sealing.instanceId) {
+            store.save(CatalogSyncState(sealing.instanceId, next))
+        }
         return changed
     }
 

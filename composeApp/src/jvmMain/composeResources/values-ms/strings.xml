@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Jemput telefon…</string>
     <string name="calendar_sync_sync_now">Segerakkan sekarang</string>
     <string name="calendar_sync_unpair">Mula semula dengan kunci baharu</string>
+    <string name="calendar_sync_unpair_available_on">Mula semula dibenarkan sekali seminggu — tersedia semula pada %1$s.</string>
     <string name="calendar_sync_devices">Telefon berdaftar</string>
     <string name="calendar_sync_no_devices">Tiada telefon didaftar lagi.</string>
     <string name="calendar_sync_devices_hint">Namakan pemilik telefon di bawah Pelanggan Jauh di atas; nama dipaparkan di sini.</string>

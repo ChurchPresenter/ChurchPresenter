@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Mag-imbita ng telepono…</string>
     <string name="calendar_sync_sync_now">I-sync ngayon</string>
     <string name="calendar_sync_unpair">Magsimula ulit gamit ang bagong key</string>
+    <string name="calendar_sync_unpair_available_on">Maaaring magsimula ulit nang isang beses sa isang linggo — magagamit muli sa %1$s.</string>
     <string name="calendar_sync_devices">Mga naka-enroll na telepono</string>
     <string name="calendar_sync_no_devices">Wala pang naka-enroll na telepono.</string>
     <string name="calendar_sync_devices_hint">Pangalanan ang may-ari ng telepono sa ilalim ng Mga Remote Client sa itaas; lalabas dito ang pangalan.</string>

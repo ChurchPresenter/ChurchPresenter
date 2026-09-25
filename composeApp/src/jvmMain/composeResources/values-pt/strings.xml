@@ -2892,6 +2892,7 @@
     <string name="calendar_sync_invite">Convidar um telefone…</string>
     <string name="calendar_sync_sync_now">Sincronizar agora</string>
     <string name="calendar_sync_unpair">Recomeçar com uma nova chave</string>
+    <string name="calendar_sync_unpair_available_on">Recomeçar é permitido uma vez por semana — disponível novamente em %1$s.</string>
     <string name="calendar_sync_devices">Telemóveis inscritos</string>
     <string name="calendar_sync_no_devices">Ainda não há telemóveis inscritos.</string>
     <string name="calendar_sync_devices_hint">Dê um nome ao dono de um telemóvel em Clientes remotos acima; o nome aparece aqui.</string>

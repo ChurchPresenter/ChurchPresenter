@@ -86,7 +86,13 @@ object RemoteKind {
 
 /**
  * A planned service as it travels inside a [SealedRecord]. [updatedAt], [updatedBy] and [rev]
- * are the relay's stamps: filled on the way in, ignored on the way out.
+ * are the relay's stamps: filled on the way in, ignored on the way out, and never merged on -- the
+ * relay could write anything there.
+ *
+ * What orders two copies travels sealed: [version], the number of edits (a writer sends the copy
+ * it edited plus one), and [editedAt], the writer's own clock, which only breaks a tie. A deletion
+ * is a record too, [deleted] and a version, sealed like any other, so the relay can neither forge
+ * one nor hand back an old copy that outranks a newer one.
  */
 @Serializable
 data class RemoteService(
@@ -100,6 +106,9 @@ data class RemoteService(
     val rows: List<RemoteRow> = emptyList(),
     val plannedSeconds: Map<String, Int> = emptyMap(),
     val timing: Map<String, RowTiming> = emptyMap(),
+    val version: Long = 0L,
+    val editedAt: String = "",
+    val deleted: Boolean = false,
     val updatedAt: String = "",
     val updatedBy: String = "",
     val rev: Long = 0L,
@@ -157,7 +166,8 @@ data class ChangesResponse(
 @Serializable
 data class StateRequest(
     val records: List<SealedRecord>,
-    val tombstones: List<RemoteTombstone>,
+    /** Always empty: deletions travel sealed, in [records]. Kept for the relay's schema. */
+    val tombstones: List<RemoteTombstone> = emptyList(),
     /** [Envelope.seal] of a [PresetIndex], record id [PRESETS_RECORD]. */
     val presetsBox: String,
 )
@@ -192,6 +202,7 @@ object WireLimits {
     const val DETAIL_CHARS = 200
     const val ROWS_PER_SERVICE = 200
     const val SERVICES_PER_PUSH = 500
+    const val DELETIONS_PER_PUSH = 500
     /** Songs per catalog record; a bigger book is split into parts so each box stays under the relay's cap. */
     const val CATALOG_PART_SONGS = 2_000
     const val CATALOG_SONGS_MAX = 20_000

@@ -55,7 +55,9 @@ import churchpresenter.composeapp.generated.resources.calendar_sync_status_unres
 import churchpresenter.composeapp.generated.resources.calendar_sync_sync_now
 import churchpresenter.composeapp.generated.resources.calendar_sync_title
 import churchpresenter.composeapp.generated.resources.calendar_sync_unpair
+import churchpresenter.composeapp.generated.resources.calendar_sync_unpair_available_on
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.server.RelayEndpoints
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
 import org.churchpresenter.app.churchpresenter.server.CalendarInvite
@@ -92,7 +94,7 @@ internal fun CalendarSyncCard(
         devices = devices,
         labelFor = labelFor,
         onSyncNow = { scope.launch { sync.syncNow() } },
-        onUnpair = sync::unpair,
+        onUnpair = { sync.unpair() },
         onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
         onInvite = { scope.launch { invite = sync.invitePhone().asInvite(sync) } },
     )
@@ -117,9 +119,11 @@ internal fun CalendarSyncCardContent(
     onInvite: () -> Unit = {},
     zone: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault(),
+    now: Instant = Instant.now(),
 ) {
     val current = settings.calendarSync
     val clock = remember(zone, locale) { LocalTimeText(zone, locale) }
+    val nextRotation = current.nextRotationAt(now)
 
     SettingsSection(title = stringResource(Res.string.calendar_sync_title)) {
         Text(
@@ -179,6 +183,7 @@ internal fun CalendarSyncCardContent(
                     }
                     GhostButton(
                         onClick = onUnpair,
+                        enabled = nextRotation == null,
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
                         Text(
@@ -187,11 +192,21 @@ internal fun CalendarSyncCardContent(
                         )
                     }
                 }
+                if (nextRotation != null) {
+                    val date = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+                        .format(nextRotation.atZone(zone))
+                    Text(
+                        text = stringResource(Res.string.calendar_sync_unpair_available_on, date),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             if (current.isPaired) {
                 DevicesList(devices = devices, labelFor = labelFor, clock = clock, onRevoke = onRevoke)
                 Text(
-                    text = "${stringResource(Res.string.calendar_sync_relay_url)}: ${current.relayUrl} · " +
+                    text = "${stringResource(Res.string.calendar_sync_relay_url)}: " +
+                        "${current.relayUrl.ifBlank { RelayEndpoints.BUILT_IN.relayUrl }} · " +
                         "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

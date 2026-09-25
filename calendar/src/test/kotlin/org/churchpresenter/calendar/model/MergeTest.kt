@@ -26,9 +26,10 @@ class MergeTest {
         date: String = "2026-09-20",
         updated: Instant = at(0),
         items: List<ScheduleItem> = emptyList(),
+        version: Long = 0L,
     ) = PlannedService(
         id = id, date = date, name = name, startTime = "10:00", items = items,
-        updatedAt = storedInstant(updated),
+        updatedAt = storedInstant(updated), version = version,
     )
 
     private fun song(id: String) = ScheduleItem.SongItem(id, 1, "Song", "Hymns", "Hymns::1")
@@ -125,11 +126,41 @@ class MergeTest {
     @Test
     fun `a service edited after it was deleted elsewhere is kept`() {
         val deleted = document(service("a"), service("b")).withoutService("b", at(5))
-        val edited = document(service("a"), service("b", name = "Back on", updated = at(8)))
+        // An edit of the same copy the deletion was made from: the same version, but later.
+        val edited = document(service("a"), service("b", name = "Back on", updated = at(8), version = 1L))
 
         val merged = deleted.mergedWith(edited, at(10))
 
         assertEquals("Back on", merged.serviceById("b")?.name, "somebody went back to it after the delete")
+    }
+
+    @Test
+    fun `more edits win over a later clock`() {
+        val edited = document(service("a", name = "Edited twice", updated = at(2), version = 2L))
+        val stale = document(service("a", name = "Old copy, restamped", updated = at(9), version = 1L))
+
+        assertEquals("Edited twice", edited.mergedWith(stale, at(10)).serviceById("a")?.name)
+        assertEquals("Edited twice", stale.mergedWith(edited, at(10)).serviceById("a")?.name)
+    }
+
+    @Test
+    fun `a deletion outranks every copy it was made from`() {
+        val here = document(service("b", version = 3L)).withoutService("b", at(5))
+        val there = document(service("b", name = "Stale", updated = at(9), version = 3L))
+
+        assertNull(here.mergedWith(there, at(10)).serviceById("b"))
+        assertEquals(4L, here.deletedVersions["b"], "one more edit than the copy it deleted")
+    }
+
+    @Test
+    fun `a local edit counts as one more edit than the copy it was made from`() {
+        val before = document(service("a", version = 3L))
+        val after = document(service("a", name = "Renamed", version = 3L), service("new"))
+
+        val stamped = after.stampingChanged(before, at(4))
+
+        assertEquals(4L, stamped.serviceById("a")?.version)
+        assertEquals(1L, stamped.serviceById("new")?.version)
     }
 
     @Test

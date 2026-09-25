@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">ເຊີນໂທລະສັບ…</string>
     <string name="calendar_sync_sync_now">ຊິງຄ໌ດຽວນີ້</string>
     <string name="calendar_sync_unpair">ເລີ່ມໃໝ່ດ້ວຍກະແຈໃໝ່</string>
+    <string name="calendar_sync_unpair_available_on">ເລີ່ມໃໝ່ໄດ້ອາທິດລະເທື່ອ — ໃຊ້ໄດ້ອີກຄັ້ງໃນວັນທີ %1$s.</string>
     <string name="calendar_sync_devices">ໂທລະສັບທີ່ລົງທະບຽນ</string>
     <string name="calendar_sync_no_devices">ຍັງບໍ່ມີໂທລະສັບທີ່ລົງທະບຽນ.</string>
     <string name="calendar_sync_devices_hint">ຕັ້ງຊື່ເຈົ້າຂອງໂທລະສັບຢູ່ໃຕ້ລູກຄ້າທາງໄກຂ້າງເທິງ; ຊື່ຈະສະແດງຢູ່ບ່ອນນີ້.</string>

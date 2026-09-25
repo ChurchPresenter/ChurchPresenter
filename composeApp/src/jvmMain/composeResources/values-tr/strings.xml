@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Telefon davet et…</string>
     <string name="calendar_sync_sync_now">Şimdi eşitle</string>
     <string name="calendar_sync_unpair">Yeni bir anahtarla baştan başla</string>
+    <string name="calendar_sync_unpair_available_on">Baştan başlamak haftada bir kez mümkündür — %1$s tarihinde yeniden kullanılabilir.</string>
     <string name="calendar_sync_devices">Kayıtlı telefonlar</string>
     <string name="calendar_sync_no_devices">Henüz kayıtlı telefon yok.</string>
     <string name="calendar_sync_devices_hint">Bir telefonun sahibini yukarıdaki Uzak İstemciler altında adlandırın; ad burada görünür.</string>

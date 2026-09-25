@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Telefonni taklif qilish…</string>
     <string name="calendar_sync_sync_now">Hozir sinxronlash</string>
     <string name="calendar_sync_unpair">Yangi kalit bilan qaytadan boshlash</string>
+    <string name="calendar_sync_unpair_available_on">Qaytadan boshlashga haftada bir marta ruxsat beriladi — %1$s kuni yana mavjud bo‘ladi.</string>
     <string name="calendar_sync_devices">Ro‘yxatdan o‘tgan telefonlar</string>
     <string name="calendar_sync_no_devices">Hali ro‘yxatdan o‘tgan telefon yo‘q.</string>
     <string name="calendar_sync_devices_hint">Telefon egasining nomini yuqoridagi Masofaviy mijozlar bo‘limida bering; nom shu yerda ko‘rinadi.</string>

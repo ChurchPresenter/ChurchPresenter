@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">دعوة هاتف…</string>
     <string name="calendar_sync_sync_now">مزامنة الآن</string>
     <string name="calendar_sync_unpair">البدء من جديد بمفتاح جديد</string>
+    <string name="calendar_sync_unpair_available_on">يُسمح بالبدء من جديد مرة واحدة في الأسبوع — سيكون متاحًا مجددًا في %1$s.</string>
     <string name="calendar_sync_devices">الهواتف المسجَّلة</string>
     <string name="calendar_sync_no_devices">لا توجد هواتف مسجَّلة بعد.</string>
     <string name="calendar_sync_devices_hint">سمِّ مالك الهاتف تحت العملاء البعيدين أعلاه؛ يظهر الاسم هنا.</string>

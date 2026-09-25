@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Alika simu…</string>
     <string name="calendar_sync_sync_now">Sawazisha sasa</string>
     <string name="calendar_sync_unpair">Anza upya na ufunguo mpya</string>
+    <string name="calendar_sync_unpair_available_on">Kuanza upya kunaruhusiwa mara moja kwa wiki — kutapatikana tena %1$s.</string>
     <string name="calendar_sync_devices">Simu zilizosajiliwa</string>
     <string name="calendar_sync_no_devices">Hakuna simu zilizosajiliwa bado.</string>
     <string name="calendar_sync_devices_hint">Mpe jina mmiliki wa simu chini ya Wateja wa Mbali hapo juu; jina huonekana hapa.</string>

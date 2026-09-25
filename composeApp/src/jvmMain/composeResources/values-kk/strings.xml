@@ -2864,6 +2864,7 @@
     <string name="calendar_sync_invite">Телефонды шақыру…</string>
     <string name="calendar_sync_sync_now">Қазір синхрондау</string>
     <string name="calendar_sync_unpair">Жаңа кілтпен қайта бастау</string>
+    <string name="calendar_sync_unpair_available_on">Қайта бастауға аптасына бір рет рұқсат етіледі — %1$s күні қайта қолжетімді болады.</string>
     <string name="calendar_sync_devices">Тіркелген телефондар</string>
     <string name="calendar_sync_no_devices">Әзірге тіркелген телефон жоқ.</string>
     <string name="calendar_sync_devices_hint">Телефон иесінің атын жоғарыдағы Қашықтағы клиенттер бөлімінде беріңіз; аты осы жерде көрсетіледі.</string>
