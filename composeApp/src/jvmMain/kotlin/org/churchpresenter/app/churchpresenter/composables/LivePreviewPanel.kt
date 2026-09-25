@@ -587,9 +587,16 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
+                                    // The preview is this output, so it takes the same three
+                                    // subtitle decisions the real one does. It used to pass none
+                                    // of them, and so always drew every track in default styling
+                                    // however the profile was configured.
                                     MediaPresenter(
                                         modifier = Modifier.fillMaxSize(),
                                         transitionAlpha = mediaTransitionAlpha,
+                                        showSubtitles = profile.showSubtitles,
+                                        profileId = profile.id,
+                                        mediaSettings = outputSettings.mediaSettings,
                                         contentScale = outputSettings.mediaScaleMode.contentScale,
                                     )
                                 }

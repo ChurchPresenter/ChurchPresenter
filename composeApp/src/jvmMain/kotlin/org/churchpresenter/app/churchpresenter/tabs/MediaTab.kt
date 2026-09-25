@@ -35,7 +35,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -85,7 +84,6 @@ import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
@@ -113,7 +111,6 @@ import churchpresenter.composeapp.generated.resources.media_now_presenting
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.media_subtitles_files
 import churchpresenter.composeapp.generated.resources.media_subtitles_load_file
-import churchpresenter.composeapp.generated.resources.media_subtitles_off
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_select_file
@@ -161,7 +158,6 @@ import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.utils.icon
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -771,35 +767,11 @@ fun MediaTab(
                     }
                 }
                 DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.media_subtitles_off)) },
-                        onClick = {
-                            viewModel.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF)
-                            subtitlesExpanded = false
-                        },
-                        trailingIcon = {
-                            if (!subtitlesShowing) {
-                                Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(14.dp))
-                            }
-                        }
-                    )
-                    viewModel.subtitleTracks.forEach { track ->
-                        DropdownMenuItem(
-                            text = { Text(track.name) },
-                            onClick = {
-                                viewModel.selectSubtitleTrack(track.id)
-                                subtitlesExpanded = false
-                            },
-                            trailingIcon = {
-                                if (viewModel.selectedSubtitleTrack == track.id) {
-                                    Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(14.dp))
-                                }
-                            }
-                        )
-                    }
-                    DropdownMenuItem(
-                        text = { Text(subtitleFileTitle) },
-                        onClick = {
+                    SubtitleMenuItems(
+                        viewModel = viewModel,
+                        profiles = appSettings.projectionSettings.outputProfiles,
+                        loadFileLabel = subtitleFileTitle,
+                        onLoadFile = {
                             subtitlesExpanded = false
                             scope.launch {
                                 // The video's own folder, where a subtitle for it almost always
@@ -813,9 +785,10 @@ fun MediaTab(
                                     ),
                                     selectDirectory = false
                                 )
-                                if (f != null) viewModel.setSubtitleFile(f.absolutePathString())
+                                // Added, not substituted: a second file is a second language.
+                                if (f != null) viewModel.addSubtitleFile(f.absolutePathString())
                             }
-                        }
+                        },
                     )
                 }
             }

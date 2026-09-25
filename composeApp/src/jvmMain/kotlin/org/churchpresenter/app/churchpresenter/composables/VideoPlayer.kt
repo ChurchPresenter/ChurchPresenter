@@ -1102,7 +1102,7 @@ private fun SoftwareMediaLoad(
         // When the caller has determined this instance must never produce audio (e.g. a
         // background decoder mounted only to keep rendering a paused frame), :no-audio
         // disables the audio track outright.
-        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl, viewModel.subtitleCues.isNotEmpty())
+        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl, viewModel.appDrawsSubtitles)
         // Auto-pause is handled by the playing() event listener above.
         if (resumeAtMs > 0) mp.controls().setTime(resumeAtMs)
     }

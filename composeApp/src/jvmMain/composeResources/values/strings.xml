@@ -792,7 +792,6 @@
     <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
     <string name="tooltip_stt_settings">STT Display Settings</string>
     <string name="tooltip_dictionary_settings">Dictionary Display Settings</string>
-    <string name="tooltip_media_subtitle_settings">Subtitle Display Settings</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
     <string name="tooltip_add_label">Add Label</string>
@@ -1431,9 +1430,11 @@
     <string name="media_subtitles">Subtitles</string>
     <string name="media_subtitles_off">Off</string>
     <string name="media_subtitles_load_file">Load subtitle file…</string>
+    <string name="media_subtitles_show_on">Show on</string>
+    <string name="media_subtitles_all_outputs">All outputs</string>
+    <string name="media_subtitles_embedded">In this video</string>
     <string name="media_subtitles_files">Subtitle files</string>
     <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>
-    <string name="media_subtitle_settings">Subtitle Settings</string>
     <string name="media_subtitle_settings_hint">Applies to SRT/WebVTT subtitle files, which the app draws itself. An embedded track or an ASS/SSA/SUB file keeps VLC's own look.</string>
     <string name="media_subtitle_text_color">Text Color</string>
     <string name="media_subtitle_background_color">Background Color</string>

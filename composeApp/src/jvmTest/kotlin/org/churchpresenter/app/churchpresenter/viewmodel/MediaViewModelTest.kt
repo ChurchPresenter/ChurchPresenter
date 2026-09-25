@@ -1,11 +1,12 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.settings.utils.Constants
+import java.io.File
+import kotlin.io.path.createTempDirectory
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -645,7 +646,11 @@ class MediaViewModelTest {
 
         vm.setSubtitleFile(srtFile())
 
-        assertEquals(listOf(1_000L to 4_000L), vm.subtitleCues.map { it.startMs to it.endMs })
+        assertEquals(
+            listOf(1_000L to 4_000L),
+            vm.sidecarSubtitles.single().cues.map { it.startMs to it.endMs },
+        )
+        assertTrue(vm.appDrawsSubtitles)
     }
 
     @Test
@@ -654,7 +659,8 @@ class MediaViewModelTest {
 
         vm.setSubtitleFile("/media/en.ass")
 
-        assertTrue(vm.subtitleCues.isEmpty(), "VLC renders this format directly; the app draws nothing")
+        assertTrue(vm.sidecarSubtitles.isEmpty(), "VLC renders this format directly; the app draws nothing")
+        assertEquals("/media/en.ass", vm.subtitleUrl, "and VLC is handed the file instead")
     }
 
     @Test
@@ -664,7 +670,7 @@ class MediaViewModelTest {
 
         vm.setSubtitleFile("")
 
-        assertTrue(vm.subtitleCues.isEmpty())
+        assertTrue(vm.sidecarSubtitles.isEmpty())
     }
 
     @Test
@@ -673,9 +679,150 @@ class MediaViewModelTest {
         vm.setSubtitleFile(srtFile())
 
         vm.setCurrentPosition(2_000L) // inside the cue's 1_000..4_000 window
-        assertEquals("Hello there", vm.activeSubtitleCue?.text)
+        assertEquals(listOf("Hello there"), vm.activeSubtitleCues(ANY_OUTPUT).map { it.text })
 
         vm.setCurrentPosition(0L) // before the cue starts
-        assertNull(vm.activeSubtitleCue)
+        assertTrue(vm.activeSubtitleCues(ANY_OUTPUT).isEmpty())
+    }
+
+    @Test
+    fun `turning subtitles off stops the app drawing its own file`() {
+        val vm = loaded()
+        vm.setSubtitleFile(srtFile())
+        vm.setCurrentPosition(2_000L)
+        assertTrue(vm.subtitlesVisible)
+
+        vm.turnSubtitlesOff()
+
+        assertTrue(vm.activeSubtitleCues(ANY_OUTPUT).isEmpty(), "Off has to reach the app-drawn path too")
+        assertFalse(vm.subtitlesVisible)
+    }
+
+    // ── Several files at once, and which output each goes to ─────────────────────
+
+    @Test
+    fun `a second file is added rather than replacing the first`() {
+        val vm = loaded()
+        vm.addSubtitleFile(srtFile())
+        vm.addSubtitleFile(srtFile())
+
+        assertEquals(2, vm.sidecarSubtitles.size)
+    }
+
+    @Test
+    fun `the same file is not loaded twice`() {
+        val vm = loaded()
+        val path = srtFile()
+
+        vm.addSubtitleFile(path)
+        vm.addSubtitleFile(path)
+
+        assertEquals(1, vm.sidecarSubtitles.size, "the sibling scan and a hand pick can name the same file")
+    }
+
+    @Test
+    fun `an unrouted track is drawn on every output`() {
+        val vm = loaded()
+        vm.setSubtitleFile(srtFile())
+        vm.setCurrentPosition(2_000L)
+
+        assertEquals(1, vm.activeSubtitleCues("sanctuary").size)
+        assertEquals(1, vm.activeSubtitleCues("lobby").size)
+    }
+
+    @Test
+    fun `a routed track is drawn only on the outputs it names`() {
+        val vm = loaded()
+        vm.addSubtitleFile(srtFile())
+        vm.setSidecarOutputs(0, setOf("sanctuary"))
+        vm.setCurrentPosition(2_000L)
+
+        assertEquals(1, vm.activeSubtitleCues("sanctuary").size)
+        assertTrue(vm.activeSubtitleCues("lobby").isEmpty())
+    }
+
+    @Test
+    fun `two tracks routed to one output stack in load order`() {
+        val vm = loaded()
+        val first = srtFile()
+        val second = createTempFile(suffix = ".srt").toFile().apply {
+            writeText("1\n00:00:01,000 --> 00:00:04,000\nHola\n")
+            deleteOnExit()
+        }.absolutePath
+        vm.addSubtitleFile(first)
+        vm.addSubtitleFile(second)
+        vm.setSidecarOutputs(0, setOf("sanctuary"))
+        vm.setSidecarOutputs(1, setOf("sanctuary"))
+        vm.setCurrentPosition(2_000L)
+
+        // Bilingual: one output drawing both, in the order they were loaded.
+        assertEquals(listOf("Hello there", "Hola"), vm.activeSubtitleCues("sanctuary").map { it.text })
+    }
+
+    @Test
+    fun `a track that is switched off is drawn nowhere`() {
+        val vm = loaded()
+        vm.setSubtitleFile(srtFile())
+        vm.setCurrentPosition(2_000L)
+
+        vm.setSidecarEnabled(0, false)
+
+        assertTrue(vm.activeSubtitleCues(ANY_OUTPUT).isEmpty())
+    }
+
+    // ── Subtitles sitting beside the video ───────────────────────────────────────
+
+    @Test
+    fun `a subtitle named after the video is picked up with it`() {
+        val folder = createTempDirectory().toFile().apply { deleteOnExit() }
+        val video = File(folder, "sermon.mp4").apply { writeText("x"); deleteOnExit() }
+        File(folder, "sermon.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
+        val vm = MediaViewModel()
+
+        vm.loadMedia(video.absolutePath, Constants.MEDIA_TYPE_LOCAL)
+
+        assertEquals(listOf("sermon.srt"), vm.sidecarSubtitles.map { it.name })
+    }
+
+    @Test
+    fun `language-suffixed subtitles are picked up in name order`() {
+        val folder = createTempDirectory().toFile().apply { deleteOnExit() }
+        val video = File(folder, "sermon.mp4").apply { writeText("x"); deleteOnExit() }
+        File(folder, "sermon.es.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
+        File(folder, "sermon.en.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
+        val vm = MediaViewModel()
+
+        vm.loadMedia(video.absolutePath, Constants.MEDIA_TYPE_LOCAL)
+
+        assertEquals(listOf("sermon.en.srt", "sermon.es.srt"), vm.sidecarSubtitles.map { it.name })
+    }
+
+    @Test
+    fun `a subtitle for a different video is left alone`() {
+        val folder = createTempDirectory().toFile().apply { deleteOnExit() }
+        val video = File(folder, "sermon.mp4").apply { writeText("x"); deleteOnExit() }
+        File(folder, "announcements.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
+        // Two dotted parts past the stem is somebody else's naming scheme, not a language tag.
+        File(folder, "sermon.en.draft.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
+        val vm = MediaViewModel()
+
+        vm.loadMedia(video.absolutePath, Constants.MEDIA_TYPE_LOCAL)
+
+        assertTrue(vm.sidecarSubtitles.isEmpty())
+    }
+
+    @Test
+    fun `a stream has no folder to scan and loads without one`() {
+        val vm = MediaViewModel()
+
+        vm.loadMedia("http://example.test/live.m3u8", Constants.MEDIA_TYPE_LOCAL)
+
+        assertTrue(vm.sidecarSubtitles.isEmpty())
+    }
+
+    private companion object {
+        /** Routing is off in most of these, and an unrouted track shows on whatever is asked. */
+        const val ANY_OUTPUT = "default"
+        const val CUE_TEXT = "1\n00:00:01,000 --> 00:00:04,000\nHello there\n"
     }
 }
