@@ -25,15 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.window.WindowPosition
-import java.awt.KeyboardFocusManager
-import java.beans.PropertyChangeListener
-import org.churchpresenter.app.churchpresenter.staysAboveMainWindow
 import org.churchpresenter.app.churchpresenter.usableScreenArea
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,6 +34,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.awt.ComposeDialog
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import java.awt.Dialog
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import javax.swing.WindowConstants
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
@@ -434,33 +437,42 @@ fun CalendarWindow(
     // taskbar -- so the footer's Load into Schedule is never underneath it. A fixed 1280x860 was
     // taller than a 1080p screen at 125% has room for above the taskbar.
     val area = remember { usableScreenArea(mainWindow) }
-    val windowState = if (area != null) {
-        rememberWindowState(position = WindowPosition(area.x, area.y), size = DpSize(area.width, area.height))
-    } else {
-        rememberWindowState(size = DpSize(CALENDAR_WIDTH, CALENDAR_HEIGHT))
-    }
-    // Above the main window while either of the two is the one in use, and an ordinary window the
-    // rest of the time: always on top outright would also cover other apps, and the app's own
-    // dialogs and file choosers, which are active windows of their own while they are open.
-    var aboveMainWindow by remember { mutableStateOf(false) }
-    Window(
-        onCloseRequest = onClose,
-        title = stringResource(Res.string.open_calendar_manager),
-        icon = painterResource(Res.drawable.ic_app_icon),
-        state = windowState,
-        alwaysOnTop = aboveMainWindow,
-    ) {
-        DisposableEffect(window, mainWindow) {
-            val focus = KeyboardFocusManager.getCurrentKeyboardFocusManager()
-            val listener = PropertyChangeListener {
-                aboveMainWindow = staysAboveMainWindow(focus.activeWindow, mainWindow, window)
+    val title = stringResource(Res.string.open_calendar_manager)
+    val icon = painterResource(Res.drawable.ic_app_icon)
+    val density = LocalDensity.current
+    val currentOnClose by rememberUpdatedState(onClose)
+    // Owned by the main window: the system keeps it in front of that window, and in front of
+    // nothing else. It was an ordinary window made always-on-top while either of the two was in
+    // use, and on Windows that flag stayed on -- it covered other apps, and the save dialog and its
+    // "replace the file?" question opened behind it, so Save seemed to do nothing and overwriting
+    // looked like a hang (#651). An owned window needs no flag at all.
+    DialogWindow(
+        create = {
+            ComposeDialog(mainWindow, Dialog.ModalityType.MODELESS).apply {
+                this.title = title
+                setIconImage(icon.toAwtImage(density, LayoutDirection.Ltr))
+                isResizable = true
+                defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
+                addWindowListener(object : WindowAdapter() {
+                    override fun windowClosing(e: WindowEvent) = currentOnClose()
+                })
+                // Opens filling the usable part of the screen the main window is on -- the monitor
+                // less its taskbar -- so the footer's Load into Schedule is never underneath it. A
+                // fixed 1280x860 was taller than a 1080p screen at 125% has room for above the taskbar.
+                if (area != null) {
+                    setBounds(area.x.px(), area.y.px(), area.width.px(), area.height.px())
+                } else {
+                    setSize(CALENDAR_WIDTH.px(), CALENDAR_HEIGHT.px())
+                    setLocationRelativeTo(mainWindow)
+                }
             }
-            focus.addPropertyChangeListener(ACTIVE_WINDOW_PROPERTY, listener)
-            onDispose { focus.removePropertyChangeListener(ACTIVE_WINDOW_PROPERTY, listener) }
-        }
-        // On macOS the export and logo dialogs are owned by this window -- see OwnedFileDialog.
+        },
+        dispose = ComposeDialog::dispose,
+    ) {
+        // The export and logo dialogs are owned by this window where the platform's own chooser would
+        // not be -- see OwnedFileDialog.
         val ownedHost = remember(host, window) {
-            if (!isMacOs(System.getProperty("os.name", ""))) {
+            if (!usesOwnedFileDialog(System.getProperty("os.name", ""))) {
                 host
             } else {
                 host.copy(
@@ -565,4 +577,15 @@ fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
 
 private val CALENDAR_WIDTH = 1280.dp
 private val CALENDAR_HEIGHT = 860.dp
-private const val ACTIVE_WINDOW_PROPERTY = "activeWindow"
+
+/** A size in dp as the AWT pixels a window is laid out in -- the same unit on desktop. */
+private fun Dp.px(): Int = value.toInt()
+
+/**
+ * Whether the calendar's file dialogs are AWT's own, owned by its window, rather than the app's
+ * usual chooser: on macOS FileKit's panel is app-modal with no parent and can be left off screen,
+ * and on Windows it is parented to the main window, behind this one. Linux keeps the desktop
+ * portal, which AWT's dialog there is no substitute for.
+ */
+internal fun usesOwnedFileDialog(osName: String): Boolean =
+    isMacOs(osName) || osName.lowercase().startsWith("windows")
