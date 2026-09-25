@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -36,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.app.churchpresenter.composables.SectionLabelRow
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
@@ -119,6 +121,8 @@ internal fun RowScope.SongLyricsPanel(
         modifier = Modifier
             .width(with(density) { lyricsPanelPx.toDp() })
             .fillMaxHeight()
+            .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
+            .bibleListCard()
     ) {
         val currentSong = filteredSongs.getOrNull(selectedSongIndex)
         LyricsActionBar(
@@ -131,7 +135,6 @@ internal fun RowScope.SongLyricsPanel(
             onPresenting = onPresenting,
             sendToPresenter = sendToPresenter,
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
         // "Back to Live" button — shown when browsing a different song than what's live.
@@ -366,10 +369,9 @@ private fun LyricsList(
 
         LazyColumn(
             state = lyricsListState,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(12.dp)
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 8.dp, end = 12.dp, bottom = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             // ── Title slide entry ────────────────────────────────────
             if (titleSlideEnabled && currentSong != null && sections.isNotEmpty()) {
@@ -445,19 +447,16 @@ private fun TitleSlideEntry(
         sendToPresenter(goLive)
     }
 
-    val contentColor = if (live.titleSlideSelected)
-        MaterialTheme.colorScheme.onSurfaceVariant
-    else
-        MaterialTheme.colorScheme.onSurface
+    val (hover, hovered) = rememberRowHover()
+    val colors = bibleRowColors(live.titleSlideSelected, hovered)
+    val contentColor = if (live.titleSlideSelected) colors.ink else MaterialTheme.colorScheme.onSurface
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                if (live.titleSlideSelected)
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                else Color.Transparent
-            )
+            .clip(LyricSectionShape)
+            .background(colors.background)
+            .hoverable(hover)
             .initialPassCombinedClickable(
                 // Clicking in this pane also takes the keyboard back: it is
                 // the operator saying "I am working here now", and a caret left
@@ -469,7 +468,7 @@ private fun TitleSlideEntry(
                     tabFocusRequester.requestFocus()
                 }
             )
-            .padding(8.dp)
+            .padding(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 12.dp)
     ) {
         // Same chip the lyric sections use, so the title slide reads as
         // one more entry in the list rather than a differently-styled one.
@@ -512,14 +511,14 @@ private fun LyricSectionEntry(
     sendToPresenter: (goLive: Boolean) -> Unit,
 ) {
     val isSelected = !live.titleSlideSelected && sectionIndex == selectedSectionIndex
+    val (hover, hovered) = rememberRowHover()
+    val colors = bibleRowColors(isSelected, hovered)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                if (isSelected)
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                else Color.Transparent
-            )
+            .clip(LyricSectionShape)
+            .background(colors.background)
+            .hoverable(hover)
             .finalPassCombinedClickable(
                 onClick = {
                     onSectionSelected(sectionIndex)
@@ -535,12 +534,9 @@ private fun LyricSectionEntry(
                     tabFocusRequester.requestFocus()
                 }
             )
-            .padding(8.dp)
+            .padding(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 12.dp)
     ) {
-        val textColor = if (isSelected)
-            MaterialTheme.colorScheme.onSurfaceVariant
-        else
-            MaterialTheme.colorScheme.onSurface
+        val textColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
 
         val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
             selectedLineIndex else -1
@@ -598,3 +594,5 @@ private fun LyricSectionEntry(
         }
     }
 }
+
+private val LyricSectionShape = RoundedCornerShape(11.dp)

@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -37,6 +38,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.book
+import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.copy_verse
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_copy
@@ -102,53 +105,32 @@ internal fun ColumnScope.BibleBrowserPane(
     liveChapterVerses: List<String>,
     liveVerseNumbers: Set<Int>,
     onLiveVerseClicked: (Int) -> Unit,
+    /** The verse card's header: its label and the actions beside it. */
+    verseHeader: @Composable () -> Unit,
     /** Drawn under the verse pane, inside the same column — the history panel. */
     footer: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-        Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp, end = 4.dp)) {
 
-            Column(modifier = Modifier.width(with(density) { bookWidthPx.toDp() }).fillMaxHeight()) {
-                BibleBrowserColumn(
-                    items = filteredBooks,
-                    selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
-                    singleLine = true,
-                    onItemSelected = onBookSelected
-                )
-            }
-
-            DragHandle(onDragEnd = onSaveColumnWidths) { amount ->
-                onBookWidthChange(
-                    (bookWidthPx + amount).coerceIn(
-                        with(density) { 80.dp.toPx() }, with(density) { 400.dp.toPx() },
-                    )
-                )
-            }
-
-            Column(modifier = Modifier.width(with(density) { chapterWidthPx.toDp() }).fillMaxHeight()) {
-                BibleBrowserColumn(
-                    items = filteredChapters,
-                    selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
-                    centerText = true,
-                    rowHeight = 31.dp,
-                    onItemSelected = onChapterSelected
-                )
-            }
-
-            DragHandle(onDragEnd = onSaveColumnWidths) { amount ->
-                onChapterWidthChange(
-                    (chapterWidthPx + amount).coerceIn(
-                        with(density) { 60.dp.toPx() }, with(density) { 300.dp.toPx() },
-                    )
-                )
-            }
+            BookAndChapterCards(
+                books = books,
+                filteredBooks = filteredBooks,
+                filteredChapters = filteredChapters,
+                selectedBookIndex = selectedBookIndex,
+                selectedChapter = selectedChapter,
+                bookWidthPx = bookWidthPx,
+                chapterWidthPx = chapterWidthPx,
+                onBookWidthChange = onBookWidthChange,
+                onChapterWidthChange = onChapterWidthChange,
+                onSaveColumnWidths = onSaveColumnWidths,
+                onBookSelected = onBookSelected,
+                onChapterSelected = onChapterSelected,
+            )
 
             Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-
                 BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
-
-                val crossRefReserve =
-                    if (crossRefsDocked) crossRefWidthPx + with(density) { 5.dp.toPx() } else 0f
+                val crossRefReserve = if (crossRefsDocked) crossRefWidthPx + with(density) { 8.dp.toPx() } else 0f
                 val effectiveSplitWidth = if (isSplitActive)
                     splitWidthPx.coerceAtMost(
                         (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
@@ -156,105 +138,35 @@ internal fun ColumnScope.BibleBrowserPane(
                 else 0f
                 Row(modifier = Modifier.fillMaxSize()) {
 
-                    Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                        var showVerseContextMenu by remember { mutableStateOf(false) }
-                        var verseContextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
-
-                        Box(modifier = Modifier.fillMaxSize()
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent(PointerEventPass.Main)
-                                        if (event.type == PointerEventType.Press && event.button?.isSecondary == true) {
-                                            val pos = event.changes.first().position
-                                            verseContextMenuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
-                                        }
-                                    }
-                                }
-                            }
-                        ) {
-
-                            BibleVerseColumn(
-                                verses = filteredVerses,
-                                selectedIndex = selectedVerseInFiltered,
-                                selectedIndices = selectedVerseIndices,
-                                onItemSelected = onVerseSelected,
-                                refCountFor = { index ->
-                                    filteredVerses.getOrNull(index)
-                                        ?.let(::verseNumberOf)
-                                        ?.let { crossRefs.counts[it] } ?: 0
-                                },
-                                refCountTooltip = crossRefCountLabel,
-                                openRefIndex = if (crossRefsDocked) -1 else crossRefs.popoverIndex,
-                                onRefsClicked = onRefsChipClicked,
-                                refPopover = {
-                                    CrossReferencePopover(
-                                        title = crossRefPopoverTitle(crossRefs.popoverLabel, crossRefs.popoverRows.size),
-                                        rows = crossRefs.popoverRows,
-                                        onDismiss = onDismissPopover,
-                                        onDock = onDockCrossRefs,
-                                        onOpen = onOpenCrossRef,
-                                        onGoLive = onGoLiveCrossRef,
-                                        onAddToSchedule = onScheduleCrossRef,
-                                    )
-                                },
-                                onItemDoubleClicked = { _ -> onVerseDoubleClicked() },
-                                onItemCtrlClicked = onVerseCtrlClicked,
-                                onItemShiftClicked = onVerseShiftClicked,
-                                onRightClicked = { index ->
-                                    onVerseRightClicked(index)
-                                    showVerseContextMenu = true
-                                }
-                            )
-
-                            DropdownMenu(
-                                expanded = showVerseContextMenu,
-                                onDismissRequest = { showVerseContextMenu = false },
-                                offset = verseContextMenuOffset
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.copy_verse)) },
-                                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
-                                    onClick = { onCopyVerse(); showVerseContextMenu = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.add_to_schedule)) },
-                                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
-                                    onClick = { onAddToSchedule(); showVerseContextMenu = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.go_live)) },
-                                    leadingIcon = { Icon(imageVector = Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary) },
-                                    onClick = { onVerseDoubleClicked(); showVerseContextMenu = false }
-                                )
-                            }
-                        }
-                    }
+                    VerseCard(
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        filteredVerses = filteredVerses,
+                        selectedVerseInFiltered = selectedVerseInFiltered,
+                        selectedVerseIndices = selectedVerseIndices,
+                        crossRefs = crossRefs,
+                        crossRefsDocked = crossRefsDocked,
+                        crossRefCountLabel = crossRefCountLabel,
+                        crossRefPopoverTitle = crossRefPopoverTitle,
+                        onOpenCrossRef = onOpenCrossRef,
+                        onGoLiveCrossRef = onGoLiveCrossRef,
+                        onScheduleCrossRef = onScheduleCrossRef,
+                        onDockCrossRefs = onDockCrossRefs,
+                        onDismissPopover = onDismissPopover,
+                        onRefsChipClicked = onRefsChipClicked,
+                        onVerseSelected = onVerseSelected,
+                        onVerseCtrlClicked = onVerseCtrlClicked,
+                        onVerseShiftClicked = onVerseShiftClicked,
+                        onVerseRightClicked = onVerseRightClicked,
+                        onVerseDoubleClicked = onVerseDoubleClicked,
+                        onCopyVerse = onCopyVerse,
+                        onAddToSchedule = onAddToSchedule,
+                        header = verseHeader,
+                    )
 
                     if (crossRefsDocked) {
-                        DragHandle(onDragEnd = onSaveCrossRefWidth) { amount ->
-                            onCrossRefWidthChange(
-                                (crossRefWidthPx - amount).coerceIn(
-                                    with(density) { CROSS_REF_MIN_WIDTH.toPx() },
-                                    with(density) { CROSS_REF_MAX_WIDTH.toPx() },
-                                )
-                            )
-                        }
-                        CrossReferencePanel(
-                            rows = crossRefs.rows,
-                            selectedIndex = crossRefs.selectedIndex,
-                            onClick = { idx ->
-                                crossRefs.selectedIndex = idx
-                                crossRefs.rows.getOrNull(idx)?.let(onOpenCrossRef)
-                            },
-                            onDoubleClick = { idx ->
-                                crossRefs.selectedIndex = idx
-                                crossRefs.rows.getOrNull(idx)?.let(onGoLiveCrossRef)
-                            },
-                            onAddToSchedule = { idx -> crossRefs.rows.getOrNull(idx)?.let(onScheduleCrossRef) },
-                            onClose = onUndockCrossRefs,
-                            passageSpan = crossRefs.passageSpan,
-                            modifier = Modifier.width(with(density) { crossRefWidthPx.toDp() }).fillMaxHeight(),
+                        DockedCrossRefs(
+                            crossRefs, crossRefWidthPx, onCrossRefWidthChange, onSaveCrossRefWidth,
+                            onOpenCrossRef, onGoLiveCrossRef, onScheduleCrossRef, onUndockCrossRefs,
                         )
                     }
 
@@ -283,4 +195,208 @@ internal fun ColumnScope.BibleBrowserPane(
             }
 
         }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun VerseCard(
+    modifier: Modifier,
+    filteredVerses: List<String>,
+    selectedVerseInFiltered: Int,
+    selectedVerseIndices: Set<Int>?,
+    crossRefs: BibleCrossReferenceState,
+    crossRefsDocked: Boolean,
+    crossRefCountLabel: (Int) -> String,
+    crossRefPopoverTitle: (String, Int) -> String,
+    onOpenCrossRef: (CrossRefRow) -> Unit,
+    onGoLiveCrossRef: (CrossRefRow) -> Unit,
+    onScheduleCrossRef: (CrossRefRow) -> Unit,
+    onDockCrossRefs: () -> Unit,
+    onDismissPopover: () -> Unit,
+    onRefsChipClicked: (Int) -> Unit,
+    onVerseSelected: (Int) -> Unit,
+    onVerseCtrlClicked: (Int) -> Unit,
+    onVerseShiftClicked: (Int) -> Unit,
+    onVerseRightClicked: (Int) -> Unit,
+    onVerseDoubleClicked: () -> Unit,
+    onCopyVerse: () -> Unit,
+    onAddToSchedule: () -> Unit,
+    header: @Composable () -> Unit,
+) {
+    val density = LocalDensity.current
+    Column(modifier = modifier.bibleListCard()) {
+        header()
+        var showVerseContextMenu by remember { mutableStateOf(false) }
+        var verseContextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+
+        Box(modifier = Modifier.fillMaxSize()
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Main)
+                        if (event.type == PointerEventType.Press && event.button?.isSecondary == true) {
+                            val pos = event.changes.first().position
+                            verseContextMenuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
+                        }
+                    }
+                }
+            }
+        ) {
+
+            BibleVerseColumn(
+                verses = filteredVerses,
+                selectedIndex = selectedVerseInFiltered,
+                selectedIndices = selectedVerseIndices,
+                onItemSelected = onVerseSelected,
+                refCountFor = { index ->
+                    filteredVerses.getOrNull(index)
+                        ?.let(::verseNumberOf)
+                        ?.let { crossRefs.counts[it] } ?: 0
+                },
+                refCountTooltip = crossRefCountLabel,
+                openRefIndex = if (crossRefsDocked) -1 else crossRefs.popoverIndex,
+                onRefsClicked = onRefsChipClicked,
+                refPopover = {
+                    CrossReferencePopover(
+                        title = crossRefPopoverTitle(crossRefs.popoverLabel, crossRefs.popoverRows.size),
+                        rows = crossRefs.popoverRows,
+                        onDismiss = onDismissPopover,
+                        onDock = onDockCrossRefs,
+                        onOpen = onOpenCrossRef,
+                        onGoLive = onGoLiveCrossRef,
+                        onAddToSchedule = onScheduleCrossRef,
+                    )
+                },
+                onItemDoubleClicked = { _ -> onVerseDoubleClicked() },
+                onItemCtrlClicked = onVerseCtrlClicked,
+                onItemShiftClicked = onVerseShiftClicked,
+                onRightClicked = { index ->
+                    onVerseRightClicked(index)
+                    showVerseContextMenu = true
+                }
+            )
+
+            DropdownMenu(
+                expanded = showVerseContextMenu,
+                onDismissRequest = { showVerseContextMenu = false },
+                offset = verseContextMenuOffset
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.copy_verse)) },
+                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
+                    onClick = { onCopyVerse(); showVerseContextMenu = false }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.add_to_schedule)) },
+                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
+                    onClick = { onAddToSchedule(); showVerseContextMenu = false }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.go_live)) },
+                    leadingIcon = { Icon(imageVector = Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary) },
+                    onClick = { onVerseDoubleClicked(); showVerseContextMenu = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookAndChapterCards(
+    books: List<String>,
+    filteredBooks: List<String>,
+    filteredChapters: List<String>,
+    selectedBookIndex: Int,
+    selectedChapter: Int,
+    bookWidthPx: Float,
+    chapterWidthPx: Float,
+    onBookWidthChange: (Float) -> Unit,
+    onChapterWidthChange: (Float) -> Unit,
+    onSaveColumnWidths: () -> Unit,
+    onBookSelected: (Int) -> Unit,
+    onChapterSelected: (Int) -> Unit,
+) {
+    val density = LocalDensity.current
+    Column(modifier = Modifier.width(with(density) { bookWidthPx.toDp() }).fillMaxHeight().bibleListCard()) {
+        BibleListHeaderLabel(
+            stringResource(Res.string.book),
+            Modifier.fillMaxWidth().padding(start = 16.dp, top = 14.dp, end = 10.dp, bottom = 8.dp),
+        )
+        BibleBrowserColumn(
+            items = filteredBooks,
+            selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
+            singleLine = true,
+            onItemSelected = onBookSelected
+        )
+    }
+
+    DragHandle(onDragEnd = onSaveColumnWidths) { amount ->
+        onBookWidthChange(
+            (bookWidthPx + amount).coerceIn(
+                with(density) { 80.dp.toPx() }, with(density) { 400.dp.toPx() },
+            )
+        )
+    }
+
+    Column(
+        modifier = Modifier.width(with(density) { chapterWidthPx.toDp() }).fillMaxHeight().bibleListCard(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        BibleListHeaderLabel(
+            stringResource(Res.string.chapter),
+            Modifier.padding(horizontal = 8.dp).padding(top = 14.dp, bottom = 8.dp),
+        )
+        BibleBrowserColumn(
+            items = filteredChapters,
+            selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
+            centerText = true,
+            onItemSelected = onChapterSelected
+        )
+    }
+
+    DragHandle(onDragEnd = onSaveColumnWidths) { amount ->
+        onChapterWidthChange(
+            (chapterWidthPx + amount).coerceIn(
+                with(density) { 60.dp.toPx() }, with(density) { 300.dp.toPx() },
+            )
+        )
+    }
+}
+
+@Composable
+private fun DockedCrossRefs(
+    crossRefs: BibleCrossReferenceState,
+    crossRefWidthPx: Float,
+    onCrossRefWidthChange: (Float) -> Unit,
+    onSaveCrossRefWidth: () -> Unit,
+    onOpenCrossRef: (CrossRefRow) -> Unit,
+    onGoLiveCrossRef: (CrossRefRow) -> Unit,
+    onScheduleCrossRef: (CrossRefRow) -> Unit,
+    onUndockCrossRefs: () -> Unit,
+) {
+    val density = LocalDensity.current
+    DragHandle(onDragEnd = onSaveCrossRefWidth) { amount ->
+        onCrossRefWidthChange(
+            (crossRefWidthPx - amount).coerceIn(
+                with(density) { CROSS_REF_MIN_WIDTH.toPx() },
+                with(density) { CROSS_REF_MAX_WIDTH.toPx() },
+            )
+        )
+    }
+    CrossReferencePanel(
+        rows = crossRefs.rows,
+        selectedIndex = crossRefs.selectedIndex,
+        onClick = { idx ->
+            crossRefs.selectedIndex = idx
+            crossRefs.rows.getOrNull(idx)?.let(onOpenCrossRef)
+        },
+        onDoubleClick = { idx ->
+            crossRefs.selectedIndex = idx
+            crossRefs.rows.getOrNull(idx)?.let(onGoLiveCrossRef)
+        },
+        onAddToSchedule = { idx -> crossRefs.rows.getOrNull(idx)?.let(onScheduleCrossRef) },
+        onClose = onUndockCrossRefs,
+        passageSpan = crossRefs.passageSpan,
+        modifier = Modifier.width(with(density) { crossRefWidthPx.toDp() }).fillMaxHeight(),
+    )
 }

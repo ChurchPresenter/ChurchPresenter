@@ -40,7 +40,6 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import org.churchpresenter.theme.components.RaisedIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -451,559 +450,557 @@ fun PresentationTab(
                 }
             }
     ) {
-        // ── File bar ──────────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            RaisedButton(
-                onClick = {
-                    scope.launch {
-                        val allFilter = FileNameExtensionFilter("All Presentation Files", "ppt", "pptx", "key", "pdf")
-                        val pptFilter = FileNameExtensionFilter("PowerPoint Files (*.ppt, *.pptx)", "ppt", "pptx")
-                        val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
-                        val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
-                        val files = FileChooser.platformInstance.chooseMultiple(
-                            path = Path(appSettings.presentationStorageDirectory),
-                            filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
-                            title = presentationFileDialogTitle,
-                            selectDirectory = false
-                        )
-                        files?.forEach { file ->
-                            viewModel.addPresentation(file.toFile())
-                            RecentPresentationFiles.add(file.toFile().absolutePath)
-                        }
-                    }
-                },
-                modifier = Modifier.height(32.dp),
-                shape = RoundedCornerShape(7.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-            ) {
-                Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
-                Spacer(Modifier.width(7.dp))
-                Text(
-                    stringResource(Res.string.select_presentation_file_button),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontSize = 12.5.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-            }
-            Text(
-                text = viewModel.selectedPresentationDisplayName
-                    ?: stringResource(Res.string.no_file_selected_presentation),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (viewModel.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-            }
-            if (viewModel.isLoading && viewModel.totalSlides > 0) {
-                Text(
-                    text = stringResource(Res.string.loading_slides_progress, viewModel.slideFiles.size, viewModel.totalSlides),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            ActionIconButton(
-                onClick = { showRemoteDialog = true },
-                tooltipText = stringResource(Res.string.tooltip_presentation_remote),
-                icon = Icons.Default.SettingsRemote,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-            if (presenterManager != null) {
-                ActionIconButton(
-                    onClick = onFreezeToggle,
-                    enabled = viewModel.slideFiles.isNotEmpty(),
-                    tooltipText = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
-                    icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = if (presentationFrozen) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            }
-            ActionIconButton(
-                onClick = { viewModel.clearPresentations(); onClearPresentation() },
-                enabled = viewModel.slideFiles.isNotEmpty(),
-                tooltipText = stringResource(Res.string.presentation_clear),
-                painter = painterResource(Res.drawable.ic_stop),
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-            if (onSavePreset != null) {
-                SavePresetButton(
-                    onClick = {
-                        val f = viewModel.selectedPresentation ?: return@SavePresetButton
-                        onSavePreset(
-                            f.absolutePath,
-                            f.nameWithoutExtension,
-                            viewModel.slideFiles.size,
-                            f.extension.lowercase(),
-                        )
-                    },
-                    enabled = viewModel.selectedPresentation != null,
-                    tooltipText = stringResource(Res.string.save_preset)
-                )
-            }
-            if (onAddToSchedule != null) {
-                AddToScheduleButton(
-                    onClick = {
-                        val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
-                        onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
-                    },
-                    enabled = viewModel.selectedPresentation != null,
-                    tooltipText = stringResource(Res.string.add_to_schedule)
-                )
-            }
-            if (presenterManager != null) {
-                GoLiveButton(
-                    onClick = {
-                        val idx = viewModel.selectedSlideIndex
-                        scope.launch {
-                            val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
-                                withContext(Dispatchers.IO) {
-                                    try {
-                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                    } catch (_: Exception) {
-                                        null
-                                    }
-                                }
-                            }
-                            val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
-                                withContext(Dispatchers.IO) {
-                                    try {
-                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                    } catch (_: Exception) {
-                                        null
-                                    }
-                                }
-                            }
-                            presenterManager.setSelectedSlide(bitmap)
-                            presenterManager.setNextSlide(nextBitmap)
-                            presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
-                        }
-                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                        viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
-                        presenterManager.setShowPresenterWindow(true)
-                        viewModel.selectedPresentation?.let { f ->
-                            wentLive(presentationRow(f, viewModel.slideFiles.size))
-                        }
-                        viewModel.selectedPresentation?.let { f ->
-                            onInstanceLinkSendProject?.invoke(
-                                ScheduleItem.PresentationItem(
-                                    id = java.util.UUID.randomUUID().toString(),
-                                    filePath = f.absolutePath,
-                                    fileName = f.nameWithoutExtension,
-                                    slideCount = viewModel.slideFiles.size,
-                                    fileType = f.extension.lowercase()
-                                )
-                            )
-                        }
-                    },
-                    enabled = viewModel.slideFiles.isNotEmpty(),
-                    tooltipText = stringResource(Res.string.go_live)
-                )
-            }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // ── Recent files bar ──────────────────────────────────────────
-        val recentOrdered = RecentPresentationFiles.pinned + RecentPresentationFiles.files.filter { it !in RecentPresentationFiles.pinned }
-        if (recentOrdered.isNotEmpty()) {
+        Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
+            // ── File bar ──────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .background(MaterialTheme.colorScheme.background)
+                    .height(48.dp)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = stringResource(Res.string.recent),
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                RaisedButton(
+                    onClick = {
+                        scope.launch {
+                            val allFilter =
+                                FileNameExtensionFilter("All Presentation Files", "ppt", "pptx", "key", "pdf")
+                            val pptFilter = FileNameExtensionFilter("PowerPoint Files (*.ppt, *.pptx)", "ppt", "pptx")
+                            val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
+                            val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
+                            val files = FileChooser.platformInstance.chooseMultiple(
+                                path = Path(appSettings.presentationStorageDirectory),
+                                filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
+                                title = presentationFileDialogTitle,
+                                selectDirectory = false
+                            )
+                            files?.forEach { file ->
+                                viewModel.addPresentation(file.toFile())
+                                RecentPresentationFiles.add(file.toFile().absolutePath)
+                            }
+                        }
+                    },
+                    modifier = Modifier.height(32.dp),
+                    shape = RoundedCornerShape(7.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
                 ) {
-                    KeyIconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                        Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                    }
-                }
-                LazyRow(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    lazyItems(recentOrdered) { path ->
-                        val isPinned = path in RecentPresentationFiles.pinned
-                        val isActive = viewModel.selectedPresentationDisplayPath == path
-                        RecentChip(
-                            name = File(path).name,
-                            isActive = isActive,
-                            isPinned = isPinned,
-                            onOpen = {
-                                val f = File(path)
-                                if (f.exists()) {
-                                    viewModel.addPresentation(f)
-                                    RecentPresentationFiles.add(path)
-                                }
-                            },
-                            onTogglePin = { RecentPresentationFiles.togglePin(path) },
+                    Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                    Spacer(Modifier.width(7.dp))
+                    Text(
+                        stringResource(Res.string.select_presentation_file_button),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
-                    }
+                    )
                 }
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        }
-
-        // ── Playback controls bar ─────────────────────────────────────
-        // Adaptive shortcut hint: inline at the end of the controls bar when it fits on one
-        // line there, otherwise on its own full-width row below the bar — never ellipsized.
-        // Built from the live bindings so a rebind is reflected here. Empty when the user has
-        // unbound all three, which both render sites below treat as "draw no hint at all" —
-        // a hint whose keys do nothing is worse than none.
-        val slideLabel = shortcuts.pairLabel(ShortcutAction.PRESENTATION_PREVIOUS, ShortcutAction.PRESENTATION_NEXT)
-        val playLabel = shortcuts.label(ShortcutAction.PRESENTATION_PLAY_PAUSE)
-        val blankLabel = shortcuts.label(ShortcutAction.PRESENTATION_BLANK)
-        val hintText = if (slideLabel.isEmpty() && playLabel.isEmpty() && blankLabel.isEmpty()) {
-            ""
-        } else {
-            stringResource(Res.string.presentation_arrow_key_hint, slideLabel, playLabel, blankLabel)
-        }
-        val hintStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp)
-        val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        var hintOnOwnRow by remember { mutableStateOf(false) }
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp, vertical = 5.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            // Transport (inner gap: 4dp)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    KeyIconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                    }
-                }
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = { viewModel.togglePlayPause() },
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        modifier = Modifier.size(38.dp),
-                        shape = CircleShape,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        Icon(painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), modifier = Modifier.size(15.dp))
-                    }
-                }
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    KeyIconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                    }
-                }
-            }
-
-            if (viewModel.slideFiles.isNotEmpty()) {
                 Text(
-                    text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slideFiles.size),
+                    text = viewModel.selectedPresentationDisplayName
+                        ?: stringResource(Res.string.no_file_selected_presentation),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                    modifier = Modifier.widthIn(min = 60.dp)
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                // Build progress of the live animated slide (only shown when it has builds).
-                val liveFrame = presenterManager?.presentationFrame?.value
-                if (liveFrame != null && liveFrame.stepCount > 0 && liveFrame.slideIndex == viewModel.selectedSlideIndex) {
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+                if (viewModel.isLoading && viewModel.totalSlides > 0) {
                     Text(
-                        text = stringResource(Res.string.presentation_builds_counter, liveFrame.completedSteps, liveFrame.stepCount),
+                        text = stringResource(Res.string.loading_slides_progress, viewModel.slideFiles.size, viewModel.totalSlides),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                ActionIconButton(
+                    onClick = { showRemoteDialog = true },
+                    tooltipText = stringResource(Res.string.tooltip_presentation_remote),
+                    icon = Icons.Default.SettingsRemote,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                if (presenterManager != null) {
+                    ActionIconButton(
+                        onClick = onFreezeToggle,
+                        enabled = viewModel.slideFiles.isNotEmpty(),
+                        tooltipText = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
+                        icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = if (presentationFrozen) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                ActionIconButton(
+                    onClick = { viewModel.clearPresentations(); onClearPresentation() },
+                    enabled = viewModel.slideFiles.isNotEmpty(),
+                    tooltipText = stringResource(Res.string.presentation_clear),
+                    painter = painterResource(Res.drawable.ic_stop),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+                if (onSavePreset != null) {
+                    SavePresetButton(
+                        onClick = {
+                            val f = viewModel.selectedPresentation ?: return@SavePresetButton
+                            onSavePreset(
+                                f.absolutePath,
+                                f.nameWithoutExtension,
+                                viewModel.slideFiles.size,
+                                f.extension.lowercase(),
+                            )
+                        },
+                        enabled = viewModel.selectedPresentation != null,
+                        tooltipText = stringResource(Res.string.save_preset)
+                    )
+                }
+                if (onAddToSchedule != null) {
+                    AddToScheduleButton(
+                        onClick = {
+                            val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
+                            onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
+                        },
+                        enabled = viewModel.selectedPresentation != null,
+                        tooltipText = stringResource(Res.string.add_to_schedule)
+                    )
+                }
+                if (presenterManager != null) {
+                    GoLiveButton(
+                        onClick = {
+                            val idx = viewModel.selectedSlideIndex
+                            scope.launch {
+                                val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
+                                    withContext(Dispatchers.IO) {
+                                        try {
+                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                        } catch (_: Exception) {
+                                            null
+                                        }
+                                    }
+                                }
+                                val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
+                                    withContext(Dispatchers.IO) {
+                                        try {
+                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                        } catch (_: Exception) {
+                                            null
+                                        }
+                                    }
+                                }
+                                presenterManager.setSelectedSlide(bitmap)
+                                presenterManager.setNextSlide(nextBitmap)
+                                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
+                            }
+                            presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
+                            presenterManager.setShowPresenterWindow(true)
+                            viewModel.selectedPresentation?.let { f ->
+                                wentLive(presentationRow(f, viewModel.slideFiles.size))
+                            }
+                            viewModel.selectedPresentation?.let { f ->
+                                onInstanceLinkSendProject?.invoke(
+                                    ScheduleItem.PresentationItem(
+                                        id = java.util.UUID.randomUUID().toString(),
+                                        filePath = f.absolutePath,
+                                        fileName = f.nameWithoutExtension,
+                                        slideCount = viewModel.slideFiles.size,
+                                        fileType = f.extension.lowercase()
+                                    )
+                                )
+                            }
+                        },
+                        enabled = viewModel.slideFiles.isNotEmpty(),
+                        tooltipText = stringResource(Res.string.go_live)
+                    )
+                }
+            }
+
+            // ── Recent files bar ──────────────────────────────────────────
+            val recentOrdered = RecentPresentationFiles.pinned + RecentPresentationFiles.files.filter { it !in RecentPresentationFiles.pinned }
+            if (recentOrdered.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.recent),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        KeyIconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
+                            Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        }
+                    }
+                    LazyRow(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        lazyItems(recentOrdered) { path ->
+                            val isPinned = path in RecentPresentationFiles.pinned
+                            val isActive = viewModel.selectedPresentationDisplayPath == path
+                            RecentChip(
+                                name = File(path).name,
+                                isActive = isActive,
+                                isPinned = isPinned,
+                                onOpen = {
+                                    val f = File(path)
+                                    if (f.exists()) {
+                                        viewModel.addPresentation(f)
+                                        RecentPresentationFiles.add(path)
+                                    }
+                                },
+                                onTogglePin = { RecentPresentationFiles.togglePin(path) },
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ── Playback controls bar ─────────────────────────────────────
+            // Adaptive shortcut hint: inline at the end of the controls bar when it fits on one
+            // line there, otherwise on its own full-width row below the bar — never ellipsized.
+            // Built from the live bindings so a rebind is reflected here. Empty when the user has
+            // unbound all three, which both render sites below treat as "draw no hint at all" —
+            // a hint whose keys do nothing is worse than none.
+            val slideLabel = shortcuts.pairLabel(ShortcutAction.PRESENTATION_PREVIOUS, ShortcutAction.PRESENTATION_NEXT)
+            val playLabel = shortcuts.label(ShortcutAction.PRESENTATION_PLAY_PAUSE)
+            val blankLabel = shortcuts.label(ShortcutAction.PRESENTATION_BLANK)
+            val hintText = if (slideLabel.isEmpty() && playLabel.isEmpty() && blankLabel.isEmpty()) {
+                ""
+            } else {
+                stringResource(Res.string.presentation_arrow_key_hint, slideLabel, playLabel, blankLabel)
+            }
+            val hintStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp)
+            val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            var hintOnOwnRow by remember { mutableStateOf(false) }
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 52.dp)
+                    .padding(horizontal = 16.dp, vertical = 5.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Transport (inner gap: 4dp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        KeyIconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
+                            Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        }
+                    }
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        RaisedIconButton(
+                            onClick = { viewModel.togglePlayPause() },
+                            enabled = viewModel.slideFiles.isNotEmpty(),
+                            modifier = Modifier.size(38.dp),
+                            shape = CircleShape,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Icon(painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), modifier = Modifier.size(15.dp))
+                        }
+                    }
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        KeyIconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
+                            Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        }
+                    }
+                }
+
+                if (viewModel.slideFiles.isNotEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slideFiles.size),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                         modifier = Modifier.widthIn(min = 60.dp)
                     )
+                    // Build progress of the live animated slide (only shown when it has builds).
+                    val liveFrame = presenterManager?.presentationFrame?.value
+                    if (liveFrame != null && liveFrame.stepCount > 0 && liveFrame.slideIndex == viewModel.selectedSlideIndex) {
+                        Text(
+                            text = stringResource(Res.string.presentation_builds_counter, liveFrame.completedSteps, liveFrame.stepCount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            modifier = Modifier.widthIn(min = 60.dp)
+                        )
+                    }
                 }
-            }
 
-            // Loop button
-            TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                KeyIconButton(
-                    onClick = {
-                        viewModel.isLooping = !viewModel.isLooping
-                        onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping)) }
-                    },
-                    modifier = Modifier.size(28.dp),
-                    colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ) else IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                    )
+                // Loop button
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    Icon(
-                        painterResource(Res.drawable.ic_refresh),
-                        contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                        modifier = Modifier.size(16.dp),
+                    KeyIconButton(
+                        onClick = {
+                            viewModel.isLooping = !viewModel.isLooping
+                            onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping)) }
+                        },
+                        modifier = Modifier.size(28.dp),
+                        colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) else IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                        )
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.ic_refresh),
+                            contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
+
+                // Divider
+                Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+                // Clickable display boxes + animation dropdown
+                var editingInterval by remember { mutableStateOf(false) }
+                var editingTransition by remember { mutableStateOf(false) }
+                var intervalInput by remember(appSettings.presentationSettings.autoScrollInterval) {
+                    mutableStateOf(appSettings.presentationSettings.autoScrollInterval.toInt().toString())
+                }
+                var transitionInput by remember(appSettings.presentationSettings.transitionDuration) {
+                    mutableStateOf(appSettings.presentationSettings.transitionDuration.toInt().toString())
+                }
+
+                Column(
+                    modifier = Modifier
+                        .height(42.dp)
+                        .width(170.dp)
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .clickable { editingInterval = true }
+                        .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        stringResource(Res.string.auto_scroll_interval).uppercase(),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Text(
+                        "${appSettings.presentationSettings.autoScrollInterval.toInt()} " +
+                            stringResource(Res.string.unit_s),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 13.sp,
+                            lineHeight = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
-            }
-
-            // Divider
-            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-            // Clickable display boxes + animation dropdown
-            var editingInterval by remember { mutableStateOf(false) }
-            var editingTransition by remember { mutableStateOf(false) }
-            var intervalInput by remember(appSettings.presentationSettings.autoScrollInterval) {
-                mutableStateOf(appSettings.presentationSettings.autoScrollInterval.toInt().toString())
-            }
-            var transitionInput by remember(appSettings.presentationSettings.transitionDuration) {
-                mutableStateOf(appSettings.presentationSettings.transitionDuration.toInt().toString())
-            }
-
-            Column(
-                modifier = Modifier
-                    .height(42.dp)
-                    .width(170.dp)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                    .clickable { editingInterval = true }
-                    .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    stringResource(Res.string.auto_scroll_interval).uppercase(),
-                    fontSize = 10.sp,
-                    lineHeight = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(1.dp))
-                Text(
-                    "${appSettings.presentationSettings.autoScrollInterval.toInt()} " +
-                        stringResource(Res.string.unit_s),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 13.sp,
-                        lineHeight = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-            if (editingInterval) {
-                AlertDialog(
-                    onDismissRequest = { editingInterval = false },
-                    title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                    text = {
-                        SunkenOutlinedTextField(
-                            value = intervalInput,
-                            onValueChange = { intervalInput = it },
-                            suffix = { Text(stringResource(Res.string.unit_s)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    },
-                    confirmButton = {
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
-                            intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
-                                viewModel.autoScrollInterval = v.toFloat()
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        presentationSettings = s.presentationSettings.copy(
-                                            autoScrollInterval = v.toFloat()
+                if (editingInterval) {
+                    AlertDialog(
+                        onDismissRequest = { editingInterval = false },
+                        title = { Text(stringResource(Res.string.auto_scroll_interval)) },
+                        text = {
+                            SunkenOutlinedTextField(
+                                value = intervalInput,
+                                onValueChange = { intervalInput = it },
+                                suffix = { Text(stringResource(Res.string.unit_s)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        },
+                        confirmButton = {
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                                intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
+                                    viewModel.autoScrollInterval = v.toFloat()
+                                    onSettingsChange { s ->
+                                        s.copy(
+                                            presentationSettings = s.presentationSettings.copy(
+                                                autoScrollInterval = v.toFloat()
+                                            )
                                         )
-                                    )
+                                    }
                                 }
+                                editingInterval = false
+                            }) { Text(stringResource(Res.string.ok)) }
+                        },
+                        dismissButton = {
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                                Text(stringResource(Res.string.cancel))
                             }
-                            editingInterval = false
-                        }) { Text(stringResource(Res.string.ok)) }
-                    },
-                    dismissButton = {
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
-                            Text(stringResource(Res.string.cancel))
+                        }
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .height(42.dp)
+                        .width(170.dp)
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .clickable { editingTransition = true }
+                        .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        stringResource(Res.string.transition_duration).uppercase(),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Text(
+                        "${appSettings.presentationSettings.transitionDuration.toInt()} " +
+                            stringResource(Res.string.unit_ms),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 13.sp,
+                            lineHeight = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
+                if (editingTransition) {
+                    AlertDialog(
+                        onDismissRequest = { editingTransition = false },
+                        title = { Text(stringResource(Res.string.transition_duration)) },
+                        text = {
+                            SunkenOutlinedTextField(
+                                value = transitionInput,
+                                onValueChange = { transitionInput = it },
+                                suffix = { Text(stringResource(Res.string.unit_ms)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        },
+                        confirmButton = {
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                                transitionInput.toIntOrNull()
+                                    ?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)
+                                    ?.let { v ->
+                                    viewModel.transitionDuration = v.toFloat()
+                                    onSettingsChange { s ->
+                                        s.copy(
+                                            presentationSettings = s.presentationSettings.copy(
+                                                transitionDuration = v.toFloat()
+                                            )
+                                        )
+                                    }
+                                }
+                                editingTransition = false
+                            }) { Text(stringResource(Res.string.ok)) }
+                        },
+                        dismissButton = {
+                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
+                        }
+                    )
+                }
+
+                val crossfadeText = stringResource(Res.string.animation_crossfade)
+                val fadeText = stringResource(Res.string.animation_fade)
+                val slideLeftText = stringResource(Res.string.animation_slide_left)
+                val slideRightText = stringResource(Res.string.animation_slide_right)
+                val noneText = stringResource(Res.string.animation_none)
+                val currentAnimationLabel = when (appSettings.presentationSettings.animationType) {
+                    Constants.ANIMATION_FADE -> fadeText
+                    Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
+                    Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
+                    Constants.ANIMATION_NONE -> noneText
+                    else -> crossfadeText
+                }
+                DropdownSelector(
+                    label = stringResource(Res.string.animation_type),
+                    items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
+                    selected = currentAnimationLabel,
+                    onSelectedChange = { selected ->
+                        viewModel.animationType = when (selected) {
+                            fadeText -> AnimationType.FADE
+                            slideLeftText -> AnimationType.SLIDE_LEFT
+                            slideRightText -> AnimationType.SLIDE_RIGHT
+                            noneText -> AnimationType.NONE
+                            else -> AnimationType.CROSSFADE
+                        }
+                        onSettingsChange { s ->
+                            s.copy(presentationSettings = s.presentationSettings.copy(animationType = when (selected) {
+                                fadeText -> Constants.ANIMATION_FADE
+                                slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
+                                slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
+                                noneText -> Constants.ANIMATION_NONE
+                                else -> Constants.ANIMATION_CROSSFADE
+                            }))
                         }
                     }
                 )
-            }
 
-            Column(
-                modifier = Modifier
-                    .height(42.dp)
-                    .width(170.dp)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                    .clickable { editingTransition = true }
-                    .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    stringResource(Res.string.transition_duration).uppercase(),
-                    fontSize = 10.sp,
-                    lineHeight = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(1.dp))
-                Text(
-                    "${appSettings.presentationSettings.transitionDuration.toInt()} " +
-                        stringResource(Res.string.unit_ms),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 13.sp,
-                        lineHeight = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-            if (editingTransition) {
-                AlertDialog(
-                    onDismissRequest = { editingTransition = false },
-                    title = { Text(stringResource(Res.string.transition_duration)) },
-                    text = {
-                        SunkenOutlinedTextField(
-                            value = transitionInput,
-                            onValueChange = { transitionInput = it },
-                            suffix = { Text(stringResource(Res.string.unit_ms)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    },
-                    confirmButton = {
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
-                            transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v ->
-                                viewModel.transitionDuration = v.toFloat()
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        presentationSettings = s.presentationSettings.copy(
-                                            transitionDuration = v.toFloat()
-                                        )
-                                    )
-                                }
-                            }
-                            editingTransition = false
-                        }) { Text(stringResource(Res.string.ok)) }
-                    },
-                    dismissButton = {
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
-                            Text(stringResource(Res.string.cancel))
-                        }
-                    }
-                )
-            }
-
-            val crossfadeText = stringResource(Res.string.animation_crossfade)
-            val fadeText = stringResource(Res.string.animation_fade)
-            val slideLeftText = stringResource(Res.string.animation_slide_left)
-            val slideRightText = stringResource(Res.string.animation_slide_right)
-            val noneText = stringResource(Res.string.animation_none)
-            val currentAnimationLabel = when (appSettings.presentationSettings.animationType) {
-                Constants.ANIMATION_FADE -> fadeText
-                Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
-                Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
-                Constants.ANIMATION_NONE -> noneText
-                else -> crossfadeText
-            }
-            DropdownSelector(
-                label = stringResource(Res.string.animation_type),
-                items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
-                selected = currentAnimationLabel,
-                onSelectedChange = { selected ->
-                    viewModel.animationType = when (selected) {
-                        fadeText -> AnimationType.FADE
-                        slideLeftText -> AnimationType.SLIDE_LEFT
-                        slideRightText -> AnimationType.SLIDE_RIGHT
-                        noneText -> AnimationType.NONE
-                        else -> AnimationType.CROSSFADE
-                    }
-                    onSettingsChange { s ->
-                        s.copy(presentationSettings = s.presentationSettings.copy(animationType = when (selected) {
-                            fadeText -> Constants.ANIMATION_FADE
-                            slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
-                            slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
-                            noneText -> Constants.ANIMATION_NONE
-                            else -> Constants.ANIMATION_CROSSFADE
-                        }))
+                // Measuring slot: takes the leftover width of the bar's last flow line and only
+                // renders the hint here when the whole text fits it on a single line. The Box
+                // stays in the flow either way, so the width measurement can't oscillate.
+                // (Deliberately NOT BoxWithConstraints — FlowRow needs children's intrinsic
+                // widths for line breaking, which SubcomposeLayout-based components can't give.)
+                val textMeasurer = rememberTextMeasurer()
+                var hintSlotWidthPx by remember { mutableStateOf(-1) }
+                val fitsInline = remember(hintText, hintStyle, hintSlotWidthPx) {
+                    hintSlotWidthPx >= 0 && !textMeasurer.measure(
+                        text = hintText,
+                        style = hintStyle,
+                        softWrap = false,
+                        maxLines = 1,
+                        constraints = Constraints(maxWidth = hintSlotWidthPx)
+                    ).didOverflowWidth
+                }
+                LaunchedEffect(fitsInline, hintSlotWidthPx) {
+                    if (hintSlotWidthPx >= 0) hintOnOwnRow = !fitsInline
+                }
+                Box(modifier = Modifier.weight(1f).onSizeChanged { hintSlotWidthPx = it.width }) {
+                    if (fitsInline && hintText.isNotEmpty()) {
+                        Text(text = hintText, style = hintStyle, color = hintColor, maxLines = 1)
                     }
                 }
-            )
 
-            // Measuring slot: takes the leftover width of the bar's last flow line and only
-            // renders the hint here when the whole text fits it on a single line. The Box
-            // stays in the flow either way, so the width measurement can't oscillate.
-            // (Deliberately NOT BoxWithConstraints — FlowRow needs children's intrinsic
-            // widths for line breaking, which SubcomposeLayout-based components can't give.)
-            val textMeasurer = rememberTextMeasurer()
-            var hintSlotWidthPx by remember { mutableStateOf(-1) }
-            val fitsInline = remember(hintText, hintStyle, hintSlotWidthPx) {
-                hintSlotWidthPx >= 0 && !textMeasurer.measure(
+            }
+            if (hintOnOwnRow && hintText.isNotEmpty()) {
+                Text(
                     text = hintText,
                     style = hintStyle,
-                    softWrap = false,
-                    maxLines = 1,
-                    constraints = Constraints(maxWidth = hintSlotWidthPx)
-                ).didOverflowWidth
+                    color = hintColor,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 6.dp)
+                )
             }
-            LaunchedEffect(fitsInline, hintSlotWidthPx) {
-                if (hintSlotWidthPx >= 0) hintOnOwnRow = !fitsInline
-            }
-            Box(modifier = Modifier.weight(1f).onSizeChanged { hintSlotWidthPx = it.width }) {
-                if (fitsInline && hintText.isNotEmpty()) {
-                    Text(text = hintText, style = hintStyle, color = hintColor, maxLines = 1)
-                }
-            }
-
         }
-        if (hintOnOwnRow && hintText.isNotEmpty()) {
-            Text(
-                text = hintText,
-                style = hintStyle,
-                color = hintColor,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 6.dp)
-            )
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
         // ── Slide content + right sidebar ────────────────────────────
         Row(modifier = Modifier.fillMaxSize()) {
             // ── Left: slide grid / states ────────────────────────────
@@ -1031,7 +1028,10 @@ fun PresentationTab(
                     FocusLostBanner(focusRescue, stringResource(Res.string.presentation_focus_lost))
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 200.dp),
-                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        modifier = Modifier.weight(1f).fillMaxWidth()
+                            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                            .bibleListCard()
+                            .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                         contentPadding = PaddingValues(vertical = 18.dp)
@@ -1253,6 +1253,7 @@ private fun SlideThumbnail(
     val borderColor = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant
     Column(
         modifier = Modifier
+            .hoverLift(RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp))
             .border(2.dp, borderColor, RoundedCornerShape(8.dp))
             .combinedClickable(onClick = onClick, onDoubleClick = onDoubleClick)

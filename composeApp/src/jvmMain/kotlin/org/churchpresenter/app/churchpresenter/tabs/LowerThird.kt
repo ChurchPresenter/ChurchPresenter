@@ -18,9 +18,6 @@ import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.LabeledRadioButton
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -76,10 +74,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
-import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
@@ -170,11 +165,7 @@ import org.churchpresenter.theme.semantic
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
-import org.churchpresenter.theme.sunken
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 
 private const val ATEM_REACHABLE_POLL_MS = 30_000L
@@ -186,9 +177,7 @@ private const val MILLIS_PER_SECOND_F = 1000f
 private const val PREVIEW_SETTLE_MS = 800L
 private const val ASPECT_EPSILON = 0.01f
 private const val MAX_FIT_SCALE = 1.01f
-private val SELECTION_BAR_WIDTH = 3.dp
-private val SELECTION_BAR_HEIGHT = 22.dp
-private val LIST_ROW_HEIGHT = 38.dp
+private val LIST_ROW_HEIGHT = 32.dp
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -793,24 +782,20 @@ fun LowerThirdTab(
             modifier = Modifier
                 .width(listWidthDp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surface)
+                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                .bibleListCard()
         ) {
             val listState = rememberLazyListState()
-            val accentColor = MaterialTheme.colorScheme.primary
-            val palette = elevationPalette()
-            // The list sits in a sunken panel; the chosen file is a raised row inside it.
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(10.dp)
-                    .sunken(RoundedCornerShape(12.dp), palette)
             ) {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize().padding(end = 8.dp),
-                    contentPadding = PaddingValues(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 6.dp, top = 6.dp, end = 10.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     if (lottieFiles.isEmpty()) {
                         item {
@@ -841,46 +826,31 @@ fun LowerThirdTab(
                             val isSelected = selectedFile?.absolutePath == file.absolutePath
                             val confirmTitle = stringResource(Res.string.confirm_delete)
                             val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
-                            val rowShape = RoundedCornerShape(9.dp)
+                            val (rowHover, rowHovered) = rememberRowHover()
+                            val rowColors = bibleRowColors(isSelected, rowHovered)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(LIST_ROW_HEIGHT)
-                                    .then(
-                                        if (isSelected) {
-                                            Modifier.raised(rowShape, palette.key, palette, lift = 2.dp)
-                                        } else {
-                                            Modifier.clip(rowShape)
-                                        }
-                                    )
+                                    .clip(BibleListRowShape)
+                                    .background(rowColors.background)
+                                    .hoverable(rowHover)
                                     .finalPassClickable { selectedFile = file; isPlaying = false }
-                                    .padding(start = 6.dp, end = 4.dp),
+                                    .padding(start = 10.dp, end = 6.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Box(
-                                        Modifier
-                                            .width(SELECTION_BAR_WIDTH)
-                                            .height(SELECTION_BAR_HEIGHT)
-                                            .clip(CircleShape)
-                                            .background(if (isSelected) accentColor else Color.Transparent)
-                                    )
                                     // The full name on hover: a long one is ellipsized in the row.
                                     Box(modifier = Modifier.weight(1f)) {
                                         Tooltip(file.nameWithoutExtension) {
                                             Text(
                                                 text = file.nameWithoutExtension,
-                                                style = MaterialTheme.typography.bodySmall.copy(
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                                ),
-                                                color = if (isSelected) {
-                                                    MaterialTheme.colorScheme.onSurface
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                                },
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = rowColors.ink,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
@@ -916,7 +886,6 @@ fun LowerThirdTab(
                 )
             }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             RaisedButton(
                 onClick = {
                     onOpenLottieGen(appSettings.streamingSettings.lowerThirdFolder) {
@@ -930,33 +899,22 @@ fun LowerThirdTab(
             }
         }
 
-        HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
-
         // Drag handle — resize the list
-        Box(
-            modifier = Modifier
-                .width(6.dp)
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.outlineVariant)
-                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .draggable(
-                    orientation = Orientation.Horizontal,
-                    state = rememberDraggableState { delta ->
-                        listWidthPx = (listWidthPx + delta)
-                            .coerceIn(
-                                with(density) { 100.dp.toPx() },
-                                with(density) { 600.dp.toPx() }
-                            )
-                    },
-                    onDragStopped = {
-                        val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
-                        onSettingsChangeState.value { s ->
-                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
-                            else s.copy(windowedLayout = s.windowedLayout.copy(lowerThirdListWidthDp = newWidthDp))
-                        }
-                    }
+        DragHandle(
+            onDragEnd = {
+                val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
+                onSettingsChangeState.value { s ->
+                    if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                    else s.copy(windowedLayout = s.windowedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                }
+            },
+        ) { delta ->
+            listWidthPx = (listWidthPx + delta)
+                .coerceIn(
+                    with(density) { 100.dp.toPx() },
+                    with(density) { 600.dp.toPx() }
                 )
-        )
+        }
 
         Column(
             modifier = Modifier
@@ -998,8 +956,8 @@ fun LowerThirdTab(
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .topBarCard(start = 0.dp)
                     .heightIn(min = 48.dp)
-                    .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 16.dp, vertical = 5.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1176,15 +1134,20 @@ fun LowerThirdTab(
                         tooltipText = stringResource(Res.string.go_live)
                     )
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+            // Upload status and the preview share one card.
+            Column(
+                modifier = Modifier.weight(1f).fillMaxWidth()
+                    .padding(end = 4.dp, bottom = 4.dp)
+                    .bibleListCard()
+            ) {
             // ── ATEM upload status ────────────────────────────────────
             val upload = remoteUpload
             if (upload != null && upload.error == null) {
                 val uploadingMsg = if (upload.processing) stringResource(Res.string.atem_processing, upload.name)
                     else if (upload.clip) stringResource(Res.string.atem_uploading_video, upload.name, upload.slot)
                     else stringResource(Res.string.atem_uploading_image, upload.name, upload.slot)
-                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(horizontal = 16.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(uploadingMsg, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     LinearProgressIndicator(progress = { upload.progress }, modifier = Modifier.fillMaxWidth())
                 }
@@ -1226,6 +1189,7 @@ fun LowerThirdTab(
                     }
                 }
             }
+            } // end card
         }
     }
 }
