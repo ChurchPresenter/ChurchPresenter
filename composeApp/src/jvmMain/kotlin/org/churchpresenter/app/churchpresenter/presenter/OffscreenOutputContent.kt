@@ -181,6 +181,7 @@ internal fun OffscreenOutputContent(
                                 LocalBandSongLineIndex provides presenterManager.bandSongLineIndex.value,
                                 LocalBandOutgoing provides presenterManager.bandOutgoing.value,
                             ) {
+                            LowerThirdLayout(mode, profile, appSettings, showBg) {
                             when (mode) {
                                 Presenting.BIBLE -> BiblePresenter(
                                     selectedVerses = presenterManager.displayedVerses.value,
@@ -309,6 +310,7 @@ internal fun OffscreenOutputContent(
                                     transitionAlpha = 1f
                                 )
                                 Presenting.NONE -> {}
+                            }
                             }
                             }
                         }

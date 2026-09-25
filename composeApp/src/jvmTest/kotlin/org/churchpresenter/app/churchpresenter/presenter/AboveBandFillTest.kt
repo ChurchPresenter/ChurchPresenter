@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
@@ -8,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /** Which wash a lower-third surface ends up with, and whether one is drawn at all. */
 class AboveBandFillTest {
@@ -128,5 +130,65 @@ class AboveBandFillTest {
             resolveAboveBand(settings, ownType).fillsBehindBand,
             "a surface with its own type does not defer, even to a Default that disagrees",
         )
+    }
+
+    // ── A picture, a clip or a camera above the band ─────────────────────────────
+
+    private val webcam = CameraDeviceRef(devicePath = "avfoundation://1", deviceName = "Logitech BRIO")
+
+    @Test
+    fun `a surface above the band on Image carries its picture and no wash`() {
+        val above = resolveAboveBand(
+            BackgroundSettings(),
+            BackgroundConfig(
+                aboveBandType = Constants.BACKGROUND_IMAGE,
+                aboveBandImage = "/pictures/hall.jpg",
+                aboveBandOpacity = 0.5f,
+            ),
+        )
+
+        assertNull(above.fill, "a picture is drawn, not a colour")
+        val media = assertNotNull(above.media)
+        assertEquals(Constants.BACKGROUND_IMAGE, media.type)
+        assertEquals("/pictures/hall.jpg", media.imagePath)
+        assertEquals(0.5f, media.opacity)
+    }
+
+    @Test
+    fun `a clip and a camera above the band are what the renderer keys on`() {
+        val clip = resolveAboveBand(
+            BackgroundSettings(),
+            BackgroundConfig(aboveBandType = Constants.BACKGROUND_VIDEO, aboveBandVideo = "/clips/loop.mp4"),
+        ).media
+        val camera = resolveAboveBand(
+            BackgroundSettings(),
+            BackgroundConfig(aboveBandType = Constants.BACKGROUND_CAMERA, aboveBandCamera = webcam),
+        ).media
+
+        assertTrue(assertNotNull(clip).usesVideo)
+        assertEquals(webcam, assertNotNull(camera).camera)
+        assertTrue(camera.usesCamera)
+    }
+
+    @Test
+    fun `media with nothing chosen draws nothing rather than black`() {
+        listOf(Constants.BACKGROUND_IMAGE, Constants.BACKGROUND_VIDEO, Constants.BACKGROUND_CAMERA).forEach { type ->
+            val above = resolveAboveBand(BackgroundSettings(), BackgroundConfig(aboveBandType = type))
+            assertNull(above.media, "$type with no file or device must leave the output alone")
+            assertNull(above.fill)
+        }
+    }
+
+    @Test
+    fun `a surface on Default takes the Default Lower Third's clip`() {
+        val above = resolveAboveBand(
+            BackgroundSettings(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_VIDEO,
+                defaultLowerThirdAboveBandVideo = "/clips/house.mp4",
+            ),
+            surface(Constants.BACKGROUND_DEFAULT),
+        )
+
+        assertEquals("/clips/house.mp4", assertNotNull(above.media).videoPath)
     }
 }

@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.core.models.camera.CameraDeviceRef
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -70,5 +71,21 @@ class BackgroundSurfaceTest {
         // Stored as names, so a document written by a build with a surface this one lacks still
         // resolves -- as "follow" for the surface it cannot place, which is the safe direction.
         assertEquals(house, resolveBackgroundSurfaces(house, mine, setOf("SOME_FUTURE_SURFACE")))
+    }
+
+    @Test
+    fun `the Default Lower Third carries what is above its band along with it`() {
+        val camera = CameraDeviceRef(devicePath = "avfoundation://1")
+        val profile = BackgroundSettings(
+            defaultLowerThirdAboveBandImage = "/pictures/hall.jpg",
+            defaultLowerThirdAboveBandVideo = "/clips/loop.mp4",
+            defaultLowerThirdAboveBandCamera = camera,
+        )
+
+        val out = resolveBackgroundSurfaces(house, profile, setOf(BackgroundSurface.DEFAULT_LOWER_THIRD.name))
+
+        assertEquals("/pictures/hall.jpg", out.defaultLowerThirdAboveBandImage)
+        assertEquals("/clips/loop.mp4", out.defaultLowerThirdAboveBandVideo)
+        assertEquals(camera, out.defaultLowerThirdAboveBandCamera)
     }
 }

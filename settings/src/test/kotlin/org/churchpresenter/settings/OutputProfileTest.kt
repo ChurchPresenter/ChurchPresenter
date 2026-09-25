@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -158,5 +159,63 @@ class OutputProfileTest {
         val stale = OutputProfile(bibleTranslations = listOf(0, 3))
 
         assertEquals(listOf(0), stale.bibleTranslationPositions(2))
+    }
+
+    // ── Where band-less content sits on a lower third ────────────────────────────
+
+    private val lowerThird = OutputProfile(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
+
+    @Test
+    fun `a lower third places everything full screen until told otherwise`() {
+        PlaceableContent.entries.forEach {
+            assertEquals(LowerThirdPlacement.FULL_SCREEN, lowerThird.placementFor(it), "$it is where it always was")
+        }
+    }
+
+    @Test
+    fun `a lower third puts in its band only what it was told to`() {
+        val profile = lowerThird.copy(
+            lowerThirdPlacements = mapOf(PlaceableContent.MEDIA to LowerThirdPlacement.IN_BAND),
+        )
+
+        assertEquals(LowerThirdPlacement.IN_BAND, profile.placementFor(PlaceableContent.MEDIA))
+        assertEquals(LowerThirdPlacement.FULL_SCREEN, profile.placementFor(PlaceableContent.PRESENTATION))
+    }
+
+    @Test
+    fun `a full-screen profile ignores a placement it carries`() {
+        val profile = OutputProfile(
+            lowerThirdPlacements = mapOf(PlaceableContent.MEDIA to LowerThirdPlacement.IN_BAND),
+        )
+
+        assertEquals(
+            LowerThirdPlacement.FULL_SCREEN,
+            profile.placementFor(PlaceableContent.MEDIA),
+            "a full screen has no band to put anything in",
+        )
+    }
+
+    @Test
+    fun `placements survive a save and a load`() {
+        val json = Json { encodeDefaults = true; ignoreUnknownKeys = true }
+        val profile = lowerThird.copy(
+            lowerThirdPlacements = mapOf(
+                PlaceableContent.MEDIA to LowerThirdPlacement.IN_BAND,
+                PlaceableContent.CANVAS to LowerThirdPlacement.FULL_SCREEN,
+            ),
+        )
+
+        val saved = json.encodeToString(OutputProfile.serializer(), profile)
+        val back = json.decodeFromString(OutputProfile.serializer(), saved)
+
+        assertEquals(profile.lowerThirdPlacements, back.lowerThirdPlacements)
+    }
+
+    @Test
+    fun `a profile saved before placements existed loads with none`() {
+        val json = Json { ignoreUnknownKeys = true }
+        val old = json.decodeFromString(OutputProfile.serializer(), """{"id":"p","displayMode":"lower_third"}""")
+
+        assertTrue(old.lowerThirdPlacements.isEmpty())
     }
 }
