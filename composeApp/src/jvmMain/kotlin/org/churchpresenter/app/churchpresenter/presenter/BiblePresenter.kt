@@ -868,6 +868,7 @@ fun BiblePresenter(
                         val reference: @Composable (Boolean) -> Unit = { fill ->
                             OutlinedText(
                                 text = itemRefText(item, buildRefText(verse, item)),
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(item.referenceBackdropFor(isLowerThird)).then(itemRefPainter.modifier),
                                 outline = item.referenceOutlineFor(isLowerThird),
@@ -883,6 +884,7 @@ fun BiblePresenter(
                         val verseText: @Composable (Boolean) -> Unit = { fill ->
                             OutlinedText(
                                 text = itemText(item, verse.verseText),
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(item.textBackdropFor(isLowerThird)).then(itemTextPainter.modifier),
                                 outline = item.textOutlineFor(isLowerThird),
@@ -1352,6 +1354,7 @@ fun BiblePresenter(
                         // floated. The reference's above/below setting becomes the order of the list.
                         val pRef = BandElement(pRefOffset) { fill ->
                             OutlinedText(
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(t0.referenceBackdropFor(isLowerThird))
                                     .then(pRefPainter.modifier),
@@ -1368,6 +1371,7 @@ fun BiblePresenter(
                         }
                         val pVerse = BandElement(pTextOffset) { fill ->
                             OutlinedText(
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(t0.textBackdropFor(isLowerThird))
                                     .then(pTextPainter.modifier),
@@ -1384,6 +1388,7 @@ fun BiblePresenter(
                         }
                         val sRef = BandElement(sRefOffset) { fill ->
                             OutlinedText(
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(t1.referenceBackdropFor(isLowerThird))
                                     .then(sRefPainter.modifier),
@@ -1400,6 +1405,7 @@ fun BiblePresenter(
                         }
                         val sVerse = BandElement(sTextOffset) { fill ->
                             OutlinedText(
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(t1.textBackdropFor(isLowerThird))
                                     .then(sTextPainter.modifier),
@@ -1531,6 +1537,7 @@ fun BiblePresenter(
                         // cannot come apart.
                         val colPRef = BandElement(colPRefOffset) { fill ->
                             OutlinedText(
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(t0.referenceBackdropFor(isLowerThird))
                                     .then(pRefPainter.modifier),
@@ -1547,6 +1554,7 @@ fun BiblePresenter(
                         }
                         val colPVerse = BandElement(colPTextOffset) { fill ->
                             OutlinedText(
+                                fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                     .backdropRoom(t0.textBackdropFor(isLowerThird))
                                     .then(pTextPainter.modifier),
@@ -1571,6 +1579,7 @@ fun BiblePresenter(
                         } else {
                             val colSRef = BandElement(colSRefOffset) { fill ->
                                 OutlinedText(
+                                    fillWidth = fill,
                                     modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                         .backdropRoom(t1.referenceBackdropFor(isLowerThird))
                                         .then(sRefPainter.modifier),
@@ -1587,6 +1596,7 @@ fun BiblePresenter(
                             }
                             val colSVerse = BandElement(colSTextOffset) { fill ->
                                 OutlinedText(
+                                    fillWidth = fill,
                                     modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
                                         .backdropRoom(t1.textBackdropFor(isLowerThird))
                                         .then(sTextPainter.modifier),

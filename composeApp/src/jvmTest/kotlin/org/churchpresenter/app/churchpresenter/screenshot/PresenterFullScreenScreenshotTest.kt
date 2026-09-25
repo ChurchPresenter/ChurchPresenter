@@ -149,11 +149,34 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
+    /**
+     * The gap the backdrop-clipping audit named, and the reason it went unnoticed for so long: every
+     * bordered picture in the set used the **default centred** alignment, and every left-aligned
+     * picture carried no backdrop. No image anywhere paired the two — which is precisely the
+     * configuration the clipping bug needed, because centred text is narrower than its box and the
+     * plate had somewhere to go.
+     *
+     * The Bible's own bordered shots are already left-aligned, that being its default. The lyrics'
+     * are not: songs centre by default, which is why they looked right while the Bible did not.
+     */
+    @Test
+    fun `lyrics aligned left in a bordered box`() = shoot("song_lyrics_border_left") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    lyricsBackdrop = BORDER_BOX,
+                    lyricsHorizontalAlignment = Constants.LEFT,
+                ),
+            ),
+        )
+    }
+
     @Test
     fun `a verse with an outline on its glyphs`() = shoot("bible_text_outline") {
         BiblePresenter(
             selectedVerses = listOf(verse()),
-            appSettings = withBibleTextOutline(TextOutline(width = 6, color = "#101820")),
+            appSettings = withBibleTextOutline(TextOutline(enabled = true, width = 6, color = "#101820")),
         )
     }
 
@@ -163,7 +186,9 @@ class PresenterFullScreenScreenshotTest {
             lyricSection = song(),
             appSettings = AppSettings(
                 songSettings = SongSettings(
-                    outlines = SongSettings().outlines.copy(lyrics = TextOutline(width = 6, color = "#101820")),
+                    outlines = SongSettings().outlines.copy(
+                        lyrics = TextOutline(enabled = true, width = 6, color = "#101820"),
+                    ),
                 ),
             ),
         )
@@ -189,7 +214,7 @@ class PresenterFullScreenScreenshotTest {
                     color = "#FFD54F",
                     bold = true,
                     italic = true,
-                    outline = TextOutline(width = 4, color = "#101820"),
+                    outline = TextOutline(enabled = true, width = 4, color = "#101820"),
                     horizontalAlignment = Constants.LEFT,
                     offset = ElementOffset(xPercent = 0, yPercent = 12),
                 ),
@@ -1100,6 +1125,26 @@ class PresenterFullScreenScreenshotTest {
                 wordBold = true,
                 referenceColor = "#90CAF9",
                 definitionColor = "#FFFFFF",
+            ),
+        )
+    }
+
+    /**
+     * The dictionary card's badge in a bordered box — the worst of the clipped surfaces after the
+     * captions, and the one the audit could only guess at.
+     *
+     * Its `.verticalScroll` is the innermost modifier, so the viewport is the content's own box on the
+     * vertical axis while `clipScrollableContainer` inflates the clip sideways. The plate therefore
+     * lost its **top and bottom**, the opposite pair from the Bible's, and lost both rather than one:
+     * `DictionaryBackdropBorderRenderTest` scores 0 horizontal strokes against the bug.
+     */
+    @Test
+    fun `a Strong's entry in a bordered box`() = shoot("dictionary_entry_border") {
+        DictionaryPresenter(
+            entry = strongs(),
+            dictionarySettings = DictionarySettings(
+                referenceBackdrop = BORDER_BOX,
+                wordBackdrop = BORDER_BOX,
             ),
         )
     }
