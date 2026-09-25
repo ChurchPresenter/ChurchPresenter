@@ -76,13 +76,31 @@ class SyncCoordinatorTest {
         assertEquals(0, catalogSync().push(token))
     }
 
-    private fun localService(id: String, name: String, updatedAt: String = "2026-09-19T00:00:00Z") = PlannedService(
-        id = id, date = "2026-09-27", name = name, startTime = "10:00", updatedAt = updatedAt,
+    private fun localService(
+        id: String,
+        name: String,
+        updatedAt: String = "2026-09-19T00:00:00Z",
+        version: Long = 1L,
+    ) = PlannedService(
+        id = id, date = "2026-09-27", name = name, startTime = "10:00", updatedAt = updatedAt, version = version,
         items = listOf(ScheduleItem.WebsiteItem("w", "https://church.example/live", "Stream")),
     )
 
-    private fun phoneService(id: String, name: String, vararg rows: RemoteRow) =
-        RemoteService(id = id, date = "2026-09-27", startTime = "10:00", name = name, rows = rows.toList())
+    /** A phone's edit of the desktop's version-1 copy, unless [version] says otherwise. */
+    private fun phoneService(
+        id: String,
+        name: String,
+        vararg rows: RemoteRow,
+        version: Long = 2L,
+        editedAt: String = "2026-09-20T09:00:00Z",
+    ) = RemoteService(
+        id = id, date = "2026-09-27", startTime = "10:00", name = name, rows = rows.toList(),
+        version = version, editedAt = editedAt,
+    )
+
+    private fun phoneDeletion(id: String, version: Long = 2L) =
+        RemoteService(id = id, date = "2026-09-20", startTime = "", name = "", deleted = true, version = version,
+            editedAt = "2026-09-20T09:00:00Z")
 
     private fun registered(): String {
         relay.desktopToken = "desk-token"
@@ -133,7 +151,7 @@ class SyncCoordinatorTest {
     @Test
     fun `a local edit newer than the phone's copy is kept`() {
         val token = registered()
-        val local = localService("s1", "Local wins", updatedAt = "2026-09-29T00:00:00Z")
+        val local = localService("s1", "Local wins", version = 3L)
         store.save(CalendarDocument(services = listOf(local)))
         relay.phoneWrote(sealing.seal(phoneService("s1", "Phone version")))
 
@@ -143,15 +161,60 @@ class SyncCoordinatorTest {
     }
 
     @Test
-    fun `a tombstone from a phone removes the service here`() {
+    fun `a sealed deletion from a phone removes the service here`() {
         val token = registered()
         store.save(CalendarDocument(services = listOf(localService("s1", "Doomed"))))
-        relay.phoneDeleted("s1")
+        relay.phoneWrote(sealing.seal(phoneDeletion("s1")))
 
         coordinator().sync(token, cursor = 0)
 
         assertTrue(store.load().document.serviceById("s1") == null)
         assertTrue("s1" in store.load().document.deletedServices)
+        assertEquals(2L, store.load().document.deletedVersions["s1"])
+    }
+
+    @Test
+    fun `the relay's own plaintext tombstone deletes nothing`() {
+        val token = registered()
+        store.save(CalendarDocument(services = listOf(localService("s1", "Kept"))))
+        relay.phoneDeleted("s1")
+
+        coordinator().sync(token, cursor = 0)
+
+        assertEquals("Kept", store.load().document.serviceById("s1")?.name, "only a deletion that opens is believed")
+    }
+
+    @Test
+    fun `an old copy handed back by the relay cannot overwrite a newer one`() {
+        val token = registered()
+        store.save(CalendarDocument(services = listOf(localService("s1", "Current", version = 5L))))
+        // A copy the relay kept from earlier, restamped by it as the newest thing it has.
+        relay.phoneWrote(sealing.seal(phoneService("s1", "Stale", version = 3L, editedAt = "2026-09-20T11:00:00Z")))
+
+        coordinator().sync(token, cursor = 0)
+
+        assertEquals("Current", store.load().document.serviceById("s1")?.name)
+    }
+
+    @Test
+    fun `an old deletion handed back cannot remove a service edited since`() {
+        val token = registered()
+        store.save(CalendarDocument(services = listOf(localService("s1", "Edited since", version = 4L))))
+        relay.phoneWrote(sealing.seal(phoneDeletion("s1", version = 2L)))
+
+        coordinator().sync(token, cursor = 0)
+
+        assertEquals("Edited since", store.load().document.serviceById("s1")?.name)
+    }
+
+    @Test
+    fun `an edit time ahead of this machine's clock is taken as now`() {
+        val token = registered()
+        relay.phoneWrote(sealing.seal(phoneService("s9", "From the future", editedAt = "2099-01-01T00:00:00Z")))
+
+        coordinator().sync(token, cursor = 0)
+
+        assertEquals("2026-09-20T12:00:00Z", store.load().document.serviceById("s9")?.updatedAt)
     }
 
     @Test

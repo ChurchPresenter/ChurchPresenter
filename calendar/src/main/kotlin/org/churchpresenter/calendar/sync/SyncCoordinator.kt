@@ -101,8 +101,7 @@ class SyncCoordinator(
     private fun push(token: String, ifRev: Long, document: CalendarDocument): Long {
         val presets = presetStore?.load()?.presets.orEmpty()
         val state = StateRequest(
-            records = Projection.services(document, today()).map(sealing::seal),
-            tombstones = Projection.tombstones(document),
+            records = (Projection.services(document, today()) + Projection.deletions(document)).map(sealing::seal),
             presetsBox = sealing.sealPresets(PresetIndex(Projection.presets(presets))),
         )
         return client.putState(token, state, ifRev)
@@ -111,7 +110,8 @@ class SyncCoordinator(
     /** What the relay sent, rebuilt and merged into the local file. */
     private fun absorb(changes: ChangesResponse): Absorbed {
         val local = store.load().document
-        val resolver = Resolver(songs(), presetStore?.load()?.presets.orEmpty(), today())
+        val resolver = Resolver(songs(), presetStore?.load()?.presets.orEmpty(), today(), now())
+        val deletions = HashMap<String, RemoteService>()
         var phoneChanges = 0
         var unresolved = 0
         var dropped = 0
@@ -125,19 +125,25 @@ class SyncCoordinator(
                 unreadable++
                 return@mapNotNull null
             }
+            if (remote.deleted) {
+                if (remote.version >= (deletions[remote.id]?.version ?: -1L)) deletions[remote.id] = remote
+                return@mapNotNull null
+            }
             val resolved = resolver.resolve(remote, local.serviceById(remote.id)) ?: return@mapNotNull null
             if (remote.updatedBy != Projection.DESKTOP) phoneChanges++
             unresolved += resolved.unresolved.size
             dropped += resolved.dropped
             resolved.service
         }
-        val tombstones = changes.tombstones
-            .filter { Sanitize.isId(it.id) }
-            .associate { tombstone ->
-                val deletedAt = runCatching { Instant.parse(tombstone.deletedAt) }.getOrNull() ?: now()
-                tombstone.id to storedInstant(deletedAt)
-            }
-        val remote = CalendarDocument(services = services, deletedServices = tombstones)
+        // The relay's own plaintext tombstones are ignored: a deletion is believed only when it
+        // arrives sealed, as a record that opens under this instance's key.
+        val remote = CalendarDocument(
+            services = services,
+            deletedServices = deletions.mapValues { (_, deletion) ->
+                resolver.editedAt(deletion.editedAt).ifEmpty { storedInstant(now()) }
+            },
+            deletedVersions = deletions.mapValues { (_, d) -> d.version.coerceAtLeast(0L) },
+        )
         val merged = local.mergedWith(remote, now())
         if (merged != local) {
             store.save(merged)
