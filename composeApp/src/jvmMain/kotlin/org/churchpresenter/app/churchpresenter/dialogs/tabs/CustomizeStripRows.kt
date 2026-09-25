@@ -184,6 +184,7 @@ internal fun MotionStripRow(
     onFadeOut: (Boolean) -> Unit,
     onCrossfade: (Boolean) -> Unit,
     onDuration: (Float) -> Unit,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     StripRow(stringResource(Res.string.customize_motion)) {
         ToggleControl(stringResource(Res.string.fade_in), fadeIn, onFadeIn)
@@ -197,6 +198,7 @@ internal fun MotionStripRow(
             onValueChange = { v -> onDuration(v.toFloat()) },
             range = DURATION_RANGE,
         )
+        trailing?.invoke()
     }
 }
 

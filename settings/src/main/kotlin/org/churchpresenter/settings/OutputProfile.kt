@@ -92,7 +92,18 @@ data class OutputProfile(
     val pictureScaleMode: OutputScaleMode = OutputScaleMode.FIT,
     /** How a video meets this output's shape: fit, fill or stretch. */
     val mediaScaleMode: OutputScaleMode = OutputScaleMode.FIT,
+    /**
+     * Where each kind of band-less content sits when [isLowerThird]. Sparse: a kind not named here
+     * is [LowerThirdPlacement.FULL_SCREEN], which is what every profile did before this existed, so
+     * an existing settings file needs no migration. Read through [placementFor].
+     */
+    val lowerThirdPlacements: Map<PlaceableContent, LowerThirdPlacement> = emptyMap(),
 ) {
+    /** Where [content] sits on this profile — always [LowerThirdPlacement.FULL_SCREEN] off a lower third. */
+    fun placementFor(content: PlaceableContent): LowerThirdPlacement =
+        if (isLowerThird) lowerThirdPlacements[content] ?: LowerThirdPlacement.FULL_SCREEN
+        else LowerThirdPlacement.FULL_SCREEN
+
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 

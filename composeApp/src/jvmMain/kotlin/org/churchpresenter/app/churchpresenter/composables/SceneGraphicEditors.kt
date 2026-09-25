@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -180,6 +182,7 @@ internal fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSo
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
     Text(
@@ -189,16 +192,24 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
     )
     val format24hLabel = stringResource(Res.string.canvas_clock_format_24h)
     val format12hLabel = stringResource(Res.string.canvas_clock_format_12h)
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        ClockModeDropdown(source, onUpdate)
+    // Half each: sized to their labels, a long mode name left the format a sliver at the end.
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        ClockModeDropdown(source, onUpdate, Modifier.weight(1f))
         DropdownSelector(
             label = stringResource(Res.string.canvas_clock_format),
             items = listOf(format24hLabel, format12hLabel),
             selected = if (source.timeFormat == "12h") format12hLabel else format24hLabel,
-            onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) }
+            onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) },
+            modifier = Modifier.weight(1f),
         )
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+    // Flowing, so a pair too long for the column puts the second box on a line of its own rather
+    // than squeezing its label to a letter per line.
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
         LabeledCheckbox(
             checked = source.showHours,
             onCheckedChange = { onUpdate(source.copy(showHours = it)) },
@@ -281,7 +292,7 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
  * never opens holding whatever a countdown left behind on the same source.
  */
 @Composable
-private fun ClockModeDropdown(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
+private fun ClockModeDropdown(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit, modifier: Modifier) {
     val modes = listOf(
         ClockModes.CLOCK to stringResource(Res.string.canvas_clock_mode_clock),
         ClockModes.COUNTDOWN to stringResource(Res.string.canvas_clock_mode_countdown),
@@ -296,7 +307,8 @@ private fun ClockModeDropdown(source: SceneSource.ClockSource, onUpdate: (SceneS
             val mode = modes.firstOrNull { it.second == picked }?.first ?: ClockModes.CLOCK
             TimerStateManager.reset(source.id, if (mode == ClockModes.COUNTDOWN) source.durationSeconds() else 0)
             onUpdate(source.copy(mode = mode))
-        }
+        },
+        modifier = modifier,
     )
 }
 

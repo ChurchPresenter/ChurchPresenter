@@ -30,6 +30,12 @@ sealed class SceneSource {
     abstract val visible: Boolean
     abstract val locked: Boolean
 
+    /**
+     * This source with every setting kept but a new [id] — how a duplicated scene stops sharing its
+     * layers with the original.
+     */
+    abstract fun withId(id: String): SceneSource
+
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.ImageSource")
     data class ImageSource(
@@ -40,7 +46,9 @@ sealed class SceneSource {
         override val locked: Boolean = false,
         val filePath: String,
         val contentScale: String = "FIT"
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.TextSource")
@@ -77,7 +85,9 @@ sealed class SceneSource {
          * one line — any newlines in [text] are drawn as spaces.
          */
         val curve: Float = 0f
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.ColorSource")
@@ -94,7 +104,9 @@ sealed class SceneSource {
         val gradientColor2Opacity: Float = 1f,
         val gradientAngle: Float = 0f,
         val gradientPosition: Float = 0.5f
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.VideoSource")
@@ -107,7 +119,9 @@ sealed class SceneSource {
         val filePath: String,
         val loop: Boolean = false,
         val volume: Float = 1f
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.BrowserSource")
@@ -124,7 +138,9 @@ sealed class SceneSource {
         val customCss: String = "",
         val fps: Int = 30,
         val forceTransparent: Boolean = false
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.ShapeSource")
@@ -147,7 +163,9 @@ sealed class SceneSource {
         val gradientColor2Opacity: Float = 1f,
         val gradientAngle: Float = 0f,
         val gradientPosition: Float = 0.5f
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.ClockSource")
@@ -187,7 +205,9 @@ sealed class SceneSource {
         val letterSpacing: Float = 0f,
         /** Bends the read-out around a circle, as on [TextSource.curve]. */
         val curve: Float = 0f
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.QRCodeSource")
@@ -207,7 +227,9 @@ sealed class SceneSource {
         val backgroundColor: String = "#FFFFFF",
         val transparentBackground: Boolean = false,
         val errorCorrection: String = "M"
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.CameraSource")
@@ -223,7 +245,9 @@ sealed class SceneSource {
         val videoConnection: Int = 0,
         val isDeckLink: Boolean = false,
         val deckLinkIndex: Int = -1
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.ScreenCaptureSource")
@@ -241,7 +265,9 @@ sealed class SceneSource {
         val captureInterval: Int = 100,
         val windowTitle: String = "",
         val windowId: String = ""
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     /**
      * A live NDI source from the network, received and drawn as a layer.
@@ -265,7 +291,9 @@ sealed class SceneSource {
         val sourceName: String = "",
         val sourceAddress: String = "",
         val lowBandwidth: Boolean = false
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.BibleSource")
@@ -304,7 +332,9 @@ sealed class SceneSource {
         val letterSpacing: Float = 0f,
         /** Bends the verse and its reference around a circle, as on [TextSource.curve]. */
         val curve: Float = 0f
-    ) : SceneSource()
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+    }
 }
 
 @Serializable

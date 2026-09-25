@@ -251,7 +251,8 @@ internal fun withQuickBackground(settings: AppSettings, picked: QuickBackground?
     if (picked == null) settings else settings.copy(
         backgroundSettings = settings.backgroundSettings.copy(
             quickBackground = picked.background,
-            quickLowerThirdBackground = picked.lowerThirdBackground,
+            // An inheriting half is no override at all: the band stays whatever the output says.
+            quickLowerThirdBackground = picked.lowerThirdBackground.takeIf { it.isCustom },
         ),
     )
 

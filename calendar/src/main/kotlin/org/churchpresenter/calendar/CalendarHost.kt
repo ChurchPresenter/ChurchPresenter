@@ -89,12 +89,13 @@ data class CalendarHost(
     val reportError: (context: String, error: Throwable) -> Unit = { _, _ -> },
 
     /**
-     * Where to save an export, or null if the user cancelled. Shown a suggested file name.
+     * Where to save an export, or null if the user cancelled. Shown a suggested file name, and opened
+     * in [folder] -- the one the last export went to -- when there is one.
      *
      * `suspend` because the app's own `FileChooser.save` is — a native save dialog is not something
      * to run on the composing thread.
      */
-    val chooseExportFile: suspend (suggestedName: String) -> File? = { null },
+    val chooseExportFile: suspend (suggestedName: String, folder: File?) -> File? = { _, _ -> null },
 
     /** An image for the PDF letterhead's logo, or null if the user cancelled. */
     val chooseImageFile: suspend () -> File? = { null },
@@ -183,6 +184,12 @@ data class CalendarBibleBook(
     val bookId: Int,
     val name: String,
     val verseCounts: List<Int>,
+    /**
+     * What the picker's tiles call it. Many translations title a book in full -- "Книга пророка
+     * Исаии" -- which a tile cuts to "Книга прор…"; the host passes the app's short name instead.
+     * Display only: the rows the picker makes still carry [name], which is what the Bible knows.
+     */
+    val shortName: String = name,
 ) {
     val chapterCount: Int get() = verseCounts.size
 

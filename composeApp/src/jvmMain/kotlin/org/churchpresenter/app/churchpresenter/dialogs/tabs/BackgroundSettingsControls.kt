@@ -121,7 +121,13 @@ internal fun BackgroundControlsColumn(
             // own still has a say in what sits above it.
             if (scope.lowerThird) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                AboveBandSection(scope = scope, config = config, onConfigChange = onConfigChange)
+                AboveBandSection(
+                    scope = scope,
+                    settings = settings,
+                    config = config,
+                    onConfigChange = onConfigChange,
+                    onSettingsChange = onSettingsChange,
+                )
             }
         }
         SettingsScrollbar(scrollState)

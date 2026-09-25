@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import churchpresenter.composeapp.generated.resources.output_profile_delete_bloc
 import churchpresenter.composeapp.generated.resources.output_profile_delete_confirm
 import churchpresenter.composeapp.generated.resources.output_profile_display_mode
 import churchpresenter.composeapp.generated.resources.output_profile_nothing_to_style
+import churchpresenter.composeapp.generated.resources.output_profile_placement
 import churchpresenter.composeapp.generated.resources.output_profile_scale
 import churchpresenter.composeapp.generated.resources.output_profile_sources
 import churchpresenter.composeapp.generated.resources.output_profile_style
@@ -147,7 +149,12 @@ internal fun ProfileEditor(
     // rather than nested under it, so its top edge lines up with the profile list's own. The stage
     // monitor draws its own preview inside its pane and gets no column here.
     Row(modifier = modifier) {
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surfaceContainer),
+        ) {
             ProfileHeader(
                 profile = profile,
                 usedBy = usedBy,
@@ -186,7 +193,7 @@ internal fun ProfileEditor(
         }
         // Every category draws its picture beside the controls, bar the stage monitor, whose own
         // tab already draws its zone layout at full size.
-        if (pane != null && pane != CustomizePane.STAGE_MONITOR) {
+        if (pane != CustomizePane.STAGE_MONITOR) {
             VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             CompositionLocalProvider(LocalOutputStyleScope provides scope) {
                 CustomizePreviewColumn(
@@ -252,6 +259,12 @@ private fun ProfileSetup(
         if (!stageMonitor && (profile.showPictures || profile.showMedia)) {
             SetupRow(stringResource(Res.string.output_profile_scale)) {
                 ProfileScaleRow(profile, onProfileChange)
+            }
+        }
+        // A lower third only: on a full screen there is nowhere else for the content to go.
+        if (profile.isLowerThird && profile.placeableShown().isNotEmpty()) {
+            SetupRow(stringResource(Res.string.output_profile_placement)) {
+                ProfilePlacementRow(profile, onProfileChange)
             }
         }
     }

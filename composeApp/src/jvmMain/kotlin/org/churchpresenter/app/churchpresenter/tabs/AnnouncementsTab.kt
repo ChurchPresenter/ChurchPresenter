@@ -45,6 +45,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
@@ -184,6 +186,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.LocalContentColor
 
 private val STEP_KEY_HEIGHT = 20.dp
+private val TRANSPARENT_KEY_PADDING = 10.dp
+private val MIN_BACKGROUND_FIELD_WIDTH = 150.dp
 private val STEP_KEY_WIDTH = 40.dp
 private val STEP_GAP = 3.dp
 private val WELL_WIDTH = 46.dp
@@ -521,8 +525,19 @@ fun AnnouncementsTab(
                                 )
                             }
                         } else {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                ColorPickerField(label = stringResource(Res.string.announcement_background_color_label), color = viewModel.backgroundColor, onColorChange = { viewModel.setBackgroundColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.weight(1f))
+                            val colorField: @Composable (Modifier) -> Unit = { fieldModifier ->
+                                ColorPickerField(
+                                    label = stringResource(Res.string.announcement_background_color_label),
+                                    color = viewModel.backgroundColor,
+                                    onColorChange = {
+                                        viewModel.setBackgroundColor(it)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    modifier = fieldModifier,
+                                )
+                            }
+                            val transparentLabel = stringResource(Res.string.transparent_default)
+                            val transparentButton: @Composable () -> Unit = {
                                 KeyButton(
                                     onClick = {
                                         viewModel.setBackgroundColor("transparent")
@@ -530,15 +545,36 @@ fun AnnouncementsTab(
                                     },
                                     shape = RoundedCornerShape(8.dp),
                                     // Compact, so the color field beside it keeps its width.
-                                    contentPadding = PaddingValues(horizontal = 10.dp),
+                                    contentPadding = PaddingValues(horizontal = TRANSPARENT_KEY_PADDING),
                                     modifier = Modifier.height(42.dp)
                                 ) {
                                     Text(
-                                        stringResource(Res.string.transparent_default),
+                                        transparentLabel,
                                         style = MaterialTheme.typography.labelMedium,
                                         maxLines = 1,
                                         softWrap = false
                                     )
+                                }
+                            }
+                            // Side by side unless the button's label leaves the field too narrow to
+                            // read, as the longer translations' did -- then the button goes under it.
+                            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                                val measurer = rememberTextMeasurer()
+                                val labelWidth = with(density) {
+                                    measurer.measure(transparentLabel, MaterialTheme.typography.labelMedium)
+                                        .size.width.toDp()
+                                }
+                                val fieldWidth = maxWidth - labelWidth - TRANSPARENT_KEY_PADDING * 2 - 8.dp
+                                if (fieldWidth < MIN_BACKGROUND_FIELD_WIDTH) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        colorField(Modifier.fillMaxWidth())
+                                        transparentButton()
+                                    }
+                                } else {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        colorField(Modifier.weight(1f))
+                                        transparentButton()
+                                    }
                                 }
                             }
                         }

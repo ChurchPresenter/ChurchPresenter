@@ -403,6 +403,18 @@ class MainLogicTest {
     }
 
     @Test
+    fun `a tile whose lower third inherits leaves the band alone`() {
+        val picked = trayEntry("#abcdef").copy(lowerThirdBackground = SongBackground())
+        val effective = withQuickBackground(AppSettings(), picked)
+
+        assertEquals(picked.background, effective.backgroundSettings.quickBackground)
+        assertNull(
+            effective.backgroundSettings.quickLowerThirdBackground,
+            "an inheriting half is no override, so the output's own band is drawn",
+        )
+    }
+
+    @Test
     fun `picking nothing leaves the configured backgrounds exactly as they were`() {
         val own = AppSettings()
         assertEquals(own, withQuickBackground(own, null))

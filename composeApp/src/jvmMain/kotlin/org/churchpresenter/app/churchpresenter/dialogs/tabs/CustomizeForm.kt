@@ -23,7 +23,6 @@ import org.churchpresenter.settings.utils.Constants
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledControl
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import androidx.compose.foundation.layout.FlowRow
@@ -204,15 +203,15 @@ internal fun VerticalAlignControl(selected: String, onSelect: (String) -> Unit) 
 /**
  * Where the block of text sits on the slide, top to bottom.
  *
- * One value for the whole category rather than one per element, which is why it sits beside the
- * typography panel instead of inside it: that panel edits one element's profile, and the lyrics,
- * the verse and its reference move down the slide together as one block. Only the element that
- * *is* the block carries it -- a look-ahead line cannot be placed independently of the lyrics it
- * sits under, and the title slide has a control of its own.
+ * One value for the whole category rather than one per element: the lyrics, the verse and its
+ * reference move down the slide together as one block. It is drawn in the typography panel's
+ * alignment row, beside the horizontal alignment, but written by the pane rather than the panel.
+ * Only the element that *is* the block carries it -- a look-ahead line cannot be placed
+ * independently of the lyrics it sits under, and the title slide has a control of its own.
  */
 @Composable
-internal fun BlockVerticalAlignmentRow(selected: String, onSelect: (String) -> Unit) {
-    LabeledControl(stringResource(Res.string.vertical_alignment).removeSuffix(":")) {
+internal fun BlockVerticalAlignmentControl(selected: String, onSelect: (String) -> Unit) {
+    ControlColumn(stringResource(Res.string.vertical_alignment)) {
         VerticalAlignControl(selected = selected, onSelect = onSelect)
     }
 }
@@ -275,18 +274,22 @@ internal fun ChoiceControl(
      * column unless it is broken up; the rows still act as one choice.
      */
     maxPerRow: Int = Int.MAX_VALUE,
+    fitEachLabel: Boolean = false,
     onSelect: (String) -> Unit,
 ) {
     // Sized to the longest label rather than a fixed width: `SegmentedButton` gives every segment
     // the same width and clips at one line, so a fixed width cut "Transparent" and "Video Loop"
     // off mid-word in the background list.
-    val width = buttonWidth ?: (options.maxOf { it.second.length } * CHOICE_CHAR_WIDTH + CHOICE_PADDING)
+    fun labelWidth(label: String) = (label.length * CHOICE_CHAR_WIDTH + CHOICE_PADDING)
         .coerceAtLeast(CHOICE_MIN_WIDTH.value).dp
+    val width = buttonWidth ?: labelWidth(options.maxBy { it.second.length }.second)
     CompositionLocalProvider(LocalSegmentedButtonTone provides SegmentedButtonTone.ACCENT) {
         Column(verticalArrangement = Arrangement.spacedBy(CHOICE_ROW_GAP)) {
             options.chunked(maxPerRow.coerceAtLeast(1)).forEach { row ->
                 SegmentedButton(
-                    items = row.map { (value, label) -> SegmentedButtonItem(value, label) },
+                    items = row.map { (value, label) ->
+                        SegmentedButtonItem(value, label, width = if (fitEachLabel) labelWidth(label) else null)
+                    },
                     selectedValue = selected,
                     onValueChange = onSelect,
                     buttonWidth = width,

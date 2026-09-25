@@ -60,7 +60,6 @@ import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualColumns
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -510,13 +509,13 @@ fun BiblePresenter(
             val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             BoxWithConstraints(modifier.fillMaxSize()) {
                 AboveBandFill(
-                    fill = if (showBackground) above.fill else null,
+                    above = above,
+                    show = showBackground,
                     bandFraction = effectiveBandFraction(
                         canvasAspectRatio = maxWidth / maxHeight,
                         bandFraction = lowerThirdFraction,
                         templateAspectRatio = loaded.width / loaded.height,
                     ),
-                    fillsBehindBand = above.fillsBehindBand,
                 )
                 BibleLottieBand(
                     template = loaded,
@@ -545,7 +544,6 @@ fun BiblePresenter(
         transparentWhenBlank = LocalTransparentBlanking.current,
     )
     val backgroundImageBitmap = rememberBackgroundBitmap(resolvedBg, isLowerThird)
-    val useVideoBackground = resolvedBg.usesVideo
     val effectiveOpacity = resolvedBg.opacity
     val bgModifier: Modifier = backgroundModifier(resolvedBg, backgroundImageBitmap)
 
@@ -650,9 +648,9 @@ fun BiblePresenter(
             // The wash behind the whole lower third, band included — see AboveBandFill.
             val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             AboveBandFill(
-                fill = if (showBackground) above.fill else null,
+                above = above,
+                show = showBackground,
                 bandFraction = lowerThirdFraction,
-                fillsBehindBand = above.fillsBehindBand,
             )
             val bandBleed = if (resolvedBg.isBlurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.
@@ -687,12 +685,7 @@ fun BiblePresenter(
                             modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
                         )
                     }
-                    if (useVideoBackground) {
-                        LoopingVideoBackground(
-                            videoPath = resolvedBg.videoPath,
-                            modifier = Modifier.fillMaxSize().alpha(effectiveOpacity),
-                        )
-                    }
+                    BandMediaLayers(resolvedBg)
                 }
             }
             if (resolvedBg.dimPercent > 0) {

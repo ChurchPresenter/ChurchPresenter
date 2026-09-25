@@ -128,6 +128,7 @@ internal object CanvasLabel {
     const val SOURCES = "Sources"
     const val NEW_SCENE = "New"
     const val RENAME_SCENE = "Rename"
+    const val DUPLICATE_SCENE = "Duplicate"
     const val REMOVE_SCENE = "Remove"
     const val ADD_SOURCE = "Add source"
     const val DELETE_SOURCE = "Delete source"

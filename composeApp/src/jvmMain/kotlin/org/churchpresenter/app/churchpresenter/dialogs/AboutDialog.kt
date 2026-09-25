@@ -25,6 +25,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.window.WindowPosition
+import java.awt.KeyboardFocusManager
+import java.beans.PropertyChangeListener
+import org.churchpresenter.app.churchpresenter.staysAboveMainWindow
+import org.churchpresenter.app.churchpresenter.usableScreenArea
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -414,23 +424,46 @@ fun CalendarWindow(
      * and opening it brings the main window forward over the calendar.
      */
     dialogs: @Composable () -> Unit = {},
+    mainWindow: AwtWindow? = null,
     onClose: () -> Unit,
 ) {
     LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_OPENED) }
+    // Opens filling the usable part of the screen the main window is on -- the monitor less its
+    // taskbar -- so the footer's Load into Schedule is never underneath it. A fixed 1280x860 was
+    // taller than a 1080p screen at 125% has room for above the taskbar.
+    val area = remember { usableScreenArea(mainWindow) }
+    val windowState = if (area != null) {
+        rememberWindowState(position = WindowPosition(area.x, area.y), size = DpSize(area.width, area.height))
+    } else {
+        rememberWindowState(size = DpSize(CALENDAR_WIDTH, CALENDAR_HEIGHT))
+    }
+    // Above the main window while either of the two is the one in use, and an ordinary window the
+    // rest of the time: always on top outright would also cover other apps, and the app's own
+    // dialogs and file choosers, which are active windows of their own while they are open.
+    var aboveMainWindow by remember { mutableStateOf(false) }
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.open_calendar_manager),
         icon = painterResource(Res.drawable.ic_app_icon),
-        state = rememberWindowState(width = 1280.dp, height = 860.dp)
+        state = windowState,
+        alwaysOnTop = aboveMainWindow,
     ) {
+        DisposableEffect(window, mainWindow) {
+            val focus = KeyboardFocusManager.getCurrentKeyboardFocusManager()
+            val listener = PropertyChangeListener {
+                aboveMainWindow = staysAboveMainWindow(focus.activeWindow, mainWindow, window)
+            }
+            focus.addPropertyChangeListener(ACTIVE_WINDOW_PROPERTY, listener)
+            onDispose { focus.removePropertyChangeListener(ACTIVE_WINDOW_PROPERTY, listener) }
+        }
         // On macOS the export and logo dialogs are owned by this window -- see OwnedFileDialog.
         val ownedHost = remember(host, window) {
             if (!isMacOs(System.getProperty("os.name", ""))) {
                 host
             } else {
                 host.copy(
-                    chooseExportFile = { suggested ->
-                        OwnedFileDialog.save(window, getString(Res.string.calendar_export_title), suggested)
+                    chooseExportFile = { suggested, folder ->
+                        OwnedFileDialog.save(window, getString(Res.string.calendar_export_title), suggested, folder)
                     },
                     chooseImageFile = {
                         OwnedFileDialog.open(
@@ -526,3 +559,7 @@ fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
         }
     }
 }
+
+private val CALENDAR_WIDTH = 1280.dp
+private val CALENDAR_HEIGHT = 860.dp
+private const val ACTIVE_WINDOW_PROPERTY = "activeWindow"

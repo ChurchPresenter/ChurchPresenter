@@ -153,10 +153,16 @@ internal fun SongBackgroundPanel(
      */
     stageAspect: Float = FALLBACK_STAGE_ASPECT,
     /**
-     * Whether "Inherit" is on offer. False for a quick background, which exists only to override —
-     * an inheriting one would be a tray tile that does nothing.
+     * Whether "Inherit" is on offer for the full-screen half. False for a quick background, which
+     * exists only to override — an inheriting one would be a tray tile that does nothing.
      */
     allowInherit: Boolean = true,
+    /**
+     * Whether "Inherit" is on offer for the lower-third half. A quick background passes true here
+     * even though it passes false above: its lower-third half inheriting means the tile leaves the
+     * output's own lower-third band alone, which is what most tiles want.
+     */
+    allowInheritLowerThird: Boolean = allowInherit,
     /**
      * An optional row along the bottom of the panel. Null for a song, whose background is edited
      * in place and saved with the song; the quick tray passes its OK/Cancel through here so a
@@ -174,6 +180,7 @@ internal fun SongBackgroundPanel(
 ) {
     var target by remember { mutableStateOf(SongBackgroundTarget.FULL_SCREEN) }
     val current = if (target == SongBackgroundTarget.FULL_SCREEN) background else lowerThirdBackground
+    val inheritable = if (target == SongBackgroundTarget.FULL_SCREEN) allowInherit else allowInheritLowerThird
     fun update(next: SongBackground) {
         if (target == SongBackgroundTarget.FULL_SCREEN) onBackgroundChange(next)
         else onLowerThirdBackgroundChange(next)
@@ -195,7 +202,7 @@ internal fun SongBackgroundPanel(
             PanelHeader(
                 target = target,
                 onTarget = { target = it },
-                allowInherit = allowInherit,
+                allowInherit = inheritable,
                 custom = current.isCustom,
                 onMode = { custom ->
                     update(
@@ -216,7 +223,7 @@ internal fun SongBackgroundPanel(
                     background = current,
                     onChange = ::update,
                     modifier = Modifier.weight(1f).fillMaxHeight()
-                        .alpha(if (current.isCustom || !allowInherit) 1f else INHERIT_ALPHA),
+                        .alpha(if (current.isCustom || !inheritable) 1f else INHERIT_ALPHA),
                 )
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SongBackgroundLookColumn(

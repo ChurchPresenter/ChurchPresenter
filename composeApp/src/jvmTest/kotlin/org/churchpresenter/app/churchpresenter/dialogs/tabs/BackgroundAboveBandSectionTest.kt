@@ -126,11 +126,13 @@ class BackgroundAboveBandSectionTest {
     }
 
     @Test
-    fun `the wash offers no picture, clip, camera or gradient`() = backgroundTab { _ ->
+    fun `above the band offers a picture, clip and camera but no gradient`() = backgroundTab { _ ->
         openSurface(Surface.BIBLE_LOWER_THIRD)
-        // One each — the band's. A second would be the wash offering something it cannot draw.
-        listOf(TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA, TypeLabel.GRADIENT).forEach {
-            assertEquals(1, controlsCount(it), "the wash must not offer $it")
+        // Two each — the band's and the area above it — so a feed can fill the rest of the output.
+        listOf(TypeLabel.IMAGE, TypeLabel.VIDEO, TypeLabel.CAMERA).forEach {
+            assertEquals(2, controlsCount(it), "above the band must offer $it")
         }
+        // One — the band's. A gradient fades the band into what is behind it; above it, it means nothing.
+        assertEquals(1, controlsCount(TypeLabel.GRADIENT), "above the band must not offer a gradient")
     }
 }

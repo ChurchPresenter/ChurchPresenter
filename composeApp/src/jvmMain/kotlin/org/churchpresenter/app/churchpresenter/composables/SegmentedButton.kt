@@ -147,7 +147,7 @@ private fun <T> SegmentedButtonGrid(
                     }
 
                     val button: @Composable () -> Unit = {
-                        val size = Modifier.size(segmentWidth, segmentHeight)
+                        val size = Modifier.size(item.width ?: segmentWidth, segmentHeight)
                         Segment(item, isSelected, selectedFill, palette, size, style) { onValueChange(item.value) }
                     }
 

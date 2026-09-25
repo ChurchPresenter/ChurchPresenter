@@ -156,16 +156,20 @@ private fun BibleStrip(
         onFadeOut = { v -> update { it.copy(fadeOut = v) } },
         onCrossfade = { v -> update { it.copy(crossfade = v) } },
         onDuration = { v -> update { it.copy(transitionDuration = v) } },
+        trailing = if (lowerThird) {
+            {
+                NumberControl(
+                    label = stringResource(Res.string.lower_third_size),
+                    value = bs.lowerThirdHeightPercent,
+                    onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
+                    range = BAND_RANGE,
+                )
+            }
+        } else {
+            null
+        },
     )
     StripRow(stringResource(Res.string.customize_layout)) {
-        if (lowerThird) {
-            NumberControl(
-                label = stringResource(Res.string.lower_third_size),
-                value = bs.lowerThirdHeightPercent,
-                onValueChange = { v -> update { it.copy(lowerThirdHeightPercent = v) } },
-                range = BAND_RANGE,
-            )
-        }
         ToggleControl(
             label = stringResource(Res.string.bible_translation_divider),
             checked = bs.multiTranslationDivider,
@@ -269,14 +273,8 @@ private fun SongStrip(
         onFadeOut = { v -> update { it.copy(fadeOut = v) } },
         onCrossfade = { v -> update { it.copy(crossfade = v) } },
         onDuration = { v -> update { it.copy(transitionDuration = v) } },
-    )
-    // The slide itself: how the lyrics are laid out on it and how it ends. These were a chip of
-    // their own until they joined the strip -- and that chip's other three sections were the
-    // margins, the fades and the band height, all three of which are already on this strip, so it
-    // was showing the operator the same settings twice under two different headings.
-    if (lowerThird || lyricSlide) {
-        StripRow(stringResource(Res.string.customize_layout)) {
-            if (lowerThird) {
+        trailing = if (lowerThird) {
+            {
                 NumberControl(
                     label = stringResource(Res.string.lower_third_size),
                     value = ss.lowerThirdHeightPercent,
@@ -284,31 +282,39 @@ private fun SongStrip(
                     range = BAND_RANGE,
                 )
             }
-            if (lyricSlide) {
-                ToggleControl(
-                    label = stringResource(Res.string.word_wrap),
-                    checked = ss.wordWrap,
-                    onCheckedChange = { v -> update { it.copy(wordWrap = v) } },
-                )
-                ToggleControl(
-                    label = stringResource(Res.string.song_auto_repeat_chorus),
-                    checked = ss.autoRepeatChorus,
-                    onCheckedChange = { v -> update { it.copy(autoRepeatChorus = v) } },
-                )
-                // The lyric slides' own vertical alignment. The title slide keeps a separate one,
-                // which is why this row is absent rather than disabled under that chip: two
-                // controls both reading "Top / Middle / Bottom" on one screen, one of them inert,
-                // is worse than one control in the place that owns it.
-                ChoiceControl(
-                    options = listOf(
-                        Constants.TOP to stringResource(Res.string.top),
-                        Constants.MIDDLE to stringResource(Res.string.middle),
-                        Constants.BOTTOM to stringResource(Res.string.bottom),
-                    ),
-                    selected = ss.lyricsAlignment,
-                    onSelect = { v -> update { it.copy(lyricsAlignment = v) } },
-                )
-            }
+        } else {
+            null
+        },
+    )
+    // The slide itself: how the lyrics are laid out on it and how it ends. These were a chip of
+    // their own until they joined the strip -- and that chip's other three sections were the
+    // margins, the fades and the band height, all three of which are already on this strip, so it
+    // was showing the operator the same settings twice under two different headings.
+    if (lyricSlide) {
+        StripRow(stringResource(Res.string.customize_layout)) {
+            ToggleControl(
+                label = stringResource(Res.string.word_wrap),
+                checked = ss.wordWrap,
+                onCheckedChange = { v -> update { it.copy(wordWrap = v) } },
+            )
+            ToggleControl(
+                label = stringResource(Res.string.song_auto_repeat_chorus),
+                checked = ss.autoRepeatChorus,
+                onCheckedChange = { v -> update { it.copy(autoRepeatChorus = v) } },
+            )
+            // The lyric slides' own vertical alignment. The title slide keeps a separate one,
+            // which is why this row is absent rather than disabled under that chip: two
+            // controls both reading "Top / Middle / Bottom" on one screen, one of them inert,
+            // is worse than one control in the place that owns it.
+            ChoiceControl(
+                options = listOf(
+                    Constants.TOP to stringResource(Res.string.top),
+                    Constants.MIDDLE to stringResource(Res.string.middle),
+                    Constants.BOTTOM to stringResource(Res.string.bottom),
+                ),
+                selected = ss.lyricsAlignment,
+                onSelect = { v -> update { it.copy(lyricsAlignment = v) } },
+            )
         }
     }
     // The marker after the last line, and how far below it sits. Off means the spacing changes

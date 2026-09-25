@@ -97,19 +97,25 @@ internal fun BibleCustomizePane(
             autoFit = null,
             autoFitEnabled = false,
             showHeader = false,
+            // Where the verse block sits on the slide, drawn beside the horizontal alignment. The
+            // panel edits one element of one translation, while this places the whole block and is
+            // one value for the Bible -- which is why it is written with `updateBible` rather than
+            // `updateEntry`. The reference has [PositionControl] instead, since all it chooses is
+            // which side of the verse it sits on.
+            blockAlignment = if (styleElement == BibleStyleElement.TEXT) {
+                {
+                    BlockVerticalAlignmentControl(
+                        selected = bs.verticalAlignment,
+                        onSelect = { v -> updateBible { it.copy(verticalAlignment = v) } },
+                    )
+                }
+            } else {
+                null
+            },
         )
-        // Where the verse block sits on the slide. Not part of the panel above: that edits one
-        // element of one translation, while this places the whole block and is one value for the
-        // Bible -- which is why it is written with `updateBible` rather than `updateEntry`. The
-        // reference has [PositionControl] instead, since all it chooses is which side of the verse
-        // it sits on.
         if (styleElement == BibleStyleElement.TEXT) {
-            BlockVerticalAlignmentRow(
-                selected = bs.verticalAlignment,
-                onSelect = { v -> updateBible { it.copy(verticalAlignment = v) } },
-            )
             // How parallel translations are arranged against each other -- the same kind of control
-            // as the one above it: one value for the whole Bible rather than for this translation,
+            // as the vertical alignment: one value for the whole Bible rather than for this translation,
             // so it is written with `updateBible` and drawn on the verse text, which is the block it
             // arranges. The two shapes keep separate values: a full screen stacks by default and a
             // band splits by default, which is what they have always drawn, so one shared field

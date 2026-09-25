@@ -36,8 +36,10 @@ data class BackgroundConfig(
      *
      * Shaped like [backgroundType] and read the same way, because it is the same decision one
      * rectangle up: `Default` defers to the surface above, `Color` paints [aboveBandColor] at
-     * [aboveBandOpacity], `Transparent` paints nothing. Only those three — the band is where a
-     * picture, a clip or a camera belongs, and the area above it is a flat wash or nothing.
+     * [aboveBandOpacity], `Image`, `Video` and `Camera` fill it with [aboveBandImage],
+     * [aboveBandVideo] or [aboveBandCamera] at that same opacity, and `Transparent` paints
+     * nothing. The media types are what let a lower-third output carry a picture or a live feed
+     * above its band — a Lottie band included, which draws only the band itself.
      *
      * `Default` is the out-of-the-box value, so Bible and Songs follow the Default Lower Third
      * until they are given a wash of their own. **The chain ends transparent**, which is what
@@ -69,4 +71,11 @@ data class BackgroundConfig(
      * the same positional-construction reason as [camera].
      */
     val backgroundLottie: String = "",
+    /**
+     * The picture, clip and device an [aboveBandType] of `Image`, `Video` or `Camera` draws.
+     * Appended last for the same positional-construction reason as [camera].
+     */
+    val aboveBandImage: String = "",
+    val aboveBandVideo: String = "",
+    val aboveBandCamera: CameraDeviceRef = CameraDeviceRef(),
 )

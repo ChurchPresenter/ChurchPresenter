@@ -100,6 +100,7 @@ import org.churchpresenter.settings.withNdiOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
@@ -556,6 +557,7 @@ private fun SingleDisplayPreview(
                             LocalBandSongLineIndex provides bandSongLineIndex,
                             LocalBandOutgoing provides bandOutgoing,
                         ) {
+                        LowerThirdLayout(mode, profile, outputSettings, showsBackground) {
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
@@ -667,6 +669,7 @@ private fun SingleDisplayPreview(
                                     transitionAlpha = 1f,
                                 )
                             else -> {}
+                        }
                         }
                         }
                         }

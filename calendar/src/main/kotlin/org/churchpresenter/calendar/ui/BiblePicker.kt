@@ -51,7 +51,7 @@ internal fun BibleCrumbs(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         Crumb(stringResource(Res.string.calendar_pick_all_bible_books), onAllBooks)
-        if (book != null) Crumb(book.name, onBook)
+        if (book != null) Crumb(book.shortName, onBook)
         if (chapter != null) Crumb(chapter.toString()) {}
         // The hint carries the weight, not the button. A Row measures its unweighted children
         // first, so a full-width Text here took every remaining pixel and squeezed the button down
@@ -140,7 +140,11 @@ internal fun BibleResults(
     when {
         book == null -> {
             val trimmed = query.trim()
-            val matches = books.filter { trimmed.isEmpty() || it.name.contains(trimmed, ignoreCase = true) }
+            val matches = books.filter {
+                trimmed.isEmpty() ||
+                    it.shortName.contains(trimmed, ignoreCase = true) ||
+                    it.name.contains(trimmed, ignoreCase = true)
+            }
             ScrollableGrid(
                 columns = GridCells.Adaptive(96.dp),
                 modifier = Modifier.fillMaxSize(),
@@ -182,7 +186,7 @@ private fun BookTile(book: CalendarBibleBook, onClick: () -> Unit) {
             .padding(horizontal = 9.dp),
     ) {
         Text(
-            text = book.name,
+            text = book.shortName,
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.5.sp),
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,

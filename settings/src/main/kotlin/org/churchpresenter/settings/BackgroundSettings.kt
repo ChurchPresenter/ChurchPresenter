@@ -61,5 +61,13 @@ data class BackgroundSettings(
      * Null is the ordinary case — nothing picked, everything above applies as configured.
      */
     @Transient val quickBackground: SongBackground? = null,
-    @Transient val quickLowerThirdBackground: SongBackground? = null
+    @Transient val quickLowerThirdBackground: SongBackground? = null,
+    /**
+     * The Default Lower Third wash's picture, clip and device — see [BackgroundConfig.aboveBandImage].
+     * Appended after the quick picks rather than beside their wash siblings, under the same
+     * positional-construction rule as dim and blur above.
+     */
+    val defaultLowerThirdAboveBandImage: String = "",
+    val defaultLowerThirdAboveBandVideo: String = "",
+    val defaultLowerThirdAboveBandCamera: CameraDeviceRef = CameraDeviceRef(),
 )
