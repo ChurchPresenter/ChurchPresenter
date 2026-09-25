@@ -58,6 +58,21 @@ class CanvasTabTest {
         assertTrue(showsExactly("No scene selected"), "and the empty state comes back")
     }
 
+    @Test
+    fun `duplicating a scene adds a named copy with the same sources and makes it current`() =
+        canvasTab(seed = { addScene("Welcome"); seedSources("Title", "Logo") }) { vm, _ ->
+            val original = vm.scenes.single()
+
+            canvasButton(CanvasLabel.DUPLICATE_SCENE).performClick()
+            waitForIdle()
+
+            assertEquals(listOf("Welcome", "Welcome (copy)"), vm.scenes.map { it.name })
+            assertEquals(vm.scenes.last().id, vm.currentSceneId.value, "the copy is the scene being edited")
+            assertEquals(listOf("Title", "Logo"), vm.sourceNames(), "with every layer of the original")
+            assertEquals(original, vm.scenes.first(), "and the original is untouched")
+            assertTrue(showsExactly("Welcome (copy)"), "the copy is listed")
+        }
+
     // ── Sources ─────────────────────────────────────────────────────────────────
 
     @Test

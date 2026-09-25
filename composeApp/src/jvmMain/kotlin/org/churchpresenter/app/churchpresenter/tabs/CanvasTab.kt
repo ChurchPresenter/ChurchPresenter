@@ -84,6 +84,7 @@ import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_copy
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.add_to_schedule
@@ -132,6 +133,8 @@ import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
 import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
 import churchpresenter.composeapp.generated.resources.canvas_rename_scene
 import churchpresenter.composeapp.generated.resources.canvas_remove_scene
+import churchpresenter.composeapp.generated.resources.canvas_duplicate_scene
+import churchpresenter.composeapp.generated.resources.canvas_scene_copy_name
 import churchpresenter.composeapp.generated.resources.canvas_add_source
 import churchpresenter.composeapp.generated.resources.canvas_delete_source
 import churchpresenter.composeapp.generated.resources.canvas_source_move_forward
@@ -356,6 +359,32 @@ fun CanvasTab(
                                     Icon(
                                         painterResource(Res.drawable.ic_edit),
                                         contentDescription = stringResource(Res.string.canvas_rename_scene),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            val copyName = stringResource(Res.string.canvas_scene_copy_name, scene.name)
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(
+                                            stringResource(Res.string.canvas_duplicate_scene),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            ) {
+                                KeyIconButton(
+                                    onClick = { sceneViewModel.duplicateScene(scene.id, copyName) },
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Icon(
+                                        painterResource(Res.drawable.ic_copy),
+                                        contentDescription = stringResource(Res.string.canvas_duplicate_scene),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
