@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
+import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
 import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
 import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -711,7 +712,7 @@ fun MediaTab(
             val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
             val scaleMode = shared ?: OutputScaleMode.FIT
             val scaled = shared != OutputScaleMode.FIT
-            val scaleLabel = scaleButtonLabel(shared, scaleMode)
+            val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.MEDIA)
             TooltipArea(
                 tooltip = { TransportTooltip(scaleLabel) },
                 tooltipPlacement = TooltipPlacement.ComponentRect(

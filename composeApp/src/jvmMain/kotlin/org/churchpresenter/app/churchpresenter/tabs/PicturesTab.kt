@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
+import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
 import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
 import org.churchpresenter.app.churchpresenter.utils.withPictureScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -552,7 +553,7 @@ fun PicturesTab(
             }
             val scaleMode = shared ?: OutputScaleMode.FIT
             val scaled = shared != OutputScaleMode.FIT
-            val scaleLabel = scaleButtonLabel(shared, scaleMode)
+            val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.PICTURES)
             TooltipArea(
                 tooltip = {
                     Surface(

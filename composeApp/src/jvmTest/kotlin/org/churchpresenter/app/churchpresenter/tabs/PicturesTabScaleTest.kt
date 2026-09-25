@@ -21,7 +21,7 @@ class PicturesTabScaleTest {
     private fun clickingFrom(mode: OutputScaleMode, label: String, next: OutputScaleMode) = picturesTab(
         settings = { it.withPictureScaleEverywhere(mode) },
     ) { _, reports ->
-        pictureButton("Scale: $label").performClick()
+        pictureButton("Picture scale on every profile: $label").performClick()
         waitForIdle()
 
         // Scaling is per profile; the button is the shortcut that moves every one of them.
@@ -43,6 +43,6 @@ class PicturesTabScaleTest {
     @Test
     fun `without saved settings the button reads fit`() = picturesTab { _, _ ->
         // A tab composed with no settings at all still has to say what the output is doing.
-        pictureButton("Scale: Fit").assertExists()
+        pictureButton("Picture scale on every profile: Fit").assertExists()
     }
 }
