@@ -1,6 +1,8 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import java.time.Duration
+import java.time.Instant
 
 /** The connection between this desktop and the calendar relay that phones plan through. */
 @Serializable
@@ -23,6 +25,21 @@ data class CalendarSyncSettings(
     /** The relay's shared client key, fetched from the website and cached;
      *  refreshed when the relay stops accepting it. */
     val clientKey: String = "",
+    val rotatedAt: String = "",
 ) {
     val isPaired: Boolean get() = instanceId.isNotBlank() && desktopToken.isNotBlank() && instanceKey.isNotBlank()
+
+    /**
+     * When "Start over" may be used again, or null when it may be used now: at most once in
+     * [ROTATION_INTERVAL]. Every rotation is a new instance on the relay and every phone enrolling
+     * again, so a rotation is a deliberate act, not something to repeat on a whim.
+     */
+    fun nextRotationAt(now: Instant): Instant? {
+        val last = runCatching { Instant.parse(rotatedAt) }.getOrNull() ?: return null
+        return last.plus(ROTATION_INTERVAL).takeIf { it.isAfter(now) }
+    }
+
+    companion object {
+        val ROTATION_INTERVAL: Duration = Duration.ofDays(7)
+    }
 }

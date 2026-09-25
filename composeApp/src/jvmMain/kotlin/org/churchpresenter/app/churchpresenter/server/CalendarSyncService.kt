@@ -87,6 +87,7 @@ class CalendarSyncService(
     private val typicalSeconds: (SongItem) -> Int? = { null },
     private val usage: UsageEventStore = UsageEvents,
     private val endpoints: RelayEndpoints = RelayEndpoints.BUILT_IN,
+    private val now: () -> Instant = Instant::now,
 ) {
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
@@ -218,12 +219,22 @@ class CalendarSyncService(
         }
     }
 
-    /** Forgets the pairing on this side; the next enrollment registers a fresh instance with a fresh key. */
-    fun unpair() {
+    /**
+     * Forgets the pairing on this side; the next enrollment registers a fresh instance with a fresh
+     * key. At most once a week -- see [CalendarSyncSettings.nextRotationAt] -- and false when refused.
+     */
+    fun unpair(): Boolean {
+        val current = settings()
+        val at = now()
+        if (current.nextRotationAt(at) != null) return false
         saveSettings(
-            settings().copy(instanceId = "", desktopToken = "", instanceKey = "", cursor = 0L, lastSyncAt = ""),
+            current.copy(
+                instanceId = "", desktopToken = "", instanceKey = "", cursor = 0L, lastSyncAt = "",
+                rotatedAt = at.toString(),
+            ),
         )
         _status.value = CalendarSyncStatus.Unpaired
+        return true
     }
 
     private suspend fun round(work: (SyncCoordinator) -> SyncOutcome): Boolean = lock.withLock {
