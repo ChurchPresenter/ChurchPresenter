@@ -1440,6 +1440,7 @@
     <string name="media_subtitles_load_file">Load subtitle file…</string>
     <string name="media_subtitles_show_on">Show on</string>
     <string name="media_subtitles_all_outputs">All outputs</string>
+    <string name="media_subtitles_output_count">%1$d outputs</string>
     <string name="media_subtitles_embedded">In this video</string>
     <string name="media_subtitles_files">Subtitle files</string>
     <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>

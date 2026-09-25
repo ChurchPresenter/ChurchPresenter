@@ -89,6 +89,8 @@ internal fun OrderedSourcePicker(
     tags: OrderedSourceTags,
     onWrite: (List<Int>) -> Unit,
     modifier: Modifier = Modifier,
+    /** False where an item's code is its slot number, which the row already prints. */
+    showRowCode: Boolean = true,
 ) {
     var open by remember { mutableStateOf(false) }
     val value = when {
@@ -112,7 +114,7 @@ internal fun OrderedSourcePicker(
             shape = RoundedCornerShape(12.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
-            OrderedSourceMenu(items, shown, strings, tags, onWrite)
+            OrderedSourceMenu(items, shown, strings, tags, onWrite, showRowCode)
         }
     }
 }
@@ -124,6 +126,7 @@ private fun OrderedSourceMenu(
     strings: OrderedSourceStrings,
     tags: OrderedSourceTags,
     onWrite: (List<Int>) -> Unit,
+    showRowCode: Boolean,
 ) {
     if (items.isEmpty()) {
         MenuNote(strings.noneLoaded)
@@ -143,6 +146,7 @@ private fun OrderedSourceMenu(
             onMoveDown = { onWrite(swapped(shown, slot, slot + 1)) },
             onRemove = { onWrite(shown - position) },
             tag = tags.orderRow(slot),
+            showCode = showRowCode,
         )
     }
     val addable = items.indices.filter { it !in shown }
@@ -159,6 +163,7 @@ private fun OrderedSourceMenu(
                 info = items[position],
                 onAdd = { onWrite(shown + position) },
                 tag = tags.addRow(position),
+                showCode = showRowCode,
             )
         }
     }
@@ -174,6 +179,7 @@ private fun OrderRow(
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
     tag: String,
+    showCode: Boolean,
 ) {
     Row(
         modifier = Modifier
@@ -189,7 +195,7 @@ private fun OrderRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.widthIn(min = 14.dp),
         )
-        TranslationName(info, modifier = Modifier.weight(1f))
+        TranslationName(info, showCode = showCode, modifier = Modifier.weight(1f))
         RowKey(Icons.Filled.KeyboardArrowUp, stringResource(Res.string.output_profile_move_up), canMoveUp, onMoveUp)
         RowKey(
             Icons.Filled.KeyboardArrowDown,
@@ -208,7 +214,12 @@ private fun OrderRow(
 }
 
 @Composable
-private fun AddTranslationRow(info: TranslationChoiceDisplay, onAdd: () -> Unit, tag: String) {
+private fun AddTranslationRow(
+    info: TranslationChoiceDisplay,
+    onAdd: () -> Unit,
+    tag: String,
+    showCode: Boolean,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,24 +235,33 @@ private fun AddTranslationRow(info: TranslationChoiceDisplay, onAdd: () -> Unit,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(ROW_ICON),
         )
-        TranslationName(info, modifier = Modifier.weight(1f))
+        TranslationName(info, showCode = showCode, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun TranslationName(info: TranslationChoiceDisplay, modifier: Modifier = Modifier) {
+private fun TranslationName(
+    info: TranslationChoiceDisplay,
+    showCode: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = info.code,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-        )
+        // A song language's code is its slot number, which the row already prints in its own
+        // gutter -- drawing both read "1  1  Language 1". A Bible's is its abbreviation, which is
+        // the most useful thing on the row, so the caller decides.
+        if (showCode && info.code.isNotBlank()) {
+            Text(
+                text = info.code,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+            )
+        }
         Text(
             text = info.title,
             style = MaterialTheme.typography.bodySmall,

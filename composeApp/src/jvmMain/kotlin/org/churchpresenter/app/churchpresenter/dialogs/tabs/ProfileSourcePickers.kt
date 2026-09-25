@@ -86,6 +86,8 @@ internal fun SongSourcePicker(
         ),
         onWrite = { next -> onProfileChange(withSongPositions(profile, next, languages.size)) },
         modifier = modifier,
+        // A language's code is its slot number, which every row already prints in its own gutter.
+        showRowCode = false,
     )
 }
 

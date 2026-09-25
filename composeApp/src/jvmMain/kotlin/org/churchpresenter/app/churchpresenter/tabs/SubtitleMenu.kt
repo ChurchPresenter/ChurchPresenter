@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.media_subtitles_all_outputs
 import churchpresenter.composeapp.generated.resources.media_subtitles_embedded
 import churchpresenter.composeapp.generated.resources.media_subtitles_off
+import churchpresenter.composeapp.generated.resources.media_subtitles_output_count
 import churchpresenter.composeapp.generated.resources.media_subtitles_show_on
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SidecarSubtitle
@@ -36,6 +41,10 @@ import org.jetbrains.compose.resources.stringResource
 
 private val CHECK_SIZE = 14.dp
 private val ROUTE_INDENT = 18.dp
+private val CHEVRON_SIZE = 14.dp
+
+/** Enough for a profile name; past that the open list is where the whole set is read. */
+private val ROUTING_SUMMARY_MAX = 110.dp
 
 /**
  * The Media tab's Subtitles menu: what is loaded, what is on, and which outputs each one goes to.
@@ -69,6 +78,7 @@ internal fun SubtitleMenuItems(
         SidecarRow(
             index = index,
             track = track,
+            profiles = profiles,
             routingOpen = routingOpen == index,
             onToggle = { viewModel.setSidecarEnabled(index, !track.enabled) },
             onToggleRouting = { routingOpen = if (routingOpen == index) -1 else index },
@@ -109,15 +119,26 @@ internal fun SubtitleMenuItems(
     )
 }
 
-/** One loaded file: a tick that turns it on or off, and the handle that opens its routing. */
+/**
+ * One loaded file: a tick that turns it on or off, and the handle that opens its routing.
+ *
+ * The tick is on the **left**, beside the name it belongs to. It was on the right, immediately after
+ * the "Show on" handle, where it read as the handle's own state rather than the track's -- which is
+ * not a thing "Show on" has, since routing is a set of outputs and not a switch.
+ *
+ * The handle says where the track currently goes rather than only "Show on", so the row answers the
+ * question without being opened, and carries a chevron so it reads as something that opens.
+ */
 @Composable
 private fun SidecarRow(
     index: Int,
     track: SidecarSubtitle,
+    profiles: List<OutputProfile>,
     routingOpen: Boolean,
     onToggle: () -> Unit,
     onToggleRouting: () -> Unit,
 ) {
+    val routable = profiles.size > 1
     DropdownMenuItem(
         text = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -127,21 +148,40 @@ private fun SidecarRow(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = stringResource(Res.string.media_subtitles_show_on),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (routingOpen) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .testTag(subtitleShowOnTag(index))
-                        .clickable(onClick = onToggleRouting)
-                        .padding(horizontal = 4.dp),
-                )
+                // One output means there is nothing to route between, so the handle would open a
+                // list with a single always-on entry -- which is what "Show on" with a lone tick
+                // beside it looked like.
+                if (routable) {
+                    Spacer(Modifier.width(12.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .testTag(subtitleShowOnTag(index))
+                            .clickable(onClick = onToggleRouting)
+                            .padding(horizontal = 4.dp),
+                    ) {
+                        Text(
+                            text = routingSummary(track, profiles),
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if (routingOpen) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.widthIn(max = ROUTING_SUMMARY_MAX),
+                        )
+                        Icon(
+                            if (routingOpen) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowRight,
+                            contentDescription = stringResource(Res.string.media_subtitles_show_on),
+                            modifier = Modifier.size(CHEVRON_SIZE),
+                            tint = if (routingOpen) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         },
         onClick = onToggle,
-        trailingIcon = { if (track.enabled) CheckMark() },
+        leadingIcon = { if (track.enabled) CheckMark() else Spacer(Modifier.size(CHECK_SIZE)) },
         modifier = Modifier.testTag(subtitleTrackTag(index)),
     )
 }
@@ -171,6 +211,23 @@ private fun RoutingRows(
             trailingIcon = { if (on) CheckMark() },
             modifier = Modifier.padding(start = ROUTE_INDENT).testTag(subtitleRouteTag(profile.id)),
         )
+    }
+}
+
+/**
+ * Where this track goes, in as few words as the row has space for.
+ *
+ * "All outputs" for an unrouted one, the profile's name for a single, and a count past that -- the
+ * open list is where an operator reads the whole set, and a row that spelled all of them out would
+ * push the file's own name out of view.
+ */
+@Composable
+private fun routingSummary(track: SidecarSubtitle, profiles: List<OutputProfile>): String {
+    val named = profiles.filter { it.id in track.outputs }
+    return when {
+        named.isEmpty() -> stringResource(Res.string.media_subtitles_all_outputs)
+        named.size == 1 -> named.first().name
+        else -> stringResource(Res.string.media_subtitles_output_count, named.size)
     }
 }
 
