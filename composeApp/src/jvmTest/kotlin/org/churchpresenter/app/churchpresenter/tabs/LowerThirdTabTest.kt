@@ -3,6 +3,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -10,6 +13,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 
 /** 3 frames at 30fps = 100ms — fast enough to play through to completion inside a test. */
 private const val QUICK_LOTTIE = """{"v":"5.7.4","fr":30,"ip":0,"op":3,"w":1920,"h":1080,"layers":[]}"""
@@ -188,4 +193,36 @@ class LowerThirdTabTest {
             // Otherwise a new user with an empty folder has no way forward from this tab.
             assertTrue(showsExactly(LowerThirdLabel.GENERATE), "got ${renderedText()}")
         }
+
+    // ── The preview ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a portrait output's preview fits inside the tab instead of running over it`() = lowerThirdTab(
+        settings = { s ->
+            s.copy(
+                projectionSettings = s.projectionSettings.copy(
+                    browserSourceOutputs = listOf(
+                        ScreenAssignment(browserSourceWidth = 1080, browserSourceHeight = 1920),
+                    ),
+                    previewOutputSelections = mapOf(
+                        Constants.PREVIEW_TAB_LOWER_THIRD to
+                            Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, 0),
+                    ),
+                ),
+            )
+        },
+    ) { _ ->
+        waitForIdle()
+        val root = onRoot().getBoundsInRoot()
+        val preview = onNodeWithTag(LOWER_THIRD_PREVIEW_TAG).getBoundsInRoot()
+
+        // Keeping the full width made the box taller than the tab, centred, so its top ran up over
+        // the header and the tab bar.
+        assertTrue(preview.top >= root.top, "preview top ${preview.top} is above the tab")
+        assertTrue(preview.bottom <= root.bottom, "preview bottom ${preview.bottom} is below the tab")
+        assertTrue(
+            preview.bottom - preview.top > preview.right - preview.left,
+            "the preview keeps the output's portrait shape",
+        )
+    }
 }
