@@ -599,24 +599,13 @@ fun SongsTab(
         )
 
         // Vertical drag handle — resize lyrics panel
-        Box(
-            modifier = Modifier
-                .width(6.dp)
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .draggable(
-                    orientation = Orientation.Horizontal,
-                    state = rememberDraggableState { delta ->
-                        lyricsPanelPx = (lyricsPanelPx - delta)
-                            .coerceIn(
-                                with(density) { 150.dp.toPx() },
-                                with(density) { 800.dp.toPx() }
-                            )
-                    },
-                    onDragStopped = { saveLyricsPanelWidth() }
+        DragHandle(onDragEnd = { saveLyricsPanelWidth() }) { delta ->
+            lyricsPanelPx = (lyricsPanelPx - delta)
+                .coerceIn(
+                    with(density) { 150.dp.toPx() },
+                    with(density) { 800.dp.toPx() }
                 )
-        )
+        }
 
         SongLyricsPanel(
             lyricsPanelPx = lyricsPanelPx,
