@@ -110,7 +110,88 @@ class SettingsManager {
         13 to ::migrateDictionaryToGlobal,
         14 to ::migrateStylingIntoProfiles,
         15 to ::migrateScaleModesIntoProfiles,
+        16 to ::migrateTitleSlideNumberStyle,
     )
+
+    /** The flat song-number field each [SongCreditStyle] property of the title slide's is seeded from. */
+    private val titleSlideNumberSeedFields = mapOf(
+        "color" to "Color",
+        "fontType" to "FontType",
+        "fontSize" to "FontSize",
+        "bold" to "Bold",
+        "italic" to "Italic",
+        "underline" to "Underline",
+        "strikethrough" to "Strikethrough",
+        "shadow" to "Shadow",
+        "shadowColor" to "ShadowColor",
+        "shadowSize" to "ShadowSize",
+        "shadowOpacity" to "ShadowOpacity",
+        "horizontalAlignment" to "HorizontalAlignment",
+        "letterSpacing" to "LetterSpacing",
+        "wordSpacing" to "WordSpacing",
+        "transform" to "Transform",
+    )
+
+    /**
+     * Schema version 16. The title slide's song number has its own style now, where it used to share
+     * the lyric slides' one, so every document is given the look it was actually drawing.
+     *
+     * Without this the split would silently reset the title slide to the defaults for anyone who had
+     * styled their number at all -- the new record's own defaults are the *stock* number's, not
+     * theirs. Seeded, nothing on screen changes and the two can then be pulled apart.
+     *
+     * Runs over the document's `songSettings` **and every profile's own copy of it**: a profile
+     * carries a whole `SongSettings`, so seeding only the document would leave every output that has
+     * ever been customised drawing stock styling. Corner and offset are deliberately not seeded --
+     * their defaults mean "in the flow with the title", which is where the title slide's number has
+     * always been.
+     */
+    private fun migrateTitleSlideNumberStyle(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val seeded = root["songSettings"]?.jsonObject?.let { seedTitleSlideNumber(it) }
+        val projection = root["projectionSettings"]?.jsonObject
+        val profiles = projection?.get("outputProfiles")?.jsonArray
+        val newProfiles = profiles?.map { element ->
+            val profile = element as? JsonObject ?: return@map element
+            val song = profile["songSettings"]?.jsonObject ?: return@map element
+            JsonObject(profile + ("songSettings" to seedTitleSlideNumber(song)))
+        }
+        var updated = root
+        if (seeded != null) updated = JsonObject(updated + ("songSettings" to seeded))
+        if (projection != null && newProfiles != null) {
+            val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(newProfiles)))
+            updated = JsonObject(updated + ("projectionSettings" to newProjection))
+        }
+        return updated.toString()
+    }
+
+    /** One `songSettings` object with `layoutExtras.titleSlideNumber` filled in from its flat fields. */
+    private fun seedTitleSlideNumber(song: JsonObject): JsonObject {
+        val extras = song["layoutExtras"]?.jsonObject ?: JsonObject(emptyMap())
+        // A document written by a build that already has this keeps its own: rolling forward from a
+        // newer build through an older one must not overwrite what the newer one stored.
+        if (extras["titleSlideNumber"] != null) return song
+        val outlines = song["outlines"]?.jsonObject
+        fun style(prefix: String, outlineKey: String): JsonObject {
+            val fields = titleSlideNumberSeedFields.mapNotNull { (target, suffix) ->
+                song["$prefix$suffix"]?.let { target to it }
+            }
+            // The backdrop is a nested record of its own, and the outline lives in `outlines`
+            // rather than beside the flat fields -- miss that and every upgraded install loses its
+            // number's stroke.
+            val backdrop = song["${prefix}Backdrop"]?.let { "backdrop" to it }
+            val outline = outlines?.get(outlineKey)?.let { "outline" to it }
+            return JsonObject((fields + listOfNotNull(backdrop, outline)).toMap())
+        }
+        val titleSlideNumber = JsonObject(
+            mapOf(
+                "fullScreen" to style("songNumber", "songNumber"),
+                "lowerThird" to style("songNumberLowerThird", "songNumberLowerThird"),
+            ),
+        )
+        val newExtras = JsonObject(extras + ("titleSlideNumber" to titleSlideNumber))
+        return JsonObject(song + ("layoutExtras" to newExtras))
+    }
 
     /**
      * Schema version 15. Fit/Fill/Stretch is set per profile now rather than once for the install,

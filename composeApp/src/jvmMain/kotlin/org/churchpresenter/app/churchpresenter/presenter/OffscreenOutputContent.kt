@@ -260,6 +260,7 @@ internal fun OffscreenOutputContent(
                                             transitionAlpha = presenterManager.mediaTransitionAlpha.value,
                                             outputRole = outputRole,
                                             showSubtitles = profile.showSubtitles,
+                                            profileId = profile.id,
                                             mediaSettings = appSettings.mediaSettings,
                                             contentScale = appSettings.mediaScaleMode.contentScale,
                                         )

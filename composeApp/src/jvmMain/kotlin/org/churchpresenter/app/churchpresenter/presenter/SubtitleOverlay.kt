@@ -1,8 +1,10 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,7 +44,23 @@ fun SubtitleOverlay(
     cue: SubtitleCue,
     mediaSettings: MediaSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+) = SubtitleOverlay(listOf(cue), mediaSettings, outputRole)
+
+/**
+ * The same overlay for several tracks at once, stacked in the order they were loaded.
+ *
+ * More than one reaches an output when two subtitle files are routed to it -- a bilingual screen.
+ * Each keeps its own card so a long line in one language does not pad the other, and the stack is
+ * anchored by the configured position exactly as a single cue is.
+ */
+@Composable
+fun SubtitleOverlay(
+    cues: List<SubtitleCue>,
+    mediaSettings: MediaSettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
+    val drawn = cues.filter { it.text.isNotBlank() }
+    if (drawn.isEmpty()) return
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val textColor = if (isKey) Color.White else parseHexColor(mediaSettings.textColor)
     val bgOpacity = (mediaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
@@ -95,23 +113,28 @@ fun SubtitleOverlay(
             modifier = Modifier.fillMaxSize().padding((OUTER_MARGIN_DP * scaleFactor).dp),
             contentAlignment = boxAlignment
         ) {
-            if (cue.text.isNotBlank()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape((CARD_CORNER_RADIUS_DP * scaleFactor).dp))
-                        .background(cardBg)
-                        .padding((CARD_PADDING_DP * scaleFactor).dp)
-                ) {
-                    BottomAlignedText(
-                        text = AnnotatedString(cue.text),
-                        style = textStyle,
-                        maxLines = mediaSettings.maxLines,
-                        modifier = Modifier.fillMaxWidth(),
-                        backdrop = mediaSettings.backdrop,
-                        outline = mediaSettings.outline,
-                        scaleFactor = scaleFactor,
-                    )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy((CARD_GAP_DP * scaleFactor).dp),
+            ) {
+                drawn.forEach { drawnCue ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape((CARD_CORNER_RADIUS_DP * scaleFactor).dp))
+                            .background(cardBg)
+                            .padding((CARD_PADDING_DP * scaleFactor).dp)
+                    ) {
+                        BottomAlignedText(
+                            text = AnnotatedString(drawnCue.text),
+                            style = textStyle,
+                            maxLines = mediaSettings.maxLines,
+                            modifier = Modifier.fillMaxWidth(),
+                            backdrop = mediaSettings.backdrop,
+                            outline = mediaSettings.outline,
+                            scaleFactor = scaleFactor,
+                        )
+                    }
                 }
             }
         }
@@ -123,3 +146,6 @@ private const val SHADOW_BLUR_PX = 8f
 private const val OUTER_MARGIN_DP = 32f
 private const val CARD_CORNER_RADIUS_DP = 16f
 private const val CARD_PADDING_DP = 24f
+
+/** Between two tracks stacked on one output, so a bilingual pair reads as two lines, not one block. */
+private const val CARD_GAP_DP = 8f

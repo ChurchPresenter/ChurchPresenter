@@ -56,7 +56,30 @@ class SubtitleTrackSyncTest {
     }
 
     @Test
-    fun `nothing is sent to VLC once the app is drawing the subtitles itself`() = runComposeUiTest {
+    fun `choosing the app-drawn file disables VLC's own subtitles`() = runComposeUiTest {
+        val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
+        temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
+        val (mp, subpictures) = mediaPlayer()
+        // setSubtitleFile selects the sidecar track itself -- that is what the operator picked.
+        val viewModel = MediaViewModel().apply { setSubtitleFile(temp.absolutePath) }
+
+        try {
+            setContent {
+                SubtitleTrackSync(viewModel = viewModel, mp = mp, gate = PlayerReleaseGate())
+            }
+            waitForIdle()
+            SwingUtilities.invokeAndWait { }
+
+            // -1 is VLC's "Disable": without it an embedded track chosen earlier keeps being
+            // burned into the frame underneath the one the app is drawing.
+            verify { subpictures.setTrack(-1) }
+        } finally {
+            temp.delete()
+        }
+    }
+
+    @Test
+    fun `an embedded track still reaches VLC while a sidecar file is loaded`() = runComposeUiTest {
         val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
         temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
         val (mp, subpictures) = mediaPlayer()
@@ -72,9 +95,23 @@ class SubtitleTrackSyncTest {
             waitForIdle()
             SwingUtilities.invokeAndWait { }
 
-            verify(exactly = 0) { subpictures.setTrack(any()) }
+            verify { subpictures.setTrack(3) }
         } finally {
             temp.delete()
         }
+    }
+
+    @Test
+    fun `turning subtitles off disables VLC's own subtitles`() = runComposeUiTest {
+        val (mp, subpictures) = mediaPlayer()
+        val viewModel = MediaViewModel().apply { selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF) }
+
+        setContent {
+            SubtitleTrackSync(viewModel = viewModel, mp = mp, gate = PlayerReleaseGate())
+        }
+        waitForIdle()
+        SwingUtilities.invokeAndWait { }
+
+        verify { subpictures.setTrack(-1) }
     }
 }

@@ -159,7 +159,9 @@ class MediaTabPlaybackTest {
         waitForIdle()
 
         assertEquals(4, vm.selectedSubtitleTrack)
-        assertFalse(showsExactly("Spanish"), "the menu closes after a choice")
+        // The menu stays open now: with several files loadable at once, and each of them routed to
+        // its own outputs, a choice is rarely the last thing the operator wants to make.
+        assertTrue(showsExactly("Spanish"))
     }
 
     @Test

@@ -91,7 +91,7 @@ internal fun titleSlideLines(
     languages: List<Int> = listOf(0),
 ): List<TitleSlideLine> {
     fun shown(element: SongStyleElement) = settings.shownOnTitleSlide(element) == true
-    val number = section.songNumber.takeIf { it > 0 && shown(SongStyleElement.NUMBER) }?.toString()
+    val number = section.songNumber.takeIf { it > 0 && shown(SongStyleElement.TITLE_SLIDE_NUMBER) }?.toString()
     val titles = titleSlideTitles(section, languages)
         .takeIf { shown(SongStyleElement.TITLE) }
         .orEmpty()
@@ -100,7 +100,7 @@ internal fun titleSlideLines(
         number == null -> titles
         settings.titleSlideNumberBeforeTitle && titles.isNotEmpty() ->
             listOf(titles.first().copy(number = number)) + titles.drop(1)
-        else -> listOf(TitleSlideLine(SongStyleElement.NUMBER, number)) + titles
+        else -> listOf(TitleSlideLine(SongStyleElement.TITLE_SLIDE_NUMBER, number)) + titles
     }
     val credits = listOf(
         SongStyleElement.AUTHOR to section.author,
@@ -157,7 +157,22 @@ internal fun SongTitleSlideContent(
     contentAlignment: Alignment,
     modifier: Modifier = Modifier,
 ) {
-    val lines = titleSlideLines(section, settings, languages)
+    val allLines = titleSlideLines(section, settings, languages)
+    val titleSlideNumber = settings.layoutExtras.titleSlideNumber
+    val numberCorner = titleSlideNumber.cornerFor(target.isLowerThird)
+    val cornered = numberCorner != Constants.NONE
+    // The number as the flow would have drawn it, kept aside for the overlay below.
+    val corneredNumber = allLines.firstOrNull { it.element == SongStyleElement.TITLE_SLIDE_NUMBER }?.text
+        ?: allLines.firstNotNullOfOrNull { it.number }
+    // Pinned to a corner, the number comes out of the flow -- from its own row *and* from the
+    // title's row, which carries it as `leading`. Filtered here at the draw site rather than in
+    // `titleSlideLines`, because that is the shared definition the stage monitor and the companion
+    // app read as plain text and the number belongs in what they read.
+    val lines = if (!cornered) allLines else allLines
+        .filterNot { it.element == SongStyleElement.TITLE_SLIDE_NUMBER }
+        .map { it.copy(number = null) }
+    val fallbackTitleFont =
+        if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
     // Fills the box it is given -- the whole slide, or the band -- so the vertical alignment the
     // rail configures places the block, exactly as it places the lyrics.
     Box(modifier = modifier.fillMaxSize(), contentAlignment = contentAlignment) {
@@ -178,12 +193,31 @@ internal fun SongTitleSlideContent(
                     // The number ahead of the title in the same paragraph, in its own style, so a
                     // long title wraps under it as one line of text would -- laid out as two
                     // boxes side by side, the title centred in what was left beside the number.
-                    leading = line.number?.let { it to settings.elementStyle(SongStyleElement.NUMBER, target) },
+                    leading = line.number?.let {
+                        it to settings.elementStyle(SongStyleElement.TITLE_SLIDE_NUMBER, target)
+                    },
                     fallbackFont = fallbackFont,
                     isKey = isKey,
                     scaleFactor = scaleFactor,
                 )
             }
+        }
+        // The number pinned to a corner, over the slide rather than in the flow -- the same
+        // placement the lyric slides give theirs, through the same modifier, and the reason this
+        // element has a profile of its own: top-left on every lyric slide and bottom-left here.
+        if (cornered && !corneredNumber.isNullOrBlank()) {
+            TitleSlideText(
+                line = TitleSlideLine(SongStyleElement.TITLE_SLIDE_NUMBER, corneredNumber),
+                style = settings.elementStyle(SongStyleElement.TITLE_SLIDE_NUMBER, target),
+                fallbackFont = fallbackTitleFont,
+                isKey = isKey,
+                scaleFactor = scaleFactor,
+                modifier = Modifier.songNumberCornerOffset(
+                    numberCorner,
+                    titleSlideNumber.offsetFor(target.isLowerThird),
+                ),
+                fillWidth = false,
+            )
         }
     }
 }
@@ -203,9 +237,23 @@ private fun TitleSlideText(
     isKey: Boolean,
     scaleFactor: Float,
     leading: Pair<String, SongElementStyle>? = null,
+    modifier: Modifier = Modifier,
+    /**
+     * False for a line pinned to a corner rather than laid out in the flow.
+     *
+     * All three draw calls below honour it. They each hard-coded `fillMaxWidth()`, and a cornered
+     * number that still filled the width would be placed nowhere -- filling leaves no room for the
+     * offset to move it through.
+     */
+    fillWidth: Boolean = true,
 ) {
+    fun lineWidth(): Modifier = if (fillWidth) Modifier.fillMaxWidth() else Modifier
     val painter = rememberTextBackdropPainter(style.backdrop)
-    val font = if (line.element == SongStyleElement.NUMBER) style.fontType.ifBlank { fallbackFont } else style.fontType
+    val font = if (line.element == SongStyleElement.TITLE_SLIDE_NUMBER) {
+        style.fontType.ifBlank { fallbackFont }
+    } else {
+        style.fontType
+    }
     // A line can carry the number's span as well as its own, and a span is where a colour lives --
     // so the stroke pass takes its own copy with every span painted the outline's colour. Building
     // it twice rather than restyling one: `AnnotatedString` spans are not editable in place.
@@ -248,7 +296,7 @@ private fun TitleSlideText(
     }
     if (!outline.isVisible) {
         Text(
-            modifier = Modifier.fillMaxWidth().then(painter.modifier),
+            modifier = modifier.then(lineWidth()).then(painter.modifier),
             onTextLayout = painter::onTextLayout,
             textAlign = textAlign,
             fontFamily = systemFontFamilyOrDefault(font),
@@ -260,7 +308,7 @@ private fun TitleSlideText(
         return
     }
     val strokeColor = parseHexColor(outline.color)
-    Box(modifier = Modifier.fillMaxWidth().then(painter.modifier)) {
+    Box(modifier = modifier.then(lineWidth()).then(painter.modifier)) {
         Text(
             modifier = Modifier.matchParentSize(),
             textAlign = textAlign,
@@ -271,7 +319,7 @@ private fun TitleSlideText(
             style = textStyle.copy(drawStyle = Stroke(width = outline.width * scaleFactor)),
         )
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = lineWidth(),
             onTextLayout = painter::onTextLayout,
             textAlign = textAlign,
             fontFamily = systemFontFamilyOrDefault(font),

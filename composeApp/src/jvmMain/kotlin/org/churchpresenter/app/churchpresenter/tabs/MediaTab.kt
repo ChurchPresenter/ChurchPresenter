@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
+import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
 import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
 import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,7 +36,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -85,7 +85,6 @@ import churchpresenter.composeapp.generated.resources.save_preset
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
@@ -113,7 +112,6 @@ import churchpresenter.composeapp.generated.resources.media_now_presenting
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.media_subtitles_files
 import churchpresenter.composeapp.generated.resources.media_subtitles_load_file
-import churchpresenter.composeapp.generated.resources.media_subtitles_off
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_select_file
@@ -161,7 +159,6 @@ import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.utils.icon
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -715,7 +712,7 @@ fun MediaTab(
             val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
             val scaleMode = shared ?: OutputScaleMode.FIT
             val scaled = shared != OutputScaleMode.FIT
-            val scaleLabel = scaleButtonLabel(shared, scaleMode)
+            val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.MEDIA)
             TooltipArea(
                 tooltip = { TransportTooltip(scaleLabel) },
                 tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -746,7 +743,7 @@ fun MediaTab(
             // Subtitles: off, one of the tracks VLC found, or a file of the operator's own.
             var subtitlesExpanded by remember { mutableStateOf(false) }
             val subtitlesLabel = stringResource(Res.string.media_subtitles)
-            val subtitlesShowing = viewModel.selectedSubtitleTrack >= 0
+            val subtitlesShowing = viewModel.subtitlesVisible
             val subtitleFilesLabel = stringResource(Res.string.media_subtitles_files)
             val subtitleFileTitle = stringResource(Res.string.media_subtitles_load_file)
             Box {
@@ -771,48 +768,28 @@ fun MediaTab(
                     }
                 }
                 DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.media_subtitles_off)) },
-                        onClick = {
-                            viewModel.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF)
-                            subtitlesExpanded = false
-                        },
-                        trailingIcon = {
-                            if (!subtitlesShowing) {
-                                Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(14.dp))
-                            }
-                        }
-                    )
-                    viewModel.subtitleTracks.forEach { track ->
-                        DropdownMenuItem(
-                            text = { Text(track.name) },
-                            onClick = {
-                                viewModel.selectSubtitleTrack(track.id)
-                                subtitlesExpanded = false
-                            },
-                            trailingIcon = {
-                                if (viewModel.selectedSubtitleTrack == track.id) {
-                                    Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(14.dp))
-                                }
-                            }
-                        )
-                    }
-                    DropdownMenuItem(
-                        text = { Text(subtitleFileTitle) },
-                        onClick = {
+                    SubtitleMenuItems(
+                        viewModel = viewModel,
+                        profiles = appSettings.projectionSettings.outputProfiles,
+                        loadFileLabel = subtitleFileTitle,
+                        onLoadFile = {
                             subtitlesExpanded = false
                             scope.launch {
+                                // The video's own folder, where a subtitle for it almost always
+                                // sits, rather than the top of the media library.
+                                val beside = runCatching { Path(viewModel.mediaUrl).parent }.getOrNull()
                                 val f = FileChooser.platformInstance.chooseSingle(
-                                    path = Path(appSettings.mediaStorageDirectory),
+                                    path = beside ?: Path(appSettings.mediaStorageDirectory),
                                     title = subtitleFileTitle,
                                     filters = listOf(
                                         FileNameExtensionFilter(subtitleFilesLabel, "srt", "vtt", "ass", "ssa", "sub")
                                     ),
                                     selectDirectory = false
                                 )
-                                if (f != null) viewModel.setSubtitleFile(f.absolutePathString())
+                                // Added, not substituted: a second file is a second language.
+                                if (f != null) viewModel.addSubtitleFile(f.absolutePathString())
                             }
-                        }
+                        },
                     )
                 }
             }

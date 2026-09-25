@@ -93,7 +93,11 @@ internal fun songBandSlots(
     if (section.type == Constants.SECTION_TYPE_TITLE_SLIDE) {
         val languages = songLanguageSelection(language, emptyList(), section.translations.size + 1)
         val lines = titleSlideLines(section, settings, languages)
-        val headings = lines.filter { it.element == SongStyleElement.TITLE || it.element == SongStyleElement.NUMBER }
+        // TITLE_SLIDE_NUMBER, because `titleSlideLines` is what produced these: the lyric slides'
+        // NUMBER never appears in them.
+        val headings = lines.filter {
+            it.element == SongStyleElement.TITLE || it.element == SongStyleElement.TITLE_SLIDE_NUMBER
+        }
         val credits = lines.filter { it !in headings }.map { it.plainText }
         val headingSlots = spreadAcrossSlots(headings.map { it.plainText }, availableSlots)
         val creditSlots = spreadAcrossSlots(splitEvenly(credits, availableSlots), availableSlots)

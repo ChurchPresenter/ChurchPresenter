@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -454,6 +455,14 @@ fun SongPresenter(
                 blurRadius = 12f * scaleFactor * mul
             )
         }
+        // The label borrows the title's shadow the way it borrows the title's face: it carries a
+        // switch of its own, not a colour, a size and an opacity of its own. Three more fields to
+        // configure a drop shadow on a two-word tag is not the trade the issue asked for.
+        val sectionLabelShadow = scaleElementShadow(
+            if (isLowerThird) ss.titleLowerThirdShadowColor else ss.titleShadowColor,
+            if (isLowerThird) ss.titleLowerThirdShadowSize else ss.titleShadowSize,
+            if (isLowerThird) ss.titleLowerThirdShadowOpacity else ss.titleShadowOpacity,
+        )
         val titleTextStyleScaled = if (effectiveTitleShadow)
             titleTextStyle.copy(shadow = scaleElementShadow(
                 if (isLowerThird) ss.titleLowerThirdShadowColor else ss.titleShadowColor,
@@ -647,6 +656,24 @@ fun SongPresenter(
                     if (maxNum > 0) {
                         reserved += autoFitTextMeasurer.measure(maxNum.toString(), numStyle, density = referenceDensity).size.height
                     }
+                }
+                // The section label, which sits above the lyrics and takes height from them exactly
+                // as the title row does -- unless it has been positioned, in which case it floats
+                // over the slide and costs them nothing, the same rule as the cornered number.
+                //
+                // This reserved nothing at all until now, so with the label switched on the fit
+                // believed it had one label's height more room than it did and the lyrics could
+                // overflow. Measured with the label's own face and size, which it has had since the
+                // styling landed beside this.
+                val fitLabel = ss.layoutExtras.sectionLabel
+                sectionLabelToReserve(fitLabel, allLyricSections, isLowerThird)?.let { longestLabel ->
+                    val labelStyle = TextStyle(
+                        fontSize = fitLabel.fontSize.sp,
+                        fontFamily = fitLabel.fontType.takeIf { it.isNotBlank() }
+                            ?.let { systemFontFamilyOrDefault(it) } ?: titleFontFamily,
+                    )
+                    reserved += autoFitTextMeasurer
+                        .measure(longestLabel, labelStyle, density = referenceDensity).size.height
                 }
                 // The fixed dp gaps the real layout draws that a section's own measured lines don't
                 // account for: the spacer before the look-ahead line (`LookAheadSpacer`, drawn once
@@ -1242,21 +1269,28 @@ fun SongPresenter(
                     }
 
                     @Composable
-                    fun SectionLabelPart() {
-                        if (!ss.layoutExtras.sectionLabel.enabled || isTitleSlide) return
-                        val label = section.header?.takeIf { it.isNotBlank() }
-                            ?: section.type.replaceFirstChar { it.uppercase() }.takeIf { it.isNotBlank() }
-                            ?: return
+                    fun SectionLabelPart(modifier: Modifier = Modifier, fillWidth: Boolean = true) {
+                        val label = sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) ?: return
+                        val labelSettings = ss.layoutExtras.sectionLabel
                         OutlinedText(
-                            modifier = Modifier.fillMaxWidth(),
-                            outline = TextOutline(),
+                            modifier = if (fillWidth) modifier.fillMaxWidth() else modifier,
+                            outline = labelSettings.outline,
                             scaleFactor = scaleFactor,
-                            textAlign = TextAlign.Center,
-                            fontFamily = titleFontFamily,
-                            fontSize = (ss.layoutExtras.sectionLabel.fontSize * scaleFactor).sp,
+                            textAlign = getTextAlign(labelSettings.horizontalAlignment),
+                            // A blank face keeps the title's, which is all this had before it
+                            // could name one of its own.
+                            fontFamily = labelSettings.fontType.takeIf { it.isNotBlank() }
+                                ?.let { systemFontFamilyOrDefault(it) } ?: titleFontFamily,
+                            fontSize = (labelSettings.fontSize * scaleFactor).sp,
                             text = label,
                             color = sectionLabelColor,
-                            style = TextStyle.Default,
+                            style = TextStyle(
+                                fontWeight = if (labelSettings.bold) FontWeight.Bold else FontWeight.Normal,
+                                fontStyle = if (labelSettings.italic) FontStyle.Italic else FontStyle.Normal,
+                                textDecoration = if (labelSettings.underline) TextDecoration.Underline
+                                                 else TextDecoration.None,
+                                shadow = if (labelSettings.shadow) sectionLabelShadow else null,
+                            ),
                         )
                     }
 
@@ -1342,8 +1376,23 @@ fun SongPresenter(
                     // modifier and nothing else.
                     val blockContainers = (lyricsBlocks + laBlocks)
                         .fold(Modifier as Modifier) { acc, block -> acc.then(block.containerModifier) }
+                    // Positioned, the label leaves the column and floats in the frame, costing the
+                    // lyrics no height -- the same trade the cornered song number already makes.
+                    // Null, it stays the column's first child, exactly where it has always been,
+                    // and no wrapper Box is added at all: one would fill the content area and
+                    // defeat the alignment the caller set on it.
+                    // Full screen only, the scope `contentRegion` has: the band's layout is
+                    // band-relative throughout and does not offer either control.
+                    val sectionLabelOffset =
+                        if (isLowerThird) null else ss.layoutExtras.sectionLabel.offset
+                    val labelFloats = sectionLabelOffset != null &&
+                        sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) != null
+                    val lyricsOffset = if (isLowerThird) null else ss.layoutExtras.lyricsOffset
+                    SongContentFrame(floating = labelFloats, floatingContent = {
+                        SectionLabelPart(modifier = Modifier.elementOffset(sectionLabelOffset), fillWidth = false)
+                    }) {
                     Column(modifier = Modifier.fillMaxSize().then(blockContainers)) {
-                        SectionLabelPart()
+                        if (!labelFloats) SectionLabelPart()
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
 
@@ -1351,9 +1400,21 @@ fun SongPresenter(
                         // The bottom title/number floats over the lyrics so it doesn't
                         // steal vertical space and cut off lyrics text.
                         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                            // Lyrics fill the entire remaining space
+                            // Lyrics fill the entire remaining space -- unless they have been
+                            // positioned, in which case the block wraps its own height and is
+                            // placed in that space, which is the same idea the three-way vertical
+                            // alignment expresses, in one-percent steps instead of three stops.
+                            //
+                            // Vertical only, and the settings offer only that axis: the blocks
+                            // below draw `fillMaxWidth()`, so there is no horizontal room to move
+                            // through. Narrowing and shifting the lyrics sideways is what Content
+                            // Region already does, against the frame these sit in.
                             Box(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = if (lyricsOffset != null) {
+                                    Modifier.fillMaxWidth().wrapContentHeight().elementOffset(lyricsOffset)
+                                } else {
+                                    Modifier.fillMaxSize()
+                                },
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
                                 if (isMultiLanguage) {
@@ -1460,6 +1521,7 @@ fun SongPresenter(
                                 }
                             }
                         }
+                    }
                     }
 
                     // The number pinned to a corner, drawn over the slide rather than in the row it
