@@ -26,6 +26,7 @@ import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.storedDate
+import java.time.LocalDate
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.rowsForSchedule
 import org.churchpresenter.calendar.model.sectionItem
@@ -51,6 +52,8 @@ internal fun CalendarDialogs(
     songEditor: (@Composable (SongEditRequest) -> Unit)?,
     /** Called once a run of show has been put into the Schedule -- the window closes behind it. */
     onLoaded: () -> Unit,
+    /** The window's today, which the date picker marks -- the same day its month grid marks. */
+    today: LocalDate = LocalDate.now(),
 ) {
     val openService = state.selectedService
     val scope = rememberCoroutineScope()
@@ -96,6 +99,7 @@ internal fun CalendarDialogs(
             dialogs.editingService,
             fromSchedule = fromSchedule,
             startFromSchedule = dialogs.startFromSchedule,
+            today = today,
             onServiceAdded = { host.recordUsage(CalendarUsage.SERVICE_ADDED) },
             onClose = dialogs::closeServiceSheet,
         )
@@ -164,6 +168,7 @@ private fun ServiceDialog(
     existing: PlannedService?,
     fromSchedule: ServiceTemplate.FromSchedule?,
     startFromSchedule: Boolean,
+    today: LocalDate,
     onServiceAdded: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -178,6 +183,7 @@ private fun ServiceDialog(
         templateLabel = { templateLabel(it) },
         servicesOn = state::servicesOn,
         initialTemplate = fromSchedule?.takeIf { startFromSchedule },
+        today = today,
         onSave = { form ->
             if (existing == null) {
                 state.addService(form.name, form.startTime, form.kind, form.template, form.date)

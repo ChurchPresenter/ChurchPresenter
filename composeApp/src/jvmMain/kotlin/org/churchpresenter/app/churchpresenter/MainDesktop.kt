@@ -220,8 +220,8 @@ fun MainDesktop(
     scheduleService: ScheduleServiceLink? = null,
     /** Writes the Schedule's rows back into [scheduleService]. */
     onSaveScheduleToCalendar: () -> Unit = {},
-    /** Opens the Calendar Manager on a new service built from the Schedule's rows. */
-    onAddScheduleToCalendar: () -> Unit = {},
+    /** Opens the Calendar Manager on a new service built from the Schedule's rows; null offers none. */
+    onAddScheduleToCalendar: (() -> Unit)? = null,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,

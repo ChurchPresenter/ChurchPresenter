@@ -166,4 +166,61 @@ class RunClockLayoutTest {
 
         assertEquals(setOf("a"), stranded)
     }
+
+    // ── A loop before the service fills the time until it starts (#653) ──────────────────────────
+
+    /** The issue's plan: a welcome loop pinned 45 minutes early, one pass 1:11, then the prelude. */
+    private fun welcomeLoop() = service(
+        items = listOf(heading("pre"), song("loop"), song("prelude"), song("prayer")),
+        planned = mapOf("loop" to 71, "prelude" to 300, "prayer" to 120),
+        timing = mapOf("loop" to RowTiming(startAt = "08:05", repeats = 0)),
+        start = "08:50",
+    )
+
+    @Test
+    fun `the row after a loop that starts before the service is at the service's start`() {
+        val clocks = runClocks(welcomeLoop())
+
+        assertEquals(LocalTime.of(8, 5), clocks.getValue("loop").time)
+        assertEquals(LocalTime.of(8, 50), clocks.getValue("prelude").time, "not one pass after the loop")
+        assertEquals(LocalTime.of(8, 55), clocks.getValue("prayer").time)
+        assertTrue(clocks.getValue("prelude").exact)
+    }
+
+    @Test
+    fun `a loop before the service needs no measured length to end at the start`() {
+        val service = welcomeLoop().let { it.copy(plannedSeconds = it.plannedSeconds - "loop") }
+
+        val prelude = runClocks(service).getValue("prelude")
+
+        assertEquals(LocalTime.of(8, 50), prelude.time)
+        assertTrue(prelude.exact, "the service's start is known, whatever one pass lasts")
+    }
+
+    @Test
+    fun `a loop inside the service still takes its stated length`() {
+        val service = service(
+            items = listOf(song("a"), song("loop"), song("b")),
+            planned = mapOf("a" to 300, "loop" to 120, "b" to 60),
+            timing = mapOf("loop" to RowTiming(repeats = 0)),
+        )
+
+        assertEquals(LocalTime.of(10, 7), runClocks(service).getValue("b").time)
+    }
+
+    @Test
+    fun `the loaded schedule and the laid-out times agree with the calendar`() {
+        val service = welcomeLoop()
+        val schedule = scheduleClocks(
+            service.items,
+            mapOf(
+                "loop" to RowTiming(startAt = "08:05", repeats = 0, runSeconds = 71),
+                "prelude" to RowTiming(runSeconds = 300),
+            ),
+            startTime = service.startTime,
+        )
+        assertEquals(LocalTime.of(8, 50), schedule.getValue("prelude").time)
+
+        assertEquals("08:50", service.withTimesLaidOut().timingOf("prelude").startAt)
+    }
 }

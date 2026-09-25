@@ -246,7 +246,8 @@ fun ScheduleTab(
     /** The planned service these rows came from, offered a save when they have changed. */
     scheduleService: ScheduleServiceLink? = null,
     onSaveScheduleToCalendar: () -> Unit = {},
-    onAddScheduleToCalendar: () -> Unit = {},
+    /** Offers to put a Schedule built here by hand on the calendar; null where there is no calendar. */
+    onAddScheduleToCalendar: (() -> Unit)? = null,
     theme: ThemeMode = ThemeMode.SYSTEM,
     itemZoomPercent: Int = ZOOM_DEFAULT,
     onItemZoomChange: (Int) -> Unit = {},
@@ -806,7 +807,8 @@ fun ScheduleTab(
                 if (confirmLoadNow) {
                     LoadServiceNowConfirm(
                         serviceName = upcomingServiceLoad.serviceName,
-                        itemCount = viewModel.scheduleItems.size,
+                        // Counted as the header counts them, so the two never disagree.
+                        itemCount = viewModel.scheduleItems.count { it !is ScheduleItem.LabelItem },
                         onChoose = { replace ->
                             confirmLoadNow = false
                             onLoadServiceNow(replace)
@@ -819,7 +821,7 @@ fun ScheduleTab(
                 ScheduleSaveToCalendarNotice(service = scheduleService, onSave = onSaveScheduleToCalendar)
             }
             // Built here by hand rather than loaded from the calendar: offer to put it there.
-            if (scheduleService == null && viewModel.scheduleItems.isNotEmpty()) {
+            if (onAddScheduleToCalendar != null && scheduleService == null && viewModel.scheduleItems.isNotEmpty()) {
                 ScheduleAddToCalendarNotice(onAdd = onAddScheduleToCalendar)
             }
         }

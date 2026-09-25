@@ -254,6 +254,8 @@
     <string name="calendar_cue_skipped_title">Cue skipped</string>
     <string name="calendar_cue_skipped_reason">Something else was live — fire it by hand if it should still go</string>
     <string name="calendar_cue_toast_close">Dismiss</string>
+    <string name="calendar_export_saved_title">PDF saved</string>
+    <string name="calendar_export_failed_title">Couldn’t save the PDF</string>
     <!-- The Presets tab's kind chips -->
     <string name="calendar_preset_kind_all">All</string>
     <string name="calendar_preset_kind_slides">Slideshows</string>

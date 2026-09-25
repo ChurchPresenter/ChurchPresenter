@@ -80,6 +80,7 @@ import androidx.compose.material.icons.filled.Settings
 import org.churchpresenter.calendar.generated.resources.calendar_cloud_invite
 import org.churchpresenter.calendar.generated.resources.calendar_settings_open
 import org.churchpresenter.calendar.model.exportRunOfShowPdf
+import org.churchpresenter.calendar.model.safeFileName
 import org.churchpresenter.calendar.model.PdfAudience
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.countImages
@@ -223,6 +224,7 @@ fun CalendarApp(
     val firedCues by CueFeed.fired.collectAsState()
     var dismissedToast by remember { mutableStateOf<String?>(null) }
     val toast = firedCues.firstOrNull()?.takeUnless { it.key == dismissedToast }
+    var exportOutcome by remember { mutableStateOf<ExportOutcome?>(null) }
 
     CompositionLocalProvider(LocalUse24HourClock provides state.document.preferences.use24HourClock) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -233,17 +235,18 @@ fun CalendarApp(
                     dialogs = dialogs,
                     clock = clock,
                     today = today,
-                    onExport = exportAction(state, host, io, scope),
+                    onExport = exportAction(state, host, io, scope, onOutcome = { exportOutcome = it }),
                     exportAudience = state.document.preferences.pdfExport.lastAudience,
                     onClose = onClose,
                     modifier = Modifier.fillMaxSize(),
                 )
-                if (toast != null) {
-                    CueToast(
-                        event = toast,
-                        onDismiss = { dismissedToast = toast.key },
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(TOAST_MARGIN),
-                    )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(TOAST_MARGIN),
+                ) {
+                    exportOutcome?.let { outcome -> ExportToast(outcome, onDismiss = { exportOutcome = null }) }
+                    if (toast != null) CueToast(event = toast, onDismiss = { dismissedToast = toast.key })
                 }
             }
         }
@@ -254,6 +257,7 @@ fun CalendarApp(
             colorPicker = colorPicker,
             songEditor = songEditor,
             onLoaded = { onClose?.invoke() },
+            today = today,
         )
     }
 }
@@ -427,8 +431,9 @@ private suspend fun relocate(item: ScheduleItem, fix: ProblemFix, host: Calendar
 
 /**
  * The header's Export action, or null when no service is open. It writes the chosen copy of the
- * run of show wherever the host's file chooser points; a cancelled chooser does nothing, and a
- * failure to write is reported through the host rather than crashing the window.
+ * run of show wherever the host's file chooser points; a cancelled chooser does nothing. Either
+ * way it ends, [onOutcome] hears -- saved, or why not -- so the window can say so; a failure is
+ * also reported through the host rather than crashing the window.
  *
  * Built here rather than inline because a `let` whose last expression is a lambda reads as a
  * trailing-lambda call to the compiler, not as the value it returns.
@@ -439,6 +444,7 @@ private fun exportAction(
     host: CalendarHost,
     io: CoroutineDispatcher,
     scope: CoroutineScope,
+    onOutcome: (ExportOutcome) -> Unit,
 ): ((PdfAudience) -> Unit)? {
     val service = state.selectedService ?: return null
     val label = shortDate(state.selectedDate)
@@ -451,7 +457,8 @@ private fun exportAction(
         }
         scope.launch {
             val lastFolder = File(preferences.pdfExport.lastFolder).takeIf { it.path.isNotEmpty() && it.isDirectory }
-            val target = host.chooseExportFile("${service.name} - ${service.date}.pdf", lastFolder) ?: return@launch
+            val suggested = safeFileName("${service.name} - ${service.date}") + ".pdf"
+            val target = host.chooseExportFile(suggested, lastFolder) ?: return@launch
             target.parentFile?.path?.let { folder ->
                 val current = state.document.preferences
                 if (folder != current.pdfExport.lastFolder) {
@@ -459,7 +466,7 @@ private fun exportAction(
                 }
             }
             // Off the composing thread: this embeds a font and writes a file.
-            withContext(io) {
+            val written = withContext(io) {
                 runCatching {
                     exportRunOfShowPdf(
                         service = service,
@@ -473,6 +480,12 @@ private fun exportAction(
                 }.onSuccess { host.recordUsage(CalendarUsage.EXPORTED) }
                     .onFailure { host.reportError("Calendar run-of-show PDF export", it) }
             }
+            onOutcome(
+                written.fold(
+                    onSuccess = { ExportOutcome.Saved(target) },
+                    onFailure = { ExportOutcome.Failed(it.message ?: it::class.simpleName.orEmpty()) },
+                ),
+            )
         }
     }
 }
