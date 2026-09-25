@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Uzaicināt tālruni…</string>
     <string name="calendar_sync_sync_now">Sinhronizēt tagad</string>
     <string name="calendar_sync_unpair">Sākt no jauna ar jaunu atslēgu</string>
+    <string name="calendar_sync_unpair_available_on">Sākt no jauna var reizi nedēļā — atkal pieejams %1$s.</string>
     <string name="calendar_sync_devices">Reģistrētie tālruņi</string>
     <string name="calendar_sync_no_devices">Vēl nav reģistrēts neviens tālrunis.</string>
     <string name="calendar_sync_devices_hint">Nosauciet tālruņa īpašnieku augstāk sadaļā Attālie klienti; vārds parādās šeit.</string>

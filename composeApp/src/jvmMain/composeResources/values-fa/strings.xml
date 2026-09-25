@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">دعوت از تلفن…</string>
     <string name="calendar_sync_sync_now">همگام‌سازی اکنون</string>
     <string name="calendar_sync_unpair">شروع دوباره با کلید جدید</string>
+    <string name="calendar_sync_unpair_available_on">شروع دوباره هفته‌ای یک بار مجاز است — دوباره در %1$s در دسترس خواهد بود.</string>
     <string name="calendar_sync_devices">تلفن‌های ثبت‌شده</string>
     <string name="calendar_sync_no_devices">هنوز تلفنی ثبت نشده است.</string>
     <string name="calendar_sync_devices_hint">نام مالک تلفن را در بخش کلاینت‌های راه دور در بالا وارد کنید؛ نام اینجا نمایش داده می‌شود.</string>

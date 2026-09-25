@@ -99,11 +99,25 @@ class ProjectionTest {
     }
 
     @Test
-    fun `tombstones and presets are projected by id and kind only`() {
-        val document = CalendarDocument(deletedServices = mapOf("x" to "2026-09-01T00:00:00Z"))
+    fun `a deletion is projected as a sealed record carrying its version`() {
+        val document = CalendarDocument(
+            deletedServices = mapOf("x" to "2026-09-01T00:00:00Z"),
+            deletedVersions = mapOf("x" to 4L),
+        )
+
+        val deletion = Projection.deletions(document).single()
+
+        assertEquals("x", deletion.id)
+        assertTrue(deletion.deleted)
+        assertEquals(4L, deletion.version)
+        assertEquals("2026-09-01T00:00:00Z", deletion.editedAt)
+        assertEquals("2026-09-01", deletion.date, "the relay keeps it for as long as the deletion is remembered")
+    }
+
+    @Test
+    fun `presets are projected by id and kind only`() {
         val presets = listOf(ItemPreset("p1", "Countdown", ScheduleItem.AnnouncementItem("a", "5:00", isTimer = true)))
 
-        assertEquals(listOf(RemoteTombstone("x", "2026-09-01T00:00:00Z")), Projection.tombstones(document))
         assertEquals(listOf(RemotePreset("p1", "Countdown", RemoteKind.TIMER)), Projection.presets(presets))
     }
 

@@ -2893,6 +2893,7 @@
     <string name="calendar_sync_invite">Invită un telefon…</string>
     <string name="calendar_sync_sync_now">Sincronizează acum</string>
     <string name="calendar_sync_unpair">Ia-o de la capăt cu o cheie nouă</string>
+    <string name="calendar_sync_unpair_available_on">Poți lua de la capăt o dată pe săptămână — disponibil din nou pe %1$s.</string>
     <string name="calendar_sync_devices">Telefoane înscrise</string>
     <string name="calendar_sync_no_devices">Niciun telefon înscris încă.</string>
     <string name="calendar_sync_devices_hint">Numește proprietarul unui telefon la Clienți la distanță mai sus; numele apare aici.</string>

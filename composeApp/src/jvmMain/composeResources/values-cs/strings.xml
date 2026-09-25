@@ -2873,6 +2873,7 @@
     <string name="calendar_sync_invite">Pozvat telefon…</string>
     <string name="calendar_sync_sync_now">Synchronizovat nyní</string>
     <string name="calendar_sync_unpair">Začít znovu s novým klíčem</string>
+    <string name="calendar_sync_unpair_available_on">Začít znovu lze jednou týdně — znovu dostupné %1$s.</string>
     <string name="calendar_sync_devices">Zaregistrované telefony</string>
     <string name="calendar_sync_no_devices">Zatím nejsou zaregistrovány žádné telefony.</string>
     <string name="calendar_sync_devices_hint">Pojmenujte majitele telefonu výše v části Vzdálení klienti; jméno se zobrazí zde.</string>

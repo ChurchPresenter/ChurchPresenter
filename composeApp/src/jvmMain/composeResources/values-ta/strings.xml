@@ -2914,6 +2914,7 @@
     <string name="calendar_sync_invite">தொலைபேசியை அழை…</string>
     <string name="calendar_sync_sync_now">இப்போது ஒத்திசை</string>
     <string name="calendar_sync_unpair">புதிய விசையுடன் மீண்டும் தொடங்கு</string>
+    <string name="calendar_sync_unpair_available_on">மீண்டும் தொடங்குவது வாரத்திற்கு ஒருமுறை மட்டுமே — %1$s அன்று மீண்டும் கிடைக்கும்.</string>
     <string name="calendar_sync_devices">பதிவு செய்யப்பட்ட தொலைபேசிகள்</string>
     <string name="calendar_sync_no_devices">இன்னும் தொலைபேசிகள் பதிவு செய்யப்படவில்லை.</string>
     <string name="calendar_sync_devices_hint">மேலே தொலைநிலை கிளையன்ட்களில் தொலைபேசி உரிமையாளரின் பெயரைக் கொடுங்கள்; பெயர் இங்கே காட்டப்படும்.</string>

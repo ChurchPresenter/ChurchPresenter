@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Inviter en telefon…</string>
     <string name="calendar_sync_sync_now">Synkroniser nå</string>
     <string name="calendar_sync_unpair">Start på nytt med en ny nøkkel</string>
+    <string name="calendar_sync_unpair_available_on">Å starte på nytt er tillatt én gang i uken — tilgjengelig igjen %1$s.</string>
     <string name="calendar_sync_devices">Registrerte telefoner</string>
     <string name="calendar_sync_no_devices">Ingen telefoner registrert ennå.</string>
     <string name="calendar_sync_devices_hint">Gi eieren av en telefon et navn under Eksterne klienter ovenfor; navnet vises her.</string>

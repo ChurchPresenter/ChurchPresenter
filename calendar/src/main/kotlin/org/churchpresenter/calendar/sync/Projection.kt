@@ -5,7 +5,9 @@ import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 /**
  * What this desktop tells the relay: each service with its rows reduced to what a phone needs
@@ -63,8 +65,27 @@ object Projection {
             .map(::service)
     }
 
-    fun tombstones(document: CalendarDocument): List<RemoteTombstone> =
-        document.deletedServices.map { (id, at) -> RemoteTombstone(id, at) }
+    /**
+     * Each remembered deletion as a sealed record of its own, newest first: the relay's plaintext
+     * tombstones are not signed by anybody, so a deletion is only believed when it opens.
+     */
+    fun deletions(document: CalendarDocument): List<RemoteService> = document.deletedServices.entries
+        .sortedByDescending { it.value }
+        .take(WireLimits.DELETIONS_PER_PUSH)
+        .map { (id, at) ->
+            RemoteService(
+                id = id,
+                // Only for the relay's retention: kept as long as the deletion is remembered.
+                date = runCatching { Instant.parse(at).atZone(ZoneOffset.UTC).toLocalDate().toString() }
+                    .getOrDefault(""),
+                startTime = "",
+                name = "",
+                version = document.deletedVersions[id] ?: 0L,
+                editedAt = at,
+                deleted = true,
+                updatedBy = DESKTOP,
+            )
+        }
 
     /** A preset by name and kind only; the item it holds never leaves this machine. */
     fun presets(presets: List<ItemPreset>): List<RemotePreset> =
@@ -81,6 +102,8 @@ object Projection {
         rows = service.items.take(WireLimits.ROWS_PER_SERVICE).map(::row),
         plannedSeconds = service.plannedSeconds.filterKeys { id -> service.items.any { it.id == id } },
         timing = service.timing.filterKeys { id -> service.items.any { it.id == id } },
+        version = service.version,
+        editedAt = service.updatedAt,
         updatedAt = service.updatedAt,
         updatedBy = DESKTOP,
     )

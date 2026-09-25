@@ -153,6 +153,8 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
+          CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
+          CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
         run: ./gradlew :composeApp:signWindowsMsi
 
       - name: Rename MSI (add WINDOWS-x64 label)
@@ -251,6 +253,8 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
+          CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
+          CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
         run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
@@ -445,6 +449,8 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
+          CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
+          CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
         run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
@@ -612,6 +618,8 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
+          CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
+          CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
         run: ./gradlew :composeApp:signLinuxDeb
 
       - name: Rename DEB (add DEBIAN-x64 label)

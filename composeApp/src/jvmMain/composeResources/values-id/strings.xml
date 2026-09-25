@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Undang ponsel…</string>
     <string name="calendar_sync_sync_now">Sinkronkan sekarang</string>
     <string name="calendar_sync_unpair">Mulai ulang dengan kunci baru</string>
+    <string name="calendar_sync_unpair_available_on">Mulai ulang hanya bisa sekali seminggu — tersedia lagi pada %1$s.</string>
     <string name="calendar_sync_devices">Ponsel terdaftar</string>
     <string name="calendar_sync_no_devices">Belum ada ponsel yang terdaftar.</string>
     <string name="calendar_sync_devices_hint">Beri nama pemilik ponsel di bawah Klien Jarak Jauh di atas; namanya muncul di sini.</string>

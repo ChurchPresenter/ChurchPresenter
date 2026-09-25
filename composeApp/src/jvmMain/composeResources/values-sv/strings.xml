@@ -2908,6 +2908,7 @@
     <string name="calendar_sync_invite">Bjud in en telefon…</string>
     <string name="calendar_sync_sync_now">Synkronisera nu</string>
     <string name="calendar_sync_unpair">Börja om med en ny nyckel</string>
+    <string name="calendar_sync_unpair_available_on">Att börja om går en gång i veckan — tillgängligt igen %1$s.</string>
     <string name="calendar_sync_devices">Registrerade telefoner</string>
     <string name="calendar_sync_no_devices">Inga telefoner registrerade än.</string>
     <string name="calendar_sync_devices_hint">Namnge en telefons ägare under Fjärrklienter ovan; namnet visas här.</string>

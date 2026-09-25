@@ -114,15 +114,13 @@ class SyncCoordinator(
      * relay since — then the relay already holds it, and [ifRev] is where it stands.
      */
     private fun push(token: String, ifRev: Long, document: CalendarDocument, relayChanged: Boolean): Long {
-        val services = Projection.services(document, today())
-        val tombstones = Projection.tombstones(document)
+        val records = Projection.services(document, today()) + Projection.deletions(document)
         val presets = PresetIndex(Projection.presets(presetStore?.load()?.presets.orEmpty()))
-        val hash = fingerprint(services, tombstones, presets)
+        val hash = fingerprint(records, presets)
         val at = now()
         if (!relayChanged && alreadyPushed(hash, at)) return ifRev
         val state = StateRequest(
-            records = services.map(sealing::seal),
-            tombstones = tombstones,
+            records = records.map(sealing::seal),
             presetsBox = sealing.sealPresets(presets),
         )
         val rev = client.putState(token, state, ifRev)
@@ -139,14 +137,9 @@ class SyncCoordinator(
     }
 
     /** A hash of the unsealed state: equal exactly when a push would carry the same picture. */
-    private fun fingerprint(
-        services: List<RemoteService>,
-        tombstones: List<RemoteTombstone>,
-        presets: PresetIndex,
-    ): String {
+    private fun fingerprint(records: List<RemoteService>, presets: PresetIndex): String {
         val digest = MessageDigest.getInstance("SHA-256")
-        digest.update(json.encodeToString(ListSerializer(RemoteService.serializer()), services).toByteArray())
-        digest.update(json.encodeToString(ListSerializer(RemoteTombstone.serializer()), tombstones).toByteArray())
+        digest.update(json.encodeToString(ListSerializer(RemoteService.serializer()), records).toByteArray())
         digest.update(json.encodeToString(PresetIndex.serializer(), presets).toByteArray())
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
@@ -154,7 +147,8 @@ class SyncCoordinator(
     /** What the relay sent, rebuilt and merged into the local file. */
     private fun absorb(changes: ChangesResponse): Absorbed {
         val local = store.load().document
-        val resolver = Resolver(songs(), presetStore?.load()?.presets.orEmpty(), today())
+        val resolver = Resolver(songs(), presetStore?.load()?.presets.orEmpty(), today(), now())
+        val deletions = HashMap<String, RemoteService>()
         var phoneChanges = 0
         var unresolved = 0
         var dropped = 0
@@ -171,19 +165,25 @@ class SyncCoordinator(
                 unreadable++
                 return@mapNotNull null
             }
+            if (remote.deleted) {
+                if (remote.version >= (deletions[remote.id]?.version ?: -1L)) deletions[remote.id] = remote
+                return@mapNotNull null
+            }
             val resolved = resolver.resolve(remote, local.serviceById(remote.id)) ?: return@mapNotNull null
             if (remote.updatedBy != Projection.DESKTOP) phoneChanges++
             unresolved += resolved.unresolved.size
             dropped += resolved.dropped
             resolved.service
         }
-        val tombstones = changes.tombstones
-            .filter { Sanitize.isId(it.id) }
-            .associate { tombstone ->
-                val deletedAt = runCatching { Instant.parse(tombstone.deletedAt) }.getOrNull() ?: now()
-                tombstone.id to storedInstant(deletedAt)
-            }
-        val remote = CalendarDocument(services = services, deletedServices = tombstones)
+        // The relay's own plaintext tombstones are ignored: a deletion is believed only when it
+        // arrives sealed, as a record that opens under this instance's key.
+        val remote = CalendarDocument(
+            services = services,
+            deletedServices = deletions.mapValues { (_, deletion) ->
+                resolver.editedAt(deletion.editedAt).ifEmpty { storedInstant(now()) }
+            },
+            deletedVersions = deletions.mapValues { (_, d) -> d.version.coerceAtLeast(0L) },
+        )
         val merged = local.mergedWith(remote, now())
         if (merged != local) {
             store.save(merged)

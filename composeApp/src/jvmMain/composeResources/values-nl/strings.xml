@@ -2891,6 +2891,7 @@
     <string name="calendar_sync_invite">Telefoon uitnodigen…</string>
     <string name="calendar_sync_sync_now">Nu synchroniseren</string>
     <string name="calendar_sync_unpair">Opnieuw beginnen met een nieuwe sleutel</string>
+    <string name="calendar_sync_unpair_available_on">Opnieuw beginnen kan eens per week — weer beschikbaar op %1$s.</string>
     <string name="calendar_sync_devices">Aangemelde telefoons</string>
     <string name="calendar_sync_no_devices">Nog geen telefoons aangemeld.</string>
     <string name="calendar_sync_devices_hint">Geef de eigenaar van een telefoon een naam onder Externe clients hierboven; de naam verschijnt hier.</string>

@@ -86,6 +86,8 @@ class CalendarSyncService(
     /** How long a song usually runs here -- the app's duration log -- for the catalog the phones plan with. */
     private val typicalSeconds: (SongItem) -> Int? = { null },
     private val usage: UsageEventStore = UsageEvents,
+    private val endpoints: RelayEndpoints = RelayEndpoints.BUILT_IN,
+    private val now: () -> Instant = Instant::now,
 ) {
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
@@ -96,7 +98,9 @@ class CalendarSyncService(
     private val watcher = CalendarFileWatcher(folder, io)
     private val lock = Mutex()
     private val relay =
-        CalendarRelayAccess(folder, songFolder, settings, saveSettings, transport, watcher::savedHere, typicalSeconds)
+        CalendarRelayAccess(
+            folder, songFolder, settings, saveSettings, transport, watcher::savedHere, typicalSeconds, endpoints,
+        )
 
     /** The startup round — pull, merge, push — within [timeoutMs]. Returns whether it completed. */
     suspend fun syncOnStartup(timeoutMs: Long = STARTUP_TIMEOUT_MS): Boolean {
@@ -170,7 +174,7 @@ class CalendarSyncService(
                 val request = EnrollRequest(tokenHash = CalendarRelayAccess.sha256Hex(deviceToken), nameBox = nameBox)
                 relay.client().enrollDevice(desktopToken, deviceId, request)
                 CalendarEnrollment(
-                    relayUrl = current.relayUrl,
+                    relayUrl = relay.relayUrl(),
                     instanceId = current.instanceId,
                     deviceId = deviceId,
                     deviceToken = deviceToken,
@@ -215,12 +219,22 @@ class CalendarSyncService(
         }
     }
 
-    /** Forgets the pairing on this side; the next enrollment registers a fresh instance with a fresh key. */
-    fun unpair() {
+    /**
+     * Forgets the pairing on this side; the next enrollment registers a fresh instance with a fresh
+     * key. At most once a week -- see [CalendarSyncSettings.nextRotationAt] -- and false when refused.
+     */
+    fun unpair(): Boolean {
+        val current = settings()
+        val at = now()
+        if (current.nextRotationAt(at) != null) return false
         saveSettings(
-            settings().copy(instanceId = "", desktopToken = "", instanceKey = "", cursor = 0L, lastSyncAt = ""),
+            current.copy(
+                instanceId = "", desktopToken = "", instanceKey = "", cursor = 0L, lastSyncAt = "",
+                rotatedAt = at.toString(),
+            ),
         )
         _status.value = CalendarSyncStatus.Unpaired
+        return true
     }
 
     private suspend fun round(work: (SyncCoordinator) -> SyncOutcome): Boolean = lock.withLock {

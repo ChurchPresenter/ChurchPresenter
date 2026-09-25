@@ -16,6 +16,8 @@ import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
+import java.time.Instant
+import java.time.Duration
 import java.io.IOException
 import java.nio.file.Files
 import java.security.MessageDigest
@@ -61,7 +63,7 @@ class CalendarSyncServiceTest {
             calls += "$method $url"
             if (relayDown) throw IOException("relay down")
             if (slowMs > 0) Thread.sleep(slowMs)
-            if (url == CalendarSyncSettings.CLIENT_KEY_URL) return clientKeyReply()
+            if (url == CLIENT_KEY_URL) return clientKeyReply()
             if (headers["X-Client-Key"] != clientKey || refuseKeyOnce) {
                 refuseKeyOnce = false
                 return RelayReply(401, """{"error":"client_key"}""")
@@ -102,13 +104,15 @@ class CalendarSyncServiceTest {
 
     private val relay = Relay()
 
-    private fun service(songFolder: File? = null) = CalendarSyncService(
+    private fun service(songFolder: File? = null, now: () -> Instant = Instant::now) = CalendarSyncService(
         folder = folder,
         songFolder = songFolder,
         settings = { settings },
         saveSettings = { settings = it; saved += it },
         transport = relay,
         typicalSeconds = { 270 },
+        endpoints = RelayEndpoints("https://relay.example", CLIENT_KEY_URL),
+        now = now,
     )
 
     /** A library of one songbook with one song, in the file form the desktop reads. */
@@ -287,6 +291,27 @@ class CalendarSyncServiceTest {
     }
 
     @Test
+    fun `starting over is refused within a week of the last time, and allowed after it`() = runBlocking<Unit> {
+        var clock = Instant.parse("2026-09-24T12:00:00Z")
+        val service = service(now = { clock })
+        service.syncOnStartup()
+
+        assertTrue(service.unpair())
+        assertEquals("2026-09-24T12:00:00Z", settings.rotatedAt)
+
+        relay.registered = false
+        service.syncOnStartup()
+        val paired = settings
+        clock = clock.plus(Duration.ofDays(6))
+        assertFalse(service.unpair(), "six days on is still inside the week")
+        assertEquals(paired, settings, "and nothing was forgotten")
+
+        clock = clock.plus(Duration.ofDays(1))
+        assertTrue(service.unpair())
+        assertFalse(settings.isPaired)
+    }
+
+    @Test
     fun `a phone can be revoked, and the relay refusing that is reported`() = runBlocking<Unit> {
         val service = service()
         service.enroll("phone-1", "")
@@ -427,3 +452,5 @@ class CalendarSyncServiceTest {
         assertNull(saved.firstOrNull { it.cursor > relay.rev })
     }
 }
+
+private const val CLIENT_KEY_URL = "https://keys.example/k3v9q"
