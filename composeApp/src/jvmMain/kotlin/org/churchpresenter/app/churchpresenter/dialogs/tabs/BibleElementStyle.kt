@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -53,6 +54,13 @@ internal data class BibleElementStyle(
     val backdrop: TextBackdrop = TextBackdrop(),
     /** The stroke drawn around this element's glyphs, under the fill. */
     val outline: TextOutline = TextOutline(),
+    /**
+     * Where this element sits when it is positioned rather than stacked; null is the stack.
+     *
+     * Full screen only -- `BibleTranslationSettings` keeps no lower-third twin, for the reason
+     * `textOffsetFor` records -- so the lower-third branches below read and write null.
+     */
+    val offset: ElementOffset? = null,
 )
 
 /** What this translation currently draws [element] with on [target]. */
@@ -78,6 +86,7 @@ internal fun BibleTranslationSettings.elementStyle(
         transform = textTransform,
         backdrop = textBackdrop,
         outline = textOutline,
+        offset = textOffset,
     )
     element == BibleStyleElement.TEXT -> BibleElementStyle(
         color = lowerThirdTextColor,
@@ -117,6 +126,7 @@ internal fun BibleTranslationSettings.elementStyle(
         transform = referenceTransform,
         backdrop = referenceBackdrop,
         outline = referenceOutline,
+        offset = referenceOffset,
     )
     else -> BibleElementStyle(
         color = lowerThirdReferenceColor,
@@ -176,6 +186,7 @@ private fun BibleTranslationSettings.withFullScreenText(s: BibleElementStyle) = 
     textTransform = s.transform,
     textBackdrop = s.backdrop,
     textOutline = s.outline,
+    textOffset = s.offset,
 )
 
 private fun BibleTranslationSettings.withLowerThirdText(s: BibleElementStyle) = copy(
@@ -217,6 +228,7 @@ private fun BibleTranslationSettings.withFullScreenReference(s: BibleElementStyl
     referenceTransform = s.transform,
     referenceBackdrop = s.backdrop,
     referenceOutline = s.outline,
+    referenceOffset = s.offset,
 )
 
 private fun BibleTranslationSettings.withLowerThirdReference(s: BibleElementStyle) = copy(

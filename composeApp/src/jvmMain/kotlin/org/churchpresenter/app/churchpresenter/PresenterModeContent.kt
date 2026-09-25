@@ -184,6 +184,7 @@ internal fun PresenterModeContent(
                         transitionAlpha = mediaTransitionAlpha,
                         outputRole = outputRole,
                         showSubtitles = profile.showSubtitles,
+                        profileId = profile.id,
                         mediaSettings = appSettings.mediaSettings,
                         contentScale = appSettings.mediaScaleMode.contentScale,
                     )

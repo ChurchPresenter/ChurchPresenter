@@ -42,7 +42,7 @@ class SongTitleSlideLinesTest {
         val lines = titleSlideLines(section, everything.copy(titleSlideNumberBeforeTitle = false))
         assertEquals(
             listOf(
-                SongStyleElement.NUMBER,
+                SongStyleElement.TITLE_SLIDE_NUMBER,
                 SongStyleElement.TITLE,
                 SongStyleElement.AUTHOR,
                 SongStyleElement.COMPOSER,
@@ -84,7 +84,7 @@ class SongTitleSlideLinesTest {
     fun `a song with no numeric number has no number line`() {
         val lines = titleSlideLines(section.copy(songNumber = 0), everything)
         assertEquals(listOf("Amazing Grace"), titles(lines))
-        assertEquals(0, lines.count { it.element == SongStyleElement.NUMBER })
+        assertEquals(0, lines.count { it.element == SongStyleElement.TITLE_SLIDE_NUMBER })
     }
 
     // ── The number's place ────────────────────────────────────────────────────
@@ -101,14 +101,14 @@ class SongTitleSlideLinesTest {
     @Test
     fun `switched off, the number takes a line of its own above the title`() {
         val lines = titleSlideLines(section, SongSettings(titleSlideNumberBeforeTitle = false))
-        assertEquals(TitleSlideLine(SongStyleElement.NUMBER, "427"), lines[0])
+        assertEquals(TitleSlideLine(SongStyleElement.TITLE_SLIDE_NUMBER, "427"), lines[0])
         assertEquals(TitleSlideLine(SongStyleElement.TITLE, "Amazing Grace"), lines[1])
     }
 
     @Test
     fun `with the title hidden the number still has a line of its own`() {
         val lines = titleSlideLines(section, SongSettings(titleSlideShowTitle = false))
-        assertEquals(listOf(TitleSlideLine(SongStyleElement.NUMBER, "427")), lines.take(1))
+        assertEquals(listOf(TitleSlideLine(SongStyleElement.TITLE_SLIDE_NUMBER, "427")), lines.take(1))
     }
 
     @Test

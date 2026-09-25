@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onRoot
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.core.models.bible.SelectedVerse
 import kotlin.test.Test
@@ -451,6 +453,77 @@ class BiblePresenterLayoutRenderTest {
             assertTrue(bounds.top >= 0f, "$marker starts above the output: $bounds")
             assertTrue(bounds.bottom <= 1080f, "$marker is clipped below the output: $bounds")
         }
+    }
+
+    // ── A positioned verse or reference (#613), which the fit search has to account for ──────────
+
+    /**
+     * Renders one long verse with [textOffset] on the verse text and returns its drawn bounds.
+     *
+     * The offset is what #613 asked for, and the trap it invites is specific: applied at draw time
+     * alone, a positioned element grows past the band and is clipped by `clipToBounds` instead of
+     * shrinking the stack. The fit search therefore measures the stacked halves as a sum and each
+     * positioned half against the band on its own -- which is what these two cases pin.
+     */
+    private fun ComposeUiTest.positionedVerseBounds(textOffset: ElementOffset?, words: Int): Rect {
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(
+                        fileName = "one.spb",
+                        textFontSize = 100,
+                        referenceFontSize = 70,
+                        textOffset = textOffset,
+                    ),
+                ),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse(text = "MARKER ${"long verse text ".repeat(words)}", number = 16, fileName = "one.spb"),
+                    ),
+                    appSettings = settings,
+                )
+            }
+        }
+        return onNodeWithText("MARKER", substring = true).fetchSemanticsNode().boundsInRoot
+    }
+
+    @Test
+    fun `a verse positioned at the bottom stays inside the output`() = runComposeUiTest {
+        val bounds = positionedVerseBounds(ElementOffset(xPercent = 50, yPercent = 100), words = 45)
+
+        assertTrue(bounds.top >= 0f, "the positioned verse starts above the output: $bounds")
+        assertTrue(bounds.bottom <= 1080f, "the positioned verse is clipped below the output: $bounds")
+    }
+
+    @Test
+    fun `the offset actually moves the verse, and null leaves it where it was`() {
+        // Without this the two bounds checks above would pass against a no-op modifier, which is the
+        // failure a containment assertion cannot see: text that never moved is trivially in frame.
+        var top0 = -1f
+        var top100 = -1f
+        var topNull = -1f
+        runComposeUiTest { top0 = positionedVerseBounds(ElementOffset(yPercent = 0), words = 8).top }
+        runComposeUiTest { top100 = positionedVerseBounds(ElementOffset(yPercent = 100), words = 8).top }
+        runComposeUiTest { topNull = positionedVerseBounds(null, words = 8).top }
+
+        assertTrue(top100 > top0, "y=100 ($top100) should sit lower than y=0 ($top0)")
+        // Null is the default at every use site and the reason nothing moves on upgrade: the verse
+        // keeps the placement `verticalAlignment` gave it, which defaults to the bottom.
+        assertTrue(topNull > top0, "an unpositioned verse should keep its own alignment, not y=0")
+    }
+
+    @Test
+    fun `a positioned verse long enough to overflow is shrunk, not clipped`() = runComposeUiTest {
+        // Long enough that it cannot fit the frame at its authored 100pt; the fit search has to bring
+        // it down. Clipping would show as a bottom past 1080 -- the frame -- rather than inside it.
+        val bounds = positionedVerseBounds(ElementOffset(xPercent = 50, yPercent = 50), words = 120)
+
+        assertTrue(bounds.top >= 0f, "shrunk text should not start above the output: $bounds")
+        assertTrue(bounds.bottom <= 1080f, "shrunk text should not run past the output: $bounds")
     }
 
     @Test

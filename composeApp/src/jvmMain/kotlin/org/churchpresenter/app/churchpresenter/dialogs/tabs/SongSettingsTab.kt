@@ -42,6 +42,7 @@ import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SliderNumberField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongNumberOffset
+import org.churchpresenter.settings.SongTitleSlideNumber
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -158,7 +159,8 @@ private fun SongTitleSlideOptions(
                 modifier = Modifier.testTag("song_show_on_title_slide"),
             )
             // The number only: on the title's row ahead of it, or on a row of its own above.
-            if (element == SongStyleElement.NUMBER) {
+            if (element == SongStyleElement.TITLE_SLIDE_NUMBER) {
+                val cornered = song.layoutExtras.titleSlideNumber.cornerFor(target.isLowerThird) != Constants.NONE
                 LabeledCheckbox(
                     checked = song.titleSlideNumberBeforeTitle,
                     onCheckedChange = { on ->
@@ -166,7 +168,8 @@ private fun SongTitleSlideOptions(
                             s.copy(songSettings = s.songSettings.copy(titleSlideNumberBeforeTitle = on))
                         }
                     },
-                    enabled = song.titleSlideShowSongNumber,
+                    // Nothing to lead when the number is not in the flow at all.
+                    enabled = song.titleSlideShowSongNumber && !cornered,
                     label = stringResource(Res.string.show_song_number_before_title),
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.testTag("song_titleSlideNumberBeforeTitle"),
@@ -181,6 +184,72 @@ private fun SongTitleSlideOptions(
                 }
             }
         }
+    // Where the title slide's number goes, which is the whole point of separating it from the lyric
+    // slides' one: the same corner-and-nudge pair those have, over this slide's own fields.
+    if (element == SongStyleElement.TITLE_SLIDE_NUMBER) {
+        TitleSlideNumberPlacement(settings, onSettingsChange, target)
+    }
+}
+
+/** The title slide number's corner and, once it has one, how far inward from it the number sits. */
+@Composable
+private fun TitleSlideNumberPlacement(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    target: SongStyleTarget,
+) {
+    val lowerThird = target.isLowerThird
+    val number = settings.songSettings.layoutExtras.titleSlideNumber
+    fun update(transform: (SongTitleSlideNumber) -> SongTitleSlideNumber) = onSettingsChange { s ->
+        s.copy(
+            songSettings = s.songSettings.copy(
+                layoutExtras = s.songSettings.layoutExtras.copy(
+                    titleSlideNumber = transform(s.songSettings.layoutExtras.titleSlideNumber),
+                ),
+            ),
+        )
+    }
+    LabeledControl(stringResource(Res.string.song_number_corner)) {
+        DropdownSelector(
+            label = "",
+            value = number.cornerFor(lowerThird),
+            options = songNumberCornerOptions(),
+            onValueChange = { v ->
+                update { if (lowerThird) it.copy(lowerThirdCorner = v) else it.copy(corner = v) }
+            },
+            compact = true,
+            modifier = Modifier.width(CORNER_DROPDOWN_WIDTH).testTag("title_slide_number_corner"),
+        )
+    }
+    if (number.cornerFor(lowerThird) != Constants.NONE) {
+        val offset = number.offsetFor(lowerThird)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            ControlColumn(stringResource(Res.string.song_number_offset_x), Modifier.weight(1f)) {
+                SliderNumberField(
+                    value = offset.xPercent,
+                    range = SongNumberOffset.PERCENT_RANGE,
+                    onValueChange = { v ->
+                        val next = offset.copy(xPercent = v)
+                        update { if (lowerThird) it.copy(lowerThirdOffset = next) else it.copy(offset = next) }
+                    },
+                    fieldWidth = NUMBER_OFFSET_FIELD_WIDTH,
+                    modifier = Modifier.testTag("title_slide_number_offset_x"),
+                )
+            }
+            ControlColumn(stringResource(Res.string.song_number_offset_y), Modifier.weight(1f)) {
+                SliderNumberField(
+                    value = offset.yPercent,
+                    range = SongNumberOffset.PERCENT_RANGE,
+                    onValueChange = { v ->
+                        val next = offset.copy(yPercent = v)
+                        update { if (lowerThird) it.copy(lowerThirdOffset = next) else it.copy(offset = next) }
+                    },
+                    fieldWidth = NUMBER_OFFSET_FIELD_WIDTH,
+                    modifier = Modifier.testTag("title_slide_number_offset_y"),
+                )
+            }
+        }
+    }
 }
 
 /**

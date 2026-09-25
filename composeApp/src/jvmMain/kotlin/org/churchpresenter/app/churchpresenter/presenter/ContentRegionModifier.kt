@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.SongNumberOffset
 import org.churchpresenter.settings.utils.Constants
 import kotlin.math.roundToInt
@@ -44,6 +45,42 @@ internal fun Modifier.contentRegion(region: ContentRegion): Modifier {
 
             layout(constraints.maxWidth, constraints.maxHeight) {
                 placeable.place(xOffset.coerceIn(0, constraints.maxWidth - placeable.width), yOffset)
+            }
+        },
+    )
+}
+
+/**
+ * Places the element it wraps at [offset] within the frame, instead of wherever the flow put it.
+ *
+ * A no-op when [offset] is null, which is what every element defaults to and what keeps an
+ * untouched document drawing exactly as it did -- see [ElementOffset] for why that cannot be a
+ * pair of numbers instead.
+ *
+ * The element is measured at its natural size, not the frame's, because a child stretched to fill
+ * leaves no room to be moved through; a call site handing something to this drops its
+ * `fillMaxWidth()`. It reports the *frame's* size rather than the child's, so it belongs on a child
+ * of a `Box`, never of a `Column` or `Row`, where it would swallow the whole main axis.
+ *
+ * Every arithmetic guard here is a containment guarantee rather than defensive tidiness:
+ * `coerceIn(PERCENT_RANGE)` survives a hand-edited settings file, `coerceAtLeast(0)` handles an
+ * element larger than its frame (which then sits flush at the start, as overflow already does), and
+ * the final `coerceIn` makes leaving the frame arithmetically impossible at any configured value.
+ */
+internal fun Modifier.elementOffset(offset: ElementOffset?): Modifier {
+    if (offset == null) return this
+    return this.then(
+        Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+            val maxX = (constraints.maxWidth - placeable.width).coerceAtLeast(0)
+            val maxY = (constraints.maxHeight - placeable.height).coerceAtLeast(0)
+            val xPercent = offset.xPercent.coerceIn(ElementOffset.PERCENT_RANGE)
+            val yPercent = offset.yPercent.coerceIn(ElementOffset.PERCENT_RANGE)
+            val xOffset = (maxX * (xPercent / FULL_PERCENT)).roundToInt().coerceIn(0, maxX)
+            val yOffset = (maxY * (yPercent / FULL_PERCENT)).roundToInt().coerceIn(0, maxY)
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                placeable.place(xOffset, yOffset)
             }
         },
     )

@@ -83,7 +83,10 @@ internal fun SongSettings.shownForPreview(
  * differ in how those things are drawn, which is what the per-target profiles are for.
  */
 internal fun SongSettings.shownOnTitleSlide(element: SongStyleElement): Boolean? = when (element) {
-    SongStyleElement.NUMBER -> titleSlideShowSongNumber
+    // TITLE_SLIDE_NUMBER, not NUMBER: the lyric slides' number is not on this slide at all, and
+    // these two `when`s take an `else` branch, so leaving NUMBER here would have compiled and then
+    // silently detached the title slide's own Show switch from the element it governs.
+    SongStyleElement.TITLE_SLIDE_NUMBER -> titleSlideShowSongNumber
     SongStyleElement.TITLE -> titleSlideShowTitle
     SongStyleElement.AUTHOR -> titleSlideShowAuthor
     SongStyleElement.COMPOSER -> titleSlideShowComposer
@@ -95,7 +98,7 @@ internal fun SongSettings.shownOnTitleSlide(element: SongStyleElement): Boolean?
 /** The inverse of [shownOnTitleSlide]; a no-op for an element the title slide never draws. */
 internal fun SongSettings.withShownOnTitleSlide(element: SongStyleElement, on: Boolean): SongSettings =
     when (element) {
-        SongStyleElement.NUMBER -> copy(titleSlideShowSongNumber = on)
+        SongStyleElement.TITLE_SLIDE_NUMBER -> copy(titleSlideShowSongNumber = on)
         SongStyleElement.TITLE -> copy(titleSlideShowTitle = on)
         SongStyleElement.AUTHOR -> copy(titleSlideShowAuthor = on)
         SongStyleElement.COMPOSER -> copy(titleSlideShowComposer = on)

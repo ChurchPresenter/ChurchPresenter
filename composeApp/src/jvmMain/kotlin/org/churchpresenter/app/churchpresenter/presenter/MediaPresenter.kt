@@ -20,8 +20,15 @@ fun MediaPresenter(
     isVisible: Boolean = true,
     transitionAlpha: Float = 1f,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
-    /** Whether this output draws the subtitle overlay at all -- `ScreenAssignment.showSubtitles`. */
+    /** Whether this output draws the subtitle overlay at all -- `OutputProfile.showSubtitles`. */
     showSubtitles: Boolean = true,
+    /**
+     * The profile this output runs, which decides *which* subtitle tracks it draws.
+     *
+     * Blank means "no particular output" -- the settings preview, a test -- and every loaded track
+     * that is on is drawn, which is also what an unrouted track does on a real output.
+     */
+    profileId: String = "",
     mediaSettings: MediaSettings = MediaSettings(),
     /** How the video meets the output -- `AppSettings.mediaScaleMode`, through `contentScale`. */
     contentScale: ContentScale = ContentScale.Fit,
@@ -52,11 +59,14 @@ fun MediaPresenter(
             // eliminating the multiple-decoder jitter that occurred with per-window VideoPlayers.
             SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize(), contentScale = contentScale)
 
-            // Drawn per-output, unlike the shared decoded frame: this is what lets one output
-            // hide the subtitle overlay ([showSubtitles]) while another keeps showing it.
+            // Drawn per-output, unlike the shared decoded frame: this is what lets one output hide
+            // the subtitle overlay ([showSubtitles]) while another keeps showing it, and what lets
+            // two outputs draw different tracks of the same video. An embedded track cannot do
+            // either -- VLC burns it into the one frame they all share.
             if (showSubtitles) {
-                viewModel.activeSubtitleCue?.let { cue ->
-                    SubtitleOverlay(cue = cue, mediaSettings = mediaSettings, outputRole = outputRole)
+                val cues = viewModel.activeSubtitleCues(profileId)
+                if (cues.isNotEmpty()) {
+                    SubtitleOverlay(cues = cues, mediaSettings = mediaSettings, outputRole = outputRole)
                 }
             }
         }

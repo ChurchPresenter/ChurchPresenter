@@ -24,7 +24,11 @@ import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.ElementOffset
+import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
@@ -65,6 +69,9 @@ import kotlin.test.Test
  * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half, and
  * the title slide's states are `PresenterTitleSlideScreenshotTest`.
  */
+// One state per test and one picture per state, so the class grows with the states the presenter
+// has rather than with any complexity of its own -- the same reason its portrait twin carries this.
+@Suppress("LargeClass")
 class PresenterFullScreenScreenshotTest {
 
     /** A 1080p output. */
@@ -78,6 +85,95 @@ class PresenterFullScreenScreenshotTest {
 
     private fun ComposeUiTest.capture(name: String) {
         onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+    }
+
+    // ── The backdrop and the outline, on a real output ──────────────────────────────────────────
+    //
+    // Neither had a picture anywhere before these. `TextBackdrop` appeared in exactly one committed
+    // image -- the Announcements *tab's* preview -- and `TextOutline` in none at all, so the band
+    // behind a verse, the box around it and the stroke on its glyphs were only ever reviewed as
+    // geometry assertions. They are also the two features most likely to break quietly on a
+    // fit-scale change, since both add visual size the fit search does not measure.
+
+    @Test
+    fun `a verse on a line backdrop`() = shoot("bible_text_backdrop") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = withBibleTextBackdrop(
+                // Not black: the presenter's own background is black, so a black band is a picture
+                // of nothing and would have reviewed as "the backdrop does not draw".
+                TextBackdrop(
+                    lineBackground = true,
+                    lineBackgroundColor = "#1B3A6B",
+                    lineBackgroundOpacity = 85,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `a verse in a bordered box`() = shoot("bible_text_backdrop_border") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = withBibleTextBackdrop(
+                centred = true,
+                backdrop = TextBackdrop(
+                    border = true,
+                    borderColor = "#FFD54F",
+                    borderWidth = 6,
+                    borderPadding = 18,
+                    borderRadius = 12,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `a verse with an outline on its glyphs`() = shoot("bible_text_outline") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = withBibleTextOutline(TextOutline(width = 6, color = "#101820")),
+        )
+    }
+
+    @Test
+    fun `lyrics with an outline on their glyphs`() = shoot("song_lyrics_outline") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    outlines = SongSettings().outlines.copy(lyrics = TextOutline(width = 6, color = "#101820")),
+                ),
+            ),
+        )
+    }
+
+    // ── The section label (#613) ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the section label above the lyrics`() = shoot("song_section_label") {
+        SongPresenter(lyricSection = song(), appSettings = withSectionLabel(SongSectionLabel(enabled = true)))
+    }
+
+    @Test
+    fun `the section label styled and positioned`() = shoot("song_section_label_styled") {
+        // Bold, stroked, left-aligned and moved off the top -- none of which it could do before
+        // #613, when it drew with a hard-coded plain style and sat centred at the top of the column.
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = withSectionLabel(
+                SongSectionLabel(
+                    enabled = true,
+                    fontSize = 44,
+                    color = "#FFD54F",
+                    bold = true,
+                    italic = true,
+                    outline = TextOutline(width = 4, color = "#101820"),
+                    horizontalAlignment = Constants.LEFT,
+                    offset = ElementOffset(xPercent = 0, yPercent = 12),
+                ),
+            ),
+        )
     }
 
     // ── Songs: what is on the slide ─────────────────────────────────────────────────────────────
@@ -993,6 +1089,30 @@ class PresenterFullScreenScreenshotTest {
     fun `a canvas scene`() = shoot("scene") { ScenePresenter(scene = scene()) }
 
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
+
+    /** The Bible stack with [backdrop] behind the primary's verse text on a full screen. */
+    private fun withBibleTextBackdrop(backdrop: TextBackdrop, centred: Boolean = false) = AppSettings(
+        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
+            listOf(
+                BibleTranslationSettings(
+                    fileName = KJV,
+                    textBackdrop = backdrop,
+                    textHorizontalAlignment = if (centred) Constants.CENTER else Constants.LEFT,
+                ),
+            ),
+        ),
+    )
+
+    /** The same, for the stroke around the verse's glyphs. */
+    private fun withBibleTextOutline(outline: TextOutline) = AppSettings(
+        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
+            listOf(BibleTranslationSettings(fileName = KJV, textOutline = outline)),
+        ),
+    )
+
+    private fun withSectionLabel(label: SongSectionLabel) = AppSettings(
+        songSettings = SongSettings(layoutExtras = SongSettings().layoutExtras.copy(sectionLabel = label)),
+    )
 
     private fun song(
         header: String = "[Verse 1]",

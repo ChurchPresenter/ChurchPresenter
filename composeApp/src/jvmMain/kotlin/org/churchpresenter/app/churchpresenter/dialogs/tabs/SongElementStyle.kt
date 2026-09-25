@@ -13,7 +13,25 @@ import org.churchpresenter.settings.SongTextStyle
  * own view of the tab. The number and the title are on both: the title slide draws them with the
  * same profiles the lyric slides do.
  */
-internal enum class SongStyleElement { NUMBER, TITLE, LYRICS, LOOK_AHEAD, NEXT_SECTION, AUTHOR, COMPOSER, CCLI, TEMPO }
+internal enum class SongStyleElement {
+    NUMBER,
+    TITLE,
+    LYRICS,
+    LOOK_AHEAD,
+    NEXT_SECTION,
+    AUTHOR,
+    COMPOSER,
+    CCLI,
+    TEMPO,
+
+    /**
+     * The song number as the **title slide** draws it, which is no longer what [NUMBER] draws.
+     *
+     * The two shared one profile, so a number in the top-left of every lyric slide and at the
+     * bottom-left of the title slide was not expressible. [NUMBER] is the lyric slides' alone now.
+     */
+    TITLE_SLIDE_NUMBER,
+}
 
 /** Which output the styling being edited belongs to. */
 internal enum class SongStyleTarget { FULL_SCREEN, LOWER_THIRD }
@@ -53,7 +71,7 @@ internal val SongStyleElement.isCredit: Boolean
 
 /** What the title slide draws, in the order it draws them; the number's place depends on a setting. */
 internal val TITLE_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
-    SongStyleElement.NUMBER,
+    SongStyleElement.TITLE_SLIDE_NUMBER,
     SongStyleElement.TITLE,
     SongStyleElement.AUTHOR,
     SongStyleElement.COMPOSER,
@@ -97,6 +115,12 @@ internal fun SongSettings.elementStyle(
         creditStyle(element, target).toElementStyle(
             titleFont = if (target.isLowerThird) titleLowerThirdFontType else titleFontType,
         )
+    // Stored as a credit-shaped record for the reason `SongTitleSlideNumber` gives: seventeen
+    // fields on two outputs is thirty-four, against the two slots `SongSettings` has left.
+    SongStyleElement.TITLE_SLIDE_NUMBER ->
+        layoutExtras.titleSlideNumber.styleFor(target.isLowerThird).toElementStyle(
+            titleFont = if (target.isLowerThird) titleLowerThirdFontType else titleFontType,
+        )
 }
 
 /**
@@ -121,6 +145,16 @@ internal fun SongSettings.withElementStyle(
         if (target.isLowerThird) withNextSectionLowerThird(style) else withNextSection(style)
     SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO ->
         withCreditStyle(element, target, style.toCreditStyle())
+    SongStyleElement.TITLE_SLIDE_NUMBER -> {
+        val number = layoutExtras.titleSlideNumber
+        val credit = style.toCreditStyle()
+        copy(
+            layoutExtras = layoutExtras.copy(
+                titleSlideNumber = if (target.isLowerThird) number.copy(lowerThird = credit)
+                                   else number.copy(fullScreen = credit),
+            ),
+        )
+    }
 }
 
 /**

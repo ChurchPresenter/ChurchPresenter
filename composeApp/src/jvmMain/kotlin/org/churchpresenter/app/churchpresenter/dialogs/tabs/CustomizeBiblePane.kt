@@ -9,6 +9,8 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.utils.Constants
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.customize_group_reference
+import churchpresenter.composeapp.generated.resources.customize_group_verse_text
 import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
 import org.jetbrains.compose.resources.stringResource
 
@@ -146,5 +148,28 @@ internal fun BibleCustomizePane(
                 onCheckedChange = { v -> updateEntry { it.copy(showAbbreviation = v) } },
             )
         }
+        // Where this element sits, once the operator takes it out of the reference/verse stack.
+        // Full screen only, the scope the content region has: a band's layout is band-relative
+        // throughout, and its two hand-rolled layouts do not offer this.
+        if (!lowerThird) {
+            val shownStyle = t.elementStyle(styleElement, target)
+            ElementOffsetStripRow(
+                label = stringResource(
+                    if (styleElement == BibleStyleElement.REFERENCE) Res.string.customize_group_reference
+                    else Res.string.customize_group_verse_text
+                ),
+                offset = shownStyle.offset,
+                tagPrefix = bibleOffsetTag(styleElement),
+            ) { v ->
+                updateEntry {
+                    val next = it.elementStyle(styleElement, target).copy(offset = v)
+                    it.withElementStyle(styleElement, target, next)
+                }
+            }
+        }
     }
 }
+
+/** Test handle for one Bible element's positioning switch. */
+internal fun bibleOffsetTag(element: BibleStyleElement): String =
+    if (element == BibleStyleElement.REFERENCE) "bible_reference_offset" else "bible_text_offset"

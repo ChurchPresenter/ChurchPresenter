@@ -5,6 +5,7 @@ import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.sync.CatalogSync
 import org.churchpresenter.calendar.sync.CatalogSyncStore
 import org.churchpresenter.calendar.sync.Envelope
+import org.churchpresenter.calendar.sync.PushedStateStore
 import org.churchpresenter.calendar.sync.RelayClient
 import org.churchpresenter.calendar.sync.RelayFailure
 import org.churchpresenter.calendar.sync.RelayTransport
@@ -104,6 +105,7 @@ internal class CalendarRelayAccess(
         installId = installId(),
         songs = ::songs,
         onSaved = onSaved,
+        pushed = PushedStateStore(folder),
     )
 
     /** The songbooks kept on the relay for the phones -- pushed on its own, after a round. */

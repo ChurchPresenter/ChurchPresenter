@@ -190,12 +190,15 @@ fun LivePreviewPanel(
             for (entry in entries) entry.content(Modifier.fillMaxWidth(), false)
         }
 
-        // Media controls — visible when presenting and media is loaded.
-        // Controls disappear only via Clear Display / Escape (which reset presentingMode to NONE).
+        // Media controls — for the clip this panel can still do something with; see
+        // [mediaTransportUseful], which is where the rule and its reasoning live.
         val presentingMode by presenterManager.presentingMode
-        if (presentingMode != Presenting.NONE
-            && mediaViewModel != null && mediaViewModel.isLoaded
-        ) {
+        val transportUseful = mediaViewModel != null && mediaTransportUseful(
+            isLoaded = mediaViewModel.isLoaded,
+            isPlaying = mediaViewModel.isPlaying,
+            presentingMode = presentingMode,
+        )
+        if (transportUseful && mediaViewModel != null) {
             MediaPreviewControls(
                     isPlaying = mediaViewModel.isPlaying,
                     duration = mediaViewModel.duration,
@@ -207,6 +210,23 @@ fun LivePreviewPanel(
         }
     }
 }
+
+/**
+ * Whether the panel's transport row can still do anything for the loaded clip.
+ *
+ * Two cases, and the second is why this is not simply "media is live": audio keeps playing while the
+ * operator shows a song or a verse, and its transport has to stay reachable.
+ *
+ *  * the media is what is on screen, playing or paused; or
+ *  * it is playing behind whatever is.
+ *
+ * A clip that has **finished** is neither. `MediaViewModel.markFinished` leaves it loaded, rewound to
+ * 0 and not playing, so the old rule -- anything live at all, plus a loaded clip -- brought the seek
+ * bar back the moment the next song went live, showing 0:00 of a video that was over and seekable to
+ * nowhere.
+ */
+internal fun mediaTransportUseful(isLoaded: Boolean, isPlaying: Boolean, presentingMode: Presenting): Boolean =
+    isLoaded && (presentingMode == Presenting.MEDIA || isPlaying)
 
 /** Every output the panel can show, in screen, Browser Source, NDI order, each drawn by its own preview. */
 @Composable
@@ -589,9 +609,16 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
+                                    // The preview is this output, so it takes the same three
+                                    // subtitle decisions the real one does. It used to pass none
+                                    // of them, and so always drew every track in default styling
+                                    // however the profile was configured.
                                     MediaPresenter(
                                         modifier = Modifier.fillMaxSize(),
                                         transitionAlpha = mediaTransitionAlpha,
+                                        showSubtitles = profile.showSubtitles,
+                                        profileId = profile.id,
+                                        mediaSettings = outputSettings.mediaSettings,
                                         contentScale = outputSettings.mediaScaleMode.contentScale,
                                     )
                                 }

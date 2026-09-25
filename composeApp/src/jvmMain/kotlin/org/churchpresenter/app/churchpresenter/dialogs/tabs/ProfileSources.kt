@@ -60,6 +60,39 @@ internal fun withBiblePositions(profile: OutputProfile, positions: List<Int>, st
     return profile.copy(bibleMode = mode, bibleTranslations = stored)
 }
 
+/**
+ * The song language slots a profile draws, in the order it draws them -- nothing while songs are
+ * off.
+ *
+ * The same empty-list-means-all sentinel the Bible uses, and the same reading `songLanguageSelection`
+ * already gave it: `songTranslations` has always been an ordered list, it simply had no widget that
+ * could write an order.
+ */
+internal fun shownSongPositions(profile: OutputProfile, slotCount: Int): List<Int> {
+    if (!profile.showSongs) return emptyList()
+    val stored = profile.songTranslations.filter { it in 0 until slotCount }.distinct()
+    return stored.ifEmpty { (0 until slotCount).toList() }
+}
+
+/**
+ * [profile] drawing exactly [positions] of a song's languages, in that order.
+ *
+ * Mirrors [withBiblePositions]: nothing left switches songs off rather than storing an empty list,
+ * because an empty list is read as "all of them", and every slot in slot order is stored as that
+ * empty list.
+ */
+internal fun withSongPositions(profile: OutputProfile, positions: List<Int>, slotCount: Int): OutputProfile {
+    if (positions.isEmpty()) {
+        return profile.copy(
+            songMode = Constants.SONG_LANG_OFF,
+            songTranslations = emptyList(),
+            songLookAhead = false,
+        )
+    }
+    val stored = if (positions == (0 until slotCount).toList()) emptyList() else positions
+    return profile.copy(songMode = Constants.SONG_LANG_BOTH, songTranslations = stored)
+}
+
 /** [list] with the entries at [from] and [to] swapped, or unchanged when either is out of range. */
 internal fun <T> swapped(list: List<T>, from: Int, to: Int): List<T> {
     if (from !in list.indices || to !in list.indices) return list

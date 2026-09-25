@@ -792,7 +792,6 @@
     <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
     <string name="tooltip_stt_settings">STT Display Settings</string>
     <string name="tooltip_dictionary_settings">Dictionary Display Settings</string>
-    <string name="tooltip_media_subtitle_settings">Subtitle Display Settings</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
     <string name="tooltip_add_label">Add Label</string>
@@ -849,8 +848,15 @@
     <string name="loop">Loop</string>
     <string name="loop_on">Loop On</string>
     <string name="loop_off">Loop Off</string>
+    <!-- Superseded by the four below, which name the content and the reach. Kept because all 34
+         locale files carry translations for them and LocaleStringsTest requires every translated key
+         to exist here; the translations are managed separately and are not ours to delete. -->
     <string name="output_scale_mode">Scale: %1$s</string>
     <string name="output_scale_mode_mixed">Scale differs by profile — click to set every profile to %1$s</string>
+    <string name="picture_scale_mode_all">Picture scale on every profile: %1$s</string>
+    <string name="media_scale_mode_all">Video scale on every profile: %1$s</string>
+    <string name="picture_scale_mode_mixed_all">Picture scale differs by profile — click to set every profile to %1$s</string>
+    <string name="media_scale_mode_mixed_all">Video scale differs by profile — click to set every profile to %1$s</string>
     <string name="transition_duration">Transition Duration:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -1023,6 +1029,9 @@
     <string name="content_region">Content Region</string>
     <string name="content_region_width">Width %</string>
     <string name="content_region_x_offset">X Offset %</string>
+    <string name="element_offset_enabled">Position</string>
+    <string name="element_offset_x">X %</string>
+    <string name="element_offset_y">Y %</string>
     <string name="content_region_y_offset">Y Offset %</string>
     <string name="end_of_song_spacing">End-of-Song (*) Spacing</string>
     <string name="auto_fit">Auto</string>
@@ -1159,6 +1168,9 @@
     <string name="output_profile_songs_off">Songs off</string>
     <string name="output_profile_bible_none_loaded">No Bibles loaded — add them on the Bible tab</string>
     <string name="output_profile_add_translation">Add translation</string>
+    <string name="output_profile_song_order_header">Languages · shown in this order</string>
+    <string name="output_profile_song_count">%1$d of %2$d languages</string>
+    <string name="output_profile_add_language">Add language</string>
     <string name="output_profile_remove_translation">Remove translation</string>
     <string name="output_profile_move_up">Move up</string>
     <string name="output_profile_move_down">Move down</string>
@@ -1428,12 +1440,20 @@
     <string name="media_mute">Mute</string>
     <string name="media_unmute">Unmute</string>
     <string name="media_loop_count">Loops</string>
+    <!-- Unused since the subtitle look moved onto the output profiles, but kept: all 34 locale
+         files carry translations for both, and `LocaleStringsTest` requires every translated key to
+         exist here. Deleting an English string whose translations remain is what breaks it. -->
+    <string name="media_subtitle_settings">Subtitle Settings</string>
+    <string name="tooltip_media_subtitle_settings">Subtitle Display Settings</string>
     <string name="media_subtitles">Subtitles</string>
     <string name="media_subtitles_off">Off</string>
     <string name="media_subtitles_load_file">Load subtitle file…</string>
+    <string name="media_subtitles_show_on">Show on</string>
+    <string name="media_subtitles_all_outputs">All outputs</string>
+    <string name="media_subtitles_output_count">%1$d outputs</string>
+    <string name="media_subtitles_embedded">In this video</string>
     <string name="media_subtitles_files">Subtitle files</string>
     <string name="media_loop_count_tooltip">How many times to repeat (0 = forever)</string>
-    <string name="media_subtitle_settings">Subtitle Settings</string>
     <string name="media_subtitle_settings_hint">Applies to SRT/WebVTT subtitle files, which the app draws itself. An embedded track or an ASS/SSA/SUB file keeps VLC's own look.</string>
     <string name="media_subtitle_text_color">Text Color</string>
     <string name="media_subtitle_background_color">Background Color</string>
