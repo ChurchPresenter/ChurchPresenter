@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.diagnostics.CrashReporter
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -974,58 +975,7 @@ fun SoftwareVideoPlayer(
         }
     }
 
-    // Load media when the URL changes, and again on every loop restart: once VLC has reached the
-    // end of a file it is in the Ended state, where setTime()/play() alone will not start it over.
-    //
-    // Keyed on `vlcSubtitleReloadVersion` and NOT on `subtitleUrl`: choosing a subtitle used to
-    // restart the video from zero and blank every output, and for an SRT/WebVTT -- the common case,
-    // which the app draws itself -- that reload changed nothing about this call. Only a format the
-    // parser does not read needs the media opened again, and that is the one thing that bumps the
-    // version. Where a reload is unavoidable, `resumeAtMs` below puts playback back where it was.
-    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion, viewModel.vlcSubtitleReloadVersion) {
-        val url = viewModel.mediaUrl
-        // A reload forced by a subtitle format VLC has to burn in itself must not lose the
-        // operator's place mid-service; a new file and a loop restart both begin at zero.
-        val sameLoad = url == loadedUrl.value && viewModel.loopRestartVersion == loadedLoopVersion.intValue
-        val resumeAtMs = if (sameLoad) viewModel.currentPosition.coerceAtLeast(0L) else 0L
-        loadedUrl.value = url
-        loadedLoopVersion.intValue = viewModel.loopRestartVersion
-        firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
-        SharedVideoOutput.frame.value = null  // clear stale frame while new media loads
-        mp.controls().stop()
-        if (url.isBlank()) return@LaunchedEffect
-
-        val mrl = try {
-            val f = File(url)
-            if (f.exists()) f.absolutePath else url
-        } catch (_: Exception) { url }
-
-        // Stay muted until playback is actually requested. Loading always briefly starts the
-        // VLC pipeline to capture a first frame (see playing() below), and without this guard
-        // that grace window would be audible even though the video is meant to load paused.
-        //
-        // Muted, not silenced by volume: the real volume is set here too, so libVLC's audio
-        // output device is asked to exist -- and negotiate with the OS -- during this load
-        // grace window rather than for the first time at Go Live. That negotiation is the
-        // asynchronous part the comment below already flags; setting volume 0 at load and only
-        // setting the real volume once Go Live is pressed meant Go Live was the first moment
-        // that device was ever actually needed, which is a plausible stall of its own layered
-        // on top of decode ramping up -- the isPlaying effect below only ever lifts a mute now,
-        // it does not ask for a device for the first time.
-        if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
-        mp.audio().setMute(!audioEnabled || !viewModel.isPlaying)
-
-        // :codec=avcodec forces FFmpeg software decoding, bypassing VideoToolbox.
-        // Required for Dolby Vision HEVC / 10-bit files where VideoToolbox outputs zero-copy
-        // GPU CVPX buffers that the callback video surface cannot read (black frame).
-        // :avcodec-fast reduces per-frame overhead; :clock-jitter=0 tightens frame scheduling.
-        // When the caller has determined this instance must never produce audio (e.g. a
-        // background decoder mounted only to keep rendering a paused frame), :no-audio
-        // disables the audio track outright.
-        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl, viewModel.subtitleCues.isNotEmpty())
-        // Auto-pause is handled by the playing() event listener above.
-        if (resumeAtMs > 0) mp.controls().setTime(resumeAtMs)
-    }
+    SoftwareMediaLoad(viewModel, mp, audioEnabled, firstFrameCaptured, loadedUrl, loadedLoopVersion)
 
     SubtitleTrackSync(viewModel, mp, gate)
 
@@ -1088,5 +1038,72 @@ fun SoftwareVideoPlayer(
             contentScale = ContentScale.Fit,
             modifier = modifier
         )
+    }
+}
+
+/**
+ * Opens the media in VLC, and opens it again only when it genuinely must be reopened.
+ *
+ * Loads when the URL changes, and again on every loop restart: once VLC has reached the end of a
+ * file it is in the Ended state, where setTime()/play() alone will not start it over.
+ *
+ * Keyed on `vlcSubtitleReloadVersion` and NOT on `subtitleUrl`: choosing a subtitle used to
+ * restart the video from zero and blank every output, and for an SRT/WebVTT -- the common case,
+ * which the app draws itself -- that reload changed nothing about this call. Only a format the
+ * parser does not read needs the media opened again, and that is the one thing that bumps the
+ * version. Where a reload is unavoidable, `resumeAtMs` below puts playback back where it was.
+ */
+@Composable
+private fun SoftwareMediaLoad(
+    viewModel: MediaViewModel,
+    mp: MediaPlayer,
+    audioEnabled: Boolean,
+    firstFrameCaptured: MutableState<Boolean>,
+    loadedUrl: MutableState<String>,
+    loadedLoopVersion: MutableIntState,
+) {
+    LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion, viewModel.vlcSubtitleReloadVersion) {
+        val url = viewModel.mediaUrl
+        // A reload forced by a subtitle format VLC has to burn in itself must not lose the
+        // operator's place mid-service; a new file and a loop restart both begin at zero.
+        val sameLoad = url == loadedUrl.value && viewModel.loopRestartVersion == loadedLoopVersion.intValue
+        val resumeAtMs = if (sameLoad) viewModel.currentPosition.coerceAtLeast(0L) else 0L
+        loadedUrl.value = url
+        loadedLoopVersion.intValue = viewModel.loopRestartVersion
+        firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
+        SharedVideoOutput.frame.value = null  // clear stale frame while new media loads
+        mp.controls().stop()
+        if (url.isBlank()) return@LaunchedEffect
+
+        val mrl = try {
+            val f = File(url)
+            if (f.exists()) f.absolutePath else url
+        } catch (_: Exception) { url }
+
+        // Stay muted until playback is actually requested. Loading always briefly starts the
+        // VLC pipeline to capture a first frame (see playing() below), and without this guard
+        // that grace window would be audible even though the video is meant to load paused.
+        //
+        // Muted, not silenced by volume: the real volume is set here too, so libVLC's audio
+        // output device is asked to exist -- and negotiate with the OS -- during this load
+        // grace window rather than for the first time at Go Live. That negotiation is the
+        // asynchronous part the comment below already flags; setting volume 0 at load and only
+        // setting the real volume once Go Live is pressed meant Go Live was the first moment
+        // that device was ever actually needed, which is a plausible stall of its own layered
+        // on top of decode ramping up -- the isPlaying effect below only ever lifts a mute now,
+        // it does not ask for a device for the first time.
+        if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * VOLUME_PERCENT_SCALE).toInt())
+        mp.audio().setMute(!audioEnabled || !viewModel.isPlaying)
+
+        // :codec=avcodec forces FFmpeg software decoding, bypassing VideoToolbox.
+        // Required for Dolby Vision HEVC / 10-bit files where VideoToolbox outputs zero-copy
+        // GPU CVPX buffers that the callback video surface cannot read (black frame).
+        // :avcodec-fast reduces per-frame overhead; :clock-jitter=0 tightens frame scheduling.
+        // When the caller has determined this instance must never produce audio (e.g. a
+        // background decoder mounted only to keep rendering a paused frame), :no-audio
+        // disables the audio track outright.
+        mp.playSoftware(mrl, audioEnabled, viewModel.subtitleUrl, viewModel.subtitleCues.isNotEmpty())
+        // Auto-pause is handled by the playing() event listener above.
+        if (resumeAtMs > 0) mp.controls().setTime(resumeAtMs)
     }
 }

@@ -1159,6 +1159,9 @@
     <string name="output_profile_songs_off">Songs off</string>
     <string name="output_profile_bible_none_loaded">No Bibles loaded — add them on the Bible tab</string>
     <string name="output_profile_add_translation">Add translation</string>
+    <string name="output_profile_song_order_header">Languages · shown in this order</string>
+    <string name="output_profile_song_count">%1$d of %2$d languages</string>
+    <string name="output_profile_add_language">Add language</string>
     <string name="output_profile_remove_translation">Remove translation</string>
     <string name="output_profile_move_up">Move up</string>
     <string name="output_profile_move_down">Move down</string>

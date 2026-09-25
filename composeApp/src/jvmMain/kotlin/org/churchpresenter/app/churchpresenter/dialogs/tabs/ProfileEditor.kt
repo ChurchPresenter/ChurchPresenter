@@ -26,11 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.content_song_languages_all_selected
-import churchpresenter.composeapp.generated.resources.content_song_languages_enabled
-import churchpresenter.composeapp.generated.resources.content_song_languages_footer
-import churchpresenter.composeapp.generated.resources.content_song_languages_header
-import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
@@ -41,7 +36,6 @@ import churchpresenter.composeapp.generated.resources.output_profile_delete_conf
 import churchpresenter.composeapp.generated.resources.output_profile_display_mode
 import churchpresenter.composeapp.generated.resources.output_profile_nothing_to_style
 import churchpresenter.composeapp.generated.resources.output_profile_scale
-import churchpresenter.composeapp.generated.resources.output_profile_songs_off
 import churchpresenter.composeapp.generated.resources.output_profile_sources
 import churchpresenter.composeapp.generated.resources.output_profile_style
 import churchpresenter.composeapp.generated.resources.song_language_fourth
@@ -244,7 +238,12 @@ private fun ProfileSetup(
                     onProfileChange = onProfileChange,
                     modifier = Modifier.weight(1f),
                 )
-                SongSourcePicker(settings, profile, onProfileChange, Modifier.weight(1f))
+                SongSourcePicker(
+                    profile = profile,
+                    languages = songLanguageChoices(settings),
+                    onProfileChange = onProfileChange,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
         // Only for what this profile shows: a screen that never draws a picture has nothing to fit.
@@ -271,42 +270,6 @@ private fun SetupRow(caption: String, control: @Composable () -> Unit) {
         )
         control()
     }
-}
-
-/** The song languages a profile draws -- the four-slot checklist, in the source field's dress. */
-@Composable
-private fun SongSourcePicker(
-    settings: AppSettings,
-    profile: OutputProfile,
-    onProfileChange: (OutputProfile) -> Unit,
-    modifier: Modifier,
-) {
-    ContentTranslationCell(
-        modifier = modifier,
-        label = stringResource(Res.string.customize_songs),
-        tags = TranslationPickerTags.SONG,
-        headerText = stringResource(Res.string.content_song_languages_header),
-        enabledFormat = stringResource(Res.string.content_song_languages_enabled),
-        footerText = stringResource(Res.string.content_song_languages_footer),
-        allSelectedText = stringResource(Res.string.content_song_languages_all_selected),
-        // Four single digits fit where the Bible's "+N more" count goes, so the field names the
-        // languages themselves rather than making the operator open the menu to find out.
-        listSelectedCodes = true,
-        translations = songLanguageChoices(settings),
-        showing = profile.showSongs,
-        selected = profile.songTranslations,
-        onShowingChange = { on ->
-            onProfileChange(
-                if (on) profile.copy(songMode = Constants.SONG_LANG_BOTH)
-                else profile.copy(songMode = Constants.SONG_LANG_OFF, songLookAhead = false),
-            )
-        },
-        onSelectedChange = { next -> onProfileChange(profile.copy(songTranslations = next)) },
-        onShowAndSelect = { next ->
-            onProfileChange(profile.copy(songMode = Constants.SONG_LANG_BOTH, songTranslations = next))
-        },
-        offText = stringResource(Res.string.output_profile_songs_off),
-    )
 }
 
 /**

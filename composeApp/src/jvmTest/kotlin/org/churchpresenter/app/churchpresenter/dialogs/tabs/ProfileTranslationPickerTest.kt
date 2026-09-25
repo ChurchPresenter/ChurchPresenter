@@ -32,8 +32,9 @@ import kotlin.test.assertEquals
  *    the current stack is ignored rather than counted, and a selection left with none of its
  *    positions surviving shows nothing rather than reading as the empty "all of them".
  *
- * The Bible source is an ordered list -- remove, add back, reorder -- rather than a checklist, since
- * a profile can put its translations in its own order; the song languages keep their checklist.
+ * Both sources are the same ordered list -- remove, add back, reorder -- rather than a checklist,
+ * since a profile draws them in its own order. The song languages were a checklist until #604: the
+ * order was always honoured by `songLanguageSelection`, but every write went through `.sorted()`.
  * Controls are addressed by test tag: the rows live in a popup, and their captions repeat.
  */
 class ProfileTranslationPickerTest {
@@ -146,13 +147,25 @@ class ProfileTranslationPickerTest {
         }
     }
 
+    // ── The song-language picker, which is the same widget over the language slots ──────────────
+
+    private fun SkikoComposeUiTest.openSongPicker() {
+        onNodeWithTag(SONG_SOURCE_TRIGGER_TAG).performClick()
+        waitForIdle()
+    }
+
+    /** Removes the language drawn in [slot] -- a position in the profile's order, not slot order. */
+    private fun SkikoComposeUiTest.removeSongSlot(slot: Int) {
+        onNode(hasContentDescription("Remove translation") and hasAnyAncestor(hasTestTag(songOrderRowTag(slot))))
+            .performClick()
+        waitForIdle()
+    }
+
     @Test
     fun `the song-language picker is a second, independent one`() {
         profilesTab(threeTranslations()) { get ->
-            onNodeWithTag(TranslationPickerTags.SONG.trigger).performClick()
-            waitForIdle()
-            onNodeWithTag(TranslationPickerTags.SONG.master).performClick()
-            waitForIdle()
+            openSongPicker()
+            repeat(MAX_SONG_LANGUAGES) { removeSongSlot(0) }
 
             assertEquals(Constants.SONG_LANG_OFF, get().profile().songMode, "songs went off")
             assertEquals(
@@ -163,39 +176,27 @@ class ProfileTranslationPickerTest {
         }
     }
 
-    // ── The song-language picker, which writes the same way ─────────────────────────────────────
-
-    private fun SkikoComposeUiTest.openSongPicker() {
-        onNodeWithTag(TranslationPickerTags.SONG.trigger).performClick()
-        waitForIdle()
-    }
-
-    private fun SkikoComposeUiTest.toggleLanguage(index: Int) {
-        onNodeWithTag(TranslationPickerTags.SONG.row(index)).performClick()
-        waitForIdle()
-    }
-
     @Test
-    fun `unticking a language narrows the profile's song selection`() {
+    fun `removing a language narrows the profile's song selection`() {
         profilesTab(threeTranslations()) { get ->
             openSongPicker()
             assertEquals(emptyList(), get().profile().songTranslations, "empty means all of them")
 
-            toggleLanguage(0)
+            removeSongSlot(0)
 
             assertEquals(
                 listOf(1, 2, 3),
                 get().profile().songTranslations,
-                "the unticked language is gone from the selection",
+                "the removed language is gone from the selection",
             )
         }
     }
 
     @Test
-    fun `unticking every language switches songs off`() {
+    fun `removing every language switches songs off`() {
         profilesTab(threeTranslations()) { get ->
             openSongPicker()
-            repeat(MAX_SONG_LANGUAGES) { toggleLanguage(it) }
+            repeat(MAX_SONG_LANGUAGES) { removeSongSlot(0) }
 
             // The same normalisation the Bible picker uses: showing none of them is a mode, not an
             // empty selection, because an empty selection reads back as "all".
@@ -204,16 +205,33 @@ class ProfileTranslationPickerTest {
     }
 
     @Test
-    fun `ticking one back on switches songs on with just that one`() {
+    fun `adding one back switches songs on with just that one`() {
         profilesTab(threeTranslations()) { get ->
             openSongPicker()
-            repeat(MAX_SONG_LANGUAGES) { toggleLanguage(it) }
+            repeat(MAX_SONG_LANGUAGES) { removeSongSlot(0) }
             assertEquals(Constants.SONG_LANG_OFF, get().profile().songMode)
 
-            toggleLanguage(2)
+            onNodeWithTag(songAddRowTag(2)).performClick()
+            waitForIdle()
 
             assertEquals(Constants.SONG_LANG_BOTH, get().profile().songMode, "songs come back on")
-            assertEquals(listOf(2), get().profile().songTranslations, "with only the one ticked")
+            assertEquals(listOf(2), get().profile().songTranslations, "with only the one that was added")
+        }
+    }
+
+    @Test
+    fun `a song language can be moved above the one before it`() {
+        profilesTab(threeTranslations()) { get ->
+            openSongPicker()
+
+            // The order is what the outputs draw in -- `songLanguageSelection` has always read
+            // `songTranslations` as a list, but the checklist this replaced sorted every write,
+            // so "the second language above the first" was unrepresentable.
+            onNode(hasContentDescription("Move up") and hasAnyAncestor(hasTestTag(songOrderRowTag(1))))
+                .performClick()
+            waitForIdle()
+
+            assertEquals(listOf(1, 0, 2, 3), get().profile().songTranslations)
         }
     }
 
