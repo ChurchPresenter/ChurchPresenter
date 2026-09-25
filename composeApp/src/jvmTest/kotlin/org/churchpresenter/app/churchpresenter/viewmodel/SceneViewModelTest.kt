@@ -155,23 +155,33 @@ class SceneViewModelTest {
     }
 
     @Test
-    fun `duplicating copies the sources under a new id and selects the copy`() {
+    fun `duplicating copies the sources under new ids and selects the copy`() {
         val vm = vmWithScene()
         vm.addSource(text("s1"))
         vm.addSource(text("s2"))
+        vm.selectSource("s1")
         val original = assertNotNull(vm.currentScene)
 
-        val copy = assertNotNull(vm.duplicateScene(original.id))
-        assertEquals("Scene 1 (copy)", copy.name)
+        val copy = assertNotNull(vm.duplicateScene(original.id, "Scene 1 copy"))
+        assertEquals("Scene 1 copy", copy.name)
         assertTrue(copy.id != original.id, "the duplicate needs its own id")
-        assertEquals(listOf("s1", "s2"), copy.sources.map { it.id }, "sources should come along")
+        assertEquals(
+            original.sources.map { it.withId("") },
+            copy.sources.map { it.withId("") },
+            "sources should come along unchanged"
+        )
+        assertTrue(
+            copy.sources.none { s -> original.sources.any { it.id == s.id } },
+            "a copied source must not share its id with the original's"
+        )
+        assertNull(vm.selectedSourceId.value, "the original's selection does not carry into the copy")
         assertEquals(copy.id, vm.currentSceneId.value, "the copy becomes current")
         assertEquals(2, vm.scenes.size)
     }
 
     @Test
     fun `duplicating an unknown scene returns null`() {
-        assertNull(vmWithScene().duplicateScene("no-such-scene"))
+        assertNull(vmWithScene().duplicateScene("no-such-scene", "Copy"))
     }
 
     @Test

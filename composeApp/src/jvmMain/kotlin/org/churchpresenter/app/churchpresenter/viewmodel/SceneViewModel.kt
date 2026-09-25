@@ -91,14 +91,21 @@ class SceneViewModel {
         updateScene(sceneId) { it.copy(name = newName) }
     }
 
-    fun duplicateScene(sceneId: String): Scene? {
+    /**
+     * Adds a copy of [sceneId] named [name] and makes it current. Every source gets a new id: caches
+     * such as the shared browser are keyed by source id, so a copy that kept them would share its
+     * layers with the original.
+     */
+    fun duplicateScene(sceneId: String, name: String): Scene? {
         val original = _scenes.find { it.id == sceneId } ?: return null
         val duplicate = original.copy(
             id = UUID.randomUUID().toString(),
-            name = "${original.name} (copy)"
+            name = name,
+            sources = original.sources.map { it.withId(UUID.randomUUID().toString()) }
         )
         _scenes.add(duplicate)
         _currentSceneId.value = duplicate.id
+        _selectedSourceId.value = null
         saveScenes()
         return duplicate
     }
