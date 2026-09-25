@@ -288,6 +288,30 @@ class InstanceLinkMessageTest {
     }
 
     @Test
+    fun `a connect timeout is rate-limited like a refused connection`() {
+        val c = clientWith(Recorder())
+
+        // One stored address produced 767 reports from three churches in seventeen days, every one
+        // of them a first failure: a follower left pointing at a machine that is switched off times
+        // out on every attempt, and `consecutiveFailures` restarts with the loop. Whether an absent
+        // primary refuses a connection or never answers it is a property of the network between the
+        // two machines, not of anything the operator did — so the two belong in the same bucket.
+        val kind = c.classifyConnectFailure(
+            ConnectTimeoutException("Connect timeout has expired [url=ws://host:8765/ws]"),
+        )
+
+        assertEquals("timeout", kind)
+        assertFalse(
+            c.shouldReportConnectFailure(kind, consecutiveFailures = 1),
+            "a primary that is simply switched off is not a defect to file",
+        )
+        assertTrue(
+            c.shouldReportConnectFailure(kind, consecutiveFailures = 10),
+            "a link that never comes up still has to surface",
+        )
+    }
+
+    @Test
     fun `an IOException that is not a ping timeout is still reported the first time`() {
         val c = clientWith(Recorder())
         val kind = c.classifyConnectFailure(IOException("broken pipe"))
@@ -335,7 +359,10 @@ class InstanceLinkMessageTest {
     fun `a failure that suggests a regression reports the first time`() {
         val c = clientWith(Recorder())
 
-        for (kind in listOf("timeout", "tls", "other")) {
+        // `timeout` used to be in this list and is not any more: a certificate that will not verify
+        // or an unrecognised exception says something is broken, where a connect that never answers
+        // says only that the machine at the other end is off. See the timeout test above.
+        for (kind in listOf("tls", "other")) {
             assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
         }
     }

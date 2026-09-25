@@ -150,6 +150,36 @@ class PresenterFullScreenScreenshotTest {
     }
 
     /**
+     * Lyrics on a plate with **one width for every line** — issue #643.
+     *
+     * Its own picture because it is the one backdrop setting that reaches song lyrics through a
+     * different painter from everything else. Lyrics are the app's only block whose lines are
+     * separate `Text`s, so each line used to be asked on its own what the widest line was and
+     * answered "me"; the setting did nothing here while working everywhere text is one `Text`.
+     * A ragged three-line verse is the sample, because a squared-off one says nothing.
+     */
+    @Test
+    fun `lyrics on a plate of one width`() = shoot("song_backdrop_uniform") {
+        SongPresenter(
+            lyricSection = song(lines = RAGGED_LINES),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    lyricsBackdrop = LINE_PLATE.copy(lineBackgroundUniformWidth = true),
+                ),
+            ),
+        )
+    }
+
+    /** The same verse with each band on its own line's width, so the pair reads as one statement. */
+    @Test
+    fun `lyrics on a plate per line`() = shoot("song_backdrop_ragged") {
+        SongPresenter(
+            lyricSection = song(lines = RAGGED_LINES),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
+        )
+    }
+
+    /**
      * The gap the backdrop-clipping audit named, and the reason it went unnoticed for so long: every
      * bordered picture in the set used the **default centred** alignment, and every left-aligned
      * picture carried no backdrop. No image anywhere paired the two — which is precisely the
@@ -1525,7 +1555,14 @@ class PresenterFullScreenScreenshotTest {
                 "me in the paths of righteousness for his name's sake."
 
         /** A band behind each line, hugging the text. */
-        val LINE_PLATE = TextBackdrop(
+/** Three lines, no two the same width — what "one width for every line" has to be judged on. */
+        val RAGGED_LINES = listOf(
+            "Amazing grace how sweet the sound",
+            "That saved",
+            "a wretch like me",
+        )
+
+                val LINE_PLATE = TextBackdrop(
             lineBackground = true,
             lineBackgroundColor = "#1B3A6B",
             lineBackgroundOpacity = 85,

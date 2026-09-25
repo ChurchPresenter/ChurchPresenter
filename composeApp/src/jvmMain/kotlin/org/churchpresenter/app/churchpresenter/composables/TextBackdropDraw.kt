@@ -44,16 +44,32 @@ internal fun DrawScope.drawTextBackdrop(
     layout: TextLayoutResult,
     backdrop: TextBackdrop,
     scale: Float = 1f,
+    /**
+     * The pair of edges "same width for every line" should use, in *this* layout's own coordinates.
+     *
+     * Null — the ordinary case — means the shared width is the union of this layout's own lines,
+     * which is the whole answer when the paragraph is one `Text`. Song lyrics are not: they are laid
+     * out a line at a time so each can carry its own alignment, chords and look-ahead styling, so
+     * every line arrives here as a layout of exactly one line whose widest line is itself. The
+     * setting could therefore never do anything there. Only [TextBlockBackdrop] can see the whole
+     * block, so it works the shared pair out and passes it down.
+     */
+    sharedExtent: Pair<Float, Float>? = null,
 ) {
     if (backdrop.isEmpty || layout.lineCount == 0) return
     if (backdrop.lineBackground && !backdrop.border) {
-        drawLineBands(layout, backdrop, scale)
+        drawLineBands(layout, backdrop, scale, sharedExtent)
     } else {
         layout.drawnTextBounds()?.let { drawBlockBacking(it, backdrop, scale) }
     }
 }
 
-private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBackdrop, scale: Float) {
+private fun DrawScope.drawLineBands(
+    layout: TextLayoutResult,
+    backdrop: TextBackdrop,
+    scale: Float,
+    sharedExtent: Pair<Float, Float>? = null,
+) {
     val fill = backdrop.lineBackgroundColor.toBackdropColor(backdrop.lineBackgroundOpacity)
     val grow = backdrop.lineBackgroundHeight.sp.toPx() * scale
     val growX = backdrop.lineBackgroundWidth.sp.toPx() * scale
@@ -61,8 +77,13 @@ private fun DrawScope.drawLineBands(layout: TextLayoutResult, backdrop: TextBack
     val radiusPx = backdrop.lineBackgroundRadius.sp.toPx() * scale
     val radius = CornerRadius(radiusPx, radiusPx)
     // One pair of edges for every band, or null to let each line keep its own. The union of the
-    // lines that have text, so it reads correctly whichever way the paragraph is aligned.
-    val shared = if (backdrop.lineBackgroundUniformWidth) layout.drawnLineExtent() else null
+    // lines that have text, so it reads correctly whichever way the paragraph is aligned — or the
+    // caller's, where the block's lines are separate `Text`s and only the caller can see them all.
+    val shared = if (backdrop.lineBackgroundUniformWidth) {
+        sharedExtent ?: layout.drawnLineExtent()
+    } else {
+        null
+    }
     for (line in 0 until layout.lineCount) {
         // Measured *before* the horizontal grow, on purpose. A blank line is zero wide, and growing
         // it would paint a band twice the grow wide with no text on it — a mark floating between two
@@ -147,7 +168,7 @@ internal fun DrawScope.drawBlockBacking(bounds: Rect, backdrop: TextBackdrop, sc
  * line's own pair is what makes it right under any alignment: centred text has a symmetric union, so
  * the bands come out centred too; left-aligned text shares its left edge and the bands end together.
  */
-private fun TextLayoutResult.drawnLineExtent(): Pair<Float, Float>? {
+internal fun TextLayoutResult.drawnLineExtent(): Pair<Float, Float>? {
     var left = Float.MAX_VALUE
     var right = -Float.MAX_VALUE
     for (line in 0 until lineCount) {

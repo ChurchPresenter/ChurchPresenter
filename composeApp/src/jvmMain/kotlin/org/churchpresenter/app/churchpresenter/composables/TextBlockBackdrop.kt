@@ -73,9 +73,15 @@ class TextBlockBackdrop internal constructor() {
         // is one shape for the block, which only the container can place -- so it takes the union
         // of where the lines landed and paints that instead.
         if (current.lineBackground && !current.border) {
+            // "Same width for every line" has to be worked out here and nowhere else. Each line is
+            // its own `Text`, so a line asked on its own what the widest line is answers "me", and
+            // the setting did nothing at all for lyrics however it was set. The union is taken in
+            // *container* space, then handed to each line in that line's own coordinates.
+            val shared = if (current.lineBackgroundUniformWidth) blockLineExtent() else null
             for ((key, layout) in lineLayouts) {
                 val offset = offsetOf(key) ?: continue
-                translate(offset.x, offset.y) { drawTextBackdrop(layout, current) }
+                val local = shared?.let { (left, right) -> (left - offset.x) to (right - offset.x) }
+                translate(offset.x, offset.y) { drawTextBackdrop(layout, current, sharedExtent = local) }
             }
             return
         }
@@ -85,6 +91,28 @@ class TextBlockBackdrop internal constructor() {
             if (bounds != null) union = union?.expandToInclude(bounds) ?: bounds
         }
         union?.let { drawBlockBacking(it, current) }
+    }
+
+    /**
+     * The leftmost left and rightmost right across every line of the block, in container space.
+     *
+     * The same union `drawnLineExtent` takes within one `Text`, taken across the several this block
+     * is made of — which is the only place it can be taken, since no line can see its neighbours.
+     * Lines still laying out are skipped rather than treated as zero-wide: one arriving late would
+     * otherwise drag the shared left edge to the container's origin for a frame.
+     */
+    private fun blockLineExtent(): Pair<Float, Float>? {
+        var left = Float.MAX_VALUE
+        var right = -Float.MAX_VALUE
+        for ((key, layout) in lineLayouts) {
+            val offset = offsetOf(key)
+            val extent = layout.drawnLineExtent()
+            if (offset != null && extent != null) {
+                left = minOf(left, offset.x + extent.first)
+                right = maxOf(right, offset.x + extent.second)
+            }
+        }
+        return if (right > left) left to right else null
     }
 }
 
