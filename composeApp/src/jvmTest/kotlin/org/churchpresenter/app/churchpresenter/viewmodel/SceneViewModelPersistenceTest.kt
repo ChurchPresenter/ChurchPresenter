@@ -90,11 +90,11 @@ class SceneViewModelPersistenceTest {
         val vm = vmWithScene("Original")
         vm.addSource(text("t1"))
 
-        vm.duplicateScene(vm.scenes.first().id)
+        vm.duplicateScene(vm.scenes.first().id, "Original (copy)")
 
         val reloaded = reopened().scenes
         assertEquals(2, reloaded.size)
-        assertTrue(reloaded.all { it.sources.map { s -> s.id } == listOf("t1") }, "the copy keeps the sources")
+        assertTrue(reloaded.all { it.sources.map { s -> s.name } == listOf("t1") }, "the copy keeps the sources")
         assertEquals(2, reloaded.map { it.id }.toSet().size, "the copy is a separate scene on disk")
     }
 
