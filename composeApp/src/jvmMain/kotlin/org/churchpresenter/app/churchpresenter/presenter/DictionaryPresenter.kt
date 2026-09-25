@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.app.churchpresenter.composables.backdropRoom
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
@@ -118,7 +119,7 @@ fun DictionaryPresenter(
                 val definitionPainter = rememberTextBackdropPainter(ds.definitionBackdrop)
                 if (ds.showReference) {
                     OutlinedText(
-                        modifier = numberPainter.modifier,
+                        modifier = Modifier.backdropRoom(ds.referenceBackdrop).then(numberPainter.modifier),
                         onTextLayout = numberPainter::onTextLayout,
                         outline = ds.referenceOutline,
                         scaleFactor = 1f,
@@ -136,7 +137,7 @@ fun DictionaryPresenter(
                 // Original word
                 if (ds.showWord && entry.word.isNotBlank()) {
                     OutlinedText(
-                        modifier = wordPainter.modifier,
+                        modifier = Modifier.backdropRoom(ds.wordBackdrop).then(wordPainter.modifier),
                         onTextLayout = wordPainter::onTextLayout,
                         outline = ds.wordOutline,
                         scaleFactor = 1f,
@@ -163,7 +164,7 @@ fun DictionaryPresenter(
                     }
                     if (translit.isNotBlank()) {
                         OutlinedText(
-                            modifier = translitPainter.modifier,
+                            modifier = Modifier.backdropRoom(ds.referenceBackdrop).then(translitPainter.modifier),
                             onTextLayout = translitPainter::onTextLayout,
                             outline = ds.referenceOutline,
                             scaleFactor = 1f,
@@ -183,7 +184,7 @@ fun DictionaryPresenter(
                 if (ds.showDefinition && entry.definition.isNotBlank()) {
                     Spacer(Modifier.height((itemSpacing.value / 2).coerceAtLeast(2f).dp))
                     OutlinedText(
-                        modifier = definitionPainter.modifier,
+                        modifier = Modifier.backdropRoom(ds.definitionBackdrop).then(definitionPainter.modifier),
                         onTextLayout = definitionPainter::onTextLayout,
                         outline = ds.definitionOutline,
                         scaleFactor = 1f,

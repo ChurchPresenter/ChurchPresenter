@@ -58,5 +58,4 @@ internal fun PaneScaffold(content: @Composable ColumnScope.() -> Unit) {
 
 // ── Shared bits ─────────────────────────────────────────────────────────────────────────────────
 
-internal val FONT_SIZE_RANGE = 8..150
 internal val MARGIN_RANGE = 0..500

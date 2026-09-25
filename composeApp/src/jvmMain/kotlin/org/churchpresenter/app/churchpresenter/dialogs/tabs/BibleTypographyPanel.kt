@@ -53,7 +53,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 private const val FONT_SIZE_MIN = 8
-private const val FONT_SIZE_MAX = 150
+private const val FONT_SIZE_MAX = 200
 private const val LETTER_SPACING_MIN = -10f
 private const val LETTER_SPACING_MAX = 30f
 private const val WORD_SPACING_MIN = 0f
