@@ -57,6 +57,54 @@ class SubtitleOverlayRenderTest {
         assertEquals(setOf(Color.Black), colors, "nothing but the plain backdrop should have been drawn")
     }
 
+    // ── Two tracks at once, which is how a bilingual output is built (#612) ─────────────────────
+
+    /** Renders [cues] over black and returns how tall the drawn cards come to, in sampled pixels. */
+    private fun drawnHeight(cues: List<SubtitleCue>): Int {
+        var height = 0
+        runComposeUiTest {
+            setContent {
+                Box(modifier = Modifier.testTag("overlay").size(200.dp).background(Color.Black)) {
+                    SubtitleOverlay(
+                        cues = cues,
+                        mediaSettings = MediaSettings(backgroundColor = "#FF0000", backgroundOpacity = 100),
+                    )
+                }
+            }
+            val map = onNodeWithTag("overlay").captureToImage().toPixelMap()
+            height = (0 until map.height).count { y ->
+                (0 until map.width step SAMPLE_STEP).any { x -> map[x, y] != Color.Black }
+            }
+        }
+        return height
+    }
+
+    @Test
+    fun `a second routed track stacks below the first rather than replacing it`() {
+        val one = drawnHeight(listOf(cue))
+        val two = drawnHeight(listOf(cue, SubtitleCue(startMs = 0, endMs = 5_000, text = "Hola")))
+
+        // Each keeps its own card, so two of them are taller than one -- a bilingual pair reads as
+        // two lines. Asserted as a relation rather than an exact height: glyph metrics differ across
+        // the three platforms, which is this suite's standing convention.
+        assertTrue(two > one, "two cards ($two px) should be taller than one ($one px)")
+    }
+
+    @Test
+    fun `a blank second cue is dropped rather than drawn as an empty card`() {
+        val one = drawnHeight(listOf(cue))
+        val withBlank = drawnHeight(listOf(cue, blank))
+
+        // One track's cue window can easily be empty while the other's is not, and an empty card
+        // under a real one is a coloured band with nothing in it.
+        assertEquals(one, withBlank)
+    }
+
+    @Test
+    fun `no cues at all draws nothing`() {
+        assertEquals(0, drawnHeight(emptyList()))
+    }
+
     @Test
     fun `a real cue draws its card, more than just the background`() = runComposeUiTest {
         setContent {

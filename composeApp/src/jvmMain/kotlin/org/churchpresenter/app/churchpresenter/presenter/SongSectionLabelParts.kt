@@ -40,6 +40,37 @@ internal fun SongContentFrame(
 }
 
 /**
+ * The label text the lyrics' auto-fit has to leave room for, or null when it costs them nothing.
+ *
+ * This decision is the whole of a bug that predates the label's styling: the fit's `reserved`
+ * accumulator counted the title row, the number row, the look-ahead spacer and the gaps between
+ * language blocks, and **never the section label at all** -- though the label sits above the lyrics
+ * and takes height from them exactly as the title row does. With the label on, the lyrics were sized
+ * for a box one label taller than the one they got, and could overflow.
+ *
+ * Null in three cases, and the third is the one worth naming: a **positioned** label has left the
+ * flow and floats over the slide, so reserving for it would shrink the lyrics for height the label no
+ * longer takes from them -- the same trade the cornered song number already makes. Positioning is
+ * full screen only, which is why the band ignores the offset here as it does everywhere else.
+ *
+ * The longest of them, because the fit has to hold for every section the song will show, not just
+ * the one on screen -- the same reasoning the title and number reservations above it use.
+ */
+internal fun sectionLabelToReserve(
+    label: SongSectionLabel,
+    sections: List<LyricSection>,
+    isLowerThird: Boolean,
+): String? {
+    if (!label.enabled) return null
+    val floats = !isLowerThird && label.offset != null
+    if (floats) return null
+    return sections
+        .mapNotNull { sectionLabelText(it, label, isTitleSlide = false) }
+        .maxByOrNull { it.length }
+        ?.takeIf { it.isNotEmpty() }
+}
+
+/**
  * The section label to draw, or null when there is nothing to draw or it is switched off.
  *
  * The brackets come from the data, not from here: `LyricSection.header` is the header line as the

@@ -668,20 +668,14 @@ fun SongPresenter(
                 // overflow. Measured with the label's own face and size, which it has had since the
                 // styling landed beside this.
                 val fitLabel = ss.layoutExtras.sectionLabel
-                val fitLabelFloats = !isLowerThird && fitLabel.offset != null
-                if (fitLabel.enabled && !fitLabelFloats) {
+                sectionLabelToReserve(fitLabel, allLyricSections, isLowerThird)?.let { longestLabel ->
                     val labelStyle = TextStyle(
                         fontSize = fitLabel.fontSize.sp,
                         fontFamily = fitLabel.fontType.takeIf { it.isNotBlank() }
                             ?.let { systemFontFamilyOrDefault(it) } ?: titleFontFamily,
                     )
-                    val longestLabel = allLyricSections
-                        .mapNotNull { sectionLabelText(it, fitLabel, isTitleSlide = false) }
-                        .maxByOrNull { it.length }
-                    if (!longestLabel.isNullOrEmpty()) {
-                        reserved += autoFitTextMeasurer
-                            .measure(longestLabel, labelStyle, density = referenceDensity).size.height
-                    }
+                    reserved += autoFitTextMeasurer
+                        .measure(longestLabel, labelStyle, density = referenceDensity).size.height
                 }
                 // The fixed dp gaps the real layout draws that a section's own measured lines don't
                 // account for: the spacer before the look-ahead line (`LookAheadSpacer`, drawn once
