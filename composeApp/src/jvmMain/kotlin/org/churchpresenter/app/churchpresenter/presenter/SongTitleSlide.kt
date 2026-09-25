@@ -33,6 +33,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isCredit
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isLowerThird
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.shownOnTitleSlide
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.titleSlideOffset
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
@@ -175,32 +176,49 @@ internal fun SongTitleSlideContent(
         if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
     // Fills the box it is given -- the whole slide, or the band -- so the vertical alignment the
     // rail configures places the block, exactly as it places the lyrics.
+    // Which lines the operator has taken out of the stack, and where each goes. A positioned line
+    // floats over the slide and costs the stack no height, which is the same trade the cornered
+    // number below makes -- and it is why the gaps are measured over `stacked` rather than over
+    // every line: a credit whose neighbour has floated away is no longer between two credits.
+    val offsets = lines.associateWith { settings.titleSlideOffset(it.element, target) }
+    val stacked = lines.filter { offsets[it] == null }
+    val positioned = lines.filter { offsets[it] != null }
+    val fallbackFont = if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
+    // One line, drawn the same way whether it is stacked or floating, so the two cannot come apart.
+    // A floating one does not fill the width: filling leaves no room for the offset to move it
+    // through, and X would silently do nothing.
+    val drawLine: @Composable (TitleSlideLine, Boolean) -> Unit = { line, fillWidth ->
+        TitleSlideText(
+            line = line,
+            // A title in a second language takes that language's own title profile, as it
+            // does above a verse; the number and the credits have one whatever the language.
+            style = settings.elementStyle(line.element, target, line.language),
+            // The number ahead of the title in the same paragraph, in its own style, so a
+            // long title wraps under it as one line of text would -- laid out as two
+            // boxes side by side, the title centred in what was left beside the number.
+            leading = line.number?.let {
+                it to settings.elementStyle(SongStyleElement.TITLE_SLIDE_NUMBER, target)
+            },
+            fallbackFont = fallbackFont,
+            isKey = isKey,
+            scaleFactor = scaleFactor,
+            fillWidth = fillWidth,
+        )
+    }
     Box(modifier = modifier.fillMaxSize(), contentAlignment = contentAlignment) {
         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-            lines.forEachIndexed { index, line ->
+            stacked.forEachIndexed { index, line ->
                 if (index > 0) {
                     // Credits sit close together; the heading stands apart from them.
-                    val betweenCredits = line.element.isCredit && lines[index - 1].element.isCredit
+                    val betweenCredits = line.element.isCredit && stacked[index - 1].element.isCredit
                     val gap = if (betweenCredits) CREDIT_GAP_PX else HEADING_GAP_PX
                     Spacer(Modifier.height((gap * scaleFactor).dp))
                 }
-                val fallbackFont = if (target.isLowerThird) settings.titleLowerThirdFontType else settings.titleFontType
-                TitleSlideText(
-                    line = line,
-                    // A title in a second language takes that language's own title profile, as it
-                    // does above a verse; the number and the credits have one whatever the language.
-                    style = settings.elementStyle(line.element, target, line.language),
-                    // The number ahead of the title in the same paragraph, in its own style, so a
-                    // long title wraps under it as one line of text would -- laid out as two
-                    // boxes side by side, the title centred in what was left beside the number.
-                    leading = line.number?.let {
-                        it to settings.elementStyle(SongStyleElement.TITLE_SLIDE_NUMBER, target)
-                    },
-                    fallbackFont = fallbackFont,
-                    isKey = isKey,
-                    scaleFactor = scaleFactor,
-                )
+                drawLine(line, true)
             }
+        }
+        positioned.forEach { line ->
+            Box(modifier = Modifier.elementOffset(offsets[line])) { drawLine(line, false) }
         }
         // The number pinned to a corner, over the slide rather than in the flow -- the same
         // placement the lyric slides give theirs, through the same modifier, and the reason this

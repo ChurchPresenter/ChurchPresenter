@@ -137,13 +137,17 @@ data class BibleTranslationSettings(
     // default, is the stack, which is what every one of these has always drawn; a positioned
     // element leaves it, so `referencePosition` stops applying to a reference that has an offset.
     //
-    // **Full screen only, and so no lower-third twin** -- the same scope [BibleSettings.contentRegion]
-    // has, for the same reason. A band is a strip a third of a screen high whose whole layout is
-    // already band-relative; positioning an element freely inside it means very little, and the
-    // control is not offered there (see `CustomizeStripRows`, which guards the content region the
-    // same way).
+    // **One pair per output**, unlike [BibleSettings.contentRegion], which stays full-screen only.
+    // The band was originally excluded on the argument that a strip a third of a screen high has
+    // little room to position anything in -- but that is an argument about how far the numbers move
+    // an element, not about whether the control works, and the request behind it asked for exactly
+    // this: the same styling available separately for full screen and the lower third. A vertical
+    // band is a tall strip with a great deal of room, and moving the reference off the verse's line
+    // is the common case in either shape.
     val textOffset: ElementOffset? = null,
     val referenceOffset: ElementOffset? = null,
+    val lowerThirdTextOffset: ElementOffset? = null,
+    val lowerThirdReferenceOffset: ElementOffset? = null,
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the
