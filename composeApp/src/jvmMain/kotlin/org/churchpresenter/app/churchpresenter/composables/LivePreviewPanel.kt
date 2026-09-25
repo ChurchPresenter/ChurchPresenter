@@ -189,12 +189,22 @@ fun LivePreviewPanel(
             for (entry in entries) entry.content(Modifier.fillMaxWidth(), false)
         }
 
-        // Media controls — visible when presenting and media is loaded.
-        // Controls disappear only via Clear Display / Escape (which reset presentingMode to NONE).
+        // Media controls — for the clip this panel can still do something with.
+        //
+        // Two cases, and the second is why this is not simply "media is live": audio keeps playing
+        // while the operator shows a song or a verse, and its transport has to stay reachable.
+        //
+        //  * the media is what is on screen, playing or paused; or
+        //  * it is playing behind whatever is.
+        //
+        // A clip that has **finished** is neither. `markFinished` leaves it loaded, rewound to 0 and
+        // not playing, so the old condition -- anything live at all, plus a loaded clip -- brought
+        // the seek bar back the moment the next song went live, showing 0:00 of a video that was
+        // over and seekable to nowhere.
         val presentingMode by presenterManager.presentingMode
-        if (presentingMode != Presenting.NONE
-            && mediaViewModel != null && mediaViewModel.isLoaded
-        ) {
+        val transportUseful = mediaViewModel != null && mediaViewModel.isLoaded &&
+            (presentingMode == Presenting.MEDIA || mediaViewModel.isPlaying)
+        if (transportUseful && mediaViewModel != null) {
             MediaPreviewControls(
                     isPlaying = mediaViewModel.isPlaying,
                     duration = mediaViewModel.duration,
