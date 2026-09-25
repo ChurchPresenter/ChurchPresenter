@@ -25,6 +25,36 @@ enum class BackgroundSurface {
 }
 
 /**
+ * The [BackgroundSettings] fields this surface owns, by their stored names -- exactly the group
+ * [resolveBackgroundSurfaces] takes from a profile when the surface is overridden.
+ *
+ * Needed where only the stored document is at hand: the migration that turned each output's old
+ * background override into a profile reads which fields it touched to know which surfaces to mark.
+ */
+val BackgroundSurface.fieldKeys: Set<String>
+    get() = when (this) {
+        BackgroundSurface.DEFAULT -> setOf(
+            "defaultBackgroundColor", "defaultBackgroundImage", "defaultBackgroundVideo",
+            "defaultBackgroundType", "defaultBackgroundOpacity", "defaultBackgroundDim",
+            "defaultBackgroundBlur", "defaultBackgroundCamera",
+        )
+        BackgroundSurface.DEFAULT_LOWER_THIRD -> setOf(
+            "defaultLowerThirdBackgroundColor", "defaultLowerThirdBackgroundImage",
+            "defaultLowerThirdBackgroundVideo", "defaultLowerThirdBackgroundType",
+            "defaultLowerThirdBackgroundOpacity", "defaultLowerThirdBackgroundDim",
+            "defaultLowerThirdBackgroundBlur", "defaultLowerThirdBackgroundCamera",
+            "defaultLowerThirdAboveBandType", "defaultLowerThirdAboveBandColor",
+            "defaultLowerThirdAboveBandOpacity", "defaultLowerThirdAboveBandFillsBehindBand",
+            "defaultLowerThirdAboveBandImage", "defaultLowerThirdAboveBandVideo",
+            "defaultLowerThirdAboveBandCamera",
+        )
+        BackgroundSurface.BIBLE -> setOf("bibleBackground")
+        BackgroundSurface.BIBLE_LOWER_THIRD -> setOf("bibleLowerThirdBackground")
+        BackgroundSurface.SONG -> setOf("songBackground")
+        BackgroundSurface.SONG_LOWER_THIRD -> setOf("songLowerThirdBackground")
+    }
+
+/**
  * [global] with each surface named in [overridden] replaced by [profile]'s copy of it.
  *
  * Field group by field group rather than wholesale, which is what makes the choice per surface. The
