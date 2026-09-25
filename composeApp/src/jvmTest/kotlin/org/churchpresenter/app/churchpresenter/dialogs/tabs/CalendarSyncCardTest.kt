@@ -10,6 +10,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarInviteFailedContent
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.app.churchpresenter.server.RelayEndpoints
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.RelayReply
@@ -48,7 +49,7 @@ class CalendarSyncCardTest {
 
         override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
             calls += "$method $url"
-            if (url == CalendarSyncSettings.CLIENT_KEY_URL) return RelayReply(200, """{"clientKey":"key-1"}""")
+            if (url == CLIENT_KEY_URL) return RelayReply(200, """{"clientKey":"key-1"}""")
             val path = url.substringAfter("/i/").substringAfter("/").substringBefore("?")
             return when {
                 path == "register" && !registered -> {
@@ -76,6 +77,7 @@ class CalendarSyncCardTest {
         settings = { settings },
         saveSettings = { settings = it },
         transport = relay,
+        endpoints = RelayEndpoints("https://relay.example", CLIENT_KEY_URL),
     )
 
     @Test
@@ -193,3 +195,5 @@ class CalendarSyncCardTest {
         assertTrue(LocalTimeText.system().format("nonsense") == "nonsense")
     }
 }
+
+private const val CLIENT_KEY_URL = "https://keys.example/k3v9q"

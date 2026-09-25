@@ -86,6 +86,7 @@ class CalendarSyncService(
     /** How long a song usually runs here -- the app's duration log -- for the catalog the phones plan with. */
     private val typicalSeconds: (SongItem) -> Int? = { null },
     private val usage: UsageEventStore = UsageEvents,
+    private val endpoints: RelayEndpoints = RelayEndpoints.BUILT_IN,
 ) {
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
@@ -96,7 +97,9 @@ class CalendarSyncService(
     private val watcher = CalendarFileWatcher(folder, io)
     private val lock = Mutex()
     private val relay =
-        CalendarRelayAccess(folder, songFolder, settings, saveSettings, transport, watcher::savedHere, typicalSeconds)
+        CalendarRelayAccess(
+            folder, songFolder, settings, saveSettings, transport, watcher::savedHere, typicalSeconds, endpoints,
+        )
 
     /** The startup round — pull, merge, push — within [timeoutMs]. Returns whether it completed. */
     suspend fun syncOnStartup(timeoutMs: Long = STARTUP_TIMEOUT_MS): Boolean {
@@ -170,7 +173,7 @@ class CalendarSyncService(
                 val request = EnrollRequest(tokenHash = CalendarRelayAccess.sha256Hex(deviceToken), nameBox = nameBox)
                 relay.client().enrollDevice(desktopToken, deviceId, request)
                 CalendarEnrollment(
-                    relayUrl = current.relayUrl,
+                    relayUrl = relay.relayUrl(),
                     instanceId = current.instanceId,
                     deviceId = deviceId,
                     deviceToken = deviceToken,

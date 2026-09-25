@@ -183,7 +183,7 @@ private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = 
     else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
 }
 
-/** `GET` of the website's relay-config: the client key the relay currently expects. */
+/** `GET` of the website's client-key endpoint: the key the relay currently expects. */
 fun fetchClientKey(url: String, transport: RelayTransport): String? {
     val reply = try {
         transport.send("GET", url, mapOf("Accept" to "application/json"), null)

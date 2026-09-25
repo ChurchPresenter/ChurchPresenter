@@ -727,6 +727,15 @@ val generateBuildConfig by tasks.registering {
         .getOrElse("local")
     val planningCenterClientId = System.getenv("PLANNING_CENTER_CLIENT_ID") ?: ""
     val planningCenterClientSecret = System.getenv("PLANNING_CENTER_CLIENT_SECRET") ?: ""
+    // Calendar sync: the relay and the website endpoint its client key is fetched from. Kept out of
+    // the repository like the Planning Center pair -- from GitHub Secrets in CI, and locally from the
+    // environment or ~/.gradle/gradle.properties. A build without them has calendar sync but no
+    // relay to reach. Only characters a URL needs survive, so nothing can break the generated source.
+    fun endpoint(name: String): String =
+        (providers.environmentVariable(name).orNull ?: providers.gradleProperty(name).orNull ?: "")
+            .filter { it.isLetterOrDigit() || it in ":/.-_~?=&%" }
+    val calendarRelayUrl = endpoint("CALENDAR_RELAY_URL")
+    val calendarRelayConfigUrl = endpoint("CALENDAR_RELAY_CONFIG_URL")
     val outputDir = layout.buildDirectory.dir("generated/buildconfig")
 
     // Always re-run — git state (commit count/hash) can change without any file edits
@@ -751,6 +760,8 @@ val generateBuildConfig by tasks.registering {
             |    const val BUILD_CHANNEL = "$buildChannel"
             |    const val PLANNING_CENTER_CLIENT_ID = "$planningCenterClientId"
             |    const val PLANNING_CENTER_CLIENT_SECRET = "$planningCenterClientSecret"
+            |    const val CALENDAR_RELAY_URL = "$calendarRelayUrl"
+            |    const val CALENDAR_RELAY_CONFIG_URL = "$calendarRelayConfigUrl"
             |}
             """.trimMargin()
         )

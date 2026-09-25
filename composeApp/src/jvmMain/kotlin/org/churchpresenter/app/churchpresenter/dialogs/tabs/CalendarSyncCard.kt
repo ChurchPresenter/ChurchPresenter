@@ -56,6 +56,7 @@ import churchpresenter.composeapp.generated.resources.calendar_sync_sync_now
 import churchpresenter.composeapp.generated.resources.calendar_sync_title
 import churchpresenter.composeapp.generated.resources.calendar_sync_unpair
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.server.RelayEndpoints
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
 import org.churchpresenter.app.churchpresenter.server.CalendarInvite
@@ -191,7 +192,8 @@ internal fun CalendarSyncCardContent(
             if (current.isPaired) {
                 DevicesList(devices = devices, labelFor = labelFor, clock = clock, onRevoke = onRevoke)
                 Text(
-                    text = "${stringResource(Res.string.calendar_sync_relay_url)}: ${current.relayUrl} · " +
+                    text = "${stringResource(Res.string.calendar_sync_relay_url)}: " +
+                        "${current.relayUrl.ifBlank { RelayEndpoints.BUILT_IN.relayUrl }} · " +
                         "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

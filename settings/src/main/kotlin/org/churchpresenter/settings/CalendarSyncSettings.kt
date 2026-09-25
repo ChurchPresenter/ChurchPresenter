@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CalendarSyncSettings(
     val enabled: Boolean = false,
-    val relayUrl: String = DEFAULT_RELAY_URL,
+    /** A relay other than the one this build was made for; blank uses the build's own. */
+    val relayUrl: String = "",
     /** Which church this is, as the relay knows it. Generated here, once. */
     val instanceId: String = "",
     /** Minted by the relay at registration. */
@@ -24,10 +25,4 @@ data class CalendarSyncSettings(
     val clientKey: String = "",
 ) {
     val isPaired: Boolean get() = instanceId.isNotBlank() && desktopToken.isNotBlank() && instanceKey.isNotBlank()
-
-    companion object {
-        const val DEFAULT_RELAY_URL = "https://sync.churchpresenter.org"
-        // The www host: the apex answers with a redirect, and a key is fetched, never followed to.
-        const val CLIENT_KEY_URL = "https://www.churchpresenter.org/api/relay-config"
-    }
 }
