@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,8 +22,12 @@ import churchpresenter.composeapp.generated.resources.content_region
 import churchpresenter.composeapp.generated.resources.content_region_width
 import churchpresenter.composeapp.generated.resources.content_region_x_offset
 import churchpresenter.composeapp.generated.resources.content_region_y_offset
+import churchpresenter.composeapp.generated.resources.center
 import churchpresenter.composeapp.generated.resources.customize_group_margins
 import churchpresenter.composeapp.generated.resources.customize_motion
+import churchpresenter.composeapp.generated.resources.element_offset_enabled
+import churchpresenter.composeapp.generated.resources.element_offset_x
+import churchpresenter.composeapp.generated.resources.element_offset_y
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.left
@@ -30,6 +35,7 @@ import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.transition_duration
 import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.ElementOffset
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -55,6 +61,27 @@ internal fun ContentRegionStripRow(region: ContentRegion, onChange: (ContentRegi
             range = ContentRegion.WIDTH_RANGE,
             width = MARGIN_FIELD_WIDTH,
         )
+        // Narrowing the width has always centred what is left, and the only way to move it was the
+        // X offset -- which does reach the edges (-100 is flush left) but reads as a nudge, not as
+        // an alignment, so "how do I align it left?" had no visible answer. This is that answer,
+        // written as the offset it already was.
+        ChoiceControl(
+            options = listOf(
+                ContentRegion.OFFSET_RANGE.first.toString() to stringResource(Res.string.left),
+                "0" to stringResource(Res.string.center),
+                ContentRegion.OFFSET_RANGE.last.toString() to stringResource(Res.string.right),
+            ),
+            selected = when (region.xOffsetPercent) {
+                ContentRegion.OFFSET_RANGE.first -> ContentRegion.OFFSET_RANGE.first.toString()
+                ContentRegion.OFFSET_RANGE.last -> ContentRegion.OFFSET_RANGE.last.toString()
+                0 -> "0"
+                // Anything between the three stops is a hand-set nudge; leave it unselected rather
+                // than rounding it to whichever stop is nearest and moving the operator's screen.
+                else -> ""
+            },
+            onSelect = { v -> v.toIntOrNull()?.let { onChange(region.copy(xOffsetPercent = it)) } },
+            buttonWidth = ALIGN_BUTTON_WIDTH,
+        )
         NumberControl(
             label = stringResource(Res.string.content_region_x_offset),
             value = region.xOffsetPercent,
@@ -69,6 +96,52 @@ internal fun ContentRegionStripRow(region: ContentRegion, onChange: (ContentRegi
             range = ContentRegion.OFFSET_RANGE,
             width = MARGIN_FIELD_WIDTH,
         )
+    }
+}
+
+/**
+ * Positions one element in the frame: a switch that takes it out of the flow, then where it goes.
+ *
+ * Off is the default and means "laid out as it always was", which is the only honest default --
+ * see [ElementOffset]. On, the sliders read 0 flush to the start, 50 centred, 100 flush to the end,
+ * and the element cannot leave the frame at any value, which is why there is nothing to warn about.
+ *
+ * [verticalOnly] for an element whose content fills the width and so has no horizontal room to move
+ * through -- the lyrics block. Offering a dead slider there would be worse than offering none.
+ */
+@Composable
+internal fun ElementOffsetStripRow(
+    label: String,
+    offset: ElementOffset?,
+    verticalOnly: Boolean = false,
+    tagPrefix: String,
+    onChange: (ElementOffset?) -> Unit,
+) {
+    StripRow(label) {
+        ToggleControl(
+            label = stringResource(Res.string.element_offset_enabled),
+            checked = offset != null,
+            onCheckedChange = { on -> onChange(if (on) ElementOffset() else null) },
+            modifier = Modifier.testTag("${tagPrefix}_enabled"),
+        )
+        if (offset != null) {
+            if (!verticalOnly) {
+                NumberControl(
+                    label = stringResource(Res.string.element_offset_x),
+                    value = offset.xPercent,
+                    onValueChange = { v -> onChange(offset.copy(xPercent = v)) },
+                    range = ElementOffset.PERCENT_RANGE,
+                    width = MARGIN_FIELD_WIDTH,
+                )
+            }
+            NumberControl(
+                label = stringResource(Res.string.element_offset_y),
+                value = offset.yPercent,
+                onValueChange = { v -> onChange(offset.copy(yPercent = v)) },
+                range = ElementOffset.PERCENT_RANGE,
+                width = MARGIN_FIELD_WIDTH,
+            )
+        }
     }
 }
 
@@ -168,6 +241,9 @@ internal fun StripRow(label: String, content: @Composable () -> Unit) {
  * the column has inside its padding -- which leaves exactly 76 each.
  */
 private val MARGIN_FIELD_WIDTH = 76.dp
+
+/** Three of these plus their gaps fit where the content region's own three fields do. */
+private val ALIGN_BUTTON_WIDTH = 58.dp
 
 /**
  * Wide enough for the longest caption on one line.

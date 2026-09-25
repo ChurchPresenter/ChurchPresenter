@@ -21,4 +21,11 @@ data class SongLayoutExtras(
     val numberOffset: SongNumberOffset = SongNumberOffset(),
     /** [numberOffset] for the lower third. */
     val numberLowerThirdOffset: SongNumberOffset = SongNumberOffset(),
+    /**
+     * Where the lyrics block sits, when it is positioned rather than aligned -- see [ElementOffset].
+     *
+     * Null, the default, leaves `SongSettings.lyricsAlignment` placing it exactly as it always has.
+     * Full screen only, like [contentRegion] beside it, so there is no lower-third twin.
+     */
+    val lyricsOffset: ElementOffset? = null,
 )

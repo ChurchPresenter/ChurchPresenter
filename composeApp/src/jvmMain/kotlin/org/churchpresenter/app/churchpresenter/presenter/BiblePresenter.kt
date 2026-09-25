@@ -58,6 +58,7 @@ import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropP
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.utils.Constants
@@ -156,6 +157,25 @@ internal fun BibleTranslationSettings.textOutlineFor(lowerThird: Boolean): TextO
 
 internal fun BibleTranslationSettings.referenceOutlineFor(lowerThird: Boolean): TextOutline =
     if (lowerThird) lowerThirdReferenceOutline else referenceOutline
+
+/**
+ * Where the verse text sits, or null while it is laid out in the stack as ever.
+ *
+ * A non-null offset takes the element out of the reference/verse column, so `referencePosition`
+ * (above or below) stops applying to whichever of the pair has one -- there is no "above" left to be
+ * when the two are placed independently.
+ *
+ * **Always null on a band**, which is the scope `contentRegion` has too: the lower third's layout is
+ * band-relative throughout and the control is not offered for it. That is what keeps the band's two
+ * hand-rolled layouts -- the side-by-side pair and the single column, each with its own fit search --
+ * on exactly the path they have always taken.
+ */
+internal fun BibleTranslationSettings.textOffsetFor(lowerThird: Boolean): ElementOffset? =
+    if (lowerThird) null else textOffset
+
+/** [textOffsetFor]'s reference twin, with the same band rule. */
+internal fun BibleTranslationSettings.referenceOffsetFor(lowerThird: Boolean): ElementOffset? =
+    if (lowerThird) null else referenceOffset
 
 internal fun buildRefText(verse: SelectedVerse, translation: BibleTranslationSettings): String {
     val label = if (translation.showAbbreviation) {
@@ -841,24 +861,33 @@ fun BiblePresenter(
                             rememberTextBackdropPainter(item.textBackdropFor(isLowerThird))
                         val itemRefPainter =
                             rememberTextBackdropPainter(item.referenceBackdropFor(isLowerThird))
-                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                            if (refPosition == Constants.POSITION_ABOVE) {
-                                OutlinedText(
-                                    text = itemRefText(item, buildRefText(verse, item)),
-                                    modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
-                                    outline = item.referenceOutlineFor(isLowerThird),
-                                    scaleFactor = scaleFactor,
-                                    color = refColor,
-                                    fontFamily = refFont,
-                                    fontSize = refSize,
-                                    textAlign = refAlign,
-                                    style = referenceStyle(item),
-                                    onTextLayout = itemRefPainter::onTextLayout,
-                                )
-                            }
+                        val refOffset = item.referenceOffsetFor(isLowerThird)
+                        val textOffset = item.textOffsetFor(isLowerThird)
+
+                        // The two halves as their own composables, so the stacked and the
+                        // positioned paths draw the identical thing and cannot drift apart. A
+                        // positioned half drops `fillMaxWidth()`: filling the width leaves no room
+                        // to be moved through, and the offset would silently do nothing on X.
+                        val reference: @Composable (Boolean) -> Unit = { fill ->
+                            OutlinedText(
+                                text = itemRefText(item, buildRefText(verse, item)),
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .then(itemRefPainter.modifier),
+                                outline = item.referenceOutlineFor(isLowerThird),
+                                scaleFactor = scaleFactor,
+                                color = refColor,
+                                fontFamily = refFont,
+                                fontSize = refSize,
+                                textAlign = refAlign,
+                                style = referenceStyle(item),
+                                onTextLayout = itemRefPainter::onTextLayout,
+                            )
+                        }
+                        val verseText: @Composable (Boolean) -> Unit = { fill ->
                             OutlinedText(
                                 text = itemText(item, verse.verseText),
-                                modifier = Modifier.fillMaxWidth().then(itemTextPainter.modifier),
+                                modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .then(itemTextPainter.modifier),
                                 outline = item.textOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
                                 color = textColor,
@@ -868,19 +897,31 @@ fun BiblePresenter(
                                 style = textStyle(item),
                                 onTextLayout = itemTextPainter::onTextLayout,
                             )
-                            if (refPosition == Constants.POSITION_BELOW) {
-                                OutlinedText(
-                                    text = itemRefText(item, buildRefText(verse, item)),
-                                    modifier = Modifier.fillMaxWidth().then(itemRefPainter.modifier),
-                                    outline = item.referenceOutlineFor(isLowerThird),
-                                    scaleFactor = scaleFactor,
-                                    color = refColor,
-                                    fontFamily = refFont,
-                                    fontSize = refSize,
-                                    textAlign = refAlign,
-                                    style = referenceStyle(item),
-                                    onTextLayout = itemRefPainter::onTextLayout,
-                                )
+                        }
+
+                        if (refOffset == null && textOffset == null) {
+                            // Every existing document: the column, unwrapped, exactly as before.
+                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                if (refPosition == Constants.POSITION_ABOVE) reference(true)
+                                verseText(true)
+                                if (refPosition == Constants.POSITION_BELOW) reference(true)
+                            }
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                                        .align(Alignment.BottomCenter),
+                                ) {
+                                    if (refPosition == Constants.POSITION_ABOVE && refOffset == null) reference(true)
+                                    if (textOffset == null) verseText(true)
+                                    if (refPosition == Constants.POSITION_BELOW && refOffset == null) reference(true)
+                                }
+                                if (textOffset != null) {
+                                    Box(modifier = Modifier.elementOffset(textOffset)) { verseText(false) }
+                                }
+                                if (refOffset != null) {
+                                    Box(modifier = Modifier.elementOffset(refOffset)) { reference(false) }
+                                }
                             }
                         }
                     }
@@ -942,22 +983,48 @@ fun BiblePresenter(
                         // or the fit search solves for a box the text is not laid out in.
                         fun itemWidth(scale: Float): Int =
                             ((constraints.maxWidth - gapsPx(gridCols, scale)) / gridCols).coerceAtLeast(1)
-                        fun blockHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
+                        fun textHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
                             val textSize = (item.textFontSize * scaleFactor * scale).sp
-                            val refSize = (item.referenceFontSize * scaleFactor * scale).sp
                             val textFont = systemFontFamilyOrDefault(item.textFontType)
-                            val refFont = systemFontFamilyOrDefault(item.referenceFontType)
-                            val widthConstraint = Constraints(maxWidth = itemWidth(scale))
                             return textMeasurer.measure(
                                 itemText(item, verse.verseText),
                                 textStyle(item).copy(fontFamily = textFont, fontSize = textSize),
-                                constraints = widthConstraint,
-                            ).size.height +
-                                textMeasurer.measure(
-                                    itemRefText(item, buildRefText(verse, item)),
-                                    referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
-                                    constraints = widthConstraint,
-                                ).size.height
+                                constraints = Constraints(maxWidth = itemWidth(scale)),
+                            ).size.height
+                        }
+                        fun refHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
+                            val refSize = (item.referenceFontSize * scaleFactor * scale).sp
+                            val refFont = systemFontFamilyOrDefault(item.referenceFontType)
+                            return textMeasurer.measure(
+                                itemRefText(item, buildRefText(verse, item)),
+                                referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
+                                constraints = Constraints(maxWidth = itemWidth(scale)),
+                            ).size.height
+                        }
+                        // Only the halves still stacked in the column add up; a positioned one is
+                        // placed in the band on its own and is checked against the band by itself
+                        // below. Both are needed: measuring a positioned half into the sum would
+                        // shrink the stack for height it no longer occupies, and leaving it out of
+                        // the search altogether would let it grow past the band and be clipped --
+                        // which is what an offset applied only at draw time would have done.
+                        fun stackedHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int =
+                            (if (item.textOffsetFor(isLowerThird) == null) textHeight(verse, item, scale) else 0) +
+                                (if (item.referenceOffsetFor(isLowerThird) == null) {
+                                    refHeight(verse, item, scale)
+                                } else {
+                                    0
+                                })
+                        fun positionedFits(
+                            verse: SelectedVerse,
+                            item: BibleTranslationSettings,
+                            scale: Float,
+                            band: Int,
+                        ): Boolean {
+                            val textOk = item.textOffsetFor(isLowerThird) == null ||
+                                textHeight(verse, item, scale) <= band
+                            val refOk = item.referenceOffsetFor(isLowerThird) == null ||
+                                refHeight(verse, item, scale) <= band
+                            return textOk && refOk
                         }
                         // What one translation has to fit in: the frame less this axis's gaps, split
                         // over the rows. One row and it is the whole height, which is what side by
@@ -974,7 +1041,10 @@ fun BiblePresenter(
                         // own band's text out through the clip.
                         fun everyBlockFits(scale: Float): Boolean {
                             val band = bandHeight(scale)
-                            return visible.all { (verse, item) -> blockHeight(verse, item, scale) <= band }
+                            return visible.all { (verse, item) ->
+                                stackedHeight(verse, item, scale) <= band &&
+                                    positionedFits(verse, item, scale, band)
+                            }
                         }
                         // No full-size gate in front of the search: its own opening probe is that same
                         // measurement and returns 1f when it fits, so gating here measured every
@@ -1083,27 +1153,37 @@ fun BiblePresenter(
                             ((constraints.maxWidth - (cols - 1) * gapPx(scale)) / cols).coerceAtLeast(1)
                         fun cellHeight(scale: Float): Int =
                             ((constraints.maxHeight - (rows - 1) * gapPx(scale)) / rows).coerceAtLeast(1)
-                        fun blockHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
+                        fun cellTextHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
                             val textSize = (item.textFontSize * scaleFactor * scale).sp
-                            val refSize = (item.referenceFontSize * scaleFactor * scale).sp
                             val textFont = systemFontFamilyOrDefault(item.textFontType)
-                            val refFont = systemFontFamilyOrDefault(item.referenceFontType)
-                            val widthConstraint = Constraints(maxWidth = cellWidth(scale))
                             return textMeasurer.measure(
                                 itemText(item, verse.verseText),
                                 textStyle(item).copy(fontFamily = textFont, fontSize = textSize),
-                                constraints = widthConstraint,
-                            ).size.height +
-                                textMeasurer.measure(
-                                    itemRefText(item, buildRefText(verse, item)),
-                                    referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
-                                    constraints = widthConstraint,
-                                ).size.height
+                                constraints = Constraints(maxWidth = cellWidth(scale)),
+                            ).size.height
                         }
+                        fun cellRefHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
+                            val refSize = (item.referenceFontSize * scaleFactor * scale).sp
+                            val refFont = systemFontFamilyOrDefault(item.referenceFontType)
+                            return textMeasurer.measure(
+                                itemRefText(item, buildRefText(verse, item)),
+                                referenceStyle(item).copy(fontFamily = refFont, fontSize = refSize),
+                                constraints = Constraints(maxWidth = cellWidth(scale)),
+                            ).size.height
+                        }
+                        // Same split as the full-screen grid above, against the cell rather than the
+                        // band: what is stacked adds up, what is positioned is checked on its own.
                         fun everyBlockFits(scale: Float): Boolean {
                             val cell = cellHeight(scale)
                             return lowerThirdMultiVisible.all { (verse, item) ->
-                                blockHeight(verse, item, scale) <= cell
+                                val textPositioned = item.textOffsetFor(isLowerThird) != null
+                                val refPositioned = item.referenceOffsetFor(isLowerThird) != null
+                                val textH = cellTextHeight(verse, item, scale)
+                                val refH = cellRefHeight(verse, item, scale)
+                                val stacked = (if (textPositioned) 0 else textH) + (if (refPositioned) 0 else refH)
+                                stacked <= cell &&
+                                    (!textPositioned || textH <= cell) &&
+                                    (!refPositioned || refH <= cell)
                             }
                         }
                         val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }

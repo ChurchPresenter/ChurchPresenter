@@ -39,12 +39,18 @@ internal fun ColorControl(label: String, color: String, onColorChange: (String) 
 
 /** An on/off setting, drawn as the [LabeledCheckbox] every settings tab uses for a boolean. */
 @Composable
-internal fun ToggleControl(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+internal fun ToggleControl(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     LabeledCheckbox(
         checked = checked,
         onCheckedChange = onCheckedChange,
         label = label,
         style = MaterialTheme.typography.bodySmall,
+        modifier = modifier,
     )
 }
 

@@ -1022,6 +1022,9 @@
     <string name="content_region">Content Region</string>
     <string name="content_region_width">Width %</string>
     <string name="content_region_x_offset">X Offset %</string>
+    <string name="element_offset_enabled">Position</string>
+    <string name="element_offset_x">X %</string>
+    <string name="element_offset_y">Y %</string>
     <string name="content_region_y_offset">Y Offset %</string>
     <string name="end_of_song_spacing">End-of-Song (*) Spacing</string>
     <string name="auto_fit">Auto</string>

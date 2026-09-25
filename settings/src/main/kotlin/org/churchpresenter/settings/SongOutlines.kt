@@ -14,7 +14,12 @@ import org.churchpresenter.core.models.text.TextOutline
  * signature`, which is to say the app did not start at all. Nested, they cost one.
  *
  * So: **a new song setting goes in a record, not in [SongSettings] directly**, and if it belongs
- * with something already nested it goes in that record. There are three slots left.
+ * with something already nested it goes in that record.
+ *
+ * **There are two slots left, not three.** This said three; counted again on 2026-09-24,
+ * `SongSettings` takes 243 properties, which is 243 + 8 masks + 1 marker + `this` = 253 of the 255.
+ * Two more flat fields fit and a third does not, so the figure is worth keeping honest: the failure
+ * it guards against is a class-load error, not a compile error, so nothing catches it until launch.
  *
  * The names are the profiles' own, dropping the `Outline` suffix a field of this type does not need
  * — `textEffects.lyricsLowerThird` is the lower third's lyrics outline.

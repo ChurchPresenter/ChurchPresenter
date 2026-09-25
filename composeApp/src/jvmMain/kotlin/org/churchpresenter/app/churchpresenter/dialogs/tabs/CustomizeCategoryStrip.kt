@@ -25,6 +25,7 @@ import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.words_suffix
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.end_of_song_spacing
+import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.middle
 import churchpresenter.composeapp.generated.resources.show
 import churchpresenter.composeapp.generated.resources.song_auto_repeat_chorus
@@ -32,6 +33,10 @@ import churchpresenter.composeapp.generated.resources.song_section_label
 import churchpresenter.composeapp.generated.resources.song_section_label_color
 import churchpresenter.composeapp.generated.resources.song_section_label_enabled
 import churchpresenter.composeapp.generated.resources.song_section_label_font_size
+import churchpresenter.composeapp.generated.resources.tooltip_bold
+import churchpresenter.composeapp.generated.resources.tooltip_italic
+import churchpresenter.composeapp.generated.resources.tooltip_shadow
+import churchpresenter.composeapp.generated.resources.tooltip_underline
 import churchpresenter.composeapp.generated.resources.word_wrap
 import churchpresenter.composeapp.generated.resources.customize_layout
 import churchpresenter.composeapp.generated.resources.customize_marker
@@ -332,8 +337,18 @@ private fun SongStrip(
             update { it.copy(layoutExtras = it.layoutExtras.copy(contentRegion = v)) }
         }
     }
+    if (!lowerThird && lyricSlide) {
+        // Vertical only: the lyric blocks draw `fillMaxWidth()`, so there is no horizontal room to
+        // move through -- narrowing and shifting them sideways is the content region's job above.
+        ElementOffsetStripRow(
+            label = stringResource(Res.string.lyrics),
+            offset = ss.layoutExtras.lyricsOffset,
+            verticalOnly = true,
+            tagPrefix = LYRICS_OFFSET_TAG,
+        ) { v -> update { it.copy(layoutExtras = it.layoutExtras.copy(lyricsOffset = v)) } }
+    }
     if (lyricSlide) {
-        SectionLabelStripRow(ss.layoutExtras.sectionLabel) { transform ->
+        SectionLabelStripRow(ss.layoutExtras.sectionLabel, lowerThird) { transform ->
             update { song ->
                 val extras = song.layoutExtras.copy(sectionLabel = transform(song.layoutExtras.sectionLabel))
                 song.copy(layoutExtras = extras)
@@ -342,13 +357,23 @@ private fun SongStrip(
     }
 }
 
+/** Test handle for the lyrics block's own positioning switch. */
+internal const val LYRICS_OFFSET_TAG = "song_lyrics_offset"
+
+/** Test handle for the section label's positioning switch. */
+internal const val SECTION_LABEL_OFFSET_TAG = "song_section_label_offset"
+
 /**
  * The current section's own label ("Verse 1", "Chorus"), drawn above the lyrics on every output
  * that shows them -- a property of the slide as a whole rather than of one element, like the
  * marker in [SongStrip].
  */
 @Composable
-private fun SectionLabelStripRow(label: SongSectionLabel, update: ((SongSectionLabel) -> SongSectionLabel) -> Unit) {
+private fun SectionLabelStripRow(
+    label: SongSectionLabel,
+    lowerThird: Boolean,
+    update: ((SongSectionLabel) -> SongSectionLabel) -> Unit,
+) {
     StripRow(stringResource(Res.string.song_section_label)) {
         ToggleControl(
             label = stringResource(Res.string.song_section_label_enabled),
@@ -367,7 +392,36 @@ private fun SectionLabelStripRow(label: SongSectionLabel, update: ((SongSectionL
                 color = label.color,
                 onColorChange = { v -> update { it.copy(color = v) } },
             )
+            // The same weight/slant/underline/shadow every other song element has had all along --
+            // the label was drawn with a hard-coded `TextStyle.Default` and no stroke at all.
+            ToggleControl(
+                label = stringResource(Res.string.tooltip_bold),
+                checked = label.bold,
+                onCheckedChange = { v -> update { it.copy(bold = v) } },
+            )
+            ToggleControl(
+                label = stringResource(Res.string.tooltip_italic),
+                checked = label.italic,
+                onCheckedChange = { v -> update { it.copy(italic = v) } },
+            )
+            ToggleControl(
+                label = stringResource(Res.string.tooltip_underline),
+                checked = label.underline,
+                onCheckedChange = { v -> update { it.copy(underline = v) } },
+            )
+            ToggleControl(
+                label = stringResource(Res.string.tooltip_shadow),
+                checked = label.shadow,
+                onCheckedChange = { v -> update { it.copy(shadow = v) } },
+            )
         }
+    }
+    if (label.enabled && !lowerThird) {
+        ElementOffsetStripRow(
+            label = stringResource(Res.string.song_section_label),
+            offset = label.offset,
+            tagPrefix = SECTION_LABEL_OFFSET_TAG,
+        ) { v -> update { it.copy(offset = v) } }
     }
 }
 

@@ -131,6 +131,19 @@ data class BibleTranslationSettings(
     val lowerThirdTextOutline: TextOutline = TextOutline(),
     val referenceOutline: TextOutline = TextOutline(),
     val lowerThirdReferenceOutline: TextOutline = TextOutline(),
+
+    // Where the verse text and the reference sit, once the operator positions them rather than
+    // leaving them stacked in the order `referencePosition` gives -- see [ElementOffset]. Null, the
+    // default, is the stack, which is what every one of these has always drawn; a positioned
+    // element leaves it, so `referencePosition` stops applying to a reference that has an offset.
+    //
+    // **Full screen only, and so no lower-third twin** -- the same scope [BibleSettings.contentRegion]
+    // has, for the same reason. A band is a strip a third of a screen high whose whole layout is
+    // already band-relative; positioning an element freely inside it means very little, and the
+    // control is not offered there (see `CustomizeStripRows`, which guards the content region the
+    // same way).
+    val textOffset: ElementOffset? = null,
+    val referenceOffset: ElementOffset? = null,
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the
