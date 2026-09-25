@@ -862,6 +862,7 @@ fun PicturesTab(
                             modifier = Modifier
                                 .animateItem()
                                 .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
+                                .hoverLift(RoundedCornerShape(8.dp))
                                 .border(2.dp, borderColor, RoundedCornerShape(8.dp))
                                 .clip(RoundedCornerShape(8.dp))
                                 .pointerInput(imageFile) {

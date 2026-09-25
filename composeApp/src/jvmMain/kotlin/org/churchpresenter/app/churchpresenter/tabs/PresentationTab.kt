@@ -1253,6 +1253,7 @@ private fun SlideThumbnail(
     val borderColor = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant
     Column(
         modifier = Modifier
+            .hoverLift(RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp))
             .border(2.dp, borderColor, RoundedCornerShape(8.dp))
             .combinedClickable(onClick = onClick, onDoubleClick = onDoubleClick)
