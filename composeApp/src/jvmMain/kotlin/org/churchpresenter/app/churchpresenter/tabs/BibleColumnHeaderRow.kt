@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -64,7 +65,7 @@ import org.churchpresenter.bible.bibleDisplayNames
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun BibleVerseHeader(
     crossRefsVisible: Boolean,
@@ -88,14 +89,16 @@ internal fun BibleVerseHeader(
     val verseSelectionHint = stringResource(Res.string.bible_verse_selection_hint)
     val goLiveStr = stringResource(Res.string.go_live)
     val addScheduleStr = stringResource(Res.string.add_to_schedule)
-    Row(
+    // Wraps rather than clips: in split mode the verse card is narrow, and a Row squeezed the
+    // trailing Go Live button to nothing.
+    FlowRow(
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
             .padding(start = 16.dp, top = 7.dp, end = 10.dp, bottom = 7.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        itemVerticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
     ) {
-        BibleListHeaderLabel(stringResource(Res.string.verse))
-        Spacer(Modifier.weight(1f))
+        BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f))
 
         if (crossRefsVisible) CrossRefsPill(crossRefsDocked, onCrossReferencesToggle)
 
