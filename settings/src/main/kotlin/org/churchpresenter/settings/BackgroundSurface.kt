@@ -63,6 +63,9 @@ fun resolveBackgroundSurfaces(
             defaultLowerThirdAboveBandColor = profile.defaultLowerThirdAboveBandColor,
             defaultLowerThirdAboveBandOpacity = profile.defaultLowerThirdAboveBandOpacity,
             defaultLowerThirdAboveBandFillsBehindBand = profile.defaultLowerThirdAboveBandFillsBehindBand,
+            defaultLowerThirdAboveBandImage = profile.defaultLowerThirdAboveBandImage,
+            defaultLowerThirdAboveBandVideo = profile.defaultLowerThirdAboveBandVideo,
+            defaultLowerThirdAboveBandCamera = profile.defaultLowerThirdAboveBandCamera,
         )
     }
     if (BackgroundSurface.BIBLE.name in overridden) out = out.copy(bibleBackground = profile.bibleBackground)

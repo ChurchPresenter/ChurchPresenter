@@ -12,6 +12,7 @@ import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.contentRegion
+import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
@@ -102,6 +103,7 @@ internal fun PresenterModeContent(
         LocalBandSongLineIndex provides bandSongLineIndex,
         LocalBandOutgoing provides bandOutgoing,
     ) {
+    LowerThirdLayout(mode, profile, appSettings, showBackgroundOverride ?: showBg) {
     when (mode) {
         Presenting.BIBLE ->
             if (profile.showBible) {
@@ -258,6 +260,7 @@ internal fun PresenterModeContent(
                 )
         Presenting.NONE -> { /* nothing */
         }
+    }
     }
     }
 }

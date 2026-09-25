@@ -1164,6 +1164,9 @@
     <string name="output_profile_move_down">Move down</string>
     <string name="output_profile_style">Style</string>
     <string name="output_profile_scale">Scale</string>
+    <string name="output_profile_placement">Placement</string>
+    <string name="lower_third_placement_full_screen">Full screen</string>
+    <string name="lower_third_placement_in_band">In band</string>
     <string name="output_profile_sample_caption_earlier">and the light shines in the darkness,</string>
     <string name="output_profile_sample_caption">and the darkness has not overcome it.</string>
     <string name="output_profile_sample_caption_translation">y las tinieblas no la vencieron.</string>

@@ -127,6 +127,27 @@ class QuickBackgroundStripTest {
         assertTrue(edited.background.blur > 0, "and blurs")
     }
 
+    @Test
+    fun `a tile's lower third can inherit, its full screen cannot`() =
+        backgroundTab(withTiles("#112233")) { settings ->
+            openTilePanel()
+            assertEquals(
+                0,
+                onAllNodes(hasText("Inherit") and hasAnyAncestor(hasTestTag(SONG_BACKGROUND_PANEL_TAG)))
+                    .fetchSemanticsNodes().size,
+                "a full screen that inherited would be a tile that does nothing when pressed",
+            )
+            inPanel("Lower third").performClick()
+            waitForIdle()
+            inPanel("Inherit").performClick()
+            waitForIdle()
+            inPanel("OK").performClick()
+            waitForIdle()
+            val edited = settings().quickBackgrounds.single()
+            assertEquals(SongBackgroundType.INHERIT, edited.lowerThirdBackground.type, "the band is left alone")
+            assertEquals(SongBackgroundType.COLOR, edited.background.type, "the full screen still overrides")
+        }
+
     /** Clicks the first tile's swatch, which is what opens the panel over it. */
     private fun androidx.compose.ui.test.ComposeUiTest.openTilePanel() {
         onNodeWithText("1").performClick()

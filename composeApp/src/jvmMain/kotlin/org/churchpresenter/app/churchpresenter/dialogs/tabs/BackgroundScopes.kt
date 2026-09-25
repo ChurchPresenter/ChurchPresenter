@@ -112,11 +112,12 @@ internal fun BackgroundScope.typeOptions(): List<String> = buildList {
 }
 
 /**
- * The types the wash above [this] surface's band offers, in the order its segments show them.
+ * The types the area above [this] surface's band offers, in the order its segments show them.
  *
- * The band's [typeOptions] minus everything that is not a color: no picture, no clip, no camera and
- * no gradient, because the band is where those belong and the two thirds above it are a flat wash
- * or nothing at all.
+ * The band's [typeOptions] minus the two that only make sense on a band: no gradient, which fades
+ * the band into what is behind it, and no Lottie, which *is* a band. A picture, a clip or a camera
+ * above the band is what puts a feed on the rest of a lower-third output — behind a Lottie band
+ * too, which draws nothing but itself.
  *
  * `Default` appears for the same reason it does in the band's row — and is absent from the Default
  * Lower Third for a reason the band does not share. That surface's *band* can follow the
@@ -128,6 +129,9 @@ internal fun BackgroundScope.aboveBandTypeOptions(): List<String> = buildList {
         add(Constants.BACKGROUND_DEFAULT)
     }
     add(Constants.BACKGROUND_COLOR)
+    add(Constants.BACKGROUND_IMAGE)
+    add(Constants.BACKGROUND_VIDEO)
+    add(Constants.BACKGROUND_CAMERA)
     add(Constants.BACKGROUND_TRANSPARENT)
 }
 
@@ -156,6 +160,9 @@ internal fun BackgroundSettings.configFor(scope: BackgroundScope): BackgroundCon
         aboveBandColor = defaultLowerThirdAboveBandColor,
         aboveBandOpacity = defaultLowerThirdAboveBandOpacity,
         aboveBandFillsBehindBand = defaultLowerThirdAboveBandFillsBehindBand,
+        aboveBandImage = defaultLowerThirdAboveBandImage,
+        aboveBandVideo = defaultLowerThirdAboveBandVideo,
+        aboveBandCamera = defaultLowerThirdAboveBandCamera,
     )
     BackgroundScope.BIBLE -> bibleBackground
     BackgroundScope.BIBLE_LOWER_THIRD -> bibleLowerThirdBackground
@@ -191,6 +198,9 @@ internal fun BackgroundSettings.withConfigFor(
         defaultLowerThirdAboveBandColor = config.aboveBandColor,
         defaultLowerThirdAboveBandOpacity = config.aboveBandOpacity,
         defaultLowerThirdAboveBandFillsBehindBand = config.aboveBandFillsBehindBand,
+        defaultLowerThirdAboveBandImage = config.aboveBandImage,
+        defaultLowerThirdAboveBandVideo = config.aboveBandVideo,
+        defaultLowerThirdAboveBandCamera = config.aboveBandCamera,
     )
     BackgroundScope.BIBLE -> copy(bibleBackground = config)
     BackgroundScope.BIBLE_LOWER_THIRD -> copy(bibleLowerThirdBackground = config)

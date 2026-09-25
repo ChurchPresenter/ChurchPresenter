@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
-import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.AppSettings
 
 import org.churchpresenter.core.models.songs.LyricSection
@@ -363,13 +362,13 @@ fun SongPresenter(
             val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             BoxWithConstraints(modifier.fillMaxSize()) {
                 AboveBandFill(
-                    fill = if (showBackground) above.fill else null,
+                    above = above,
+                    show = showBackground,
                     bandFraction = effectiveBandFraction(
                         canvasAspectRatio = maxWidth / maxHeight,
                         bandFraction = lowerThirdFraction,
                         templateAspectRatio = loaded.width / loaded.height,
                     ),
-                    fillsBehindBand = above.fillsBehindBand,
                 )
                 val outgoing = LocalBandOutgoing.current
                 SongLottieBand(
@@ -408,7 +407,6 @@ fun SongPresenter(
     val bgBlurReferencePx = resolvedBg.blurReferencePx
 
     val backgroundImageBitmap = rememberBackgroundBitmap(resolvedBg, isLowerThird)
-    val useVideoBackground = resolvedBg.usesVideo
     val effectiveOpacity = resolvedBg.opacity
     val bgModifier: Modifier = backgroundModifier(resolvedBg, backgroundImageBitmap)
 
@@ -718,9 +716,9 @@ fun SongPresenter(
             // The wash behind the whole lower third, band included — see AboveBandFill.
             val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
             AboveBandFill(
-                fill = if (showBackground) above.fill else null,
+                above = above,
+                show = showBackground,
                 bandFraction = lowerThirdFraction,
-                fillsBehindBand = above.fillsBehindBand,
             )
             val bandBleed = if (blurred) blurRadius * BLUR_EDGE_BLEED else 0.dp
             // Read out here: the band Box's own scope shadows this one.
@@ -755,12 +753,7 @@ fun SongPresenter(
                             modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
                         )
                     }
-                    if (useVideoBackground) {
-                        LoopingVideoBackground(
-                            videoPath = resolvedBg.videoPath,
-                            modifier = Modifier.fillMaxSize().alpha(effectiveOpacity),
-                        )
-                    }
+                    BandMediaLayers(resolvedBg)
                 }
             }
             if (bgDimPercent > 0) {

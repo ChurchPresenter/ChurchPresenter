@@ -1230,6 +1230,7 @@ private fun QuickBackgroundStripTile(
                         onDismiss = { onOpenChange(false) },
                         stageAspect = tileAspect,
                         allowInherit = false,
+                        allowInheritLowerThird = true,
                         footer = {
                             QuickBackgroundPanelFooter(
                                 onCancel = { onOpenChange(false) },

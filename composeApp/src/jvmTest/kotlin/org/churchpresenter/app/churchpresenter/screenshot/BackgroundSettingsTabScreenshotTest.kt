@@ -12,6 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -22,6 +25,7 @@ import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
@@ -267,6 +271,12 @@ class BackgroundSettingsTabScreenshotTest {
         openRailRow(DEFAULT_LOWER_THIRD, nth = 0)
     }
 
+    /** A clip above the band, which swaps the colour field for the band's own video picker. */
+    @Test
+    fun `a clip above the band`() = shoot("above_band_video", settings = withClipAboveBand()) {
+        openRailRow(DEFAULT_LOWER_THIRD, nth = 0)
+    }
+
     // ── The quick backgrounds shelf ─────────────────────────────────────────────────────────────
 
     /** The shelf with a tray configured, which is where the tiles are made. */
@@ -281,6 +291,19 @@ class BackgroundSettingsTabScreenshotTest {
         rootIndex = 1,
     ) {
         onAllNodesWithText("1")[0].performClick()
+        waitForIdle()
+    }
+
+    /** The same panel on its lower-third half, the one half of a tile that can inherit. */
+    @Test
+    fun `a quick background panel's lower third`() = shoot(
+        "quick_background_panel_lower_third",
+        settings = withQuickTray(),
+        rootIndex = 1,
+    ) {
+        onAllNodesWithText("1")[0].performClick()
+        waitForIdle()
+        onNode(hasText("Lower third") and hasAnyAncestor(hasTestTag(SONG_BACKGROUND_PANEL_TAG))).performClick()
         waitForIdle()
     }
 
@@ -361,6 +384,15 @@ class BackgroundSettingsTabScreenshotTest {
             defaultLowerThirdAboveBandOpacity = 0.75f,
         )
     )
+
+    private fun withClipAboveBand() = withWash().let {
+        it.copy(
+            backgroundSettings = it.backgroundSettings.copy(
+                defaultLowerThirdAboveBandType = Constants.BACKGROUND_VIDEO,
+                defaultLowerThirdAboveBandVideo = "/clips/sanctuary-loop.mp4",
+            ),
+        )
+    }
 
     /** A tray of three, so the shelf shows tiles, their names and the slot each answers to. */
     private fun withQuickTray() = AppSettings(

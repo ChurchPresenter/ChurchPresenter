@@ -253,7 +253,7 @@ private fun BackgroundSurfaceRows(
     // Every lower-third surface, whatever its band is set to: the wash falls through on its own
     // field rather than on the band's type, so a surface drawing a picture still has a say above it.
     if (scope.lowerThird) {
-        AboveBandRows(scope, config, onConfig)
+        AboveBandRows(scope, settings, config, onConfig, onSettingsChange)
     }
 }
 
@@ -303,21 +303,31 @@ private fun LottieRows(
 @Composable
 private fun AboveBandRows(
     scope: BackgroundScope,
+    settings: AppSettings,
     config: BackgroundConfig,
     onConfig: (BackgroundConfig) -> Unit,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     CustomizeRow(stringResource(Res.string.background_above_band_caption)) {
         ChoiceControl(
             options = scope.aboveBandTypeOptions().map { it to stringResource(customizeTypeLabel(it)) },
             selected = config.aboveBandType,
+            maxPerRow = TYPES_PER_ROW,
             onSelect = { v -> onConfig(config.copy(aboveBandType = v)) },
         )
     }
-    if (config.aboveBandType != Constants.BACKGROUND_COLOR) return
-    val fill = stringResource(Res.string.background_above_band_fill)
-    CustomizeRow(fill, labelInsideControl = true) {
-        ColorControl(fill, config.aboveBandColor) { v -> onConfig(config.copy(aboveBandColor = v)) }
+    if (config.aboveBandType == Constants.BACKGROUND_COLOR) {
+        val fill = stringResource(Res.string.background_above_band_fill)
+        CustomizeRow(fill, labelInsideControl = true) {
+            ColorControl(fill, config.aboveBandColor) { v -> onConfig(config.copy(aboveBandColor = v)) }
+        }
     }
+    aboveBandMediaCaption(config.aboveBandType)?.let { caption ->
+        CustomizeRow(stringResource(caption)) {
+            AboveBandMediaPicker(settings, config, onConfig, onSettingsChange, Modifier.width(SOURCE_FIELD_WIDTH))
+        }
+    }
+    if (!config.aboveBandType.drawsAboveBand()) return
     CustomizeRow(stringResource(Res.string.background_above_band_opacity)) {
         SliderControl(
             value = (config.aboveBandOpacity * PERCENT).toInt(),
