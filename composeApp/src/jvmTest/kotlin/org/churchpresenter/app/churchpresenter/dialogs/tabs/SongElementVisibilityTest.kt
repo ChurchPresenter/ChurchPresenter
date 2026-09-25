@@ -248,7 +248,10 @@ class SongElementVisibilityTest {
     @Test
     fun `the title slide's defaults keep what it always showed`() {
         val s = SongSettings()
-        assertEquals(true, s.shownOnTitleSlide(SongStyleElement.NUMBER))
+        assertEquals(true, s.shownOnTitleSlide(SongStyleElement.TITLE_SLIDE_NUMBER))
+        // The lyric slides' number is not on this slide at all, so it answers null rather than
+        // false: `shownOnTitleSlide` means "does the title slide draw this", not "is it visible".
+        assertEquals(null, s.shownOnTitleSlide(SongStyleElement.NUMBER))
         assertEquals(true, s.shownOnTitleSlide(SongStyleElement.TITLE))
         assertEquals(true, s.shownOnTitleSlide(SongStyleElement.AUTHOR))
         assertEquals(true, s.shownOnTitleSlide(SongStyleElement.COMPOSER))

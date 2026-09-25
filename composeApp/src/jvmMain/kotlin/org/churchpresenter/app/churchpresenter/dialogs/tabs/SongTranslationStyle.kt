@@ -13,7 +13,8 @@ import org.churchpresenter.settings.withTranslationSettings
  */
 internal val SongStyleElement.translationElement: SongTranslationElement?
     get() = when (this) {
-        SongStyleElement.NUMBER -> null
+        // Neither number changes with the language: the digits are the digits.
+        SongStyleElement.NUMBER, SongStyleElement.TITLE_SLIDE_NUMBER -> null
         SongStyleElement.TITLE -> SongTranslationElement.TITLE
         SongStyleElement.LYRICS -> SongTranslationElement.LYRICS
         SongStyleElement.LOOK_AHEAD -> SongTranslationElement.LOOK_AHEAD

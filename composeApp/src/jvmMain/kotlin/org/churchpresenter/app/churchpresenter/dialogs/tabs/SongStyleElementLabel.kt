@@ -17,7 +17,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun SongStyleElement.label(): String = stringResource(
     when (this) {
-        SongStyleElement.NUMBER -> Res.string.song_element_number
+        // Both read "Number": each is chosen from its own slide's chip strip, so the slide the
+        // operator is looking at already says which number they are editing.
+        SongStyleElement.NUMBER, SongStyleElement.TITLE_SLIDE_NUMBER -> Res.string.song_element_number
         SongStyleElement.TITLE -> Res.string.song_element_title
         SongStyleElement.LYRICS -> Res.string.song_element_lyrics
         SongStyleElement.LOOK_AHEAD -> Res.string.song_element_look_ahead

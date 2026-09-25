@@ -1430,6 +1430,11 @@
     <string name="media_mute">Mute</string>
     <string name="media_unmute">Unmute</string>
     <string name="media_loop_count">Loops</string>
+    <!-- Unused since the subtitle look moved onto the output profiles, but kept: all 34 locale
+         files carry translations for both, and `LocaleStringsTest` requires every translated key to
+         exist here. Deleting an English string whose translations remain is what breaks it. -->
+    <string name="media_subtitle_settings">Subtitle Settings</string>
+    <string name="tooltip_media_subtitle_settings">Subtitle Display Settings</string>
     <string name="media_subtitles">Subtitles</string>
     <string name="media_subtitles_off">Off</string>
     <string name="media_subtitles_load_file">Load subtitle file…</string>

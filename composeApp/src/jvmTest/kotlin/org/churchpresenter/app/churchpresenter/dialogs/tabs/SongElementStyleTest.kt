@@ -44,8 +44,10 @@ class SongElementStyleTest {
     )
 
     @Test
-    fun `there are eighteen profiles`() {
-        assertEquals(18, combinations.size)
+    fun `there are twenty profiles`() {
+        // Nine elements on two outputs, plus the title slide's own number, which used to share the
+        // lyric slides' profile and now has one of its own -- see #609.
+        assertEquals(20, combinations.size)
     }
 
     @Test
@@ -166,10 +168,17 @@ class SongElementStyleTest {
     fun `the four credits are the title slide's alone`() {
         listOf(SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO)
             .forEach { assertTrue(it.isCredit && it.onTitleSlide, "$it") }
-        listOf(SongStyleElement.NUMBER, SongStyleElement.TITLE).forEach {
+        listOf(SongStyleElement.TITLE_SLIDE_NUMBER, SongStyleElement.TITLE).forEach {
             assertTrue(it.onTitleSlide && !it.isCredit, "$it")
         }
-        listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION).forEach {
+        // NUMBER is the lyric slides' alone now: the title slide draws TITLE_SLIDE_NUMBER, which is
+        // what lets the number sit in one corner on the lyrics and another on the title slide.
+        listOf(
+            SongStyleElement.NUMBER,
+            SongStyleElement.LYRICS,
+            SongStyleElement.LOOK_AHEAD,
+            SongStyleElement.NEXT_SECTION,
+        ).forEach {
             assertTrue(!it.onTitleSlide && !it.isCredit, "$it")
         }
     }
