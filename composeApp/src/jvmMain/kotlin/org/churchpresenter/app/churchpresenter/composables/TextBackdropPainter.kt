@@ -9,14 +9,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.text.TextBackdrop
 
 /**
@@ -53,6 +56,48 @@ class TextBackdropPainter internal constructor() {
     fun onTextLayout(result: TextLayoutResult) {
         layout = result
     }
+}
+
+/**
+ * How far outside the text this backdrop reaches, in sp.
+ *
+ * `drawTextBackdrop` deliberately does not clamp itself to the text's own box -- clamping would eat
+ * the padding on every side the text reaches, leaving the outline sitting on the first letter. That
+ * is the right call, and it carries a condition its own comment names: *only an ancestor that clips
+ * would cut it off*. The presenters do clip, and their text fills the clipped box, so on anything
+ * but centred text the plate had nowhere to go and was shaved off at the edge.
+ *
+ * So the text is inset by this instead, which is what [backdropRoom] does. A plate needs room; this
+ * says how much.
+ */
+internal val TextBackdrop.outsetSp: Float
+    get() {
+        if (isEmpty) return 0f
+        // The block shape: `drawBlockBacking` pads by `borderPadding + stroke / 2` and strokes
+        // outwards to that edge, so the stroke's full width is what has to be cleared.
+        val block = if (border) (borderPadding + borderWidth).toFloat() else 0f
+        // The per-line bands: grown sideways and up and down, and slid by the offset.
+        val bands = if (lineBackground) {
+            maxOf(lineBackgroundWidth, lineBackgroundHeight).toFloat() + kotlin.math.abs(lineBackgroundOffset)
+        } else {
+            0f
+        }
+        return maxOf(block, bands)
+    }
+
+/**
+ * Room around the text for [backdrop] to draw into, inside whatever the ancestors clip to.
+ *
+ * Goes **before** [TextBackdropPainter.modifier] in the chain, so the painter's `drawBehind` sits on
+ * the inset node and its overdraw lands in the room this reserved rather than outside the parent.
+ * A no-op when the backdrop needs none, so text without one is laid out exactly as it always was.
+ */
+@Composable
+fun Modifier.backdropRoom(backdrop: TextBackdrop, scale: Float = 1f): Modifier {
+    val outset = backdrop.outsetSp * scale
+    if (outset <= 0f) return this
+    val room = with(LocalDensity.current) { outset.sp.toDp() }
+    return this.padding(horizontal = room, vertical = room)
 }
 
 /**

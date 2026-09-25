@@ -54,6 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.app.churchpresenter.composables.backdropRoom
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
@@ -590,7 +591,9 @@ private fun TextContent(style: StageMonitorZoneStyle, text: String) {
                 shadowSize = style.shadowSize,
                 shadowOpacity = style.shadowOpacity
             ),
-            modifier = Modifier.fillMaxWidth().then(painter.modifier),
+            modifier = Modifier.fillMaxWidth()
+                .backdropRoom(style.backdrop)
+                .then(painter.modifier),
             onTextLayout = painter::onTextLayout,
             textAlign = resolveTextAlign(style.horizontalAlignment)
         )
@@ -659,7 +662,7 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
             shadowSize = style.shadowSize,
             shadowOpacity = style.shadowOpacity
         ),
-        modifier = painter.modifier,
+        modifier = Modifier.backdropRoom(style.backdrop).then(painter.modifier),
         onTextLayout = painter::onTextLayout,
         textAlign = TextAlign.Center
     )

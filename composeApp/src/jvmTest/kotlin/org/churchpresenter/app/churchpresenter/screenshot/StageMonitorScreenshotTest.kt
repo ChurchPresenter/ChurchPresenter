@@ -24,6 +24,7 @@ import org.churchpresenter.settings.StageMonitorLayout
 import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
+import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.settings.toZone
 import org.churchpresenter.core.models.songs.LyricSection
@@ -508,6 +509,36 @@ class StageMonitorScreenshotTest {
                 StageMonitorStyleZone.B to StageMonitorZoneStyle(
                     fontSize = 28, color = "#8FB3F5", bgColor = "#10131A", italic = true,
                     verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER,
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /**
+     * A bordered backdrop on a left-aligned zone, which is the state the clipping audit found had no
+     * picture anywhere in the set.
+     *
+     * A zone has no clip and no gap to its neighbour, so the plate was drawn **outside** the zone and
+     * bled onto the one below it — the only surface where the overdraw landed on other content rather
+     * than being shaved off. `Modifier.backdropRoom` insets the text so the box lands inside its own
+     * zone; that it does is what this picture is for. Both zones carry it so the boundary between
+     * them is where a reviewer looks.
+     */
+    @Test
+    fun `zones in bordered boxes`() = shoot(
+        "zone_backdrop_border",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 44,
+                    horizontalAlignment = Constants.LEFT,
+                    backdrop = BORDER_BOX,
+                ),
+                StageMonitorStyleZone.B to StageMonitorZoneStyle(
+                    fontSize = 32,
+                    horizontalAlignment = Constants.LEFT,
+                    backdrop = BORDER_BOX,
                 ),
             )
         ),
@@ -1131,6 +1162,15 @@ class StageMonitorScreenshotTest {
 
     private companion object {
         const val SECTION = "stageMonitor"
+
+        /** A box around a zone's text. No fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
 
         /** 16:9, and the shape every image outside the zone-size set is recorded at. */
         val LANDSCAPE = OutputSize(1024, 576)

@@ -23,6 +23,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import kotlinx.serialization.json.jsonPrimitive
 
 /** The key the band height is stored under, in all three of its homes. */
@@ -32,6 +34,12 @@ private const val VERSION_HIDDEN_TABS = 5
 
 /** The Schedule toolbar gained a Calendar button that starts hidden. */
 private const val VERSION_CALENDAR_BUTTON = 11
+
+/** A quick-tray tile's lower-third half may inherit the output's band — see [SettingsManager]. */
+private const val VERSION_QUICK_BACKGROUND_INHERITS = 17
+
+/** What the tray's old constructor seeded both halves of a tile with: opaque black, nothing else. */
+private val SEEDED_BLACK = SongBackground(type = SongBackgroundType.COLOR, color = "#000000")
 
 /** The three placement-field prefixes used throughout companionSatelliteConnections[] entries
  * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
@@ -336,6 +344,9 @@ class SettingsManager {
             // a button nobody asked for.
             settings = settings.copy(hiddenScheduleButtons = settings.hiddenScheduleButtons + "CALENDAR")
         }
+        if (fromVersion < VERSION_QUICK_BACKGROUND_INHERITS) {
+            settings = migrateQuickBackgroundLowerThird(settings)
+        }
         // The primary/secondary-bible output shorthand ("primary"/"secondary" bibleMode, converted
         // to a position in the stack) used to be migrated here as a typed, per-[ScreenAssignment]
         // step gated on `fromVersion < 6`. An output no longer carries `bibleMode` at all -- that
@@ -446,6 +457,35 @@ class SettingsManager {
             result = result.copy(hiddenTabs = result.hiddenTabs + "STT")
         }
         return result
+    }
+
+    /**
+     * Schema version 17. A quick-tray tile's lower-third half goes back to inheriting the output's
+     * band, where the tray's old constructor had seeded it opaque black.
+     *
+     * The fix that let a tile's band inherit changed the constructor and said so plainly: *"tiles
+     * already saved keep whatever they hold."* They do, and that is the whole of the report that
+     * followed it — every tile an operator had made before the update still carried a black band, so
+     * picking one still painted every lower third solid black, a keyed transparent one included.
+     * A fix to a constructor cannot reach data that is already on disk.
+     *
+     * **Only the seeded value is reset.** The editor of the day offered no Inherit switch on that
+     * half, so a tile holding exactly what the constructor produced -- an opaque black colour and
+     * nothing else -- is one nobody chose. Anything else is a choice and is left alone: a tile whose
+     * band is a picture, a gradient, a dimmed black or any other colour comes through untouched.
+     * A black band that *was* wanted is two clicks to set again, now that the switch exists.
+     */
+    private fun migrateQuickBackgroundLowerThird(settings: AppSettings): AppSettings {
+        if (settings.quickBackgrounds.none { it.lowerThirdBackground == SEEDED_BLACK }) return settings
+        return settings.copy(
+            quickBackgrounds = settings.quickBackgrounds.map { tile ->
+                if (tile.lowerThirdBackground == SEEDED_BLACK) {
+                    tile.copy(lowerThirdBackground = SongBackground())
+                } else {
+                    tile
+                }
+            },
+        )
     }
 
     /** One screen assignment with showBible/showSongs turned into modes, or null if untouched. */

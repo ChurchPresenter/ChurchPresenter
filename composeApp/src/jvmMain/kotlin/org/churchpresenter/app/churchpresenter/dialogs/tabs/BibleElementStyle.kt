@@ -57,8 +57,8 @@ internal data class BibleElementStyle(
     /**
      * Where this element sits when it is positioned rather than stacked; null is the stack.
      *
-     * Full screen only -- `BibleTranslationSettings` keeps no lower-third twin, for the reason
-     * `textOffsetFor` records -- so the lower-third branches below read and write null.
+     * Stored per output, so all four branches below carry one -- see `textOffsetFor`, which is where
+     * the band's own pair is read.
      */
     val offset: ElementOffset? = null,
 )
@@ -106,6 +106,7 @@ internal fun BibleTranslationSettings.elementStyle(
         transform = lowerThirdTextTransform,
         backdrop = lowerThirdTextBackdrop,
         outline = lowerThirdTextOutline,
+        offset = lowerThirdTextOffset,
     )
     !target.isLowerThird -> BibleElementStyle(
         color = referenceColor,
@@ -147,6 +148,7 @@ internal fun BibleTranslationSettings.elementStyle(
         transform = lowerThirdReferenceTransform,
         backdrop = lowerThirdReferenceBackdrop,
         outline = lowerThirdReferenceOutline,
+        offset = lowerThirdReferenceOffset,
     )
 }
 
@@ -207,6 +209,7 @@ private fun BibleTranslationSettings.withLowerThirdText(s: BibleElementStyle) = 
     lowerThirdTextTransform = s.transform,
     lowerThirdTextBackdrop = s.backdrop,
     lowerThirdTextOutline = s.outline,
+    lowerThirdTextOffset = s.offset,
 )
 
 private fun BibleTranslationSettings.withFullScreenReference(s: BibleElementStyle) = copy(
@@ -250,6 +253,7 @@ private fun BibleTranslationSettings.withLowerThirdReference(s: BibleElementStyl
     lowerThirdReferenceTransform = s.transform,
     lowerThirdReferenceBackdrop = s.backdrop,
     lowerThirdReferenceOutline = s.outline,
+    lowerThirdReferenceOffset = s.offset,
 )
 
 /**

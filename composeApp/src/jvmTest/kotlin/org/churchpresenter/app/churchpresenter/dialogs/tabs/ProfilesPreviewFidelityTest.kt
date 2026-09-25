@@ -183,4 +183,121 @@ class ProfilesPreviewFidelityTest {
             )
         }
     }
+
+    /**
+     * The mirror of the test above, and the half that was missing: a **portrait** band stacks its
+     * translations instead of setting them side by side.
+     *
+     * Both halves are needed. One alone passes against a preview that has picked an orientation and
+     * stuck to it -- landscape-only coverage cannot tell "reads the profile's shape" from "always
+     * draws side by side", and portrait-only coverage cannot tell it from "always stacks".
+     */
+    @Test
+    fun `a portrait band previews as a stacked band`() {
+        profilesTab(twoTranslationBand(width = 1080, height = 1920)) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            val verses = onAllNodesWithText(sampleVerse, substring = true).fetchSemanticsNodes()
+            assertEquals(2, verses.size, "both translations are drawn")
+            assertTrue(
+                verses[0].positionInRoot.y != verses[1].positionInRoot.y,
+                "a portrait band stacks its translations rather than setting them side by side",
+            )
+        }
+    }
+
+    /** And the landscape case read straight through, so the pair reads as one statement. */
+    @Test
+    fun `a landscape band previews as a side-by-side band`() {
+        profilesTab(twoTranslationBand(width = 1920, height = 1080)) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            val verses = onAllNodesWithText(sampleVerse, substring = true).fetchSemanticsNodes()
+            assertEquals(2, verses.size, "both translations are drawn")
+            assertEquals(
+                verses[0].positionInRoot.y,
+                verses[1].positionInRoot.y,
+                "a landscape band sets its translations side by side",
+            )
+        }
+    }
+
+    /**
+     * A portrait band reads *its own* shape, not a landscape sibling's.
+     *
+     * The guard beside the landscape one already in this suite, pointing the other way: an output
+     * whose orientation is read off some other profile is wrong in both directions, and only a pair
+     * of tests says so.
+     */
+    @Test
+    fun `a portrait band stays stacked even beside a landscape one`() {
+        val beside = twoTranslationBand(width = 1080, height = 1920).let {
+            it.copy(
+                projectionSettings = it.projectionSettings.copy(
+                    outputProfiles = it.projectionSettings.outputProfiles +
+                        OutputProfile(
+                            id = "wall",
+                            name = "Wall",
+                            displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                            previewWidth = 1920,
+                            previewHeight = 1080,
+                        ),
+                ),
+            )
+        }
+        profilesTab(beside) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            val verses = onAllNodesWithText(sampleVerse, substring = true).fetchSemanticsNodes()
+            assertEquals(2, verses.size, "both translations are drawn")
+            assertTrue(
+                verses[0].positionInRoot.y != verses[1].positionInRoot.y,
+                "the portrait band must keep stacking beside a landscape sibling",
+            )
+        }
+    }
+
+    /**
+     * The content region narrows a **portrait** full screen too.
+     *
+     * The two content-region tests above are landscape. A region is a percentage of the width, and
+     * a portrait screen has much less of it -- which is where a rounding or a min-width floor would
+     * show up first, and where the operator's "it shrinks from all sides" report came from.
+     */
+    @Test
+    fun `the content region is applied to a portrait Bible preview`() {
+        val portrait = OutputProfile(previewWidth = 1080, previewHeight = 1920)
+        val narrow = doc(
+            profile = portrait,
+            bible = BibleSettings(
+                translations = listOf(BibleTranslationSettings(fileName = "kjv.spb")),
+                contentRegion = ContentRegion(widthPercent = 40, xOffsetPercent = -30),
+            ),
+        )
+        var narrowWidth = 0
+        var fullWidth = 0
+        profilesTab(narrow) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            narrowWidth = onAllNodesWithText(sampleVerse, substring = true)
+                .fetchSemanticsNodes().first().size.width
+        }
+        profilesTab(doc(profile = portrait)) { _ ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+            fullWidth = onAllNodesWithText(sampleVerse, substring = true)
+                .fetchSemanticsNodes().first().size.width
+        }
+        assertTrue(
+            narrowWidth < fullWidth,
+            "a portrait verse confined to 40% must be drawn narrower (got $narrowWidth vs $fullWidth)",
+        )
+    }
+
+    /** A two-translation band on a profile of the given shape, which is what decides its stacking. */
+    private fun twoTranslationBand(width: Int, height: Int) = doc(
+        profile = OutputProfile(previewWidth = width, previewHeight = height),
+        mode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+        bible = BibleSettings(
+            translations = listOf(
+                BibleTranslationSettings(fileName = "kjv.spb"),
+                BibleTranslationSettings(fileName = "niv.spb"),
+            ),
+        ),
+    )
 }

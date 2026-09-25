@@ -411,15 +411,52 @@ class BibleViewModelBranchTest {
         assertNull(vm.moduleRefFor(43, 99, 1))
     }
 
+    /**
+     * An id no book can have is the only genuine no-op, and it is one synchronously.
+     *
+     * `selectVerseByBookId` returns early only when `getDisplayIndexForBookId` is negative, and that
+     * function falls back to `bookId - 1` when no book carries the id — so it is negative for a
+     * negative id and for nothing else. The early return happens before any coroutine is launched,
+     * which is what makes reading the state straight afterwards race-free.
+     */
     @Test
-    fun `selecting by book id for a book this module lacks changes nothing`() {
+    fun `selecting by an impossible book id changes nothing`() {
         openChapter(vm, 0, 1)
         val before = vm.verses.value
 
-        vm.selectVerseByBookId(35, 1, 1)
         vm.selectVerseByBookId(-5, 1, 1)
 
         assertEquals(before, vm.verses.value)
+    }
+
+    /**
+     * A **positive** id the module lacks is not a no-op, and this used to claim it was.
+     *
+     * `getDisplayIndexForBookId` falls back to the canonical position (`bookId - 1`) so a module
+     * whose ids do not match the canonical numbering still resolves positionally. For this
+     * three-book fixture, id 35 becomes position 34, which clamps to the last book — John — and
+     * loads a chapter it does not have, emptying the verse list.
+     *
+     * The old test asserted that nothing changed and passed only by reading the state **before the
+     * coroutine that changes it had run**. It won that race on a developer's machine and lost it on
+     * CI, where it failed with `expected:<[3 verses]> but was:<[]>`. Waiting on
+     * `verseSelectionToken` — the signal the load itself bumps — is what makes this deterministic,
+     * and asserting the fallback is what the behaviour actually is.
+     */
+    @Test
+    fun `selecting by a book id this module lacks falls back to the canonical position`() {
+        openChapter(vm, 0, 1)
+        val token = vm.verseSelectionToken.value
+
+        vm.selectVerseByBookId(35, 1, 1)
+
+        awaitUntil("the fallback chapter to load") { vm.verseSelectionToken.value > token }
+        assertEquals(
+            vm.books.value.lastIndex,
+            vm.selectedBookIndex.value,
+            "position 34 clamps to the last book this module has",
+        )
+        assertEquals(emptyList(), vm.verses.value, "and that book has no chapter 1 in this fixture")
     }
 
     @Test

@@ -188,6 +188,19 @@ private fun SongTitleSlideOptions(
     // slides' one: the same corner-and-nudge pair those have, over this slide's own fields.
     if (element == SongStyleElement.TITLE_SLIDE_NUMBER) {
         TitleSlideNumberPlacement(settings, onSettingsChange, target)
+    } else {
+        // Every other element the slide draws -- the title and the four credits. The number is not
+        // among them because it has the richer placement above; this is the plain positioning switch
+        // the lyrics and the section label already carry, and the five of them had nothing at all.
+        ElementOffsetStripRow(
+            label = element.label(),
+            offset = song.titleSlideOffset(element, target),
+            tagPrefix = titleSlideOffsetTag(element),
+        ) { v ->
+            onSettingsChange { s ->
+                s.copy(songSettings = s.songSettings.withTitleSlideOffset(element, target, v))
+            }
+        }
     }
 }
 

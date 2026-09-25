@@ -10,6 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -274,6 +275,55 @@ class CrashReporterStartupTest {
         handler.uncaughtException(Thread.currentThread(), IllegalStateException("kaboom"))
 
         assertEquals(EXIT_CODE_FATAL_CRASH, exitCode, "a distinct code from the clean-exit 0")
+    }
+
+    /** An exception thrown from the AWT clipboard peer, as Windows produces it. */
+    private fun clipboardRefusal() = IllegalStateException("cannot open system clipboard").apply {
+        stackTrace = arrayOf(
+            StackTraceElement("sun.awt.windows.WClipboard", "openClipboard0", null, -2),
+            StackTraceElement("sun.awt.datatransfer.SunClipboard", "setContents", null, -1),
+            StackTraceElement(
+                "androidx.compose.foundation.text.selection.TextFieldSelectionManager",
+                "copy", "TextFieldSelectionManager.kt", 882,
+            ),
+        )
+    }
+
+    @Test
+    fun `a refused clipboard is logged but does not end the process`() {
+        // Sentry CHURCH-PRESENTER-DESKTOP-42. Windows throws this out of `WClipboard` when another
+        // process is holding the clipboard open -- a clipboard manager, a remote-desktop session,
+        // Office -- and it surfaces here because it comes out of Compose's own copy handler, with
+        // no frame of ours to catch it. The event thread is fine afterwards; the copy just did not
+        // happen. Quitting mid-service over a failed Ctrl+C is much the worse of the two outcomes.
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(Thread.currentThread(), clipboardRefusal())
+
+        assertNull(exitCode, "a refused clipboard must not end the process")
+        val logs = crashDir.listFiles()?.filter { it.name.startsWith("crash_") }.orEmpty()
+        assertEquals(1, logs.size, "it is still written down, so it can still be found")
+        assertTrue(logs.single().readText().contains("WClipboard"), "and says where it came from")
+    }
+
+    @Test
+    fun `the same exception type from anywhere else still ends the process`() {
+        // The guard is the clipboard peer, not the exception type and not the wording: recovering
+        // from every IllegalStateException is the opposite of what #518 asked for.
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(
+            Thread.currentThread(),
+            IllegalStateException("cannot open system clipboard"),
+        )
+
+        assertEquals(
+            EXIT_CODE_FATAL_CRASH,
+            exitCode,
+            "the same message from a frame that is not the clipboard peer is not the known case",
+        )
     }
 
     @Test

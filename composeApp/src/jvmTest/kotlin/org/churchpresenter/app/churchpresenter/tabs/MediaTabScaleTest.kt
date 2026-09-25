@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * The Media tab's scale button: it names the mode every profile is in, and one click moves them all
+ * The Media tab's scale button: it names the mode every output is in, and one click moves them all
  * to the next.
  *
  * Like loop, it waits for something to be loaded. The harness applies a write to the settings the
@@ -38,7 +38,7 @@ class MediaTabScaleTest {
     ) { _, reports ->
         loadUrl()
 
-        mediaButton("Video scale on every profile: $label").performClick()
+        mediaButton("Video scale on every output: $label").performClick()
         waitForIdle()
 
         // Scaling is per profile; the button is the shortcut that moves every one of them.
@@ -49,7 +49,7 @@ class MediaTabScaleTest {
 
     @Test
     fun `nothing loaded, the button is disabled and saves nothing`() = mediaTab { _, reports ->
-        mediaButton("Video scale on every profile: Fit").assertIsNotEnabled().performClick()
+        mediaButton("Video scale on every output: Fit").assertIsNotEnabled().performClick()
         waitForIdle()
 
         assertNull(reports.settingsAfterChange)

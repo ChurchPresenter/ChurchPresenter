@@ -99,6 +99,7 @@ import org.churchpresenter.settings.withBrowserSourceOutput
 import org.churchpresenter.settings.withNdiOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -561,6 +562,11 @@ private fun SingleDisplayPreview(
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
+                                    modifier = if (isLowerThird) {
+                                        Modifier
+                                    } else {
+                                        Modifier.contentRegion(outputSettings.bibleSettings.contentRegion)
+                                    },
                                     selectedVerses = displayedVerses,
                                     appSettings = outputSettings,
                                     isLowerThird = isLowerThird,
@@ -573,6 +579,11 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
+                                    modifier = if (isLowerThird) {
+                                        Modifier
+                                    } else {
+                                        Modifier.contentRegion(outputSettings.songSettings.layoutExtras.contentRegion)
+                                    },
                                     lyricSection = displayedLyricSection,
                                     appSettings = outputSettings,
                                     isLowerThird = isLowerThird,
