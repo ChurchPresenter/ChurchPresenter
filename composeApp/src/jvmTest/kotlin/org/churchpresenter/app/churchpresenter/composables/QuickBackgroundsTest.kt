@@ -64,7 +64,7 @@ class QuickBackgroundsTest {
     }
 
     @Test
-    fun `a new tray entry overrides rather than inherits`() {
+    fun `a new tray entry overrides the full screen and inherits the lower third`() {
         val added = newQuickBackground()
         assertEquals(SongBackgroundType.COLOR, added.background.type)
         assertNotEquals(
@@ -72,7 +72,11 @@ class QuickBackgroundsTest {
             added.background.type,
             "a tile that inherited would do nothing when pressed",
         )
-        assertEquals(added.background.type, added.lowerThirdBackground.type, "both halves are set")
+        assertEquals(
+            SongBackgroundType.INHERIT,
+            added.lowerThirdBackground.type,
+            "a lower third seeded black painted every band black the moment the tile was picked",
+        )
         assertTrue(added.id.isNotBlank(), "the tray addresses its entries by id")
     }
 
