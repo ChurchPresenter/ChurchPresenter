@@ -1692,6 +1692,17 @@
     <string name="canvas_rename_scene">Rename</string>
     <string name="canvas_duplicate_scene">Duplicate</string>
     <string name="canvas_scene_copy_name">%1$s (copy)</string>
+    <string name="canvas_size">Canvas size</string>
+    <string name="canvas_size_tooltip">Canvas size (%1$s)</string>
+    <string name="canvas_size_match_output">Match %1$s</string>
+    <string name="canvas_size_screen">Screen %1$d</string>
+    <string name="canvas_size_custom">Custom</string>
+    <string name="canvas_size_set">Set</string>
+    <string name="canvas_layer_partly_outside">Partly outside the canvas</string>
+    <string name="canvas_layer_outside">Outside the canvas — not visible</string>
+    <string name="canvas_layers_outside_one">1 layer is outside the canvas</string>
+    <string name="canvas_layers_outside">%1$d layers are outside the canvas</string>
+    <string name="canvas_bring_into_view">Bring into view</string>
     <string name="canvas_remove_scene">Remove</string>
     <string name="canvas_add_source">Add source</string>
     <string name="canvas_delete_source">Delete source</string>

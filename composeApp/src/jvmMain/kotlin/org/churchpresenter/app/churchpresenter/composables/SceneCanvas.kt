@@ -17,7 +17,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -55,6 +57,9 @@ enum class SnapOrientation { HORIZONTAL, VERTICAL }
 
 private const val SNAP_THRESHOLD_PX = 6f
 
+/** Test handle for the canvas itself -- the scene-shaped surface, not the area it is centred in. */
+internal const val SCENE_CANVAS_TAG = "scene_canvas"
+
 @Composable
 fun SceneCanvas(
     modifier: Modifier = Modifier,
@@ -78,302 +83,309 @@ fun SceneCanvas(
     var drawCurrentNorm by remember { mutableStateOf(Offset.Zero) }
     var freehandPoints by remember { mutableStateOf<List<PathPoint>>(emptyList()) }
 
-    Box(
-        modifier = modifier
-            .aspectRatio(scene.canvasWidth.toFloat() / scene.canvasHeight.toFloat())
-            .clipToBounds()
-            .background(Color.Black)
-            .onSizeChanged { canvasSize = it }
-            .then(
-                if (isInteractive && activeTool == "select") {
-                    Modifier.pointerInput(Unit) {
-                        detectTapGestures { onSourceSelected(null) }
-                    }
-                } else if (isInteractive && activeTool != "select") {
-                    // Drawing mode pointer input
-                    Modifier.pointerInput(activeTool, drawingStrokeColor, drawingFillColor, drawingStrokeWidth) {
-                        val cw = canvasSize.width.toFloat()
-                        val ch = canvasSize.height.toFloat()
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                if (cw > 0 && ch > 0) {
-                                    val density = this@pointerInput.density
-                                    val normX = offset.x * density / cw
-                                    val normY = offset.y * density / ch
-                                    drawStartNorm = Offset(normX, normY)
-                                    drawCurrentNorm = Offset(normX, normY)
-                                    drawingInProgress = true
-                                    if (activeTool == "freehand") {
-                                        freehandPoints = listOf(PathPoint(normX, normY))
-                                    }
-                                }
-                            },
-                            onDrag = { change, _ ->
-                                change.consume()
-                                if (cw > 0 && ch > 0) {
-                                    val density = this@pointerInput.density
-                                    val normX = change.position.x * density / cw
-                                    val normY = change.position.y * density / ch
-                                    drawCurrentNorm = Offset(normX, normY)
-                                    if (activeTool == "freehand") {
-                                        freehandPoints = freehandPoints + PathPoint(normX, normY)
-                                    }
-                                }
-                            },
-                            onDragEnd = {
-                                if (drawingInProgress) {
-                                    drawingInProgress = false
-                                    val x = minOf(drawStartNorm.x, drawCurrentNorm.x)
-                                    val y = minOf(drawStartNorm.y, drawCurrentNorm.y)
-                                    val w = abs(drawCurrentNorm.x - drawStartNorm.x).coerceAtLeast(0.01f)
-                                    val h = abs(drawCurrentNorm.y - drawStartNorm.y).coerceAtLeast(0.01f)
-
-                                    val shape = SceneSource.ShapeSource(
-                                        id = UUID.randomUUID().toString(),
-                                        name = activeTool.replaceFirstChar { it.uppercase() },
-                                        transform = when (activeTool) {
-                                            "line", "arrow" -> {
-                                                val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
-                                                val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
-                                                val maxX = maxOf(drawStartNorm.x, drawCurrentNorm.x)
-                                                val maxY = maxOf(drawStartNorm.y, drawCurrentNorm.y)
-                                                SourceTransform(
-                                                    x = minX, y = minY,
-                                                    width = (maxX - minX).coerceAtLeast(0.01f),
-                                                    height = (maxY - minY).coerceAtLeast(0.01f)
-                                                )
-                                            }
-                                            "freehand" -> {
-                                                val minX = freehandPoints.minOf { it.x }
-                                                val minY = freehandPoints.minOf { it.y }
-                                                val maxX = freehandPoints.maxOf { it.x }
-                                                val maxY = freehandPoints.maxOf { it.y }
-                                                SourceTransform(
-                                                    x = minX, y = minY,
-                                                    width = (maxX - minX).coerceAtLeast(0.01f),
-                                                    height = (maxY - minY).coerceAtLeast(0.01f)
-                                                )
-                                            }
-                                            else -> SourceTransform(x = x, y = y, width = w, height = h)
-                                        },
-                                        shapeType = activeTool,
-                                        strokeColor = drawingStrokeColor,
-                                        fillColor = drawingFillColor,
-                                        strokeWidth = drawingStrokeWidth,
-                                        points = if (activeTool == "line" || activeTool == "arrow") {
-                                            // Store start/end as normalized points within bounding box
-                                            val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
-                                            val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
-                                            val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX).coerceAtLeast(0.01f)
-                                            val rangeY = (maxOf(drawStartNorm.y, drawCurrentNorm.y) - minY).coerceAtLeast(0.01f)
-                                            listOf(
-                                                PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY),
-                                                PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)
-                                            )
-                                        } else if (activeTool == "freehand") {
-                                            // Normalize points relative to bounding box
-                                            val minX = freehandPoints.minOf { it.x }
-                                            val minY = freehandPoints.minOf { it.y }
-                                            val rangeX = (freehandPoints.maxOf { it.x } - minX).coerceAtLeast(0.01f)
-                                            val rangeY = (freehandPoints.maxOf { it.y } - minY).coerceAtLeast(0.01f)
-                                            freehandPoints.map { p ->
-                                                PathPoint((p.x - minX) / rangeX, (p.y - minY) / rangeY)
-                                            }
-                                        } else emptyList()
-                                    )
-                                    onShapeDrawn?.invoke(shape)
-                                    freehandPoints = emptyList()
-                                }
-                            }
-                        )
-                    }
-                } else Modifier
-            )
-    ) {
-        val density = LocalDensity.current
-        val cw = canvasSize.width.toFloat()
-        val ch = canvasSize.height.toFloat()
-        val fontScale = if (scene.canvasWidth > 0 && cw > 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f
-
-        // Render sources in order (first = back, last = front)
-        scene.sources.forEach { source ->
-            if (!source.visible) return@forEach
-
-            val t = source.transform
-            val currentTransform by rememberUpdatedState(t)
-            val sxDp = with(density) { (t.x * cw).toInt().toDp() }
-            val syDp = with(density) { (t.y * ch).toInt().toDp() }
-            val swDp = with(density) { (t.width * cw).toInt().toDp() }
-            val shDp = with(density) { (t.height * ch).toInt().toDp() }
-            val isSelected = isInteractive && source.id == selectedSourceId
-
-            val editableForDrag = isSelected && !source.locked && activeTool == "select"
-            Box(
-                modifier = Modifier
-                    .offset(sxDp, syDp)
-                    .size(width = swDp, height = shDp)
-                    // Pointer input BEFORE graphicsLayer so drag is in parent (unrotated) space
-                    .then(
-                        if (isInteractive && editableForDrag) {
-                            // Selected + unlocked: drag to move with snapping
-                            Modifier.pointerInput(source.id, isSelected) {
-                                var rawX = 0f
-                                var rawY = 0f
-                                detectDragGestures(
-                                    onDragStart = {
-                                        rawX = currentTransform.x
-                                        rawY = currentTransform.y
-                                    },
-                                    onDragEnd = { activeSnapLines = emptyList() },
-                                    onDragCancel = { activeSnapLines = emptyList() },
-                                    onDrag = { change, dragAmount ->
-                                        change.consume()
-                                        if (cw > 0 && ch > 0) {
-                                            val ct = currentTransform
-                                            // Track raw (un-snapped) position so snap doesn't
-                                            // cause drift between cursor and element
-                                            rawX += dragAmount.x / cw
-                                            rawY += dragAmount.y / ch
-
-                                            // Snap logic
-                                            val snapResult = computeSnap(
-                                                rawX, rawY, ct.width, ct.height,
-                                                scene.sources, source.id, cw, ch
-                                            )
-                                            activeSnapLines = snapResult.snapLines
-
-                                            onTransformChanged(
-                                                source.id,
-                                                ct.copy(x = snapResult.x, y = snapResult.y)
-                                            )
+    // The caller's modifier sizes the area and this centres the canvas in it. Applied to the canvas
+    // itself, a caller's `fillMaxSize()` pinned the minimum size to the whole area, so `aspectRatio`
+    // could not shrink to fit and sized from the width instead -- a portrait scene came out taller
+    // than its area, spilling over the rows around it and cropped to a band on a landscape output.
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(scene.canvasWidth.toFloat() / scene.canvasHeight.toFloat())
+                .testTag(SCENE_CANVAS_TAG)
+                .clipToBounds()
+                .background(Color.Black)
+                .onSizeChanged { canvasSize = it }
+                .then(
+                    if (isInteractive && activeTool == "select") {
+                        Modifier.pointerInput(Unit) {
+                            detectTapGestures { onSourceSelected(null) }
+                        }
+                    } else if (isInteractive && activeTool != "select") {
+                        // Drawing mode pointer input
+                        Modifier.pointerInput(activeTool, drawingStrokeColor, drawingFillColor, drawingStrokeWidth) {
+                            val cw = canvasSize.width.toFloat()
+                            val ch = canvasSize.height.toFloat()
+                            detectDragGestures(
+                                onDragStart = { offset ->
+                                    if (cw > 0 && ch > 0) {
+                                        val density = this@pointerInput.density
+                                        val normX = offset.x * density / cw
+                                        val normY = offset.y * density / ch
+                                        drawStartNorm = Offset(normX, normY)
+                                        drawCurrentNorm = Offset(normX, normY)
+                                        drawingInProgress = true
+                                        if (activeTool == "freehand") {
+                                            freehandPoints = listOf(PathPoint(normX, normY))
                                         }
                                     }
-                                )
-                            }
-                        } else if (isInteractive && activeTool == "select") {
-                            // Not selected or locked: tap to select only
-                            Modifier.pointerInput(source.id, isSelected) {
-                                detectTapGestures { onSourceSelected(source.id) }
-                            }
-                        } else Modifier
-                    )
-                    .graphicsLayer {
-                        rotationZ = t.rotation
-                        alpha = t.opacity
-                    }
-                    .then(
-                        if (isSelected) Modifier.border(2.dp, Color.Cyan) else Modifier
-                    )
-            ) {
-                SceneSourceRenderer(
-                    source = source,
-                    fontScale = fontScale,
-                    showDiagnostics = isInteractive
-                )
-            }
+                                },
+                                onDrag = { change, _ ->
+                                    change.consume()
+                                    if (cw > 0 && ch > 0) {
+                                        val density = this@pointerInput.density
+                                        val normX = change.position.x * density / cw
+                                        val normY = change.position.y * density / ch
+                                        drawCurrentNorm = Offset(normX, normY)
+                                        if (activeTool == "freehand") {
+                                            freehandPoints = freehandPoints + PathPoint(normX, normY)
+                                        }
+                                    }
+                                },
+                                onDragEnd = {
+                                    if (drawingInProgress) {
+                                        drawingInProgress = false
+                                        val x = minOf(drawStartNorm.x, drawCurrentNorm.x)
+                                        val y = minOf(drawStartNorm.y, drawCurrentNorm.y)
+                                        val w = abs(drawCurrentNorm.x - drawStartNorm.x).coerceAtLeast(0.01f)
+                                        val h = abs(drawCurrentNorm.y - drawStartNorm.y).coerceAtLeast(0.01f)
 
-            // Resize + rotate handles for selected source
-            val resizable = isSelected && !source.locked
-            val hasArea = cw > 0 && ch > 0
-            if (resizable && hasArea && activeTool == "select") {
-                ResizeHandles(
-                    transform = t,
-                    canvasWidth = cw,
-                    canvasHeight = ch,
-                    onTransformChanged = { newTransform ->
-                        onTransformChanged(source.id, newTransform)
-                    }
-                )
-                RotateHandle(
-                    transform = t,
-                    canvasWidth = cw,
-                    canvasHeight = ch,
-                    onTransformChanged = { newTransform ->
-                        onTransformChanged(source.id, newTransform)
-                    }
-                )
-            }
-        }
-
-        // Draw snap guide lines
-        if (activeSnapLines.isNotEmpty() && cw > 0 && ch > 0) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val dashEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f))
-                activeSnapLines.forEach { snap ->
-                    when (snap.orientation) {
-                        SnapOrientation.VERTICAL -> {
-                            val px = snap.position * size.width
-                            drawLine(
-                                color = Color.Magenta,
-                                start = Offset(px, 0f),
-                                end = Offset(px, size.height),
-                                strokeWidth = 1f,
-                                pathEffect = dashEffect
+                                        val shape = SceneSource.ShapeSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = activeTool.replaceFirstChar { it.uppercase() },
+                                            transform = when (activeTool) {
+                                                "line", "arrow" -> {
+                                                    val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
+                                                    val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
+                                                    val maxX = maxOf(drawStartNorm.x, drawCurrentNorm.x)
+                                                    val maxY = maxOf(drawStartNorm.y, drawCurrentNorm.y)
+                                                    SourceTransform(
+                                                        x = minX, y = minY,
+                                                        width = (maxX - minX).coerceAtLeast(0.01f),
+                                                        height = (maxY - minY).coerceAtLeast(0.01f)
+                                                    )
+                                                }
+                                                "freehand" -> {
+                                                    val minX = freehandPoints.minOf { it.x }
+                                                    val minY = freehandPoints.minOf { it.y }
+                                                    val maxX = freehandPoints.maxOf { it.x }
+                                                    val maxY = freehandPoints.maxOf { it.y }
+                                                    SourceTransform(
+                                                        x = minX, y = minY,
+                                                        width = (maxX - minX).coerceAtLeast(0.01f),
+                                                        height = (maxY - minY).coerceAtLeast(0.01f)
+                                                    )
+                                                }
+                                                else -> SourceTransform(x = x, y = y, width = w, height = h)
+                                            },
+                                            shapeType = activeTool,
+                                            strokeColor = drawingStrokeColor,
+                                            fillColor = drawingFillColor,
+                                            strokeWidth = drawingStrokeWidth,
+                                            points = if (activeTool == "line" || activeTool == "arrow") {
+                                                // Store start/end as normalized points within bounding box
+                                                val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
+                                                val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
+                                                val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX).coerceAtLeast(0.01f)
+                                                val rangeY = (maxOf(drawStartNorm.y, drawCurrentNorm.y) - minY).coerceAtLeast(0.01f)
+                                                listOf(
+                                                    PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY),
+                                                    PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)
+                                                )
+                                            } else if (activeTool == "freehand") {
+                                                // Normalize points relative to bounding box
+                                                val minX = freehandPoints.minOf { it.x }
+                                                val minY = freehandPoints.minOf { it.y }
+                                                val rangeX = (freehandPoints.maxOf { it.x } - minX).coerceAtLeast(0.01f)
+                                                val rangeY = (freehandPoints.maxOf { it.y } - minY).coerceAtLeast(0.01f)
+                                                freehandPoints.map { p ->
+                                                    PathPoint((p.x - minX) / rangeX, (p.y - minY) / rangeY)
+                                                }
+                                            } else emptyList()
+                                        )
+                                        onShapeDrawn?.invoke(shape)
+                                        freehandPoints = emptyList()
+                                    }
+                                }
                             )
                         }
-                        SnapOrientation.HORIZONTAL -> {
-                            val py = snap.position * size.height
-                            drawLine(
-                                color = Color.Magenta,
-                                start = Offset(0f, py),
-                                end = Offset(size.width, py),
-                                strokeWidth = 1f,
-                                pathEffect = dashEffect
-                            )
+                    } else Modifier
+                )
+        ) {
+            val density = LocalDensity.current
+            val cw = canvasSize.width.toFloat()
+            val ch = canvasSize.height.toFloat()
+            val fontScale = if (scene.canvasWidth > 0 && cw > 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f
+
+            // Render sources in order (first = back, last = front)
+            scene.sources.forEach { source ->
+                if (!source.visible) return@forEach
+
+                val t = source.transform
+                val currentTransform by rememberUpdatedState(t)
+                val sxDp = with(density) { (t.x * cw).toInt().toDp() }
+                val syDp = with(density) { (t.y * ch).toInt().toDp() }
+                val swDp = with(density) { (t.width * cw).toInt().toDp() }
+                val shDp = with(density) { (t.height * ch).toInt().toDp() }
+                val isSelected = isInteractive && source.id == selectedSourceId
+
+                val editableForDrag = isSelected && !source.locked && activeTool == "select"
+                Box(
+                    modifier = Modifier
+                        .offset(sxDp, syDp)
+                        .size(width = swDp, height = shDp)
+                        // Pointer input BEFORE graphicsLayer so drag is in parent (unrotated) space
+                        .then(
+                            if (isInteractive && editableForDrag) {
+                                // Selected + unlocked: drag to move with snapping
+                                Modifier.pointerInput(source.id, isSelected) {
+                                    var rawX = 0f
+                                    var rawY = 0f
+                                    detectDragGestures(
+                                        onDragStart = {
+                                            rawX = currentTransform.x
+                                            rawY = currentTransform.y
+                                        },
+                                        onDragEnd = { activeSnapLines = emptyList() },
+                                        onDragCancel = { activeSnapLines = emptyList() },
+                                        onDrag = { change, dragAmount ->
+                                            change.consume()
+                                            if (cw > 0 && ch > 0) {
+                                                val ct = currentTransform
+                                                // Track raw (un-snapped) position so snap doesn't
+                                                // cause drift between cursor and element
+                                                rawX += dragAmount.x / cw
+                                                rawY += dragAmount.y / ch
+
+                                                // Snap logic
+                                                val snapResult = computeSnap(
+                                                    rawX, rawY, ct.width, ct.height,
+                                                    scene.sources, source.id, cw, ch
+                                                )
+                                                activeSnapLines = snapResult.snapLines
+
+                                                onTransformChanged(
+                                                    source.id,
+                                                    ct.copy(x = snapResult.x, y = snapResult.y)
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            } else if (isInteractive && activeTool == "select") {
+                                // Not selected or locked: tap to select only
+                                Modifier.pointerInput(source.id, isSelected) {
+                                    detectTapGestures { onSourceSelected(source.id) }
+                                }
+                            } else Modifier
+                        )
+                        .graphicsLayer {
+                            rotationZ = t.rotation
+                            alpha = t.opacity
+                        }
+                        .then(
+                            if (isSelected) Modifier.border(2.dp, Color.Cyan) else Modifier
+                        )
+                ) {
+                    SceneSourceRenderer(
+                        source = source,
+                        fontScale = fontScale,
+                        showDiagnostics = isInteractive
+                    )
+                }
+
+                // Resize + rotate handles for selected source
+                val resizable = isSelected && !source.locked
+                val hasArea = cw > 0 && ch > 0
+                if (resizable && hasArea && activeTool == "select") {
+                    ResizeHandles(
+                        transform = t,
+                        canvasWidth = cw,
+                        canvasHeight = ch,
+                        onTransformChanged = { newTransform ->
+                            onTransformChanged(source.id, newTransform)
+                        }
+                    )
+                    RotateHandle(
+                        transform = t,
+                        canvasWidth = cw,
+                        canvasHeight = ch,
+                        onTransformChanged = { newTransform ->
+                            onTransformChanged(source.id, newTransform)
+                        }
+                    )
+                }
+            }
+
+            // Draw snap guide lines
+            if (activeSnapLines.isNotEmpty() && cw > 0 && ch > 0) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val dashEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f))
+                    activeSnapLines.forEach { snap ->
+                        when (snap.orientation) {
+                            SnapOrientation.VERTICAL -> {
+                                val px = snap.position * size.width
+                                drawLine(
+                                    color = Color.Magenta,
+                                    start = Offset(px, 0f),
+                                    end = Offset(px, size.height),
+                                    strokeWidth = 1f,
+                                    pathEffect = dashEffect
+                                )
+                            }
+                            SnapOrientation.HORIZONTAL -> {
+                                val py = snap.position * size.height
+                                drawLine(
+                                    color = Color.Magenta,
+                                    start = Offset(0f, py),
+                                    end = Offset(size.width, py),
+                                    strokeWidth = 1f,
+                                    pathEffect = dashEffect
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Drawing preview overlay
-        if (drawingInProgress && cw > 0 && ch > 0) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val previewColor = Color.Cyan.copy(alpha = 0.7f)
-                val previewStroke = Stroke(width = 2f)
+            // Drawing preview overlay
+            if (drawingInProgress && cw > 0 && ch > 0) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val previewColor = Color.Cyan.copy(alpha = 0.7f)
+                    val previewStroke = Stroke(width = 2f)
 
-                when (activeTool) {
-                    "rectangle" -> {
-                        val left = minOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
-                        val top = minOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
-                        val right = maxOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
-                        val bottom = maxOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
-                        drawRect(
-                            color = previewColor,
-                            topLeft = Offset(left, top),
-                            size = Size(right - left, bottom - top),
-                            style = previewStroke
-                        )
-                    }
-                    "ellipse" -> {
-                        val left = minOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
-                        val top = minOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
-                        val right = maxOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
-                        val bottom = maxOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
-                        drawOval(
-                            color = previewColor,
-                            topLeft = Offset(left, top),
-                            size = Size(right - left, bottom - top),
-                            style = previewStroke
-                        )
-                    }
-                    "line", "arrow" -> {
-                        drawLine(
-                            color = previewColor,
-                            start = Offset(drawStartNorm.x * size.width, drawStartNorm.y * size.height),
-                            end = Offset(drawCurrentNorm.x * size.width, drawCurrentNorm.y * size.height),
-                            strokeWidth = 2f
-                        )
-                    }
-                    "freehand" -> {
-                        if (freehandPoints.size >= 2) {
-                            val path = Path().apply {
-                                moveTo(freehandPoints[0].x * size.width, freehandPoints[0].y * size.height)
-                                for (i in 1 until freehandPoints.size) {
-                                    lineTo(freehandPoints[i].x * size.width, freehandPoints[i].y * size.height)
+                    when (activeTool) {
+                        "rectangle" -> {
+                            val left = minOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
+                            val top = minOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
+                            val right = maxOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
+                            val bottom = maxOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
+                            drawRect(
+                                color = previewColor,
+                                topLeft = Offset(left, top),
+                                size = Size(right - left, bottom - top),
+                                style = previewStroke
+                            )
+                        }
+                        "ellipse" -> {
+                            val left = minOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
+                            val top = minOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
+                            val right = maxOf(drawStartNorm.x, drawCurrentNorm.x) * size.width
+                            val bottom = maxOf(drawStartNorm.y, drawCurrentNorm.y) * size.height
+                            drawOval(
+                                color = previewColor,
+                                topLeft = Offset(left, top),
+                                size = Size(right - left, bottom - top),
+                                style = previewStroke
+                            )
+                        }
+                        "line", "arrow" -> {
+                            drawLine(
+                                color = previewColor,
+                                start = Offset(drawStartNorm.x * size.width, drawStartNorm.y * size.height),
+                                end = Offset(drawCurrentNorm.x * size.width, drawCurrentNorm.y * size.height),
+                                strokeWidth = 2f
+                            )
+                        }
+                        "freehand" -> {
+                            if (freehandPoints.size >= 2) {
+                                val path = Path().apply {
+                                    moveTo(freehandPoints[0].x * size.width, freehandPoints[0].y * size.height)
+                                    for (i in 1 until freehandPoints.size) {
+                                        lineTo(freehandPoints[i].x * size.width, freehandPoints[i].y * size.height)
+                                    }
                                 }
+                                drawPath(path, color = previewColor, style = previewStroke)
                             }
-                            drawPath(path, color = previewColor, style = previewStroke)
                         }
                     }
                 }
