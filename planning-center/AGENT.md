@@ -25,7 +25,7 @@ app.
 |---|---|
 | `PlanningCenterClient.kt` | `object PlanningCenterClient` — OAuth token exchange and refresh, `/people/v2/me`, service types, plans, plan items, arrangement lyrics, attachment metadata, attachment download |
 | `PlanningCenterLyricsFormatter.kt` | Chord-chart → plain lyrics, and PCO's `html_details` rich text → plain text |
-| `PlanningCenterAuthServer.kt` | The loopback listener on the registered redirect port, started per connect attempt and torn down when the callback lands |
+| `PlanningCenterAuthServer.kt` | The loopback listener on the registered redirect port, started per connect attempt and torn down when the callback lands. The JDK's own `HttpServer`, not Ktor — see **Rules** |
 
 ## What deliberately stayed in `:composeApp`
 
@@ -40,6 +40,13 @@ app.
 
 ## Rules
 
+- **The callback listener is the JDK's `com.sun.net.httpserver.HttpServer`, and must stay a server
+  that writes synchronously.** It was Ktor on Netty, and the callback page was intermittently cut
+  short (#678): Netty writes a response's last part without flushing it and flushes on a later
+  task, so `ResponseSent` fired with the bytes still queued and `stop()` took the event loop away
+  under them. The JDK server has written the whole page before its handler returns, and the handler
+  hands the result over only after that, so tearing the server down cannot truncate it. Ktor's
+  server libraries are test-only here now, for `PlanningCenterDownloadTest`'s fake host.
 - **Anything `:composeApp` calls has to be public here.** `internal` no longer reaches the app —
   which is why the `@Serializable` DTOs' construction test moved with the code, as
   `PlanningCenterDtoConstructionTest`.
@@ -111,7 +118,7 @@ All three run in CI, gated on this directory or the shared build files changing.
 `api(libs.ktor.client.core)` — `api` rather than `implementation` because every request function
 takes an `HttpClient`, so the type is part of this module's public surface and has to resolve at a
 caller that supplies its own engine. Then `ktor-client-cio` for the default engine,
-`ktor-server-core`/`ktor-server-netty` for the callback listener only, `kotlinx-serialization-json`,
+`kotlinx-serialization-json`,
 `:settings` for the one port constant, and `:diagnostics` for `CrashReporter.reportWarning`. No
 Compose, and no dependency on `:composeApp` — the import UI depends on this module, never the
 other way round.
