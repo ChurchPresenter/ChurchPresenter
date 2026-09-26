@@ -799,7 +799,9 @@ fun BibleTab(
             }
         } else {
 
-            FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
+            // No top gap of its own: the search card above already ends in an 8dp margin, which
+            // matches the banner's 8dp below.
+            FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost), topPadding = 0.dp)
 
             // Provided rather than passed: the verse row that draws it is five levels down.
             CompositionLocalProvider(
