@@ -110,13 +110,7 @@ private val COLOR_FIELD_MIN_WIDTH = 132.dp
 @Composable
 fun StageMonitorSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    /**
-     * Drawn inside a page that already scrolls -- the Profiles editor -- rather than as a tab of
-     * its own: no background, no padding and no scroll here, since a scrolling column inside a
-     * scrolling column cannot be measured.
-     */
-    embedded: Boolean = false,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val availableFonts = rememberSystemFonts()
 
@@ -131,21 +125,13 @@ fun StageMonitorSettingsTab(
 
     val scrollState = rememberScrollState()
     Box(
-        modifier = if (embedded) {
-            Modifier.fillMaxWidth()
-        } else {
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(14.dp)
-        }
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(14.dp)
     ) {
         Column(
-            modifier = if (embedded) {
-                Modifier.fillMaxWidth()
-            } else {
-                Modifier.fillMaxSize().verticalScroll(scrollState).padding(end = SettingsScrollbarGutter)
-            },
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(end = SettingsScrollbarGutter),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
@@ -192,7 +178,7 @@ fun StageMonitorSettingsTab(
                 }
             }
         }
-        if (!embedded) SettingsScrollbar(scrollState)
+        SettingsScrollbar(scrollState)
     }
 }
 

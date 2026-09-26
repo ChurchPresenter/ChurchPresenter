@@ -32,8 +32,6 @@ internal fun ProfileFormPage(
     SettingsGroup(stringResource(Res.string.profile_group_look)) {
         SettingsWideRow {
             when (pane) {
-                CustomizePane.STAGE_MONITOR ->
-                    StageMonitorSettingsTab(settings = draft, onSettingsChange = onSettingsChange, embedded = true)
                 CustomizePane.CAPTIONS -> STTDisplaySettings(
                     appSettings = draft,
                     onSettingsChange = onSettingsChange,
@@ -55,7 +53,9 @@ internal fun ProfileFormPage(
                     SubtitleStyleSettings(settings = draft, onSettingsChange = onSettingsChange)
                 }
                 // Pages of their own; the editor never sends them here.
-                CustomizePane.BIBLE, CustomizePane.SONGS, CustomizePane.BACKGROUND, CustomizePane.DICTIONARY -> Unit
+                CustomizePane.BIBLE, CustomizePane.SONGS, CustomizePane.BACKGROUND, CustomizePane.DICTIONARY,
+                CustomizePane.STAGE_MONITOR,
+                -> Unit
             }
         }
     }

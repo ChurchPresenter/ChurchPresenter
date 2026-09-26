@@ -320,6 +320,7 @@ private fun ColumnScope.PageBody(
                 settings = draft,
                 onSettingsChange = onDraftSettingsChange,
             )
+            CustomizePane.STAGE_MONITOR -> ProfileStagePage(draft, onDraftSettingsChange)
             else -> ProfileFormPage(page.pane, draft, onDraftSettingsChange)
         }
     }

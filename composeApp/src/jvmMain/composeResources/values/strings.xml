@@ -3381,4 +3381,9 @@
     <string name="profile_adjust_width">W %1$d%</string>
     <string name="profile_preview_larger">Larger</string>
     <string name="profile_preview_done">Done</string>
+    <string name="profile_group_layout">Layout</string>
+    <string name="profile_group_what_goes_where">What goes where</string>
+    <string name="profile_stage_zones">Zones</string>
+    <string name="profile_stage_arrangement">Arrangement</string>
+    <string name="profile_stage_zone_background">Zone background</string>
 </resources>

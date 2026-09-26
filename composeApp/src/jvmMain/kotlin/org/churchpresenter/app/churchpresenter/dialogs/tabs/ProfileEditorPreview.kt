@@ -91,7 +91,8 @@ internal fun EditorPreview(
         backgroundMode = backgroundMode,
         onBackgroundModeChange = { backgroundMode = it },
         onOpenOutputs = onOpenOutputs,
-        toolbarActions = { if (pane != null) LargerKey { large = true } },
+        // Not for the stage layout, whose picture is a miniature -- the page draws it to scale.
+        toolbarActions = { if (pane != null && pane != CustomizePane.STAGE_MONITOR) LargerKey { large = true } },
         overlay = { width -> if (adjust && adjustModel != null) PreviewAdjustOverlay(adjustModel, width, output) },
         underPreview = {
             if (adjustModel != null) AdjustSwitch(adjust, { adjust = it }, adjustModel.band != null)

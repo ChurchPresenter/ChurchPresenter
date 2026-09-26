@@ -267,7 +267,7 @@ class ProfilesRedesignTest {
             // The section list now leads with the stage monitor's own layout page.
             clickTab(CustomizePane.STAGE_MONITOR)
 
-            onNodeWithText("Screen Layout", substring = true).assertExists()
+            onNodeWithText("WHAT GOES WHERE").assertExists()
         }
     }
 

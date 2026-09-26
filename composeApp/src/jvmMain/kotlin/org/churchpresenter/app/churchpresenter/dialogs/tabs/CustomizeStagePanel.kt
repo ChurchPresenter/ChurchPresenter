@@ -8,28 +8,24 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.OutputStyleScope
+import org.churchpresenter.settings.StageMonitorLayout
 import org.churchpresenter.settings.bibleTranslationPositions
-import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.theme.AppShape
 
 /**
  * The 16:9 stage beside the Customize dialog's controls — what this output will actually draw.
@@ -72,9 +68,8 @@ internal fun CustomizeStagePanel(
             CustomizePane.QA,
             CustomizePane.DICTIONARY,
             -> ProfileFormStage(pane, settings, output)
-            // The stage monitor gets no preview column -- its own tab draws its zone layout at full
-            // size -- so this is never reached.
-            CustomizePane.STAGE_MONITOR -> NoStage()
+            // The page draws the monitor to scale already; this is the shape of it at a glance.
+            CustomizePane.STAGE_MONITOR -> StageLayoutStage(settings.stageMonitorSettings.layout, output)
         }
     }
 }
@@ -243,29 +238,20 @@ private fun StageFrame(output: PreviewOutputSize, content: @Composable () -> Uni
 }
 
 /** What the stage says where the category has nothing to draw. */
+/** A stage monitor's zones, as they divide a screen of [output]'s shape. */
 @Composable
-private fun NoStage() {
+private fun StageLayoutStage(layout: StageMonitorLayout, output: PreviewOutputSize) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(NO_STAGE_RATIO)
+            .aspectRatio(output.aspectRatio)
             .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
-            .padding(12.dp),
-        contentAlignment = Alignment.Center,
+            .padding(6.dp),
     ) {
-        Text(
-            text = stringResource(Res.string.customize_no_preview),
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = NO_STAGE_ALPHA),
-        )
+        LayoutMiniature(layout, Modifier.fillMaxSize())
     }
 }
-
-private const val NO_STAGE_ALPHA = 0.45f
-
-/** 16:9, so the empty plate is the shape a stage would have been. */
-private const val NO_STAGE_RATIO = 16f / 9f
 
 /** Test handle for the preview stage. */
 internal const val CUSTOMIZE_STAGE_TAG = "customize_stage"
