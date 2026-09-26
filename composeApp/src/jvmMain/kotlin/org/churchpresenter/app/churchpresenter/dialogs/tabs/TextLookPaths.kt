@@ -16,13 +16,17 @@ internal class TextLookPaths(private val byField: Map<TextLookField, List<String
     /** Every path the group writes, for its Revert. */
     val all: List<String> get() = byField.values.flatten().distinct()
 
+    /** Both sets of paths, row by row. */
+    operator fun plus(other: TextLookPaths): TextLookPaths =
+        TextLookPaths(TextLookField.entries.associateWith { this[it] + other[it] })
+
     companion object {
         val NONE = TextLookPaths(emptyMap())
     }
 }
 
 /** [this] with [field] changed, to any value but its own. */
-private fun TextLook.perturbed(field: TextLookField): TextLook = when (field) {
+internal fun TextLook.perturbed(field: TextLookField): TextLook = when (field) {
     TextLookField.FONT -> copy(fontType = "$fontType~")
     TextLookField.SIZE -> copy(fontSize = fontSize + 1)
     TextLookField.AUTO_FIT -> copy(autoFit = autoFit?.not())

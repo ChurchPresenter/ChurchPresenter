@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.content_bible_translations_all
 import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.middle
@@ -124,11 +126,15 @@ private fun SongTextGroup(
     val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
     val styleLanguages = styleLanguagesFor(profile.songMode, profile.songTranslations)
     val perLanguage = styleLanguages.size > 1 && styleElement in SECOND_LANGUAGE_ELEMENTS
-    val editingLanguage = if (perLanguage && language in styleLanguages) language else styleLanguages.first()
-
-    val style = song.elementStyle(styleElement, target, editingLanguage)
+    // Under several languages the first stands for All, and is always on the strip.
+    val offered = if (perLanguage) listOf(SongStyleLanguage.PRIMARY) + styleLanguages.filter { it.isTranslation }
+                  else styleLanguages
+    val editingLanguage = language.takeIf { it in offered } ?: offered.first()
+    val edit = SongEdit(song, styleElement, target, editingLanguage, perLanguage, updateSong)
+    val style = edit.style
     val elements = styleElementsFor(CustomizePane.SONGS, profile)
-    val lookPaths = songLookPaths(song, styleElement, target, editingLanguage)
+    val lookPaths = songLookPaths(song, styleElement, target, editingLanguage) + edit.targetPaths()
+    val allLabel = stringResource(Res.string.content_bible_translations_all)
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
         paths = lookPaths.all,
@@ -138,7 +144,11 @@ private fun SongTextGroup(
         header = {
             AppliesToStrip(
                 targets = if (perLanguage) {
-                    styleLanguages.map { RowOption(it, it.nameLabel(song), songLanguageTag(it)) }
+                    offered.map { RowOption(
+                        it,
+                        if (it.isTranslation) it.nameLabel(song) else allLabel,
+                        songLanguageTag(it),
+                    ) }
                 } else {
                     emptyList()
                 },
@@ -151,12 +161,11 @@ private fun SongTextGroup(
         },
     ) {
         if (titleSlideView) SlideElementRow(slideElement) { slideElement = it }
-        key(styleElement, editingLanguage) {
+        key(styleElement, editingLanguage) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
             TextLookRows(
                 look = style.toLook(styleElement),
-                onChange = { look ->
-                    updateSong { it.withElementStyle(styleElement, target, editingLanguage, style.withLook(look)) }
-                },
+                onChange = { look -> edit.write(style.withLook(look)) },
+                extraAdvanced = { if (edit.picked) SongShiftRow(edit) },
                 fonts = rememberSystemFonts(),
                 paths = lookPaths,
                 autoFitScope = if (!titleSlideView && styleElement.hasAutoFit) {
@@ -181,20 +190,13 @@ private fun SongTextGroup(
                                     RowOption(Constants.BELOW_VERSE, stringResource(Res.string.profile_ref_after)),
                                 ),
                                 selected = style.position,
-                                onSelect = { v ->
-                                    updateSong { it.withElementStyle(
-                                        styleElement,
-                                        target,
-                                        editingLanguage,
-                                        style.copy(position = v),
-                                    ) }
-                                },
+                                onSelect = { v -> edit.write(style.copy(position = v)) },
                             )
                         }
                     }
                 },
             )
-        }
+        } }
         // What the element shows and where the number goes: the song tab's own options for it,
         // which have no simpler row of their own -- the slide chunk, the languages on screen, when
         // the number and title appear, the number's corner, the title slide's own placements.

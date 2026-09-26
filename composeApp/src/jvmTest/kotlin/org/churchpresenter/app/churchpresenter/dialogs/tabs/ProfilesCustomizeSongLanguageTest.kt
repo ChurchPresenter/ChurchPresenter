@@ -65,8 +65,9 @@ class ProfilesCustomizeSongLanguageTest {
     fun `a bilingual profile offers the language switch on the lyrics`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            // Two of each: the header's picker and the pane's switch.
-            assertEquals(2, countOf("Language 1"))
+            // The header's picker names both; the pane's switch names the second, and stands the
+            // first for All, which every language follows.
+            assertEquals(1, countOf("Language 1"))
             assertEquals(2, countOf("Language 2"))
         }
     }
