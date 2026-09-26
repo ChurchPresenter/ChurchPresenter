@@ -1,7 +1,6 @@
 package org.churchpresenter.theme
 
 import androidx.compose.foundation.LocalScrollbarStyle
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -166,11 +165,11 @@ class ThemeRenderTest {
         // Material's defaults are rounder; these are the values the whole app is drawn with.
         val shapes = underTheme(ThemeMode.LIGHT) { MaterialTheme.shapes }
 
-        assertEquals(RoundedCornerShape(4.dp), shapes.extraSmall)
-        assertEquals(RoundedCornerShape(6.dp), shapes.small)
-        assertEquals(RoundedCornerShape(8.dp), shapes.medium)
-        assertEquals(RoundedCornerShape(10.dp), shapes.large)
-        assertEquals(RoundedCornerShape(12.dp), shapes.extraLarge)
+        assertEquals(AppShape(4.dp), shapes.extraSmall)
+        assertEquals(AppShape(6.dp), shapes.small)
+        assertEquals(AppShape(8.dp), shapes.medium)
+        assertEquals(AppShape(10.dp), shapes.large)
+        assertEquals(AppShape(12.dp), shapes.extraLarge)
     }
 
     @Test

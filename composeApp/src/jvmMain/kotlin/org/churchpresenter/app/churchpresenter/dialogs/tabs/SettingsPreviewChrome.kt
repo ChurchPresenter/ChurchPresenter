@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -221,7 +221,7 @@ internal fun MarginGuide(
 internal fun PreviewBadge(label: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .background(Color.Black.copy(alpha = BADGE_ALPHA), RoundedCornerShape(4.dp))
+            .background(Color.Black.copy(alpha = BADGE_ALPHA), AppShape(4.dp))
             .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
         Text(

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
@@ -103,9 +103,9 @@ fun IncludeRow(label: String, sub: String, on: Boolean, onToggle: () -> Unit) {
                 .then(
                     // Ticked is a raised accent key, clear a sunken well -- the app's checkbox.
                     if (on) {
-                        Modifier.raised(RoundedCornerShape(4.dp), palette.accent, palette, lift = 2.dp)
+                        Modifier.raised(AppShape(4.dp), palette.accent, palette, lift = 2.dp)
                     } else {
-                        Modifier.sunken(RoundedCornerShape(4.dp), palette)
+                        Modifier.sunken(AppShape(4.dp), palette)
                     }
                 ),
             contentAlignment = Alignment.Center,

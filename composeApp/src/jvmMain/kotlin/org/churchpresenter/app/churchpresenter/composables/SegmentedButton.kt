@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -127,7 +127,7 @@ private fun <T> SegmentedButtonGrid(
     // -- so every call site keeps its layout; the track's inset comes out of the segments.
     val segmentWidth = buttonWidth - (TRACK_INSET * 2 + SEGMENT_GAP * (columns - 1)) / columns
     val segmentHeight = buttonHeight - TRACK_INSET * 2
-    val trackShape = RoundedCornerShape(TRACK_RADIUS)
+    val trackShape = AppShape(TRACK_RADIUS)
     val style = SegmentStyle(fontSize, contentPadding, maxLines)
     Column(
         modifier = modifier,
@@ -197,7 +197,7 @@ private fun <T> Segment(
     style: SegmentStyle,
     onClick: () -> Unit,
 ) {
-    val segmentShape = RoundedCornerShape(TRACK_RADIUS - TRACK_INSET)
+    val segmentShape = AppShape(TRACK_RADIUS - TRACK_INSET)
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val ink = when {

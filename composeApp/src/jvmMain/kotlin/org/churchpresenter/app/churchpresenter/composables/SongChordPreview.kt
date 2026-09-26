@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
@@ -220,7 +220,7 @@ fun SectionLabelRow(
             text = label,
             color = ink,
             modifier = Modifier
-                .background(ink.copy(alpha = 0.16f), RoundedCornerShape(6.dp))
+                .background(ink.copy(alpha = 0.16f), AppShape(6.dp))
                 .padding(horizontal = 9.dp, vertical = 3.dp),
         )
         // Which slide of the section this is, shown only when there is more than one — otherwise
@@ -305,7 +305,7 @@ fun SongChordPreview(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(7.dp))
                             .clickable(onClick = onTransposeReset)
                             .padding(horizontal = 10.dp, vertical = 5.dp),
                     )
@@ -382,13 +382,13 @@ fun SongChordPreview(
                                     .background(
                                         if (inSong) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
                                         else MaterialTheme.colorScheme.surfaceContainerHigh,
-                                        RoundedCornerShape(7.dp),
+                                        AppShape(7.dp),
                                     )
                                     .border(
                                         1.dp,
                                         if (inSong) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                                         else MaterialTheme.colorScheme.outlineVariant,
-                                        RoundedCornerShape(7.dp),
+                                        AppShape(7.dp),
                                     )
                                     .clickable { onInsertChord(chord) }
                                     .padding(horizontal = 9.dp, vertical = 5.dp),
@@ -637,8 +637,8 @@ private fun KeyStepper(keyName: String, onUp: () -> Unit, onDown: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
-            .background(accent.copy(alpha = 0.10f), RoundedCornerShape(8.dp))
-            .border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
+            .background(accent.copy(alpha = 0.10f), AppShape(8.dp))
+            .border(1.dp, accent.copy(alpha = 0.35f), AppShape(8.dp))
             .padding(start = 10.dp, end = 4.dp, top = 3.dp, bottom = 3.dp),
     ) {
         ZoneLabel(stringResource(Res.string.song_key), color = accent.copy(alpha = 0.85f))
@@ -663,7 +663,7 @@ private fun TooltipWrapper(tooltip: String, content: @Composable () -> Unit) {
         tooltip = {
             Surface(
                 color = MaterialTheme.colorScheme.inverseSurface,
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 shadowElevation = 4.dp,
             ) {
                 Text(
@@ -684,7 +684,7 @@ private fun StepButton(glyph: String, tooltip: String, accent: Color, onClick: (
         Box(
             modifier = Modifier
                 .size(width = 22.dp, height = 20.dp)
-                .background(accent.copy(alpha = 0.16f), RoundedCornerShape(5.dp))
+                .background(accent.copy(alpha = 0.16f), AppShape(5.dp))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {

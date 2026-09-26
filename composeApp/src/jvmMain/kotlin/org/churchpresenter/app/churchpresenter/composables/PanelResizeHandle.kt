@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,7 +91,7 @@ internal fun PanelResizeHandle(
             .background(
                 if (hovered && !collapsed) MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_ALPHA)
                 else Color.Transparent,
-                RoundedCornerShape(6.dp),
+                AppShape(6.dp),
             )
             .hoverable(interaction)
             // Keyed only on `collapsed` -- never on the width being dragged. The caller persists
@@ -132,5 +132,5 @@ internal fun PanelResizeHandle(
 
 @Composable
 private fun Grip(color: Color, modifier: Modifier) {
-    Box(modifier.size(width = GRIP_WIDTH, height = GRIP_LENGTH).background(color, RoundedCornerShape(3.dp)))
+    Box(modifier.size(width = GRIP_WIDTH, height = GRIP_LENGTH).background(color, AppShape(3.dp)))
 }

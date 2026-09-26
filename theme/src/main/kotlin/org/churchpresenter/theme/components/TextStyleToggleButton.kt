@@ -9,7 +9,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,7 +58,7 @@ fun TextStyleToggleButton(
     ) {
         val palette = elevationPalette()
         val fill = if (isActive) palette.accent else palette.key
-        val shape = RoundedCornerShape(8.dp)
+        val shape = AppShape(8.dp)
         val interaction = remember { MutableInteractionSource() }
         val pressed by interaction.collectIsPressedAsState()
         val hovered by interaction.collectIsHoveredAsState()

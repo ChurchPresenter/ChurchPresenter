@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bolt
@@ -70,9 +70,9 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
             .width(TOAST_WIDTH)
             // Min intrinsic height, so the accent bar can fill whatever height the text makes.
             .height(IntrinsicSize.Min)
-            .clip(RoundedCornerShape(11.dp))
+            .clip(AppShape(11.dp))
             .background(scheme.surfaceContainerHigh)
-            .border(1.dp, tone.copy(alpha = TOAST_BORDER), RoundedCornerShape(11.dp)),
+            .border(1.dp, tone.copy(alpha = TOAST_BORDER), AppShape(11.dp)),
     ) {
         Box(Modifier.width(TOAST_ACCENT).fillMaxHeight().background(tone))
         Row(
@@ -83,7 +83,7 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
             Box(
                 Modifier
                     .size(TOAST_ICON)
-                    .clip(RoundedCornerShape(7.dp))
+                    .clip(AppShape(7.dp))
                     .background(tone.copy(alpha = TOAST_TINT)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -192,7 +192,7 @@ private fun ToastTarget(payload: ScheduleItem, plays: Int) {
                 color = scheme.tertiary,
                 maxLines = 1,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(AppShape(4.dp))
                     .background(scheme.tertiary.copy(alpha = TOAST_TINT))
                     .padding(horizontal = 5.dp, vertical = 1.dp),
             )

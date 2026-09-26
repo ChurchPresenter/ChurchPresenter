@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -182,9 +182,9 @@ private fun LabelColorColumn(
                 Box(
                     modifier = Modifier
                         .size(width = 34.dp, height = 24.dp)
-                        .clip(RoundedCornerShape(5.dp))
+                        .clip(AppShape(5.dp))
                         .background(background)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(5.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(5.dp))
                         .testTag("${tagPrefix}_$index")
                         .clickable { onPick(pair) },
                     contentAlignment = Alignment.Center,

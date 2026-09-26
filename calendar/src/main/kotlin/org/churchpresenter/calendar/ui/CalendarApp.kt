@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
@@ -487,7 +487,7 @@ private fun Header(
         Box(
             Modifier
                 .size(HEADER_BADGE)
-                .clip(RoundedCornerShape(9.dp))
+                .clip(AppShape(9.dp))
                 .background(scheme.primary.copy(alpha = BADGE_TINT)),
             contentAlignment = Alignment.Center,
         ) {

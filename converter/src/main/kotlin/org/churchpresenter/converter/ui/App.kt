@@ -26,7 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -117,7 +117,7 @@ import javax.swing.JFileChooser
 import javax.swing.filechooser.FileFilter
 import javax.swing.filechooser.FileNameExtensionFilter
 
-private val ButtonShape = RoundedCornerShape(6.dp)
+private val ButtonShape = AppShape(6.dp)
 
 /** Cards and forms stop widening past this — on a wide window a full-bleed row reads as empty band. */
 private val CONTENT_MAX_WIDTH = 820.dp
@@ -1775,8 +1775,8 @@ fun DuplicateFinderTab() {
 
                                 Box(
                                     modifier = Modifier.weight(1f).fillMaxWidth()
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .border(1.dp, dividerColor, RoundedCornerShape(6.dp))
+                                        .clip(AppShape(6.dp))
+                                        .border(1.dp, dividerColor, AppShape(6.dp))
                                         .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                                 ) {
                                     Column(modifier = Modifier.verticalScroll(diffScrollV)) {
@@ -2423,8 +2423,8 @@ fun BulkRenameTab() {
 
                         Box(
                             modifier = Modifier.weight(1f).fillMaxWidth()
-                                .clip(RoundedCornerShape(6.dp))
-                                .border(1.dp, dividerColor, RoundedCornerShape(6.dp))
+                                .clip(AppShape(6.dp))
+                                .border(1.dp, dividerColor, AppShape(6.dp))
                                 .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                         ) {
                             Column(modifier = Modifier.verticalScroll(diffScrollV)) {

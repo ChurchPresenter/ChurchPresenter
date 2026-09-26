@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -66,9 +66,9 @@ private const val CAP_GROUP_SEPARATOR = "/"
 /** Wide enough that a lone letter cap is still a square-ish key rather than a sliver. */
 private val CAP_MIN_WIDTH = 24.dp
 
-private val ROW_SHAPE = RoundedCornerShape(9.dp)
-private val CAP_SHAPE = RoundedCornerShape(5.dp)
-private val CHIP_SHAPE = RoundedCornerShape(7.dp)
+private val ROW_SHAPE = AppShape(9.dp)
+private val CAP_SHAPE = AppShape(5.dp)
+private val CHIP_SHAPE = AppShape(7.dp)
 
 /** One row of the list, whether it holds a rebindable action or a pointer gesture. */
 private val ROW_MIN_HEIGHT = 44.dp

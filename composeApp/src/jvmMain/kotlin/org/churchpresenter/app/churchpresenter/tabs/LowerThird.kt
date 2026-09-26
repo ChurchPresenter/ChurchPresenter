@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,7 +43,7 @@ import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
@@ -759,14 +758,14 @@ fun LowerThirdTab(
                     },
                     enabled = !atemBusy && !atemClipTooLong
 ,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = AppShape(8.dp)
                 ) {
                     Text(stringResource(Res.string.atem_upload))
                 }
             },
             dismissButton = {
                 GhostButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = { showAtemDialog = false },
                     enabled = !atemBusy
                 ) {
@@ -795,7 +794,7 @@ fun LowerThirdTab(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 6.dp, top = 6.dp, end = 10.dp, bottom = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(rowPad(2.dp))
                 ) {
                     if (lottieFiles.isEmpty()) {
                         item {
@@ -831,7 +830,7 @@ fun LowerThirdTab(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(LIST_ROW_HEIGHT)
+                                    .heightIn(min = rowSpan(LIST_ROW_HEIGHT))
                                     .clip(BibleListRowShape)
                                     .background(rowColors.background)
                                     .hoverable(rowHover)
@@ -893,7 +892,7 @@ fun LowerThirdTab(
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                shape = RoundedCornerShape(8.dp)
+                shape = AppShape(8.dp)
             ) {
                 Text(stringResource(Res.string.generate_lower_third), style = MaterialTheme.typography.labelMedium)
             }
@@ -997,7 +996,7 @@ fun LowerThirdTab(
                         RaisedIconButton(
                             onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
                             modifier = Modifier.size(34.dp),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = AppShape(8.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
                                 contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -1027,7 +1026,7 @@ fun LowerThirdTab(
                                 },
                                 enabled = quickEnabled,
                                 modifier = Modifier.size(34.dp),
-                                shape = RoundedCornerShape(8.dp),
+                                shape = AppShape(8.dp),
                                 colors = atemButtonColors
                             ) {
                                 Icon(Icons.Filled.Image, contentDescription = quickStillLabel, modifier = Modifier.size(16.dp))
@@ -1043,7 +1042,7 @@ fun LowerThirdTab(
                                 },
                                 enabled = quickEnabled && !quickClipTooLong,
                                 modifier = Modifier.size(34.dp),
-                                shape = RoundedCornerShape(8.dp),
+                                shape = AppShape(8.dp),
                                 colors = atemButtonColors
                             ) {
                                 Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))
@@ -1055,7 +1054,7 @@ fun LowerThirdTab(
                                 onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
                                 enabled = canPlay && !atemBusy && atemReachable,
                                 modifier = Modifier.size(34.dp),
-                                shape = RoundedCornerShape(8.dp),
+                                shape = AppShape(8.dp),
                                 colors = atemButtonColors
                             ) {
                                 Icon(
@@ -1084,7 +1083,7 @@ fun LowerThirdTab(
                         },
                         enabled = canPlay,
                         modifier = Modifier.size(34.dp),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = AppShape(8.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -1176,8 +1175,8 @@ fun LowerThirdTab(
                     modifier = Modifier
                         .aspectRatio(previewOutput.size.aspectRatio)
                         .testTag(LOWER_THIRD_PREVIEW_TAG)
-                        .background(Color.Black, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                        .background(Color.Black, AppShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     if (canPlay) {

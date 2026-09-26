@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
@@ -708,7 +708,7 @@ internal fun firstLyricLine(lyrics: String): String =
 private val SECTION_MARKER_LINE = Regex("""^[\[{][^\]}]*[\]}]$""")
 private val CHORD_MARKER = Regex("""\[[^\]]*]""")
 
-private val CardShape = RoundedCornerShape(9.dp)
+private val CardShape = AppShape(9.dp)
 
 /**
  * The one type style every metadata card's value is set in.
@@ -750,11 +750,11 @@ private fun EditSongFooter(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        GhostButton(shape = RoundedCornerShape(9.dp), onClick = onDismiss) {
+        GhostButton(shape = AppShape(9.dp), onClick = onDismiss) {
             Text(stringResource(Res.string.cancel))
         }
         RaisedButton(
-            shape = RoundedCornerShape(9.dp),
+            shape = AppShape(9.dp),
             enabled = saveEnabled,
             onClick = onSave,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -979,7 +979,7 @@ private fun HoverLabel(text: String, content: @Composable () -> Unit) {
         tooltip = {
             Surface(
                 color = MaterialTheme.colorScheme.inverseSurface,
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 shadowElevation = 4.dp,
             ) {
                 Text(
@@ -1003,7 +1003,7 @@ private fun InsertChip(label: String, onClick: () -> Unit) {
         fontSize = 11.sp,
         color = palette.key.ink,
         modifier = Modifier
-            .raisedHover(RoundedCornerShape(6.dp), palette.key, palette, lift = 2.dp)
+            .raisedHover(AppShape(6.dp), palette.key, palette, lift = 2.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 9.dp, vertical = 4.dp),
     )
@@ -1043,7 +1043,7 @@ private fun LegendChip(text: String, ink: Color) {
         fontSize = 10.5.sp,
         color = ink,
         modifier = Modifier
-            .background(ink.copy(alpha = 0.14f), RoundedCornerShape(5.dp))
+            .background(ink.copy(alpha = 0.14f), AppShape(5.dp))
             .padding(horizontal = 7.dp, vertical = 2.dp),
     )
 }
@@ -1111,7 +1111,7 @@ private fun AnnotatedString.Builder.appendChordHighlighted(line: String, ink: Co
  */
 private fun clipboardText(): String? = SystemClipboard.paste()
 
-private val LyricsFieldShape = RoundedCornerShape(10.dp)
+private val LyricsFieldShape = AppShape(10.dp)
 
 /**
  * Dedicated multi-line, scrollable lyrics editor — kept separate from SettingsTextField

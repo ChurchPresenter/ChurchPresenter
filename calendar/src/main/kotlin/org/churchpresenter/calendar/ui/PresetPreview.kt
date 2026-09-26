@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -282,9 +282,9 @@ private fun PreviewFrame(background: Color? = null, content: @Composable () -> U
     Box(
         Modifier
             .size(VIDEO_WIDTH, VIDEO_HEIGHT)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(background ?: scheme.surfaceVariant)
-            .border(1.dp, scheme.outlineVariant, RoundedCornerShape(6.dp)),
+            .border(1.dp, scheme.outlineVariant, AppShape(6.dp)),
         contentAlignment = Alignment.Center,
     ) {
         content()
@@ -304,8 +304,8 @@ private fun ThumbnailStrip(thumbs: List<ImageBitmap>) {
                 modifier = Modifier
                     .width(THUMB_WIDTH)
                     .height(THUMB_HEIGHT)
-                    .clip(RoundedCornerShape(5.dp))
-                    .border(1.dp, scheme.outlineVariant, RoundedCornerShape(5.dp)),
+                    .clip(AppShape(5.dp))
+                    .border(1.dp, scheme.outlineVariant, AppShape(5.dp)),
             )
         }
     }

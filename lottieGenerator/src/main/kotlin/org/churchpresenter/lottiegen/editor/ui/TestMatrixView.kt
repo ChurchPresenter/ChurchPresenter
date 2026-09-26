@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -85,8 +85,8 @@ private fun MatrixCellView(cell: MatrixCell, progress: Float, aspect: Float, mod
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(aspect)
-                .clip(RoundedCornerShape(4.dp))
-                .border(1.dp, CellBorderColor, RoundedCornerShape(4.dp))
+                .clip(AppShape(4.dp))
+                .border(1.dp, CellBorderColor, AppShape(4.dp))
                 .background(CellBackgroundColor)
         ) {
             val composition by rememberLottieComposition(key = cell.json) {

@@ -435,6 +435,10 @@
     <string name="customize_theme_text_size_default">Default</string>
     <string name="customize_theme_text_size_large">Large</string>
     <string name="customize_theme_text_size_extra_large">Extra large</string>
+    <string name="customize_theme_margin">Margin</string>
+    <string name="customize_theme_margin_normal">Normal</string>
+    <string name="customize_theme_margin_thin">Thin</string>
+    <string name="customize_theme_margin_thinner">Thinner</string>
     <string name="customize_theme_text_size_hint">Changes the app's own windows only. Output screens are not affected.</string>
     <string name="customize_theme_preview_heading">Sunday Service</string>
     <string name="customize_theme_preview_body">Songs, scripture and slides, ready to go live.</string>

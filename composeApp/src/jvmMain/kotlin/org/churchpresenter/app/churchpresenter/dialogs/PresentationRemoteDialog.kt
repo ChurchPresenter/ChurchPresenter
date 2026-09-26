@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
@@ -234,7 +234,7 @@ internal fun PresentationRemoteDialogContent(
                     }
                     Spacer(Modifier.height(8.dp))
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { copyText(qrUrl) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -268,7 +268,7 @@ internal fun PresentationRemoteDialogContent(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = onStartTunnel,
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                             ) {
@@ -290,14 +290,14 @@ internal fun PresentationRemoteDialogContent(
                         is TunnelStatus.Connected -> {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 RaisedButton(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = AppShape(6.dp),
                                     onClick = { onPresentationDisplayUrlChanged(serverUrl) },
                                     colors = if (presentationDisplayUrl.isEmpty() || presentationDisplayUrl == serverUrl)
                                         ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), contentColor = MaterialTheme.colorScheme.primary)
                                     else ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                                 ) { Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall) }
                                 RaisedButton(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = AppShape(6.dp),
                                     onClick = { onPresentationDisplayUrlChanged(tunnelUrl) },
                                     colors = if (presentationDisplayUrl == tunnelUrl)
                                         ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), contentColor = MaterialTheme.colorScheme.primary)
@@ -306,7 +306,7 @@ internal fun PresentationRemoteDialogContent(
                             }
                             Spacer(Modifier.height(8.dp))
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = onStopTunnel,
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                             ) {
@@ -320,7 +320,7 @@ internal fun PresentationRemoteDialogContent(
                                 color = MaterialTheme.colorScheme.error
                             )
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = onStartTunnel,
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                             ) {
@@ -340,7 +340,7 @@ internal fun PresentationRemoteDialogContent(
 
                 Spacer(Modifier.height(16.dp))
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = onDismiss,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

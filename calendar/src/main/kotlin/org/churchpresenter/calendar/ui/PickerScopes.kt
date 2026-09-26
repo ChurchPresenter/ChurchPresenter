@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,7 +54,7 @@ internal fun PickChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         Modifier
             .height(26.dp)
-            .raisedKey(RoundedCornerShape(7.dp), fill, onClick = onClick)
+            .raisedKey(AppShape(7.dp), fill, onClick = onClick)
             .padding(horizontal = 11.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -181,9 +181,9 @@ private fun ScopeRow(label: String, count: Int, selected: Boolean, onClick: () -
             .then(
                 // The chosen scope is a raised row, the way a chosen list row is everywhere else.
                 if (selected) {
-                    Modifier.raisedKey(RoundedCornerShape(7.dp), selectedFill, onClick = onClick)
+                    Modifier.raisedKey(AppShape(7.dp), selectedFill, onClick = onClick)
                 } else {
-                    Modifier.clip(RoundedCornerShape(7.dp)).clickable(onClick = onClick)
+                    Modifier.clip(AppShape(7.dp)).clickable(onClick = onClick)
                 }
             )
             .padding(horizontal = 9.dp, vertical = 7.dp),

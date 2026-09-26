@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -126,8 +126,8 @@ internal fun SongBackgroundLookColumn(
             Box(Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(27.dp)
-                        .clip(RoundedCornerShape(7.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(7.dp))
+                        .clip(AppShape(7.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, AppShape(7.dp))
                         .clickable(onClick = onApplyToSongbook),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -155,8 +155,8 @@ private fun SongBackgroundStage(background: SongBackground, sampleLine: String, 
         // taken back from here, so the preview keeps the size the sliders were fitted around.
         modifier = Modifier.fillMaxWidth().heightIn(max = STAGE_MAX_HEIGHT)
             .aspectRatio(stageAspect, matchHeightConstraintsFirst = true)
-            .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            .clip(AppShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(8.dp)),
     ) {
         SongBackgroundFill(background, Modifier.fillMaxSize())
         if (background.dim > 0) {
@@ -190,16 +190,16 @@ private fun YourColor(background: SongBackground, onChange: (SongBackground) -> 
         PanelCaption(stringResource(Res.string.song_background_your_color))
         Row(
             modifier = Modifier.fillMaxWidth().height(27.dp)
-                .sunken(RoundedCornerShape(7.dp), elevationPalette())
-                .hoverTint(RoundedCornerShape(7.dp))
+                .sunken(AppShape(7.dp), elevationPalette())
+                .hoverTint(AppShape(7.dp))
                 .padding(start = 8.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Box(
-                Modifier.size(14.dp).clip(RoundedCornerShape(4.dp))
+                Modifier.size(14.dp).clip(AppShape(4.dp))
                     .background(parseHexColor(background.color))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, AppShape(4.dp))
             )
             BasicTextField(
                 value = background.color,
@@ -221,13 +221,13 @@ private fun YourColor(background: SongBackground, onChange: (SongBackground) -> 
             backgroundSwatches(RecentColors.colors).forEach { hex ->
                 val selected = background.color.equals(hex, ignoreCase = true)
                 Box(
-                    Modifier.weight(1f).height(16.dp).clip(RoundedCornerShape(4.dp))
+                    Modifier.weight(1f).height(16.dp).clip(AppShape(4.dp))
                         .background(parseHexColor(hex))
                         .border(
                             1.dp,
                             if (selected) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(4.dp),
+                            AppShape(4.dp),
                         )
                         .clickable {
                             onChange(background.copy(type = SongBackgroundType.COLOR, color = hex))

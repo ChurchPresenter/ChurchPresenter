@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -501,8 +501,8 @@ private fun SingleDisplayPreview(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(outputSize.aspectRatio)
-                .clip(RoundedCornerShape(6.dp))
-                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+                .clip(AppShape(6.dp))
+                .border(1.dp, borderColor, AppShape(6.dp))
         ) {
         val primaryRole = rawAssignment.primaryOutputRole
 
@@ -732,7 +732,7 @@ private fun SingleDisplayPreview(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(4.dp)
-                    .background(Color(LIVE_BADGE_COLOR), RoundedCornerShape(3.dp))
+                    .background(Color(LIVE_BADGE_COLOR), AppShape(3.dp))
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             )
         }
@@ -749,7 +749,7 @@ private fun SingleDisplayPreview(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 4.dp, bottom = if (rawAssignment.hasKeyOutput) 24.dp else 4.dp)
-                        .background(Color(LOCK_BADGE_COLOR), RoundedCornerShape(3.dp))
+                        .background(Color(LOCK_BADGE_COLOR), AppShape(3.dp))
                         .padding(horizontal = 5.dp, vertical = 2.dp)
                 )
             }
@@ -790,7 +790,7 @@ private fun SingleDisplayPreview(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                    .background(Color.Black.copy(alpha = 0.5f), AppShape(3.dp))
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             )
         }
@@ -802,7 +802,7 @@ private fun SingleDisplayPreview(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 6.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
+                    .background(Color.Black.copy(alpha = 0.6f), AppShape(4.dp))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 AnimatedEqualizer()
@@ -840,7 +840,7 @@ private fun PreviewHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(3.dp))
+            .clip(AppShape(3.dp))
             .then(if (collapsible) Modifier.clickable(onClick = onToggle) else Modifier)
             .padding(bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -992,7 +992,7 @@ private fun AnimatedEqualizer() {
                 modifier = Modifier
                     .width(3.dp)
                     .fillMaxHeight(heightFraction.value)
-                    .background(Color(AUDIO_LEVEL_COLOR), RoundedCornerShape(1.dp))
+                    .background(Color(AUDIO_LEVEL_COLOR), AppShape(1.dp))
             )
         }
     }

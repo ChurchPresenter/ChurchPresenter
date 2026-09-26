@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -323,7 +323,7 @@ internal fun RemoteEventDialogContent(
                     Box(
                         modifier = Modifier
                             .size(38.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(AppShape(10.dp))
                             .background(typeAccent.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -357,7 +357,7 @@ internal fun RemoteEventDialogContent(
                     // Prominent one-tap allow (mirrors the ✓ button below)
                     RaisedButton(
                         onClick = onAllow,
-                        shape = RoundedCornerShape(8.dp),
+                        shape = AppShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.semantic.success,
                             contentColor = MaterialTheme.semantic.onSuccess

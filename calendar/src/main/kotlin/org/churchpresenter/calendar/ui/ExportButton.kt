@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
@@ -106,7 +106,7 @@ internal fun ExportSplitButton(
             expanded = open,
             onDismissRequest = { open = false },
             modifier = Modifier.width(MENU_WIDTH),
-            shape = RoundedCornerShape(10.dp),
+            shape = AppShape(10.dp),
             containerColor = scheme.surfaceVariant,
         ) {
             PdfAudience.entries.forEach { entry ->

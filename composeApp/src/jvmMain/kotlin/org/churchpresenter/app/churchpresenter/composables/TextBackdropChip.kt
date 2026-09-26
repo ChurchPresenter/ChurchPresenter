@@ -5,7 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.SquircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -71,7 +72,7 @@ internal fun TextBackdropChip(
         mode == TextBackdropMode.OFF -> emptyInk
         else -> Color.White
     }
-    val shape = RoundedCornerShape(3.dp)
+    val shape = AppShape(3.dp)
     Box(
         modifier = modifier
             // A backing is drawn over a photo or a video, never over the settings panel, so the
@@ -88,7 +89,7 @@ internal fun TextBackdropChip(
         contentAlignment = Alignment.Center,
     ) {
         if (label == null) {
-            Box(Modifier.width(CHIP_BAR_WIDTH).height(CHIP_BAR_HEIGHT).background(ink, RoundedCornerShape(2.dp)))
+            Box(Modifier.width(CHIP_BAR_WIDTH).height(CHIP_BAR_HEIGHT).background(ink, AppShape(2.dp)))
         } else {
             ChipLabel(label, ink, fontSize)
         }
@@ -140,10 +141,10 @@ private val CHIP_BAR_HEIGHT = 2.5.dp
 internal fun BackdropTooltip(text: String) = ControlTooltip(text)
 
 /** Square where it meets its neighbour, rounded where it does not, so a strip reads as one shape. */
-internal fun segmentShape(index: Int, count: Int): RoundedCornerShape {
+internal fun segmentShape(index: Int, count: Int): SquircleShape {
     val rounded = 8.dp
     val square = 0.dp
-    return RoundedCornerShape(
+    return AppShape(
         topStart = if (index == 0) rounded else square,
         bottomStart = if (index == 0) rounded else square,
         topEnd = if (index == count - 1) rounded else square,

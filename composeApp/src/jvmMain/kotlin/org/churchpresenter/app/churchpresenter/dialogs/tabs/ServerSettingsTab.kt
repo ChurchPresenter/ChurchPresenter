@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -391,7 +391,7 @@ private fun ServerPortRow(
             )
             if (isRunning) {
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = onRestart,
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -454,7 +454,7 @@ private fun ServerUrlRow(serverUrl: String, apiKey: String?) {
                 modifier = Modifier.widthIn(max = 280.dp),
             )
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = { showConnectionQrDialog = true },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -935,7 +935,7 @@ private fun CopyUrlButton(
         )
     }
     RaisedButton(
-        shape = RoundedCornerShape(6.dp),
+        shape = AppShape(6.dp),
         onClick = onClick,
         contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 6.dp),
         colors = colors
@@ -960,7 +960,7 @@ private fun ClientRow(
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                RoundedCornerShape(4.dp)
+                AppShape(4.dp)
             )
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
@@ -1019,7 +1019,7 @@ private fun ClientRow(
             }
             Spacer(Modifier.width(4.dp))
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = onRemove,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -1139,7 +1139,7 @@ internal fun ConnectionQrDialogContent(serverUrl: String, apiKey: String?, onDis
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, AppShape(4.dp))
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -1151,7 +1151,7 @@ internal fun ConnectionQrDialogContent(serverUrl: String, apiKey: String?, onDis
                     )
                 }
             }
-            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            RaisedButton(shape = AppShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
             }
         }

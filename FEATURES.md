@@ -279,7 +279,7 @@
 ## Personalization & Workflow
 - **34 languages** — full interface translation: English, Spanish, French, German, Portuguese, Dutch, Swedish, Norwegian, Finnish, Estonian, Latvian, Polish, Czech, Slovak, Croatian, Romanian, Ukrainian, Russian, Belarusian, Kazakh, Uzbek, Turkish, Arabic, Persian, Hindi, Nepali, Thai, Lao, Japanese, Chinese, Indonesian, Malay, Tagalog and Swahili — with the interface laid out right-to-left for Arabic and Persian.
 - **9 themes** — light, dark, system and six accent themes to match your booth.
-- **Make it yours** — View → Customize Theme… builds a whole palette from one accent color on a light or dark base, lets you set the background, text, secondary, selection, success, warning and error colors too — or leave any on Auto — and sets the font and text size the app's own windows use. Text is kept readable whatever you pick, and output screens are never affected.
+- **Make it yours** — View → Customize Theme… builds a whole palette from one accent color on a light or dark base, lets you set the background, text, secondary, selection, success, warning and error colors too — or leave any on Auto — and sets the font, text size and list Margin — Normal, Thin or Thinner, for more rows on screen — the app's own windows use. Text is kept readable whatever you pick, and output screens are never affected.
 - **Guided setup** — a friendly first-run wizard gets your Bibles, songs and media ready in minutes.
 - **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service.
 - **Portable settings** — export and import your entire configuration to set up another machine instantly.

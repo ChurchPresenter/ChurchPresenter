@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -354,7 +354,7 @@ internal fun ResultRow(
             .padding(horizontal = 10.dp, vertical = 8.dp),
     ) {
         Box(
-            Modifier.size(RESULT_ICON).clip(RoundedCornerShape(7.dp)).background(tint.copy(alpha = 0.16f)),
+            Modifier.size(RESULT_ICON).clip(AppShape(7.dp)).background(tint.copy(alpha = 0.16f)),
             contentAlignment = Alignment.Center,
         ) {
             Box(Modifier.size(8.dp).clip(CircleShape).background(tint))
@@ -372,7 +372,7 @@ internal fun ResultRow(
                 if (badge != null) {
                     Box(
                         Modifier
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(AppShape(4.dp))
                             .background(scheme.primary.copy(alpha = 0.18f))
                             .padding(horizontal = 5.dp, vertical = 1.5.dp),
                     ) {
@@ -417,7 +417,7 @@ internal fun ResultRow(
         val addTip = stringResource(Res.string.calendar_pick_add_tip)
         Hint(addTip) {
             Box(
-                Modifier.size(ADD_BADGE).clip(RoundedCornerShape(6.dp)).background(scheme.primary.copy(alpha = 0.16f)),
+                Modifier.size(ADD_BADGE).clip(AppShape(6.dp)).background(scheme.primary.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

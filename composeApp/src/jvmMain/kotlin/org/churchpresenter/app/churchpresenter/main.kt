@@ -2013,6 +2013,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                         customThemeColors = choice.colors,
                                         uiFontFamily = choice.fontFamily,
                                         uiFontScale = choice.fontScale,
+                                        uiRowSpacing = choice.rowSpacing,
                                     )
                                     settingsManager.saveSettings(appSettings)
                                     onThemeCustomizationChange(themeCustomizationFrom(appSettings))

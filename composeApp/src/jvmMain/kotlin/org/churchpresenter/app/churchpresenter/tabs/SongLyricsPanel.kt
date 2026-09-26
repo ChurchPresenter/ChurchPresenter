@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -150,7 +150,7 @@ internal fun RowScope.SongLyricsPanel(
         val showBackToLive = isPresenting && live.songId != null && currentSong?.songId != live.songId
         if (showBackToLive && !dialogOpen) {
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 onClick = {
                     onBackToLiveSong()
@@ -371,7 +371,7 @@ private fun LyricsList(
             state = lyricsListState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 8.dp, end = 12.dp, bottom = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(rowPad(4.dp)),
         ) {
             // ── Title slide entry ────────────────────────────────────
             if (titleSlideEnabled && currentSong != null && sections.isNotEmpty()) {
@@ -468,7 +468,7 @@ private fun TitleSlideEntry(
                     tabFocusRequester.requestFocus()
                 }
             )
-            .padding(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 12.dp)
+            .padding(start = rowPad(14.dp), top = rowPad(10.dp), end = rowPad(14.dp), bottom = rowPad(12.dp))
     ) {
         // Same chip the lyric sections use, so the title slide reads as
         // one more entry in the list rather than a differently-styled one.
@@ -534,7 +534,7 @@ private fun LyricSectionEntry(
                     tabFocusRequester.requestFocus()
                 }
             )
-            .padding(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 12.dp)
+            .padding(start = rowPad(14.dp), top = rowPad(10.dp), end = rowPad(14.dp), bottom = rowPad(12.dp))
     ) {
         val textColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
 
@@ -595,4 +595,4 @@ private fun LyricSectionEntry(
     }
 }
 
-private val LyricSectionShape = RoundedCornerShape(11.dp)
+private val LyricSectionShape = AppShape(11.dp)

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +34,8 @@ import churchpresenter.composeapp.generated.resources.customize_theme_preview_so
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_song_selected
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_success
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_warning
+import org.churchpresenter.app.churchpresenter.tabs.rowPad
+import org.churchpresenter.app.churchpresenter.tabs.rowSpan
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.RaisedFilterChip
@@ -56,7 +58,7 @@ internal fun ThemePreviewCard() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(scheme.surfaceContainer, RoundedCornerShape(8.dp))
+                .background(scheme.surfaceContainer, AppShape(8.dp))
                 .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(PREVIEW_GAP),
         ) {
@@ -119,19 +121,19 @@ private fun PreviewRow(text: String, selected: Boolean) {
             .fillMaxWidth()
             .background(
                 if (selected) scheme.primaryContainer else scheme.surfaceContainerHigh,
-                RoundedCornerShape(6.dp),
+                AppShape(6.dp),
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             Modifier
                 .width(3.dp)
-                .height(28.dp)
+                .height(rowSpan(28.dp))
                 .background(if (selected) MaterialTheme.semantic.marker else Color.Transparent),
         )
         Text(
             text,
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = rowPad(8.dp)),
             style = MaterialTheme.typography.bodyMedium,
             color = if (selected) scheme.onPrimaryContainer else scheme.onSurface,
             maxLines = 1,

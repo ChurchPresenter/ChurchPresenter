@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -135,7 +135,7 @@ private fun DetectedChip(text: String) {
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(horizontal = 8.dp, vertical = 3.dp),
     )
@@ -148,7 +148,7 @@ private fun DetailAction(text: String, icon: DrawableResource, enabled: Boolean 
     RaisedButton(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(9.dp),
+        shape = AppShape(9.dp),
         contentPadding = PaddingValues(horizontal = 13.dp),
         modifier = Modifier.height(30.dp),
     ) {
@@ -289,7 +289,7 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(7.dp))
+            .clip(AppShape(7.dp))
             .background(MaterialTheme.semantic.warningContainer)
             .padding(horizontal = 9.dp, vertical = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
@@ -333,7 +333,7 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
                     }
                 },
                 modifier = Modifier.height(22.dp),
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

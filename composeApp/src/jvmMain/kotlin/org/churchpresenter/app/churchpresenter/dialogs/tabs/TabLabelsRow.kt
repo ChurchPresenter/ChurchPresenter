@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Label
@@ -151,7 +151,7 @@ private fun CycleButton(
         KeyButton(
             onClick = onClick,
             modifier = modifier.fillMaxWidth().height(34.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = AppShape(8.dp),
             contentPadding = PaddingValues(horizontal = 12.dp),
         ) {
             Icon(

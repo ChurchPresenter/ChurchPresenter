@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
@@ -101,7 +101,7 @@ internal fun ExportTab(
                 Box(
                     Modifier
                         .size(12.dp)
-                        .clip(RoundedCornerShape(3.dp))
+                        .clip(AppShape(3.dp))
                         .background(parseHex(section.colorHex))
                 )
                 CardText(title = section.name, subtitle = null)
@@ -124,9 +124,9 @@ private fun LogoRow(path: String, onChoose: () -> Unit, onRemove: () -> Unit) {
         Box(
             Modifier
                 .size(LOGO_PREVIEW)
-                .clip(RoundedCornerShape(7.dp))
+                .clip(AppShape(7.dp))
                 .background(scheme.surface)
-                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(7.dp)),
+                .border(1.dp, scheme.outlineVariant, AppShape(7.dp)),
             contentAlignment = Alignment.Center,
         ) {
             if (preview != null) {

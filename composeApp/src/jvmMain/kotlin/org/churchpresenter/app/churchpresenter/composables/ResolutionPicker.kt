@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -81,7 +81,7 @@ fun ResolutionPicker(
             )
         }
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
             // Inset in its cell so it does not butt against the raised key beside it.
@@ -147,7 +147,7 @@ private fun CustomResolutionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(12.dp),
+        shape = AppShape(12.dp),
         title = { Text(stringResource(Res.string.output_resolution_custom_title)) },
         text = {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

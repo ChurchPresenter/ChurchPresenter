@@ -33,7 +33,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
@@ -481,7 +481,7 @@ fun PresentationTab(
                         }
                     },
                     modifier = Modifier.height(32.dp),
-                    shape = RoundedCornerShape(7.dp),
+                    shape = AppShape(7.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -794,7 +794,7 @@ fun PresentationTab(
                     modifier = Modifier
                         .height(42.dp)
                         .width(170.dp)
-                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .sunken(AppShape(8.dp), elevationPalette())
                         .clickable { editingInterval = true }
                         .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
@@ -836,7 +836,7 @@ fun PresentationTab(
                             )
                         },
                         confirmButton = {
-                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                            GhostButton(shape = AppShape(6.dp), onClick = {
                                 intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
                                     viewModel.autoScrollInterval = v.toFloat()
                                     onSettingsChange { s ->
@@ -851,7 +851,7 @@ fun PresentationTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                            GhostButton(shape = AppShape(6.dp), onClick = { editingInterval = false }) {
                                 Text(stringResource(Res.string.cancel))
                             }
                         }
@@ -862,7 +862,7 @@ fun PresentationTab(
                     modifier = Modifier
                         .height(42.dp)
                         .width(170.dp)
-                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .sunken(AppShape(8.dp), elevationPalette())
                         .clickable { editingTransition = true }
                         .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
@@ -904,7 +904,7 @@ fun PresentationTab(
                             )
                         },
                         confirmButton = {
-                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = {
+                            GhostButton(shape = AppShape(6.dp), onClick = {
                                 transitionInput.toIntOrNull()
                                     ?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)
                                     ?.let { v ->
@@ -921,7 +921,7 @@ fun PresentationTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                            GhostButton(shape = AppShape(6.dp), onClick = { editingTransition = false }) {
                                 Text(stringResource(Res.string.cancel))
                             }
                         }
@@ -1138,7 +1138,12 @@ fun PresentationTab(
                         }
                     }
                 } else {
-                    Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.weight(1f).fillMaxWidth()
+                            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                            .bibleListCard(),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(stringResource(Res.string.select_presentation_file), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                             Text(stringResource(Res.string.supported_formats), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
@@ -1167,7 +1172,7 @@ fun PresentationTab(
                             val openFill = if (viewModel.selectedPresentation == f) palette.selected else palette.key
                             Row(
                                 modifier = Modifier
-                                    .raisedHover(RoundedCornerShape(8.dp), openFill, palette, lift = 2.dp)
+                                    .raisedHover(AppShape(8.dp), openFill, palette, lift = 2.dp)
                                     .clickable { viewModel.selectPresentation(f) }
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1253,9 +1258,9 @@ private fun SlideThumbnail(
     val borderColor = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant
     Column(
         modifier = Modifier
-            .hoverLift(RoundedCornerShape(8.dp))
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .hoverLift(AppShape(8.dp))
+            .clip(AppShape(8.dp))
+            .border(2.dp, borderColor, AppShape(8.dp))
             .combinedClickable(onClick = onClick, onDoubleClick = onDoubleClick)
     ) {
         Box(
@@ -1280,7 +1285,7 @@ private fun SlideThumbnail(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), AppShape(4.dp))
                         .padding(horizontal = 5.dp, vertical = 1.dp)
                 )
             }

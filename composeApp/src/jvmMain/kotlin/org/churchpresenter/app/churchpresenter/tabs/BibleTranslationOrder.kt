@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.DropdownMenu
@@ -91,7 +91,7 @@ internal fun TranslationOrderSelector(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(34.dp)
-                .dropdownField(RoundedCornerShape(10.dp), open = expanded)
+                .dropdownField(AppShape(10.dp), open = expanded)
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
                 .padding(horizontal = 10.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -118,7 +118,7 @@ internal fun TranslationOrderSelector(
             if (extraCount > 0) {
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(5.dp))
+                        .background(MaterialTheme.colorScheme.surface, AppShape(5.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
                     Text(
@@ -140,7 +140,7 @@ internal fun TranslationOrderSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             containerColor = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(13.dp),
+            shape = AppShape(13.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             offset = DpOffset(0.dp, 8.dp),
         ) {
@@ -189,12 +189,12 @@ private fun TranslationOrderPanel(
                         .graphicsLayer { translationY = if (isDragged) dragOffsetY else 0f }
                         .background(
                             if (isPrimary) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f) else Color.Transparent,
-                            RoundedCornerShape(9.dp),
+                            AppShape(9.dp),
                         )
                         .border(
                             1.dp,
                             if (isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color.Transparent,
-                            RoundedCornerShape(9.dp),
+                            AppShape(9.dp),
                         )
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -240,7 +240,7 @@ private fun TranslationOrderPanel(
                             .size(22.dp)
                             .background(
                                 if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(7.dp),
+                                AppShape(7.dp),
                             ),
                         contentAlignment = Alignment.Center,
                     ) {

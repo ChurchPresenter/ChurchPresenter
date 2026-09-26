@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Check
@@ -98,13 +98,13 @@ private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
                 .then(
                     if (enabled) {
                         Modifier.raised(
-                            RoundedCornerShape(5.dp),
+                            AppShape(5.dp),
                             elevationPalette().accent,
                             elevationPalette(),
                             lift = 2.dp,
                         )
                     } else {
-                        Modifier.sunken(RoundedCornerShape(5.dp), elevationPalette())
+                        Modifier.sunken(AppShape(5.dp), elevationPalette())
                     }
                 )
                 .clickable(onClick = onToggle),
@@ -154,7 +154,7 @@ private fun CueBadge(action: String, ink: Float) {
         fontWeight = FontWeight.ExtraBold,
         color = scheme.tertiary.copy(alpha = ink),
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(AppShape(4.dp))
             .background(scheme.tertiary.copy(alpha = CHIP_TINT))
             .padding(horizontal = 5.dp, vertical = 1.5.dp),
     )
@@ -219,7 +219,7 @@ internal fun CueRow(
         Box(
             Modifier
                 .size(CUE_ICON)
-                .clip(RoundedCornerShape(5.dp))
+                .clip(AppShape(5.dp))
                 .background(scheme.tertiary.copy(alpha = CHIP_TINT)),
             contentAlignment = Alignment.Center,
         ) {

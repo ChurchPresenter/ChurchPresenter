@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -163,7 +163,7 @@ private fun LayoutVariantCard(
     onPick: () -> Unit,
 ) {
     val palette = elevationPalette()
-    val shape = RoundedCornerShape(8.dp)
+    val shape = AppShape(8.dp)
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
@@ -260,7 +260,7 @@ internal fun LayoutMiniature(
                         modifier = Modifier
                             .weight(cell.weight)
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(2.dp))
+                            .clip(AppShape(2.dp))
                             .background(zoneColor),
                     )
                 }
@@ -277,9 +277,9 @@ internal fun OffGridZoneChip(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
         Text(

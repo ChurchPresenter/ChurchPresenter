@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -422,7 +422,7 @@ private fun StockMediaThumbnail(
     Box(
         modifier = Modifier
             .aspectRatio(THUMB_ASPECT_W / THUMB_ASPECT_H)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         val loadedBitmap = bitmap
@@ -454,7 +454,7 @@ private fun StockMediaThumbnail(
                 .padding(4.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = AppShape(4.dp)
                 )
         ) {
             if (isDownloading) {

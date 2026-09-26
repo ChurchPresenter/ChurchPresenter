@@ -51,6 +51,10 @@ import churchpresenter.composeapp.generated.resources.customize_theme_colors
 import churchpresenter.composeapp.generated.resources.customize_theme_error
 import churchpresenter.composeapp.generated.resources.customize_theme_font
 import churchpresenter.composeapp.generated.resources.customize_theme_font_default
+import churchpresenter.composeapp.generated.resources.customize_theme_margin
+import churchpresenter.composeapp.generated.resources.customize_theme_margin_normal
+import churchpresenter.composeapp.generated.resources.customize_theme_margin_thin
+import churchpresenter.composeapp.generated.resources.customize_theme_margin_thinner
 import churchpresenter.composeapp.generated.resources.customize_theme_more_colors_hint
 import churchpresenter.composeapp.generated.resources.customize_theme_reset
 import churchpresenter.composeapp.generated.resources.customize_theme_reset_color
@@ -79,7 +83,9 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.CustomThemeColors
+import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.LocalThemeCustomization
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.UI_FONT_SCALES
 import org.churchpresenter.theme.components.GhostButton
@@ -108,6 +114,13 @@ private val FONT_SCALE_LABELS: List<StringResource> = listOf(
     Res.string.customize_theme_text_size_default,
     Res.string.customize_theme_text_size_large,
     Res.string.customize_theme_text_size_extra_large,
+)
+
+/** The labels of the Margin choices. */
+private val ROW_SPACING_LABELS: Map<ListRowSpacing, StringResource> = mapOf(
+    ListRowSpacing.NORMAL to Res.string.customize_theme_margin_normal,
+    ListRowSpacing.THIN to Res.string.customize_theme_margin_thin,
+    ListRowSpacing.THINNER to Res.string.customize_theme_margin_thinner,
 )
 
 /**
@@ -183,16 +196,23 @@ internal fun CustomizeThemeContent(
                         defaultLabel = defaultFontLabel,
                         onFontChange = { draft = draft.copy(fontFamily = if (it == defaultFontLabel) "" else it) },
                         onScaleChange = { draft = draft.copy(fontScale = it) },
+                        rowSpacing = draft.rowSpacing,
+                        onRowSpacingChange = { draft = draft.copy(rowSpacing = it) },
                     )
                 }
                 SettingsSection(
                     title = stringResource(Res.string.preview),
                     modifier = Modifier.width(PREVIEW_COLUMN_WIDTH).fillMaxHeight(),
                 ) {
-                    CompositionLocalProvider(LocalDensity provides previewDensity) {
+                    // The draft is provided, not only passed: the preview's rows read the Margin from it.
+                    val draftCustomization = draft.toCustomization()
+                    CompositionLocalProvider(
+                        LocalDensity provides previewDensity,
+                        LocalThemeCustomization provides draftCustomization,
+                    ) {
                         ChurchPresenterTheme(
                             themeMode = if (draft.useCustomColors) ThemeMode.CUSTOM else currentTheme,
-                            customization = draft.toCustomization(),
+                            customization = draftCustomization,
                         ) {
                             ThemePreviewCard()
                         }
@@ -396,6 +416,8 @@ private fun TextSection(
     defaultLabel: String,
     onFontChange: (String) -> Unit,
     onScaleChange: (Float) -> Unit,
+    rowSpacing: ListRowSpacing,
+    onRowSpacingChange: (ListRowSpacing) -> Unit,
 ) {
     val fonts = rememberSystemFonts()
     SettingsSection(title = stringResource(Res.string.customize_theme_font)) {
@@ -423,6 +445,24 @@ private fun TextSection(
                         ) {
                             Text(
                                 stringResource(FONT_SCALE_LABELS[index]),
+                                color = LocalContentColor.current,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FieldLabel(stringResource(Res.string.customize_theme_margin))
+                SegmentTrack(modifier = Modifier.weight(1f).height(SEGMENT_TRACK_HEIGHT)) {
+                    ListRowSpacing.entries.forEach { spacing ->
+                        SegmentTrackItem(
+                            selected = rowSpacing == spacing,
+                            onClick = { onRowSpacingChange(spacing) },
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        ) {
+                            Text(
+                                stringResource(ROW_SPACING_LABELS.getValue(spacing)),
                                 color = LocalContentColor.current,
                                 maxLines = 1,
                             )

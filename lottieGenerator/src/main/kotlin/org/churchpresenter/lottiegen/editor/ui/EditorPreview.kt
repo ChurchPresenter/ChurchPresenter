@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -45,7 +45,7 @@ private val PREVIEW_BORDER = Color(0xFF2A2D35)
 private val PREVIEW_BACKDROP = Color(0xFF10131A)
 
 
-private val ButtonShape = RoundedCornerShape(6.dp)
+private val ButtonShape = AppShape(6.dp)
 
 /**
  * The Style Editor's live preview — the generator PreviewPanel's Compottie mechanics
@@ -75,8 +75,8 @@ fun EditorPreview(
                 modifier = Modifier
                     .aspectRatio(aspectRatio)
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(4.dp))
-                    .border(1.dp, PREVIEW_BORDER, RoundedCornerShape(4.dp))
+                    .clip(AppShape(4.dp))
+                    .border(1.dp, PREVIEW_BORDER, AppShape(4.dp))
                     .background(PREVIEW_BACKDROP),
                 contentAlignment = Alignment.Center
             ) {

@@ -9,7 +9,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
@@ -41,7 +41,7 @@ fun KeyIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = RoundedCornerShape(ICON_KEY_RADIUS),
+    shape: Shape = AppShape(ICON_KEY_RADIUS),
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit,
@@ -95,7 +95,7 @@ fun RaisedIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = RoundedCornerShape(ICON_KEY_RADIUS),
+    shape: Shape = AppShape(ICON_KEY_RADIUS),
     colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
     border: BorderStroke? = null,
     interactionSource: MutableInteractionSource? = null,

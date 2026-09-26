@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
@@ -291,7 +291,7 @@ private fun TestEventRow(scope: CoroutineScope) {
                 }
             },
             modifier = Modifier.height(32.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = AppShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -350,7 +350,7 @@ private fun ManageButton(text: String, danger: Boolean = false, onClick: () -> U
     KeyButton(
         onClick = onClick,
         modifier = Modifier.height(34.dp),
-        shape = RoundedCornerShape(8.dp),
+        shape = AppShape(8.dp),
         contentPadding = PaddingValues(horizontal = 15.dp),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         // Destructive: the palette's red-tinted key, whose label clears 4.5:1 in every theme, with

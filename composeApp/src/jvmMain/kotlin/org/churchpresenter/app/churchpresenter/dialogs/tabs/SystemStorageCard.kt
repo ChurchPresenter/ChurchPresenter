@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -398,7 +398,7 @@ private fun StorageRow(
             Box(
                 modifier = Modifier
                     .size(28.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(AppShape(8.dp))
                     .background(folder.tint.copy(alpha = ICON_TILE_ALPHA)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -439,7 +439,7 @@ private fun StorageRow(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ),
-            shape = RoundedCornerShape(8.dp),
+            shape = AppShape(8.dp),
             contentPadding = PaddingValues(horizontal = 14.dp),
         ) {
             Text(text = stringResource(Res.string.browse_directory), style = MaterialTheme.typography.labelMedium)
@@ -454,7 +454,7 @@ private fun StorageRow(
                     containerColor = MaterialTheme.semantic.successContainer,
                     contentColor = MaterialTheme.semantic.onSuccessContainer,
                 ),
-                shape = RoundedCornerShape(8.dp),
+                shape = AppShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 13.dp),
             ) {
                 Text(
@@ -474,7 +474,7 @@ private fun StorageRow(
                     containerColor = MaterialTheme.semantic.successContainer,
                     contentColor = MaterialTheme.semantic.onSuccessContainer,
                 ),
-                shape = RoundedCornerShape(8.dp),
+                shape = AppShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 13.dp),
             ) {
                 Text(
@@ -495,9 +495,9 @@ private fun StoragePathField(path: String, status: DirStatus, modifier: Modifier
     Row(
         modifier = modifier
             .height(CONTROL_HEIGHT)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(AppShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+            .border(1.dp, borderColor, AppShape(8.dp))
             .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,

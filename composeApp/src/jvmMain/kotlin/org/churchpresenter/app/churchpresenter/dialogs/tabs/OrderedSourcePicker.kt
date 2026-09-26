@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -124,7 +124,7 @@ internal fun OrderedSourcePicker(
             expanded = open,
             onDismissRequest = { open = false },
             modifier = Modifier.width(MENU_WIDTH),
-            shape = RoundedCornerShape(12.dp),
+            shape = AppShape(12.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             OrderedSourceMenu(items, shown, strings, tags, onWrite, showRowCode)

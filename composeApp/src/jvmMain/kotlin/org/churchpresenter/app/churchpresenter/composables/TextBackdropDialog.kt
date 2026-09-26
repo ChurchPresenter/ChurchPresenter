@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -117,7 +117,7 @@ fun TextBackdropDialog(
     val mode = draft.mode
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(12.dp),
+            shape = AppShape(12.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp,
             modifier = Modifier.width(DIALOG_WIDTH),
@@ -283,7 +283,7 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
                             .fillMaxWidth()
                             .height(PRESET_HEIGHT)
                             .raisedHover(
-                                RoundedCornerShape(7.dp),
+                                AppShape(7.dp),
                                 elevationPalette().key,
                                 elevationPalette(),
                                 lift = 2.dp,
@@ -310,7 +310,7 @@ private fun BackdropPresetRow(current: TextBackdrop, onPick: (TextBackdrop) -> U
         GhostButton(
             onClick = { SavedTextBackdrops.add(current) },
             enabled = !alreadySaved,
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             modifier = Modifier.height(28.dp),
             contentPadding = PaddingValues(horizontal = 8.dp),
         ) {
@@ -445,7 +445,7 @@ private fun FieldGroup(title: String, fields: @Composable () -> Unit) {
                 modifier = Modifier
                     .width(4.dp)
                     .height(11.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.primary, AppShape(2.dp))
             )
             SectionLabel(title)
         }

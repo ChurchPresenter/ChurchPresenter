@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +40,7 @@ import org.churchpresenter.lottiegen.ui.Tokens
 
 private val THUMB_WIDTH = 104.dp
 private val THUMB_MIN_HEIGHT = 20.dp
-private val THUMB_SHAPE = RoundedCornerShape(4.dp)
+private val THUMB_SHAPE = AppShape(4.dp)
 private val TEMPLATE_ROW_PADDING = 6.dp
 
 /**
@@ -126,7 +126,7 @@ private fun CountBadge(text: String) {
     Text(
         text, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Tokens.Accent, maxLines = 1,
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
+            .clip(AppShape(5.dp))
             .background(Tokens.LogoChipBg)
             .padding(horizontal = 6.dp, vertical = 2.dp),
     )

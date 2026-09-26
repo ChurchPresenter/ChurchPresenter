@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,7 +78,7 @@ private fun PanelHeader() {
         Box(
             modifier = Modifier
                 .size(26.dp)
-                .clip(RoundedCornerShape(7.dp))
+                .clip(AppShape(7.dp))
                 .background(Tokens.LogoChipBg),
             contentAlignment = Alignment.Center
         ) {
@@ -86,14 +86,14 @@ private fun PanelHeader() {
             Box(
                 modifier = Modifier
                     .size(width = 14.dp, height = 11.dp)
-                    .border(1.3.dp, Tokens.LogoIcon, RoundedCornerShape(2.dp)),
+                    .border(1.3.dp, Tokens.LogoIcon, AppShape(2.dp)),
                 contentAlignment = Alignment.BottomStart
             ) {
                 Box(
                     modifier = Modifier
                         .padding(start = 2.dp, bottom = 1.5.dp)
                         .size(width = 8.dp, height = 2.6.dp)
-                        .clip(RoundedCornerShape(1.dp))
+                        .clip(AppShape(1.dp))
                         .background(Tokens.LogoIcon)
                 )
             }

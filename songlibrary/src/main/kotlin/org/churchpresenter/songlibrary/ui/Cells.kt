@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -92,9 +92,9 @@ fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> U
             onValueChange = { draft = it },
             style = if (strong) LibraryType.bodyStrong else LibraryType.body,
             modifier = Modifier.fillMaxWidth()
-                .clip(RoundedCornerShape(6.dp))
+                .clip(AppShape(6.dp))
                 .background(scheme.background)
-                .border(1.5.dp, scheme.primary, RoundedCornerShape(6.dp))
+                .border(1.5.dp, scheme.primary, AppShape(6.dp))
                 .padding(horizontal = 6.dp, vertical = 5.dp),
             textModifier = Modifier.focusRequester(focus)
                 // Only once it HAS been focused. `onFocusChanged` also fires as the modifier

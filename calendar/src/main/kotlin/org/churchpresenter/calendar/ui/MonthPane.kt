@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -174,7 +174,7 @@ private fun NavButton(
         Box(
             Modifier
                 .size(CalendarMetrics.monthNavButton)
-                .raisedKey(RoundedCornerShape(7.dp), key, onClick = onClick),
+                .raisedKey(AppShape(7.dp), key, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -261,7 +261,7 @@ private fun DayCell(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = CELL_GAP)
                     .size(width = CalendarMetrics.todayBarWidth, height = CalendarMetrics.todayBarHeight)
-                    .clip(RoundedCornerShape(1.dp))
+                    .clip(AppShape(1.dp))
                     .background(if (isSelected) scheme.onPrimaryContainer else scheme.primary)
             )
         }

@@ -79,6 +79,8 @@ data class AppSettings(
     val uiFontFamily: String = "",
     /** The UI text size, as a multiplier of the platform's font scale. Output windows ignore it. */
     val uiFontScale: Float = 1f,
+    /** How much room list rows leave around their text. Output windows ignore it. */
+    val uiRowSpacing: ListRowSpacing = ListRowSpacing.NORMAL,
     val language: String = "en",
     val eulaAcceptedVersion: Int = 0,
     val webBookmarks: List<WebBookmark> = emptyList(),

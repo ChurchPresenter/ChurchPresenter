@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
@@ -123,7 +123,7 @@ private fun TrayHeader(
             modifier = Modifier
                 .weight(1f)
                 .testTag(QUICK_BACKGROUND_HEADER_TAG)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(AppShape(4.dp))
                 .clickable { onExpandedChange(!expanded) }
                 .padding(end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -164,7 +164,7 @@ private fun TrayHeader(
                     modifier = Modifier
                         .testTag(QUICK_BACKGROUND_RESET_TAG)
                         .size(18.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(AppShape(4.dp))
                         .clickable { onPick(null) },
                     contentAlignment = Alignment.Center,
                 ) {
@@ -250,13 +250,13 @@ private fun QuickBackgroundTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(tileAspect)
-                    .clip(RoundedCornerShape(7.dp))
+                    .clip(AppShape(7.dp))
                     .clickable(onClick = onPick)
                     .border(
                         width = 2.dp,
                         color = if (active) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.outlineVariant,
-                        shape = RoundedCornerShape(7.dp),
+                        shape = AppShape(7.dp),
                     ),
             ) {
                 SongBackgroundFill(entry.background, Modifier.fillMaxSize())
@@ -282,12 +282,12 @@ private fun MiniSwatch(entry: QuickBackground, slot: Int, active: Boolean, onPic
         Box(
             modifier = Modifier
                 .size(15.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(AppShape(4.dp))
                 .clickable(onClick = onPick)
                 .border(
                     width = 1.5.dp,
                     color = if (active) MaterialTheme.colorScheme.primary else Color.Transparent,
-                    shape = RoundedCornerShape(4.dp),
+                    shape = AppShape(4.dp),
                 ),
         ) {
             SongBackgroundFill(entry.background, Modifier.fillMaxSize())
@@ -306,7 +306,7 @@ private fun SlotBadge(slot: Int, modifier: Modifier = Modifier) {
     if (slot > QUICK_BACKGROUND_SLOTS) return
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(3.dp))
+            .clip(AppShape(3.dp))
             .background(Color.Black.copy(alpha = SLOT_SCRIM_ALPHA))
             .padding(horizontal = 3.dp, vertical = 1.dp),
     ) {

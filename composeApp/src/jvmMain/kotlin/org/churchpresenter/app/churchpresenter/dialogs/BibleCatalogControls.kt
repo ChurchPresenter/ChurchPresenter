@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -193,7 +193,7 @@ internal fun LanguageDropdown(
     )
 }
 
-internal val SearchFieldShape = RoundedCornerShape(10.dp)
+internal val SearchFieldShape = AppShape(10.dp)
 
 @Composable
 internal fun SearchField(viewModel: BibleCatalogViewModel) {

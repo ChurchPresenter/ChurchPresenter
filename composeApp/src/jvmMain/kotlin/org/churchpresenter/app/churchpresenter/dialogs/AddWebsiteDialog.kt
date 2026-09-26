@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
@@ -157,7 +157,7 @@ internal fun AddWebsiteDialogContent(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                         Text(
                             stringResource(Res.string.cancel),
                             style = MaterialTheme.typography.labelLarge
@@ -165,7 +165,7 @@ internal fun AddWebsiteDialogContent(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             val finalUrl = url.trim()
                             val finalTitle = displayTitle.trim().ifBlank { finalUrl }

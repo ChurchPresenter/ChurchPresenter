@@ -7,7 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -300,7 +300,7 @@ internal fun PillGroup(content: @Composable () -> Unit) {
     val palette = elevationPalette()
     FlowRow(
         modifier = Modifier
-            .raised(RoundedCornerShape(8.dp), palette.key, palette, lift = 2.dp)
+            .raised(AppShape(8.dp), palette.key, palette, lift = 2.dp)
             .padding(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
@@ -367,7 +367,7 @@ internal fun ScheduleRowActionButton(
 internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val shape = RoundedCornerShape(8.dp)
+    val shape = AppShape(8.dp)
     val borderColor = if (hovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                        else MaterialTheme.colorScheme.outlineVariant
     val contentColor = if (hovered) MaterialTheme.colorScheme.primary

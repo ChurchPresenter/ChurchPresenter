@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +80,7 @@ fun ScreenPositionPicker(
             modifier = Modifier
                 .width(SCREEN_WIDTH)
                 .aspectRatio(SCREEN_ASPECT)
-                .sunken(RoundedCornerShape(10.dp), palette)
+                .sunken(AppShape(10.dp), palette)
                 .padding(SCREEN_PADDING),
             verticalArrangement = Arrangement.spacedBy(CELL_GAP),
         ) {
@@ -131,7 +131,7 @@ private fun PositionCell(
     modifier: Modifier,
 ) {
     val palette = elevationPalette()
-    val shape = RoundedCornerShape(6.dp)
+    val shape = AppShape(6.dp)
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val dotWidth by animateDpAsState(if (isSelected) MARKER_WIDTH else DOT_WIDTH)

@@ -44,7 +44,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
@@ -155,7 +155,7 @@ private fun IssueLinkRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             modifier = Modifier.weight(1f),
             onClick = { onOpen(url) }
         ) {
@@ -197,7 +197,7 @@ internal fun AboutDialogContent(
                 Box(
                     modifier = Modifier
                         .size(72.dp)
-                        .clip(RoundedCornerShape(18.dp))
+                        .clip(AppShape(18.dp))
                         .background(
                             Brush.linearGradient(
                                 listOf(
@@ -261,7 +261,7 @@ internal fun AboutDialogContent(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 KeyButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
@@ -277,7 +277,7 @@ internal fun AboutDialogContent(
                 val saveFailedMsg = stringResource(Res.string.diagnostic_info_save_failed)
                 val saveCoroutineScope = rememberCoroutineScope()
                 KeyButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         saveCoroutineScope.launch {
@@ -315,7 +315,7 @@ internal fun AboutDialogContent(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onDismiss
                 ) {

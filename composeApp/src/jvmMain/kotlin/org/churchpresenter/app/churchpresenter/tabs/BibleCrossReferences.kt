@@ -26,7 +26,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -150,7 +150,7 @@ private fun CrossReferenceCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 1.dp)
+            .padding(horizontal = 6.dp, vertical = rowPad(1.dp))
             .clip(BibleListRowShape)
             .background(colors.background)
             .hoverable(hover),
@@ -166,8 +166,8 @@ private fun CrossReferenceCard(
                         onDoubleClick = onDoubleClick,
                     ) else Modifier
                 )
-                .padding(start = 9.dp, top = 7.dp, bottom = 7.dp, end = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
+                .padding(start = rowPad(9.dp), top = rowPad(7.dp), bottom = rowPad(7.dp), end = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(rowPad(3.dp)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -247,7 +247,7 @@ private fun CrossRefActionButton(
     ) {
         Box(
             modifier = Modifier.size(22.dp)
-                .clip(RoundedCornerShape(6.dp))
+                .clip(AppShape(6.dp))
 
                 .initialPassClickable(onClick),
             contentAlignment = Alignment.Center,
@@ -406,7 +406,7 @@ internal fun CrossReferencePopover(
         properties = PopupProperties(focusable = true),
     ) {
         Surface(
-            shape = RoundedCornerShape(12.dp),
+            shape = AppShape(12.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 6.dp,
             shadowElevation = 16.dp,
@@ -502,12 +502,12 @@ internal fun CrossRefChip(
                 .height(19.dp)
                 .background(
                     if (active) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                    RoundedCornerShape(10.dp),
+                    AppShape(10.dp),
                 )
                 .border(
                     1.dp,
                     if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                    RoundedCornerShape(10.dp),
+                    AppShape(10.dp),
                 )
 
                 .initialPassClickable(onClick)

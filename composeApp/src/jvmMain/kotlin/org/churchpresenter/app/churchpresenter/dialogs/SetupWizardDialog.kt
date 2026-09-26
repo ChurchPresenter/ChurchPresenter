@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -465,7 +465,7 @@ private fun LanguageStep(selectedLanguage: Language, onLanguageSelected: (Langua
         value = query,
         onValueChange = { query = it },
         singleLine = true,
-        shape = RoundedCornerShape(9.dp),
+        shape = AppShape(9.dp),
         modifier = Modifier.fillMaxWidth(),
         leadingIcon = {
             Icon(
@@ -509,7 +509,7 @@ private fun LanguageStep(selectedLanguage: Language, onLanguageSelected: (Langua
 /** A rounded selectable pill: filled with the accent when selected, subtle outline otherwise. */
 @Composable
 private fun SelectPill(label: String, selected: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(9.dp)
+    val shape = AppShape(9.dp)
     Box(
         modifier = Modifier
             .clip(shape)
@@ -619,7 +619,7 @@ private fun ThemeSwatchCard(
     modifier: Modifier = Modifier,
 ) {
     val scheme = remember(mode) { colorSchemeFor(mode) }
-    val shape = RoundedCornerShape(10.dp)
+    val shape = AppShape(10.dp)
     Column(
         modifier = modifier
             .clip(shape)
@@ -690,7 +690,7 @@ private fun WelcomeStep(onGoToStep: (Int) -> Unit) {
         Box(
             modifier = Modifier
                 .size(52.dp)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(AppShape(14.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -740,7 +740,7 @@ private fun WelcomeStep(onGoToStep: (Int) -> Unit) {
 
 @Composable
 private fun WelcomeCard(icon: ImageVector, title: String, body: String, step: Int, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(10.dp)
+    val shape = AppShape(10.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -755,7 +755,7 @@ private fun WelcomeCard(icon: ImageVector, title: String, body: String, step: In
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .clip(RoundedCornerShape(9.dp))
+                .clip(AppShape(9.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -852,7 +852,7 @@ private const val SONG_INSTRUCTIONS = 4
  */
 @Composable
 private fun ConverterCallout(onOpenConverter: () -> Unit) {
-    val shape = RoundedCornerShape(10.dp)
+    val shape = AppShape(10.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -867,7 +867,7 @@ private fun ConverterCallout(onOpenConverter: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        RaisedButton(shape = RoundedCornerShape(8.dp), onClick = onOpenConverter) {
+        RaisedButton(shape = AppShape(8.dp), onClick = onOpenConverter) {
             Text(stringResource(Res.string.setup_songs_converter_button))
         }
     }
@@ -920,7 +920,7 @@ private fun ScreenAssignmentHint() {
         trailing = {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(AppShape(6.dp))
                     .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 10.dp, vertical = 3.dp),
             ) {
@@ -973,8 +973,8 @@ private fun MockColumn(label: String, value: String) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(5.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(5.dp))
+                .clip(AppShape(5.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(5.dp))
                 .padding(horizontal = 7.dp, vertical = 4.dp),
         ) {
             Text(
@@ -1041,7 +1041,7 @@ internal fun VlcStep(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+            .clip(AppShape(10.dp))
             .background(
                 if (vlcOk) MaterialTheme.semantic.successContainer
                 else MaterialTheme.colorScheme.errorContainer
@@ -1087,7 +1087,7 @@ internal fun VlcStep(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RaisedButton(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = AppShape(8.dp),
                     onClick = { onOpenDownloadPage(downloadUrl) }
                 ) {
                     Text(
@@ -1101,7 +1101,7 @@ internal fun VlcStep(
                     )
                 }
                 KeyButton(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = AppShape(8.dp),
                     onClick = {
                         scope.launch {
                             rechecking = true
@@ -1131,7 +1131,7 @@ internal fun VlcStep(
 
 @Composable
 private fun InfoCard(title: String, body: String) {
-    val shape = RoundedCornerShape(10.dp)
+    val shape = AppShape(10.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1198,7 +1198,7 @@ private fun ReadyStep(selectedLanguage: Language, theme: ThemeMode, summary: Set
  */
 @Composable
 private fun SummaryRow(label: String, value: String, satisfied: Boolean = true) {
-    val shape = RoundedCornerShape(9.dp)
+    val shape = AppShape(9.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1296,7 +1296,7 @@ internal fun withoutLeadingNumber(text: String): String = text.replace(LEADING_N
 
 @Composable
 private fun OpenSettingsButton(onOpenSettings: () -> Unit) {
-    KeyButton(shape = RoundedCornerShape(8.dp), onClick = onOpenSettings) {
+    KeyButton(shape = AppShape(8.dp), onClick = onOpenSettings) {
         Image(
             painter = painterResource(Res.drawable.ic_settings),
             contentDescription = null,
@@ -1321,7 +1321,7 @@ private fun SettingsTabHint(highlightedTab: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(AppShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1331,7 +1331,7 @@ private fun SettingsTabHint(highlightedTab: String) {
             val active = tab == highlightedTab
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(AppShape(6.dp))
                     .background(if (active) MaterialTheme.colorScheme.primary else Color.Transparent)
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
@@ -1361,7 +1361,7 @@ private fun TipBox(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(AppShape(8.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {

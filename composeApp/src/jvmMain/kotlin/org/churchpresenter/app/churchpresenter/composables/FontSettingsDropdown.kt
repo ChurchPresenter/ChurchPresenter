@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -168,7 +168,7 @@ private fun FontPickerTrigger(
     Box(
         modifier = modifier
             .heightIn(min = 42.dp)
-            .dropdownField(RoundedCornerShape(8.dp), open = expanded)
+            .dropdownField(AppShape(8.dp), open = expanded)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -323,7 +323,7 @@ private fun FontPickerPanel(
                 }
             },
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(9.dp),
+        shape = AppShape(9.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 12.dp,
     ) {
@@ -423,7 +423,7 @@ private fun FontPickerNoResults(query: String, onClearSearch: () -> Unit) {
         Box(
             modifier = Modifier
                 .height(24.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer, AppShape(6.dp))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,

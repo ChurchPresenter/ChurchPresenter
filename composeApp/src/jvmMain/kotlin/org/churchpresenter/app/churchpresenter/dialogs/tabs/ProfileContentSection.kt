@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -190,7 +190,7 @@ internal fun ProfileContentSection(
             hidden.joinToString(", "),
         )
     }
-    val shape = RoundedCornerShape(10.dp)
+    val shape = AppShape(10.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,7 +224,7 @@ internal fun ProfileContentSection(
             }
             KeyButton(
                 onClick = { onOpenChange(!open) },
-                shape = RoundedCornerShape(7.dp),
+                shape = AppShape(7.dp),
                 contentPadding = PaddingValues(start = 12.dp, end = 8.dp),
                 modifier = Modifier.testTag(PROFILE_CONTENT_TOGGLE_TAG),
             ) {
@@ -302,7 +302,7 @@ private fun ContentCheckRow(label: String, checked: Boolean, onCheckedChange: (B
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .toggleRow(checked, onCheckedChange, interaction, role = Role.Checkbox)
             .padding(horizontal = 2.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -330,7 +330,7 @@ private fun ContentCheckRow(label: String, checked: Boolean, onCheckedChange: (B
 private fun SmallGhost(label: String, onClick: () -> Unit) {
     GhostButton(
         onClick = onClick,
-        shape = RoundedCornerShape(6.dp),
+        shape = AppShape(6.dp),
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
     ) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)

@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -83,8 +83,8 @@ internal fun FontSearchRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(28.dp)
-            .sunken(RoundedCornerShape(6.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(6.dp))
+            .sunken(AppShape(6.dp), elevationPalette())
+            .hoverTint(AppShape(6.dp))
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -195,7 +195,7 @@ internal fun FontFamilyRow(
             .fillMaxWidth()
             .height(30.dp)
             .hoverable(interaction)
-            .background(rowBackground(selected, highlighted), RoundedCornerShape(6.dp))
+            .background(rowBackground(selected, highlighted), AppShape(6.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -303,8 +303,8 @@ internal fun FontPreviewPane(face: FontFace, measured: Boolean, lines: List<Stri
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black, RoundedCornerShape(6.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                .background(Color.Black, AppShape(6.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
                 .padding(horizontal = 11.dp, vertical = 9.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -336,8 +336,8 @@ private fun FontScriptWarning(name: String, script: PreviewScript) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(semantic.warningContainer, RoundedCornerShape(6.dp))
-            .border(1.dp, semantic.warning.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+            .background(semantic.warningContainer, AppShape(6.dp))
+            .border(1.dp, semantic.warning.copy(alpha = 0.4f), AppShape(6.dp))
             .padding(horizontal = 9.dp, vertical = 7.dp),
         verticalAlignment = Alignment.Top,
     ) {

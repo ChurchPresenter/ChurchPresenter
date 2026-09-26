@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
@@ -87,9 +87,9 @@ fun LibraryDialog(
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
             Modifier.width(width)
-                .clip(RoundedCornerShape(LibraryMetrics.panelRadius))
+                .clip(AppShape(LibraryMetrics.panelRadius))
                 .background(scheme.surfaceContainer)
-                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(LibraryMetrics.panelRadius)),
+                .border(1.dp, scheme.outlineVariant, AppShape(LibraryMetrics.panelRadius)),
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp),
@@ -98,7 +98,7 @@ fun LibraryDialog(
             ) {
                 Box(
                     Modifier.size(30.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(AppShape(8.dp))
                         .background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA)),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -110,7 +110,7 @@ fun LibraryDialog(
                 }
                 Box(
                     Modifier.size(28.dp)
-                        .clip(RoundedCornerShape(7.dp))
+                        .clip(AppShape(7.dp))
                         .background(scheme.surfaceContainerHigh)
                         .clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
@@ -177,12 +177,12 @@ fun NewSongBookDialog(
         Box(
             Modifier.fillMaxWidth()
                 .height(36.dp)
-                .clip(RoundedCornerShape(LibraryMetrics.radius))
+                .clip(AppShape(LibraryMetrics.radius))
                 .background(scheme.background)
                 .border(
                     1.dp,
                     if (clash || invalid) scheme.error else scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA),
-                    RoundedCornerShape(LibraryMetrics.radius),
+                    AppShape(LibraryMetrics.radius),
                 )
                 .padding(horizontal = 11.dp),
             contentAlignment = Alignment.CenterStart,
@@ -206,12 +206,12 @@ fun NewSongBookDialog(
             Spacer(Modifier.height(10.dp))
             Row(
                 Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(LibraryMetrics.radius))
+                    .clip(AppShape(LibraryMetrics.radius))
                     .background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA))
                     .border(
                         1.dp,
                         scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA),
-                        RoundedCornerShape(LibraryMetrics.radius),
+                        AppShape(LibraryMetrics.radius),
                     )
                     .clickable { assign = !assign }
                     .padding(horizontal = 11.dp, vertical = 9.dp),
@@ -308,13 +308,13 @@ fun BatchEditDialog(
                     Box(
                         Modifier.fillMaxWidth()
                             .height(32.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(AppShape(8.dp))
                             .background(if (on) scheme.background else scheme.surfaceContainer)
                             .border(
                                 1.dp,
                                 if (on) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)
                                 else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA),
-                                RoundedCornerShape(8.dp),
+                                AppShape(8.dp),
                             )
                             .padding(horizontal = 10.dp),
                         contentAlignment = Alignment.CenterStart,
@@ -342,13 +342,13 @@ private fun BatchSongbookField(
         Row(
             Modifier.fillMaxWidth()
                 .height(32.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(AppShape(8.dp))
                 .background(if (enabled) scheme.background else scheme.surfaceContainer)
                 .border(
                     1.dp,
                     if (enabled) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)
                     else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA),
-                    RoundedCornerShape(8.dp),
+                    AppShape(8.dp),
                 )
                 .clickable(enabled = enabled) { open = true }
                 .padding(horizontal = 10.dp),
@@ -432,9 +432,9 @@ private fun DangerButton(label: String, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.height(LibraryMetrics.control)
-            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .clip(AppShape(LibraryMetrics.radius))
             .background(scheme.errorContainer)
-            .border(1.dp, scheme.error, RoundedCornerShape(LibraryMetrics.radius))
+            .border(1.dp, scheme.error, AppShape(LibraryMetrics.radius))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,

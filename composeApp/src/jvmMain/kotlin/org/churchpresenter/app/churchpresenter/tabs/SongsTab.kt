@@ -4,7 +4,7 @@ import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -685,7 +685,7 @@ fun SongsTab(
                 },
                 confirmButton = {
                     GhostButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                         viewModel.deleteSong(s)
                         dialogs.closeDelete()
@@ -695,7 +695,7 @@ fun SongsTab(
                 },
                 dismissButton = {
                     GhostButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { dialogs.closeDelete(); dialogs.closeDelete() }
                     ) {
                         Text(stringResource(Res.string.cancel))
