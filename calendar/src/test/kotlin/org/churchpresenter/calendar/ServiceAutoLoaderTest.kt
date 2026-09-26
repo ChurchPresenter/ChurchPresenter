@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ServiceAutoLoaderTest {
@@ -208,5 +209,108 @@ class ServiceAutoLoaderTest {
 
         assertEquals(2, schedule.loads, "the morning has had its turn")
         assertEquals(listOf("e-1"), schedule.rows.map { it.id })
+    }
+    @Test
+    fun `announces the next service to load, and nothing when auto-load is off`() = runTest {
+        val morning = service("m", "10:00")
+        val evening = service("e", "18:00")
+        var clock = at(8, 0)
+        val loader = loader(document(morning, evening), FakeSchedule()) { clock }
+
+        loader.tick()
+        assertEquals("m", loader.upcoming.value?.serviceId)
+
+        clock = at(9, 56)
+        loader.tick()
+        assertEquals("e", loader.upcoming.value?.serviceId, "the morning is loading; the evening is next")
+
+        val off = loader(document(morning, on = false), FakeSchedule()) { at(8, 0) }
+        off.tick()
+        assertNull(off.upcoming.value)
+    }
+
+    @Test
+    fun `load now loads the service early, and its window leaves it alone while it is there`() = runTest {
+        val schedule = FakeSchedule()
+        val morning = service("m", "10:00")
+        val evening = service("e", "18:00")
+        var clock = at(8, 0)
+        val loader = loader(document(morning, evening), schedule) { clock }
+        loader.tick()
+
+        loader.loadNow("m", replace = true)
+        assertEquals(1, schedule.loads)
+        assertEquals(listOf("m-1"), schedule.rows.map { it.id })
+        assertEquals("e", loader.upcoming.value?.serviceId, "the morning is in the Schedule; the evening is next")
+
+        clock = at(9, 56)
+        repeat(3) { loader.tick() }
+        assertEquals(1, schedule.loads)
+    }
+
+    @Test
+    fun `clearing an early load brings its notice back, and it loads on time`() = runTest {
+        val schedule = FakeSchedule()
+        val morning = service("m", "10:00")
+        var clock = at(8, 0)
+        val loader = loader(document(morning, service("e", "18:00")), schedule) { clock }
+        loader.loadNow("m", replace = true)
+
+        schedule.rows = emptyList()
+        loader.refresh()
+        assertEquals("m", loader.upcoming.value?.serviceId)
+
+        clock = at(9, 56)
+        loader.tick()
+        assertEquals(2, schedule.loads)
+        assertEquals(listOf("m-1"), schedule.rows.map { it.id })
+    }
+
+    @Test
+    fun `knows which service the Schedule holds, and when it has changed`() = runTest {
+        val schedule = FakeSchedule()
+        val morning = service("m", "10:00")
+        val loader = loader(document(morning, on = false), schedule) { at(8, 0) }
+
+        loader.refresh()
+        assertNull(loader.scheduleService.value, "an empty Schedule holds no service")
+
+        loader.loadNow("m", replace = true)
+        assertEquals(ScheduleServiceLink("m", "Service m", hasChanges = false), loader.scheduleService.value)
+
+        schedule.rows = schedule.rows + song("added")
+        loader.refresh()
+        assertEquals(true, loader.scheduleService.value?.hasChanges)
+    }
+
+    @Test
+    fun `saving writes the Schedule back into its service, and it is unchanged from then on`() = runTest {
+        val schedule = FakeSchedule()
+        var stored = document(service("m", "10:00"), service("e", "18:00"))
+        val loader = ServiceAutoLoader(
+            document = { stored }, host = schedule.host(), now = { at(8, 0) }, save = { stored = it },
+        )
+        loader.loadNow("m", replace = true)
+        schedule.rows = listOf(song("added")) + schedule.rows
+
+        loader.saveScheduleToService()
+
+        assertEquals(listOf("added", "m-1"), stored.services.first { it.id == "m" }.items.map { it.id })
+        assertEquals(listOf("e-1"), stored.services.first { it.id == "e" }.items.map { it.id }, "untouched")
+        assertEquals(false, loader.scheduleService.value?.hasChanges)
+    }
+
+    @Test
+    fun `load now does what the operator chose with the rows already there`() = runTest {
+        val byHand = song("built-by-hand")
+        val morning = service("m", "10:00")
+
+        val appended = FakeSchedule().apply { rows = listOf(byHand) }
+        loader(document(morning), appended) { at(8, 0) }.loadNow("m", replace = false)
+        assertEquals(listOf(byHand) + morning.items, appended.rows, "added to the end")
+
+        val replaced = FakeSchedule().apply { rows = listOf(byHand) }
+        loader(document(morning), replaced) { at(8, 0) }.loadNow("m", replace = true)
+        assertEquals(morning.items, replaced.rows, "the operator's rows go when they say so")
     }
 }

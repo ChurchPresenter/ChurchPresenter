@@ -80,6 +80,10 @@ import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.utils.songLanguageEvent
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.settings.profileFor
+import org.churchpresenter.settings.languageLabel
+import org.churchpresenter.settings.withLanguageNames
+import org.churchpresenter.settings.moveSongLanguageAmong
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong
 import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
@@ -623,12 +627,22 @@ fun SongsTab(
             onAddToSchedule = onAddToSchedule,
             onPresenting = onPresenting,
             sendToPresenter = ::sendToPresenter,
+            onMoveLanguage = { available, index, offset ->
+                onSettingsChangeState.value { s -> s.moveSongLanguageAmong(available, index, offset) }
+            },
         )
     }
 
     // The metronome tempo is only ever read by the stage monitor, so the field that sets it is
     // offered only when there is one configured.
     val hasStageMonitorScreen = stageMonitorScreenIndices(appSettings.projectionSettings).isNotEmpty()
+
+    // What the song's languages are called install-wide -- named in the editor, read by the
+    // profiles' song languages and the output language switch.
+    val songLanguageNames = List(MAX_SONG_TRANSLATIONS) { appSettings.songSettings.languageLabel(it) }
+    val onLanguageNamesChange: (List<String>) -> Unit = { names ->
+        onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.withLanguageNames(names)) }
+    }
 
     // Edit Song Dialog — pure UI dialog state is fine here
     EditSongDialog(
@@ -647,6 +661,8 @@ fun SongsTab(
         onApplyBackgroundToSongbook = { songbook, background, lowerThirdBackground ->
             viewModel.applyBackgroundToSongbook(songbook, background, lowerThirdBackground)
         },
+        languageNames = songLanguageNames,
+        onLanguageNamesChange = onLanguageNamesChange,
         onDismiss = { dialogs.closeEditor() },
         onSave = { updatedSong, tuning ->
             dialogs.editing?.let { oldSong ->
@@ -729,6 +745,8 @@ fun SongsTab(
         onChordsVisibleChange = { visible ->
             onSettingsChangeState.value { s -> s.copy(songSettings = s.songSettings.copy(editorShowChords = visible)) }
         },
+        languageNames = songLanguageNames,
+        onLanguageNamesChange = onLanguageNamesChange,
         onDismiss = { dialogs.closeNew() },
         onSave = { newSong, tuning ->
             val success = viewModel.createSong(newSong)

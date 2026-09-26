@@ -107,6 +107,29 @@ class PicturesViewModelTest {
     }
 
     @Test
+    fun `a single dropped picture opens its folder on itself`() {
+        image("a.jpg"); image("b.jpg"); image("c.jpg")
+        val vm = vm()
+
+        vm.selectFolder(folder)
+        vm.selectImagePath(File(folder, "b.jpg").absolutePath)
+
+        assertEquals(1, vm.selectedImageIndex, "b.jpg, not the folder's first picture (#652)")
+    }
+
+    @Test
+    fun `a folder row, or a picture no longer there, leaves the selection alone`() {
+        image("a.jpg"); image("b.jpg")
+        val vm = vm()
+        vm.selectFolder(folder)
+
+        vm.selectImagePath("")
+        vm.selectImagePath(File(folder, "gone.jpg").absolutePath)
+
+        assertEquals(0, vm.selectedImageIndex)
+    }
+
+    @Test
     fun `loading a folder twice does not duplicate images`() {
         // PicturesTab keys its LazyVerticalGrid by absolutePath; a duplicate path there is a fatal
         // IllegalArgumentException at render time. A repeated load (re-entrant calls, or the file

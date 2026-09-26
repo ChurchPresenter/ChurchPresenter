@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.dialogs.usesOwnedFileDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -136,13 +137,9 @@ class WindowUtilsTest {
     }
 
     @Test
-    fun `the calendar stays above the main window only while one of the two is in use`() {
-        val main = Any()
-        val calendar = Any()
-        assertTrue(staysAboveMainWindow(main, main, calendar), "the main window is in use")
-        assertTrue(staysAboveMainWindow(calendar, main, calendar), "the calendar is in use")
-        assertFalse(staysAboveMainWindow(Any(), main, calendar), "a dialog of the app's own is in use")
-        assertFalse(staysAboveMainWindow(null, main, calendar), "another app is in use")
-        assertFalse(staysAboveMainWindow(calendar, null, calendar), "there is no main window to stay above")
+    fun `the calendar's file dialogs are owned by it on macOS and Windows, not on Linux`() {
+        assertTrue(usesOwnedFileDialog("Mac OS X"))
+        assertTrue(usesOwnedFileDialog("Windows 11"))
+        assertFalse(usesOwnedFileDialog("Linux"))
     }
 }

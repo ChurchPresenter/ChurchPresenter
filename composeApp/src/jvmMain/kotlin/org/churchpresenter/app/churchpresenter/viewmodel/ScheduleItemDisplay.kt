@@ -56,7 +56,7 @@ internal fun scheduleItemGlyph(item: ScheduleItem): String = when (item) {
 internal fun scheduleItemDetailText(item: ScheduleItem): String? = when (item) {
     is ScheduleItem.BibleVerseItem ->
         item.verseText.take(VERSE_PREVIEW_CHARS) + if (item.verseText.length > VERSE_PREVIEW_CHARS) "..." else ""
-    is ScheduleItem.PictureItem -> item.folderPath
+    is ScheduleItem.PictureItem -> item.imagePath.ifEmpty { item.folderPath }
     is ScheduleItem.PresentationItem -> "${item.fileType.uppercase()} - ${item.filePath}"
     is ScheduleItem.MediaItem -> "${item.mediaType.uppercase()} - ${item.mediaUrl}"
     // `9:45 AM · Announcement loop`: when it fires, and what it puts on screen if anything.

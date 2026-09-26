@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.Dp
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.calendar.ScheduleServiceLink
+import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
@@ -70,6 +72,10 @@ internal class ScheduleReports {
     val zoomChanges = mutableListOf<Int>()
     val legacyRowActionChanges = mutableListOf<Boolean>()
     val toolbarButtonToggles = mutableListOf<ScheduleToolbarButton>()
+    /** Each Load now that went through, and whether it asked for the Schedule to be replaced. */
+    val loadNowChoices = mutableListOf<Boolean>()
+    var saveToCalendarRequests = 0
+    var addToCalendarRequests = 0
 
     /**
      * The action set the tab hands its parent, so the menu and keyboard paths — which never touch a
@@ -110,6 +116,12 @@ internal fun scheduleTab(
     density: Float? = null,
     /** The clock the live row's behind/ahead badge is reckoned from; pinned by the shot that shows it. */
     clock: () -> LocalTime = { LocalTime.now() },
+    /** The calendar's next service to load itself, announced under Add Files. */
+    upcomingServiceLoad: UpcomingLoad? = null,
+    /** The planned service the rows came from, and whether they have changed since. */
+    scheduleService: ScheduleServiceLink? = null,
+    /** Whether the tab is offered a calendar to add a hand-built Schedule to, as the app does. */
+    offerAddToCalendar: Boolean = false,
     block: ComposeUiTest.(vm: ScheduleViewModel, reports: ScheduleReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -145,6 +157,12 @@ internal fun scheduleTab(
                         onPresentMedia = { reports.presented += it },
                         onPresentLowerThird = { reports.presented += it },
                         onPresentDictionary = { reports.presented += it },
+                        upcomingServiceLoad = upcomingServiceLoad,
+                        onLoadServiceNow = { reports.loadNowChoices += it },
+                        scheduleService = scheduleService,
+                        onSaveScheduleToCalendar = { reports.saveToCalendarRequests++ },
+                        onAddScheduleToCalendar =
+                            if (offerAddToCalendar) ({ reports.addToCalendarRequests += 1 }) else null,
                     )
                     }
                 }

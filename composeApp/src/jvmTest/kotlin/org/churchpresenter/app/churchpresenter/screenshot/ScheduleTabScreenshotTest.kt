@@ -3,6 +3,10 @@
 package org.churchpresenter.app.churchpresenter.screenshot
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import org.churchpresenter.calendar.ScheduleServiceLink
+import org.churchpresenter.calendar.model.UpcomingLoad
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +17,9 @@ import org.churchpresenter.app.churchpresenter.tabs.scheduleTab
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.LocalTime
 import org.churchpresenter.calendar.CueFeed
 import org.churchpresenter.calendar.FiredCue
@@ -33,6 +40,9 @@ class ScheduleTabScreenshotTest {
         rootIndex: Int = 0,
         seed: ScheduleViewModel.() -> Unit = { everyItemType() },
         clock: () -> LocalTime = { NOW },
+        upcomingServiceLoad: UpcomingLoad? = null,
+        scheduleService: ScheduleServiceLink? = null,
+        offerAddToCalendar: Boolean = false,
         drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         // A feed left over from another shot would mark this one's cue rows.
@@ -45,6 +55,9 @@ class ScheduleTabScreenshotTest {
             seed = seed,
             themeMode = mode,
             clock = clock,
+            upcomingServiceLoad = upcomingServiceLoad,
+            scheduleService = scheduleService,
+            offerAddToCalendar = offerAddToCalendar,
         ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
@@ -103,6 +116,44 @@ class ScheduleTabScreenshotTest {
 
     @Test
     fun `every item type`() = shoot("every_item_type")
+
+    // ── The calendar's notices under Add Files ──────────────────────────────────────────────────
+
+    /**
+     * The next planned service, due in an hour and twenty minutes. The notice draws the time *left*,
+     * never a date, so the picture is the same on any day; its moment is set from the wall clock
+     * the shot starts at, with half a minute's slack, so the text holds however long the render
+     * takes. Epoch milliseconds rather than a `java.time` now(), which is the date-drawing family
+     * `ScreenshotInvariantsTest` keeps out of screenshots.
+     */
+    private fun sundayLoad() = UpcomingLoad(
+        serviceId = "sunday",
+        serviceName = "Sunday Morning",
+        loadAt = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(System.currentTimeMillis() + SUNDAY_LOAD_IN_MILLIS),
+            ZoneId.systemDefault(),
+        ),
+    )
+
+    @Test
+    fun `the next service announced, with Load now`() =
+        shoot("autoload_notice", seed = {}, upcomingServiceLoad = sundayLoad())
+
+    @Test
+    fun `load now asking what to do with the rows already there`() =
+        shoot("load_now_confirm", upcomingServiceLoad = sundayLoad(), rootIndex = 1) {
+            onNodeWithText("Load now").performClick()
+            waitForIdle()
+        }
+
+    @Test
+    fun `changes offered to be saved back to the calendar`() = shoot(
+        "save_to_calendar",
+        scheduleService = ScheduleServiceLink("sunday", "Sunday Morning", hasChanges = true),
+    )
+
+    @Test
+    fun `a hand-built schedule offered to the calendar`() = shoot("add_to_calendar", offerAddToCalendar = true)
 
     /**
      * A service loaded from the calendar, part-way through: every row carries the time the plan
@@ -323,5 +374,8 @@ class ScheduleTabScreenshotTest {
         val NOW: LocalTime = LocalTime.of(10, 14)
 
         const val SECTION = "scheduleTab"
+
+        /** An hour and twenty minutes, less the half minute of slack -- "in 1 h 20 min". */
+        const val SUNDAY_LOAD_IN_MILLIS = (80 * 60 - 30) * 1_000L
     }
 }

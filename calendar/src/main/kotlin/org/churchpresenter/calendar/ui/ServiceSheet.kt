@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +41,7 @@ import org.churchpresenter.calendar.generated.resources.calendar_edit_service
 import org.churchpresenter.calendar.generated.resources.calendar_invalid_time
 import org.churchpresenter.calendar.generated.resources.calendar_new_service_on
 import org.churchpresenter.calendar.generated.resources.calendar_save
+import org.churchpresenter.calendar.generated.resources.calendar_service_date
 import org.churchpresenter.calendar.generated.resources.calendar_service_name
 import org.churchpresenter.calendar.generated.resources.calendar_service_name_hint
 import org.churchpresenter.calendar.generated.resources.calendar_service_start
@@ -48,9 +53,14 @@ import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.calendar.model.parseClockText
+import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.storedTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
@@ -71,6 +81,8 @@ data class ServiceForm(
     val kind: ServiceKind,
     val template: ServiceTemplate = ServiceTemplate.Blank,
     val wholeSeries: Boolean = false,
+    /** The day it is on: the one it was opened for, or the one it is being moved to. */
+    val date: LocalDate = LocalDate.MIN,
 )
 
 /**
@@ -96,17 +108,22 @@ fun ServiceSheet(
     onSave: (ServiceForm) -> Unit,
     onDelete: ((wholeSeries: Boolean) -> Unit)?,
     onDismiss: () -> Unit,
+    /** What is already planned on a day, for the dots on the date picker's grid. */
+    servicesOn: (LocalDate) -> List<PlannedService> = { emptyList() },
+    /** The `Start from` option chosen when the sheet opens -- the Schedule tab, when sent from it. */
+    initialTemplate: ServiceTemplate? = null,
+    today: LocalDate = LocalDate.now(),
 ) {
     // The form holds the time as it is shown; it is stored as HH:mm only on save.
     val use24Hour = LocalUse24HourClock.current
     var form by remember(existing, use24Hour) {
-        mutableStateOf(
-            ServiceForm(
-                name = existing?.name ?: "",
-                startTime = clockText(existing?.startTime ?: defaultStartTime, use24Hour),
-                kind = ServiceKind.from(existing?.kind ?: ServiceKind.SUNDAY.id),
-            )
+        val blank = ServiceForm(
+            name = existing?.name ?: "",
+            startTime = clockText(existing?.startTime ?: defaultStartTime, use24Hour),
+            kind = ServiceKind.from(existing?.kind ?: ServiceKind.SUNDAY.id),
+            date = existing?.date?.let(::parseStoredDate) ?: date,
         )
+        mutableStateOf(initialTemplate?.let { blank.withTemplate(it, use24Hour) } ?: blank)
     }
     val startAt = parseClockText(form.startTime)
     val canSave = form.name.isNotBlank() && startAt != null
@@ -114,7 +131,7 @@ fun ServiceSheet(
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         SheetScaffold(
             title = if (existing == null) {
-                stringResource(Res.string.calendar_new_service_on, shortDate(date))
+                stringResource(Res.string.calendar_new_service_on, shortDate(form.date))
             } else {
                 stringResource(Res.string.calendar_edit_service)
             },
@@ -150,6 +167,8 @@ fun ServiceSheet(
                 templates = templates,
                 templateLabel = templateLabel,
                 onChange = { form = it },
+                servicesOn = servicesOn,
+                today = today,
             )
         }
     }
@@ -163,6 +182,8 @@ private fun ServiceFields(
     templates: List<ServiceTemplate>,
     templateLabel: @Composable (ServiceTemplate) -> Pair<String, String>,
     onChange: (ServiceForm) -> Unit,
+    servicesOn: (LocalDate) -> List<PlannedService>,
+    today: LocalDate,
 ) {
     val timeValid = parseClockText(form.startTime) != null
     Column(
@@ -178,6 +199,17 @@ private fun ServiceFields(
                 placeholder = stringResource(Res.string.calendar_service_name_hint),
                 focused = true,
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        Column {
+            FieldLabel(stringResource(Res.string.calendar_service_date))
+            Spacer(Modifier.height(5.dp))
+            DateField(
+                date = form.date,
+                today = today,
+                servicesOn = servicesOn,
+                onPick = { onChange(form.copy(date = it)) },
             )
         }
 
@@ -253,7 +285,7 @@ private fun ServiceFields(
  * Blank leaves the fields alone.
  */
 private fun ServiceForm.withTemplate(option: ServiceTemplate, use24Hour: Boolean): ServiceForm = when (option) {
-    ServiceTemplate.Blank -> copy(template = option)
+    ServiceTemplate.Blank, is ServiceTemplate.FromSchedule -> copy(template = option)
     is ServiceTemplate.CopyOf -> copy(
         template = option,
         name = option.service.name,
@@ -268,6 +300,72 @@ private fun ServiceForm.withTemplate(option: ServiceTemplate, use24Hour: Boolean
         kind = ServiceKind.from(option.template.kind),
     )
 }
+
+/**
+ * The service's day, as a field that opens the calendar's own month grid beneath it -- the same
+ * grid, dots and all, so the days that already hold a service are visible while choosing.
+ */
+@Composable
+private fun DateField(
+    date: LocalDate,
+    today: LocalDate,
+    servicesOn: (LocalDate) -> List<PlannedService>,
+    onPick: (LocalDate) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    var month by remember(date) { mutableStateOf(YearMonth.from(date)) }
+    val scheme = MaterialTheme.colorScheme
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(DATE_FIELD_HEIGHT)
+                .clip(RoundedCornerShape(DATE_FIELD_RADIUS))
+                .sunken(RoundedCornerShape(DATE_FIELD_RADIUS), elevationPalette())
+                .clickable { open = true }
+                .padding(horizontal = 10.dp),
+        ) {
+            Icon(
+                Icons.Filled.CalendarMonth,
+                contentDescription = null,
+                tint = scheme.onSurfaceVariant,
+                modifier = Modifier.size(14.dp),
+            )
+            Text(
+                text = fullDate(date),
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.5.sp),
+                color = scheme.onSurface,
+                maxLines = 1,
+            )
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            MonthPane(
+                month = month,
+                selected = date,
+                today = today,
+                servicesOn = servicesOn,
+                onSelect = {
+                    onPick(it)
+                    open = false
+                },
+                onPreviousMonth = { month = month.minusMonths(1) },
+                onNextMonth = { month = month.plusMonths(1) },
+                modifier = Modifier.size(DATE_PICKER_WIDTH, DATE_PICKER_HEIGHT),
+            )
+        }
+    }
+}
+
+/** `Sunday, 28 September 2026`, in the reader's language and order. */
+private fun fullDate(date: LocalDate): String =
+    date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault()))
+
+private val DATE_FIELD_HEIGHT = 30.dp
+private val DATE_FIELD_RADIUS = 7.dp
+private val DATE_PICKER_WIDTH = 280.dp
+private val DATE_PICKER_HEIGHT = 300.dp
 
 /** One `Start from` option: a radio dot, a label and the line under it. */
 @Composable
