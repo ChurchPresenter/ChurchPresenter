@@ -3328,4 +3328,7 @@
     <string name="profile_context_open_general">General</string>
     <string name="profile_song_look_ahead">Song look-ahead</string>
     <string name="profile_text_autofit_scope">Fit across</string>
+    <string name="profile_menu_rename">Rename</string>
+    <string name="profile_menu_move_up">Move up</string>
+    <string name="profile_menu_move_down">Move down</string>
 </resources>

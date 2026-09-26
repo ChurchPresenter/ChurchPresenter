@@ -1,26 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -31,33 +14,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.output_profile_empty_state
-import churchpresenter.composeapp.generated.resources.output_profile_list_header
 import churchpresenter.composeapp.generated.resources.output_profile_new_name_default
-import churchpresenter.composeapp.generated.resources.profile_list_hint
-import churchpresenter.composeapp.generated.resources.profile_list_new
 import churchpresenter.composeapp.generated.resources.screen_number
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.deleteOutputProfile
 import org.churchpresenter.settings.duplicateOutputProfile
+import org.churchpresenter.settings.moveOutputProfile
 import org.churchpresenter.settings.newOutputProfile
 import org.churchpresenter.settings.renameOutputProfile
 import org.churchpresenter.settings.updateOutputProfile
-import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -103,14 +74,26 @@ internal fun ProfilesSettingsTab(
             profiles = proj.outputProfiles,
             selectedId = effectiveId,
             usageOf = { id -> usage[id].orEmpty() },
-            onSelect = { selectedId = it },
-            onNew = {
-                // Unnamed: General opens on it, with its name field waiting to be filled in.
-                val fresh = newOutputProfile(proj.outputProfiles)
-                updateProjection { it.copy(outputProfiles = it.outputProfiles + fresh) }
-                selectedId = fresh.id
-                page = ProfilePage.General
-            },
+            actions = ProfileListActions(
+                onSelect = { selectedId = it },
+                onNew = {
+                    // Unnamed: General opens on it, with its name field waiting to be filled in.
+                    val fresh = newOutputProfile(proj.outputProfiles)
+                    updateProjection { it.copy(outputProfiles = it.outputProfiles + fresh) }
+                    selectedId = fresh.id
+                    page = ProfilePage.General
+                },
+                onMove = { id, to -> updateProjection { it.moveOutputProfile(id, to) } },
+                onRename = { id, name -> updateProjection { it.renameOutputProfile(id, name) } },
+                onDuplicate = { id ->
+                    val source = proj.outputProfiles.find { it.id == id }
+                    if (source != null) {
+                        val copyName = duplicateName(source.name.ifBlank { defaultProfileName })
+                        updateProjection { it.duplicateOutputProfile(id, copyName) }
+                    }
+                },
+                onDelete = { pendingDeleteId = it },
+            ),
         )
         VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         if (profile != null) {
@@ -182,121 +165,3 @@ internal fun profileUserLabels(proj: ProjectionSettings, id: String): List<Strin
     }
     return labels
 }
-
-/** The profile list is this wide: a name, its badge, and what uses it under them. */
-internal val PROFILE_LIST_WIDTH = 250.dp
-
-/** The left column: every profile in order, with "+" above them and a hint below. */
-@Composable
-private fun ProfilesList(
-    profiles: List<OutputProfile>,
-    selectedId: String?,
-    usageOf: (String) -> List<String>,
-    onSelect: (String) -> Unit,
-    onNew: () -> Unit,
-) {
-    val palette = profilesPalette()
-    Column(
-        modifier = Modifier
-            .width(PROFILE_LIST_WIDTH)
-            .fillMaxHeight()
-            .background(palette.rail),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 10.dp, top = 12.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            GroupCaption(stringResource(Res.string.output_profile_list_header), Modifier.weight(1f))
-            KeyIconButton(onClick = onNew, modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG)) {
-                Icon(
-                    Icons.Filled.Add,
-                    contentDescription = stringResource(Res.string.profile_list_new),
-                    modifier = Modifier.size(17.dp),
-                )
-            }
-        }
-        val scrollState = rememberScrollState()
-        Box(modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(horizontal = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-                profiles.forEach { profile ->
-                    ProfileListRow(
-                        profile = profile,
-                        selected = profile.id == selectedId,
-                        usedBy = usageOf(profile.id),
-                        onSelect = { onSelect(profile.id) },
-                    )
-                }
-            }
-            SettingsScrollbar(scrollState)
-        }
-        Text(
-            text = stringResource(Res.string.profile_list_hint),
-            fontSize = 11.sp,
-            lineHeight = 15.sp,
-            color = palette.faintText,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 14.dp),
-        )
-    }
-}
-
-private const val HOVER_WASH_ALPHA = 0.06f
-
-/** One profile: its mode's dot, its name, what uses it, and its mode's badge. */
-@Composable
-private fun ProfileListRow(
-    profile: OutputProfile,
-    selected: Boolean,
-    usedBy: List<String>,
-    onSelect: () -> Unit,
-) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val scheme = MaterialTheme.colorScheme
-    val background = when {
-        selected -> scheme.secondaryContainer
-        hovered -> scheme.onSurface.copy(alpha = HOVER_WASH_ALPHA)
-        else -> Color.Transparent
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(AppShape(9.dp))
-            .background(background)
-            .hoverable(interaction)
-            .clickable(onClick = onSelect)
-            .testTag(profileRowTag(profile.id))
-            .padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ProfileModeDot(profile.displayMode)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = profile.displayName(),
-                fontSize = 14.sp,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                color = if (selected) scheme.onSecondaryContainer else scheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = usageText(usedBy),
-                fontSize = 11.sp,
-                color = scheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        Spacer(Modifier.width(2.dp))
-        ProfileModeBadge(profile.displayMode)
-    }
-}
-
-/** Test handle for one row of the profile list. */
-internal fun profileRowTag(id: String): String = "profile_row_$id"
-
-/** Test handle for the "+" that makes a new profile. */
-internal const val NEW_PROFILE_TAG = "profile_new"
