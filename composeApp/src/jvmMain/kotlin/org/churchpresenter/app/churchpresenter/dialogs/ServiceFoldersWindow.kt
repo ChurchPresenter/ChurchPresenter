@@ -95,7 +95,7 @@ private fun ContentRepositoryContent(onSettingsChanged: (AppSettings) -> Unit) {
                     repositories.forEach { repository -> Button(enabled = !busy, onClick = { selectedRepository = repository; runAction { branches = GitHubApi.branches(session, repository); branch = repository.default_branch } }, modifier = Modifier.fillMaxWidth()) { Text(repository.full_name) } }
                     branches.forEach { availableBranch -> Button(enabled = !busy, onClick = { branch = availableBranch }, modifier = Modifier.fillMaxWidth()) { Text(if (availableBranch == branch) "✓ $availableBranch" else availableBranch) } }
                 }
-                status?.let { Text("${it.branch}: ${it.staged} staged, ${it.unstaged} changed, ahead ${it.ahead}, behind ${it.behind}\n${it.message}") }
+                status?.let { Text("${it.kind}: ${it.branch}: ${it.staged} staged, ${it.unstaged} changed, ahead ${it.ahead}, behind ${it.behind}\n${it.message}") }
                 Button(enabled = !busy && root != null && selectedRepository != null, onClick = { val r = root!!; val repository = selectedRepository!!; runAction { val manager = ContentRepositoryManager(r); manager.initialize("https://github.com/${repository.full_name}.git", branch); status = manager.status(); services = manager.services() } }) { Text("Connect selected repository") }
                 OutlinedTextField(commitMessage, { commitMessage = it }, enabled = !busy, label = { Text("Commit message") }, modifier = Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

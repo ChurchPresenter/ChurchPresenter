@@ -10,6 +10,7 @@ import java.time.format.ResolverStyle
 import java.util.Locale
 
 data class RepositoryStatus(
+    val kind: String,
     val branch: String,
     val staged: Int,
     val unstaged: Int,
@@ -55,8 +56,18 @@ class ContentRepositoryManager(private val root: Path) {
         val unstaged = porcelain.lineSequence().count { it.length >= 2 && it[1] != ' ' }
         val counts = git("rev-list", "--left-right", "--count", "HEAD...@{upstream}", allowFailure = true)
             .split(Regex("\\s+"))
-        return RepositoryStatus(branch, staged, unstaged, counts.getOrNull(0)?.toIntOrNull() ?: 0,
-            counts.getOrNull(1)?.toIntOrNull() ?: 0, git("log", "-1", "--pretty=%s", allowFailure = true))
+        val ahead = counts.getOrNull(0)?.toIntOrNull() ?: 0
+        val behind = counts.getOrNull(1)?.toIntOrNull() ?: 0
+        val conflicts = git("diff", "--name-only", "--diff-filter=U", allowFailure = true).lineSequence().count { it.isNotBlank() }
+        val kind = when {
+            conflicts > 0 -> "conflict"
+            staged + unstaged > 0 && behind > 0 -> "both"
+            ahead > 0 && behind > 0 -> "both"
+            staged + unstaged > 0 || ahead > 0 -> "local"
+            behind > 0 -> "remote"
+            else -> "synced"
+        }
+        return RepositoryStatus(kind, branch, staged, unstaged, ahead, behind, git("log", "-1", "--pretty=%s", allowFailure = true))
     }
 
     fun commit(message: String) {
@@ -66,8 +77,11 @@ class ContentRepositoryManager(private val root: Path) {
     }
 
     fun synchronize() {
-        git("pull", "--rebase", "--autostash")
-        git("push")
+        val current = status()
+        if (current.kind == "conflict") error("Resolve the existing merge conflicts first.")
+        if (current.staged + current.unstaged > 0) commit("chore: sync ChurchPresenter content")
+        if (current.behind > 0) git("merge", "--no-edit", "origin/${current.branch}")
+        if (current.ahead > 0 || current.behind > 0) git("push", "origin", "HEAD:${current.branch}")
         git("lfs", "pull", allowFailure = true)
     }
 
