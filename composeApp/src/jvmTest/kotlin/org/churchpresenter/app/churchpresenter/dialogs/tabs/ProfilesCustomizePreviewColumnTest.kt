@@ -35,7 +35,7 @@ class ProfilesCustomizePreviewColumnTest {
     fun `the preview column is drawn beside the styling panes`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("PREVIEW").assertExists()
+            onNodeWithText("PREVIEW", substring = true).assertExists()
             onNodeWithTag(CUSTOMIZE_STAGE_TAG).assertExists()
         }
     }
@@ -114,7 +114,7 @@ class ProfilesCustomizePreviewColumnTest {
     fun `picking a preview shape stores it on the profile`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithTag(previewShapeTag(PreviewShapePreset.STANDARD.name)).performClick()
+            pickPreviewShape(PreviewShapePreset.STANDARD.name)
             waitForIdle()
 
             assertEquals(1440, get().profile().previewWidth)
@@ -128,7 +128,7 @@ class ProfilesCustomizePreviewColumnTest {
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
             assertEquals(false, get().profile().isLowerThirdVertical, "it starts landscape")
 
-            onNodeWithTag(previewShapeTag(PreviewShapePreset.PORTRAIT.name)).performClick()
+            pickPreviewShape(PreviewShapePreset.PORTRAIT.name)
             waitForIdle()
 
             // Derived from the shape rather than chosen: a portrait band has no width to split.

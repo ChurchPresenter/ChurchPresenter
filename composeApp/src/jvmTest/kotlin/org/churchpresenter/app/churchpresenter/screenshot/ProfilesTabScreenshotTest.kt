@@ -28,7 +28,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.BIBLE_SOURCE_TRIGGER
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.PROFILE_CONTENT_TOGGLE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilesSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewShapeTag
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickPreviewShape
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
@@ -83,7 +83,7 @@ class ProfilesTabScreenshotTest {
 
     @Test
     fun `a custom preview shape`() = shoot("custom_shape") {
-        onNodeWithTag(previewShapeTag("CUSTOM")).performClick()
+        pickPreviewShape("CUSTOM")
     }
 
     @Test

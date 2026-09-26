@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.hasTestTag
@@ -158,6 +159,14 @@ internal fun SkikoComposeUiTest.takeOverBackground() {
 /** Hands the open surface back to the Background tab. */
 internal fun SkikoComposeUiTest.followBackground() {
     onNodeWithText(BACKGROUND_FOLLOW).performScrollTo().performClick()
+    waitForIdle()
+}
+
+/** Opens the preview's shape menu and picks [name] -- a [PreviewShapePreset] name, or `CUSTOM`. */
+internal fun ComposeUiTest.pickPreviewShape(name: String) {
+    onNodeWithTag(PREVIEW_SHAPE_TRIGGER_TAG).performClick()
+    waitForIdle()
+    onNodeWithTag(previewShapeTag(name)).performClick()
     waitForIdle()
 }
 

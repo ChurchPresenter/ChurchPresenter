@@ -91,7 +91,7 @@ class ProfilesRedesignTest {
             onNodeWithText("Hide all").performClick()
             waitForIdle()
 
-            onNodeWithText("PREVIEW").assertExists()
+            onNodeWithText("PREVIEW", substring = true).assertExists()
             onNodeWithText("Short").assertDoesNotExist()
         }
     }
@@ -173,7 +173,7 @@ class ProfilesRedesignTest {
     @Test
     fun `a custom ratio is stored as a size 1080 tall`() {
         profilesTab(profileDocument()) { get ->
-            onNodeWithTag(previewShapeTag("CUSTOM")).performClick()
+            pickPreviewShape("CUSTOM")
             waitForIdle()
             retypeNumberField(showing = 16, to = 5)
             retypeNumberField(showing = 9, to = 4)
@@ -186,7 +186,7 @@ class ProfilesRedesignTest {
     @Test
     fun `a custom resolution is stored exactly as typed`() {
         profilesTab(profileDocument()) { get ->
-            onNodeWithTag(previewShapeTag("CUSTOM")).performClick()
+            pickPreviewShape("CUSTOM")
             waitForIdle()
             onNodeWithText("Resolution").performClick()
             waitForIdle()
@@ -201,7 +201,7 @@ class ProfilesRedesignTest {
     @Test
     fun `a resolution outside the allowed range is not stored`() {
         profilesTab(profileDocument()) { get ->
-            onNodeWithTag(previewShapeTag("CUSTOM")).performClick()
+            pickPreviewShape("CUSTOM")
             waitForIdle()
             onNodeWithText("Resolution").performClick()
             waitForIdle()
@@ -223,9 +223,9 @@ class ProfilesRedesignTest {
     @Test
     fun `picking a preset after Custom stores it and folds the fields away`() {
         profilesTab(profileDocument()) { get ->
-            onNodeWithTag(previewShapeTag("CUSTOM")).performClick()
+            pickPreviewShape("CUSTOM")
             waitForIdle()
-            onNodeWithTag(previewShapeTag(PreviewShapePreset.STANDARD.name)).performClick()
+            pickPreviewShape(PreviewShapePreset.STANDARD.name)
             waitForIdle()
 
             assertEquals(1440 to 1080, get().profile().let { it.previewWidth to it.previewHeight })

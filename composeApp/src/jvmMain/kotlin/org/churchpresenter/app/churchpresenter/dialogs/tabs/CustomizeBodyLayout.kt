@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,17 +23,12 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
 import churchpresenter.composeapp.generated.resources.output_profile_output_panel
-import churchpresenter.composeapp.generated.resources.preview
-import churchpresenter.composeapp.generated.resources.preview_sample_long
-import churchpresenter.composeapp.generated.resources.preview_sample_medium
-import churchpresenter.composeapp.generated.resources.preview_sample_short
 import kotlin.math.ceil
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
@@ -68,9 +61,6 @@ private val PREVIEW_WIDTH = 426.dp
 
 /** How tall the picture may grow, leaving the rest of the column to the settings beneath it. */
 private val STAGE_MAX_HEIGHT = 230.dp
-
-/** The five preset shapes and Custom, sharing the column's width. */
-private val SHAPE_SEGMENTS = PreviewShapePreset.entries.size + 1
 
 /**
  * The element controls -- the left of the two panes [CustomizeBody] used to draw as one Row.
@@ -143,6 +133,8 @@ internal fun CustomizePreviewColumn(
     onNavigate: (CustomizePane, CustomizeElement) -> Unit,
     slot: PreviewSampleSlot,
     onSlotChange: (PreviewSampleSlot) -> Unit,
+    backgroundMode: PreviewBackgroundMode = PreviewBackgroundMode.ACTUAL,
+    onBackgroundModeChange: (PreviewBackgroundMode) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -156,49 +148,19 @@ internal fun CustomizePreviewColumn(
             // controls sit on, the page beneath this column, and the fields on top of it.
             .background(MaterialTheme.colorScheme.surface),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CustomizeCaption(stringResource(Res.string.preview))
-            Spacer(modifier = Modifier.weight(1f))
-            // The shape named beside the mode, never a resolution on its own: a profile is not tied to
-            // one output's real size, and "1920×1080" here read exactly like the target-display
-            // pickers on the Projection tab.
-            Text(
-                text = "${displayModeLabel(profile.displayMode)} · " +
-                    previewShapeLabel(profile.previewWidth, profile.previewHeight),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        // How much text the picture stands in for. A layout that reads perfectly against one verse
-        // can overflow against a long one, and this is the only way to check that without putting
-        // the real thing live -- the samples themselves never went anywhere, but the selector that
-        // reached them did, leaving every preview stuck on MEDIUM.
-        // Only where there is sample text to lengthen: the caption, subtitle, question and card
-        // samples are one fixed piece each.
-        if (pane != null && !pane.isWholeForm) Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)) {
-            ChoiceControl(
-                options = listOf(
-                    PreviewSampleSlot.SHORT.name to stringResource(Res.string.preview_sample_short),
-                    PreviewSampleSlot.MEDIUM.name to stringResource(Res.string.preview_sample_medium),
-                    PreviewSampleSlot.LONG.name to stringResource(Res.string.preview_sample_long),
-                ),
-                selected = slot.name,
-                buttonWidth = (PREVIEW_WIDTH - 24.dp) / PreviewSampleSlot.entries.size,
-                onSelect = { picked -> onSlotChange(PreviewSampleSlot.valueOf(picked)) },
-            )
-        }
-        Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
-            PreviewShapeChooser(
-                profile = profile,
-                onProfileChange = onProfileFieldChange,
-                segmentWidth = (PREVIEW_WIDTH - 24.dp) / SHAPE_SEGMENTS,
-            )
-        }
+        PreviewToolbar(
+            pageLabel = pane?.label() ?: displayModeLabel(profile.displayMode),
+            profile = profile,
+            onProfileChange = onProfileFieldChange,
+            shapeState = rememberPreviewShapeState(profile),
+            // Only where there is a background to draw behind the text, and sample text to lengthen:
+            // the caption, subtitle, question and card samples are one fixed piece each.
+            backgroundMode = backgroundMode.takeIf { pane == CustomizePane.BIBLE || pane == CustomizePane.SONGS },
+            onBackgroundModeChange = onBackgroundModeChange,
+            slot = slot.takeIf { pane != null && !pane.isWholeForm && pane != CustomizePane.BACKGROUND },
+            onSlotChange = onSlotChange,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         // Never dimmed with the controls: this is what the screen shows, which is just as true when
         // the category is following the global settings as when it has its own.
@@ -228,8 +190,17 @@ internal fun CustomizePreviewColumn(
                     output = output,
                     slot = slot,
                     modifier = stageWidth,
+                    backgroundMode = backgroundMode,
                 )
             }
+        }
+        if (pane != null) {
+            Text(
+                text = previewNote(pane, draft, profile),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
+            )
         }
         if (pane == null) return@Column
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

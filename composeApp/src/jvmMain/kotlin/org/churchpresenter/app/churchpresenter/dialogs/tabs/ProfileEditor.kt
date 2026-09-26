@@ -102,6 +102,9 @@ internal fun ProfileEditor(
     // Which of the three sample texts the picture stands in for. Not on the profile: it is a
     // question about this session's checking, not about the profile's own look.
     var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
+    // What goes behind the text in the preview. Preview-only, like the sample: it changes the
+    // picture of the profile and never the profile.
+    var backgroundMode by remember { mutableStateOf(PreviewBackgroundMode.ACTUAL) }
 
     val panes = stylePanesFor(profile)
     val pane = pickedPane?.takeIf { it in panes } ?: panes.firstOrNull()
@@ -206,6 +209,8 @@ internal fun ProfileEditor(
                     },
                     slot = sampleSlot,
                     onSlotChange = { sampleSlot = it },
+                    backgroundMode = backgroundMode,
+                    onBackgroundModeChange = { backgroundMode = it },
                 )
             }
         }

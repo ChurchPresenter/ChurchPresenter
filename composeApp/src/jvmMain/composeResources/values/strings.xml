@@ -982,6 +982,14 @@
     <string name="preview_sample_short">Short</string>
     <string name="preview_sample_medium">Medium</string>
     <string name="preview_sample_long">Long</string>
+    <string name="preview_background_actual">Actual</string>
+    <string name="preview_background_off">Off</string>
+    <string name="preview_background_checker">Checker</string>
+    <string name="profile_preview_caption">Preview · %1$s</string>
+    <string name="profile_preview_note_video">Videos preview as their first frame.</string>
+    <string name="profile_preview_note_camera">Cameras preview as one snapshot, taken when the preview first shows them.</string>
+    <string name="profile_preview_note_above_band">Above the band is transparent on the output.</string>
+    <string name="profile_preview_note_matches">Matches the output at %1$s.</string>
     <string name="preview_on_screen">Preview on screen</string>
     <string name="preview_on_screen_stop">Stop preview</string>
     <string name="song_preview_full_screen">Full screen preview</string>

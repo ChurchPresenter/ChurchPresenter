@@ -54,6 +54,8 @@ internal fun CustomizeStagePanel(
     output: PreviewOutputSize,
     slot: PreviewSampleSlot,
     modifier: Modifier = Modifier,
+    /** What goes behind the text -- see [PreviewBackgroundMode]. */
+    backgroundMode: PreviewBackgroundMode = PreviewBackgroundMode.ACTUAL,
 ) {
     val lowerThird = LocalOutputStyleScope.current == OutputStyleScope.LOWER_THIRD
     // Sized by WIDTH alone by its caller, so the `aspectRatio` inside each panel is free to set the
@@ -62,8 +64,8 @@ internal fun CustomizeStagePanel(
     // shaped like the screen it is previewing.
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element)
+            CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot, backgroundMode)
+            CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element, backgroundMode)
             CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
             CustomizePane.CAPTIONS,
             CustomizePane.SUBTITLES,
@@ -85,6 +87,7 @@ private fun BibleStage(
     output: PreviewOutputSize,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
+    backgroundMode: PreviewBackgroundMode,
 ) {
     // The profile's own subset, not the whole stack -- see [bibleTranslationPositions]. Narrowing
     // an output to one translation used to leave the preview drawing all of them, so the picture
@@ -112,6 +115,9 @@ private fun BibleStage(
         // This profile's own shape, not whether some other output happens to be portrait.
         vertical = profile.isLowerThirdVertical,
         modifier = Modifier.fillMaxWidth(),
+        background = {
+            PreviewBackgroundLayer(settings, profile, PreviewBackgroundSurface.BIBLE, lowerThird, backgroundMode)
+        },
     )
 }
 
@@ -127,6 +133,7 @@ private fun SongStage(
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
     element: CustomizeElement?,
+    backgroundMode: PreviewBackgroundMode,
 ) {
     val titleSlide = element == CustomizeElement.SONG_TITLE_SLIDE
     val lyricSections = songSampleSections(slot)
@@ -163,6 +170,9 @@ private fun SongStage(
         vertical = profile.isLowerThirdVertical,
         titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
+        background = {
+            PreviewBackgroundLayer(settings, profile, PreviewBackgroundSurface.SONGS, lowerThird, backgroundMode)
+        },
     )
 }
 
@@ -192,7 +202,7 @@ private fun BackgroundStage(
     val config = settings.backgroundSettings.configFor(scope)
     StageFrame(output) {
         if (!scope.lowerThird) {
-            BackgroundConfigFill(config, Modifier.fillMaxSize())
+            BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
             return@StageFrame
         }
         val band = settings.bandFractionFor(scope)
@@ -211,7 +221,7 @@ private fun BackgroundStage(
                     // The template at rest, sample text and all: it is the band, not a fill.
                     BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
                 } else {
-                    BackgroundConfigFill(config, Modifier.fillMaxSize())
+                    BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
                 }
             }
         }
