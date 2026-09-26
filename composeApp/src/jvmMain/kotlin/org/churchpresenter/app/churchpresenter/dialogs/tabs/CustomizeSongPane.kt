@@ -7,6 +7,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.SongSettings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -134,19 +135,11 @@ internal fun SongCustomizePane(
                 // look-ahead and the next section sit under the line they follow, and the title
                 // slide has its own control above.
                 blockAlignment = if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
-                    {
-                        BlockVerticalAlignmentControl(
-                            selected = song.lyricsAlignment,
-                            onSelect = { v ->
-                                onSettingsChange { s ->
-                                    s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v))
-                                }
-                            },
-                        )
-                    }
+                    blockAlignmentSlot(song, onSettingsChange)
                 } else {
                     null
                 },
+                autoFitScope = if (!titleSlideView) autoFitScopeSlot(song, target, onSettingsChange) else null,
             )
         }
         if (!titleSlideView && styleElement == SongStyleElement.LYRICS) {
@@ -169,6 +162,40 @@ internal fun SongCustomizePane(
             }
         }
     }
+}
+
+/** Where the lyric block sits on the slide -- one value for the song, beside the lyrics' alignment. */
+private fun blockAlignmentSlot(
+    song: SongSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+): @Composable () -> Unit = {
+    BlockVerticalAlignmentControl(
+        selected = song.lyricsAlignment,
+        onSelect = { v ->
+            onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsAlignment = v)) }
+        },
+    )
+}
+
+/**
+ * The Whole song / Each slide switch beside Auto, for [target]'s output.
+ *
+ * Per output rather than per element, like the block alignment: written straight onto
+ * `SongSettings`, not into the profile being edited.
+ */
+private fun autoFitScopeSlot(
+    song: SongSettings,
+    target: SongStyleTarget,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+): @Composable () -> Unit = {
+    AutoFitScopeControl(
+        eachSlide = song.autoFitEachSlide(target.isLowerThird),
+        onEachSlideChange = { v ->
+            onSettingsChange { s ->
+                s.copy(songSettings = s.songSettings.withAutoFitEachSlide(target.isLowerThird, v))
+            }
+        },
+    )
 }
 
 /** Which stored profile a Songs chip stands for. */

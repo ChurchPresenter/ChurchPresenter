@@ -121,6 +121,12 @@ internal fun SongTypographyPanel(
      */
     numberInCorner: Boolean = false,
     blockAlignment: (@Composable () -> Unit)? = null,
+    /**
+     * Whether Auto fits the whole song or each slide, shown beside Auto while it is on. Supplied by
+     * the caller because it is stored per output rather than in [style] -- the lyrics and the
+     * next-section line share one fitted size, so there is one scope for both.
+     */
+    autoFitScope: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // The colour and the faces, then the font and its size, on one flowing row. The font and its
@@ -140,6 +146,11 @@ internal fun SongTypographyPanel(
             Row(horizontalArrangement = Arrangement.spacedBy(CONTROL_GAP), verticalAlignment = Alignment.Top) {
                 SongFontControl(style, onStyleChange, availableFonts, Modifier.width(FONT_FIELD_WIDTH))
                 SongSizeControl(element, style, onStyleChange)
+            }
+            // A cell of its own rather than inside the size cell: that one is fixed-width beside the
+            // font field, so the switch would be clipped there instead of flowing onto the next row.
+            if (autoFitScope != null && element.hasAutoFit && style.autoFit) {
+                autoFitScope()
             }
         }
         // Flowing, like the font row above: alignment and the transform share it, which is more

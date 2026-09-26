@@ -45,4 +45,20 @@ data class SongLayoutExtras(
      * nudge, which is a richer placement than an offset and the one that slide's number wants.
      */
     val titleSlideOffsets: SongTitleSlideOffsets = SongTitleSlideOffsets(),
+    /**
+     * Whether Auto sizes the full-screen lyrics for **each slide on its own** rather than once for
+     * the whole song.
+     *
+     * False, the default, is the song-wide fit Auto has always done: one size at which every line of
+     * every section fits, so the text does not change size from slide to slide -- and one tall
+     * section, or look-ahead measuring each section together with the next, holds the whole song
+     * down to what that one slide needs. True fits only the slide on screen, up to the configured
+     * size, so a short verse fills the frame and a long one shrinks. Lines stay on one row either way.
+     *
+     * One value per output rather than per element: the lyrics and the next-section line are drawn
+     * at the one fitted size, so there is only one fit to scope.
+     */
+    val autoFitEachSlide: Boolean = false,
+    /** [autoFitEachSlide] for the lower third. */
+    val autoFitEachSlideLowerThird: Boolean = false,
 )

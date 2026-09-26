@@ -497,6 +497,12 @@ fun SongPresenter(
         // Auto-fit: compute the largest font size that fits ALL sections without line wrapping.
         // Uses the reference 1920×1080 coordinate space (margins subtracted).
         val autoFitTextMeasurer = rememberTextMeasurer()
+        // Fitting each slide on its own rather than the whole song -- see `autoFitEachSlide`.
+        val fitEachSlide = if (isLowerThird) {
+            ss.layoutExtras.autoFitEachSlideLowerThird
+        } else {
+            ss.layoutExtras.autoFitEachSlide
+        }
         val autoFitFontSize = remember(
             allLyricSections,
             isLowerThird,
@@ -509,6 +515,11 @@ fun SongPresenter(
             // must also invalidate this memo -- otherwise a live resize (or a screenshot test moving
             // between box sizes) would keep the previous size's stale fit.
             scaleFactor,
+            // Only while fitting slide by slide: the song-wide fit is the same for every slide, and
+            // keying it on the slide would re-measure the whole song on every advance.
+            if (fitEachSlide) lyricSection else null,
+            if (fitEachSlide) displaySectionIndex else null,
+            if (fitEachSlide) displayLineIndex else null,
         ) {
             if (allLyricSections.isEmpty()) null
             else {
@@ -691,14 +702,27 @@ fun SongPresenter(
                     reserved += (drawnLanguages - 1) * LANGUAGE_BLOCK_REFERENCE_GAP
                 }
 
+                // Slide by slide, only the slide on screen is measured, so a short verse can grow up
+                // to the configured size instead of being held to what the song's tallest slide needs.
+                val slideFit = if (fitEachSlide) {
+                    slideFitSections(
+                        sectionsForFit = sectionsForFit,
+                        allLyricSections = allLyricSections,
+                        slide = SlidePosition(lyricSection, displaySectionIndex, displayLineIndex),
+                        isLineMode = fitIsLineMode,
+                        lookAheadEnabled = lookAheadEnabled,
+                    )
+                } else {
+                    null
+                }
                 calculateAutoFitForAllSections(
                     textMeasurer = autoFitTextMeasurer,
-                    sections = sectionsForFit,
+                    sections = slideFit?.sections ?: sectionsForFit,
                     baseStyle = baseStyle,
                     availableWidth = refWidth,
                     availableHeight = refHeight,
                     reservedHeight = reserved,
-                    includeEndIndicator = true,
+                    includeEndIndicator = slideFit?.isLast ?: true,
                     // Measure what `LyricLine` draws, not the stored line: an uppercase transform
                     // and the word spacing below are both applied at render, and a fit that did not
                     // include them chose a size whose lines then ran off the side of the output.
@@ -1696,7 +1720,7 @@ internal fun shouldShowText(
  * rather than with `==`, because the section that goes out is stamped with the song's tempo and
  * capo and the list it came from is not.
  */
-private fun LyricSection.isSamePageAs(other: LyricSection): Boolean =
+internal fun LyricSection.isSamePageAs(other: LyricSection): Boolean =
     header == other.header && slideIndex == other.slideIndex && type == other.type && lines == other.lines
 
 private fun shouldShowText(display: String, lyricSection: LyricSection): Boolean {
