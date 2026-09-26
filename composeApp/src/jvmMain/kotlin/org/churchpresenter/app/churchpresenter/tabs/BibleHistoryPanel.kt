@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,8 +67,8 @@ internal fun BibleHistoryPanel(
     onEntryDoubleClick: (Int) -> Unit,
 ) {
         if (entries.isEmpty()) return
-    Column(modifier = Modifier.fillMaxWidth()) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    // Its own card under the verse card; the gap lives here so an empty history leaves none.
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).bibleListCard()) {
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .clickable(onClick = onToggleExpanded)

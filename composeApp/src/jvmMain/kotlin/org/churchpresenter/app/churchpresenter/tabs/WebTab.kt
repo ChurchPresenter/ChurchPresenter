@@ -272,182 +272,168 @@ fun WebTab(
     val currentUrlNormalised = normaliseUrl(urlInput)
     val isBookmarked = bookmarks.any { it.url == currentUrlNormalised }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        // ── Toolbar: nav + URL + actions (1 or 2 rows based on width) ──
-        // Approximate width consumed by nav buttons + zoom + desktop toggle + action buttons
-        val navButtonsWidth = 440.dp   // 4 icon buttons + zoom controls + desktop toggle
-        val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
-        val minUrlWidth = 200.dp
+    Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().searchBarCard(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            // ── Toolbar: nav + URL + actions (1 or 2 rows based on width) ──
+            // Approximate width consumed by nav buttons + zoom + desktop toggle + action buttons
+            val navButtonsWidth = 440.dp   // 4 icon buttons + zoom controls + desktop toggle
+            val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
+            val minUrlWidth = 200.dp
 
-        val hasSecondaryDisplay = rememberScreenDevices().size > 1
-        // Web can only go live if at least one regular (non-DeckLink) fill output has showWebsite enabled
-        val hasWebCapableOutput = remember(appSettings.projectionSettings) {
-            val proj = appSettings.projectionSettings
-            val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
-            assignments.any {
-                it.targetType != "decklink" && it.targetDisplay >= 0 && (proj.profileFor(it)?.showWebsite ?: false)
+            val hasSecondaryDisplay = rememberScreenDevices().size > 1
+            // Web can only go live if at least one regular (non-DeckLink) fill output has showWebsite enabled
+            val hasWebCapableOutput = remember(appSettings.projectionSettings) {
+                val proj = appSettings.projectionSettings
+                val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
+                assignments.any {
+                    it.targetType != "decklink" && it.targetDisplay >= 0 && (proj.profileFor(it)?.showWebsite ?: false)
+                }
             }
-        }
 
-        // Shared composables for URL bar and action buttons
-        val urlBar: @Composable RowScope.() -> Unit = {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .widthIn(min = minUrlWidth)
-                    .height(42.dp)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                    .hoverTint(RoundedCornerShape(8.dp)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_web),
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 11.dp).size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                )
-                Box(
+            // Shared composables for URL bar and action buttons
+            val urlBar: @Composable RowScope.() -> Unit = {
+                Row(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp)
+                        .widthIn(min = minUrlWidth)
+                        .height(42.dp)
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .hoverTint(RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    BasicTextField(
-                        value = urlInput,
-                        onValueChange = { urlInput = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onKeyEvent { event ->
-                                if (event.type == KeyEventType.KeyUp && event.key == Key.Enter) {
-                                    val url = normaliseUrl(urlInput)
-                                    urlInput = url
-                                    liveUrl = url
-                                    presenterManager?.setWebsiteUrl(url)
-                                    if (isLive) {
-                                        presenterManager?.liveBrowser?.value?.loadURL(url)
-                                    }
-                                    true
-                                } else false
-                            },
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        decorationBox = { innerTextField ->
-                            if (urlInput.isEmpty()) {
-                                Text(
-                                    text = stringResource(Res.string.web_url_hint),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    maxLines = 1
-                                )
-                            }
-                            innerTextField()
-                        }
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_web),
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 11.dp).size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
                     )
-                }
-                if (urlInput.isNotEmpty() && urlInput != "https://") {
-                    KeyIconButton(
-                        onClick = { urlInput = "" },
-                        modifier = Modifier.size(30.dp)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_close),
-                            contentDescription = stringResource(Res.string.web_clear_url),
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        BasicTextField(
+                            value = urlInput,
+                            onValueChange = { urlInput = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onKeyEvent { event ->
+                                    if (event.type == KeyEventType.KeyUp && event.key == Key.Enter) {
+                                        val url = normaliseUrl(urlInput)
+                                        urlInput = url
+                                        liveUrl = url
+                                        presenterManager?.setWebsiteUrl(url)
+                                        if (isLive) {
+                                            presenterManager?.liveBrowser?.value?.loadURL(url)
+                                        }
+                                        true
+                                    } else false
+                                },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            decorationBox = { innerTextField ->
+                                if (urlInput.isEmpty()) {
+                                    Text(
+                                        text = stringResource(Res.string.web_url_hint),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                        maxLines = 1
+                                    )
+                                }
+                                innerTextField()
+                            }
                         )
+                    }
+                    if (urlInput.isNotEmpty() && urlInput != "https://") {
+                        KeyIconButton(
+                            onClick = { urlInput = "" },
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_close),
+                                contentDescription = stringResource(Res.string.web_clear_url),
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        val actionButtons: @Composable RowScope.() -> Unit = {
-            // Star bookmark toggle
-            ActionIconButton(
-                onClick = {
-                    val url = normaliseUrl(urlInput)
-                    if (isBookmarked) {
-                        onSettingsChange { s ->
-                            s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
-                        }
-                    } else {
-                        val title = pageTitle.ifBlank { url }
-                        onSettingsChange { s ->
-                            s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
-                        }
-                    }
-                },
-                enabled = urlInput.isNotBlank() && urlInput != "https://",
-                tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
-                icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Add to Schedule
-            if (onAddToSchedule != null) {
-                AddToScheduleButton(
+            val actionButtons: @Composable RowScope.() -> Unit = {
+                // Star bookmark toggle
+                ActionIconButton(
                     onClick = {
                         val url = normaliseUrl(urlInput)
-                        val title = pageTitle.ifBlank { url }
-                        onAddToSchedule(url, title)
+                        if (isBookmarked) {
+                            onSettingsChange { s ->
+                                s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
+                            }
+                        } else {
+                            val title = pageTitle.ifBlank { url }
+                            onSettingsChange { s ->
+                                s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
+                            }
+                        }
                     },
-                    enabled = urlInput.isNotBlank(),
-                    tooltipText = stringResource(Res.string.web_add_to_schedule)
+                    enabled = urlInput.isNotBlank() && urlInput != "https://",
+                    tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
+                    icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                    containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Add to Schedule
+                if (onAddToSchedule != null) {
+                    AddToScheduleButton(
+                        onClick = {
+                            val url = normaliseUrl(urlInput)
+                            val title = pageTitle.ifBlank { url }
+                            onAddToSchedule(url, title)
+                        },
+                        enabled = urlInput.isNotBlank(),
+                        tooltipText = stringResource(Res.string.web_add_to_schedule)
+                    )
+                }
+
+                // Go Live
+                val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
+                GoLiveButton(
+                    onClick = {
+                        val url = normaliseUrl(urlInput)
+                        urlInput = url
+                        liveUrl = url
+                        presenterManager?.setWebsiteUrl(url)
+                        presenterManager?.setPresentingMode(Presenting.WEBSITE)
+                    },
+                    enabled = goLiveEnabled,
+                    tooltipText = stringResource(Res.string.web_go_live)
                 )
             }
 
-            // Go Live
-            val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
-            GoLiveButton(
-                onClick = {
-                    val url = normaliseUrl(urlInput)
-                    urlInput = url
-                    liveUrl = url
-                    presenterManager?.setWebsiteUrl(url)
-                    presenterManager?.setPresentingMode(Presenting.WEBSITE)
-                },
-                enabled = goLiveEnabled,
-                tooltipText = stringResource(Res.string.web_go_live)
-            )
-        }
-
-        val onMobileToggle: (Boolean) -> Unit = { mobile ->
-            isMobileView = mobile
-            navController.setMobileEmulation(mobile)
-            // Also toggle on the live browser if presenting
-            if (isLive) {
-                presenterManager?.liveBrowser?.value?.let { liveBrowser ->
-                    // The live browser uses a separate NavController, so override UA + reload directly
-                    liveBrowser.reload()
+            val onMobileToggle: (Boolean) -> Unit = { mobile ->
+                isMobileView = mobile
+                navController.setMobileEmulation(mobile)
+                // Also toggle on the live browser if presenting
+                if (isLive) {
+                    presenterManager?.liveBrowser?.value?.let { liveBrowser ->
+                        // The live browser uses a separate NavController, so override UA + reload directly
+                        liveBrowser.reload()
+                    }
                 }
             }
-        }
 
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val singleRow = maxWidth >= navButtonsWidth + minUrlWidth + actionButtonsWidth
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val singleRow = maxWidth >= navButtonsWidth + minUrlWidth + actionButtonsWidth
 
-            if (singleRow) {
-                // Everything on one line
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    NavButtons(navController, presenterManager, isLive, useInteractivePreview,
-                        zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
-                    urlBar()
-                    actionButtons()
-                }
-            } else {
-                // Two rows: nav + actions on top, URL bar below
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (singleRow) {
+                    // Everything on one line
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -455,185 +441,210 @@ fun WebTab(
                     ) {
                         NavButtons(navController, presenterManager, isLive, useInteractivePreview,
                             zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
-                        Spacer(Modifier.weight(1f))
+                        urlBar()
                         actionButtons()
                     }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        urlBar()
+                } else {
+                    // Two rows: nav + actions on top, URL bar below
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                                zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
+                            Spacer(Modifier.weight(1f))
+                            actionButtons()
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            urlBar()
+                        }
                     }
                 }
             }
-        }
 
-        // ── Horizontal bookmarks bar ───────────────────────────────────────
-        if (bookmarks.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                bookmarks.forEach { bookmark ->
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = if (liveUrl == bookmark.url) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surface,
-                        modifier = Modifier.clickable {
-                            urlInput = bookmark.url
-                            liveUrl = bookmark.url
-                            pageTitle = bookmark.title
-                            presenterManager?.setWebsiteUrl(bookmark.url)
-                            if (isLive) {
-                                presenterManager?.liveBrowser?.value?.loadURL(bookmark.url)
+            // ── Horizontal bookmarks bar ───────────────────────────────────────
+            if (bookmarks.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            RoundedCornerShape(4.dp),
+                        )
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    bookmarks.forEach { bookmark ->
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = if (liveUrl == bookmark.url) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surface,
+                            modifier = Modifier.clickable {
+                                urlInput = bookmark.url
+                                liveUrl = bookmark.url
+                                pageTitle = bookmark.title
+                                presenterManager?.setWebsiteUrl(bookmark.url)
+                                if (isLive) {
+                                    presenterManager?.liveBrowser?.value?.loadURL(bookmark.url)
+                                }
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = bookmark.title.ifBlank { bookmark.url },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.widthIn(max = 160.dp)
+                                )
+                                Text(
+                                    text = "\u2715",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    modifier = Modifier.clickable {
+                                        onSettingsChange { s ->
+                                            s.copy(webBookmarks = s.webBookmarks.filter { it.url != bookmark.url })
+                                        }
+                                    }
+                                )
                             }
                         }
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = bookmark.title.ifBlank { bookmark.url },
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.widthIn(max = 160.dp)
-                            )
-                            Text(
-                                text = "\u2715",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                modifier = Modifier.clickable {
-                                    onSettingsChange { s ->
-                                        s.copy(webBookmarks = s.webBookmarks.filter { it.url != bookmark.url })
-                                    }
-                                }
-                            )
-                        }
                     }
                 }
             }
-        }
 
-        // ── Live badge + preview mode toggle ──────────────────────────────
-        if (isLive) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = MaterialTheme.colorScheme.error
-                ) {
-                    Text(
-                        text = stringResource(Res.string.web_live_badge),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onError,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-                Text(
-                    text = if (pageTitle.isNotBlank()) pageTitle else liveUrl,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f)
-                )
-                // Toggle between screenshot mirror and interactive preview
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = if (useInteractivePreview) MaterialTheme.colorScheme.tertiaryContainer
-                            else MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
-                ) {
-                    Text(
-                        text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            // ── "Type to page" input for the live mirror ──
-            // Only useful in mirror mode — interactive mode already accepts native typing.
-            if (!useInteractivePreview) {
+            // ── Live badge + preview mode toggle ──────────────────────────────
+            if (isLive) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                            .hoverTint(RoundedCornerShape(8.dp)),
-                        verticalAlignment = Alignment.CenterVertically
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.error
                     ) {
-                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            BasicTextField(
-                                value = typeBuffer,
-                                onValueChange = { next ->
-                                    val browser = presenterManager?.liveBrowser?.value
-                                    if (browser == null) { typeBuffer = next; return@BasicTextField }
-                                    val old = typeBuffer
-                                    val common = commonPrefixLength(old, next)
-                                    val toDelete = old.length - common
-                                    val toInsert = next.substring(common)
-                                    repeat(toDelete) { browser.executeJavaScript(JS_BACKSPACE, "", 0) }
-                                    toInsert.forEach { ch -> browser.executeJavaScript(jsInsert(ch), "", 0) }
-                                    typeBuffer = next
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .onKeyEvent { event ->
-                                        if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
-                                            presenterManager?.liveBrowser?.value
-                                                ?.executeJavaScript(JS_ENTER, "", 0)
-                                            typeBuffer = ""
-                                            true
-                                        } else false
+                        Text(
+                            text = stringResource(Res.string.web_live_badge),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                    Text(
+                        text = if (pageTitle.isNotBlank()) pageTitle else liveUrl,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    // Toggle between screenshot mirror and interactive preview
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = if (useInteractivePreview) MaterialTheme.colorScheme.tertiaryContainer
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
+                    ) {
+                        Text(
+                            text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                // ── "Type to page" input for the live mirror ──
+                // Only useful in mirror mode — interactive mode already accepts native typing.
+                if (!useInteractivePreview) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(42.dp)
+                                .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                                .hoverTint(RoundedCornerShape(8.dp)),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                                BasicTextField(
+                                    value = typeBuffer,
+                                    onValueChange = { next ->
+                                        val browser = presenterManager?.liveBrowser?.value
+                                        if (browser == null) { typeBuffer = next; return@BasicTextField }
+                                        val old = typeBuffer
+                                        val common = commonPrefixLength(old, next)
+                                        val toDelete = old.length - common
+                                        val toInsert = next.substring(common)
+                                        repeat(toDelete) { browser.executeJavaScript(JS_BACKSPACE, "", 0) }
+                                        toInsert.forEach { ch -> browser.executeJavaScript(jsInsert(ch), "", 0) }
+                                        typeBuffer = next
                                     },
-                                singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                ),
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                decorationBox = { innerTextField ->
-                                    if (typeBuffer.isEmpty()) {
-                                        Text(
-                                            text = stringResource(Res.string.web_type_to_page_placeholder),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                            maxLines = 1
-                                        )
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .onKeyEvent { event ->
+                                            if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
+                                                presenterManager?.liveBrowser?.value
+                                                    ?.executeJavaScript(JS_ENTER, "", 0)
+                                                typeBuffer = ""
+                                                true
+                                            } else false
+                                        },
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    decorationBox = { innerTextField ->
+                                        if (typeBuffer.isEmpty()) {
+                                            Text(
+                                                text = stringResource(Res.string.web_type_to_page_placeholder),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                                maxLines = 1
+                                            )
+                                        }
+                                        innerTextField()
                                     }
-                                    innerTextField()
+                                )
+                            }
+                            if (typeBuffer.isNotEmpty()) {
+                                KeyIconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
+                                    Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                            )
-                        }
-                        if (typeBuffer.isNotEmpty()) {
-                            KeyIconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
+                        TooltipIconButton(
+                            painter = painterResource(Res.drawable.ic_cast),
+                            text = stringResource(Res.string.web_focus_first_input),
+                            onClick = {
+                                presenterManager?.liveBrowser?.value
+                                    ?.executeJavaScript(JS_FOCUS_FIRST_INPUT, "", 0)
+                            }
+                        )
                     }
-                    TooltipIconButton(
-                        painter = painterResource(Res.drawable.ic_cast),
-                        text = stringResource(Res.string.web_focus_first_input),
-                        onClick = {
-                            presenterManager?.liveBrowser?.value
-                                ?.executeJavaScript(JS_FOCUS_FIRST_INPUT, "", 0)
-                        }
-                    )
                 }
             }
         }
-
+        // The output picker and the preview share one card.
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth()
+                .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                .bibleListCard()
+        ) {
         // ── Preview WebView ────────────────────────────────────────────────
         PreviewOutputPicker(
             settings = appSettings,
@@ -644,7 +655,7 @@ fun WebTab(
         )
         // Fit preview to remaining space while keeping the output's aspect ratio
         BoxWithConstraints(
-            modifier = Modifier.weight(1f).fillMaxSize(),
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
             contentAlignment = Alignment.TopCenter
         ) {
             // Pick the largest size that fits both width and height constraints
@@ -891,6 +902,7 @@ fun WebTab(
             }
         }
         }
+        } // end card
     }
 }
 

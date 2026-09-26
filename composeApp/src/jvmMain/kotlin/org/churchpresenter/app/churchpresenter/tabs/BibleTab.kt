@@ -654,7 +654,6 @@ fun BibleTab(
             onScopeSelected = viewModel::updateSelectedScopeIndex,
             onModeSelected = viewModel::updateSelectedModeIndex,
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         if (engineSettings.enabled && sttConnected) {
             val engineStartFailed = bibleEngineClient?.startFailed?.value == true
@@ -801,56 +800,6 @@ fun BibleTab(
 
             FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
-            BibleColumnHeaderRow(
-                bookWidth = with(density) { colWBook.toDp() },
-                chapterWidth = with(density) { colWChapter.toDp() },
-                crossRefsVisible = crossRefsAvailable,
-                crossRefsDocked = crossRefsDocked,
-                holdAvailable = presenterManager != null && !splitBrowseMode,
-                holdLive = presenterManager?.bibleHold?.value ?: false,
-                sttToggleVisible = appSettings.sttSettings.lastConnectedUrl.isNotBlank() &&
-                    appSettings.sttSettings.lastConnectedUrl == appSettings.sttSettings.serverUrl &&
-                    sttManager != null,
-                sttConnected = sttConnected,
-                translations = appSettings.bibleSettings.translationList(),
-                storageDirectory = appSettings.bibleSettings.storageDirectory,
-                translationSelectionKey = translationSelectionKey,
-                onCrossReferencesToggle = {
-                    onSettingsChange { s -> withBibleCrossReferencePanel(s, !crossRefsDocked) }
-
-                    crossRefs.popoverIndex = -1
-                    crossRefs.popoverAnchor = null
-                    focusRequester.requestFocus()
-                },
-                onHoldLiveToggle = {
-                    val next = !(presenterManager?.bibleHold?.value ?: false)
-                    presenterManager?.setBibleHold(next)
-                    onInstanceLinkSendBibleHold?.invoke(next)
-                    focusRequester.requestFocus()
-                },
-                onSttToggle = {
-                    if (sttConnected) sttManager?.disconnect()
-                    else sttManager?.connect(appSettings.sttSettings.serverUrl)
-                    focusRequester.requestFocus()
-                },
-                onSwapTranslations = {
-                    onSettingsChange { s -> s.swapBibleTranslations() }
-                    focusRequester.requestFocus()
-                },
-                onMoveTranslation = { index, offset ->
-                    onSettingsChange { app -> app.moveBibleTranslation(index, offset) }
-                    focusRequester.requestFocus()
-                },
-                onAddToSchedule = {
-                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
-                        onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
-                    }
-                    focusRequester.requestFocus()
-                },
-                onGoLive = { goLiveWithHistory(); focusRequester.requestFocus() },
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
             // Provided rather than passed: the verse row that draws it is five levels down.
             CompositionLocalProvider(
                 LocalVerseSplitMark provides viewModel.liveVerseSplitMark(displayedVerses.firstOrNull())
@@ -991,6 +940,54 @@ fun BibleTab(
                                 )?.let(crossRefs::anchorLiveVerse)
                             }
                         }
+                    },
+                    verseHeader = {
+                    BibleVerseHeader(
+                        crossRefsVisible = crossRefsAvailable,
+                        crossRefsDocked = crossRefsDocked,
+                        holdAvailable = presenterManager != null && !splitBrowseMode,
+                        holdLive = presenterManager?.bibleHold?.value ?: false,
+                        sttToggleVisible = appSettings.sttSettings.lastConnectedUrl.isNotBlank() &&
+                            appSettings.sttSettings.lastConnectedUrl == appSettings.sttSettings.serverUrl &&
+                            sttManager != null,
+                        sttConnected = sttConnected,
+                        translations = appSettings.bibleSettings.translationList(),
+                        storageDirectory = appSettings.bibleSettings.storageDirectory,
+                        translationSelectionKey = translationSelectionKey,
+                        onCrossReferencesToggle = {
+                            onSettingsChange { s -> withBibleCrossReferencePanel(s, !crossRefsDocked) }
+
+                            crossRefs.popoverIndex = -1
+                            crossRefs.popoverAnchor = null
+                            focusRequester.requestFocus()
+                        },
+                        onHoldLiveToggle = {
+                            val next = !(presenterManager?.bibleHold?.value ?: false)
+                            presenterManager?.setBibleHold(next)
+                            onInstanceLinkSendBibleHold?.invoke(next)
+                            focusRequester.requestFocus()
+                        },
+                        onSttToggle = {
+                            if (sttConnected) sttManager?.disconnect()
+                            else sttManager?.connect(appSettings.sttSettings.serverUrl)
+                            focusRequester.requestFocus()
+                        },
+                        onSwapTranslations = {
+                            onSettingsChange { s -> s.swapBibleTranslations() }
+                            focusRequester.requestFocus()
+                        },
+                        onMoveTranslation = { index, offset ->
+                            onSettingsChange { app -> app.moveBibleTranslation(index, offset) }
+                            focusRequester.requestFocus()
+                        },
+                        onAddToSchedule = {
+                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+                            }
+                            focusRequester.requestFocus()
+                        },
+                        onGoLive = { goLiveWithHistory(); focusRequester.requestFocus() },
+                    )
                     },
                 ) {
                     BibleHistoryPanel(

@@ -206,7 +206,7 @@ private val DRAG_HANDLE_THRESHOLD = 4.dp
 
 private val DELETE_ZONE_HEIGHT = 56.dp
 
-internal val CARD_SHAPE = RoundedCornerShape(9.dp)
+internal val CARD_SHAPE = RoundedCornerShape(12.dp)
 
 internal object ScheduleToolbarTags {
     const val UNDO = "schedule_undo"
@@ -445,7 +445,6 @@ fun ScheduleTab(
 
         Box(
             modifier = Modifier.weight(1f).fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .onSizeChanged { listHeightPx = it.height }
                 // Compose's own target, scoped to this panel. An AWT `DropTarget` reached for a
                 // window by hand instead, which is not reliably the one holding this composable and
@@ -571,8 +570,7 @@ fun ScheduleTab(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize()
-                    .padding(horizontal = 8.dp)
-                    .padding(top = 6.dp, bottom = 10.dp, end = 4.dp)
+                    .padding(start = 4.dp, top = 6.dp, bottom = 10.dp)
             ) {
 
                 itemsIndexed(rows, key = { _, item -> item.id }) { index, item ->
@@ -582,7 +580,7 @@ fun ScheduleTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem()
-                            .padding(bottom = 3.dp)
+                            .padding(bottom = 4.dp)
                             .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
                             .reorderGesture(index, requireShift = true)
                     ) {
@@ -774,8 +772,6 @@ fun ScheduleTab(
 
         Column(
             modifier = Modifier.fillMaxWidth()
-                // The list's own fill, so the button's strip reads as the bottom of the list.
-                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
