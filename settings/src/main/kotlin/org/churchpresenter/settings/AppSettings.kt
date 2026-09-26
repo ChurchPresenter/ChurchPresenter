@@ -52,6 +52,11 @@ data class AppSettings(
      */
     val scheduleLegacyRowActions: Boolean = false,
     /**
+     * How large the schedule toolbar's icons are drawn, by `ScheduleToolbarIconSize` name. A name
+     * this build does not know falls back to the smallest, which is the size they always had.
+     */
+    val scheduleToolbarIconSize: String = "SMALL",
+    /**
      * Schedule toolbar buttons the operator has turned off, by `ScheduleToolbarButton` name — the
      * same shape as [hiddenTabs], so an unknown name from a newer build is simply ignored.
      *

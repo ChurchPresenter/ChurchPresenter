@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
 /**
  * The schedule toolbar's buttons, in the order they are drawn — each one the operator can turn off
  * from the panel's options menu. Persisted by `name` in `AppSettings.hiddenScheduleButtons`, so a
@@ -12,6 +15,24 @@ enum class ScheduleToolbarButton {
 
     /** The menu's own test tag for this entry. */
     val menuTag: String get() = "schedule_options_button_${name.lowercase()}"
+}
+
+/**
+ * How large the schedule toolbar's icons are drawn, chosen from the panel's options menu. Persisted by
+ * `name` in `AppSettings.scheduleToolbarIconSize`; [SMALL] is the size they had before the choice.
+ */
+enum class ScheduleToolbarIconSize(val buttonSize: Dp, val iconSize: Dp) {
+    SMALL(26.dp, 14.dp),
+    MEDIUM(32.dp, 18.dp),
+    LARGE(40.dp, 22.dp);
+
+    /** The menu's own test tag for this entry. */
+    val menuTag: String get() = "schedule_options_icon_size_${name.lowercase()}"
+
+    companion object {
+        /** The size named [name], or [SMALL] for a name this build does not know. */
+        fun fromName(name: String): ScheduleToolbarIconSize = entries.firstOrNull { it.name == name } ?: SMALL
+    }
 }
 
 /** The file group, the history group, the extras group — what the two pill dividers separate. */

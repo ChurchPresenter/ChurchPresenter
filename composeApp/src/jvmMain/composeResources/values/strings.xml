@@ -838,6 +838,10 @@
     <string name="schedule_show_buttons_under_title">Show buttons under title</string>
     <string name="schedule_option_item_count">Item Count</string>
     <string name="schedule_option_zoom">Zoom Controls</string>
+    <string name="schedule_option_icon_size">Toolbar icon size</string>
+    <string name="schedule_icon_size_small">Small</string>
+    <string name="schedule_icon_size_medium">Medium</string>
+    <string name="schedule_icon_size_large">Large</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>

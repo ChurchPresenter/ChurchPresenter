@@ -137,6 +137,7 @@ internal fun ScheduleZoomPill(
 @Composable
 internal fun ScheduleFileButtons(
     hiddenButtons: Set<String>,
+    size: ScheduleToolbarIconSize,
     onNewSchedule: () -> Unit,
     onOpenSchedule: () -> Unit,
     onSaveSchedule: () -> Unit,
@@ -146,16 +147,19 @@ internal fun ScheduleFileButtons(
     if (ScheduleToolbarButton.NEW.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(Res.drawable.ic_add), stringResource(Res.string.tooltip_new_schedule), onNewSchedule,
+            buttonSize = size.buttonSize, iconSize = size.iconSize,
         )
     }
     if (ScheduleToolbarButton.OPEN.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(Res.drawable.ic_folder), stringResource(Res.string.tooltip_open_schedule), onOpenSchedule,
+            buttonSize = size.buttonSize, iconSize = size.iconSize,
         )
     }
     if (ScheduleToolbarButton.SAVE.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(Res.drawable.ic_save), stringResource(Res.string.tooltip_save_schedule), onSaveSchedule,
+            buttonSize = size.buttonSize, iconSize = size.iconSize,
         )
     }
     if (ScheduleToolbarButton.CLEAR.shownIn(hiddenButtons)) {
@@ -165,6 +169,8 @@ internal fun ScheduleFileButtons(
             onClick = onClearSchedule,
             enabled = canClear,
             tint = MaterialTheme.colorScheme.error,
+            buttonSize = size.buttonSize,
+            iconSize = size.iconSize,
         )
     }
 }
@@ -173,6 +179,7 @@ internal fun ScheduleFileButtons(
 @Composable
 internal fun ScheduleHistoryButtons(
     hiddenButtons: Set<String>,
+    size: ScheduleToolbarIconSize,
     canUndo: Boolean,
     canRedo: Boolean,
     onUndo: () -> Unit,
@@ -190,6 +197,8 @@ internal fun ScheduleHistoryButtons(
                 onClick = onUndo,
                 modifier = Modifier.testTag(ScheduleToolbarTags.UNDO),
                 enabled = canUndo,
+                buttonSize = size.buttonSize,
+                iconSize = size.iconSize,
             )
         }
         if (ScheduleToolbarButton.REDO.shownIn(hiddenButtons)) {
@@ -200,6 +209,8 @@ internal fun ScheduleHistoryButtons(
                 onClick = onRedo,
                 modifier = Modifier.testTag(ScheduleToolbarTags.REDO),
                 enabled = canRedo,
+                buttonSize = size.buttonSize,
+                iconSize = size.iconSize,
             )
         }
     }
@@ -209,6 +220,7 @@ internal fun ScheduleHistoryButtons(
 @Composable
 internal fun SchedulePlanningButtons(
     hiddenButtons: Set<String>,
+    size: ScheduleToolbarIconSize,
     onAddLabel: () -> Unit,
     onImportPlanningCenter: () -> Unit,
     onOpenCalendar: () -> Unit,
@@ -216,6 +228,7 @@ internal fun SchedulePlanningButtons(
     if (ScheduleToolbarButton.ADD_LABEL.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(Res.drawable.ic_label), stringResource(Res.string.tooltip_add_label), onAddLabel,
+            buttonSize = size.buttonSize, iconSize = size.iconSize,
         )
     }
     if (ScheduleToolbarButton.PLANNING_CENTER.shownIn(hiddenButtons)) {
@@ -223,6 +236,8 @@ internal fun SchedulePlanningButtons(
             painter = rememberVectorPainter(Icons.Default.CloudDownload),
             text = stringResource(Res.string.planning_center_import_title),
             onClick = onImportPlanningCenter,
+            buttonSize = size.buttonSize,
+            iconSize = size.iconSize,
         )
     }
     if (ScheduleToolbarButton.CALENDAR.shownIn(hiddenButtons)) {
@@ -230,6 +245,8 @@ internal fun SchedulePlanningButtons(
             painter = rememberVectorPainter(Icons.Default.CalendarMonth),
             text = stringResource(Res.string.open_calendar_manager),
             onClick = onOpenCalendar,
+            buttonSize = size.buttonSize,
+            iconSize = size.iconSize,
         )
     }
 }
