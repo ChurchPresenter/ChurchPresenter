@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.SquircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -141,7 +141,7 @@ private val CHIP_BAR_HEIGHT = 2.5.dp
 internal fun BackdropTooltip(text: String) = ControlTooltip(text)
 
 /** Square where it meets its neighbour, rounded where it does not, so a strip reads as one shape. */
-internal fun segmentShape(index: Int, count: Int): SquircleShape {
+internal fun segmentShape(index: Int, count: Int): RoundedCornerShape {
     val rounded = 8.dp
     val square = 0.dp
     return AppShape(

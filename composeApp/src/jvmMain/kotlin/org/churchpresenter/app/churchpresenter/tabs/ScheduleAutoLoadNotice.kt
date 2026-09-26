@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.AlertDialog
@@ -132,16 +132,16 @@ internal fun LoadServiceNowConfirm(
         title = { Text(stringResource(Res.string.schedule_load_confirm_title, serviceName)) },
         text = { Text(stringResource(Res.string.schedule_load_confirm_body, itemCount)) },
         confirmButton = {
-            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = { onChoose(true) }) {
+            RaisedButton(shape = AppShape(6.dp), onClick = { onChoose(true) }) {
                 Text(stringResource(Res.string.schedule_load_confirm_replace))
             }
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                     Text(stringResource(Res.string.cancel))
                 }
-                GhostButton(shape = RoundedCornerShape(6.dp), onClick = { onChoose(false) }) {
+                GhostButton(shape = AppShape(6.dp), onClick = { onChoose(false) }) {
                     Text(stringResource(Res.string.schedule_load_confirm_append))
                 }
             }
@@ -169,7 +169,7 @@ private fun NoticeRow(icon: Painter, text: String, action: String, onAction: () 
         )
         KeyButton(
             onClick = onAction,
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
             modifier = Modifier.height(26.dp)
         ) {
