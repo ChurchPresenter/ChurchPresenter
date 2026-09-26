@@ -63,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -98,6 +99,7 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
@@ -126,6 +128,12 @@ import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
 import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
 import churchpresenter.composeapp.generated.resources.canvas_rename_scene
 import churchpresenter.composeapp.generated.resources.canvas_remove_scene
+import churchpresenter.composeapp.generated.resources.canvas_size_screen
+import churchpresenter.composeapp.generated.resources.canvas_bring_into_view
+import churchpresenter.composeapp.generated.resources.canvas_layer_outside
+import churchpresenter.composeapp.generated.resources.canvas_layer_partly_outside
+import churchpresenter.composeapp.generated.resources.canvas_layers_outside
+import churchpresenter.composeapp.generated.resources.canvas_layers_outside_one
 import churchpresenter.composeapp.generated.resources.canvas_duplicate_scene
 import churchpresenter.composeapp.generated.resources.canvas_scene_copy_name
 import churchpresenter.composeapp.generated.resources.canvas_add_source
@@ -273,6 +281,23 @@ fun CanvasTab(
                 assignedDisplayBounds(presentationAssignment0)
             }
             val displayAr0 = if (presentationBounds0.height > 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f
+            // Every projection screen a scene can be sized to match, from its size menu. A screen
+            // switched off or not yet resolved has no size and is left out.
+            val assignments = appSettings.projectionSettings.screenAssignments
+            val assignmentBounds = remember(assignments) { assignments.map { assignedDisplayBounds(it) } }
+            val canvasOutputs = assignments.zip(assignmentBounds).mapIndexedNotNull { index, (assignment, bounds) ->
+                if (assignment.targetDisplay == Constants.KEY_TARGET_NONE || bounds.width <= 0 || bounds.height <= 0) {
+                    null
+                } else {
+                    CanvasOutputSize(
+                        label = assignment.screenName.ifBlank {
+                            stringResource(Res.string.canvas_size_screen, index + 1)
+                        },
+                        width = bounds.width,
+                        height = bounds.height,
+                    )
+                }
+            }
 
             @OptIn(ExperimentalFoundationApi::class)
             LazyColumn(
@@ -383,6 +408,12 @@ fun CanvasTab(
                                     )
                                 }
                             }
+                            CanvasSizeMenu(
+                                width = scene.canvasWidth,
+                                height = scene.canvasHeight,
+                                outputs = canvasOutputs,
+                                onSetSize = { w, h -> sceneViewModel.updateCanvasSize(w, h, scene.id) },
+                            )
                             TooltipArea(
                                 tooltip = {
                                     Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
@@ -501,6 +532,35 @@ fun CanvasTab(
                                 modifier = Modifier.weight(1f).alpha(if (source.visible) 1f else HIDDEN_SOURCE_ALPHA)
                                     .initialPassClickable { sceneViewModel.selectSource(source.id) }
                             )
+                            // The canvas clips what it draws, so a layer past an edge is cut off or gone
+                            // with nothing else on screen saying it is still there.
+                            val placement = source.transform.placement()
+                            if (placement != CanvasPlacement.INSIDE) {
+                                val placementText = stringResource(
+                                    if (placement == CanvasPlacement.OUTSIDE) Res.string.canvas_layer_outside
+                                    else Res.string.canvas_layer_partly_outside
+                                )
+                                TooltipArea(
+                                    tooltip = {
+                                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                            Text(
+                                                placementText,
+                                                color = MaterialTheme.colorScheme.inverseOnSurface,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
+                                    },
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Warning,
+                                        contentDescription = placementText,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -944,12 +1004,58 @@ fun CanvasTab(
                     }
                 }
 
-                // Canvas preview
+                // Layers the canvas is clipping away, with one click to put them back inside.
+                val outsideLayers = currentScene.sources.filter {
+                    it.transform.placement() != CanvasPlacement.INSIDE
+                }
+                if (outsideLayers.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp)
+                            .background(MaterialTheme.colorScheme.errorContainer, AppShape(4.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            if (outsideLayers.size == 1) {
+                                stringResource(Res.string.canvas_layers_outside_one)
+                            } else {
+                                stringResource(Res.string.canvas_layers_outside, outsideLayers.size)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        RaisedButton(
+                            onClick = {
+                                outsideLayers.forEach {
+                                    sceneViewModel.updateTransform(it.id, it.transform.broughtIntoView())
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            modifier = Modifier.height(28.dp).testTag(CANVAS_BRING_INTO_VIEW_TAG),
+                            shape = AppShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                        ) {
+                            Text(
+                                stringResource(Res.string.canvas_bring_into_view),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                }
+
+                // Canvas preview -- padded all round, so a canvas bound by the height (portrait) or
+                // the width (ultra-wide) does not run into the edges of the area it sits in.
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     SceneCanvas(
@@ -1028,3 +1134,9 @@ fun CanvasTab(
         }
     }
 }
+
+/** One output a scene can be sized to match: its name and its size. */
+internal data class CanvasOutputSize(val label: String, val width: Int, val height: Int)
+
+/** Test handle for the off-canvas banner's Bring into view button. */
+internal const val CANVAS_BRING_INTO_VIEW_TAG = "canvas_bring_into_view"

@@ -122,6 +122,7 @@ import churchpresenter.composeapp.generated.resources.song_syntax_chord_hint
 import churchpresenter.composeapp.generated.resources.song_tempo
 import churchpresenter.composeapp.generated.resources.song_title
 import churchpresenter.composeapp.generated.resources.song_translation_label
+import churchpresenter.composeapp.generated.resources.song_named_title
 import churchpresenter.composeapp.generated.resources.song_translation_title
 import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.unit_bpm
@@ -271,6 +272,27 @@ internal fun translationPaneLabel(index: Int, label: String): String = when {
 }
 
 /**
+ * What the first language's title card says: "<name> Title" once Language 1 is named, as the other
+ * languages' cards do, and "Song Title" until then. Only the label follows the name -- the field is
+ * still the song's own title, the one the library lists and search finds.
+ */
+@Composable
+internal fun primaryTitleLabel(name: String): String =
+    if (name.isNotBlank()) stringResource(Res.string.song_named_title, name)
+    else stringResource(Res.string.song_title)
+
+/**
+ * What a language's title card says: "<name> Title" where the language has a name -- the same name
+ * its pane tab shows -- and its position otherwise, exactly as before languages could be named.
+ */
+@Composable
+internal fun translationTitleLabel(index: Int, name: String): String = when {
+    name.isNotBlank() -> stringResource(Res.string.song_named_title, name)
+    index == 0 -> stringResource(Res.string.secondary_title)
+    else -> stringResource(Res.string.song_translation_title, index + 2)
+}
+
+/**
  * Puts [snippet] in at the caret, replacing whatever is selected, and leaves the caret after it.
  *
  * With [ownLine] the snippet is given a blank line above and a line below unless it already has
@@ -390,6 +412,11 @@ internal fun EditSongContent(
     var editedLanguageNames by remember(isVisible, song, languageNames) {
         mutableStateOf(List(MAX_SONG_TRANSLATIONS) { languageNames.getOrElse(it) { "" } })
     }
+    // What extra language [index] is called, for its pane tab and its title card alike: the
+    // install-wide name first, and a label the song file carries itself (an import's) only while
+    // the language has none. Read live, so a rename typed here relabels both at once.
+    fun languageName(index: Int): String =
+        editedLanguageNames[index + 1].trim().ifBlank { editedTranslations[index].label }
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
@@ -460,7 +487,7 @@ internal fun EditSongContent(
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FieldCard(
-                            label = stringResource(Res.string.song_title),
+                            label = primaryTitleLabel(editedLanguageNames[0].trim()),
                             value = editedTitle,
                             onValueChange = {
                                 editedTitle = it
@@ -477,8 +504,7 @@ internal fun EditSongContent(
                         // card it always did, since it has exactly one pane.
                         repeat(visibleTranslations) { slot ->
                             FieldCard(
-                                label = if (slot == 0) stringResource(Res.string.secondary_title)
-                                else stringResource(Res.string.song_translation_title, slot + 2),
+                                label = translationTitleLabel(slot, languageName(slot)),
                                 value = editedTranslations[slot].title,
                                 onValueChange = { value ->
                                     editedTranslations = editedTranslations.mapIndexed { index, draft ->
@@ -568,11 +594,7 @@ internal fun EditSongContent(
                                     .ifBlank { stringResource(Res.string.song_pane_lyrics) }
                                 PaneTab(primaryName, pane == 0) { pane = 0 }
                                 repeat(visibleTranslations) { index ->
-                                    // The install-wide name first; a label the song file carries
-                                    // itself (an import's) only while the language has none.
-                                    val name = editedLanguageNames[index + 1].trim()
-                                        .ifBlank { editedTranslations[index].label }
-                                    val paneLabel = translationPaneLabel(index, name)
+                                    val paneLabel = translationPaneLabel(index, languageName(index))
                                     PaneTab(paneLabel, pane == index + 1) {
                                         pane = index + 1
                                     }

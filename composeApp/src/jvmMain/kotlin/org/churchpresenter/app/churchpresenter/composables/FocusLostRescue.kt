@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import java.awt.Canvas
@@ -27,6 +28,9 @@ import java.awt.Component
 import java.awt.Container
 import java.awt.Window as AwtWindow
 import org.churchpresenter.theme.components.RaisedButton
+
+/** The banner's gap from what is above and below it. */
+private val BANNER_GAP = 8.dp
 private const val RESCUE_ATTEMPTS = 10
 private const val RESCUE_INTERVAL_MS = 100L
 
@@ -72,9 +76,15 @@ fun rememberFocusLostRescue(
 
 /** The rescue banner. Renders nothing while focus is healthy. */
 @Composable
-fun FocusLostBanner(state: FocusLostRescueState, text: String, modifier: Modifier = Modifier) {
+fun FocusLostBanner(
+    state: FocusLostRescueState,
+    text: String,
+    modifier: Modifier = Modifier,
+    /** See [FocusHintBanner]. */
+    topPadding: Dp = BANNER_GAP,
+) {
     if (!state.bannerVisible) return
-    FocusHintBanner(text = text, onClick = { state.rescue() }, modifier = modifier)
+    FocusHintBanner(text = text, onClick = { state.rescue() }, modifier = modifier, topPadding = topPadding)
 }
 
 /**
@@ -87,12 +97,21 @@ fun FocusLostBanner(state: FocusLostRescueState, text: String, modifier: Modifie
  * picture, same words, different reason; see SongsTab's search banner.
  */
 @Composable
-fun FocusHintBanner(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun FocusHintBanner(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    /**
+     * The gap above the banner. Zero where whatever sits above already ends in a margin of its
+     * own -- a tab's top card does -- so the banner is not twice as far from it as from what follows.
+     */
+    topPadding: Dp = BANNER_GAP,
+) {
     RaisedButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(start = 16.dp, end = 16.dp, top = topPadding, bottom = BANNER_GAP)
             // min-height, not fixed: in narrow panels the text wraps to two lines.
             .heightIn(min = 48.dp)
             // MUST stay non-focusable: a click on a focusable button takes focus, which

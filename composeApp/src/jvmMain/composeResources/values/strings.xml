@@ -1702,6 +1702,17 @@
     <string name="canvas_rename_scene">Rename</string>
     <string name="canvas_duplicate_scene">Duplicate</string>
     <string name="canvas_scene_copy_name">%1$s (copy)</string>
+    <string name="canvas_size">Canvas size</string>
+    <string name="canvas_size_tooltip">Canvas size (%1$s)</string>
+    <string name="canvas_size_match_output">Match %1$s</string>
+    <string name="canvas_size_screen">Screen %1$d</string>
+    <string name="canvas_size_custom">Custom</string>
+    <string name="canvas_size_set">Set</string>
+    <string name="canvas_layer_partly_outside">Partly outside the canvas</string>
+    <string name="canvas_layer_outside">Outside the canvas — not visible</string>
+    <string name="canvas_layers_outside_one">1 layer is outside the canvas</string>
+    <string name="canvas_layers_outside">%1$d layers are outside the canvas</string>
+    <string name="canvas_bring_into_view">Bring into view</string>
     <string name="canvas_remove_scene">Remove</string>
     <string name="canvas_add_source">Add source</string>
     <string name="canvas_delete_source">Delete source</string>
@@ -2107,6 +2118,7 @@
     <string name="song_pane_secondary">Language 2</string>
     <string name="song_pane_translation">Language %1$d</string>
     <string name="song_translation_title">Language %1$d Title</string>
+    <string name="song_named_title">%1$s Title</string>
     <string name="enter_translation_lyrics_here">Enter translation %1$d lyrics here...</string>
     <string name="song_add_translation">Add a language</string>
     <string name="song_remove_translation">Remove this language</string>
@@ -2221,6 +2233,8 @@
     <string name="launch_on_login">Launch at login</string>
     <string name="start_outputs_hidden">Start with output screens hidden</string>
     <string name="start_outputs_hidden_hint">Outputs stay off at launch until you press the display button in the sidebar</string>
+    <string name="hide_cursor_on_outputs">Hide the mouse on output screens</string>
+    <string name="hide_cursor_on_outputs_hint">The mouse pointer is never shown over a full-screen output, even when it passes across one</string>
     <string name="analytics_reporting">Share anonymous crash &amp; analytics reports</string>
     <string name="send_test_event">Send test event</string>
     <string name="test_event_title">Sentry test event</string>

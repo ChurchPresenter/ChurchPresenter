@@ -74,6 +74,9 @@ data class ProjectionSettings(
     // Launch with the output windows hidden; the operator reveals them with the toolbar's display
     // toggle when ready to present.
     val startOutputsHidden: Boolean = false,
+    // Never show the mouse pointer over a full-screen output, so the congregation does not see it
+    // crossing the projector while the operator works on the main screen. On unless turned off.
+    val hideCursorOnOutputs: Boolean = true,
     /**
      * Named, reusable [OutputProfile]s, any of which an output can follow via
      * [ScreenAssignment.activeProfileId] -- see `AppSettings.resolvedFor(profile)`

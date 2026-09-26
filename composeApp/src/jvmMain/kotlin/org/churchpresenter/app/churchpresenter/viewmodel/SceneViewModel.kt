@@ -13,6 +13,12 @@ import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import java.io.File
 import java.util.UUID
 
+/**
+ * The smallest and largest side a scene's canvas may have -- no zero, no 1-pixel sliver, nothing
+ * past 8K. The same bounds a profile's custom preview shape uses.
+ */
+internal val CANVAS_SIDE_RANGE = 16..7680
+
 class SceneViewModel {
     private val appDataDir = File(System.getProperty("user.home"), ".churchpresenter")
     private val scenesFile = File(appDataDir, "scenes.json")
@@ -61,13 +67,23 @@ class SceneViewModel {
         return scene
     }
 
-    fun updateCanvasSize(width: Int, height: Int) {
-        val id = _currentSceneId.value ?: return
+    /**
+     * Sets [sceneId]'s canvas to [width]×[height] -- the current scene unless another is named, so
+     * every row of the scene list can be resized, not only the one being edited.
+     *
+     * Layers are fractions of the canvas, so they keep their relative places and stretch with it.
+     * Each side is kept in [CANVAS_SIDE_RANGE].
+     */
+    fun updateCanvasSize(width: Int, height: Int, sceneId: String? = _currentSceneId.value) {
+        val id = sceneId ?: return
         val index = _scenes.indexOfFirst { it.id == id }
-        if (index >= 0) {
-            _scenes[index] = _scenes[index].copy(canvasWidth = width, canvasHeight = height)
-            saveScenes()
-        }
+        if (index < 0) return
+        val w = width.coerceIn(CANVAS_SIDE_RANGE)
+        val h = height.coerceIn(CANVAS_SIDE_RANGE)
+        val scene = _scenes[index]
+        if (scene.canvasWidth == w && scene.canvasHeight == h) return
+        _scenes[index] = scene.copy(canvasWidth = w, canvasHeight = h)
+        saveScenes()
     }
 
     fun removeScene(sceneId: String) {

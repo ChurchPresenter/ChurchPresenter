@@ -58,6 +58,8 @@ import churchpresenter.composeapp.generated.resources.settings_exported
 import churchpresenter.composeapp.generated.resources.settings_import_failed
 import churchpresenter.composeapp.generated.resources.start_outputs_hidden
 import churchpresenter.composeapp.generated.resources.start_outputs_hidden_hint
+import churchpresenter.composeapp.generated.resources.hide_cursor_on_outputs
+import churchpresenter.composeapp.generated.resources.hide_cursor_on_outputs_hint
 import churchpresenter.composeapp.generated.resources.system_manage_settings
 import churchpresenter.composeapp.generated.resources.test_event_dev_only
 import churchpresenter.composeapp.generated.resources.test_event_failed
@@ -225,6 +227,17 @@ private fun GeneralCard(
                 onCheckedChange = { hidden ->
                     onSettingsChange { s ->
                         s.copy(projectionSettings = s.projectionSettings.copy(startOutputsHidden = hidden))
+                    }
+                }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.hide_cursor_on_outputs),
+                hint = stringResource(Res.string.hide_cursor_on_outputs_hint),
+                checked = settings.projectionSettings.hideCursorOnOutputs,
+                onCheckedChange = { hide ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(hideCursorOnOutputs = hide))
                     }
                 }
             )
