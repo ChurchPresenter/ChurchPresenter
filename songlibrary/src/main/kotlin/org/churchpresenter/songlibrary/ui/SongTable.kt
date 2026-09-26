@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -53,7 +52,9 @@ import org.churchpresenter.songlibrary.generated.resources.column_ccli
 import org.churchpresenter.songlibrary.generated.resources.column_composer
 import org.churchpresenter.songlibrary.generated.resources.column_duration
 import org.churchpresenter.songlibrary.generated.resources.column_number
+import org.churchpresenter.songlibrary.generated.resources.column_fourth_title
 import org.churchpresenter.songlibrary.generated.resources.column_secondary_title
+import org.churchpresenter.songlibrary.generated.resources.column_third_title
 import org.churchpresenter.songlibrary.generated.resources.column_song_book
 import org.churchpresenter.songlibrary.generated.resources.column_title
 import org.churchpresenter.songlibrary.generated.resources.column_tune
@@ -69,6 +70,7 @@ import org.churchpresenter.songlibrary.generated.resources.reset_filters
 internal fun SongTable(
     state: SongLibraryState,
     modifier: Modifier = Modifier,
+    onCompareRow: (SongItem) -> Unit,
     onEditRow: ((SongItem) -> Unit)?,
     onDeleteRow: (SongItem) -> Unit,
     onNewBook: () -> Unit,
@@ -80,7 +82,7 @@ internal fun SongTable(
     // whole library per visible row per frame.
     val songbooks = state.songbooks
     val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
-    val width = TICK_WIDTH + columnWidth + durationColumnWidth(state.showDuration) + ACTIONS_WIDTH
+    val width = TICK_WIDTH + PROBLEM_WIDTH + columnWidth + durationColumnWidth(state.showDuration) + ACTIONS_WIDTH
 
     // The scrollbars sit OUTSIDE the horizontally scrolled column, so they stay pinned to the edges
     // of the table rather than sliding away with the columns they are there to move.
@@ -97,6 +99,7 @@ internal fun SongTable(
                             state = state,
                             songbooks = songbooks,
                             width = width,
+                            onCompare = { onCompareRow(song) },
                             onEdit = onEditRow?.let { { it(song) } },
                             onDelete = { onDeleteRow(song) },
                             onNewBook = onNewBook,
@@ -134,6 +137,7 @@ private fun TableHeader(state: SongLibraryState, width: Dp) {
             Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
                 LibraryCheckbox(checked = all, indeterminate = some, onToggle = { state.toggleAll() })
             }
+            Spacer(Modifier.width(PROBLEM_WIDTH))
             state.visibleColumns.forEach { field ->
                 HeadCell(state, label = columnLabel(field), sort = field.sortColumn(), width = field.width())
             }
@@ -189,6 +193,7 @@ private fun SongRow(
     state: SongLibraryState,
     songbooks: List<String>,
     width: Dp,
+    onCompare: () -> Unit,
     onEdit: (() -> Unit)?,
     onDelete: () -> Unit,
     onNewBook: () -> Unit,
@@ -212,6 +217,7 @@ private fun SongRow(
             Box(Modifier.width(TICK_WIDTH - 2.dp), contentAlignment = Alignment.Center) {
                 LibraryCheckbox(checked = checked, onToggle = { state.toggle(song.sourceFile) })
             }
+            ProblemMark(state.translationProblems[song.sourceFile])
             state.visibleColumns.forEach { field ->
                 Box(Modifier.width(field.width())) {
                     if (field == SongField.SONGBOOK) {
@@ -251,6 +257,11 @@ private fun SongRow(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                CompareAction(
+                    languages = song.translationList().count { !it.isEmpty },
+                    mismatches = state.translationProblems[song.sourceFile]?.mismatchedSections ?: 0,
+                    onClick = onCompare,
+                )
                 if (onEdit != null) {
                     RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
                 }
@@ -258,16 +269,6 @@ private fun SongRow(
             }
         }
         Hairline()
-    }
-}
-
-@Composable
-private fun RowAction(icon: ImageVector, description: String, tint: Color, onClick: () -> Unit) {
-    Box(
-        Modifier.size(26.dp).clip(AppShape(7.dp)).clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(14.dp))
     }
 }
 
@@ -309,6 +310,8 @@ internal fun columnLabel(field: SongField): String = when (field) {
     SongField.NUMBER -> stringResource(Res.string.column_number)
     SongField.TITLE -> stringResource(Res.string.column_title)
     SongField.SECONDARY_TITLE -> stringResource(Res.string.column_secondary_title)
+    SongField.THIRD_TITLE -> stringResource(Res.string.column_third_title)
+    SongField.FOURTH_TITLE -> stringResource(Res.string.column_fourth_title)
     SongField.SONGBOOK -> stringResource(Res.string.column_song_book)
     SongField.AUTHOR -> stringResource(Res.string.column_author)
     SongField.COMPOSER -> stringResource(Res.string.column_composer)
@@ -320,6 +323,8 @@ private fun SongField.sortColumn(): SortColumn = when (this) {
     SongField.NUMBER -> SortColumn.NUMBER
     SongField.TITLE -> SortColumn.TITLE
     SongField.SECONDARY_TITLE -> SortColumn.SECONDARY_TITLE
+    SongField.THIRD_TITLE -> SortColumn.THIRD_TITLE
+    SongField.FOURTH_TITLE -> SortColumn.FOURTH_TITLE
     SongField.SONGBOOK -> SortColumn.SONGBOOK
     SongField.AUTHOR -> SortColumn.AUTHOR
     SongField.COMPOSER -> SortColumn.COMPOSER
@@ -330,7 +335,7 @@ private fun SongField.sortColumn(): SortColumn = when (this) {
 /** Wide enough for what the column holds: a title is a sentence, a number is four digits. */
 internal fun SongField.width(): Dp = when (this) {
     SongField.NUMBER -> 84.dp
-    SongField.TITLE, SongField.SECONDARY_TITLE -> 280.dp
+    SongField.TITLE, SongField.SECONDARY_TITLE, SongField.THIRD_TITLE, SongField.FOURTH_TITLE -> 280.dp
     SongField.SONGBOOK -> 190.dp
     SongField.AUTHOR, SongField.COMPOSER -> 180.dp
     SongField.TUNE -> 150.dp
@@ -339,4 +344,7 @@ internal fun SongField.width(): Dp = when (this) {
 
 internal val TICK_WIDTH = 36.dp
 
-internal val ACTIONS_WIDTH = 68.dp
+/** The slot between the tick and the first column that holds a problem song's `!`. */
+internal val PROBLEM_WIDTH = 18.dp
+
+internal val ACTIONS_WIDTH = 96.dp

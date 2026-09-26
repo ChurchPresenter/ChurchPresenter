@@ -84,6 +84,7 @@ fun SongLibraryApp(
             // Null when the host supplied no editor: the row then has nothing to open, so it
             // shows no Edit button rather than one that does nothing. The cells are still typed in
             // directly, which is what the grid is for.
+            onCompareRow = { state.comparing = it.sourceFile },
             onEditRow = songEditor?.let { { song: SongItem -> state.editing = song.sourceFile } },
             onDeleteRow = { pendingDelete = listOf(it) },
             onNewBook = { newBookOpen = true },
@@ -125,6 +126,19 @@ fun SongLibraryApp(
                 pendingDelete = emptyList()
             },
         )
+    }
+
+    state.comparing?.let { sourceFile ->
+        state.songOf(sourceFile)?.let { song ->
+            CompareTranslationsDialog(
+                song = song,
+                onDismiss = { state.comparing = null },
+                onSave = {
+                    state.replace(it)
+                    state.comparing = null
+                },
+            )
+        }
     }
 
     state.editing?.let { sourceFile ->

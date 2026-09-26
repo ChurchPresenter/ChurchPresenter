@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.songs.SongField
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.songlibrary.OPTIONAL_COLUMNS
+import org.churchpresenter.songlibrary.DEFAULT_HIDDEN_COLUMNS
 import org.churchpresenter.songlibrary.SongLibraryState
 import org.churchpresenter.songlibrary.generated.resources.Res
 import org.churchpresenter.songlibrary.generated.resources.all_song_books
@@ -275,7 +275,7 @@ private fun ColumnsMenu(state: SongLibraryState) {
     val scheme = MaterialTheme.colorScheme
     LibraryDropdown(
         label = stringResource(Res.string.columns),
-        highlighted = state.hiddenColumns.isNotEmpty() || !state.showDuration,
+        highlighted = state.hiddenColumns != DEFAULT_HIDDEN_COLUMNS || !state.showDuration,
         menuWidth = 224.dp,
         leading = {
             Icon(Icons.Default.ViewColumn, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
@@ -283,6 +283,9 @@ private fun ColumnsMenu(state: SongLibraryState) {
     ) { _ ->
         MenuRow(stringResource(Res.string.columns_show_all), accent = true) { state.showAllColumns() }
         MenuDivider()
+        // In the grid's own order: the number, then the title, then the rest.
+        val (number, rest) = state.availableColumns.partition { it == SongField.NUMBER }
+        number.forEach { ColumnToggle(state, it) }
         // The title is always shown: a row identified only by its number is unreadable.
         MenuRow(
             label = columnLabel(SongField.TITLE),
@@ -296,15 +299,18 @@ private fun ColumnsMenu(state: SongLibraryState) {
             },
             onClick = null,
         )
-        OPTIONAL_COLUMNS.forEach { field ->
-            MenuRow(
-                label = columnLabel(field),
-                leading = { LibraryCheckbox(checked = field !in state.hiddenColumns) },
-            ) { state.toggleColumn(field) }
-        }
+        rest.forEach { ColumnToggle(state, it) }
         MenuRow(
             label = stringResource(Res.string.column_duration),
             leading = { LibraryCheckbox(checked = state.showDuration) },
         ) { state.toggleDuration() }
     }
+}
+
+@Composable
+private fun ColumnToggle(state: SongLibraryState, field: SongField) {
+    MenuRow(
+        label = columnLabel(field),
+        leading = { LibraryCheckbox(checked = field !in state.hiddenColumns) },
+    ) { state.toggleColumn(field) }
 }

@@ -164,6 +164,7 @@ jobs:
               - *shared
               - 'songlibrary/**'
               - 'core-models/**'          # implementation(projects.coreModels)
+              - 'song-chords/**'          # implementation(projects.songChords)
               - 'theme/**'                # implementation(projects.theme)
             ble:
               - *shared

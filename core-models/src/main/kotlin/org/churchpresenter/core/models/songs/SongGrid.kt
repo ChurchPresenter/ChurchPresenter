@@ -1,7 +1,9 @@
 package org.churchpresenter.core.models.songs
 
 /** Which column the grid is ordered by. [DURATION] is measured, not a field of the song -- see [SongGrid.rows]. */
-enum class SortColumn { NUMBER, TITLE, SECONDARY_TITLE, SONGBOOK, AUTHOR, COMPOSER, TUNE, CCLI, DURATION }
+enum class SortColumn {
+    NUMBER, TITLE, SECONDARY_TITLE, THIRD_TITLE, FOURTH_TITLE, SONGBOOK, AUTHOR, COMPOSER, TUNE, CCLI, DURATION
+}
 
 /** How the grid is filtered and ordered: what the search box, the book filter and a header say. */
 data class GridView(
@@ -42,7 +44,8 @@ object SongGrid {
     private fun SongItem.matches(query: String): Boolean {
         val words = query.trim().lowercase().split(WHITESPACE).filter { it.isNotEmpty() }
         if (words.isEmpty()) return true
-        val haystack = listOf(number, title, secondaryTitle, author, composer, tune, ccliNumber, songbook)
+        val haystack = (listOf(number, title, author, composer, tune, ccliNumber, songbook) +
+            extraTranslations().map { it.title })
             .joinToString(" ") { it.lowercase() }
         return words.all { it in haystack }
     }
@@ -62,6 +65,8 @@ object SongGrid {
             )
             SortColumn.TITLE -> songs.byText { it.title }
             SortColumn.SECONDARY_TITLE -> songs.byText { it.secondaryTitle }
+            SortColumn.THIRD_TITLE -> songs.byText { SongField.THIRD_TITLE.of(it) }
+            SortColumn.FOURTH_TITLE -> songs.byText { SongField.FOURTH_TITLE.of(it) }
             SortColumn.AUTHOR -> songs.byText { it.author }
             SortColumn.COMPOSER -> songs.byText { it.composer }
             SortColumn.TUNE -> songs.byText { it.tune }

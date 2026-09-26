@@ -21,12 +21,20 @@ import java.io.File
 val OPTIONAL_COLUMNS: List<SongField> = listOf(
     SongField.NUMBER,
     SongField.SECONDARY_TITLE,
+    SongField.THIRD_TITLE,
+    SongField.FOURTH_TITLE,
     SongField.SONGBOOK,
     SongField.AUTHOR,
     SongField.COMPOSER,
     SongField.TUNE,
     SongField.CCLI,
 )
+
+/**
+ * The columns the grid opens with switched off: a third and a fourth language are rare enough that
+ * two more title columns would mostly push the ones people use off the side of the grid.
+ */
+val DEFAULT_HIDDEN_COLUMNS: Set<SongField> = setOf(SongField.THIRD_TITLE, SongField.FOURTH_TITLE)
 
 /**
  * What the window is showing and what has been typed into it.
@@ -72,7 +80,7 @@ class SongLibraryState(
     var view by mutableStateOf(GridView())
     var selected by mutableStateOf<Set<String>>(emptySet())
         private set
-    var hiddenColumns by mutableStateOf<Set<SongField>>(emptySet())
+    var hiddenColumns by mutableStateOf(DEFAULT_HIDDEN_COLUMNS)
         private set
 
     /**
@@ -103,6 +111,9 @@ class SongLibraryState(
 
     /** The song whose editor is open, by source file, or null when none is. */
     var editing by mutableStateOf<String?>(null)
+
+    /** The song whose languages are being compared, by source file, or null when none is. */
+    var comparing by mutableStateOf<String?>(null)
     var isDirty by mutableStateOf(false)
         private set
     var lastOutcome by mutableStateOf<SaveOutcome?>(null)
@@ -114,8 +125,35 @@ class SongLibraryState(
     val rows: List<SongItem> by derivedStateOf { SongGrid.rows(songs, view) { durations[it.sourceFile] } }
     val songbooks: List<String> by derivedStateOf { library.songbooks(songs) }
     val counts: Map<String, Int> by derivedStateOf { SongGrid.countsBySongbook(songs) }
+
+    /**
+     * [OPTIONAL_COLUMNS] less the language 3 and 4 titles when no song in the library uses that
+     * language: most libraries have two at most, and two empty title columns would
+     * push everything else off the side of the grid.
+     */
+    val availableColumns: List<SongField> by derivedStateOf {
+        fun used(language: Int) = songs.any { song ->
+            song.extraTranslations().getOrNull(language - 2)?.isEmpty == false
+        }
+        OPTIONAL_COLUMNS.filter { field ->
+            when (field) {
+                SongField.THIRD_TITLE -> used(THIRD_LANGUAGE)
+                SongField.FOURTH_TITLE -> used(FOURTH_LANGUAGE)
+                else -> true
+            }
+        }
+    }
+    /** What the grid draws, left to right: the number first when it is shown, then the title, then the rest. */
     val visibleColumns: List<SongField> by derivedStateOf {
-        listOf(SongField.TITLE) + OPTIONAL_COLUMNS.filterNot { it in hiddenColumns }
+        val (number, rest) = availableColumns.filterNot { it in hiddenColumns }.partition { it == SongField.NUMBER }
+        number + SongField.TITLE + rest
+    }
+
+    /** What is wrong with each song's languages, by source file, for the songs that have anything. */
+    val translationProblems: Map<String, TranslationProblems> by derivedStateOf {
+        songs.mapNotNull { song ->
+            TranslationComparison.problemsOf(song).takeUnless { it.isEmpty }?.let { song.sourceFile to it }
+        }.toMap()
     }
     val changedCount: Int get() = edits.changed.size
 
@@ -162,8 +200,7 @@ class SongLibraryState(
     fun songOf(sourceFile: String): SongItem? = songs.firstOrNull { it.sourceFile == sourceFile }
 
     fun replace(song: SongItem) {
-        SongField.entries.forEach { field -> edits.edit(song.sourceFile, field, field.of(song)) }
-        edits.editLyrics(song.sourceFile, song.lyrics, song.secondaryLyrics)
+        edits.replace(song)
         refresh()
     }
 
@@ -300,5 +337,8 @@ class SongLibraryState(
         isDirty = edits.isDirty
     }
 }
+
+private const val THIRD_LANGUAGE = 3
+private const val FOURTH_LANGUAGE = 4
 
 enum class SongLibraryUsage { SONGS_SAVED, BULK_EDIT, SONGBOOK_CREATED, SONGS_DELETED }
