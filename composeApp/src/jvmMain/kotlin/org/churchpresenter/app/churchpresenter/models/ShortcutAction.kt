@@ -23,6 +23,9 @@ import churchpresenter.composeapp.generated.resources.shortcut_description_blank
 import churchpresenter.composeapp.generated.resources.shortcut_description_clicker_next
 import churchpresenter.composeapp.generated.resources.shortcut_description_clicker_prev
 import churchpresenter.composeapp.generated.resources.shortcut_description_close_schedule
+import churchpresenter.composeapp.generated.resources.shortcut_description_open_calendar_manager
+import churchpresenter.composeapp.generated.resources.shortcut_description_open_converter
+import churchpresenter.composeapp.generated.resources.shortcut_description_open_song_library
 import churchpresenter.composeapp.generated.resources.shortcut_description_delete_source
 import churchpresenter.composeapp.generated.resources.shortcut_description_escape
 import churchpresenter.composeapp.generated.resources.shortcut_description_exit
@@ -146,6 +149,12 @@ enum class ShortcutAction(
         listOf(KeyChord.of(Key.T, ctrl = true))),
     KEYBOARD_SHORTCUTS(ShortcutScope.MENU, Res.string.shortcut_description_f1_keyboard_shortcuts,
         listOf(KeyChord.of(Key.F1))),
+    OPEN_SONG_LIBRARY(ShortcutScope.MENU, Res.string.shortcut_description_open_song_library,
+        listOf(KeyChord.of(Key.L, ctrl = true, shift = true))),
+    OPEN_CONVERTER(ShortcutScope.MENU, Res.string.shortcut_description_open_converter,
+        listOf(KeyChord.of(Key.K, ctrl = true, shift = true))),
+    OPEN_CALENDAR_MANAGER(ShortcutScope.MENU, Res.string.shortcut_description_open_calendar_manager,
+        listOf(KeyChord.of(Key.D, ctrl = true, shift = true))),
     ADD_TO_SCHEDULE(ShortcutScope.MENU, Res.string.shortcut_description_add_to_schedule,
         listOf(KeyChord.of(Key.F2))),
     REMOVE_FROM_SCHEDULE(ShortcutScope.MENU, Res.string.shortcut_description_remove_from_schedule,

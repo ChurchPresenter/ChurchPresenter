@@ -219,13 +219,13 @@
     <string name="menu_about">About</string>
     <string name="about_title">About Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter Song and Bible Converter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="open_crash_logs">Open Crash Logs</string>
     <string name="save_diagnostic_info">Save Diagnostic Info…</string>
     <string name="diagnostic_info_saved">Diagnostic info saved successfully.</string>
     <string name="diagnostic_info_save_failed">Failed to save diagnostic info.</string>
-    <string name="open_converter">Converter</string>
+    <string name="open_converter">Song and Bible Converter</string>
     <string name="open_song_library">Song Library Manager</string>
     <string name="open_calendar_manager">Calendar Manager</string>
     <string name="calendar_locate_file_title">Find %1$s</string>
@@ -271,6 +271,9 @@
     <string name="shortcut_description_next_slide">Next Slide</string>
     <string name="shortcut_category_tab_switching">Tab Switching</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Open Keyboard Shortcuts</string>
+    <string name="shortcut_description_open_song_library">Open Song Library Manager</string>
+    <string name="shortcut_description_open_converter">Open Song and Bible Converter</string>
+    <string name="shortcut_description_open_calendar_manager">Open Calendar Manager</string>
     <string name="shortcut_description_f6_bible">Switch to Bible Tab</string>
     <string name="shortcut_description_f7_songs">Switch to Songs Tab</string>
     <string name="shortcut_description_f8_pictures">Switch to Pictures Tab</string>
@@ -771,6 +774,8 @@
     <string name="tooltip_remove_from_schedule">Remove from Schedule</string>
     <string name="tooltip_clear_schedule">Clear Schedule</string>
     <string name="tooltip_clear_display">Clear Display</string>
+    <string name="remote_action_clear_display">Clear Display</string>
+    <string name="schedule_add_files_title">Add Files to Schedule</string>
     <string name="tooltip_toggle_displays">Toggle Presenter Displays</string>
     <string name="tooltip_preview_settings">Preview Settings</string>
     <string name="preview_settings_show_labels">Show output labels</string>
@@ -1449,6 +1454,7 @@
     <string name="vlc_custom_path">Custom VLC path</string>
     <string name="vlc_browse">Browse</string>
     <string name="vlc_path_hint">Select VLC installation directory</string>
+    <string name="vlc_directory_chooser_title">Select VLC installation directory</string>
     <string name="vlc_path_invalid">Directory does not contain VLC libraries</string>
     <string name="media_audio_continues">Audio will continue playing in the background when switching tabs or displaying other content</string>
     <string name="media_now_playing">Now playing:</string>
@@ -1951,6 +1957,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Presenter View %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
+    <string name="decklink_output_title">DeckLink Output %1$d</string>
     <string name="lower_third_generator">Lower Third Generator</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d (%3$s) but output is %4$dx%5$d (%6$s)</string>
@@ -2708,7 +2715,7 @@
     <string name="setup_step2_step6">6. Go to the Bible tab and choose a Primary Bible</string>
     <string name="setup_step2_download_hint">Over 1,500 translations in more than 1,000 languages are available from eBible.org and the Zefania archive. Each one shows its copyright before you install it.</string>
     <string name="setup_step2_tip">Already have Bible files? Point the folder at them instead and they will be picked up automatically.</string>
-    <string name="setup_step2_tip2">Have a Bible in another format? The Conversion Tool (Help → Converter) can convert it.</string>
+    <string name="setup_step2_tip2">Have a Bible in another format? The Song and Bible Converter (Help → Song and Bible Converter) can convert it.</string>
     <string name="setup_step3_title">Add Song Books</string>
     <string name="setup_step3_subtitle">Point the app to your song library folder</string>
     <string name="setup_step3_step1">1. Open Settings using the ⚙ button in the toolbar</string>
@@ -3120,8 +3127,8 @@
     <!-- Step 5: song books. setup_step3_tip claimed the library folder reads OpenLyrics and
          SongPro; it reads .song only, and the other formats go through the Converter. -->
     <string name="setup_songs_format_note">The song library folder reads .song files. Songs saved in another format need converting first.</string>
-    <string name="setup_songs_converter_body">Coming from SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm or SoftProjector? The built-in Converter reads all of them — and lyrics out of PDF, Word, PowerPoint and Keynote — and writes the .song files this folder expects.</string>
-    <string name="setup_songs_converter_button">Open Converter</string>
+    <string name="setup_songs_converter_body">Coming from SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm or SoftProjector? The built-in Song and Bible Converter reads all of them — and lyrics out of PDF, Word, PowerPoint and Keynote — and writes the .song files this folder expects.</string>
+    <string name="setup_songs_converter_button">Open Song and Bible Converter</string>
     <string name="setup_songs_samples_note">No songs yet? "Add Song Samples" on the System tab fills the folder with a working set to try.</string>
 
     <!-- Step 6: projection. setup_proj_step3 told the user to set a window count; there is no

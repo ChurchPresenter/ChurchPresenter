@@ -32,6 +32,9 @@ object Strings {
             ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES),
         )
 
+    // Window
+    val windowTitle: String get() = bundle.getString("window_title")
+
     // Tab names
     val tabBibles: String get() = bundle.getString("tab_bibles")
     val tabSongs: String get() = bundle.getString("tab_songs")

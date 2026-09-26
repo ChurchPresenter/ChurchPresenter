@@ -392,9 +392,21 @@ private fun MenuBarScope.HelpMenu(
         Item(stringResource(Res.string.menu_getting_started), onClick = onGettingStarted)
         Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))
         Item(stringResource(Res.string.menu_how_to_blog), onClick = onHowToBlog)
-        Item(stringResource(Res.string.open_converter), onClick = onConverter)
-        Item(stringResource(Res.string.open_song_library), onClick = onSongLibrary)
-        Item(stringResource(Res.string.open_calendar_manager), onClick = onCalendar)
+        Item(
+            stringResource(Res.string.open_converter),
+            onClick = onConverter,
+            shortcut = accel(ShortcutAction.OPEN_CONVERTER),
+        )
+        Item(
+            stringResource(Res.string.open_song_library),
+            onClick = onSongLibrary,
+            shortcut = accel(ShortcutAction.OPEN_SONG_LIBRARY),
+        )
+        Item(
+            stringResource(Res.string.open_calendar_manager),
+            onClick = onCalendar,
+            shortcut = accel(ShortcutAction.OPEN_CALENDAR_MANAGER),
+        )
         Item(stringResource(Res.string.menu_about), onClick = onAbout)
         Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
         Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)
