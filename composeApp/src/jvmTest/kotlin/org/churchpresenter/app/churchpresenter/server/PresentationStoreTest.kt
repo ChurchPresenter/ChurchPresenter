@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
+import org.churchpresenter.presentationengine.model.DeckFormat
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import java.io.File
@@ -151,5 +152,26 @@ class PresentationStoreTest {
         val notADeck = temp.newFile("notes.txt").apply { writeText("just notes") }
         s.renderPresentationForServer("txt", notADeck.absolutePath)
         assertNull(s._slideBytes["txt"])
+    }
+
+    /**
+     * The phone's render losing the cache entry at the very end (Sentry CHURCH-PRESENTER-DESKTOP-8T):
+     * the Presentation tab began a render of the same deck after this one's last slide, so this
+     * one's commit is refused. That is the other render's job now, not an error.
+     */
+    @Test
+    fun `a render overtaken before its commit steps aside instead of failing`() {
+        val s = store()
+        val deck = temp.newFile("sermon.pdf").apply { writeBytes(byteArrayOf(1)) }
+        val phones = s.slideDiskCache.beginWrite(deck, DeckFormat.PDF, renderWidthPx = 1280)
+        val tabs = s.slideDiskCache.beginWrite(deck, DeckFormat.PDF, renderWidthPx = 1280)
+        try {
+            assertFalse(s.commitUnlessSuperseded(phones), "the overtaken render does not commit")
+            assertTrue(s.commitUnlessSuperseded(tabs), "the newer one still does")
+        } finally {
+            phones.abort()
+            tabs.abort()
+            s.slideDiskCache.invalidate(deck)
+        }
     }
 }
