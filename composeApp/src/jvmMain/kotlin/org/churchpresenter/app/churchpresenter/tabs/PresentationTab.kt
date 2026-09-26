@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -129,6 +130,7 @@ import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
 import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.slide_counter
+import churchpresenter.composeapp.generated.resources.slide_counter_with_hidden
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.presentation_static_note
 import churchpresenter.composeapp.generated.resources.presentation_error_password_protected
@@ -146,6 +148,9 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.HIDDEN_TILE_ALPHA
+import org.churchpresenter.app.churchpresenter.composables.HiddenBadge
+import org.churchpresenter.app.churchpresenter.composables.SlideshowHideToggle
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
@@ -368,7 +373,8 @@ fun PresentationTab(
                     }
                 }
             }
-            val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
+            val nextFile = viewModel.nextShownSlideIndex(idx)?.let { viewModel.slideFiles.getOrNull(it) }
+            val nextBitmap = nextFile?.let { f ->
                 withContext(Dispatchers.IO) {
                     try {
                         org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
@@ -385,6 +391,25 @@ fun PresentationTab(
             viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx, enterAtLastStep) }
                 ?: presenterManager.clearPresentationPlayback()
         }
+    }
+
+    // Hiding or showing a slide can change which one comes next, so the stage monitor's "next"
+    // is refreshed -- and only that. Re-pushing the live slide here restarted its animation.
+    LaunchedEffect(viewModel.hiddenSlides) {
+        val onPresentation = presenterManager?.presentingMode?.value == Presenting.PRESENTATION ||
+            presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
+        if (!onPresentation) return@LaunchedEffect
+        val nextFile = viewModel.nextShownSlideIndex()?.let { viewModel.slideFiles.getOrNull(it) }
+        val nextBitmap = nextFile?.let { f ->
+            withContext(Dispatchers.IO) {
+                try {
+                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                } catch (_: Exception) {
+                    null
+                }
+            }
+        }
+        presenterManager.setNextSlide(nextBitmap)
     }
 
     LaunchedEffect(viewModel.animationType, viewModel.transitionDuration) {
@@ -581,7 +606,9 @@ fun PresentationTab(
                                         }
                                     }
                                 }
-                                val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
+                                val nextFile = viewModel.nextShownSlideIndex(idx)
+                                    ?.let { viewModel.slideFiles.getOrNull(it) }
+                                val nextBitmap = nextFile?.let { f ->
                                     withContext(Dispatchers.IO) {
                                         try {
                                             org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
@@ -732,8 +759,22 @@ fun PresentationTab(
                 }
 
                 if (viewModel.slideFiles.isNotEmpty()) {
+                    val hiddenCount = viewModel.hiddenSlides.count { it in viewModel.slideFiles.indices }
                     Text(
-                        text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slideFiles.size),
+                        text = if (hiddenCount == 0) {
+                            stringResource(
+                                Res.string.slide_counter,
+                                viewModel.selectedSlideIndex + 1,
+                                viewModel.slideFiles.size,
+                            )
+                        } else {
+                            stringResource(
+                                Res.string.slide_counter_with_hidden,
+                                viewModel.selectedSlideIndex + 1,
+                                viewModel.slideFiles.size,
+                                hiddenCount,
+                            )
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                         modifier = Modifier.widthIn(min = 60.dp)
@@ -1057,6 +1098,8 @@ fun PresentationTab(
                                 slideNumber = index + 1,
                                 buildCount = viewModel.deck?.slides?.getOrNull(index)?.timeline?.stepCount ?: 0,
                                 isSelected = viewModel.selectedSlideIndex == index,
+                                isHidden = index in viewModel.hiddenSlides,
+                                onToggleHidden = { viewModel.toggleSlideHidden(index) },
                                 onClick = {
                                     viewModel.selectSlide(index)
                                     // Keep arrow keys working after a mouse selection.
@@ -1075,7 +1118,9 @@ fun PresentationTab(
                                                     }
                                                 }
                                             }
-                                            val next = viewModel.slideFiles.getOrNull(index + 1)?.let { f ->
+                                            val nextFile = viewModel.nextShownSlideIndex(index)
+                                                ?.let { viewModel.slideFiles.getOrNull(it) }
+                                            val next = nextFile?.let { f ->
                                                 withContext(Dispatchers.IO) {
                                                     try {
                                                         org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
@@ -1252,6 +1297,8 @@ private fun SlideThumbnail(
     slideNumber: Int,
     buildCount: Int = 0,
     isSelected: Boolean,
+    isHidden: Boolean = false,
+    onToggleHidden: () -> Unit = {},
     onClick: () -> Unit,
     onDoubleClick: () -> Unit = {}
 ) {
@@ -1273,9 +1320,10 @@ private fun SlideThumbnail(
             if (slide != null) Image(
                 bitmap = slide,
                 contentDescription = stringResource(Res.string.slide_number, slideNumber),
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().alpha(if (isHidden) HIDDEN_TILE_ALPHA else 1f),
                 contentScale = ContentScale.Fit
             )
+            if (isHidden) HiddenBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
             // Build-step badge: the slide animates in N click steps.
             if (buildCount > 0) {
                 Text(
@@ -1290,13 +1338,15 @@ private fun SlideThumbnail(
                 )
             }
         }
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 10.dp, vertical = 6.dp)
+                .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.slide_number, slideNumber),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 11.5.sp,
@@ -1305,6 +1355,7 @@ private fun SlideThumbnail(
                 color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
                 maxLines = 1
             )
+            SlideshowHideToggle(hidden = isHidden, position = slideNumber - 1, onToggle = onToggleHidden)
         }
     }
 }

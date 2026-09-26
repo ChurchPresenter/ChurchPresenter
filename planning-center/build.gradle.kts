@@ -16,8 +16,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     api(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.netty)
     implementation(projects.settings)
     implementation(projects.diagnostics)
 
@@ -25,6 +23,10 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.ktor.client.cio)
+    // The fake attachment host in PlanningCenterDownloadTest. The callback listener itself is the
+    // JDK's own HttpServer, so production no longer needs a server library at all.
+    testImplementation(libs.ktor.server.core)
+    testImplementation(libs.ktor.server.netty)
 }
 
 detekt {

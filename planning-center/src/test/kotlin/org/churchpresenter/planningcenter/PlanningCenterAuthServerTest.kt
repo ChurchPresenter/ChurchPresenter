@@ -21,8 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-// Not exercised: CallbackResult.Timeout (CALLBACK_TIMEOUT_MS, 5 minutes, not injectable) and the
-// bind-failure branch (Netty takes ~4s to report a taken port, which is a duration, not a test).
+// Not exercised: CallbackResult.Timeout (CALLBACK_TIMEOUT_MS, 5 minutes, not injectable).
 class PlanningCenterAuthServerTest {
 
     private fun url(query: String) = "http://127.0.0.1:${Constants.PLANNING_CENTER_OAUTH_PORT}/callback$query"
@@ -156,5 +155,60 @@ class PlanningCenterAuthServerTest {
         val finalResult = withTimeout(10_000) { resultDeferred.await() }
         assertIs<PlanningCenterAuthServer.CallbackResult.Success>(finalResult)
         Unit
+    }
+
+    @Test
+    fun `a port already taken is reported as an Error at once`() = runBlocking {
+        ServerSocket().use { holder ->
+            holder.reuseAddress = true
+            holder.bind(InetSocketAddress("127.0.0.1", Constants.PLANNING_CENTER_OAUTH_PORT))
+
+            val result = withTimeout(5_000) { PlanningCenterAuthServer.awaitAuthorizationCode() }
+
+            assertIs<PlanningCenterAuthServer.CallbackResult.Error>(result)
+        }
+        Unit
+    }
+
+    // ── What a callback's query string means ─────────────────────────────────────
+
+    @Test
+    fun `a code is read from among other parameters`() {
+        assertEquals(
+            PlanningCenterAuthServer.CallbackResult.Success("abc"),
+            PlanningCenterAuthServer.callbackResult("state=s1&code=abc&scope=services"),
+        )
+    }
+
+    @Test
+    fun `a percent-encoded value is decoded`() {
+        assertEquals(
+            PlanningCenterAuthServer.CallbackResult.Error("access denied"),
+            PlanningCenterAuthServer.callbackResult("error=access%20denied"),
+        )
+    }
+
+    @Test
+    fun `a code wins over an error sent beside it`() {
+        assertEquals(
+            PlanningCenterAuthServer.CallbackResult.Success("abc"),
+            PlanningCenterAuthServer.callbackResult("error=x&code=abc"),
+        )
+    }
+
+    @Test
+    fun `no query at all, or only empty pieces, means no code`() {
+        val none = PlanningCenterAuthServer.CallbackResult.Error("No authorization code returned")
+        assertEquals(none, PlanningCenterAuthServer.callbackResult(null))
+        assertEquals(none, PlanningCenterAuthServer.callbackResult("&&"))
+        assertEquals(none, PlanningCenterAuthServer.callbackResult("state"))
+    }
+
+    @Test
+    fun `an empty code is still a code`() {
+        assertEquals(
+            PlanningCenterAuthServer.CallbackResult.Success(""),
+            PlanningCenterAuthServer.callbackResult("code="),
+        )
     }
 }

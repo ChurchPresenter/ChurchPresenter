@@ -17,7 +17,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.app.churchpresenter.composables.HIDDEN_TILE_ALPHA
+import org.churchpresenter.app.churchpresenter.composables.HiddenBadge
+import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
+import org.churchpresenter.app.churchpresenter.composables.SlideshowHideToggle
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
@@ -117,6 +120,7 @@ import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
 import churchpresenter.composeapp.generated.resources.image_counter
+import churchpresenter.composeapp.generated.resources.image_counter_with_hidden
 import churchpresenter.composeapp.generated.resources.loading
 import churchpresenter.composeapp.generated.resources.picture_thumbnail_unreadable
 import churchpresenter.composeapp.generated.resources.loop_off
@@ -519,8 +523,22 @@ fun PicturesTab(
 
                 // Image counter
                 if (viewModel.images.isNotEmpty()) {
+                    val hiddenCount = viewModel.imagesSnapshot().count { viewModel.isHidden(it) }
                     Text(
-                        text = stringResource(Res.string.image_counter, viewModel.selectedImageIndex + 1, viewModel.images.size),
+                        text = if (hiddenCount == 0) {
+                            stringResource(
+                                Res.string.image_counter,
+                                viewModel.selectedImageIndex + 1,
+                                viewModel.images.size,
+                            )
+                        } else {
+                            stringResource(
+                                Res.string.image_counter_with_hidden,
+                                viewModel.selectedImageIndex + 1,
+                                viewModel.images.size,
+                                hiddenCount,
+                            )
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                         modifier = Modifier.widthIn(min = 60.dp)
@@ -851,6 +869,7 @@ fun PicturesTab(
                     items(shownImages, key = { it.absolutePath }) { imageFile ->
                         val index = shownImages.indexOf(imageFile)
                         val isSelected = index == viewModel.selectedImageIndex
+                        val isHidden = viewModel.isHidden(imageFile)
                         val isDraggingThis = draggingFile == imageFile
                         val isDropTarget = isDragActive && dropTargetIndex == index && !isDraggingThis
 
@@ -928,7 +947,10 @@ fun PicturesTab(
                                         }
                                     }
                                 }
-                                .initialPassCombinedClickable(
+                                // Final pass, so the hide eye in the nameplate gets its own click
+                                // first: taken in the initial pass, a click on the eye selected the
+                                // picture instead, and put it on screen when live.
+                                .finalPassCombinedClickable(
                                     onClick = {
                                         if (!isDragActive) viewModel.selectImage(viewModel.images.indexOf(imageFile))
                                     },
@@ -955,7 +977,8 @@ fun PicturesTab(
                                     thumbnail != null -> Image(
                                         bitmap = thumbnail,
                                         contentDescription = imageFile.name,
-                                        modifier = Modifier.fillMaxSize(),
+                                        modifier = Modifier.fillMaxSize()
+                                            .alpha(if (isHidden) HIDDEN_TILE_ALPHA else 1f),
                                         contentScale = ContentScale.Crop
                                     )
                                     // A decode that failed used to leave "Loading..." on the tile for
@@ -972,15 +995,18 @@ fun PicturesTab(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
+                                if (isHidden) HiddenBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
                             }
                             // Nameplate below image
-                            Box(
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                                    .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
+                                    modifier = Modifier.weight(1f),
                                     text = imageFile.nameWithoutExtension,
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp),
@@ -991,6 +1017,11 @@ fun PicturesTab(
                                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
+                                )
+                                SlideshowHideToggle(
+                                    hidden = isHidden,
+                                    position = index,
+                                    onToggle = { viewModel.toggleHidden(imageFile) },
                                 )
                             }
                         }

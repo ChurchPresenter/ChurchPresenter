@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +39,7 @@ import org.churchpresenter.core.models.scene.PathPoint
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.core.models.scene.forArea
 import androidx.compose.foundation.shape.CircleShape
 import java.awt.Cursor
 import java.util.UUID
@@ -60,6 +62,13 @@ private const val SNAP_THRESHOLD_PX = 6f
 /** Test handle for the canvas itself -- the scene-shaped surface, not the area it is centred in. */
 internal const val SCENE_CANVAS_TAG = "scene_canvas"
 
+/**
+ * Draws [scene] centred in the area [modifier] gives it, editable when [isInteractive].
+ *
+ * @param autoLayout whether to draw whichever of the scene's layouts suits the area's shape (see
+ *   [forArea]) — so an output picks its layout from its own shape. The editor turns it off and
+ *   passes each layout itself.
+ */
 @Composable
 fun SceneCanvas(
     modifier: Modifier = Modifier,
@@ -72,7 +81,8 @@ fun SceneCanvas(
     drawingStrokeColor: String = "#FFFFFF",
     drawingFillColor: String = "#00000000",
     drawingStrokeWidth: Float = 3f,
-    onShapeDrawn: ((SceneSource.ShapeSource) -> Unit)? = null
+    onShapeDrawn: ((SceneSource.ShapeSource) -> Unit)? = null,
+    autoLayout: Boolean = true,
 ) {
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
     var activeSnapLines by remember { mutableStateOf<List<SnapLine>>(emptyList()) }
@@ -87,10 +97,12 @@ fun SceneCanvas(
     // itself, a caller's `fillMaxSize()` pinned the minimum size to the whole area, so `aspectRatio`
     // could not shrink to fit and sized from the width instead -- a portrait scene came out taller
     // than its area, spilling over the rows around it and cropped to a band on a landscape output.
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+        // A scene with a landscape and a portrait layout draws the one this area's shape calls for.
+        val drawn = if (autoLayout) scene.forArea(maxWidth.value, maxHeight.value) else scene
         Box(
             modifier = Modifier
-                .aspectRatio(scene.canvasWidth.toFloat() / scene.canvasHeight.toFloat())
+                .aspectRatio(drawn.canvasWidth.toFloat() / drawn.canvasHeight.toFloat())
                 .testTag(SCENE_CANVAS_TAG)
                 .clipToBounds()
                 .background(Color.Black)
@@ -204,10 +216,11 @@ fun SceneCanvas(
             val density = LocalDensity.current
             val cw = canvasSize.width.toFloat()
             val ch = canvasSize.height.toFloat()
-            val fontScale = if (scene.canvasWidth > 0 && cw > 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f
+            val fontScale =
+                if (drawn.canvasWidth > 0 && cw > 0) (cw / density.density) / drawn.canvasWidth.toFloat() else 1f
 
             // Render sources in order (first = back, last = front)
-            scene.sources.forEach { source ->
+            drawn.sources.forEach { source ->
                 if (!source.visible) return@forEach
 
                 val t = source.transform
@@ -249,7 +262,7 @@ fun SceneCanvas(
                                                 // Snap logic
                                                 val snapResult = computeSnap(
                                                     rawX, rawY, ct.width, ct.height,
-                                                    scene.sources, source.id, cw, ch
+                                                    drawn.sources, source.id, cw, ch
                                                 )
                                                 activeSnapLines = snapResult.snapLines
 

@@ -159,7 +159,11 @@ private fun RemotePresentationEffects(
         selectSlideFlow?.collect { (_, index) ->
             if (index in presentationViewModel.slideFiles.indices) {
                 presentationViewModel.selectSlide(index)
-                val (bitmap, nextBitmap) = decodeSlideBitmaps(presentationViewModel.slideFiles, index)
+                val (bitmap, nextBitmap) = decodeSlideBitmaps(
+                    presentationViewModel.slideFiles,
+                    index,
+                    presentationViewModel.nextShownSlideIndex(index),
+                )
                 presenterManager.setSelectedSlide(bitmap)
                 presenterManager.setNextSlide(nextBitmap)
                 presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))

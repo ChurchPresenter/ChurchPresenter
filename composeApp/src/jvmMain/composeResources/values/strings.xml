@@ -865,6 +865,10 @@
     <string name="play">Play</string>
     <string name="next_image">Next Image</string>
     <string name="image_counter">Image %1$d of %2$d</string>
+    <string name="image_counter_with_hidden">Image %1$d of %2$d · %3$d hidden</string>
+    <string name="hide_from_slideshow">Hide — skipped by Next and the slideshow</string>
+    <string name="show_in_slideshow">Show again in the slideshow</string>
+    <string name="slideshow_hidden">Hidden</string>
     <string name="no_images">No images</string>
     <string name="auto_scroll_interval">Auto-scroll interval:</string>
     <string name="seconds_suffix">s</string>
@@ -908,6 +912,7 @@
     <string name="slide_count">%1$d slides</string>
     <string name="loading_slides_progress">%1$d / %2$d slides</string>
     <string name="slide_counter">Slide %1$d of %2$d</string>
+    <string name="slide_counter_with_hidden">Slide %1$d of %2$d · %3$d hidden</string>
     <string name="presentation_builds_counter">Build %1$d of %2$d</string>
     <string name="presentation_animate_keynote">Animate Keynote presentations</string>
     <string name="presentation_focus_lost">Keyboard focus lost — click here to re-enable keyboard and clicker control</string>
@@ -1713,6 +1718,13 @@
     <string name="canvas_layers_outside_one">1 layer is outside the canvas</string>
     <string name="canvas_layers_outside">%1$d layers are outside the canvas</string>
     <string name="canvas_bring_into_view">Bring into view</string>
+    <string name="canvas_dual_layout">Landscape and portrait</string>
+    <string name="canvas_layout_landscape">Landscape %1$s</string>
+    <string name="canvas_layout_portrait">Portrait %1$s</string>
+    <string name="canvas_layout_landscape_short">Landscape</string>
+    <string name="canvas_layout_portrait_short">Portrait</string>
+    <string name="canvas_layer_placement_in">%1$s: %2$s</string>
+    <string name="canvas_dual_layout_off_confirm">Remove the portrait/landscape layout? Its positions will be lost.</string>
     <string name="canvas_remove_scene">Remove</string>
     <string name="canvas_add_source">Add source</string>
     <string name="canvas_delete_source">Delete source</string>

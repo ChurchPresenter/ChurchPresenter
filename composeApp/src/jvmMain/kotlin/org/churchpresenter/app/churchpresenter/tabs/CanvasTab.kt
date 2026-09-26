@@ -37,11 +37,13 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.items
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -107,6 +109,8 @@ import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.core.models.scene.forArea
+import org.churchpresenter.core.models.scene.isLandscape
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
@@ -130,6 +134,14 @@ import churchpresenter.composeapp.generated.resources.canvas_rename_scene
 import churchpresenter.composeapp.generated.resources.canvas_remove_scene
 import churchpresenter.composeapp.generated.resources.canvas_size_screen
 import churchpresenter.composeapp.generated.resources.canvas_bring_into_view
+import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.canvas_dual_layout_off_confirm
+import churchpresenter.composeapp.generated.resources.canvas_layer_placement_in
+import churchpresenter.composeapp.generated.resources.canvas_layout_landscape
+import churchpresenter.composeapp.generated.resources.canvas_layout_landscape_short
+import churchpresenter.composeapp.generated.resources.canvas_layout_portrait
+import churchpresenter.composeapp.generated.resources.canvas_layout_portrait_short
+import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.canvas_layer_outside
 import churchpresenter.composeapp.generated.resources.canvas_layer_partly_outside
 import churchpresenter.composeapp.generated.resources.canvas_layers_outside
@@ -201,6 +213,17 @@ fun CanvasTab(
         onSettingsChangeState.value { s -> withCanvasRightPanelWidth(s, isMaximized, dp) }
     }
     var renamingSceneId by remember { mutableStateOf<String?>(null) }
+    // The scene whose second layout is about to be removed, while the confirmation is open.
+    var confirmSingleLayoutSceneId by remember { mutableStateOf<String?>(null) }
+    confirmSingleLayoutSceneId?.let { sceneId ->
+        SingleLayoutConfirmDialog(
+            onConfirm = {
+                sceneViewModel.setDualLayout(sceneId, false)
+                confirmSingleLayoutSceneId = null
+            },
+            onDismiss = { confirmSingleLayoutSceneId = null },
+        )
+    }
     var renameText by remember { mutableStateOf("") }
     val currentScene = sceneViewModel.currentScene
     val selectedSourceId by sceneViewModel.selectedSourceId
@@ -307,7 +330,13 @@ fun CanvasTab(
                 items(sceneViewModel.scenes) { scene ->
                     val isSelected = scene.id == sceneViewModel.currentSceneId.value
                     val isRenaming = renamingSceneId == scene.id
-                    val sceneAr0 = if (scene.canvasHeight > 0) scene.canvasWidth.toFloat() / scene.canvasHeight else 0f
+                    val usedLayout0 =
+                        scene.forArea(presentationBounds0.width.toFloat(), presentationBounds0.height.toFloat())
+                    val sceneAr0 = if (usedLayout0.canvasHeight > 0) {
+                        usedLayout0.canvasWidth.toFloat() / usedLayout0.canvasHeight
+                    } else {
+                        0f
+                    }
                     val isMismatched = displayAr0 > 0f && kotlin.math.abs(displayAr0 - sceneAr0) > 0.01f
                     val (sceneHover, sceneHovered) = rememberRowHover()
                     val sceneColors = bibleRowColors(isSelected, sceneHovered)
@@ -413,6 +442,14 @@ fun CanvasTab(
                                 height = scene.canvasHeight,
                                 outputs = canvasOutputs,
                                 onSetSize = { w, h -> sceneViewModel.updateCanvasSize(w, h, scene.id) },
+                                dualLayout = scene.alternate != null,
+                                onDualLayoutChange = { on ->
+                                    if (on) {
+                                        sceneViewModel.setDualLayout(scene.id, true)
+                                    } else {
+                                        confirmSingleLayoutSceneId = scene.id
+                                    }
+                                },
                             )
                             TooltipArea(
                                 tooltip = {
@@ -463,6 +500,8 @@ fun CanvasTab(
             Spacer(Modifier.height(4.dp))
 
             if (currentScene != null) {
+                val sourceLayouts = remember(currentScene) { currentScene.editorLayouts() }
+                val placementTexts = placementTexts(dual = sourceLayouts.size > 1)
                 LazyColumn(
                     modifier = Modifier.weight(SOURCE_LIST_WEIGHT).fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
@@ -534,12 +573,13 @@ fun CanvasTab(
                             )
                             // The canvas clips what it draws, so a layer past an edge is cut off or gone
                             // with nothing else on screen saying it is still there.
-                            val placement = source.transform.placement()
-                            if (placement != CanvasPlacement.INSIDE) {
-                                val placementText = stringResource(
-                                    if (placement == CanvasPlacement.OUTSIDE) Res.string.canvas_layer_outside
-                                    else Res.string.canvas_layer_partly_outside
-                                )
+                            // With two layouts it is flagged if it is outside either, and the tooltip
+                            // says which.
+                            val misplaced = sourceLayouts.misplacements(source.id)
+                            if (misplaced.isNotEmpty()) {
+                                val placementText = misplaced.joinToString("\n") { (layout, placement) ->
+                                    placementTexts.getValue(layout.scene.isLandscape to placement)
+                                }
                                 TooltipArea(
                                     tooltip = {
                                         Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
@@ -968,7 +1008,11 @@ fun CanvasTab(
                 val displayW = presentationBounds.width
                 val displayH = presentationBounds.height
                 val displayAr = if (displayH > 0) displayW.toFloat() / displayH else 0f
-                val sceneAr = if (currentScene.canvasHeight > 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight else 0f
+                // A scene with two layouts is compared by the one this output would draw.
+                val usedLayout = currentScene.forArea(displayW.toFloat(), displayH.toFloat())
+                val usesAlternate = usedLayout !== currentScene
+                val sceneAr =
+                    if (usedLayout.canvasHeight > 0) usedLayout.canvasWidth.toFloat() / usedLayout.canvasHeight else 0f
                 if (displayAr > 0f && kotlin.math.abs(displayAr - sceneAr) > ASPECT_EPSILON) {
                     Row(
                         modifier = Modifier
@@ -981,7 +1025,7 @@ fun CanvasTab(
                         Text(
                             stringResource(
                                 Res.string.canvas_aspect_ratio_warning,
-                                formatAspectRatio(currentScene.canvasWidth, currentScene.canvasHeight),
+                                formatAspectRatio(usedLayout.canvasWidth, usedLayout.canvasHeight),
                                 formatAspectRatio(displayW, displayH)
                             ),
                             style = MaterialTheme.typography.labelSmall,
@@ -989,7 +1033,13 @@ fun CanvasTab(
                         )
                         RaisedButton(
                             onClick = {
-                                sceneViewModel.updateCanvasSize(displayW, displayH)
+                                // The second layout is the main canvas turned sideways, so matching
+                                // it means setting the main canvas to the output turned sideways.
+                                if (usesAlternate) {
+                                    sceneViewModel.updateCanvasSize(displayH, displayW)
+                                } else {
+                                    sceneViewModel.updateCanvasSize(displayW, displayH)
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error,
@@ -1005,9 +1055,8 @@ fun CanvasTab(
                 }
 
                 // Layers the canvas is clipping away, with one click to put them back inside.
-                val outsideLayers = currentScene.sources.filter {
-                    it.transform.placement() != CanvasPlacement.INSIDE
-                }
+                val canvasLayouts = remember(currentScene) { currentScene.editorLayouts() }
+                val outsideLayers = currentScene.sources.filter { canvasLayouts.misplacements(it.id).isNotEmpty() }
                 if (outsideLayers.isNotEmpty()) {
                     Row(
                         modifier = Modifier
@@ -1029,8 +1078,15 @@ fun CanvasTab(
                         )
                         RaisedButton(
                             onClick = {
-                                outsideLayers.forEach {
-                                    sceneViewModel.updateTransform(it.id, it.transform.broughtIntoView())
+                                outsideLayers.forEach { layer ->
+                                    canvasLayouts.misplacements(layer.id).forEach { (layout, _) ->
+                                        val transform = layout.scene.sources.first { it.id == layer.id }.transform
+                                        sceneViewModel.updateTransform(
+                                            layer.id,
+                                            transform.broughtIntoView(),
+                                            alternate = layout.isAlternate,
+                                        )
+                                    }
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -1058,23 +1114,56 @@ fun CanvasTab(
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    SceneCanvas(
-                        modifier = Modifier.fillMaxSize(),
-                        scene = currentScene,
-                        selectedSourceId = selectedSourceId,
-                        onSourceSelected = { sceneViewModel.selectSource(it) },
-                        onTransformChanged = { sourceId, transform ->
-                            sceneViewModel.updateTransform(sourceId, transform)
-                        },
-                        isInteractive = true,
-                        activeTool = activeTool,
-                        drawingStrokeColor = drawingStrokeColor,
-                        drawingFillColor = drawingFillColor,
-                        drawingStrokeWidth = drawingStrokeWidth,
-                        onShapeDrawn = { shape ->
-                            sceneViewModel.addSource(shape)
+                    if (canvasLayouts.size == 1) {
+                        EditorCanvas(
+                            modifier = Modifier.fillMaxSize(),
+                            layout = canvasLayouts.single(),
+                            selectedSourceId = selectedSourceId,
+                            sceneViewModel = sceneViewModel,
+                            activeTool = activeTool,
+                            drawingStrokeColor = drawingStrokeColor,
+                            drawingFillColor = drawingFillColor,
+                            drawingStrokeWidth = drawingStrokeWidth,
+                        )
+                    } else {
+                        // Weighted by shape, so the two stand at the same height and both fit.
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            canvasLayouts.forEach { layout ->
+                                val shape = layout.scene.canvasWidth.toFloat() / layout.scene.canvasHeight
+                                Column(
+                                    modifier = Modifier.weight(shape).fillMaxHeight(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    val size = "${layout.scene.canvasWidth}×${layout.scene.canvasHeight}"
+                                    Text(
+                                        stringResource(
+                                            if (layout.scene.isLandscape) Res.string.canvas_layout_landscape
+                                            else Res.string.canvas_layout_portrait,
+                                            size,
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(bottom = 4.dp),
+                                    )
+                                    val tag = CANVAS_LAYOUT_TAG_PREFIX + if (layout.isAlternate) "alternate" else "main"
+                                    EditorCanvas(
+                                        modifier = Modifier.weight(1f).fillMaxWidth().testTag(tag),
+                                        layout = layout,
+                                        selectedSourceId = selectedSourceId,
+                                        sceneViewModel = sceneViewModel,
+                                        activeTool = activeTool,
+                                        drawingStrokeColor = drawingStrokeColor,
+                                        drawingFillColor = drawingFillColor,
+                                        drawingStrokeWidth = drawingStrokeWidth,
+                                    )
+                                }
+                            }
                         }
-                    )
+                    }
                 }
             } else {
                 Box(
@@ -1140,3 +1229,82 @@ internal data class CanvasOutputSize(val label: String, val width: Int, val heig
 
 /** Test handle for the off-canvas banner's Bring into view button. */
 internal const val CANVAS_BRING_INTO_VIEW_TAG = "canvas_bring_into_view"
+
+/** Test handles for the two canvases of a scene with a second layout: this plus `main` or `alternate`. */
+internal const val CANVAS_LAYOUT_TAG_PREFIX = "canvas_layout_"
+
+/**
+ * One of the scene's layouts, editable. A move or resize goes to the layout it was made in; a shape
+ * drawn on either is added to the scene, where it starts at the drawn place in both.
+ */
+@Composable
+private fun EditorCanvas(
+    modifier: Modifier,
+    layout: EditorLayout,
+    selectedSourceId: String?,
+    sceneViewModel: SceneViewModel,
+    activeTool: String,
+    drawingStrokeColor: String,
+    drawingFillColor: String,
+    drawingStrokeWidth: Float,
+) {
+    SceneCanvas(
+        modifier = modifier,
+        scene = layout.scene,
+        selectedSourceId = selectedSourceId,
+        onSourceSelected = { sceneViewModel.selectSource(it) },
+        onTransformChanged = { sourceId, transform ->
+            sceneViewModel.updateTransform(sourceId, transform, alternate = layout.isAlternate)
+        },
+        isInteractive = true,
+        activeTool = activeTool,
+        drawingStrokeColor = drawingStrokeColor,
+        drawingFillColor = drawingFillColor,
+        drawingStrokeWidth = drawingStrokeWidth,
+        onShapeDrawn = { shape -> sceneViewModel.addSource(shape) },
+        autoLayout = false,
+    )
+}
+
+/**
+ * What a layer's warning says, keyed by (landscape layout, placement). With one layout the layout is
+ * not named; with two, each line says which it is about.
+ */
+@Composable
+private fun placementTexts(dual: Boolean): Map<Pair<Boolean, CanvasPlacement>, String> {
+    val outside = stringResource(Res.string.canvas_layer_outside)
+    val partly = stringResource(Res.string.canvas_layer_partly_outside)
+    val landscape = stringResource(Res.string.canvas_layout_landscape_short)
+    val portrait = stringResource(Res.string.canvas_layout_portrait_short)
+    val landscapeOutside = stringResource(Res.string.canvas_layer_placement_in, landscape, outside)
+    val landscapePartly = stringResource(Res.string.canvas_layer_placement_in, landscape, partly)
+    val portraitOutside = stringResource(Res.string.canvas_layer_placement_in, portrait, outside)
+    val portraitPartly = stringResource(Res.string.canvas_layer_placement_in, portrait, partly)
+    return mapOf(
+        (true to CanvasPlacement.OUTSIDE) to if (dual) landscapeOutside else outside,
+        (true to CanvasPlacement.PARTLY_OUTSIDE) to if (dual) landscapePartly else partly,
+        (false to CanvasPlacement.OUTSIDE) to if (dual) portraitOutside else outside,
+        (false to CanvasPlacement.PARTLY_OUTSIDE) to if (dual) portraitPartly else partly,
+    )
+}
+
+/** Asks before a scene's second layout, and every position in it, is thrown away. */
+@Composable
+private fun SingleLayoutConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = {
+            Text(stringResource(Res.string.canvas_dual_layout_off_confirm), style = MaterialTheme.typography.bodyMedium)
+        },
+        confirmButton = {
+            GhostButton(shape = AppShape(6.dp), onClick = onConfirm) {
+                Text(stringResource(Res.string.remove), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
+                Text(stringResource(Res.string.cancel))
+            }
+        },
+    )
+}
