@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.remote_action_clear_display
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -16,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.utils.Constants
-import org.jetbrains.compose.resources.getString
 
 /**
  * Routes for reading and mutating the schedule from a companion device.
@@ -140,7 +137,9 @@ internal fun Route.scheduleRoutes(
                     scope.launch { server.onClear.emit(Unit) }
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "clear",
-                        title = getString(Res.string.remote_action_clear_display),
+                        // Titled where it is shown: a string resource needs the UI, and this
+                        // runs on the server's IO scope.
+                        title = "",
                         clientId = clientId
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)

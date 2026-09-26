@@ -47,6 +47,7 @@ import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.remote_action_clear_display
 import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll_code
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.app_name
@@ -1611,13 +1612,17 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     }
                             }
 
+                            val clearDisplayTitle by rememberUpdatedState(
+                                stringResource(Res.string.remote_action_clear_display)
+                            )
                             LaunchedEffect(Unit) {
                                 companionServer.onInstantAction.collect { action ->
                                     val type = remoteActionType(action.actionType)
                                     remoteActivityNotifications.add(
                                         RemoteActivityNotification(
                                             type = type,
-                                            title = action.title,
+                                            title =
+                                                if (type == RemoteEventType.CLEAR) clearDisplayTitle else action.title,
                                             detail = action.detail,
                                             clientId = action.clientId,
                                             clientLabel = remoteClientManager.getLabel(action.clientId)
