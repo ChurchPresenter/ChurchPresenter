@@ -68,7 +68,7 @@
     <ID>LongMethod:RemoteEventDialog.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun RemoteEventDialogContent( event: RemoteEvent, actionLabel: String, typeIcon: ImageVector, typeAccent: Color, bodyTitle: String, remaining: Int, showAllowPermanently: Boolean, isClientKnownAllowed: Boolean, isClientKnownBlocked: Boolean, isInstanceLinkFollower: Boolean, onAllow: () -&gt; Unit, onAllowForSession: () -&gt; Unit, onAllowPermanently: () -&gt; Unit, onBlockForSession: () -&gt; Unit, onBlockPermanently: () -&gt; Unit, onDeny: () -&gt; Unit, )</ID>
     <ID>LongMethod:STTPresenter.kt$@Composable fun STTPresenter( modifier: Modifier = Modifier, segments: List&lt;STTSegment&gt;, inProgressText: String, translationSegments: List&lt;STTSegment&gt;, inProgressTranslation: String, highlightedWords: List&lt;HighlightedWord&gt;, sttSettings: STTSettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, )</ID>
     <ID>LongMethod:STTTab.kt$@Composable fun STTTab( modifier: Modifier = Modifier, sttManager: STTManager, presenterManager: PresenterManager, presenting: (Presenting) -&gt; Unit, appSettings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit, )</ID>
-    <ID>LongMethod:SceneCanvas.kt$@Composable fun SceneCanvas( modifier: Modifier = Modifier, scene: Scene, selectedSourceId: String?, onSourceSelected: (String?) -&gt; Unit, onTransformChanged: (sourceId: String, SourceTransform) -&gt; Unit, isInteractive: Boolean = true, activeTool: String = "select", drawingStrokeColor: String = "#FFFFFF", drawingFillColor: String = "#00000000", drawingStrokeWidth: Float = 3f, onShapeDrawn: ((SceneSource.ShapeSource) -&gt; Unit)? = null )</ID>
+    <ID>LongMethod:SceneCanvas.kt$@Composable fun SceneCanvas( modifier: Modifier = Modifier, scene: Scene, selectedSourceId: String?, onSourceSelected: (String?) -&gt; Unit, onTransformChanged: (sourceId: String, SourceTransform) -&gt; Unit, isInteractive: Boolean = true, activeTool: String = "select", drawingStrokeColor: String = "#FFFFFF", drawingFillColor: String = "#00000000", drawingStrokeWidth: Float = 3f, onShapeDrawn: ((SceneSource.ShapeSource) -&gt; Unit)? = null, autoLayout: Boolean = true, )</ID>
     <ID>LongMethod:SceneDeviceEditors.kt$@Composable internal fun CameraProperties( source: SceneSource.CameraSource, onUpdate: (SceneSource) -&gt; Unit, /** * The cameras to offer, or null to ask this machine. * * A test passes a list: enumeration reports whatever hardware the recording machine happens to * have, so the committed image of this panel said "MacBook Pro Camera" on one and "Capture * screen 0" on another. Same seam, same reason, as `SongBackgroundLibrary`'s. */ devices: List&lt;CameraDevice&gt;? = null, )</ID>
     <ID>LongMethod:SceneGraphicEditors.kt$@Composable internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSource) -&gt; Unit)</ID>
     <ID>LongMethod:SceneMediaEditors.kt$@Composable internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSource) -&gt; Unit)</ID>
@@ -397,7 +397,6 @@
     <ID>MaxLineLength:CanvasTab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))</ID>
     <ID>MaxLineLength:CanvasTab.kt$val</ID>
     <ID>MaxLineLength:CanvasTab.kt$val displayAr0 = if (presentationBounds0.height &gt; 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f</ID>
-    <ID>MaxLineLength:CanvasTab.kt$val sceneAr = if (currentScene.canvasHeight &gt; 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight else 0f</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$.</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))</ID>
@@ -975,7 +974,6 @@
     <ID>MaxLineLength:STTTab.kt$val url = if (urlInput.isNotBlank() &amp;&amp; !urlInput.startsWith("http://") &amp;&amp; !urlInput.startsWith("https://")) "http://$urlInput" else urlInput</ID>
     <ID>MaxLineLength:SceneCanvas.kt$PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)</ID>
     <ID>MaxLineLength:SceneCanvas.kt$PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY)</ID>
-    <ID>MaxLineLength:SceneCanvas.kt$val fontScale = if (scene.canvasWidth &gt; 0 &amp;&amp; cw &gt; 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f</ID>
     <ID>MaxLineLength:SceneCanvas.kt$val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX).coerceAtLeast(0.01f)</ID>
     <ID>MaxLineLength:SceneCanvas.kt$val rangeY = (maxOf(drawStartNorm.y, drawCurrentNorm.y) - minY).coerceAtLeast(0.01f)</ID>
     <ID>MaxLineLength:SceneDeviceEditors.kt$PropertySliderWithInput</ID>

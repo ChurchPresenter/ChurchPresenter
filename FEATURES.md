@@ -129,6 +129,7 @@
 ## Web & Canvas
 - **Live websites on screen** — present any web page with bookmarks, navigation and zoom, and even type into live pages.
 - **Canvas scene compositor** — build layered scenes from images, text, video, shapes, gradients, clocks, QR codes, live cameras, screen capture, NDI sources from the network, web pages and Bible verses — like a mini production switcher inside the app.
+- **One scene for landscape and portrait screens** — give a scene a second layout from its size menu and arrange both side by side: the same layers, each placed on its own per layout. Every output draws the layout that matches its shape.
 - **QR codes made easy** — generate QR codes for URLs, WiFi, contact cards, email, SMS and more, right on the slide.
 - **Cameras that just work** — ChurchPresenter carries its own copy of ffmpeg, so a webcam or capture card can be put on the canvas without installing anything first. Point it at a different ffmpeg from Settings → Projection if you would rather use your own.
 - **NDI sources on the canvas** — receive any NDI source on your network as a layer: a camera from another machine, a graphics feed, an overflow room's output. Pick it from a list of what is sending, or drop to the sender's low-bandwidth proxy for a small layer on a busy network. Needs the same free NDI Runtime as NDI output.
@@ -137,8 +138,9 @@
 - `tabs/WebTab.kt` — web browser UI
 - `tabs/CanvasTab.kt` — scene compositor UI
 - `viewmodel/SceneViewModel.kt`
-- `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module)
+- `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module) — including a scene's second layout and which one an output draws
 - `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`
+- `tabs/CanvasSizeMenu.kt`, `tabs/CanvasPlacement.kt` — a scene's size and layouts, and layers left off the canvas
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
 - `composables/NdiFrameCache.kt`, `composables/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
 - `composables/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed

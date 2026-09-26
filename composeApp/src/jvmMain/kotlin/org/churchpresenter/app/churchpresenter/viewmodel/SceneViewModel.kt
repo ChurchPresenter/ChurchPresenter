@@ -7,6 +7,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.scene.SceneAlternateLayout
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
@@ -110,14 +111,19 @@ class SceneViewModel {
     /**
      * Adds a copy of [sceneId] named [name] and makes it current. Every source gets a new id: caches
      * such as the shared browser are keyed by source id, so a copy that kept them would share its
-     * layers with the original.
+     * layers with the original. A second layout's positions move over to the new ids.
      */
     fun duplicateScene(sceneId: String, name: String): Scene? {
         val original = _scenes.find { it.id == sceneId } ?: return null
+        val newIds = original.sources.associate { it.id to UUID.randomUUID().toString() }
         val duplicate = original.copy(
             id = UUID.randomUUID().toString(),
             name = name,
-            sources = original.sources.map { it.withId(UUID.randomUUID().toString()) }
+            sources = original.sources.map { it.withId(newIds.getValue(it.id)) },
+            alternate = original.alternate?.let { layout ->
+                val remapped = layout.transforms.mapNotNull { (id, t) -> newIds[id]?.let { it to t } }
+                layout.copy(transforms = remapped.toMap())
+            }
         )
         _scenes.add(duplicate)
         _currentSceneId.value = duplicate.id
@@ -136,7 +142,12 @@ class SceneViewModel {
 
     fun removeSource(sourceId: String) {
         val scene = currentScene ?: return
-        updateScene(scene.id) { it.copy(sources = it.sources.filter { s -> s.id != sourceId }) }
+        updateScene(scene.id) {
+            it.copy(
+                sources = it.sources.filter { s -> s.id != sourceId },
+                alternate = it.alternate?.let { layout -> layout.copy(transforms = layout.transforms - sourceId) }
+            )
+        }
         if (_selectedSourceId.value == sourceId) {
             _selectedSourceId.value = null
         }
@@ -217,21 +228,32 @@ class SceneViewModel {
         }
     }
 
-    fun updateTransform(sourceId: String, transform: SourceTransform) {
-        updateSource(sourceId) { source ->
-            when (source) {
-                is SceneSource.ImageSource -> source.copy(transform = transform)
-                is SceneSource.TextSource -> source.copy(transform = transform)
-                is SceneSource.ColorSource -> source.copy(transform = transform)
-                is SceneSource.VideoSource -> source.copy(transform = transform)
-                is SceneSource.BrowserSource -> source.copy(transform = transform)
-                is SceneSource.ShapeSource -> source.copy(transform = transform)
-                is SceneSource.ClockSource -> source.copy(transform = transform)
-                is SceneSource.QRCodeSource -> source.copy(transform = transform)
-                is SceneSource.CameraSource -> source.copy(transform = transform)
-                is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
-                is SceneSource.NdiSource -> source.copy(transform = transform)
-                is SceneSource.BibleSource -> source.copy(transform = transform)
+    /**
+     * Moves or resizes [sourceId]. With [alternate] set the change goes to the scene's second layout
+     * and the main one is left as it was; with no second layout it is ignored.
+     */
+    fun updateTransform(sourceId: String, transform: SourceTransform, alternate: Boolean = false) {
+        if (!alternate) {
+            updateSource(sourceId) { it.withTransform(transform) }
+            return
+        }
+        val scene = currentScene ?: return
+        val layout = scene.alternate ?: return
+        updateScene(scene.id) {
+            it.copy(alternate = layout.copy(transforms = layout.transforms + (sourceId to transform)))
+        }
+    }
+
+    /**
+     * Gives [sceneId] a second layout for screens of the other orientation, or takes it away. A new
+     * one starts empty, so every layer begins at the same fractions of the turned canvas.
+     */
+    fun setDualLayout(sceneId: String, enabled: Boolean) {
+        updateScene(sceneId) { scene ->
+            when {
+                enabled && scene.alternate == null -> scene.copy(alternate = SceneAlternateLayout())
+                !enabled -> scene.copy(alternate = null)
+                else -> scene
             }
         }
     }

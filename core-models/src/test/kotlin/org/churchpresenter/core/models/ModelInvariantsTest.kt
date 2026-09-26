@@ -96,6 +96,11 @@ class ModelInvariantsTest {
                 val arg = type.arguments.firstOrNull()?.type ?: return emptyList<Any>()
                 listOf(valueOfType(arg, name, n, seed))
             }
+            cls == Map::class -> {
+                val key = type.arguments.getOrNull(0)?.type ?: return emptyMap<Any, Any>()
+                val value = type.arguments.getOrNull(1)?.type ?: return emptyMap<Any, Any>()
+                mapOf(valueOfType(key, name, n, seed) to valueOfType(value, name, n, seed))
+            }
             cls.java.isEnum -> {
                 val constants = cls.java.enumConstants
                 constants[((n + seed) % constants.size).toInt()]
