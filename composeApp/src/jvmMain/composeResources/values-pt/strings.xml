@@ -103,7 +103,7 @@
     <string name="about_title">Sobre o Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Abrir Registros de Erros</string>
-    <string name="open_converter">Conversor</string>
+    <string name="open_converter">Conversor de Músicas e Bíblias</string>
     <string name="open_song_library">Gerenciador da biblioteca de músicas</string>
     <string name="report_bug">Reportar um Problema</string>
     <string name="submit_feature_request">Enviar Solicitação de Recurso</string>
@@ -144,6 +144,9 @@
     <string name="shortcut_description_next_slide">Próximo Slide</string>
     <string name="shortcut_category_tab_switching">Alternância de Abas</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Abrir Atalhos de Teclado</string>
+    <string name="shortcut_description_open_song_library">Abrir o gerenciador da biblioteca de músicas</string>
+    <string name="shortcut_description_open_converter">Abrir o Conversor de Músicas e Bíblias</string>
+    <string name="shortcut_description_open_calendar_manager">Abrir o gerenciador de calendário</string>
     <string name="shortcut_description_f6_bible">Ir para Aba Bíblia</string>
     <string name="shortcut_description_f7_songs">Ir para Aba Músicas</string>
     <string name="shortcut_description_f8_pictures">Ir para Aba Imagens</string>
@@ -488,6 +491,8 @@
     <string name="tooltip_remove_from_schedule">Remover do Roteiro</string>
     <string name="tooltip_clear_schedule">Limpar Roteiro</string>
     <string name="tooltip_clear_display">Limpar Tela</string>
+    <string name="remote_action_clear_display">Limpar Tela</string>
+    <string name="schedule_add_files_title">Adicionar arquivos ao roteiro</string>
     <string name="tooltip_toggle_displays">Alternar Telas do Apresentador</string>
     <string name="tooltip_settings">Configurações</string>
     <string name="tooltip_theme_light">Tema Claro</string>
@@ -710,6 +715,7 @@
     <string name="vlc_custom_path">Caminho personalizado do VLC</string>
     <string name="vlc_browse">Procurar</string>
     <string name="vlc_path_hint">Selecionar diretório de instalação do VLC</string>
+    <string name="vlc_directory_chooser_title">Selecionar diretório de instalação do VLC</string>
     <string name="vlc_path_invalid">O diretório não contém bibliotecas VLC</string>
     <string name="media_audio_continues">O áudio continuará sendo reproduzido em segundo plano ao trocar de aba ou exibir outro conteúdo</string>
     <string name="media_now_playing">Reproduzindo agora:</string>
@@ -1156,6 +1162,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Visão do Apresentador %1$d</string>
     <string name="key_output_title">Saída Key %1$d</string>
+    <string name="decklink_output_title">Saída DeckLink %1$d</string>
     <string name="lower_third_generator">Gerador de Lower Third</string>
     <string name="pause_duration_ms">Pausar %1$dms</string>
     <string name="aspect_ratio_mismatch">Incompatibilidade de proporção: o arquivo é %1$dx%2$d (%3$s) mas a saída é %4$dx%5$d (%6$s)</string>
@@ -1833,7 +1840,7 @@
     <string name="clear_recents">Limpar recentes</string>
     <string name="recent">Recentes:</string>
     <string name="menu_getting_started">Introdução…</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter – Conversor de Músicas e Bíblias</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="warm_theme">Tema Quente</string>
     <string name="ocean_theme">Tema Oceano</string>
@@ -1877,7 +1884,7 @@
     <string name="setup_step2_step4">4. Selecione uma pasta contendo seus arquivos de Bíblia (.db3)</string>
     <string name="setup_step2_step5">5. Vá para a aba Bíblia e escolha uma Bíblia principal</string>
     <string name="setup_step2_tip">Pesquise na internet por um arquivo XML da Bíblia no seu idioma.</string>
-    <string name="setup_step2_tip2">Assim que tiver um arquivo XML, use a Ferramenta de conversão (Ajuda → Converter) para convertê-lo ao formato necessário.</string>
+    <string name="setup_step2_tip2">Tem uma Bíblia em outro formato? O Conversor de Músicas e Bíblias (Ajuda → Conversor de Músicas e Bíblias) pode convertê-la.</string>
     <string name="setup_step3_title">Adicionar hinários</string>
     <string name="setup_step3_subtitle">Aponte o aplicativo para sua pasta de biblioteca de hinos</string>
     <string name="setup_step3_step1">1. Abra as Configurações usando o botão ⚙ na barra de ferramentas</string>
@@ -2674,8 +2681,8 @@
     <string name="setup_bible_choose_folder">Clique em «Procurar...» ao lado da pasta de Bíblias e escolha uma pasta para guardar seus arquivos de Bíblia.</string>
     <string name="setup_bible_pick_translations">Vá até a aba Bíblia e escolha suas traduções — a primeira é a principal.</string>
     <string name="setup_songs_format_note">A pasta da biblioteca de músicas lê arquivos .song. Músicas salvas em outro formato precisam ser convertidas primeiro.</string>
-    <string name="setup_songs_converter_body">Vindo do SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ou SoftProjector? O conversor integrado lê todos eles — e também letras de PDF, Word, PowerPoint e Keynote — e grava os arquivos .song que esta pasta espera.</string>
-    <string name="setup_songs_converter_button">Abrir o conversor</string>
+    <string name="setup_songs_converter_body">Vindo do SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ou SoftProjector? O Conversor de Músicas e Bíblias integrado lê todos eles — e também letras de PDF, Word, PowerPoint e Keynote — e grava os arquivos .song que esta pasta espera.</string>
+    <string name="setup_songs_converter_button">Abrir o Conversor de Músicas e Bíblias</string>
     <string name="setup_songs_samples_note">Ainda sem músicas? «Adicionar músicas de exemplo» na aba Sistema preenche a pasta com um conjunto funcional.</string>
     <string name="setup_proj_rows_note">Cada tela conectada ganha sua própria linha abaixo. O número de janelas de projeção decorre do que você atribuir ali, então não há nada para definir manualmente.</string>
     <string name="setup_proj_assign_note">Para cada tela escolha um monitor e um modo de exibição e depois use «Saídas de conteúdo» para definir o que aparece ali. «Substituir estilos» dá àquela tela uma aparência própria.</string>

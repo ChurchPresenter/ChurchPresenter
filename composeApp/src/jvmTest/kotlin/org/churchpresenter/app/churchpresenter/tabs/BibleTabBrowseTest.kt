@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.BibleSettings
@@ -36,11 +37,21 @@ class BibleTabBrowseTest {
         }
 
     @Test
-    fun `the book and verse columns are labelled and the chapter column is not`() = bibleTab { _, _ ->
+    fun `the book, chapter and verse columns are all labelled`() = bibleTab { _, _ ->
         // Uppercased by the tab, so this also pins that they are headers rather than data rows.
         assertTrue(showsExactly(BibleLabel.BOOK.uppercase()), "BOOK header")
-        assertFalse(showsExactly(BibleLabel.CHAPTER.uppercase()), "the chapter numbers carry no header")
+        assertTrue(showsExactly(BibleLabel.CHAPTER.uppercase()), "CHAPTER header")
         assertTrue(showsExactly(BibleLabel.VERSE.uppercase()), "VERSE header")
+    }
+
+    @Test
+    fun `the three headings and the verse buttons share one center line`() = bibleTab { _, _ ->
+        fun centerY(node: SemanticsNodeInteraction) = node.fetchSemanticsNode().boundsInRoot.center.y
+
+        val book = centerY(onNodeWithText(BibleLabel.BOOK.uppercase()))
+        assertEquals(book, centerY(onNodeWithText(BibleLabel.CHAPTER.uppercase())), ALIGNMENT_TOLERANCE, "CHAPTER")
+        assertEquals(book, centerY(onNodeWithText(BibleLabel.VERSE.uppercase())), ALIGNMENT_TOLERANCE, "VERSE")
+        assertEquals(book, centerY(actionButton(BibleLabel.GO_LIVE)), ALIGNMENT_TOLERANCE, "the Go Live button")
     }
 
     @Test
@@ -120,5 +131,10 @@ class BibleTabBrowseTest {
         assertEquals(1, reports.settingsChanges, "one settings change requested")
         assertEquals("second.spb", swapped?.primaryBible, "the secondary became primary")
         assertEquals("test.spb", swapped?.secondaryBible, "and the primary became secondary")
+    }
+
+    private companion object {
+        /** Pixels either way: the heading and the buttons are centered, so rounding can split a pixel. */
+        const val ALIGNMENT_TOLERANCE = 1.5f
     }
 }

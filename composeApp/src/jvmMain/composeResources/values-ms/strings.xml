@@ -178,13 +178,13 @@
     <string name="menu_about">Perihal</string>
     <string name="about_title">Perihal Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">Penukar ChurchPresenter</string>
+    <string name="converter_window_title">Penukar Lagu dan Alkitab ChurchPresenter</string>
     <string name="lottie_gen_window_title">Penjana Lower Third Lottie</string>
     <string name="open_crash_logs">Buka Log Ranap</string>
     <string name="save_diagnostic_info">Simpan Maklumat Diagnostik…</string>
     <string name="diagnostic_info_saved">Maklumat diagnostik berjaya disimpan.</string>
     <string name="diagnostic_info_save_failed">Gagal menyimpan maklumat diagnostik.</string>
-    <string name="open_converter">Penukar</string>
+    <string name="open_converter">Penukar Lagu dan Alkitab</string>
     <string name="open_song_library">Pengurus Pustaka Lagu</string>
     <string name="report_bug">Laporkan Pepijat</string>
     <string name="submit_feature_request">Permintaan Ciri</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Slaid Seterusnya</string>
     <string name="shortcut_category_tab_switching">Penukaran Tab</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Buka Pintasan Papan Kekunci</string>
+    <string name="shortcut_description_open_song_library">Buka Pengurus Pustaka Lagu</string>
+    <string name="shortcut_description_open_converter">Buka Penukar Lagu dan Alkitab</string>
+    <string name="shortcut_description_open_calendar_manager">Buka Pengurus Kalendar</string>
     <string name="shortcut_description_f6_bible">Tukar ke Tab Alkitab</string>
     <string name="shortcut_description_f7_songs">Tukar ke Tab Lagu</string>
     <string name="shortcut_description_f8_pictures">Tukar ke Tab Gambar</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Buang daripada Jadual</string>
     <string name="tooltip_clear_schedule">Kosongkan Jadual</string>
     <string name="tooltip_clear_display">Kosongkan Paparan</string>
+    <string name="remote_action_clear_display">Kosongkan Paparan</string>
+    <string name="schedule_add_files_title">Tambah Fail ke Jadual</string>
     <string name="tooltip_toggle_displays">Buka/Tutup Paparan Pembentang</string>
     <string name="tooltip_settings">Tetapan</string>
     <string name="tooltip_theme_light">Tema Cerah</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Laluan VLC tersuai</string>
     <string name="vlc_browse">Semak Lalu</string>
     <string name="vlc_path_hint">Pilih direktori pemasangan VLC</string>
+    <string name="vlc_directory_chooser_title">Pilih direktori pemasangan VLC</string>
     <string name="vlc_path_invalid">Direktori ini tidak mengandungi pustaka VLC</string>
     <string name="media_audio_continues">Audio akan terus dimainkan di latar belakang apabila anda menukar tab atau memaparkan kandungan lain</string>
     <string name="media_now_playing">Kini dimainkan:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Pandangan Pembentang %1$d</string>
     <string name="key_output_title">Output Key %1$d</string>
+    <string name="decklink_output_title">Output DeckLink %1$d</string>
     <string name="lower_third_generator">Penjana Lower Third</string>
     <string name="pause_duration_ms">Jeda %1$dms</string>
     <string name="aspect_ratio_mismatch">Nisbah aspek tidak sepadan: fail ialah %1$dx%2$d (%3$s) tetapi output ialah %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Pergi ke tab Alkitab dan pilih Alkitab Utama</string>
     <string name="setup_step2_download_hint">Lebih 1,500 terjemahan dalam lebih 1,000 bahasa tersedia daripada eBible.org dan arkib Zefania. Setiap satu menunjukkan hak ciptanya sebelum anda memasangnya.</string>
     <string name="setup_step2_tip">Sudah ada fail Alkitab? Halakan folder itu kepadanya dan ia akan dikesan secara automatik.</string>
-    <string name="setup_step2_tip2">Ada Alkitab dalam format lain? Alat Penukaran (Bantuan → Penukar) boleh menukarnya.</string>
+    <string name="setup_step2_tip2">Ada Alkitab dalam format lain? Penukar Lagu dan Alkitab (Bantuan → Penukar Lagu dan Alkitab) boleh menukarnya.</string>
     <string name="setup_step3_title">Tambah Buku Lagu</string>
     <string name="setup_step3_subtitle">Halakan aplikasi ke folder pustaka lagu anda</string>
     <string name="setup_step3_step1">1. Buka Tetapan menggunakan butang ⚙ pada bar alat</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Klik «Semak imbas...» di sebelah folder Alkitab dan pilih folder untuk menyimpan fail Alkitab anda.</string>
     <string name="setup_bible_pick_translations">Pergi ke tab Alkitab dan pilih terjemahan anda — yang pertama ialah yang utama.</string>
     <string name="setup_songs_format_note">Folder pustaka lagu membaca fail .song. Lagu yang disimpan dalam format lain perlu ditukar terlebih dahulu.</string>
-    <string name="setup_songs_converter_body">Berpindah daripada SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm atau SoftProjector? Penukar terbina dalam membaca kesemuanya — juga lirik daripada PDF, Word, PowerPoint dan Keynote — lalu menulis fail .song yang diperlukan folder ini.</string>
-    <string name="setup_songs_converter_button">Buka penukar</string>
+    <string name="setup_songs_converter_body">Berpindah daripada SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm atau SoftProjector? Penukar Lagu dan Alkitab terbina dalam membaca kesemuanya — juga lirik daripada PDF, Word, PowerPoint dan Keynote — lalu menulis fail .song yang diperlukan folder ini.</string>
+    <string name="setup_songs_converter_button">Buka Penukar Lagu dan Alkitab</string>
     <string name="setup_songs_samples_note">Belum ada lagu? «Tambah lagu contoh» pada tab Sistem akan mengisi folder dengan satu set yang boleh digunakan.</string>
     <string name="setup_proj_rows_note">Setiap skrin yang disambungkan mendapat barisnya sendiri di bawah. Bilangan tetingkap persembahan berpunca daripada apa yang anda tetapkan di situ, jadi tiada apa yang perlu ditetapkan secara manual.</string>
     <string name="setup_proj_assign_note">Bagi setiap skrin pilih paparan dan mod paparan, kemudian gunakan «Output kandungan» untuk menentukan apa yang muncul di situ. «Tulis ganti gaya» memberikan skrin itu penampilannya sendiri.</string>

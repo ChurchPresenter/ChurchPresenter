@@ -34,6 +34,7 @@ import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -74,6 +75,10 @@ import churchpresenter.composeapp.generated.resources.open_calendar_manager
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_item_count
+import churchpresenter.composeapp.generated.resources.schedule_icon_size_large
+import churchpresenter.composeapp.generated.resources.schedule_icon_size_medium
+import churchpresenter.composeapp.generated.resources.schedule_icon_size_small
+import churchpresenter.composeapp.generated.resources.schedule_option_icon_size
 import churchpresenter.composeapp.generated.resources.schedule_option_item_count
 import churchpresenter.composeapp.generated.resources.schedule_option_zoom
 import churchpresenter.composeapp.generated.resources.schedule_show_buttons_under_title
@@ -129,7 +134,9 @@ internal fun ScheduleHeader(
     legacyRowActions: Boolean = false,
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
     hiddenButtons: Set<String> = emptySet(),
-    onToggleButton: (ScheduleToolbarButton) -> Unit = {}
+    onToggleButton: (ScheduleToolbarButton) -> Unit = {},
+    toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
+    onToolbarIconSizeChange: (ScheduleToolbarIconSize) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -173,7 +180,9 @@ internal fun ScheduleHeader(
                 legacyRowActions = legacyRowActions,
                 onLegacyRowActionsChange = onLegacyRowActionsChange,
                 hiddenButtons = hiddenButtons,
-                onToggleButton = onToggleButton
+                onToggleButton = onToggleButton,
+                toolbarIconSize = toolbarIconSize,
+                onToolbarIconSizeChange = onToolbarIconSizeChange
             )
         }
 
@@ -186,12 +195,15 @@ internal fun ScheduleHeader(
         ) {
             PillGroup {
                 ScheduleFileButtons(
-                    hiddenButtons, onNewSchedule, onOpenSchedule, onSaveSchedule, onClearSchedule, canClear,
+                    hiddenButtons, toolbarIconSize,
+                    onNewSchedule, onOpenSchedule, onSaveSchedule, onClearSchedule, canClear,
                 )
                 if (scheduleToolbarDividerVisible(0, hiddenButtons)) PillDivider()
-                ScheduleHistoryButtons(hiddenButtons, canUndo, canRedo, onUndo, onRedo)
+                ScheduleHistoryButtons(hiddenButtons, toolbarIconSize, canUndo, canRedo, onUndo, onRedo)
                 if (scheduleToolbarDividerVisible(1, hiddenButtons)) PillDivider()
-                SchedulePlanningButtons(hiddenButtons, onAddLabel, onImportPlanningCenter, onOpenCalendar)
+                SchedulePlanningButtons(
+                    hiddenButtons, toolbarIconSize, onAddLabel, onImportPlanningCenter, onOpenCalendar,
+                )
             }
         }
         }
@@ -209,7 +221,9 @@ private fun ScheduleOptionsButton(
     legacyRowActions: Boolean,
     onLegacyRowActionsChange: (Boolean) -> Unit,
     hiddenButtons: Set<String>,
-    onToggleButton: (ScheduleToolbarButton) -> Unit
+    onToggleButton: (ScheduleToolbarButton) -> Unit,
+    toolbarIconSize: ScheduleToolbarIconSize,
+    onToolbarIconSizeChange: (ScheduleToolbarIconSize) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -226,6 +240,21 @@ private fun ScheduleOptionsButton(
             buttonSize = 36.dp,
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            Text(
+                text = stringResource(Res.string.schedule_option_icon_size),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+            )
+            ScheduleToolbarIconSize.entries.forEach { size ->
+                DropdownMenuItem(
+                    text = { Text(scheduleToolbarIconSizeLabel(size)) },
+                    onClick = { onToolbarIconSizeChange(size) },
+                    modifier = Modifier.testTag(size.menuTag),
+                    leadingIcon = { RadioButton(selected = size == toolbarIconSize, onClick = null) }
+                )
+            }
+            HorizontalDivider()
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.schedule_show_buttons_under_title)) },
                 onClick = { onLegacyRowActionsChange(!legacyRowActions) },
@@ -255,6 +284,13 @@ private fun ScheduleOptionsButton(
             }
         }
     }
+}
+
+@Composable
+private fun scheduleToolbarIconSizeLabel(size: ScheduleToolbarIconSize): String = when (size) {
+    ScheduleToolbarIconSize.SMALL -> stringResource(Res.string.schedule_icon_size_small)
+    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.schedule_icon_size_medium)
+    ScheduleToolbarIconSize.LARGE -> stringResource(Res.string.schedule_icon_size_large)
 }
 
 /** The same icon the toolbar button itself draws, so the menu entry is recognisable as that button. */

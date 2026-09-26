@@ -128,10 +128,10 @@
     <string name="menu_about">Teave</string>
     <string name="about_title">Teave Church Presenteri kohta</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter konverter</string>
+    <string name="converter_window_title">ChurchPresenter – Laulude ja Piibli teisendaja</string>
     <string name="lottie_gen_window_title">Lottie alumise kolmandiku generaator</string>
     <string name="open_crash_logs">Ava krahhilogid</string>
-    <string name="open_converter">Konverter</string>
+    <string name="open_converter">Laulude ja Piibli teisendaja</string>
     <string name="open_song_library">Laulukogu haldur</string>
     <string name="report_bug">Teata veast</string>
     <string name="submit_feature_request">Funktsioonisoov</string>
@@ -172,6 +172,9 @@
     <string name="shortcut_description_next_slide">Järgmine slaid</string>
     <string name="shortcut_category_tab_switching">Vahekaartide vahetamine</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Ava kiirklahvid</string>
+    <string name="shortcut_description_open_song_library">Ava laulukogu haldur</string>
+    <string name="shortcut_description_open_converter">Ava laulude ja Piibli teisendaja</string>
+    <string name="shortcut_description_open_calendar_manager">Ava kalendrihaldur</string>
     <string name="shortcut_description_f6_bible">Lülitu Piibli vahekaardile</string>
     <string name="shortcut_description_f7_songs">Lülitu laulude vahekaardile</string>
     <string name="shortcut_description_f8_pictures">Lülitu piltide vahekaardile</string>
@@ -555,6 +558,8 @@
     <string name="tooltip_remove_from_schedule">Eemalda kavast</string>
     <string name="tooltip_clear_schedule">Tühjenda kava</string>
     <string name="tooltip_clear_display">Tühjenda kuva</string>
+    <string name="remote_action_clear_display">Tühjenda kuva</string>
+    <string name="schedule_add_files_title">Lisa failid kavasse</string>
     <string name="tooltip_toggle_displays">Lülita esitluskuvad</string>
     <string name="tooltip_settings">Seaded</string>
     <string name="tooltip_theme_light">Hele teema</string>
@@ -788,6 +793,7 @@
     <string name="vlc_custom_path">Kohandatud VLC asukoht</string>
     <string name="vlc_browse">Sirvi</string>
     <string name="vlc_path_hint">Vali VLC paigalduskaust</string>
+    <string name="vlc_directory_chooser_title">Vali VLC paigalduskaust</string>
     <string name="vlc_path_invalid">Kaust ei sisalda VLC teeke</string>
     <string name="media_audio_continues">Heli jätkub taustal mängimist, kui vahetad vahekaarte või kuvad muud sisu</string>
     <string name="media_now_playing">Praegu esitatakse:</string>
@@ -1244,6 +1250,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Esitlusvaade %1$d</string>
     <string name="key_output_title">Key väljund %1$d</string>
+    <string name="decklink_output_title">DeckLinki väljund %1$d</string>
     <string name="lower_third_generator">Alumise kolmandiku generaator</string>
     <string name="pause_duration_ms">Paus %1$dms</string>
     <string name="aspect_ratio_mismatch">Kuvasuhte mittevastavus: fail on %1$dx%2$d (%3$s), kuid väljund on %4$dx%5$d (%6$s)</string>
@@ -1917,7 +1924,7 @@
     <string name="setup_step2_step4">4. Vali kaust, mis sisaldab su piiblifaile (.db3)</string>
     <string name="setup_step2_step5">5. Mine Piibli vahekaardile ja vali peamine Piibel</string>
     <string name="setup_step2_tip">Otsi internetist oma keeles piibli XML-faili.</string>
-    <string name="setup_step2_tip2">Kui sul on XML-fail, kasuta selle nõutud vormingusse teisendamiseks teisendustööriista (Abi → Konverter).</string>
+    <string name="setup_step2_tip2">Kas sul on Piibel muus vormingus? Laulude ja Piibli teisendaja (Abi → Laulude ja Piibli teisendaja) oskab selle teisendada.</string>
     <string name="setup_step3_title">Lisa laulikud</string>
     <string name="setup_step3_subtitle">Suuna rakendus oma laulukogu kausta</string>
     <string name="setup_step3_step1">1. Ava seaded tööriistariba nupuga ⚙</string>
@@ -2678,8 +2685,8 @@
     <string name="setup_bible_choose_folder">Klõpsake Piiblite kausta kõrval „Sirvi...” ja valige kaust oma Piibli failide hoidmiseks.</string>
     <string name="setup_bible_pick_translations">Avage vahekaart Piibel ja valige tõlked — esimene on põhitõlge.</string>
     <string name="setup_songs_format_note">Lauluraamatukogu kaust loeb .song-faile. Muus vormingus salvestatud laulud tuleb esmalt teisendada.</string>
-    <string name="setup_songs_converter_body">Tulete programmist SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm või SoftProjector? Sisseehitatud teisendaja loeb neid kõiki — ja ka laulusõnu PDF-, Word-, PowerPointi- ja Keynote-failidest — ning kirjutab .song-failid, mida see kaust ootab.</string>
-    <string name="setup_songs_converter_button">Ava teisendaja</string>
+    <string name="setup_songs_converter_body">Tulete programmist SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm või SoftProjector? Sisseehitatud laulude ja Piibli teisendaja loeb neid kõiki — ja ka laulusõnu PDF-, Word-, PowerPointi- ja Keynote-failidest — ning kirjutab .song-failid, mida see kaust ootab.</string>
+    <string name="setup_songs_converter_button">Ava laulude ja Piibli teisendaja</string>
     <string name="setup_songs_samples_note">Laule veel pole? Vahekaardil Süsteem täidab „Lisa näidislaulud” kausta töötava valikuga.</string>
     <string name="setup_proj_rows_note">Iga ühendatud ekraan saab allpool oma rea. Esitlusakende arv tuleneb sellest, mida te seal määrate, nii et käsitsi pole midagi seada.</string>
     <string name="setup_proj_assign_note">Valige iga ekraani jaoks kuvar ja kuvarežiim ning määrake seejärel jaotises „Sisu väljundid”, mis seal ilmub. „Kirjuta stiilid üle” annab sellele ekraanile oma välimuse.</string>

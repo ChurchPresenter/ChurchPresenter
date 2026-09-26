@@ -178,13 +178,13 @@
     <string name="menu_about">Om</string>
     <string name="about_title">Om Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Konverterare</string>
+    <string name="converter_window_title">ChurchPresenter sång- och bibelkonverterare</string>
     <string name="lottie_gen_window_title">Lottie-generator för nedre tredjedel</string>
     <string name="open_crash_logs">Öppna kraschloggar</string>
     <string name="save_diagnostic_info">Spara diagnostikinformation…</string>
     <string name="diagnostic_info_saved">Diagnostikinformationen sparades.</string>
     <string name="diagnostic_info_save_failed">Kunde inte spara diagnostikinformationen.</string>
-    <string name="open_converter">Konverterare</string>
+    <string name="open_converter">Sång- och bibelkonverterare</string>
     <string name="open_song_library">Sångbibliotekshanterare</string>
     <string name="report_bug">Rapportera ett fel</string>
     <string name="submit_feature_request">Funktionsförslag</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Nästa bild</string>
     <string name="shortcut_category_tab_switching">Flikbyte</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Öppna tangentbordsgenvägar</string>
+    <string name="shortcut_description_open_song_library">Öppna sångbibliotekshanteraren</string>
+    <string name="shortcut_description_open_converter">Öppna sång- och bibelkonverteraren</string>
+    <string name="shortcut_description_open_calendar_manager">Öppna kalenderhanteraren</string>
     <string name="shortcut_description_f6_bible">Byt till bibelfliken</string>
     <string name="shortcut_description_f7_songs">Byt till sångfliken</string>
     <string name="shortcut_description_f8_pictures">Byt till bildfliken</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Ta bort från programmet</string>
     <string name="tooltip_clear_schedule">Rensa programmet</string>
     <string name="tooltip_clear_display">Rensa skärmen</string>
+    <string name="remote_action_clear_display">Rensa skärmen</string>
+    <string name="schedule_add_files_title">Lägg till filer i programmet</string>
     <string name="tooltip_toggle_displays">Växla presentationsskärmar</string>
     <string name="tooltip_settings">Inställningar</string>
     <string name="tooltip_theme_light">Ljust tema</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Egen sökväg till VLC</string>
     <string name="vlc_browse">Bläddra</string>
     <string name="vlc_path_hint">Välj VLC:s installationsmapp</string>
+    <string name="vlc_directory_chooser_title">Välj VLC:s installationsmapp</string>
     <string name="vlc_path_invalid">Mappen innehåller inga VLC-bibliotek</string>
     <string name="media_audio_continues">Ljudet fortsätter spelas i bakgrunden när du byter flik eller visar annat innehåll</string>
     <string name="media_now_playing">Spelas nu:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Presentationsvy %1$d</string>
     <string name="key_output_title">Key-utgång %1$d</string>
+    <string name="decklink_output_title">DeckLink-utgång %1$d</string>
     <string name="lower_third_generator">Generator för nedre tredjedel</string>
     <string name="pause_duration_ms">Pausa %1$d ms</string>
     <string name="aspect_ratio_mismatch">Bildförhållandet stämmer inte: filen är %1$dx%2$d (%3$s) men utgången är %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Gå till fliken Bibel och välj en primär bibel</string>
     <string name="setup_step2_download_hint">Över 1 500 översättningar på mer än 1 000 språk finns hos eBible.org och i Zefania-arkivet. Varje översättning visar sin upphovsrätt innan du installerar den.</string>
     <string name="setup_step2_tip">Har du redan bibelfiler? Peka mappen mot dem i stället, då hittas de automatiskt.</string>
-    <string name="setup_step2_tip2">Har du en bibel i ett annat format? Konverteringsverktyget (Hjälp → Konverterare) kan konvertera den.</string>
+    <string name="setup_step2_tip2">Har du en bibel i ett annat format? Sång- och bibelkonverteraren (Hjälp → Sång- och bibelkonverterare) kan konvertera den.</string>
     <string name="setup_step3_title">Lägg till sångböcker</string>
     <string name="setup_step3_subtitle">Visa programmet var ditt sångbibliotek finns</string>
     <string name="setup_step3_step1">1. Öppna Inställningar med ⚙-knappen i verktygsfältet</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Klicka på ”Bläddra...” bredvid bibelmappen och välj en mapp för dina bibelfiler.</string>
     <string name="setup_bible_pick_translations">Gå till fliken Bibel och välj dina översättningar — den första är den primära.</string>
     <string name="setup_songs_format_note">Sångbibliotekets mapp läser .song-filer. Sånger sparade i ett annat format måste konverteras först.</string>
-    <string name="setup_songs_converter_body">Kommer du från SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm eller SoftProjector? Den inbyggda konverteraren läser dem alla — och sångtexter ur PDF, Word, PowerPoint och Keynote — och skriver de .song-filer som mappen förväntar sig.</string>
-    <string name="setup_songs_converter_button">Öppna konverteraren</string>
+    <string name="setup_songs_converter_body">Kommer du från SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm eller SoftProjector? Den inbyggda sång- och bibelkonverteraren läser dem alla — och sångtexter ur PDF, Word, PowerPoint och Keynote — och skriver de .song-filer som mappen förväntar sig.</string>
+    <string name="setup_songs_converter_button">Öppna sång- och bibelkonverteraren</string>
     <string name="setup_songs_samples_note">Inga sånger än? ”Lägg till exempelsånger” på fliken System fyller mappen med en fungerande uppsättning.</string>
     <string name="setup_proj_rows_note">Varje ansluten skärm får en egen rad nedan. Antalet presentationsfönster följer av vad du tilldelar där, så det behöver inte ställas in för hand.</string>
     <string name="setup_proj_assign_note">Välj en skärm och ett visningsläge för varje rad, och ange sedan under ”Innehållsutgångar” vad som ska visas. ”Skriv över stilar” ger den skärmen ett eget utseende.</string>

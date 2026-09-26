@@ -178,13 +178,13 @@
     <string name="menu_about">Tungkol</string>
     <string name="about_title">Tungkol sa Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter Converter ng Awit at Bibliya</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="open_crash_logs">Buksan ang Crash Logs</string>
     <string name="save_diagnostic_info">I-save ang Diagnostic Info…</string>
     <string name="diagnostic_info_saved">Matagumpay na nai-save ang diagnostic info.</string>
     <string name="diagnostic_info_save_failed">Hindi nai-save ang diagnostic info.</string>
-    <string name="open_converter">Converter</string>
+    <string name="open_converter">Converter ng Awit at Bibliya</string>
     <string name="open_song_library">Tagapamahala ng Aklatan ng Awit</string>
     <string name="report_bug">Mag-report ng Bug</string>
     <string name="submit_feature_request">Feature Request</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Susunod na Slide</string>
     <string name="shortcut_category_tab_switching">Paglipat ng Tab</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Buksan ang Mga Keyboard Shortcut</string>
+    <string name="shortcut_description_open_song_library">Buksan ang Tagapamahala ng Aklatan ng Awit</string>
+    <string name="shortcut_description_open_converter">Buksan ang Converter ng Awit at Bibliya</string>
+    <string name="shortcut_description_open_calendar_manager">Buksan ang Tagapamahala ng Kalendaryo</string>
     <string name="shortcut_description_f6_bible">Lumipat sa Tab ng Biblia</string>
     <string name="shortcut_description_f7_songs">Lumipat sa Tab ng mga Awit</string>
     <string name="shortcut_description_f8_pictures">Lumipat sa Tab ng mga Larawan</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Alisin sa Schedule</string>
     <string name="tooltip_clear_schedule">I-clear ang Schedule</string>
     <string name="tooltip_clear_display">I-clear ang Display</string>
+    <string name="remote_action_clear_display">I-clear ang Display</string>
+    <string name="schedule_add_files_title">Magdagdag ng mga File sa Schedule</string>
     <string name="tooltip_toggle_displays">I-toggle ang mga Presenter Display</string>
     <string name="tooltip_settings">Mga Setting</string>
     <string name="tooltip_theme_light">Maliwanag na Tema</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Custom na path ng VLC</string>
     <string name="vlc_browse">Mag-browse</string>
     <string name="vlc_path_hint">Piliin ang folder kung saan naka-install ang VLC</string>
+    <string name="vlc_directory_chooser_title">Piliin ang folder kung saan naka-install ang VLC</string>
     <string name="vlc_path_invalid">Walang VLC libraries ang folder na ito</string>
     <string name="media_audio_continues">Magpapatuloy ang audio sa background kapag lumipat ng tab o nagpakita ng ibang content</string>
     <string name="media_now_playing">Kasalukuyang tumutugtog:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Presenter View %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
+    <string name="decklink_output_title">DeckLink Output %1$d</string>
     <string name="lower_third_generator">Lower Third Generator</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Hindi tugma ang aspect ratio: %1$dx%2$d (%3$s) ang file pero %4$dx%5$d (%6$s) ang output</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Pumunta sa tab na Bibliya at pumili ng pangunahing Bibliya</string>
     <string name="setup_step2_download_hint">Mahigit 1,500 salin sa mahigit 1,000 wika ang makukuha mula sa eBible.org at sa Zefania archive. Ipinapakita ng bawat isa ang copyright nito bago mo i-install.</string>
     <string name="setup_step2_tip">May mga file ka na ng Bibliya? Ituro na lang ang folder sa mga ito at awtomatiko silang mababasa.</string>
-    <string name="setup_step2_tip2">May Bibliya ka sa ibang format? Kayang i-convert iyon ng Conversion Tool (Tulong → Converter).</string>
+    <string name="setup_step2_tip2">May Bibliya ka sa ibang format? Kayang i-convert iyon ng Converter ng Awit at Bibliya (Tulong → Converter ng Awit at Bibliya).</string>
     <string name="setup_step3_title">Magdagdag ng aklat ng awit</string>
     <string name="setup_step3_subtitle">Ituro sa app ang folder ng iyong koleksyon ng awit</string>
     <string name="setup_step3_step1">1. Buksan ang Mga Setting gamit ang ⚙ na buton sa toolbar</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">I-click ang «Mag-browse...» sa tabi ng folder ng Bibliya at pumili ng folder para sa inyong mga file ng Bibliya.</string>
     <string name="setup_bible_pick_translations">Pumunta sa tab na Bibliya at piliin ang inyong mga salin — ang una ang pangunahin.</string>
     <string name="setup_songs_format_note">Binabasa ng folder ng aklatan ng awit ang mga file na .song. Ang mga awit na nakaimbak sa ibang format ay kailangang i-convert muna.</string>
-    <string name="setup_songs_converter_body">Galing sa SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? Nababasa ng nakapaloob na converter ang lahat ng ito — pati ang liriko mula sa PDF, Word, PowerPoint at Keynote — at isinusulat nito ang mga file na .song na hinihingi ng folder na ito.</string>
-    <string name="setup_songs_converter_button">Buksan ang converter</string>
+    <string name="setup_songs_converter_body">Galing sa SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? Nababasa ng nakapaloob na Converter ng Awit at Bibliya ang lahat ng ito — pati ang liriko mula sa PDF, Word, PowerPoint at Keynote — at isinusulat nito ang mga file na .song na hinihingi ng folder na ito.</string>
+    <string name="setup_songs_converter_button">Buksan ang Converter ng Awit at Bibliya</string>
     <string name="setup_songs_samples_note">Wala pang awit? Pinupuno ng «Magdagdag ng halimbawang awit» sa tab na Sistema ang folder ng isang gumaganang set.</string>
     <string name="setup_proj_rows_note">Bawat nakakabit na tabing ay may sariling hilera sa ibaba. Ang bilang ng bintana ng pagtatanghal ay nagmumula sa inyong itinakda roon, kaya walang kailangang itakda nang manu-mano.</string>
     <string name="setup_proj_assign_note">Para sa bawat tabing, pumili ng display at mode ng pagpapakita, at gamitin ang «Mga labasan ng nilalaman» upang piliin kung ano ang lilitaw doon. Ang «I-overwrite ang mga estilo» ay nagbibigay sa tabing na iyon ng sariling anyo.</string>

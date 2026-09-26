@@ -103,7 +103,7 @@
     <string name="about_title">O Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Otvoriť protokoly zlyhaní</string>
-    <string name="open_converter">Konvertor</string>
+    <string name="open_converter">Prevodník piesní a Biblie</string>
     <string name="open_song_library">Správca knižnice piesní</string>
     <string name="report_bug">Nahlásiť chybu</string>
     <string name="submit_feature_request">Navrhnúť funkciu</string>
@@ -144,6 +144,9 @@
     <string name="shortcut_description_next_slide">Nasledujúci snímok</string>
     <string name="shortcut_category_tab_switching">Prepínanie záložiek</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Otvoriť klávesové skratky</string>
+    <string name="shortcut_description_open_song_library">Otvoriť správcu knižnice piesní</string>
+    <string name="shortcut_description_open_converter">Otvoriť prevodník piesní a Biblie</string>
+    <string name="shortcut_description_open_calendar_manager">Otvoriť správcu kalendára</string>
     <string name="shortcut_description_f6_bible">Prepnúť na záložku Biblia</string>
     <string name="shortcut_description_f7_songs">Prepnúť na záložku Piesne</string>
     <string name="shortcut_description_f8_pictures">Prepnúť na záložku Obrázky</string>
@@ -488,6 +491,8 @@
     <string name="tooltip_remove_from_schedule">Odstrániť z programu</string>
     <string name="tooltip_clear_schedule">Vymazať program</string>
     <string name="tooltip_clear_display">Vymazať obrazovku</string>
+    <string name="remote_action_clear_display">Vymazať obrazovku</string>
+    <string name="schedule_add_files_title">Pridať súbory do programu</string>
     <string name="tooltip_toggle_displays">Prepnúť obrazovky prezentátora</string>
     <string name="tooltip_settings">Nastavenia</string>
     <string name="tooltip_theme_light">Svetlá téma</string>
@@ -710,6 +715,7 @@
     <string name="vlc_custom_path">Vlastná cesta VLC</string>
     <string name="vlc_browse">Prehľadávať</string>
     <string name="vlc_path_hint">Vyberte inštalačný priečinok VLC</string>
+    <string name="vlc_directory_chooser_title">Vyberte inštalačný priečinok VLC</string>
     <string name="vlc_path_invalid">Priečinok neobsahuje knižnice VLC</string>
     <string name="media_audio_continues">Zvuk bude pokračovať v pozadí pri prepínaní záložiek alebo zobrazovaní iného obsahu</string>
     <string name="media_now_playing">Teraz sa prehráva:</string>
@@ -1156,6 +1162,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Zobrazenie prezentátora %1$d</string>
     <string name="key_output_title">Kľúčový výstup %1$d</string>
+    <string name="decklink_output_title">Výstup DeckLink %1$d</string>
     <string name="lower_third_generator">Generátor lower third</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
     <string name="aspect_ratio_mismatch">Nezhoda pomeru strán: súbor je %1$dx%2$d (%3$s), ale výstup je %4$dx%5$d (%6$s)</string>
@@ -1833,7 +1840,7 @@
     <string name="clear_recents">Vymazať posledné</string>
     <string name="recent">Posledné:</string>
     <string name="menu_getting_started">Začíname…</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter – Prevodník piesní a Biblie</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="warm_theme">Teplý motív</string>
     <string name="ocean_theme">Oceánsky motív</string>
@@ -1877,7 +1884,7 @@
     <string name="setup_step2_step4">4. Vyberte priečinok obsahujúci vaše súbory Biblie (.db3)</string>
     <string name="setup_step2_step5">5. Prejdite na kartu Biblia a vyberte primárnu Bibliu</string>
     <string name="setup_step2_tip">Hľadajte na internete XML súbor Biblie vo vašom jazyku.</string>
-    <string name="setup_step2_tip2">Keď budete mať XML súbor, použite Nástroj na konverziu (Pomoc → Converter) na jeho prevod do požadovaného formátu.</string>
+    <string name="setup_step2_tip2">Máte Bibliu v inom formáte? Prevodník piesní a Biblie (Pomoc → Prevodník piesní a Biblie) ju dokáže previesť.</string>
     <string name="setup_step3_title">Pridať spevníky</string>
     <string name="setup_step3_subtitle">Ukážte aplikácii na priečinok vašej knižnice piesní</string>
     <string name="setup_step3_step1">1. Otvorte Nastavenia pomocou tlačidla ⚙ na paneli nástrojov</string>
@@ -2675,8 +2682,8 @@
     <string name="setup_bible_choose_folder">Kliknite na „Prehľadávať...“ vedľa priečinka Biblií a vyberte priečinok pre súbory Biblií.</string>
     <string name="setup_bible_pick_translations">Prejdite na kartu Biblia a vyberte preklady — prvý je hlavný.</string>
     <string name="setup_songs_format_note">Priečinok knižnice piesní číta súbory .song. Piesne uložené v inom formáte treba najprv previesť.</string>
-    <string name="setup_songs_converter_body">Prechádzate zo SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm alebo SoftProjector? Vstavaný prevodník číta všetky — aj texty z PDF, Wordu, PowerPointu a Keynote — a zapisuje súbory .song, ktoré tento priečinok očakáva.</string>
-    <string name="setup_songs_converter_button">Otvoriť prevodník</string>
+    <string name="setup_songs_converter_body">Prechádzate zo SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm alebo SoftProjector? Vstavaný prevodník piesní a Biblie číta všetky — aj texty z PDF, Wordu, PowerPointu a Keynote — a zapisuje súbory .song, ktoré tento priečinok očakáva.</string>
+    <string name="setup_songs_converter_button">Otvoriť prevodník piesní a Biblie</string>
     <string name="setup_songs_samples_note">Zatiaľ žiadne piesne? Tlačidlo „Pridať ukážkové piesne“ na karte Systém naplní priečinok funkčnou sadou.</string>
     <string name="setup_proj_rows_note">Každá pripojená obrazovka dostane nižšie vlastný riadok. Počet okien prezentácie vyplýva z toho, čo tam priradíte, takže sa nenastavuje ručne.</string>
     <string name="setup_proj_assign_note">Pre každú obrazovku vyberte displej a režim zobrazenia, potom vo „Výstupoch obsahu“ určite, čo sa na nej zobrazí. „Prepísať štýly“ dá tejto obrazovke vlastný vzhľad.</string>

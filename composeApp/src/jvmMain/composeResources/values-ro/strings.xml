@@ -121,12 +121,12 @@
     <string name="menu_about">Despre</string>
     <string name="about_title">Despre Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter – Convertor de cântări și Biblii</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="clear_recents">Șterge recente</string>
     <string name="recent">Recent:</string>
     <string name="open_crash_logs">Deschide Jurnalele de Erori</string>
-    <string name="open_converter">Convertor</string>
+    <string name="open_converter">Convertor de cântări și Biblii</string>
     <string name="open_song_library">Manager al bibliotecii de cântări</string>
     <string name="report_bug">Raportează o Eroare</string>
     <string name="submit_feature_request">Trimite Solicitare de Funcție</string>
@@ -167,6 +167,9 @@
     <string name="shortcut_description_next_slide">Slide-ul Următor</string>
     <string name="shortcut_category_tab_switching">Comutare File</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Deschide Scurtăturile de Tastatură</string>
+    <string name="shortcut_description_open_song_library">Deschide managerul bibliotecii de cântări</string>
+    <string name="shortcut_description_open_converter">Deschide convertorul de cântări și Biblii</string>
+    <string name="shortcut_description_open_calendar_manager">Deschide managerul de calendar</string>
     <string name="shortcut_description_f6_bible">Comută la Fila Biblie</string>
     <string name="shortcut_description_f7_songs">Comută la Fila Cântări</string>
     <string name="shortcut_description_f8_pictures">Comută la Fila Imagini</string>
@@ -518,6 +521,8 @@
     <string name="tooltip_remove_from_schedule">Elimină din Program</string>
     <string name="tooltip_clear_schedule">Golește Programul</string>
     <string name="tooltip_clear_display">Golește Ecranul</string>
+    <string name="remote_action_clear_display">Golește Ecranul</string>
+    <string name="schedule_add_files_title">Adaugă fișiere la program</string>
     <string name="tooltip_toggle_displays">Comută Ecranele Prezentatorului</string>
     <string name="tooltip_settings">Setări</string>
     <string name="tooltip_theme_light">Temă Deschisă</string>
@@ -741,6 +746,7 @@
     <string name="vlc_custom_path">Cale VLC personalizată</string>
     <string name="vlc_browse">Răsfoire</string>
     <string name="vlc_path_hint">Selectați directorul de instalare VLC</string>
+    <string name="vlc_directory_chooser_title">Selectați directorul de instalare VLC</string>
     <string name="vlc_path_invalid">Directorul nu conține bibliotecile VLC</string>
     <string name="media_audio_continues">Audio va continua să fie redat în fundal la schimbarea filelor sau afișarea altor conținuturi</string>
     <string name="media_now_playing">Se redă acum:</string>
@@ -1197,6 +1203,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Vizualizare Prezentator %1$d</string>
     <string name="key_output_title">Ieșire Key %1$d</string>
+    <string name="decklink_output_title">Ieșire DeckLink %1$d</string>
     <string name="lower_third_generator">Generator Lower Third</string>
     <string name="pause_duration_ms">Pauză %1$dms</string>
     <string name="aspect_ratio_mismatch">Nepotrivire raport aspect: fișierul este %1$dx%2$d (%3$s) dar ieșirea este %4$dx%5$d (%6$s)</string>
@@ -1885,7 +1892,7 @@
     <string name="setup_step2_step4">4. Selectați un dosar cu fișierele dvs. de Biblie (.db3)</string>
     <string name="setup_step2_step5">5. Mergeți la fila Biblie și alegeți o Biblie primară</string>
     <string name="setup_step2_tip">Căutați pe internet un fișier XML al Bibliei în limba dvs.</string>
-    <string name="setup_step2_tip2">Odată ce aveți fișierul XML, folosiți Instrumentul de conversie (Ajutor → Convertor) pentru a-l converti în formatul necesar.</string>
+    <string name="setup_step2_tip2">Aveți o Biblie în alt format? Convertorul de cântări și Biblii (Ajutor → Convertor de cântări și Biblii) o poate converti.</string>
     <string name="setup_step3_title">Adăugați cărți de cântece</string>
     <string name="setup_step3_subtitle">Indicați aplicației dosarul cu biblioteca dvs. de cântece</string>
     <string name="setup_step3_step1">1. Deschideți Setări folosind butonul ⚙ din bara de instrumente</string>
@@ -2675,8 +2682,8 @@
     <string name="setup_bible_choose_folder">Apăsați „Răsfoiește...” lângă folderul Bibliilor și alegeți un folder pentru fișierele Bibliei.</string>
     <string name="setup_bible_pick_translations">Mergeți la fila Biblie și alegeți traducerile — prima este cea principală.</string>
     <string name="setup_songs_format_note">Folderul bibliotecii de cântări citește fișiere .song. Cântările salvate în alt format trebuie convertite mai întâi.</string>
-    <string name="setup_songs_converter_body">Veniți de la SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm sau SoftProjector? Convertorul încorporat le citește pe toate — și versurile din PDF, Word, PowerPoint și Keynote — și scrie fișierele .song pe care le așteaptă acest folder.</string>
-    <string name="setup_songs_converter_button">Deschide convertorul</string>
+    <string name="setup_songs_converter_body">Veniți de la SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm sau SoftProjector? Convertorul de cântări și Biblii încorporat le citește pe toate — și versurile din PDF, Word, PowerPoint și Keynote — și scrie fișierele .song pe care le așteaptă acest folder.</string>
+    <string name="setup_songs_converter_button">Deschide convertorul de cântări și Biblii</string>
     <string name="setup_songs_samples_note">Încă nu aveți cântări? „Adaugă cântări exemplu” din fila Sistem umple folderul cu un set funcțional.</string>
     <string name="setup_proj_rows_note">Fiecare ecran conectat primește mai jos propriul rând. Numărul ferestrelor de proiecție rezultă din ce alocați acolo, deci nu trebuie setat manual.</string>
     <string name="setup_proj_assign_note">Pentru fiecare ecran alegeți un afișaj și un mod de afișare, apoi folosiți „Ieșiri de conținut” pentru a stabili ce apare acolo. „Suprascrie stilurile” dă acelui ecran un aspect propriu.</string>

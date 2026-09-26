@@ -39,6 +39,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import org.jetbrains.compose.resources.getString
+import churchpresenter.composeapp.generated.resources.vlc_directory_chooser_title
 import churchpresenter.composeapp.generated.resources.audio_output
 import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
@@ -600,7 +602,7 @@ private fun VlcPathRow(
             scope.launch {
                 val file = FileChooser.platformInstance.chooseSingle(
                     path = Path(vlcPathText),
-                    title = "Select VLC installation directory",
+                    title = getString(Res.string.vlc_directory_chooser_title),
                     selectDirectory = true,
                     filters = emptyList()
                 )

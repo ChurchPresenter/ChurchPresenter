@@ -72,6 +72,7 @@ internal class ScheduleReports {
     val zoomChanges = mutableListOf<Int>()
     val legacyRowActionChanges = mutableListOf<Boolean>()
     val toolbarButtonToggles = mutableListOf<ScheduleToolbarButton>()
+    val toolbarIconSizeChanges = mutableListOf<ScheduleToolbarIconSize>()
     /** Each Load now that went through, and whether it asked for the Schedule to be replaced. */
     val loadNowChoices = mutableListOf<Boolean>()
     var saveToCalendarRequests = 0
@@ -99,6 +100,8 @@ internal fun scheduleTab(
     legacyRowActions: Boolean = false,
     /** Toolbar buttons turned off from the panel's options menu, by [ScheduleToolbarButton] name. */
     hiddenToolbarButtons: Set<String> = emptySet(),
+    /** How large the toolbar's icons are drawn, as chosen from the options menu. */
+    toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
     /** Constrains the panel, for the layout tests that need it narrow enough to wrap. */
     width: Dp? = null,
     seed: ScheduleViewModel.() -> Unit = {},
@@ -144,6 +147,8 @@ internal fun scheduleTab(
                         onLegacyRowActionsChange = { reports.legacyRowActionChanges += it },
                         hiddenToolbarButtons = hiddenToolbarButtons,
                         onToggleToolbarButton = { reports.toolbarButtonToggles += it },
+                        toolbarIconSize = toolbarIconSize,
+                        onToolbarIconSizeChange = { reports.toolbarIconSizeChanges += it },
                         onPresenting = { reports.presenting += it },
                         onItemClick = { reports.clicked += it },
                         onEditLabel = { reports.editedLabels += it },

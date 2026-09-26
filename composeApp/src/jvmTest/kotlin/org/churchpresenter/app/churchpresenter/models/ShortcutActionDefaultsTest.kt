@@ -47,6 +47,25 @@ class ShortcutActionDefaultsTest {
     }
 
     @Test
+    fun `the Help menu's three windows open on Ctrl+Shift shortcuts of their own`() {
+        assertEquals(listOf(KeyChord.of(Key.L, ctrl = true, shift = true)), ShortcutAction.OPEN_SONG_LIBRARY.defaults)
+        assertEquals(listOf(KeyChord.of(Key.K, ctrl = true, shift = true)), ShortcutAction.OPEN_CONVERTER.defaults)
+        assertEquals(
+            listOf(KeyChord.of(Key.D, ctrl = true, shift = true)),
+            ShortcutAction.OPEN_CALENDAR_MANAGER.defaults,
+        )
+        val windows = listOf(
+            ShortcutAction.OPEN_SONG_LIBRARY,
+            ShortcutAction.OPEN_CONVERTER,
+            ShortcutAction.OPEN_CALENDAR_MANAGER,
+        )
+        assertTrue(
+            windows.all { it.scope == ShortcutScope.MENU },
+            "menu accelerators, dispatched by the menu bar",
+        )
+    }
+
+    @Test
     fun `exactly the tab-switching actions carry a target tab`() {
         val withTab = ShortcutAction.entries.filter { it.targetTab != null }
 

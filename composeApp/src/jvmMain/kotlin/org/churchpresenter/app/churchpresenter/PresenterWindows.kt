@@ -266,7 +266,7 @@ internal fun PresenterWindows(
 
                         Window(
                             visible = true,
-                            title = "Key Output ${i + 1}",
+                            title = stringResource(Res.string.key_output_title, i + 1),
                             icon = painterResource(Res.drawable.ic_app_icon),
                             onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                             state = keyWindowState,

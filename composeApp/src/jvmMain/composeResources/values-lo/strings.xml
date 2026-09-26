@@ -178,13 +178,13 @@
     <string name="menu_about">ກ່ຽວກັບ</string>
     <string name="about_title">ກ່ຽວກັບ Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ຕົວແປງໄຟລ໌ ChurchPresenter</string>
+    <string name="converter_window_title">ຕົວແປງເພງ ແລະ ພຣະຄຳພີ ChurchPresenter</string>
     <string name="lottie_gen_window_title">ຕົວສ້າງແຖບລຸ່ມຈໍ Lottie</string>
     <string name="open_crash_logs">ເປີດບັນທຶກການລົ້ມ</string>
     <string name="save_diagnostic_info">ບັນທຶກຂໍ້ມູນວິນິດໄສ…</string>
     <string name="diagnostic_info_saved">ບັນທຶກຂໍ້ມູນວິນິດໄສສຳເລັດແລ້ວ.</string>
     <string name="diagnostic_info_save_failed">ບັນທຶກຂໍ້ມູນວິນິດໄສບໍ່ສຳເລັດ.</string>
-    <string name="open_converter">ຕົວແປງໄຟລ໌</string>
+    <string name="open_converter">ຕົວແປງເພງ ແລະ ພຣະຄຳພີ</string>
     <string name="open_song_library">ຕົວຈັດການຄັງເພງ</string>
     <string name="report_bug">ລາຍງານບັນຫາ</string>
     <string name="submit_feature_request">ຂໍຟັງຊັນໃໝ່</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">ສະໄລ້ຕໍ່ໄປ</string>
     <string name="shortcut_category_tab_switching">ການສະຫຼັບແທັບ</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">ເປີດລາຍການປຸ່ມລັດ</string>
+    <string name="shortcut_description_open_song_library">ເປີດຕົວຈັດການຄັງເພງ</string>
+    <string name="shortcut_description_open_converter">ເປີດຕົວແປງເພງ ແລະ ພຣະຄຳພີ</string>
+    <string name="shortcut_description_open_calendar_manager">ເປີດຕົວຈັດການປະຕິທິນ</string>
     <string name="shortcut_description_f6_bible">ໄປແທັບພຣະຄຳພີ</string>
     <string name="shortcut_description_f7_songs">ໄປແທັບເພງ</string>
     <string name="shortcut_description_f8_pictures">ໄປແທັບຮູບພາບ</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">ລຶບອອກຈາກລາຍການ</string>
     <string name="tooltip_clear_schedule">ລ້າງລາຍການ</string>
     <string name="tooltip_clear_display">ລ້າງໜ້າຈໍ</string>
+    <string name="remote_action_clear_display">ລ້າງໜ້າຈໍ</string>
+    <string name="schedule_add_files_title">ເພີ່ມໄຟລ໌ໃສ່ລາຍການ</string>
     <string name="tooltip_toggle_displays">ເປີດ/ປິດໜ້າຈໍສາຍພາບ</string>
     <string name="tooltip_settings">ການຕັ້ງຄ່າ</string>
     <string name="tooltip_theme_light">ຮູບແບບແຈ້ງ</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">ເສັ້ນທາງ VLC ກຳນົດເອງ</string>
     <string name="vlc_browse">ເລືອກ</string>
     <string name="vlc_path_hint">ເລືອກໂຟນເດີທີ່ຕິດຕັ້ງ VLC</string>
+    <string name="vlc_directory_chooser_title">ເລືອກໂຟນເດີທີ່ຕິດຕັ້ງ VLC</string>
     <string name="vlc_path_invalid">ໂຟນເດີນີ້ບໍ່ມີໄລບຣາຣີຂອງ VLC</string>
     <string name="media_audio_continues">ສຽງຈະຫຼິ້ນຕໍ່ຢູ່ເບື້ອງຫຼັງ ເມື່ອສະຫຼັບແຖບ ຫຼື ສະແດງເນື້ອຫາອື່ນ</string>
     <string name="media_now_playing">ກຳລັງຫຼິ້ນ:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">ໜ້າຈໍສາຍພາບ %1$d</string>
     <string name="key_output_title">ຊ່ອງອອກ Key %1$d</string>
+    <string name="decklink_output_title">ຊ່ອງອອກ DeckLink %1$d</string>
     <string name="lower_third_generator">ຕົວສ້າງແຖບລຸ່ມ</string>
     <string name="pause_duration_ms">ຢຸດ %1$d ms</string>
     <string name="aspect_ratio_mismatch">ອັດຕາສ່ວນບໍ່ກົງກັນ: ໄຟລ໌ເປັນ %1$dx%2$d (%3$s) ແຕ່ຊ່ອງອອກເປັນ %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. ໄປທີ່ແຖບ "ພຣະຄຳພີ" ແລ້ວເລືອກພຣະຄຳພີຫຼັກ</string>
     <string name="setup_step2_download_hint">ມີສະບັບແປຫຼາຍກວ່າ 1,500 ສະບັບ ໃນຫຼາຍກວ່າ 1,000 ພາສາ ຈາກ eBible.org ແລະ ຄັງ Zefania. ແຕ່ລະສະບັບຈະສະແດງລິຂະສິດຂອງຕົນກ່ອນທ່ານຕິດຕັ້ງ.</string>
     <string name="setup_step2_tip">ມີໄຟລ໌ພຣະຄຳພີຢູ່ແລ້ວບໍ່? ຊີ້ໂຟນເດີໄປຫາໄຟລ໌ເຫຼົ່ານັ້ນ ແລ້ວມັນຈະຖືກອ່ານອັດຕະໂນມັດ.</string>
-    <string name="setup_step2_tip2">ມີພຣະຄຳພີໃນຮູບແບບອື່ນບໍ່? ເຄື່ອງມືແປງໄຟລ໌ (ຊ່ວຍເຫຼືອ → ຕົວແປງ) ສາມາດແປງໃຫ້ໄດ້.</string>
+    <string name="setup_step2_tip2">ມີພຣະຄຳພີໃນຮູບແບບອື່ນບໍ່? ຕົວແປງເພງ ແລະ ພຣະຄຳພີ (ຊ່ວຍເຫຼືອ → ຕົວແປງເພງ ແລະ ພຣະຄຳພີ) ສາມາດແປງໃຫ້ໄດ້.</string>
     <string name="setup_step3_title">ເພີ່ມປຶ້ມເພງ</string>
     <string name="setup_step3_subtitle">ຊີ້ໂປຣແກຣມໄປຫາໂຟນເດີຄັງເພງຂອງທ່ານ</string>
     <string name="setup_step3_step1">1. ເປີດການຕັ້ງຄ່າດ້ວຍປຸ່ມ ⚙ ໃນແຖບເຄື່ອງມື</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">ຄລິກ «ເປີດເບິ່ງ...» ຂ້າງໂຟນເດີພຣະຄຳພີ ແລ້ວເລືອກໂຟນເດີສຳລັບເກັບໄຟລ໌ພຣະຄຳພີຂອງທ່ານ</string>
     <string name="setup_bible_pick_translations">ໄປທີ່ແທັບພຣະຄຳພີ ແລ້ວເລືອກສະບັບແປ — ສະບັບທຳອິດແມ່ນສະບັບຫຼັກ</string>
     <string name="setup_songs_format_note">ໂຟນເດີຫ້ອງສະໝຸດເພງອ່ານໄຟລ໌ .song ເພງທີ່ບັນທຶກໃນຮູບແບບອື່ນຕ້ອງແປງກ່ອນ</string>
-    <string name="setup_songs_converter_body">ຍ້າຍມາຈາກ SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ຫຼື SoftProjector ບໍ? ຕົວແປງໃນຕົວອ່ານໄດ້ທັງໝົດ — ລວມທັງເນື້ອຮ້ອງຈາກ PDF, Word, PowerPoint ແລະ Keynote — ແລ້ວຂຽນໄຟລ໌ .song ທີ່ໂຟນເດີນີ້ຕ້ອງການ</string>
-    <string name="setup_songs_converter_button">ເປີດຕົວແປງ</string>
+    <string name="setup_songs_converter_body">ຍ້າຍມາຈາກ SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ຫຼື SoftProjector ບໍ? ຕົວແປງເພງ ແລະ ພຣະຄຳພີໃນຕົວອ່ານໄດ້ທັງໝົດ — ລວມທັງເນື້ອຮ້ອງຈາກ PDF, Word, PowerPoint ແລະ Keynote — ແລ້ວຂຽນໄຟລ໌ .song ທີ່ໂຟນເດີນີ້ຕ້ອງການ</string>
+    <string name="setup_songs_converter_button">ເປີດຕົວແປງເພງ ແລະ ພຣະຄຳພີ</string>
     <string name="setup_songs_samples_note">ຍັງບໍ່ມີເພງບໍ? ປຸ່ມ «ເພີ່ມເພງຕົວຢ່າງ» ໃນແທັບລະບົບຈະຕື່ມໂຟນເດີດ້ວຍຊຸດທີ່ໃຊ້ໄດ້</string>
     <string name="setup_proj_rows_note">ຈໍທີ່ເຊື່ອມຕໍ່ແຕ່ລະຈໍຈະໄດ້ແຖວຂອງຕົນຢູ່ລຸ່ມ. ຈຳນວນປ່ອງນຳສະເໜີເກີດຈາກສິ່ງທີ່ທ່ານກຳນົດຢູ່ນັ້ນ ຈຶ່ງບໍ່ຕ້ອງຕັ້ງດ້ວຍມື</string>
     <string name="setup_proj_assign_note">ສຳລັບແຕ່ລະຈໍ ໃຫ້ເລືອກຈໍສະແດງຜົນ ແລະ ໂໝດການສະແດງ ຈາກນັ້ນໃຊ້ «ຜົນອອກເນື້ອຫາ» ເພື່ອກຳນົດວ່າຈະສະແດງຫຍັງ. «ຂຽນທັບຮູບແບບ» ຈະໃຫ້ຈໍນັ້ນມີຮູບລັກສະນະຂອງຕົນ</string>
