@@ -118,6 +118,20 @@ private const val BOUNDS_HEIGHT_INDEX = 3
  * the presenter output, where a troubleshooting sentence in front of a congregation would be worse
  * than the missing picture it explains.
  */
+/** The smallest font size a canvas layer is drawn at, whatever it was saved with. */
+private const val MIN_DRAWN_FONT_SIZE = 1
+
+/**
+ * [size] scaled to the canvas, never below [MIN_DRAWN_FONT_SIZE].
+ *
+ * A layer saved with a font size of 0 gives a line height of 0 too, and Compose hands Skia the
+ * height as line height over font size: 0 ÷ 0, which Skia refuses with `IllegalStateException:
+ * Check failed.` on the event thread -- the whole app down mid-service (Sentry
+ * CHURCH-PRESENTER-DESKTOP-8Z). A negative one fails the same way. The size fields now refuse both,
+ * but a scene saved before that, or sent over Instance Link, still has to draw.
+ */
+internal fun drawnFontSize(size: Int, scale: Float): TextUnit = (size.coerceAtLeast(MIN_DRAWN_FONT_SIZE) * scale).sp
+
 @Composable
 fun SceneSourceRenderer(
     source: SceneSource,
@@ -220,7 +234,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                 curve = source.curve,
                 style = TextStyle(
                     color = textColor,
-                    fontSize = (source.fontSize * fontScale).sp,
+                    fontSize = drawnFontSize(source.fontSize, fontScale),
                     fontFamily = fontFamily,
                     fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
@@ -236,7 +250,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                 outline = source.outline,
                 scaleFactor = fontScale,
                 color = textColor,
-                fontSize = (source.fontSize * fontScale).sp,
+                fontSize = drawnFontSize(source.fontSize, fontScale),
                 fontFamily = fontFamily,
                 style = TextStyle(
                     fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
@@ -245,7 +259,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
                     letterSpacing = trackingOf(source.letterSpacing),
                 ),
                 textAlign = align,
-                lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
+                lineHeight = drawnFontSize(source.fontSize, fontScale * lineHeightMultiplier),
                 overflow = TextOverflow.Ellipsis,
                 fillWidth = false,
                 modifier = Modifier.padding(4.dp)
@@ -612,7 +626,7 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
 
     val style = TextStyle(
         color = fontColor,
-        fontSize = (source.fontSize * fontScale).sp,
+        fontSize = drawnFontSize(source.fontSize, fontScale),
         fontFamily = fontFamily,
         fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
@@ -751,7 +765,7 @@ private fun CurvedBibleText(
             curve = source.curve,
             style = TextStyle(
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,
-                fontSize = (source.fontSize * fontScale).sp,
+                fontSize = drawnFontSize(source.fontSize, fontScale),
                 fontFamily = fontFamily,
                 fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
                 fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
@@ -768,7 +782,7 @@ private fun CurvedBibleText(
                 curve = source.curve,
                 style = TextStyle(
                     color = refColor,
-                    fontSize = (source.referenceFontSize * fontScale).sp,
+                    fontSize = drawnFontSize(source.referenceFontSize, fontScale),
                     fontFamily = fontFamily,
                     fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
@@ -1184,7 +1198,7 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 outline = source.outline,
                 scaleFactor = fontScale,
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,
-                fontSize = (source.fontSize * fontScale).sp,
+                fontSize = drawnFontSize(source.fontSize, fontScale),
                 fontFamily = fontFamily,
                 style = TextStyle(
                     fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
@@ -1193,7 +1207,7 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                     letterSpacing = trackingOf(source.letterSpacing),
                 ),
                 textAlign = align,
-                lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
+                lineHeight = drawnFontSize(source.fontSize, fontScale * lineHeightMultiplier),
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
                     .backdropRoom(source.backdrop, fontScale)
@@ -1207,7 +1221,7 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                     outline = source.referenceOutline,
                     scaleFactor = fontScale,
                     color = refColor,
-                    fontSize = (source.referenceFontSize * fontScale).sp,
+                    fontSize = drawnFontSize(source.referenceFontSize, fontScale),
                     fontFamily = fontFamily,
                     style = TextStyle(
                         fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,

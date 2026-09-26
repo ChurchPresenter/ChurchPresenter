@@ -89,8 +89,9 @@ private const val MAX_TEXT_CURVE = 200f
 /** Tracking, as a percentage of the font size. */
 private const val MIN_LETTER_SPACING = -20f
 private const val MAX_LETTER_SPACING = 100f
-private const val MIN_FONT_SIZE = 8
-private const val MAX_FONT_SIZE = 500
+/** The font sizes a canvas layer's size field accepts; see `drawnFontSize` for why 0 cannot be one. */
+internal const val MIN_FONT_SIZE = 8
+internal const val MAX_FONT_SIZE = 500
 private const val MAX_TARGET_HOUR = 99
 private const val MAX_MINUTE_OR_SECOND = 59
 private const val MAX_HOUR_OF_DAY = 23

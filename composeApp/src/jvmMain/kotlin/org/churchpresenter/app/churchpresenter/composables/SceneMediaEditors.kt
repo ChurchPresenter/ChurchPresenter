@@ -266,7 +266,7 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
             source.fontSize.toString(),
             Modifier.weight(1f)
         ) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
+            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))) }
         }
     }
     TextStyleButtons(
