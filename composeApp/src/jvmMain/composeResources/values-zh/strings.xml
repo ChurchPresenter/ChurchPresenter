@@ -178,13 +178,13 @@
     <string name="menu_about">关于</string>
     <string name="about_title">关于 Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter 转换器</string>
+    <string name="converter_window_title">ChurchPresenter 歌曲与圣经转换器</string>
     <string name="lottie_gen_window_title">Lottie 字幕条生成器</string>
     <string name="open_crash_logs">打开崩溃日志</string>
     <string name="save_diagnostic_info">保存诊断信息…</string>
     <string name="diagnostic_info_saved">诊断信息已成功保存。</string>
     <string name="diagnostic_info_save_failed">保存诊断信息失败。</string>
-    <string name="open_converter">转换器</string>
+    <string name="open_converter">歌曲与圣经转换器</string>
     <string name="open_song_library">歌曲库管理器</string>
     <string name="report_bug">反馈问题</string>
     <string name="submit_feature_request">功能建议</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">下一张幻灯片</string>
     <string name="shortcut_category_tab_switching">标签页切换</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">打开键盘快捷键</string>
+    <string name="shortcut_description_open_song_library">打开歌曲库管理器</string>
+    <string name="shortcut_description_open_converter">打开歌曲与圣经转换器</string>
+    <string name="shortcut_description_open_calendar_manager">打开日历管理器</string>
     <string name="shortcut_description_f6_bible">切换到圣经标签页</string>
     <string name="shortcut_description_f7_songs">切换到歌曲标签页</string>
     <string name="shortcut_description_f8_pictures">切换到图片标签页</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">从程序单移除</string>
     <string name="tooltip_clear_schedule">清空程序单</string>
     <string name="tooltip_clear_display">清除画面</string>
+    <string name="remote_action_clear_display">清除画面</string>
+    <string name="schedule_add_files_title">向程序单添加文件</string>
     <string name="tooltip_toggle_displays">切换投放窗口</string>
     <string name="tooltip_settings">设置</string>
     <string name="tooltip_theme_light">浅色主题</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">自定义 VLC 路径</string>
     <string name="vlc_browse">浏览</string>
     <string name="vlc_path_hint">选择 VLC 的安装目录</string>
+    <string name="vlc_directory_chooser_title">选择 VLC 的安装目录</string>
     <string name="vlc_path_invalid">该目录不包含 VLC 库文件</string>
     <string name="media_audio_continues">切换标签页或显示其他内容时，音频会在后台继续播放</string>
     <string name="media_now_playing">正在播放：</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">投影视图 %1$d</string>
     <string name="key_output_title">Key 输出 %1$d</string>
+    <string name="decklink_output_title">DeckLink 输出 %1$d</string>
     <string name="lower_third_generator">下三分之一字幕生成器</string>
     <string name="pause_duration_ms">暂停 %1$d 毫秒</string>
     <string name="aspect_ratio_mismatch">宽高比不一致：文件为 %1$dx%2$d（%3$s），而输出为 %4$dx%5$d（%6$s）</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. 切换到“圣经”选项卡并选择主要圣经</string>
     <string name="setup_step2_download_hint">eBible.org 和 Zefania 档案库提供超过 1,000 种语言的 1,500 多个译本。安装前每个译本都会显示其版权信息。</string>
     <string name="setup_step2_tip">已经有圣经文件了？把文件夹指向它们，程序会自动读取。</string>
-    <string name="setup_step2_tip2">有其他格式的圣经？转换工具（帮助 → 转换器）可以转换它。</string>
+    <string name="setup_step2_tip2">有其他格式的圣经？歌曲与圣经转换器（帮助 → 歌曲与圣经转换器）可以转换它。</string>
     <string name="setup_step3_title">添加诗歌本</string>
     <string name="setup_step3_subtitle">把应用指向你的诗歌库文件夹</string>
     <string name="setup_step3_step1">1. 用工具栏上的 ⚙ 按钮打开设置</string>
@@ -2691,8 +2698,8 @@
     <string name="setup_bible_choose_folder">点击圣经文件夹旁的“浏览...”，选择一个用于存放圣经文件的文件夹。</string>
     <string name="setup_bible_pick_translations">转到“圣经”选项卡并选择译本——第一个即为主译本。</string>
     <string name="setup_songs_format_note">诗歌库文件夹读取 .song 文件。以其他格式保存的诗歌需要先转换。</string>
-    <string name="setup_songs_converter_body">从 SongBeamer、OpenLP、OpenSong、FreeShow、Free Worship、EasySlides、Quelea、VideoPsalm 或 SoftProjector 迁移过来？内置转换器全部都能读取——还包括从 PDF、Word、PowerPoint 和 Keynote 中提取歌词——并写出此文件夹所需的 .song 文件。</string>
-    <string name="setup_songs_converter_button">打开转换器</string>
+    <string name="setup_songs_converter_body">从 SongBeamer、OpenLP、OpenSong、FreeShow、Free Worship、EasySlides、Quelea、VideoPsalm 或 SoftProjector 迁移过来？内置的歌曲与圣经转换器全部都能读取——还包括从 PDF、Word、PowerPoint 和 Keynote 中提取歌词——并写出此文件夹所需的 .song 文件。</string>
+    <string name="setup_songs_converter_button">打开歌曲与圣经转换器</string>
     <string name="setup_songs_samples_note">还没有诗歌？“系统”选项卡中的“添加示例诗歌”会为文件夹填入一套可用的诗歌。</string>
     <string name="setup_proj_rows_note">每块已连接的屏幕都会在下方获得自己的一行。演示窗口数量由您在那里的分配决定，无需手动设置。</string>
     <string name="setup_proj_assign_note">为每块屏幕选择显示设备和显示模式，然后用“内容输出”决定在其上显示什么。“覆盖样式”可让该屏幕拥有独立的外观。</string>

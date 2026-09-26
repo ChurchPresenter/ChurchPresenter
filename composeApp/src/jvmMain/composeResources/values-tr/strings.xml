@@ -178,13 +178,13 @@
     <string name="menu_about">Hakkında</string>
     <string name="about_title">Church Presenter Hakkında</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Dönüştürücü</string>
+    <string name="converter_window_title">ChurchPresenter İlahi ve Kutsal Kitap Dönüştürücü</string>
     <string name="lottie_gen_window_title">Lottie Alt Bant Oluşturucu</string>
     <string name="open_crash_logs">Çökme Kayıtlarını Aç</string>
     <string name="save_diagnostic_info">Tanılama Bilgilerini Kaydet…</string>
     <string name="diagnostic_info_saved">Tanılama bilgileri kaydedildi.</string>
     <string name="diagnostic_info_save_failed">Tanılama bilgileri kaydedilemedi.</string>
-    <string name="open_converter">Dönüştürücü</string>
+    <string name="open_converter">İlahi ve Kutsal Kitap Dönüştürücü</string>
     <string name="open_song_library">Şarkı Kitaplığı Yöneticisi</string>
     <string name="report_bug">Hata Bildir</string>
     <string name="submit_feature_request">Özellik İsteği</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Sonraki Slayt</string>
     <string name="shortcut_category_tab_switching">Sekme Değiştirme</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Klavye Kısayollarını Aç</string>
+    <string name="shortcut_description_open_song_library">Şarkı Kitaplığı Yöneticisini Aç</string>
+    <string name="shortcut_description_open_converter">İlahi ve Kutsal Kitap Dönüştürücüyü Aç</string>
+    <string name="shortcut_description_open_calendar_manager">Takvim Yöneticisini Aç</string>
     <string name="shortcut_description_f6_bible">Kutsal Kitap Sekmesine Geç</string>
     <string name="shortcut_description_f7_songs">Şarkılar Sekmesine Geç</string>
     <string name="shortcut_description_f8_pictures">Resimler Sekmesine Geç</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Programdan Çıkar</string>
     <string name="tooltip_clear_schedule">Programı Temizle</string>
     <string name="tooltip_clear_display">Ekranı Temizle</string>
+    <string name="remote_action_clear_display">Ekranı Temizle</string>
+    <string name="schedule_add_files_title">Programa Dosya Ekle</string>
     <string name="tooltip_toggle_displays">Sunum Ekranlarını Aç/Kapat</string>
     <string name="tooltip_settings">Ayarlar</string>
     <string name="tooltip_theme_light">Açık Tema</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Özel VLC yolu</string>
     <string name="vlc_browse">Gözat</string>
     <string name="vlc_path_hint">VLC kurulum klasörünü seçin</string>
+    <string name="vlc_directory_chooser_title">VLC kurulum klasörünü seçin</string>
     <string name="vlc_path_invalid">Klasör VLC kitaplıklarını içermiyor</string>
     <string name="media_audio_continues">Sekmeler arasında geçiş yaptığınızda veya başka içerik gösterdiğinizde ses arka planda çalmaya devam eder</string>
     <string name="media_now_playing">Şimdi çalıyor:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Sunum Görünümü %1$d</string>
     <string name="key_output_title">Key Çıkışı %1$d</string>
+    <string name="decklink_output_title">DeckLink Çıkışı %1$d</string>
     <string name="lower_third_generator">Alt Bant Oluşturucu</string>
     <string name="pause_duration_ms">Duraklat %1$dms</string>
     <string name="aspect_ratio_mismatch">En boy oranı uyuşmuyor: dosya %1$dx%2$d (%3$s), çıkış ise %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Kutsal Kitap sekmesine gidip birincil Kutsal Kitap'ı seçin</string>
     <string name="setup_step2_download_hint">eBible.org ve Zefania arşivinden, 1.000'den fazla dilde 1.500'ü aşkın çeviri edinilebilir. Her biri kurulumdan önce telif bilgisini gösterir.</string>
     <string name="setup_step2_tip">Kutsal Kitap dosyalarınız zaten var mı? Klasörü onlara yönlendirin; otomatik olarak alınırlar.</string>
-    <string name="setup_step2_tip2">Başka biçimde bir Kutsal Kitap mı var? Dönüştürme aracı (Yardım → Dönüştürücü) onu dönüştürebilir.</string>
+    <string name="setup_step2_tip2">Başka biçimde bir Kutsal Kitap mı var? İlahi ve Kutsal Kitap Dönüştürücü (Yardım → İlahi ve Kutsal Kitap Dönüştürücü) onu dönüştürebilir.</string>
     <string name="setup_step3_title">İlahi kitapları ekleyin</string>
     <string name="setup_step3_subtitle">Uygulamayı ilahi arşivinizin klasörüne yönlendirin</string>
     <string name="setup_step3_step1">1. Araç çubuğundaki ⚙ düğmesiyle Ayarlar'ı açın</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Kutsal Kitap klasörünün yanındaki „Gözat...” düğmesine tıklayın ve dosyalarınızı saklayacağınız klasörü seçin.</string>
     <string name="setup_bible_pick_translations">Kutsal Kitap sekmesine gidin ve çevirilerinizi seçin — ilki birincil olandır.</string>
     <string name="setup_songs_format_note">İlahi kitaplığı klasörü .song dosyalarını okur. Başka bir biçimde kaydedilmiş ilahilerin önce dönüştürülmesi gerekir.</string>
-    <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm veya SoftProjector'dan mı geçiyorsunuz? Yerleşik dönüştürücü hepsini okur — ayrıca PDF, Word, PowerPoint ve Keynote içindeki sözleri de — ve bu klasörün beklediği .song dosyalarını yazar.</string>
-    <string name="setup_songs_converter_button">Dönüştürücüyü aç</string>
+    <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm veya SoftProjector'dan mı geçiyorsunuz? Yerleşik İlahi ve Kutsal Kitap Dönüştürücü hepsini okur — ayrıca PDF, Word, PowerPoint ve Keynote içindeki sözleri de — ve bu klasörün beklediği .song dosyalarını yazar.</string>
+    <string name="setup_songs_converter_button">İlahi ve Kutsal Kitap Dönüştürücüyü Aç</string>
     <string name="setup_songs_samples_note">Henüz ilahi yok mu? Sistem sekmesindeki „Örnek ilahiler ekle” klasörü çalışan bir setle doldurur.</string>
     <string name="setup_proj_rows_note">Bağlı her ekran aşağıda kendi satırını alır. Sunum penceresi sayısı oradaki atamalarınızdan çıkar, elle ayarlanacak bir şey yoktur.</string>
     <string name="setup_proj_assign_note">Her ekran için bir görüntü aygıtı ve bir görüntüleme modu seçin, ardından „İçerik çıkışları” ile orada ne görüneceğini belirleyin. „Stilleri geçersiz kıl” o ekrana kendi görünümünü verir.</string>

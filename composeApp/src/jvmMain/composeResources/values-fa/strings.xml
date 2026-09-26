@@ -178,13 +178,13 @@
     <string name="menu_about">درباره</string>
     <string name="about_title">درباره Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">مبدل ChurchPresenter</string>
+    <string name="converter_window_title">مبدل سرود و کتاب‌مقدس ChurchPresenter</string>
     <string name="lottie_gen_window_title">سازنده نوار پایین Lottie</string>
     <string name="open_crash_logs">باز کردن گزارش‌های خرابی</string>
     <string name="save_diagnostic_info">ذخیره اطلاعات عیب‌یابی…</string>
     <string name="diagnostic_info_saved">اطلاعات عیب‌یابی با موفقیت ذخیره شد.</string>
     <string name="diagnostic_info_save_failed">ذخیره اطلاعات عیب‌یابی ناموفق بود.</string>
-    <string name="open_converter">مبدل</string>
+    <string name="open_converter">مبدل سرود و کتاب‌مقدس</string>
     <string name="open_song_library">مدیر کتابخانهٔ سرودها</string>
     <string name="report_bug">گزارش اشکال</string>
     <string name="submit_feature_request">درخواست ویژگی</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">اسلاید بعدی</string>
     <string name="shortcut_category_tab_switching">جابه‌جایی بین زبانه‌ها</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">باز کردن میان‌برهای صفحه‌کلید</string>
+    <string name="shortcut_description_open_song_library">باز کردن مدیر کتابخانهٔ سرودها</string>
+    <string name="shortcut_description_open_converter">باز کردن مبدل سرود و کتاب‌مقدس</string>
+    <string name="shortcut_description_open_calendar_manager">باز کردن مدیر تقویم</string>
     <string name="shortcut_description_f6_bible">رفتن به زبانه کتاب‌مقدس</string>
     <string name="shortcut_description_f7_songs">رفتن به زبانه سرودها</string>
     <string name="shortcut_description_f8_pictures">رفتن به زبانه تصاویر</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">حذف از برنامه</string>
     <string name="tooltip_clear_schedule">پاک کردن برنامه</string>
     <string name="tooltip_clear_display">پاک کردن نمایش</string>
+    <string name="remote_action_clear_display">پاک کردن نمایش</string>
+    <string name="schedule_add_files_title">افزودن فایل‌ها به برنامه</string>
     <string name="tooltip_toggle_displays">روشن/خاموش کردن نمایشگرهای خروجی</string>
     <string name="tooltip_settings">تنظیمات</string>
     <string name="tooltip_theme_light">پوسته روشن</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">مسیر دلخواه VLC</string>
     <string name="vlc_browse">مرور</string>
     <string name="vlc_path_hint">پوشه نصب VLC را انتخاب کنید</string>
+    <string name="vlc_directory_chooser_title">پوشه نصب VLC را انتخاب کنید</string>
     <string name="vlc_path_invalid">این پوشه کتابخانه‌های VLC را ندارد</string>
     <string name="media_audio_continues">هنگام جابه‌جایی بین زبانه‌ها یا نمایش محتوای دیگر، پخش صدا در پس‌زمینه ادامه می‌یابد</string>
     <string name="media_now_playing">در حال پخش:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">نمای نمایش %1$d</string>
     <string name="key_output_title">خروجی Key %1$d</string>
+    <string name="decklink_output_title">خروجی DeckLink %1$d</string>
     <string name="lower_third_generator">سازندهٔ نوار پایینی</string>
     <string name="pause_duration_ms">مکث %1$d میلی‌ثانیه</string>
     <string name="aspect_ratio_mismatch">ناهمخوانی نسبت ابعاد: پرونده %1$dx%2$d (%3$s) است اما خروجی %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">۶. به زبانهٔ «کتاب‌مقدس» بروید و نسخهٔ اصلی را برگزینید</string>
     <string name="setup_step2_download_hint">بیش از ۱۵۰۰ ترجمه به بیش از ۱۰۰۰ زبان از eBible.org و بایگانی Zefania در دسترس است. هر کدام پیش از نصب، حق نشر خود را نشان می‌دهد.</string>
     <string name="setup_step2_tip">از پیش پرونده‌های کتاب‌مقدس دارید؟ پوشه را به آن‌ها اشاره دهید تا خودکار خوانده شوند.</string>
-    <string name="setup_step2_tip2">کتاب‌مقدسی در قالبی دیگر دارید؟ ابزار تبدیل (راهنما ← مبدل) می‌تواند آن را تبدیل کند.</string>
+    <string name="setup_step2_tip2">کتاب‌مقدسی در قالبی دیگر دارید؟ مبدل سرود و کتاب‌مقدس (راهنما ← مبدل سرود و کتاب‌مقدس) می‌تواند آن را تبدیل کند.</string>
     <string name="setup_step3_title">افزودن کتاب‌های سرود</string>
     <string name="setup_step3_subtitle">برنامه را به پوشهٔ کتابخانهٔ سرودهایتان اشاره دهید</string>
     <string name="setup_step3_step1">۱. تنظیمات را با دکمهٔ ⚙ در نوار ابزار باز کنید</string>
@@ -2691,8 +2698,8 @@
     <string name="setup_bible_choose_folder">کنار پوشهٔ کتاب‌مقدس روی «مرور...» کلیک کنید و پوشه‌ای برای نگهداری فایل‌هایتان برگزینید.</string>
     <string name="setup_bible_pick_translations">به زبانهٔ کتاب‌مقدس بروید و ترجمه‌ها را انتخاب کنید — اولی ترجمهٔ اصلی است.</string>
     <string name="setup_songs_format_note">پوشهٔ کتابخانهٔ سرودها فایل‌های ‎.song‎ را می‌خواند. سرودهای ذخیره‌شده در قالبی دیگر نخست باید تبدیل شوند.</string>
-    <string name="setup_songs_converter_body">از SongBeamer، OpenLP، OpenSong، FreeShow، Free Worship، EasySlides، Quelea، VideoPsalm یا SoftProjector می‌آیید؟ مبدل داخلی همهٔ آن‌ها را می‌خواند — و نیز متن‌ها را از PDF، Word، PowerPoint و Keynote — و فایل‌های ‎.song‎ مورد انتظار این پوشه را می‌نویسد.</string>
-    <string name="setup_songs_converter_button">باز کردن مبدل</string>
+    <string name="setup_songs_converter_body">از SongBeamer، OpenLP، OpenSong، FreeShow، Free Worship، EasySlides، Quelea، VideoPsalm یا SoftProjector می‌آیید؟ مبدل سرود و کتاب‌مقدس داخلی همهٔ آن‌ها را می‌خواند — و نیز متن‌ها را از PDF، Word، PowerPoint و Keynote — و فایل‌های ‎.song‎ مورد انتظار این پوشه را می‌نویسد.</string>
+    <string name="setup_songs_converter_button">باز کردن مبدل سرود و کتاب‌مقدس</string>
     <string name="setup_songs_samples_note">هنوز سرودی ندارید؟ دکمهٔ «افزودن سرودهای نمونه» در زبانهٔ سیستم پوشه را با مجموعه‌ای آماده پر می‌کند.</string>
     <string name="setup_proj_rows_note">هر نمایشگر متصل در پایین ردیف خود را می‌گیرد. شمار پنجره‌های نمایش از آنچه آنجا تعیین می‌کنید به دست می‌آید، پس چیزی برای تنظیم دستی نیست.</string>
     <string name="setup_proj_assign_note">برای هر پرده یک نمایشگر و یک حالت نمایش برگزینید، سپس با «خروجی‌های محتوا» تعیین کنید چه چیزی آنجا دیده شود. «بازنویسی سبک‌ها» به آن پرده ظاهر ویژهٔ خودش را می‌دهد.</string>

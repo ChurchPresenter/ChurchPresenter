@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.book
+import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.copy_verse
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_copy
@@ -347,10 +348,12 @@ private fun BookCard(
 ) {
     val density = LocalDensity.current
     Column(modifier = Modifier.width(with(density) { bookWidthPx.toDp() }).fillMaxHeight().bibleListCard()) {
-        BibleListHeaderLabel(
-            stringResource(Res.string.book),
-            Modifier.fillMaxWidth().padding(start = 16.dp, top = 14.dp, end = 10.dp, bottom = 8.dp),
-        )
+        Box(
+            Modifier.fillMaxWidth().height(BIBLE_HEADER_HEIGHT).padding(start = 16.dp, end = 10.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            BibleListHeaderLabel(stringResource(Res.string.book))
+        }
         BibleBrowserColumn(
             items = filteredBooks,
             selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
@@ -381,11 +384,16 @@ private fun ChapterCard(
         modifier = Modifier.width(with(density) { chapterWidthPx.toDp() }).fillMaxHeight().bibleListCard(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // No heading. Beside the Book card an empty one holds its place -- it takes the heading's
-        // exact height at any text size, keeping chapter 1 level with the first book. Under the
-        // action row there is nothing to line up with, so the list starts at the top like the verses.
-        if (underHeader) Spacer(Modifier.height(CHAPTER_LIST_TOP_INSET))
-        else BibleListHeaderLabel("", Modifier.padding(top = 14.dp, bottom = 8.dp))
+        // Beside the Book card the heading is the same height as the Book heading, keeping chapter 1
+        // level with the first book. Under the action row there is nothing to line up with, so the
+        // list starts at the top like the verses.
+        if (underHeader) {
+            Spacer(Modifier.height(CHAPTER_LIST_TOP_INSET))
+        } else {
+            Box(Modifier.fillMaxWidth().height(BIBLE_HEADER_HEIGHT), contentAlignment = Alignment.Center) {
+                BibleListHeaderLabel(stringResource(Res.string.chapter))
+            }
+        }
         BibleBrowserColumn(
             items = filteredChapters,
             selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),

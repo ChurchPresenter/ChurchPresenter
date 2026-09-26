@@ -346,7 +346,7 @@ class SetupWizardContentTest {
     fun `the song step offers the converter`() = wizard { choices ->
         railStep(5)
         assertEquals(0, choices.openedConverter)
-        onNodeWithText("Open Converter").performClick()
+        onNodeWithText("Open Song and Bible Converter").performClick()
         waitForIdle()
         assertEquals(1, choices.openedConverter, "the button must open the converter")
     }

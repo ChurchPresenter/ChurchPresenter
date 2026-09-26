@@ -178,13 +178,13 @@
     <string name="menu_about">Par programmu</string>
     <string name="about_title">Par Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter konvertētājs</string>
+    <string name="converter_window_title">ChurchPresenter — Dziesmu un Bībeles pārveidotājs</string>
     <string name="lottie_gen_window_title">Lottie apakšjoslu ģenerators</string>
     <string name="open_crash_logs">Atvērt avāriju žurnālus</string>
     <string name="save_diagnostic_info">Saglabāt diagnostikas datus…</string>
     <string name="diagnostic_info_saved">Diagnostikas dati saglabāti.</string>
     <string name="diagnostic_info_save_failed">Neizdevās saglabāt diagnostikas datus.</string>
-    <string name="open_converter">Konvertētājs</string>
+    <string name="open_converter">Dziesmu un Bībeles pārveidotājs</string>
     <string name="open_song_library">Dziesmu bibliotēkas pārvaldnieks</string>
     <string name="report_bug">Ziņot par kļūdu</string>
     <string name="submit_feature_request">Ieteikt uzlabojumu</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Nākamais slaids</string>
     <string name="shortcut_category_tab_switching">Ciļņu pārslēgšana</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Atvērt īsinājumtaustiņus</string>
+    <string name="shortcut_description_open_song_library">Atvērt dziesmu bibliotēkas pārvaldnieku</string>
+    <string name="shortcut_description_open_converter">Atvērt dziesmu un Bībeles pārveidotāju</string>
+    <string name="shortcut_description_open_calendar_manager">Atvērt kalendāra pārvaldnieku</string>
     <string name="shortcut_description_f6_bible">Pārslēgties uz Bībeles cilni</string>
     <string name="shortcut_description_f7_songs">Pārslēgties uz dziesmu cilni</string>
     <string name="shortcut_description_f8_pictures">Pārslēgties uz attēlu cilni</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Noņemt no programmas</string>
     <string name="tooltip_clear_schedule">Notīrīt programmu</string>
     <string name="tooltip_clear_display">Notīrīt ekrānu</string>
+    <string name="remote_action_clear_display">Notīrīt ekrānu</string>
+    <string name="schedule_add_files_title">Pievienot failus programmai</string>
     <string name="tooltip_toggle_displays">Ieslēgt vai izslēgt projekcijas logus</string>
     <string name="tooltip_settings">Iestatījumi</string>
     <string name="tooltip_theme_light">Gaišā tēma</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Pielāgots VLC ceļš</string>
     <string name="vlc_browse">Pārlūkot</string>
     <string name="vlc_path_hint">Izvēlieties VLC instalācijas mapi</string>
+    <string name="vlc_directory_chooser_title">Izvēlieties VLC instalācijas mapi</string>
     <string name="vlc_path_invalid">Mapē nav VLC bibliotēku</string>
     <string name="media_audio_continues">Audio turpinās atskaņoties fonā arī tad, kad pārslēdzat cilnes vai rādāt citu saturu</string>
     <string name="media_now_playing">Šobrīd atskaņo:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Projekcijas skats %1$d</string>
     <string name="key_output_title">Key izvade %1$d</string>
+    <string name="decklink_output_title">DeckLink izvade %1$d</string>
     <string name="lower_third_generator">Apakšjoslu ģenerators</string>
     <string name="pause_duration_ms">Pauze %1$d ms</string>
     <string name="aspect_ratio_mismatch">Malu attiecība nesakrīt: fails ir %1$dx%2$d (%3$s), bet izvade — %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Dodieties uz cilni Bībele un izvēlieties galveno Bībeli</string>
     <string name="setup_step2_download_hint">No eBible.org un Zefania arhīva pieejami vairāk nekā 1500 tulkojumu vairāk nekā 1000 valodās. Katrs pirms uzstādīšanas parāda savas autortiesības.</string>
     <string name="setup_step2_tip">Jums jau ir Bībeles faili? Norādiet mapi uz tiem, un tie tiks nolasīti automātiski.</string>
-    <string name="setup_step2_tip2">Jums ir Bībele citā formātā? Pārveidošanas rīks (Palīdzība → Pārveidotājs) to var pārveidot.</string>
+    <string name="setup_step2_tip2">Jums ir Bībele citā formātā? Dziesmu un Bībeles pārveidotājs (Palīdzība → Dziesmu un Bībeles pārveidotājs) to var pārveidot.</string>
     <string name="setup_step3_title">Pievienojiet dziesmu grāmatas</string>
     <string name="setup_step3_subtitle">Norādiet lietotnei savu dziesmu krājuma mapi</string>
     <string name="setup_step3_step1">1. Atveriet iestatījumus ar ⚙ pogu rīkjoslā</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Blakus Bībeļu mapei noklikšķiniet „Pārlūkot...” un izvēlieties mapi savu Bībeles failu glabāšanai.</string>
     <string name="setup_bible_pick_translations">Atveriet cilni Bībele un izvēlieties tulkojumus — pirmais ir galvenais.</string>
     <string name="setup_songs_format_note">Dziesmu bibliotēkas mape lasa .song failus. Citā formātā saglabātas dziesmas vispirms jāpārveido.</string>
-    <string name="setup_songs_converter_body">Pārejat no SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm vai SoftProjector? Iebūvētais pārveidotājs lasa tos visus — un arī dziesmu vārdus no PDF, Word, PowerPoint un Keynote — un raksta .song failus, kurus šī mape sagaida.</string>
-    <string name="setup_songs_converter_button">Atvērt pārveidotāju</string>
+    <string name="setup_songs_converter_body">Pārejat no SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm vai SoftProjector? Iebūvētais dziesmu un Bībeles pārveidotājs lasa tos visus — un arī dziesmu vārdus no PDF, Word, PowerPoint un Keynote — un raksta .song failus, kurus šī mape sagaida.</string>
+    <string name="setup_songs_converter_button">Atvērt dziesmu un Bībeles pārveidotāju</string>
     <string name="setup_songs_samples_note">Vēl nav dziesmu? Cilnē Sistēma poga „Pievienot dziesmu paraugus” piepilda mapi ar strādājošu kopu.</string>
     <string name="setup_proj_rows_note">Katrs pievienotais ekrāns zemāk iegūst savu rindu. Projekcijas logu skaits izriet no tā, ko tur piešķirat, tāpēc manuāli nekas nav jāiestata.</string>
     <string name="setup_proj_assign_note">Katram ekrānam izvēlieties displeju un attēlošanas režīmu, pēc tam sadaļā „Satura izvadi” norādiet, kas tur parādīsies. „Pārrakstīt stilus” piešķir šim ekrānam savu izskatu.</string>

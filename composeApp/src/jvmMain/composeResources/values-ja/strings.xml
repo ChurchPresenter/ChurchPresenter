@@ -178,13 +178,13 @@
     <string name="menu_about">このアプリについて</string>
     <string name="about_title">Church Presenter について</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter コンバーター</string>
+    <string name="converter_window_title">ChurchPresenter 賛美歌・聖書コンバーター</string>
     <string name="lottie_gen_window_title">Lottie 下部テロップ生成ツール</string>
     <string name="open_crash_logs">クラッシュログを開く</string>
     <string name="save_diagnostic_info">診断情報を保存…</string>
     <string name="diagnostic_info_saved">診断情報を保存しました。</string>
     <string name="diagnostic_info_save_failed">診断情報を保存できませんでした。</string>
-    <string name="open_converter">コンバーター</string>
+    <string name="open_converter">賛美歌・聖書コンバーター</string>
     <string name="open_song_library">賛美歌ライブラリ管理</string>
     <string name="report_bug">不具合を報告</string>
     <string name="submit_feature_request">機能のご要望</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">次のスライド</string>
     <string name="shortcut_category_tab_switching">タブの切り替え</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">キーボードショートカットを開く</string>
+    <string name="shortcut_description_open_song_library">賛美歌ライブラリ管理を開く</string>
+    <string name="shortcut_description_open_converter">賛美歌・聖書コンバーターを開く</string>
+    <string name="shortcut_description_open_calendar_manager">カレンダーマネージャーを開く</string>
     <string name="shortcut_description_f6_bible">聖書タブに切り替え</string>
     <string name="shortcut_description_f7_songs">賛美歌タブに切り替え</string>
     <string name="shortcut_description_f8_pictures">画像タブに切り替え</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">進行表から削除</string>
     <string name="tooltip_clear_schedule">進行表をクリア</string>
     <string name="tooltip_clear_display">表示をクリア</string>
+    <string name="remote_action_clear_display">表示をクリア</string>
+    <string name="schedule_add_files_title">進行表にファイルを追加</string>
     <string name="tooltip_toggle_displays">プレゼンター画面の表示を切り替え</string>
     <string name="tooltip_settings">設定</string>
     <string name="tooltip_theme_light">ライトテーマ</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">VLC のパスを指定</string>
     <string name="vlc_browse">参照</string>
     <string name="vlc_path_hint">VLC のインストールフォルダーを選択してください</string>
+    <string name="vlc_directory_chooser_title">VLC のインストールフォルダーを選択してください</string>
     <string name="vlc_path_invalid">このフォルダーには VLC のライブラリがありません</string>
     <string name="media_audio_continues">タブを切り替えたり別の内容を表示しても、音声はバックグラウンドで再生され続けます</string>
     <string name="media_now_playing">再生中：</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">フィル</string>
     <string name="presenter_view_title">プレゼンタービュー %1$d</string>
     <string name="key_output_title">キー出力 %1$d</string>
+    <string name="decklink_output_title">DeckLink 出力 %1$d</string>
     <string name="lower_third_generator">下部テロップ生成ツール</string>
     <string name="pause_duration_ms">一時停止 %1$dms</string>
     <string name="aspect_ratio_mismatch">アスペクト比が一致しません：ファイルは %1$dx%2$d（%3$s）ですが、出力は %4$dx%5$d（%6$s）です</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6.「聖書」タブを開き、主となる聖書を選びます</string>
     <string name="setup_step2_download_hint">eBible.org と Zefania アーカイブから、1,000 以上の言語で 1,500 を超える訳を利用できます。インストール前にそれぞれの著作権表示が示されます。</string>
     <string name="setup_step2_tip">すでに聖書ファイルをお持ちですか？そのフォルダーを指定すれば自動的に読み込まれます。</string>
-    <string name="setup_step2_tip2">別の形式の聖書をお持ちですか？変換ツール（ヘルプ → コンバーター）で変換できます。</string>
+    <string name="setup_step2_tip2">別の形式の聖書をお持ちですか？賛美歌・聖書コンバーター（ヘルプ → 賛美歌・聖書コンバーター）で変換できます。</string>
     <string name="setup_step3_title">曲集を追加</string>
     <string name="setup_step3_subtitle">曲のライブラリーのフォルダーをアプリに指定します</string>
     <string name="setup_step3_step1">1. ツールバーの ⚙ ボタンから設定を開きます</string>
@@ -2691,8 +2698,8 @@
     <string name="setup_bible_choose_folder">聖書フォルダーの横の「参照...」をクリックし、聖書ファイルを保存するフォルダーを選びます。</string>
     <string name="setup_bible_pick_translations">「聖書」タブを開いて訳を選びます。最初のものが主たる訳になります。</string>
     <string name="setup_songs_format_note">賛美歌ライブラリのフォルダーは .song ファイルを読み込みます。ほかの形式で保存された曲は、まず変換が必要です。</string>
-    <string name="setup_songs_converter_body">SongBeamer、OpenLP、OpenSong、FreeShow、Free Worship、EasySlides、Quelea、VideoPsalm、SoftProjector からの移行ですか。内蔵コンバーターはそのすべてを読み込み、PDF・Word・PowerPoint・Keynote の歌詞にも対応して、このフォルダーが必要とする .song ファイルを書き出します。</string>
-    <string name="setup_songs_converter_button">コンバーターを開く</string>
+    <string name="setup_songs_converter_body">SongBeamer、OpenLP、OpenSong、FreeShow、Free Worship、EasySlides、Quelea、VideoPsalm、SoftProjector からの移行ですか。内蔵の賛美歌・聖書コンバーターはそのすべてを読み込み、PDF・Word・PowerPoint・Keynote の歌詞にも対応して、このフォルダーが必要とする .song ファイルを書き出します。</string>
+    <string name="setup_songs_converter_button">賛美歌・聖書コンバーターを開く</string>
     <string name="setup_songs_samples_note">まだ曲がありませんか。「システム」タブの「サンプル曲を追加」でフォルダーに一式が入ります。</string>
     <string name="setup_proj_rows_note">接続された画面ごとに下へ行が追加されます。表示ウィンドウの数はそこでの割り当てから決まるため、手動で設定する項目はありません。</string>
     <string name="setup_proj_assign_note">画面ごとにディスプレイと表示モードを選び、「コンテンツ出力」でそこに何を映すかを決めます。「スタイルを上書き」でその画面だけ別の見た目にできます。</string>

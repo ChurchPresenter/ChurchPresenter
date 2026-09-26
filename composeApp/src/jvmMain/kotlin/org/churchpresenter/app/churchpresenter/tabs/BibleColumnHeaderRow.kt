@@ -86,14 +86,20 @@ internal fun BibleVerseHeader(
     // Wraps rather than clips: in split mode the verse card is narrow, and a Row squeezed the
     // trailing Go Live button to nothing.
     FlowRow(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-            .padding(start = 16.dp, top = 7.dp, end = 10.dp, bottom = 7.dp),
+        // The same height as the Book and Chapter headings, so the label and the buttons sit on their
+        // center line and all three lists start level.
+        modifier = Modifier.fillMaxWidth().heightIn(min = BIBLE_HEADER_HEIGHT)
+            .padding(start = 16.dp, end = 10.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
     ) {
         // Without the label the spacer keeps the actions right-aligned, as the label's weight did.
-        if (showLabel) BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f))
+        // Its own vertical padding is lost inside the 48dp row and only shows when a narrow card
+        // wraps the buttons below it, where it keeps the label off the card's top edge.
+        if (showLabel) {
+            BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f).padding(vertical = 7.dp))
+        }
         else Spacer(Modifier.weight(1f))
 
         if (crossRefsVisible) CrossRefsPill(crossRefsDocked, onCrossReferencesToggle)
@@ -292,3 +298,6 @@ private fun HeaderTooltip(text: String) {
 private fun HeaderChipLabel(text: String) {
     Text(text, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), maxLines = 1)
 }
+
+/** The height of every Bible list card's heading row: the buttons' touch target. */
+internal val BIBLE_HEADER_HEIGHT = 48.dp

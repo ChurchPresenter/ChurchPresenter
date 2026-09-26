@@ -645,6 +645,9 @@
     <string name="shortcut_description_prev_slide">Vorherige Folie</string>
     <string name="shortcut_description_next_slide">Nächste Folie</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Tastenkürzel öffnen</string>
+    <string name="shortcut_description_open_song_library">Liederbibliothek-Verwaltung öffnen</string>
+    <string name="shortcut_description_open_converter">Lieder- und Bibelkonverter öffnen</string>
+    <string name="shortcut_description_open_calendar_manager">Kalender-Manager öffnen</string>
     <string name="shortcut_description_f6_bible">Bibel-Reiter</string>
     <string name="shortcut_description_f7_songs">Lieder-Reiter</string>
     <string name="shortcut_description_f8_pictures">Fotos-Reiter</string>
@@ -709,6 +712,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Präsentationsansicht %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
+    <string name="decklink_output_title">DeckLink-Ausgang %1$d</string>
     <string name="lower_third_generator">Lower-Third-Generator</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Seitenverhältnis stimmt nicht überein: Datei ist %1$dx%2$d (%3$s), aber Ausgabe ist %4$dx%5$d (%6$s)</string>
@@ -811,6 +815,7 @@
     <string name="vlc_custom_path">Benutzerdefinierter VLC-Pfad</string>
     <string name="vlc_browse">Durchsuchen</string>
     <string name="vlc_path_hint">VLC-Installationsverzeichnis auswählen</string>
+    <string name="vlc_directory_chooser_title">VLC-Installationsverzeichnis auswählen</string>
     <string name="vlc_path_invalid">Verzeichnis enthält keine VLC-Bibliotheken</string>
     <string name="menu_view">Ansicht</string>
     <string name="output_role_fill">Füllung</string>
@@ -893,6 +898,8 @@
     <string name="timer_title">Timer</string>
     <string name="tooltip_add_website">Webseite hinzufügen</string>
     <string name="tooltip_clear_display">Anzeige löschen</string>
+    <string name="remote_action_clear_display">Anzeige löschen</string>
+    <string name="schedule_add_files_title">Dateien zum Programm hinzufügen</string>
     <string name="tooltip_toggle_displays">Präsentationsanzeigen umschalten</string>
     <string name="tooltip_collapse_schedule">Programm einklappen</string>
     <string name="tooltip_expand_schedule">Programm ausklappen</string>
@@ -1734,7 +1741,7 @@
     <string name="lottie_select_json_file">Lottie-JSON-Datei auswählen</string>
     <string name="media_vlc_arch_mismatch">Falsche VLC-Architektur. Dein Mac verwendet Apple Silicon (arm64), aber das installierte VLC ist nur für Intel (x86_64). Lade den Apple Silicon-Build von VLC auf videolan.org herunter und starte neu.</string>
     <string name="media_vlc_load_failed">VLC wurde gefunden, konnte aber nicht geladen werden. Versuchen Sie, VLC von videolan.org neu zu installieren (installieren Sie unter Windows auch das Microsoft Visual C++ Redistributable) und starten Sie die Anwendung dann neu.</string>
-    <string name="open_converter">Konverter</string>
+    <string name="open_converter">Lieder- und Bibelkonverter</string>
     <string name="open_song_library">Liederbibliothek-Verwaltung</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Hintergrund</string>
@@ -1811,7 +1818,7 @@
     <string name="clear_recents">Verlauf löschen</string>
     <string name="recent">Zuletzt:</string>
     <string name="menu_getting_started">Erste Schritte…</string>
-    <string name="converter_window_title">ChurchPresenter Konverter</string>
+    <string name="converter_window_title">ChurchPresenter Lieder- und Bibelkonverter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="warm_theme">Warmes Design</string>
     <string name="ocean_theme">Ozean-Design</string>
@@ -1855,7 +1862,7 @@
     <string name="setup_step2_step4">4. Wählen Sie einen Ordner mit Ihren Bibeldateien (.db3)</string>
     <string name="setup_step2_step5">5. Gehen Sie zum Reiter Bibel und wählen Sie eine primäre Bibel</string>
     <string name="setup_step2_tip">Suchen Sie im Internet nach einer Bibel-XML-Datei in Ihrer Sprache.</string>
-    <string name="setup_step2_tip2">Wenn Sie eine XML-Datei haben, verwenden Sie das Konvertierungswerkzeug (Hilfe → Konverter), um sie in das erforderliche Format zu konvertieren.</string>
+    <string name="setup_step2_tip2">Haben Sie eine Bibel in einem anderen Format? Der Lieder- und Bibelkonverter (Hilfe → Lieder- und Bibelkonverter) kann sie konvertieren.</string>
     <string name="setup_step3_title">Liederbücher hinzufügen</string>
     <string name="setup_step3_subtitle">Zeigen Sie der App auf Ihren Liederbibliotheksordner</string>
     <string name="setup_step3_step1">1. Öffnen Sie die Einstellungen über die Schaltfläche ⚙ in der Symbolleiste</string>
@@ -2646,8 +2653,8 @@
     <string name="setup_bible_choose_folder">Klicken Sie neben dem Bibel-Speicherordner auf „Durchsuchen...“ und wählen Sie einen Ordner für Ihre Bibeldateien.</string>
     <string name="setup_bible_pick_translations">Wechseln Sie zum Reiter Bibel und wählen Sie Ihre Übersetzungen — die erste ist die primäre.</string>
     <string name="setup_songs_format_note">Der Liedbibliotheks-Ordner liest .song-Dateien. Lieder in einem anderen Format müssen zuerst umgewandelt werden.</string>
-    <string name="setup_songs_converter_body">Sie wechseln von SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm oder SoftProjector? Der eingebaute Konverter liest sie alle — und Liedtexte aus PDF, Word, PowerPoint und Keynote — und schreibt die .song-Dateien, die dieser Ordner erwartet.</string>
-    <string name="setup_songs_converter_button">Konverter öffnen</string>
+    <string name="setup_songs_converter_body">Sie wechseln von SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm oder SoftProjector? Der eingebaute Lieder- und Bibelkonverter liest sie alle — und Liedtexte aus PDF, Word, PowerPoint und Keynote — und schreibt die .song-Dateien, die dieser Ordner erwartet.</string>
+    <string name="setup_songs_converter_button">Lieder- und Bibelkonverter öffnen</string>
     <string name="setup_songs_samples_note">Noch keine Lieder? „Beispiellieder hinzufügen“ im Reiter System füllt den Ordner mit einem funktionierenden Satz.</string>
     <string name="setup_proj_rows_note">Jeder angeschlossene Bildschirm erhält unten eine eigene Zeile. Die Zahl der Ausgabefenster ergibt sich aus Ihren Zuweisungen und muss nicht von Hand eingestellt werden.</string>
     <string name="setup_proj_assign_note">Wählen Sie je Bildschirm ein Anzeigegerät und einen Anzeigemodus und legen Sie dann unter „Inhaltsausgaben“ fest, was dort erscheint. „Stile überschreiben“ gibt diesem Bildschirm ein eigenes Aussehen.</string>

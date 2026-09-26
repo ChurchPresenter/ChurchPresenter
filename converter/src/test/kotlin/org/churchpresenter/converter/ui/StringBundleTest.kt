@@ -124,6 +124,14 @@ class StringBundleTest {
      * same in both.
      */
     @Test
+    fun `the window title follows the chosen language`() {
+        Strings.setLocale(Locale.ENGLISH)
+        assertEquals("ChurchPresenter Song and Bible Converter", Strings.windowTitle)
+        Strings.setLocale(Locale.forLanguageTag("de"))
+        assertEquals(load("converter_strings_de.properties").getProperty("window_title"), Strings.windowTitle)
+    }
+
+    @Test
     fun `a language with no bundle falls back to English, not to the machine's`() {
         Locale.setDefault(Locale.forLanguageTag("ru"))
         Strings.setLocale(Locale.forLanguageTag("el"))

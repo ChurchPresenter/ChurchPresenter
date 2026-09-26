@@ -137,7 +137,9 @@ internal fun Route.scheduleRoutes(
                     scope.launch { server.onClear.emit(Unit) }
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "clear",
-                        title = "Clear Display",
+                        // Titled where it is shown: a string resource needs the UI, and this
+                        // runs on the server's IO scope.
+                        title = "",
                         clientId = clientId
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)

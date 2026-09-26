@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import churchpresenter.composeapp.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
+import churchpresenter.composeapp.generated.resources.decklink_output_title
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +70,7 @@ fun DeckLinkComposeOutput(
     val currentIsLowerThird by rememberUpdatedState(isLowerThird)
 
     val appIconImage = rememberAppIconImage()
+    val frameTitle = stringResource(Res.string.decklink_output_title, deviceIndex)
 
     DisposableEffect(deviceIndex) {
         if (!DeckLinkManager.isAvailable()) return@DisposableEffect onDispose {}
@@ -79,7 +82,7 @@ fun DeckLinkComposeOutput(
         val h = info?.height ?: 1080
         System.err.println("[DeckLink] Device $deviceIndex: ${w}x${h} @ ${info?.fps} fps, role=$outputRole")
 
-        val jframe = offscreenFrame(deviceIndex, w, h, appIconImage)
+        val jframe = offscreenFrame(frameTitle, w, h, appIconImage)
 
         val composePanel = ComposePanel().apply {
             preferredSize = Dimension(w, h)
@@ -238,11 +241,11 @@ private fun rememberAppIconImage(): java.awt.image.BufferedImage? {
  * desktop — far enough not to be seen, close enough that DWM still renders it.
  */
 private fun offscreenFrame(
-    deviceIndex: Int,
+    title: String,
     width: Int,
     height: Int,
     icon: java.awt.image.BufferedImage?,
-): JFrame = JFrame("DeckLink Output $deviceIndex").apply {
+): JFrame = JFrame(title).apply {
     isUndecorated = true
     icon?.let { iconImage = it }
     setSize(width, height)

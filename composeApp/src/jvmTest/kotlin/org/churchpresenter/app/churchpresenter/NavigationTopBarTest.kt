@@ -17,7 +17,9 @@ import javax.swing.JRadioButtonMenuItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import java.awt.event.KeyEvent
 
 private fun navigationTopBar(
     theme: (ThemeMode) -> Unit = {},
@@ -435,13 +437,19 @@ class NavigationTopBarTest {
             assertEquals("Getting Started…", helpMenu.getItem(0).text)
             assertEquals("Keyboard Shortcuts", helpMenu.getItem(1).text)
             assertEquals("How To Blog", helpMenu.getItem(2).text)
-            assertEquals("Converter", helpMenu.getItem(3).text)
+            assertEquals("Song and Bible Converter", helpMenu.getItem(3).text)
             assertEquals("Song Library Manager", helpMenu.getItem(4).text)
             assertEquals("Calendar Manager", helpMenu.getItem(5).text)
             assertEquals("About", helpMenu.getItem(6).text)
             assertEquals("Help", helpMenu.getItem(7).text)
             assertEquals("Contact", helpMenu.getItem(8).text)
             assertEquals("Check for Updates…", helpMenu.getItem(9).text)
+            assertNotNull(helpMenu.getItem(3).accelerator, "the converter has a shortcut")
+            assertNotNull(helpMenu.getItem(4).accelerator, "the song library has a shortcut")
+            assertNotNull(helpMenu.getItem(5).accelerator, "the calendar has a shortcut")
+            assertEquals(KeyEvent.VK_K, helpMenu.getItem(3).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_L, helpMenu.getItem(4).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_D, helpMenu.getItem(5).accelerator.keyCode)
             for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick()
         }
         assertEquals(1, gettingStarted)

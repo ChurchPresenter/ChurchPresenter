@@ -31,7 +31,7 @@ fun main(args: Array<String>) = application {
     } else {
         Window(
             onCloseRequest = ::exitApplication,
-            title = "Lottie Lower Third Generator",
+            title = Strings.appTitle,
             state = rememberWindowState(width = 1200.dp, height = 800.dp)
         ) {
             App()

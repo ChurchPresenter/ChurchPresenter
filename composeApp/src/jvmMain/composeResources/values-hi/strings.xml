@@ -178,13 +178,13 @@
     <string name="menu_about">परिचय</string>
     <string name="about_title">Church Presenter के बारे में</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter कन्वर्टर</string>
+    <string name="converter_window_title">ChurchPresenter गीत और बाइबल कन्वर्टर</string>
     <string name="lottie_gen_window_title">Lottie लोअर थर्ड जेनरेटर</string>
     <string name="open_crash_logs">क्रैश लॉग खोलें</string>
     <string name="save_diagnostic_info">डायग्नोस्टिक जानकारी सहेजें…</string>
     <string name="diagnostic_info_saved">डायग्नोस्टिक जानकारी सफलतापूर्वक सहेजी गई।</string>
     <string name="diagnostic_info_save_failed">डायग्नोस्टिक जानकारी सहेजी नहीं जा सकी।</string>
-    <string name="open_converter">कन्वर्टर</string>
+    <string name="open_converter">गीत और बाइबल कन्वर्टर</string>
     <string name="open_song_library">गीत लाइब्रेरी प्रबंधक</string>
     <string name="report_bug">बग रिपोर्ट करें</string>
     <string name="submit_feature_request">नई सुविधा का अनुरोध</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">अगली स्लाइड</string>
     <string name="shortcut_category_tab_switching">टैब बदलना</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">कीबोर्ड शॉर्टकट खोलें</string>
+    <string name="shortcut_description_open_song_library">गीत लाइब्रेरी प्रबंधक खोलें</string>
+    <string name="shortcut_description_open_converter">गीत और बाइबल कन्वर्टर खोलें</string>
+    <string name="shortcut_description_open_calendar_manager">कैलेंडर प्रबंधक खोलें</string>
     <string name="shortcut_description_f6_bible">बाइबल टैब पर जाएँ</string>
     <string name="shortcut_description_f7_songs">गीत टैब पर जाएँ</string>
     <string name="shortcut_description_f8_pictures">चित्र टैब पर जाएँ</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">कार्यक्रम से हटाएँ</string>
     <string name="tooltip_clear_schedule">कार्यक्रम खाली करें</string>
     <string name="tooltip_clear_display">स्क्रीन साफ़ करें</string>
+    <string name="remote_action_clear_display">स्क्रीन साफ़ करें</string>
+    <string name="schedule_add_files_title">कार्यक्रम में फ़ाइलें जोड़ें</string>
     <string name="tooltip_toggle_displays">प्रेज़ेंटर डिस्प्ले चालू/बंद करें</string>
     <string name="tooltip_settings">सेटिंग्स</string>
     <string name="tooltip_theme_light">लाइट थीम</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">VLC का अपना पथ</string>
     <string name="vlc_browse">ब्राउज़ करें</string>
     <string name="vlc_path_hint">VLC इंस्टॉलेशन फ़ोल्डर चुनें</string>
+    <string name="vlc_directory_chooser_title">VLC इंस्टॉलेशन फ़ोल्डर चुनें</string>
     <string name="vlc_path_invalid">इस फ़ोल्डर में VLC लाइब्रेरी नहीं हैं</string>
     <string name="media_audio_continues">टैब बदलने या दूसरी सामग्री दिखाने पर भी ऑडियो बैकग्राउंड में चलता रहेगा</string>
     <string name="media_now_playing">अभी चल रहा है:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">फ़िल</string>
     <string name="presenter_view_title">प्रेज़ेंटर व्यू %1$d</string>
     <string name="key_output_title">Key आउटपुट %1$d</string>
+    <string name="decklink_output_title">DeckLink आउटपुट %1$d</string>
     <string name="lower_third_generator">लोअर थर्ड जेनरेटर</string>
     <string name="pause_duration_ms">%1$d मि.से रुकें</string>
     <string name="aspect_ratio_mismatch">आस्पेक्ट रेशियो मेल नहीं खा रहा: फ़ाइल %1$dx%2$d (%3$s) है लेकिन आउटपुट %4$dx%5$d (%6$s) है</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. बाइबल टैब पर जाकर मुख्य बाइबल चुनें</string>
     <string name="setup_step2_download_hint">eBible.org और Zefania संग्रह से 1,000 से अधिक भाषाओं में 1,500 से अधिक अनुवाद उपलब्ध हैं। इंस्टॉल करने से पहले हर एक का कॉपीराइट दिखाया जाता है।</string>
     <string name="setup_step2_tip">बाइबल फ़ाइलें पहले से हैं? फ़ोल्डर उन्हीं पर सेट कर दें और वे अपने आप पहचान ली जाएँगी।</string>
-    <string name="setup_step2_tip2">किसी दूसरे प्रारूप में बाइबल है? कन्वर्ज़न टूल (सहायता → कन्वर्टर) उसे बदल सकता है।</string>
+    <string name="setup_step2_tip2">किसी दूसरे प्रारूप में बाइबल है? गीत और बाइबल कन्वर्टर (सहायता → गीत और बाइबल कन्वर्टर) उसे बदल सकता है।</string>
     <string name="setup_step3_title">गीत पुस्तकें जोड़ें</string>
     <string name="setup_step3_subtitle">ऐप को अपनी गीत लाइब्रेरी का फ़ोल्डर बताएँ</string>
     <string name="setup_step3_step1">1. टूलबार के ⚙ बटन से सेटिंग्स खोलें</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">बाइबल फ़ोल्डर के पास «ब्राउज़ करें...» पर क्लिक करें और अपनी बाइबल फ़ाइलें रखने के लिए फ़ोल्डर चुनें।</string>
     <string name="setup_bible_pick_translations">बाइबल टैब पर जाएँ और अपने अनुवाद चुनें — पहला मुख्य होता है।</string>
     <string name="setup_songs_format_note">गीत लाइब्रेरी फ़ोल्डर .song फ़ाइलें पढ़ता है। किसी अन्य प्रारूप में सहेजे गए गीतों को पहले बदलना होगा।</string>
-    <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm या SoftProjector से आ रहे हैं? अंतर्निहित कन्वर्टर इन सभी को पढ़ता है — और PDF, Word, PowerPoint तथा Keynote से बोल भी — और वे .song फ़ाइलें लिखता है जिनकी इस फ़ोल्डर को अपेक्षा है।</string>
-    <string name="setup_songs_converter_button">कन्वर्टर खोलें</string>
+    <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm या SoftProjector से आ रहे हैं? अंतर्निहित गीत और बाइबल कन्वर्टर इन सभी को पढ़ता है — और PDF, Word, PowerPoint तथा Keynote से बोल भी — और वे .song फ़ाइलें लिखता है जिनकी इस फ़ोल्डर को अपेक्षा है।</string>
+    <string name="setup_songs_converter_button">गीत और बाइबल कन्वर्टर खोलें</string>
     <string name="setup_songs_samples_note">अभी कोई गीत नहीं? सिस्टम टैब का «नमूना गीत जोड़ें» फ़ोल्डर को एक कार्यशील संग्रह से भर देता है।</string>
     <string name="setup_proj_rows_note">हर जुड़े हुए पर्दे को नीचे अपनी पंक्ति मिलती है। प्रस्तुति विंडो की संख्या वहाँ के असाइनमेंट से तय होती है, इसलिए हाथ से कुछ सेट नहीं करना है।</string>
     <string name="setup_proj_assign_note">हर पर्दे के लिए एक डिस्प्ले और प्रदर्शन मोड चुनें, फिर «सामग्री आउटपुट» से तय करें कि वहाँ क्या दिखे। «शैलियाँ अधिलेखित करें» उस पर्दे को अपना रूप देता है।</string>

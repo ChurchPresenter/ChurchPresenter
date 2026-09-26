@@ -71,6 +71,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.setup_wizard_title
 import churchpresenter.composeapp.generated.resources.appearance
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.bible
@@ -244,7 +245,7 @@ fun SetupWizardDialog(
 
     Window(
         onCloseRequest = onDismiss,
-        title = "Getting Started",
+        title = stringResource(Res.string.setup_wizard_title),
         icon = painterResource(Res.drawable.ic_app_icon),
         state = windowState,
         resizable = true,

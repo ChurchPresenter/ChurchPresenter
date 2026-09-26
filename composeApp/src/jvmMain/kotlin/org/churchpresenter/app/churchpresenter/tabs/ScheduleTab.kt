@@ -61,6 +61,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import org.jetbrains.compose.resources.getString
+import churchpresenter.composeapp.generated.resources.schedule_add_files_title
 import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
@@ -255,6 +257,8 @@ fun ScheduleTab(
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
     hiddenToolbarButtons: Set<String> = emptySet(),
     onToggleToolbarButton: (ScheduleToolbarButton) -> Unit = {},
+    toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
+    onToolbarIconSizeChange: (ScheduleToolbarIconSize) -> Unit = {},
     planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
     onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit = { _, _, _ -> },
     onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit = { _, _, _, _ -> },
@@ -385,7 +389,9 @@ fun ScheduleTab(
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,
-            onToggleButton = onToggleToolbarButton
+            onToggleButton = onToggleToolbarButton,
+            toolbarIconSize = toolbarIconSize,
+            onToolbarIconSizeChange = onToolbarIconSizeChange
         )
 
         // When each row is expected to go live, reckoned from the first pinned row across the
@@ -781,7 +787,7 @@ fun ScheduleTab(
                     scope.launch {
                         val files = FileChooser.platformInstance.chooseMultiple(
                             path = null,
-                            title = "Add Files to Schedule",
+                            title = getString(Res.string.schedule_add_files_title),
                             filters = emptyList(),
                             selectDirectory = false
                         )

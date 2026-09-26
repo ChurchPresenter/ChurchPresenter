@@ -178,13 +178,13 @@
     <string name="menu_about">Kuhusu</string>
     <string name="about_title">Kuhusu Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">Kibadilishaji cha ChurchPresenter</string>
+    <string name="converter_window_title">Kibadilishaji cha Nyimbo na Biblia cha ChurchPresenter</string>
     <string name="lottie_gen_window_title">Kizalishaji cha Lower Third cha Lottie</string>
     <string name="open_crash_logs">Fungua Kumbukumbu za Kuvunjika</string>
     <string name="save_diagnostic_info">Hifadhi Maelezo ya Uchunguzi…</string>
     <string name="diagnostic_info_saved">Maelezo ya uchunguzi yamehifadhiwa.</string>
     <string name="diagnostic_info_save_failed">Kuhifadhi maelezo ya uchunguzi kumeshindikana.</string>
-    <string name="open_converter">Kibadilishaji</string>
+    <string name="open_converter">Kibadilishaji cha Nyimbo na Biblia</string>
     <string name="open_song_library">Kidhibiti cha Maktaba ya Nyimbo</string>
     <string name="report_bug">Ripoti Hitilafu</string>
     <string name="submit_feature_request">Omba Kipengele</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Slaidi Inayofuata</string>
     <string name="shortcut_category_tab_switching">Kubadili Vichupo</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Fungua Njia za Mkato za Kibodi</string>
+    <string name="shortcut_description_open_song_library">Fungua Kidhibiti cha Maktaba ya Nyimbo</string>
+    <string name="shortcut_description_open_converter">Fungua Kibadilishaji cha Nyimbo na Biblia</string>
+    <string name="shortcut_description_open_calendar_manager">Fungua Msimamizi wa Kalenda</string>
     <string name="shortcut_description_f6_bible">Nenda kwenye Kichupo cha Biblia</string>
     <string name="shortcut_description_f7_songs">Nenda kwenye Kichupo cha Nyimbo</string>
     <string name="shortcut_description_f8_pictures">Nenda kwenye Kichupo cha Picha</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Ondoa kwenye Ratiba</string>
     <string name="tooltip_clear_schedule">Futa Ratiba</string>
     <string name="tooltip_clear_display">Futa Onyesho</string>
+    <string name="remote_action_clear_display">Futa Onyesho</string>
+    <string name="schedule_add_files_title">Ongeza Faili kwenye Ratiba</string>
     <string name="tooltip_toggle_displays">Washa au Zima Maonyesho ya Mwasilishaji</string>
     <string name="tooltip_settings">Mipangilio</string>
     <string name="tooltip_theme_light">Mandhari Mepesi</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Njia maalum ya VLC</string>
     <string name="vlc_browse">Vinjari</string>
     <string name="vlc_path_hint">Chagua saraka ya usakinishaji wa VLC</string>
+    <string name="vlc_directory_chooser_title">Chagua saraka ya usakinishaji wa VLC</string>
     <string name="vlc_path_invalid">Saraka haina maktaba za VLC</string>
     <string name="media_audio_continues">Sauti itaendelea kucheza chinichini unapobadilisha vichupo au kuonyesha maudhui mengine</string>
     <string name="media_now_playing">Inachezwa sasa:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Mwonekano wa makadirio %1$d</string>
     <string name="key_output_title">Towe la Key %1$d</string>
+    <string name="decklink_output_title">Towe la DeckLink %1$d</string>
     <string name="lower_third_generator">Kitengeneza mistari ya chini</string>
     <string name="pause_duration_ms">Simama %1$d ms</string>
     <string name="aspect_ratio_mismatch">Uwiano hauendani: faili ni %1$dx%2$d (%3$s) lakini towe ni %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Nenda kwenye kichupo cha Biblia na uchague Biblia kuu</string>
     <string name="setup_step2_download_hint">Tafsiri zaidi ya 1,500 katika lugha zaidi ya 1,000 zinapatikana kutoka eBible.org na hifadhi ya Zefania. Kila moja huonyesha hakimiliki yake kabla ya kusakinisha.</string>
     <string name="setup_step2_tip">Tayari una faili za Biblia? Elekeza folda kwao badala yake nazo zitasomwa kiotomatiki.</string>
-    <string name="setup_step2_tip2">Una Biblia katika muundo mwingine? Kifaa cha kubadilisha (Msaada → Kibadilishaji) kinaweza kuibadilisha.</string>
+    <string name="setup_step2_tip2">Una Biblia katika muundo mwingine? Kibadilishaji cha Nyimbo na Biblia (Msaada → Kibadilishaji cha Nyimbo na Biblia) kinaweza kuibadilisha.</string>
     <string name="setup_step3_title">Ongeza vitabu vya nyimbo</string>
     <string name="setup_step3_subtitle">Elekeza programu kwenye folda ya mkusanyiko wako wa nyimbo</string>
     <string name="setup_step3_step1">1. Fungua Mipangilio kwa kitufe cha ⚙ kwenye upau wa vitendea kazi</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Bofya «Vinjari...» kando ya folda ya Biblia na uchague folda ya kuhifadhi faili zako za Biblia.</string>
     <string name="setup_bible_pick_translations">Nenda kwenye kichupo cha Biblia na uchague tafsiri zako — ya kwanza ndiyo kuu.</string>
     <string name="setup_songs_format_note">Folda ya maktaba ya nyimbo husoma faili za .song. Nyimbo zilizohifadhiwa katika muundo mwingine lazima zibadilishwe kwanza.</string>
-    <string name="setup_songs_converter_body">Unatoka SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm au SoftProjector? Kibadilishaji kilichojengwa ndani husoma vyote — pia maneno kutoka PDF, Word, PowerPoint na Keynote — na kuandika faili za .song ambazo folda hii inahitaji.</string>
-    <string name="setup_songs_converter_button">Fungua kibadilishaji</string>
+    <string name="setup_songs_converter_body">Unatoka SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm au SoftProjector? Kibadilishaji cha Nyimbo na Biblia kilichojengwa ndani husoma vyote — pia maneno kutoka PDF, Word, PowerPoint na Keynote — na kuandika faili za .song ambazo folda hii inahitaji.</string>
+    <string name="setup_songs_converter_button">Fungua Kibadilishaji cha Nyimbo na Biblia</string>
     <string name="setup_songs_samples_note">Bado huna nyimbo? «Ongeza nyimbo za mfano» kwenye kichupo cha Mfumo hujaza folda kwa seti inayofanya kazi.</string>
     <string name="setup_proj_rows_note">Kila skrini iliyounganishwa hupata safu yake hapa chini. Idadi ya madirisha ya uwasilishaji hutokana na unachopanga hapo, hivyo hakuna cha kuweka kwa mkono.</string>
     <string name="setup_proj_assign_note">Kwa kila skrini chagua kifaa cha kuonyesha na hali ya kuonyesha, kisha tumia «Matokeo ya maudhui» kuamua kitakachoonekana hapo. «Andika juu ya mitindo» huipa skrini hiyo mwonekano wake.</string>
