@@ -1273,9 +1273,13 @@ fun SongPresenter(
                         val label = sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) ?: return
                         val labelSettings = ss.layoutExtras.sectionLabel
                         OutlinedText(
-                            modifier = if (fillWidth) modifier.fillMaxWidth() else modifier,
+                            modifier = modifier,
                             outline = labelSettings.outline,
                             scaleFactor = scaleFactor,
+                            // Forwarded, not applied here: `OutlinedText` fills the width unless told
+                            // otherwise, and a positioned label laid out that wide left its offset no
+                            // room to move it sideways, so X did nothing (#656).
+                            fillWidth = fillWidth,
                             textAlign = getTextAlign(labelSettings.horizontalAlignment),
                             // A blank face keeps the title's, which is all this had before it
                             // could name one of its own.
