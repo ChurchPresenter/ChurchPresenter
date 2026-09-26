@@ -142,11 +142,11 @@ internal fun ColumnScope.BibleBrowserPane(
             val verseArea: @Composable ColumnScope.() -> Unit = {
                 BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 val crossRefReserve = if (crossRefsDocked) crossRefWidthPx + with(density) { 8.dp.toPx() } else 0f
-                val effectiveSplitWidth = if (isSplitActive)
-                    splitWidthPx.coerceAtMost(
-                        (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
-                    )
-                else 0f
+                // The most the live pane can take, leaving the verse card its minimum. It depends only on
+                // the space around the pane, so it holds still while the pane itself is dragged.
+                val maxSplitWidth =
+                    (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
+                val effectiveSplitWidth = if (isSplitActive) splitWidthPx.coerceAtMost(maxSplitWidth) else 0f
                 Row(modifier = Modifier.fillMaxSize()) {
 
                     VerseCard(
@@ -183,12 +183,14 @@ internal fun ColumnScope.BibleBrowserPane(
 
                     if (isSplitActive) {
                         DragHandle(onDragEnd = onSaveSplitWidth) { amount ->
-                            // From the width actually drawn, which can be less than the one stored when
-                            // the window is tight -- otherwise the first stretch of a drag does nothing.
+                            // Held to the room there is, going in and coming out, so the stored width
+                            // never runs ahead of the one drawn: past it, a drag would first have to
+                            // wind the difference back before anything moved. Capped by that room
+                            // rather than by the width last drawn, which is stale between frames.
                             onSplitWidthChange { width ->
-                                (width.coerceAtMost(effectiveSplitWidth) - amount).coerceIn(
-                                    with(density) { 150.dp.toPx() }, with(density) { 600.dp.toPx() },
-                                )
+                                (width.coerceAtMost(maxSplitWidth) - amount)
+                                    .coerceIn(with(density) { 150.dp.toPx() }, with(density) { 600.dp.toPx() })
+                                    .coerceAtMost(maxSplitWidth)
                             }
                         }
                         Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
