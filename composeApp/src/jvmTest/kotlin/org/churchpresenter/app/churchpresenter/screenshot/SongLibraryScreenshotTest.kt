@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
+import org.churchpresenter.core.models.songs.SongTranslation
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -109,6 +111,31 @@ class SongLibraryScreenshotTest {
         dismissPopup()
     }
 
+    // ── Languages ─────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Songs in several languages: the `!` beside a song whose languages need attention, and the
+     * compare button — amber where sections are out of step, disabled on a one-language song. The
+     * wide columns are turned off to bring the row's buttons into view at this window size.
+     */
+    @Test
+    fun `songs with translation problems flagged`() = shoot("translation_problems", songs = TRANSLATED) {
+        onNodeWithText(COLUMNS).performClick()
+        listOf("Song Book", "Author", "Composer", "Tune", "CCLI", "Duration").forEach {
+            onAllNodesWithText(it).onLast().performClick()
+        }
+        dismissPopup()
+    }
+
+    /** The language 3 and 4 title columns, which start hidden and are offered once a song uses them. */
+    @Test
+    fun `the language 3 and 4 title columns turned on`() = shoot("language_columns", songs = TRANSLATED) {
+        onNodeWithText(COLUMNS).performClick()
+        listOf("Language 3 Title", "Language 4 Title", "Song Book", "Author", "Composer", "Tune", "CCLI")
+            .forEach { onAllNodesWithText(it).onLast().performClick() }
+        dismissPopup()
+    }
+
     // ── The two menus ───────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -190,6 +217,8 @@ class SongLibraryScreenshotTest {
                                 onClose = {},
                                 typicalSeconds = typicalSeconds,
                                 io = if (hold) gate else Dispatchers.IO,
+                                // A flash caught at a different moment each run is a different image.
+                                animateProblems = false,
                             )
                         }
                     }
@@ -287,6 +316,35 @@ class SongLibraryScreenshotTest {
             song("002", "O Come All Ye Faithful", "Christmas/Carols", author = "John Wade"),
             song("", "Doxology", ""),
         )
+
+        /**
+         * A library sung in several languages, one song for each thing the grid can say about them:
+         * a verse a line short, a translation with no title, one with no lyrics, languages that
+         * line up, all four languages, and a song in one language only.
+         */
+        val TRANSLATED = listOf(
+            song("001", "Amazing Grace", "Hymnal").translated(
+                SongTranslation(title = "О благодать", lyrics = listOf("[Куплет 1]", "Одна строка")),
+                SongTranslation(title = "О благодать", lyrics = listOf("[Куплет 1]", "Рядок", "Ще рядок")),
+            ),
+            song("002", "Be Thou My Vision", "Hymnal").translated(
+                SongTranslation(lyrics = listOf("[Куплет 1]", "Одна строка")),
+            ),
+            song("010", "Holy, Holy, Holy", "Hymnal").translated(
+                SongTranslation(title = "Свят, свят, свят", lyrics = listOf("[Куплет 1]", "Строка")),
+                SongTranslation(title = "Святий, святий", lyrics = listOf("[Куплет 1]", "Рядок")),
+                SongTranslation(title = "Ыйык, ыйык", lyrics = listOf("[Куплет 1]", "Сап")),
+            ),
+            song("001", "Silent Night", "Christmas/Carols").translated(
+                SongTranslation(title = "Тихая ночь", lyrics = listOf("[Куплет 1]", "Строка")),
+            ),
+            song("002", "O Come All Ye Faithful", "Christmas/Carols").translated(
+                SongTranslation(title = "Придите, верные"),
+            ),
+            song("", "Doxology", ""),
+        )
+
+        fun SongItem.translated(vararg languages: SongTranslation) = withTranslations(languages.toList())
 
         @Suppress("LongParameterList")
         fun song(

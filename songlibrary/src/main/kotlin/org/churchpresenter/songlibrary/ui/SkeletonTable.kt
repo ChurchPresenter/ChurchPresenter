@@ -64,6 +64,8 @@ private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>,
                 SkeletonBar(15.dp, sweep, offset + 10.dp, width)
             }
             offset += TICK_WIDTH
+            Spacer(Modifier.width(PROBLEM_WIDTH))
+            offset += PROBLEM_WIDTH
             state.visibleColumns.forEach { field ->
                 val cell = field.width()
                 Box(Modifier.width(cell).padding(horizontal = 9.dp), contentAlignment = Alignment.CenterStart) {

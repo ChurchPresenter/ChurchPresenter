@@ -21,6 +21,7 @@ compose.resources {
 
 dependencies {
     implementation(projects.coreModels)
+    implementation(projects.songChords)
     implementation(projects.theme)
 
     implementation(libs.kotlinx.coroutines.core)

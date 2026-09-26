@@ -110,17 +110,25 @@ class SongEditsTest {
     @Test
     fun `lyrics are edited too, which the grid does not show but the editor changes`() {
         val edits = edits()
-        edits.editLyrics(grace.sourceFile, listOf("[Verse 1]", "Amazing grace"), listOf("Чудна благодать"))
+        edits.replace(
+            grace.copy(lyrics = listOf("[Verse 1]", "Amazing grace")).withTranslations(
+                listOf(
+                    SongTranslation(lyrics = listOf("Чудна благодать")),
+                    SongTranslation(lyrics = listOf("Дивна благодать")),
+                )
+            )
+        )
 
         assertTrue(edits.isDirty)
         assertEquals(listOf("[Verse 1]", "Amazing grace"), edits.songs.first().lyrics)
         assertEquals(listOf("Чудна благодать"), edits.songs.first().secondaryLyrics)
+        assertEquals(listOf("Дивна благодать"), edits.songs.first().extraTranslations()[1].lyrics)
     }
 
     @Test
     fun `lyrics edited on a song that is not there change nothing`() {
         val edits = edits()
-        edits.editLyrics("/library/gone.song", listOf("x"), emptyList())
+        edits.replace(grace.copy(sourceFile = "/library/gone.song", lyrics = listOf("x")))
 
         assertFalse(edits.isDirty)
     }

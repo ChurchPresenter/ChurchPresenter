@@ -7,6 +7,8 @@ enum class SongField {
     NUMBER,
     TITLE,
     SECONDARY_TITLE,
+    THIRD_TITLE,
+    FOURTH_TITLE,
     SONGBOOK,
     AUTHOR,
     COMPOSER,
@@ -21,6 +23,8 @@ enum class SongField {
         NUMBER -> song.number
         TITLE -> song.title
         SECONDARY_TITLE -> song.secondaryTitle
+        THIRD_TITLE -> song.extraTranslations().getOrNull(1)?.title.orEmpty()
+        FOURTH_TITLE -> song.extraTranslations().getOrNull(2)?.title.orEmpty()
         SONGBOOK -> song.songbook
         AUTHOR -> song.author
         COMPOSER -> song.composer
@@ -32,6 +36,8 @@ enum class SongField {
         NUMBER -> song.copy(number = value.trim())
         TITLE -> song.copy(title = value.trim())
         SECONDARY_TITLE -> song.withTranslation(0) { it.copy(title = value.trim()) }
+        THIRD_TITLE -> song.withTranslation(1) { it.copy(title = value.trim()) }
+        FOURTH_TITLE -> song.withTranslation(2) { it.copy(title = value.trim()) }
         SONGBOOK -> song.copy(songbook = value.trim().trim('/'))
         AUTHOR -> song.copy(author = value.trim())
         COMPOSER -> song.copy(composer = value.trim())
@@ -74,10 +80,13 @@ class SongEdits(loaded: List<SongItem>) {
         current[sourceFile] = field.set(song, value)
     }
 
-    /** The lyrics of the song in [sourceFile], which a grid does not show but an editor changes. */
-    fun editLyrics(sourceFile: String, lyrics: List<String>, secondaryLyrics: List<String>) {
-        val song = current[sourceFile] ?: return
-        current[sourceFile] = song.copy(lyrics = lyrics).withTranslation(0) { it.copy(lyrics = secondaryLyrics) }
+    /**
+     * [song] as it came back from an editor, as one edit — lyrics included, which a grid does not
+     * show, and every language of them rather than the first two.
+     */
+    fun replace(song: SongItem) {
+        if (song.sourceFile !in current) return
+        current[song.sourceFile] = song
     }
 
     /**

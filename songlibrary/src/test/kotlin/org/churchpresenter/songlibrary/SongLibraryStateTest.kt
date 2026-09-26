@@ -112,7 +112,7 @@ class SongLibraryStateTest {
     // ── Columns ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `the title column cannot be hidden and stays first`() {
+    fun `the title column cannot be hidden`() {
         OPTIONAL_COLUMNS.forEach { state.toggleColumn(it) }
 
         assertEquals(listOf(SongField.TITLE), state.visibleColumns)
@@ -129,11 +129,14 @@ class SongLibraryStateTest {
 
         state.toggleColumn(SongField.TUNE)
         state.toggleColumn(SongField.AUTHOR)
-        assertEquals(setOf(SongField.TUNE, SongField.AUTHOR), state.hiddenColumns.toSet())
+        assertEquals(DEFAULT_HIDDEN_COLUMNS + setOf(SongField.TUNE, SongField.AUTHOR), state.hiddenColumns)
 
         state.showAllColumns()
         assertTrue(state.hiddenColumns.isEmpty())
-        assertEquals(listOf(SongField.TITLE) + OPTIONAL_COLUMNS, state.visibleColumns)
+        assertEquals(
+            listOf(SongField.NUMBER, SongField.TITLE) + (state.availableColumns - SongField.NUMBER),
+            state.visibleColumns,
+        )
     }
 
     // ── Selection ─────────────────────────────────────────────────────────────
