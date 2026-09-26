@@ -81,6 +81,7 @@
 
 ## Images & Media
 - **Image slideshows** — point to a folder and present photos with crossfade, fade and slide transitions, auto-advance and looping.
+- **Hide what you won't show** — hide any picture or presentation slide from its tile, as in PowerPoint: Next, Previous and the slideshow pass over it, you can still click it to show it on purpose, and it stays hidden the next time the folder or file is opened.
 - **Audio & video playback** — play local files or network streams (HTTP, RTSP and more), powered by VLC.
 - **Full transport controls** — play, pause, seek, volume, mute, and choose your audio output device.
 - **Background audio** — music keeps playing while you switch tabs or show other content.
@@ -91,6 +92,7 @@
 - `tabs/PicturesTab.kt` — image slideshow UI
 - `tabs/MediaTab.kt` — audio/video UI
 - `viewmodel/PicturesViewModel.kt`, `viewmodel/MediaViewModel.kt`, `viewmodel/LocalMediaViewModel.kt`
+- `data/HiddenItemsStore.kt`, `composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
 - `presenter/PicturePresenter.kt`, `presenter/MediaPresenter.kt`
 - `composables/VideoPlayer.kt`

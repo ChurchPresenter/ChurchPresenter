@@ -148,6 +148,20 @@ class PicturesTabScreenshotTest {
         waitForIdle()
     }
 
+    /**
+     * A folder of its own: hidden marks are remembered per folder path, and every other shot here
+     * shares "Sunday Service", which would then show this one's badge.
+     */
+    @Test
+    fun `a picture hidden from the slideshow`() = shoot(
+        "image_hidden",
+        folder = { folderOf("Hidden Pictures", *GALLERY) },
+    ) { vm ->
+        awaitAll(vm)
+        vm.images.getOrNull(1)?.let { if (!vm.isHidden(it)) vm.toggleHidden(it) }
+        waitForIdle()
+    }
+
     @Test
     fun `the slideshow running`() = shoot("playing") { vm ->
         awaitAll(vm)

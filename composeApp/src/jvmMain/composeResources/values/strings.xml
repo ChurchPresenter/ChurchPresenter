@@ -865,6 +865,10 @@
     <string name="play">Play</string>
     <string name="next_image">Next Image</string>
     <string name="image_counter">Image %1$d of %2$d</string>
+    <string name="image_counter_with_hidden">Image %1$d of %2$d · %3$d hidden</string>
+    <string name="hide_from_slideshow">Hide — skipped by Next and the slideshow</string>
+    <string name="show_in_slideshow">Show again in the slideshow</string>
+    <string name="slideshow_hidden">Hidden</string>
     <string name="no_images">No images</string>
     <string name="auto_scroll_interval">Auto-scroll interval:</string>
     <string name="seconds_suffix">s</string>
@@ -908,6 +912,7 @@
     <string name="slide_count">%1$d slides</string>
     <string name="loading_slides_progress">%1$d / %2$d slides</string>
     <string name="slide_counter">Slide %1$d of %2$d</string>
+    <string name="slide_counter_with_hidden">Slide %1$d of %2$d · %3$d hidden</string>
     <string name="presentation_builds_counter">Build %1$d of %2$d</string>
     <string name="presentation_animate_keynote">Animate Keynote presentations</string>
     <string name="presentation_focus_lost">Keyboard focus lost — click here to re-enable keyboard and clicker control</string>

@@ -724,7 +724,6 @@
     <ID>MaxLineLength:PicturesTab.kt$shortcuts.matches(ShortcutAction.PICTURES_PREVIOUS, keyEvent) -&gt; { viewModel.previousImage(onInstanceLinkSendPreviousPicture); true }</ID>
     <ID>MaxLineLength:PicturesTab.kt$text = "${appSettings.pictureSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}"</ID>
     <ID>MaxLineLength:PicturesTab.kt$text = "${appSettings.pictureSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}"</ID>
-    <ID>MaxLineLength:PicturesTab.kt$text = stringResource(Res.string.image_counter, viewModel.selectedImageIndex + 1, viewModel.images.size)</ID>
     <ID>MaxLineLength:PicturesTab.kt$tint</ID>
     <ID>MaxLineLength:PicturesTab.kt$tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }</ID>
     <ID>MaxLineLength:PicturesTab.kt$tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }</ID>
@@ -818,7 +817,6 @@
     <ID>MaxLineLength:PresentationTab.kt$shortcuts.matches(ShortcutAction.PRESENTATION_PLAY_PAUSE, keyEvent) -&gt; { viewModel.togglePlayPause(); true }</ID>
     <ID>MaxLineLength:PresentationTab.kt$text = stringResource(Res.string.loading_slides_progress, viewModel.slideFiles.size, viewModel.totalSlides)</ID>
     <ID>MaxLineLength:PresentationTab.kt$text = stringResource(Res.string.presentation_builds_counter, liveFrame.completedSteps, liveFrame.stepCount)</ID>
-    <ID>MaxLineLength:PresentationTab.kt$text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slideFiles.size)</ID>
     <ID>MaxLineLength:PresentationTab.kt$text = { OutlinedTextField(value = intervalInput, onValueChange = { intervalInput = it }, suffix = { Text(stringResource(Res.string.unit_s)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) }</ID>
     <ID>MaxLineLength:PresentationTab.kt$text = { OutlinedTextField(value = transitionInput, onValueChange = { transitionInput = it }, suffix = { Text(stringResource(Res.string.unit_ms)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) }</ID>
     <ID>MaxLineLength:PresentationTab.kt$tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)</ID>
