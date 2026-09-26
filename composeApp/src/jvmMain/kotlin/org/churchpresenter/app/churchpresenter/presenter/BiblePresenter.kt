@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.HorizontalDivider
@@ -173,6 +174,20 @@ internal fun BibleTranslationSettings.referenceOutlineFor(lowerThird: Boolean): 
  * band and be clipped, and one measured into the sum would shrink the stack for height the half no
  * longer occupies.
  */
+/**
+ * [item]'s block moved by its own Shift X / Y -- output pixels at 1080 lines, scaled as its text
+ * is -- so one translation of a parallel stack can be nudged without moving the others.
+ */
+internal fun Modifier.translationShift(
+    item: BibleTranslationSettings,
+    lowerThird: Boolean,
+    scaleFactor: Float,
+): Modifier {
+    val x = if (lowerThird) item.lowerThirdShiftX else item.shiftX
+    val y = if (lowerThird) item.lowerThirdShiftY else item.shiftY
+    return if (x == 0 && y == 0) this else offset((x * scaleFactor).dp, (y * scaleFactor).dp)
+}
+
 internal fun BibleTranslationSettings.textOffsetFor(lowerThird: Boolean): ElementOffset? =
     if (lowerThird) lowerThirdTextOffset else textOffset
 
@@ -1074,7 +1089,9 @@ fun BiblePresenter(
                                             contentAlignment = contentAlignment,
                                         ) {
                                             if (cell != null) {
-                                                translationBlock(cell.first, cell.second, fitScale)
+                                                Box(Modifier.translationShift(cell.second, isLowerThird, scaleFactor)) {
+                                                    translationBlock(cell.first, cell.second, fitScale)
+                                                }
                                             }
                                         }
                                         if (colIndex < gridCols - 1) {
@@ -1204,7 +1221,9 @@ fun BiblePresenter(
                                             contentAlignment = Alignment.BottomCenter,
                                         ) {
                                             if (cell != null) {
-                                                translationBlock(cell.first, cell.second, fitScale)
+                                                Box(Modifier.translationShift(cell.second, isLowerThird, scaleFactor)) {
+                                                    translationBlock(cell.first, cell.second, fitScale)
+                                                }
                                             }
                                         }
                                     }

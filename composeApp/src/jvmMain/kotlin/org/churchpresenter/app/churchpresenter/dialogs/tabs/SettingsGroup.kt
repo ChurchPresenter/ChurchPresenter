@@ -265,6 +265,7 @@ internal fun SettingsRow(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                    TargetChip(paths)
                     LinkedControl(link, paths, control)
                 }
             },

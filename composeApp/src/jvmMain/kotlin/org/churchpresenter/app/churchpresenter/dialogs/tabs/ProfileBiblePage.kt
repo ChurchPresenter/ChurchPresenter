@@ -1,8 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
 import churchpresenter.composeapp.generated.resources.customize_bible
@@ -16,6 +18,8 @@ import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_ref_above
 import churchpresenter.composeapp.generated.resources.profile_ref_after
 import churchpresenter.composeapp.generated.resources.profile_reference
+import churchpresenter.composeapp.generated.resources.profile_shift
+import churchpresenter.composeapp.generated.resources.profile_shift_sub
 import churchpresenter.composeapp.generated.resources.profile_space_between_translations
 import churchpresenter.composeapp.generated.resources.profile_split_long_verses
 import churchpresenter.composeapp.generated.resources.profile_split_words
@@ -30,6 +34,10 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.allStyle
+import org.churchpresenter.settings.clearOwnStyle
+import org.churchpresenter.settings.updateAllLayer
+import org.churchpresenter.settings.updateOwnStyle
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -87,24 +95,41 @@ private class BibleEdit(
     val stack = bs.translationList()
     val index = effectiveTranslationIndex(translationIndex, stack.size)
     val all = index == ALL_TRANSLATIONS
-    val shown = stack.getOrNull(if (all) 0 else index) ?: BibleTranslationSettings()
+    val shown = if (all) bs.allStyle() else stack.getOrNull(index) ?: BibleTranslationSettings()
     val target = if (lowerThird) BibleStyleTarget.LOWER_THIRD else BibleStyleTarget.FULL_SCREEN
     val styleElement =
         if (element == CustomizeElement.BIBLE_REFERENCE) BibleStyleElement.REFERENCE else BibleStyleElement.TEXT
     val style = shown.elementStyle(styleElement, target)
 
-    /** [transform] of the translation being edited -- or of every one, under All. */
+    /** One translation of a stack of several is being edited, rather than All. */
+    val picked = !all && stack.size > 1
+
+    /** The picked translation as the rows mark its own values; null under All. */
+    @Composable
+    fun styleTarget(): StyleTarget? {
+        val entry = stack.getOrNull(index)
+        if (!picked || entry == null) return null
+        val label = entry.customAbbreviation
+            .ifBlank { defaultTranslationAbbreviation(title = "", fileName = entry.fileName) }
+        return StyleTarget(label, "bibleSettings.translations[${entry.fileName}]", entry.ownStyleKeys, ::clearOwn)
+    }
+
+    /**
+     * [transform] of the translation being edited, whose changed fields become its own -- or, under
+     * All, of the All layer and every translation without a value of its own for what changed.
+     */
     fun updateEntry(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
-        onSettingsChange { s ->
-            val bible = s.bibleSettings
-            s.copy(
-                bibleSettings = if (all) {
-                    bible.updateEveryTranslation(transform)
-                } else {
-                    bible.updateTranslation(index, transform)
-                },
-            )
-        }
+        onSettingsChange { s -> s.copy(bibleSettings = entryUpdated(s.bibleSettings, transform)) }
+    }
+
+    private fun entryUpdated(
+        bible: BibleSettings,
+        transform: (BibleTranslationSettings) -> BibleTranslationSettings,
+    ): BibleSettings = if (all) bible.updateAllLayer(transform) else bible.updateOwnStyle(index, transform)
+
+    /** Translation [index] following All again at [keys] -- its "Only KJV ×". */
+    fun clearOwn(keys: Collection<String>) {
+        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.clearOwnStyle(index, keys)) }
     }
 
     /** [transform] of the settings that are one for the whole Bible rather than per translation. */
@@ -112,28 +137,23 @@ private class BibleEdit(
         onSettingsChange { s -> s.copy(bibleSettings = transform(s.bibleSettings)) }
     }
 
-    /**
-     * [edited] written to [of] -- under All only the property that changed, so each translation
-     * keeps everything else it had of its own.
-     */
+    /** [edited] written to [of] of the translation being edited, or of the All layer. */
     fun writeStyle(edited: BibleElementStyle, of: BibleStyleElement = styleElement) {
         onSettingsChange { s -> s.copy(bibleSettings = styled(s.bibleSettings, edited, of)) }
     }
 
     /** [bible] with [edited] written the way [writeStyle] writes it. */
-    fun styled(bible: BibleSettings, edited: BibleElementStyle, of: BibleStyleElement = styleElement): BibleSettings {
-        val before = shown.elementStyle(of, target)
-        val write = { t: BibleTranslationSettings ->
-            val next = if (all) t.elementStyle(of, target).withChangesFrom(before, edited) else edited
-            t.withElementStyle(of, target, next)
-        }
-        return if (all) bible.updateEveryTranslation(write) else bible.updateTranslation(index, write)
-    }
+    fun styled(bible: BibleSettings, edited: BibleElementStyle, of: BibleStyleElement = styleElement): BibleSettings =
+        entryUpdated(bible) { it.withElementStyle(of, target, edited) }
 
-    /** Where the Text group's rows store their values, on a linked profile; none elsewhere. */
+    /**
+     * Where the Text group's rows store their values -- for a linked profile to mark them, and for a
+     * picked translation to show which are its own. None when neither needs them.
+     */
     @Composable
     fun lookPaths(): TextLookPaths {
-        val link = LocalProfileLink.current?.takeIf { it.isLinked } ?: return TextLookPaths.NONE
+        val link = LocalProfileLink.current ?: return TextLookPaths.NONE
+        if (!link.isLinked && !picked) return TextLookPaths.NONE
         val base = link.profile.copy(bibleSettings = bs)
         return remember(link.profile.id, index, styleElement, target, stack.map { it.fileName }) {
             probeTextLookPaths(base, style.toLook()) { p, look ->
@@ -184,7 +204,7 @@ private fun BibleTextGroup(
     ) {
         // Keyed on what the rows point at: one set of controls stands for many stored styles, and
         // without this a field keeps the text it was typing into the translation it left.
-        key(edit.index, edit.styleElement) {
+        key(edit.index, edit.styleElement) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
             TextLookRows(
                 look = style.toLook(),
                 onChange = { look -> edit.writeStyle(style.withLook(look)) },
@@ -199,10 +219,52 @@ private fun BibleTextGroup(
                         )
                     }
                 },
+                extraAdvanced = { if (edit.picked) ShiftRow(edit) },
             )
-        }
+        } }
     }
 }
+
+/** SHIFT X / Y: the picked translation's block moved on its own, in output pixels. */
+@Composable
+private fun ShiftRow(edit: BibleEdit) {
+    val entry = edit.shown
+    val lowerThird = edit.lowerThird
+    val x = if (lowerThird) entry.lowerThirdShiftX else entry.shiftX
+    val y = if (lowerThird) entry.lowerThirdShiftY else entry.shiftY
+    val entryPath = "bibleSettings.translations[${entry.fileName}]"
+    val fields = if (lowerThird) listOf("lowerThirdShiftX", "lowerThirdShiftY") else listOf("shiftX", "shiftY")
+    SettingsRow(
+        stringResource(Res.string.profile_shift),
+        sub = stringResource(Res.string.profile_shift_sub),
+        advanced = true,
+        paths = fields.map { "$entryPath.$it" },
+    ) {
+        val px = stringResource(Res.string.pixels_short)
+        RowNumberField(
+            x,
+            { v -> edit.updateEntry { if (lowerThird) it.copy(lowerThirdShiftX = v) else it.copy(shiftX = v) } },
+            SHIFT_RANGE,
+            unit = "X $px",
+            width = 72.dp,
+            testTag = SHIFT_X_TAG,
+        )
+        RowNumberField(
+            y,
+            { v -> edit.updateEntry { if (lowerThird) it.copy(lowerThirdShiftY = v) else it.copy(shiftY = v) } },
+            SHIFT_RANGE,
+            unit = "Y $px",
+            width = 72.dp,
+            testTag = SHIFT_Y_TAG,
+        )
+    }
+}
+
+private val SHIFT_RANGE = -960..960
+
+/** Test handles for the Shift X / Y fields. */
+internal const val SHIFT_X_TAG = "profile_shift_x"
+internal const val SHIFT_Y_TAG = "profile_shift_y"
 
 /** Where the block sits, the band, and the fades. */
 @Composable

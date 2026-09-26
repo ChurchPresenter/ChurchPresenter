@@ -366,7 +366,7 @@ class SettingsManager {
      */
     private fun AppSettings.repaired(): AppSettings =
         copy(
-            bibleSettings = bibleSettings.migrateTranslations(),
+            bibleSettings = bibleSettings.migrateTranslations().migrateAllLayer(),
             songSettings = songSettings.migrateSongNumberStyle().migrateElementPositions(),
             projectionSettings = projectionSettings.copy(
                 outputProfiles = projectionSettings.outputProfiles.map(::repairedProfile),
@@ -385,7 +385,7 @@ class SettingsManager {
      */
     private fun repairedProfile(profile: OutputProfile): OutputProfile =
         profile.copy(
-            bibleSettings = profile.bibleSettings.migrateTranslations(),
+            bibleSettings = profile.bibleSettings.migrateTranslations().migrateAllLayer(),
             songSettings = profile.songSettings.migrateElementPositions(),
         )
 

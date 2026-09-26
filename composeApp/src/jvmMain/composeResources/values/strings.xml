@@ -3370,4 +3370,7 @@
     <string name="profile_no_changes">No changes from %1$s.</string>
     <string name="profile_value_on">On</string>
     <string name="profile_value_off">Off</string>
+    <string name="profile_only_target">Only %1$s</string>
+    <string name="profile_shift">Move X / Y</string>
+    <string name="profile_shift_sub">Moves this translation on its own, in output pixels.</string>
 </resources>
