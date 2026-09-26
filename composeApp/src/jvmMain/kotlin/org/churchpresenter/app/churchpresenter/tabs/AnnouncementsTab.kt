@@ -8,12 +8,6 @@ import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import java.awt.Cursor
-import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
@@ -336,167 +330,167 @@ fun AnnouncementsTab(
             }
             val durationMs = viewModel.animationDuration
 
-        // ── Text input bar ────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
+        Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
+            // ── Text input bar ────────────────────────────────────────────
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                    .hoverTint(RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                BasicTextField(
-                    value = viewModel.text,
-                    onValueChange = { viewModel.setText(it); viewModel.saveToSettings(onSettingsChange) },
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    maxLines = 2,
-                    modifier = Modifier.fillMaxWidth(),
-                    decorationBox = { inner ->
-                        if (viewModel.text.isEmpty()) {
-                            Text(stringResource(Res.string.announcement_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .hoverTint(RoundedCornerShape(8.dp))
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                ) {
+                    BasicTextField(
+                        value = viewModel.text,
+                        onValueChange = { viewModel.setText(it); viewModel.saveToSettings(onSettingsChange) },
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        maxLines = 2,
+                        modifier = Modifier.fillMaxWidth(),
+                        decorationBox = { inner ->
+                            if (viewModel.text.isEmpty()) {
+                                Text(stringResource(Res.string.announcement_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            }
+                            inner()
                         }
-                        inner()
-                    }
-                )
-            }
-            if (presenterManager != null) {
-                // Mutually exclusive with the timer's own play/pause button below — only one of
-                // text/timer can occupy the shared announcementText slot at a time, so whichever
-                // one is started (isTimerRunning going true) automatically shows this as not-live.
-                val announcementTextIsLive = presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS && !isTimerRunning
-                ActionIconButton(
-                    onClick = {
-                        if (announcementTextIsLive) presenterManager.requestClearDisplay()
-                        else { viewModel.pauseTimer(presenterManager); presenterManager.setAnnouncementText(viewModel.text); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }
-                    },
-                    enabled = viewModel.text.isNotBlank() || announcementTextIsLive,
-                    tooltipText = stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show),
-                    painter = painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play),
-                    containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
-                    contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
-                )
-                if (canSendToStageMonitor) {
+                    )
+                }
+                if (presenterManager != null) {
+                    // Mutually exclusive with the timer's own play/pause button below — only one of
+                    // text/timer can occupy the shared announcementText slot at a time, so whichever
+                    // one is started (isTimerRunning going true) automatically shows this as not-live.
+                    val announcementTextIsLive = presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS && !isTimerRunning
                     ActionIconButton(
-                        onClick = { toggleStageMonitor(viewModel.text, stopTicker = true) },
-                        enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
-                        tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
-                        icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
-                        containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        onClick = {
+                            if (announcementTextIsLive) presenterManager.requestClearDisplay()
+                            else { viewModel.pauseTimer(presenterManager); presenterManager.setAnnouncementText(viewModel.text); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }
+                        },
+                        enabled = viewModel.text.isNotBlank() || announcementTextIsLive,
+                        tooltipText = stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show),
+                        painter = painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play),
+                        containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
+                        contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
                     )
-                }
-            }
-            if (onSavePreset != null) {
-                SavePresetButton(
-                    onClick = {
-                        // A saved announcement is the text and its look; the timer fields
-                        // belong to a timer preset, not to this one.
-                        onSavePreset.invoke(
-                            viewModel.buildSettings().copy(
-                                timerHours = 0,
-                                timerMinutes = 0,
-                                timerSeconds = 0,
-                                timerTextColor = "#FFFFFF",
-                                timerExpiredText = "",
-                                timerMode = Constants.TIMER_MODE_DURATION,
-                            )
+                    if (canSendToStageMonitor) {
+                        ActionIconButton(
+                            onClick = { toggleStageMonitor(viewModel.text, stopTicker = true) },
+                            enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
+                            tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
+                            icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
+                            containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    },
-                    enabled = viewModel.text.isNotBlank(),
-                    tooltipText = stringResource(Res.string.save_preset)
-                )
-            }
-            if (onAddToSchedule != null) {
-                AddToScheduleButton(
-                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings().copy(timerHours = 0, timerMinutes = 0, timerSeconds = 0, timerTextColor = "#FFFFFF", timerExpiredText = "", timerMode = Constants.TIMER_MODE_DURATION)) },
-                    enabled = viewModel.text.isNotBlank(),
-                    tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
-                )
-            }
-            if (presenterManager != null) {
-                GoLiveButton(
-                    onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
-                    enabled = viewModel.text.isNotBlank(),
-                    tooltipText = stringResource(Res.string.tooltip_go_live)
-                )
-            }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // ── Formatting bar ────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            ColorPickerField(label = stringResource(Res.string.text_color), color = viewModel.textColor, onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.width(120.dp))
-            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            TextStyleButtons(
-                bold = viewModel.bold, italic = viewModel.italic, underline = viewModel.underline, shadow = viewModel.shadow,
-                onBoldChange = { viewModel.setBold(it); viewModel.saveToSettings(onSettingsChange) },
-                onItalicChange = { viewModel.setItalic(it); viewModel.saveToSettings(onSettingsChange) },
-                onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
-                onShadowChange = { viewModel.setShadow(it); viewModel.saveToSettings(onSettingsChange) },
-                backdrop = viewModel.backdrop,
-                onBackdropChange = { updated ->
-                    viewModel.setBackdrop(updated)
-                    viewModel.saveToSettings(onSettingsChange)
-                },
-                outline = viewModel.outline,
-                onOutlineChange = { updated ->
-                    viewModel.setOutline(updated)
-                    viewModel.saveToSettings(onSettingsChange)
-                },
-            )
-            HorizontalAlignmentButtons(
-                selectedAlignment = viewModel.horizontalAlignment,
-                onAlignmentChange = { viewModel.setHorizontalAlignment(it); viewModel.saveToSettings(onSettingsChange) },
-                leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
-            )
-            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            FontSettingsDropdown(label = stringResource(Res.string.font_type), value = viewModel.fontType, fonts = availableFonts, onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) })
-            NumberSettingsTextField(label = stringResource(Res.string.font_size), initialText = viewModel.fontSize, range = 8..200, onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) })
-            Spacer(Modifier.weight(1f))
-        }
-        AnimatedVisibility(visible = viewModel.shadow) {
-            Column {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 16.dp, vertical = 6.dp)) {
-                    ShadowDetailRow(
-                        shadowColor = appSettings.announcementsSettings.shadowColor,
-                        shadowSize = appSettings.announcementsSettings.shadowSize,
-                        shadowOpacity = appSettings.announcementsSettings.shadowOpacity,
-                        onColorChange = { c -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowColor = c)) } },
-                        onSizeChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowSize = v)) } },
-                        onOpacityChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowOpacity = v)) } }
+                    }
+                }
+                if (onSavePreset != null) {
+                    SavePresetButton(
+                        onClick = {
+                            // A saved announcement is the text and its look; the timer fields
+                            // belong to a timer preset, not to this one.
+                            onSavePreset.invoke(
+                                viewModel.buildSettings().copy(
+                                    timerHours = 0,
+                                    timerMinutes = 0,
+                                    timerSeconds = 0,
+                                    timerTextColor = "#FFFFFF",
+                                    timerExpiredText = "",
+                                    timerMode = Constants.TIMER_MODE_DURATION,
+                                )
+                            )
+                        },
+                        enabled = viewModel.text.isNotBlank(),
+                        tooltipText = stringResource(Res.string.save_preset)
+                    )
+                }
+                if (onAddToSchedule != null) {
+                    AddToScheduleButton(
+                        onClick = { onAddToSchedule.invoke(viewModel.buildSettings().copy(timerHours = 0, timerMinutes = 0, timerSeconds = 0, timerTextColor = "#FFFFFF", timerExpiredText = "", timerMode = Constants.TIMER_MODE_DURATION)) },
+                        enabled = viewModel.text.isNotBlank(),
+                        tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
+                    )
+                }
+                if (presenterManager != null) {
+                    GoLiveButton(
+                        onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
+                        enabled = viewModel.text.isNotBlank(),
+                        tooltipText = stringResource(Res.string.tooltip_go_live)
                     )
                 }
             }
+
+            // ── Formatting bar ────────────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                ColorPickerField(label = stringResource(Res.string.text_color), color = viewModel.textColor, onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.width(120.dp))
+                HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                TextStyleButtons(
+                    bold = viewModel.bold, italic = viewModel.italic, underline = viewModel.underline, shadow = viewModel.shadow,
+                    onBoldChange = { viewModel.setBold(it); viewModel.saveToSettings(onSettingsChange) },
+                    onItalicChange = { viewModel.setItalic(it); viewModel.saveToSettings(onSettingsChange) },
+                    onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
+                    onShadowChange = { viewModel.setShadow(it); viewModel.saveToSettings(onSettingsChange) },
+                    backdrop = viewModel.backdrop,
+                    onBackdropChange = { updated ->
+                        viewModel.setBackdrop(updated)
+                        viewModel.saveToSettings(onSettingsChange)
+                    },
+                    outline = viewModel.outline,
+                    onOutlineChange = { updated ->
+                        viewModel.setOutline(updated)
+                        viewModel.saveToSettings(onSettingsChange)
+                    },
+                )
+                HorizontalAlignmentButtons(
+                    selectedAlignment = viewModel.horizontalAlignment,
+                    onAlignmentChange = { viewModel.setHorizontalAlignment(it); viewModel.saveToSettings(onSettingsChange) },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+                HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                FontSettingsDropdown(label = stringResource(Res.string.font_type), value = viewModel.fontType, fonts = availableFonts, onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) })
+                NumberSettingsTextField(label = stringResource(Res.string.font_size), initialText = viewModel.fontSize, range = 8..200, onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) })
+                Spacer(Modifier.weight(1f))
+            }
+            AnimatedVisibility(visible = viewModel.shadow) {
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 16.dp, vertical = 6.dp)) {
+                        ShadowDetailRow(
+                            shadowColor = appSettings.announcementsSettings.shadowColor,
+                            shadowSize = appSettings.announcementsSettings.shadowSize,
+                            shadowOpacity = appSettings.announcementsSettings.shadowOpacity,
+                            onColorChange = { c -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowColor = c)) } },
+                            onSizeChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowSize = v)) } },
+                            onOpacityChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowOpacity = v)) } }
+                        )
+                    }
+                }
+            }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         // ── Resizable split panel ─────────────────────────────────────
         var twoColHeightPx by remember { mutableStateOf(0) }
         var twoColWidthPx by remember { mutableStateOf(0) }
         Box(modifier = Modifier.weight(1f).fillMaxWidth().onSizeChanged { twoColHeightPx = it.height; twoColWidthPx = it.width }) {
-            Row(modifier = Modifier.fillMaxSize()) {
+            Row(modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 4.dp, bottom = 4.dp)) {
                 // ── LEFT: background color + position + timer ──────────────
                 Column(
                     modifier = Modifier
                         .width(with(density) { leftPanelPx.toDp() })
                         .fillMaxHeight()
+                        .bibleListCard()
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -596,7 +590,7 @@ fun AnnouncementsTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(end = 8.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                            .background(bibleInsetFill(), RoundedCornerShape(11.dp))
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -906,27 +900,17 @@ fun AnnouncementsTab(
                 } // end left column
 
                 // Drag handle
-                Box(
-                    modifier = Modifier
-                        .width(6.dp)
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.outlineVariant)
-                        .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                        .draggable(
-                            orientation = Orientation.Horizontal,
-                            state = rememberDraggableState { delta ->
-                                leftPanelPx = (leftPanelPx + delta).coerceIn(
-                                    with(density) { 150.dp.toPx() },
-                                    (twoColWidthPx - with(density) { 100.dp.toPx() }).coerceAtLeast(with(density) { 150.dp.toPx() })
-                                )
-                            },
-                            onDragStopped = { saveLeftPanel() }
-                        )
-                )
+                DragHandle(onDragEnd = { saveLeftPanel() }) { delta ->
+                    leftPanelPx = (leftPanelPx + delta).coerceIn(
+                        with(density) { 150.dp.toPx() },
+                        (twoColWidthPx - with(density) { 100.dp.toPx() }).coerceAtLeast(with(density) { 150.dp.toPx() })
+                    )
+                }
 
                 // ── RIGHT COLUMN: preview + animation/loop/speed ──────────
                 Column(
-                    modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
+                    modifier = Modifier.weight(1f).fillMaxHeight().bibleListCard()
+                        .verticalScroll(rememberScrollState()).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {

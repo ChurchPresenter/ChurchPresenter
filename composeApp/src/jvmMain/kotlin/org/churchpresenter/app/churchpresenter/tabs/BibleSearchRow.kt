@@ -71,7 +71,7 @@ internal fun BibleSearchRow(
     onScopeSelected: (Int) -> Unit,
     onModeSelected: (Int) -> Unit,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp)) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth().searchBarCard()) {
         val searchIsNarrow = maxWidth < 440.dp
 
         if (searchIsNarrow) {

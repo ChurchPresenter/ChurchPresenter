@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,11 +48,14 @@ internal fun ColumnScope.BibleSearchResults(
     query: String,
     onResultChosen: (BibleSearch) -> Unit,
 ) {
-        Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        Column(
+            modifier = Modifier.fillMaxWidth().weight(1f)
+                .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                .bibleListCard()
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth().height(31.dp)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 12.dp),
+                modifier = Modifier.fillMaxWidth().height(40.dp)
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -58,10 +64,14 @@ internal fun ColumnScope.BibleSearchResults(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                 val listState = rememberLazyListState()
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 8.dp, end = 12.dp, bottom = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
                     itemsIndexed(results) { _, result ->
 
                         val resultText = result.verseText
@@ -81,17 +91,21 @@ internal fun ColumnScope.BibleSearchResults(
                             }
                             if (lastIndex < resultText.length) append(resultText.substring(lastIndex))
                         }
+                        val (hover, hovered) = rememberRowHover()
                         Text(
                             text = highlightedText,
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .clip(BibleVerseRowShape)
+                                .background(bibleRowColors(selected = false, hovered = hovered).background)
+                                .hoverable(hover)
                                 .initialPassClickable { onResultChosen(result) }
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.bodySmall,
+                                .padding(start = 12.dp, top = 8.dp, end = 10.dp, bottom = 8.dp),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                lineHeight = MaterialTheme.typography.bodyMedium.fontSize * 1.55f,
+                            ),
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     }
                 }
                 VerticalScrollbar(
