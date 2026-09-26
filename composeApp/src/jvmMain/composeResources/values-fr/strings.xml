@@ -103,7 +103,7 @@
     <string name="about_title">À propos de Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Ouvrir les journaux d'erreurs</string>
-    <string name="open_converter">Convertisseur</string>
+    <string name="open_converter">Convertisseur de cantiques et de Bibles</string>
     <string name="open_song_library">Gestionnaire de la bibliothèque de cantiques</string>
     <string name="report_bug">Signaler un bogue</string>
     <string name="submit_feature_request">Soumettre une demande de fonctionnalité</string>
@@ -144,6 +144,9 @@
     <string name="shortcut_description_next_slide">Diapositive suivante</string>
     <string name="shortcut_category_tab_switching">Changement d'onglet</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Ouvrir les raccourcis clavier</string>
+    <string name="shortcut_description_open_song_library">Ouvrir le gestionnaire de la bibliothèque de cantiques</string>
+    <string name="shortcut_description_open_converter">Ouvrir le convertisseur de cantiques et de Bibles</string>
+    <string name="shortcut_description_open_calendar_manager">Ouvrir le gestionnaire de calendrier</string>
     <string name="shortcut_description_f6_bible">Aller à l'onglet Bible</string>
     <string name="shortcut_description_f7_songs">Aller à l'onglet Cantiques</string>
     <string name="shortcut_description_f8_pictures">Aller à l'onglet Images</string>
@@ -488,6 +491,8 @@
     <string name="tooltip_remove_from_schedule">Retirer du programme</string>
     <string name="tooltip_clear_schedule">Effacer le programme</string>
     <string name="tooltip_clear_display">Effacer l'affichage</string>
+    <string name="remote_action_clear_display">Effacer l'affichage</string>
+    <string name="schedule_add_files_title">Ajouter des fichiers au programme</string>
     <string name="tooltip_toggle_displays">Basculer les écrans du présentateur</string>
     <string name="tooltip_settings">Paramètres</string>
     <string name="tooltip_theme_light">Thème clair</string>
@@ -710,6 +715,7 @@
     <string name="vlc_custom_path">Chemin VLC personnalisé</string>
     <string name="vlc_browse">Parcourir</string>
     <string name="vlc_path_hint">Sélectionner le répertoire d'installation de VLC</string>
+    <string name="vlc_directory_chooser_title">Sélectionner le répertoire d'installation de VLC</string>
     <string name="vlc_path_invalid">Le répertoire ne contient pas les bibliothèques VLC</string>
     <string name="media_audio_continues">L'audio continuera à jouer en arrière-plan lors du changement d'onglet ou de l'affichage d'autre contenu</string>
     <string name="media_now_playing">En lecture :</string>
@@ -1156,6 +1162,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Vue du présentateur %1$d</string>
     <string name="key_output_title">Sortie de clé %1$d</string>
+    <string name="decklink_output_title">Sortie DeckLink %1$d</string>
     <string name="lower_third_generator">Générateur de bandeau inférieur</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Discordance de format : le fichier est %1$dx%2$d (%3$s) mais la sortie est %4$dx%5$d (%6$s)</string>
@@ -1833,7 +1840,7 @@
     <string name="clear_recents">Effacer les récents</string>
     <string name="recent">Récents :</string>
     <string name="menu_getting_started">Prise en main…</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter – Convertisseur de cantiques et de Bibles</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="warm_theme">Thème Chaud</string>
     <string name="ocean_theme">Thème Océan</string>
@@ -1877,7 +1884,7 @@
     <string name="setup_step2_step4">4. Sélectionnez un dossier contenant vos fichiers Bible (.db3)</string>
     <string name="setup_step2_step5">5. Accédez à l'onglet Bible et choisissez une Bible principale</string>
     <string name="setup_step2_tip">Recherchez sur Internet un fichier XML de la Bible dans votre langue.</string>
-    <string name="setup_step2_tip2">Une fois que vous avez un fichier XML, utilisez l'Outil de conversion (Aide → Converter) pour le convertir au format requis.</string>
+    <string name="setup_step2_tip2">Vous avez une Bible dans un autre format ? Le Convertisseur de cantiques et de Bibles (Aide → Convertisseur de cantiques et de Bibles) peut la convertir.</string>
     <string name="setup_step3_title">Ajouter des recueils de cantiques</string>
     <string name="setup_step3_subtitle">Indiquez à l'application le dossier de votre bibliothèque de cantiques</string>
     <string name="setup_step3_step1">1. Ouvrez les Paramètres en utilisant le bouton ⚙ dans la barre d'outils</string>
@@ -2673,8 +2680,8 @@
     <string name="setup_bible_choose_folder">Cliquez sur « Parcourir... » à côté du dossier des Bibles et choisissez un dossier pour vos fichiers de Bible.</string>
     <string name="setup_bible_pick_translations">Ouvrez l'onglet Bible et choisissez vos traductions — la première est la principale.</string>
     <string name="setup_songs_format_note">Le dossier de la bibliothèque de chants lit les fichiers .song. Les chants enregistrés dans un autre format doivent d'abord être convertis.</string>
-    <string name="setup_songs_converter_body">Vous venez de SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ou SoftProjector ? Le convertisseur intégré les lit tous — ainsi que les paroles issues de PDF, Word, PowerPoint et Keynote — et écrit les fichiers .song attendus par ce dossier.</string>
-    <string name="setup_songs_converter_button">Ouvrir le convertisseur</string>
+    <string name="setup_songs_converter_body">Vous venez de SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ou SoftProjector ? Le convertisseur de cantiques et de Bibles intégré les lit tous — ainsi que les paroles issues de PDF, Word, PowerPoint et Keynote — et écrit les fichiers .song attendus par ce dossier.</string>
+    <string name="setup_songs_converter_button">Ouvrir le convertisseur de cantiques et de Bibles</string>
     <string name="setup_songs_samples_note">Pas encore de chants ? « Ajouter des exemples de chants » dans l'onglet Système remplit le dossier avec un jeu prêt à l'emploi.</string>
     <string name="setup_proj_rows_note">Chaque écran connecté obtient sa propre ligne ci-dessous. Le nombre de fenêtres de projection découle de vos affectations : rien à régler à la main.</string>
     <string name="setup_proj_assign_note">Pour chaque écran, choisissez un affichage et un mode d'affichage, puis utilisez « Sorties de contenu » pour définir ce qui y apparaît. « Remplacer les styles » donne à cet écran son propre aspect.</string>

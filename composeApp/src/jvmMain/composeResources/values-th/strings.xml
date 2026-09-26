@@ -178,13 +178,13 @@
     <string name="menu_about">เกี่ยวกับ</string>
     <string name="about_title">เกี่ยวกับ Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ตัวแปลงไฟล์ ChurchPresenter</string>
+    <string name="converter_window_title">ตัวแปลงเพลงและพระคัมภีร์ ChurchPresenter</string>
     <string name="lottie_gen_window_title">ตัวสร้างแถบล่าง Lottie</string>
     <string name="open_crash_logs">เปิดบันทึกข้อขัดข้อง</string>
     <string name="save_diagnostic_info">บันทึกข้อมูลวินิจฉัย…</string>
     <string name="diagnostic_info_saved">บันทึกข้อมูลวินิจฉัยสำเร็จแล้ว</string>
     <string name="diagnostic_info_save_failed">บันทึกข้อมูลวินิจฉัยไม่สำเร็จ</string>
-    <string name="open_converter">ตัวแปลงไฟล์</string>
+    <string name="open_converter">ตัวแปลงเพลงและพระคัมภีร์</string>
     <string name="open_song_library">ตัวจัดการคลังเพลง</string>
     <string name="report_bug">แจ้งข้อบกพร่อง</string>
     <string name="submit_feature_request">ขอฟีเจอร์ใหม่</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">สไลด์ถัดไป</string>
     <string name="shortcut_category_tab_switching">การสลับแท็บ</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">เปิดแป้นลัด</string>
+    <string name="shortcut_description_open_song_library">เปิดตัวจัดการคลังเพลง</string>
+    <string name="shortcut_description_open_converter">เปิดตัวแปลงเพลงและพระคัมภีร์</string>
+    <string name="shortcut_description_open_calendar_manager">เปิดตัวจัดการปฏิทิน</string>
     <string name="shortcut_description_f6_bible">ไปที่แท็บพระคัมภีร์</string>
     <string name="shortcut_description_f7_songs">ไปที่แท็บเพลง</string>
     <string name="shortcut_description_f8_pictures">ไปที่แท็บภาพ</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">นำออกจากรายการ</string>
     <string name="tooltip_clear_schedule">ล้างรายการ</string>
     <string name="tooltip_clear_display">ล้างจอ</string>
+    <string name="remote_action_clear_display">ล้างจอ</string>
+    <string name="schedule_add_files_title">เพิ่มไฟล์ลงรายการ</string>
     <string name="tooltip_toggle_displays">เปิด/ปิดจอแสดงผล</string>
     <string name="tooltip_settings">การตั้งค่า</string>
     <string name="tooltip_theme_light">ธีมสว่าง</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">พาธ VLC ที่กำหนดเอง</string>
     <string name="vlc_browse">เรียกดู</string>
     <string name="vlc_path_hint">เลือกโฟลเดอร์ที่ติดตั้ง VLC</string>
+    <string name="vlc_directory_chooser_title">เลือกโฟลเดอร์ที่ติดตั้ง VLC</string>
     <string name="vlc_path_invalid">โฟลเดอร์นี้ไม่มีไลบรารีของ VLC</string>
     <string name="media_audio_continues">เสียงจะเล่นต่อเบื้องหลังเมื่อสลับแท็บหรือแสดงเนื้อหาอื่น</string>
     <string name="media_now_playing">กำลังเล่น:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">หน้าต่างแสดงผล %1$d</string>
     <string name="key_output_title">ช่องสัญญาณ Key %1$d</string>
+    <string name="decklink_output_title">ช่องสัญญาณ DeckLink %1$d</string>
     <string name="lower_third_generator">ตัวสร้างแถบล่าง</string>
     <string name="pause_duration_ms">หยุด %1$d ms</string>
     <string name="aspect_ratio_mismatch">อัตราส่วนไม่ตรงกัน: ไฟล์เป็น %1$dx%2$d (%3$s) แต่ช่องสัญญาณออกเป็น %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. ไปที่แท็บ "พระคัมภีร์" แล้วเลือกพระคัมภีร์หลัก</string>
     <string name="setup_step2_download_hint">มีฉบับแปลกว่า 1,500 ฉบับในกว่า 1,000 ภาษาจาก eBible.org และคลัง Zefania แต่ละฉบับจะแสดงลิขสิทธิ์ของตนก่อนติดตั้ง</string>
     <string name="setup_step2_tip">มีไฟล์พระคัมภีร์อยู่แล้วใช่ไหม ชี้โฟลเดอร์ไปที่ไฟล์เหล่านั้น แล้วโปรแกรมจะอ่านให้อัตโนมัติ</string>
-    <string name="setup_step2_tip2">มีพระคัมภีร์ในรูปแบบอื่นใช่ไหม เครื่องมือแปลงไฟล์ (ช่วยเหลือ → ตัวแปลงไฟล์) แปลงให้ได้</string>
+    <string name="setup_step2_tip2">มีพระคัมภีร์ในรูปแบบอื่นใช่ไหม ตัวแปลงเพลงและพระคัมภีร์ (ช่วยเหลือ → ตัวแปลงเพลงและพระคัมภีร์) แปลงให้ได้</string>
     <string name="setup_step3_title">เพิ่มหนังสือเพลง</string>
     <string name="setup_step3_subtitle">ชี้โปรแกรมไปที่โฟลเดอร์คลังเพลงของคุณ</string>
     <string name="setup_step3_step1">1. เปิดการตั้งค่าด้วยปุ่ม ⚙ บนแถบเครื่องมือ</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">คลิก «เรียกดู...» ข้างโฟลเดอร์พระคัมภีร์ แล้วเลือกโฟลเดอร์สำหรับเก็บไฟล์พระคัมภีร์ของคุณ</string>
     <string name="setup_bible_pick_translations">ไปที่แท็บพระคัมภีร์แล้วเลือกฉบับแปล — ฉบับแรกคือฉบับหลัก</string>
     <string name="setup_songs_format_note">โฟลเดอร์คลังเพลงอ่านไฟล์ .song เพลงที่บันทึกในรูปแบบอื่นต้องแปลงก่อน</string>
-    <string name="setup_songs_converter_body">ย้ายมาจาก SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm หรือ SoftProjector ใช่ไหม ตัวแปลงในตัวอ่านได้ทั้งหมด — รวมถึงเนื้อร้องจาก PDF, Word, PowerPoint และ Keynote — แล้วเขียนไฟล์ .song ที่โฟลเดอร์นี้ต้องการ</string>
-    <string name="setup_songs_converter_button">เปิดตัวแปลง</string>
+    <string name="setup_songs_converter_body">ย้ายมาจาก SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm หรือ SoftProjector ใช่ไหม ตัวแปลงเพลงและพระคัมภีร์ในตัวอ่านได้ทั้งหมด — รวมถึงเนื้อร้องจาก PDF, Word, PowerPoint และ Keynote — แล้วเขียนไฟล์ .song ที่โฟลเดอร์นี้ต้องการ</string>
+    <string name="setup_songs_converter_button">เปิดตัวแปลงเพลงและพระคัมภีร์</string>
     <string name="setup_songs_samples_note">ยังไม่มีเพลงใช่ไหม ปุ่ม «เพิ่มเพลงตัวอย่าง» ในแท็บระบบจะเติมโฟลเดอร์ด้วยชุดที่ใช้งานได้</string>
     <string name="setup_proj_rows_note">จอที่เชื่อมต่อแต่ละจอจะได้แถวของตัวเองด้านล่าง จำนวนหน้าต่างนำเสนอเป็นผลจากสิ่งที่คุณกำหนดไว้ตรงนั้น จึงไม่ต้องตั้งค่าเอง</string>
     <string name="setup_proj_assign_note">สำหรับแต่ละจอ ให้เลือกจอแสดงผลและโหมดการแสดงผล แล้วใช้ «เอาต์พุตเนื้อหา» เพื่อกำหนดว่าจะแสดงอะไร «เขียนทับสไตล์» จะให้จอนั้นมีรูปลักษณ์ของตัวเอง</string>

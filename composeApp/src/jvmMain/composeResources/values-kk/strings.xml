@@ -645,6 +645,9 @@
     <string name="shortcut_description_prev_slide">Алдыңғы слайд</string>
     <string name="shortcut_description_next_slide">Келесі слайд</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Пернелер тіркесімдерін ашу</string>
+    <string name="shortcut_description_open_song_library">Әндер жинағының менеджерін ашу</string>
+    <string name="shortcut_description_open_converter">Әндер мен Киелі кітап түрлендіргішін ашу</string>
+    <string name="shortcut_description_open_calendar_manager">Күнтізбе менеджерін ашу</string>
     <string name="shortcut_description_f6_bible">Киелі кітап қойындысы</string>
     <string name="shortcut_description_f7_songs">Әндер қойындысы</string>
     <string name="shortcut_description_f8_pictures">Суреттер қойындысы</string>
@@ -709,6 +712,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Презентация терезесі %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
+    <string name="decklink_output_title">DeckLink шығысы %1$d</string>
     <string name="lower_third_generator">Төменгі үштен бір генераторы</string>
     <string name="pause_duration_ms">Кідіріс %1$dмс</string>
     <string name="aspect_ratio_mismatch">Қатынас сәйкессіздігі: файл %1$dx%2$d (%3$s), бірақ шығыс %4$dx%5$d (%6$s)</string>
@@ -811,6 +815,7 @@
     <string name="vlc_custom_path">VLC жолы</string>
     <string name="vlc_browse">Шолу</string>
     <string name="vlc_path_hint">VLC орнату каталогын таңдаңыз</string>
+    <string name="vlc_directory_chooser_title">VLC орнату каталогын таңдаңыз</string>
     <string name="vlc_path_invalid">Каталогта VLC кітапханалары жоқ</string>
     <string name="menu_view">Көрініс</string>
     <string name="output_role_fill">Толтыру</string>
@@ -893,6 +898,8 @@
     <string name="timer_title">Таймер</string>
     <string name="tooltip_add_website">Веб-сайт қосу</string>
     <string name="tooltip_clear_display">Дисплейді тазалау</string>
+    <string name="remote_action_clear_display">Дисплейді тазалау</string>
+    <string name="schedule_add_files_title">Бағдарламаға файлдар қосу</string>
     <string name="tooltip_toggle_displays">Презентация дисплейлерін ауыстыру</string>
     <string name="tooltip_collapse_schedule">Бағдарламаны жию</string>
     <string name="tooltip_expand_schedule">Бағдарламаны жаю</string>
@@ -1734,7 +1741,7 @@
     <string name="lottie_select_json_file">Lottie JSON файлын таңдаңыз</string>
     <string name="media_vlc_arch_mismatch">VLC архитектурасы сәйкес емес. Сіздің Mac Apple Silicon (arm64) пайдаланады, бірақ орнатылған VLC тек Intel (x86_64) үшін. videolan.org сайтынан Apple Silicon нұсқасын жүктеп, қайта іске қосыңыз.</string>
     <string name="media_vlc_load_failed">VLC табылды, бірақ жүктелмеді. VLC бағдарламасын videolan.org сайтынан қайта орнатып көріңіз (Windows жүйесінде Microsoft Visual C++ Redistributable де орнатыңыз), содан кейін қолданбаны қайта іске қосыңыз.</string>
-    <string name="open_converter">Конвертер</string>
+    <string name="open_converter">Әндер мен Киелі кітап түрлендіргіші</string>
     <string name="open_song_library">Әндер жинағының менеджері</string>
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
@@ -1811,7 +1818,7 @@
     <string name="clear_recents">Жақындарды тазалау</string>
     <string name="recent">Жақында:</string>
     <string name="menu_getting_started">Бастау…</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter — Әндер мен Киелі кітап түрлендіргіші</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="warm_theme">Жылы тақырып</string>
     <string name="ocean_theme">Мұхит тақырыбы</string>
@@ -1855,7 +1862,7 @@
     <string name="setup_step2_step4">4. Библия файлдары (.db3) бар қалтаны таңдаңыз</string>
     <string name="setup_step2_step5">5. Библия қойындысына өтіп, Негізгі Библияны таңдаңыз</string>
     <string name="setup_step2_tip">Тіліңіздегі Библия XML файлын Интернеттен іздеңіз.</string>
-    <string name="setup_step2_tip2">XML файлы болған кезде, оны қажетті форматқа түрлендіру үшін Түрлендіру құралын (Анықтама → Converter) пайдаланыңыз.</string>
+    <string name="setup_step2_tip2">Киелі кітабыңыз басқа форматта ма? Әндер мен Киелі кітап түрлендіргіші (Анықтама → Әндер мен Киелі кітап түрлендіргіші) оны түрлендіре алады.</string>
     <string name="setup_step3_title">Жырнамалар қосыңыз</string>
     <string name="setup_step3_subtitle">Қолданбаны ән кітапханасы қалтасына бағыттаңыз</string>
     <string name="setup_step3_step1">1. Саймандар тақтасындағы ⚙ түймесін пайдаланып Параметрлерді ашыңыз</string>
@@ -2646,8 +2653,8 @@
     <string name="setup_bible_choose_folder">Киелі кітап қалтасының жанындағы «Шолу...» түймесін басып, файлдарды сақтайтын қалтаны таңдаңыз.</string>
     <string name="setup_bible_pick_translations">«Киелі кітап» қойындысына өтіп, аудармаларды таңдаңыз — біріншісі негізгі болып саналады.</string>
     <string name="setup_songs_format_note">Ән кітапханасының қалтасы .song файлдарын оқиды. Басқа пішімде сақталған әндерді алдымен түрлендіру керек.</string>
-    <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm немесе SoftProjector бағдарламасынан көшіп жатырсыз ба? Кірістірілген түрлендіргіш олардың барлығын оқиды — сондай-ақ PDF, Word, PowerPoint және Keynote ішіндегі ән мәтіндерін — және осы қалта күтетін .song файлдарын жазады.</string>
-    <string name="setup_songs_converter_button">Түрлендіргішті ашу</string>
+    <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm немесе SoftProjector бағдарламасынан көшіп жатырсыз ба? Кірістірілген Әндер мен Киелі кітап түрлендіргіші олардың барлығын оқиды — сондай-ақ PDF, Word, PowerPoint және Keynote ішіндегі ән мәтіндерін — және осы қалта күтетін .song файлдарын жазады.</string>
+    <string name="setup_songs_converter_button">Әндер мен Киелі кітап түрлендіргішін ашу</string>
     <string name="setup_songs_samples_note">Әндер әлі жоқ па? «Жүйе» қойындысындағы «Ән үлгілерін қосу» түймесі қалтаны жұмыс жиынымен толтырады.</string>
     <string name="setup_proj_rows_note">Қосылған әр экран төменде өз жолын алады. Көрсету терезелерінің саны сол жерде тағайындағаныңыздан шығады, сондықтан қолмен орнатудың қажеті жоқ.</string>
     <string name="setup_proj_assign_note">Әр экран үшін дисплей мен көрсету режимін таңдап, содан кейін «Мазмұн шығысы» арқылы онда не көрсетілетінін белгілеңіз. «Стильдерді қайта анықтау» сол экранға өз көрінісін береді.</string>

@@ -111,7 +111,7 @@
     <string name="menu_about">О программе</string>
     <string name="about_title">О Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter — Конвертер песен и Библий</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="clear_recents">Очистить недавние</string>
     <string name="recent">Недавние:</string>
@@ -677,6 +677,9 @@
     <string name="shortcut_description_prev_slide">Предыдущий слайд</string>
     <string name="shortcut_description_next_slide">Следующий слайд</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Открыть сочетания клавиш</string>
+    <string name="shortcut_description_open_song_library">Открыть менеджер сборника песен</string>
+    <string name="shortcut_description_open_converter">Открыть конвертер песен и Библий</string>
+    <string name="shortcut_description_open_calendar_manager">Открыть менеджер календаря</string>
     <string name="shortcut_description_f6_bible">Вкладка Библия</string>
     <string name="shortcut_description_f7_songs">Вкладка Песни</string>
     <string name="shortcut_description_f8_pictures">Вкладка Фото</string>
@@ -741,6 +744,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Окно презентации %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
+    <string name="decklink_output_title">Выход DeckLink %1$d</string>
     <string name="lower_third_generator">Генератор нижней трети</string>
     <string name="pause_duration_ms">Пауза %1$dмс</string>
     <string name="aspect_ratio_mismatch">Несоответствие соотношения сторон: файл %1$dx%2$d (%3$s), но вывод %4$dx%5$d (%6$s)</string>
@@ -848,6 +852,7 @@
     <string name="vlc_custom_path">Путь к VLC</string>
     <string name="vlc_browse">Обзор</string>
     <string name="vlc_path_hint">Выберите каталог установки VLC</string>
+    <string name="vlc_directory_chooser_title">Выберите каталог установки VLC</string>
     <string name="vlc_path_invalid">Каталог не содержит библиотек VLC</string>
     <string name="menu_view">Вид</string>
     <string name="output_role_fill">Заливка</string>
@@ -933,6 +938,8 @@
     <string name="timer_target_time">Отсчёт до</string>
     <string name="tooltip_add_website">Добавить веб-сайт</string>
     <string name="tooltip_clear_display">Очистить экран</string>
+    <string name="remote_action_clear_display">Очистить экран</string>
+    <string name="schedule_add_files_title">Добавить файлы в программу</string>
     <string name="tooltip_toggle_displays">Вкл/Выкл экраны презентации</string>
     <string name="tooltip_collapse_schedule">Свернуть программу</string>
     <string name="tooltip_expand_schedule">Развернуть программу</string>
@@ -1780,7 +1787,7 @@
     <string name="lottie_select_json_file">Выбрать JSON-файл Lottie</string>
     <string name="media_vlc_arch_mismatch">Неверная архитектура VLC. Ваш Mac использует Apple Silicon (arm64), а установленный VLC поддерживает только Intel (x86_64). Скачайте версию VLC для Apple Silicon с сайта videolan.org и перезапустите программу.</string>
     <string name="media_vlc_load_failed">VLC найден, но не удалось его загрузить. Попробуйте переустановить VLC с сайта videolan.org (в Windows также установите Microsoft Visual C++ Redistributable), затем перезапустите приложение.</string>
-    <string name="open_converter">Конвертер</string>
+    <string name="open_converter">Конвертер песен и Библий</string>
     <string name="open_song_library">Менеджер сборника песен</string>
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
@@ -1858,7 +1865,7 @@
     <string name="setup_step2_step4">4. Выберите папку с файлами Библии (.db3)</string>
     <string name="setup_step2_step5">5. Перейдите на вкладку Библия и выберите основную Библию</string>
     <string name="setup_step2_tip">Найдите в интернете XML-файл Библии на вашем языке.</string>
-    <string name="setup_step2_tip2">Получив XML-файл, используйте Инструмент конвертации (Справка → Конвертор) для преобразования в нужный формат.</string>
+    <string name="setup_step2_tip2">Есть Библия в другом формате? Конвертер песен и Библий (Справка → Конвертер песен и Библий) может её преобразовать.</string>
     <string name="setup_step3_title">Добавить песенники</string>
     <string name="setup_step3_subtitle">Укажите приложению папку с вашей библиотекой песен</string>
     <string name="setup_step3_step1">1. Откройте Настройки с помощью кнопки ⚙ на панели инструментов</string>
@@ -2648,8 +2655,8 @@
     <string name="setup_bible_choose_folder">Нажмите «Обзор...» рядом с папкой Библий и выберите папку для хранения файлов Библий.</string>
     <string name="setup_bible_pick_translations">Перейдите на вкладку «Библия» и выберите переводы — первый из них основной.</string>
     <string name="setup_songs_format_note">Папка библиотеки песен читает файлы .song. Песни в другом формате нужно сначала преобразовать.</string>
-    <string name="setup_songs_converter_body">Переходите с SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm или SoftProjector? Встроенный конвертер читает их все — и тексты из PDF, Word, PowerPoint и Keynote — и создаёт файлы .song, которые ожидает эта папка.</string>
-    <string name="setup_songs_converter_button">Открыть конвертер</string>
+    <string name="setup_songs_converter_body">Переходите с SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm или SoftProjector? Встроенный конвертер песен и Библий читает их все — и тексты из PDF, Word, PowerPoint и Keynote — и создаёт файлы .song, которые ожидает эта папка.</string>
+    <string name="setup_songs_converter_button">Открыть конвертер песен и Библий</string>
     <string name="setup_songs_samples_note">Ещё нет песен? Кнопка «Добавить примеры песен» на вкладке «Система» наполнит папку рабочим набором.</string>
     <string name="setup_proj_rows_note">Каждый подключённый экран получает свою строку ниже. Количество окон вывода следует из того, что вы там назначите, — задавать его вручную не нужно.</string>
     <string name="setup_proj_assign_note">Для каждого экрана выберите дисплей и режим отображения, затем через «Выводимое содержимое» укажите, что на нём показывать. «Переопределить стили» задаёт этому экрану собственный вид.</string>

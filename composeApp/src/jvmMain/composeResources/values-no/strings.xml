@@ -178,13 +178,13 @@
     <string name="menu_about">Om</string>
     <string name="about_title">Om Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter-konverterer</string>
+    <string name="converter_window_title">ChurchPresenter sang- og bibelkonverterer</string>
     <string name="lottie_gen_window_title">Generator for nedre tredjedel (Lottie)</string>
     <string name="open_crash_logs">Åpne krasjlogger</string>
     <string name="save_diagnostic_info">Lagre diagnoseinformasjon…</string>
     <string name="diagnostic_info_saved">Diagnoseinformasjonen ble lagret.</string>
     <string name="diagnostic_info_save_failed">Kunne ikke lagre diagnoseinformasjonen.</string>
-    <string name="open_converter">Konverterer</string>
+    <string name="open_converter">Sang- og bibelkonverterer</string>
     <string name="open_song_library">Sangbibliotekbehandler</string>
     <string name="report_bug">Meld en feil</string>
     <string name="submit_feature_request">Forslag til funksjon</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Neste lysbilde</string>
     <string name="shortcut_category_tab_switching">Fanebytte</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Åpne hurtigtaster</string>
+    <string name="shortcut_description_open_song_library">Åpne sangbibliotekbehandleren</string>
+    <string name="shortcut_description_open_converter">Åpne sang- og bibelkonvertereren</string>
+    <string name="shortcut_description_open_calendar_manager">Åpne kalenderbehandleren</string>
     <string name="shortcut_description_f6_bible">Bytt til Bibel-fanen</string>
     <string name="shortcut_description_f7_songs">Bytt til Sang-fanen</string>
     <string name="shortcut_description_f8_pictures">Bytt til Bilder-fanen</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Fjern fra kjøreplan</string>
     <string name="tooltip_clear_schedule">Tøm kjøreplan</string>
     <string name="tooltip_clear_display">Tøm skjermen</string>
+    <string name="remote_action_clear_display">Tøm skjermen</string>
+    <string name="schedule_add_files_title">Legg til filer i kjøreplanen</string>
     <string name="tooltip_toggle_displays">Slå presentasjonsskjermene av og på</string>
     <string name="tooltip_settings">Innstillinger</string>
     <string name="tooltip_theme_light">Lyst tema</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Egen VLC-bane</string>
     <string name="vlc_browse">Bla gjennom</string>
     <string name="vlc_path_hint">Velg installasjonsmappen til VLC</string>
+    <string name="vlc_directory_chooser_title">Velg installasjonsmappen til VLC</string>
     <string name="vlc_path_invalid">Mappen inneholder ikke VLC-biblioteker</string>
     <string name="media_audio_continues">Lyden fortsetter å spille i bakgrunnen når du bytter fane eller viser annet innhold</string>
     <string name="media_now_playing">Spiller nå:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Presentasjonsvisning %1$d</string>
     <string name="key_output_title">Key-utgang %1$d</string>
+    <string name="decklink_output_title">DeckLink-utgang %1$d</string>
     <string name="lower_third_generator">Generator for nedre tredjedel</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Sideforholdet stemmer ikke: filen er %1$dx%2$d (%3$s), men utgangen er %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Gå til Bibel-fanen og velg en primærbibel</string>
     <string name="setup_step2_download_hint">Over 1 500 oversettelser på mer enn 1 000 språk er tilgjengelige fra eBible.org og Zefania-arkivet. Hver av dem viser opphavsretten sin før du installerer den.</string>
     <string name="setup_step2_tip">Har du allerede bibelfiler? Pek mappen mot dem i stedet, så blir de plukket opp automatisk.</string>
-    <string name="setup_step2_tip2">Har du en bibel i et annet format? Konverteringsverktøyet (Hjelp → Konverterer) kan konvertere den.</string>
+    <string name="setup_step2_tip2">Har du en bibel i et annet format? Sang- og bibelkonvertereren (Hjelp → Sang- og bibelkonverterer) kan konvertere den.</string>
     <string name="setup_step3_title">Legg til sangbøker</string>
     <string name="setup_step3_subtitle">Pek appen mot mappen med sangbiblioteket ditt</string>
     <string name="setup_step3_step1">1. Åpne Innstillinger med ⚙-knappen på verktøylinjen</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Klikk «Bla gjennom...» ved siden av bibelmappen og velg en mappe for bibelfilene dine.</string>
     <string name="setup_bible_pick_translations">Gå til fanen Bibel og velg oversettelsene dine — den første er hovedoversettelsen.</string>
     <string name="setup_songs_format_note">Sangbibliotekmappen leser .song-filer. Sanger lagret i et annet format må konverteres først.</string>
-    <string name="setup_songs_converter_body">Kommer du fra SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm eller SoftProjector? Den innebygde konvertereren leser dem alle — og sangtekster fra PDF, Word, PowerPoint og Keynote — og skriver .song-filene denne mappen forventer.</string>
-    <string name="setup_songs_converter_button">Åpne konverterer</string>
+    <string name="setup_songs_converter_body">Kommer du fra SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm eller SoftProjector? Den innebygde sang- og bibelkonvertereren leser dem alle — og sangtekster fra PDF, Word, PowerPoint og Keynote — og skriver .song-filene denne mappen forventer.</string>
+    <string name="setup_songs_converter_button">Åpne sang- og bibelkonvertereren</string>
     <string name="setup_songs_samples_note">Ingen sanger ennå? «Legg til eksempelsanger» på fanen System fyller mappen med et fungerende sett.</string>
     <string name="setup_proj_rows_note">Hver tilkoblede skjerm får sin egen rad nedenfor. Antall presentasjonsvinduer følger av det du tildeler der, så det trenger ikke settes for hånd.</string>
     <string name="setup_proj_assign_note">Velg en skjerm og en visningsmodus for hver rad, og bruk deretter «Innholdsutganger» til å velge hva som vises. «Overstyr stiler» gir den skjermen sitt eget utseende.</string>

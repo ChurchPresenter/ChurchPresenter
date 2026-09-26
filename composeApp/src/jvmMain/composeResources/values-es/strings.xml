@@ -103,7 +103,7 @@
     <string name="about_title">Acerca de Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Abrir registros de errores</string>
-    <string name="open_converter">Convertidor</string>
+    <string name="open_converter">Conversor de cantos y Biblias</string>
     <string name="open_song_library">Gestor de la biblioteca de cantos</string>
     <string name="report_bug">Reportar un error</string>
     <string name="submit_feature_request">Enviar solicitud de función</string>
@@ -144,6 +144,9 @@
     <string name="shortcut_description_next_slide">Diapositiva siguiente</string>
     <string name="shortcut_category_tab_switching">Cambio de pestañas</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Abrir atajos de teclado</string>
+    <string name="shortcut_description_open_song_library">Abrir el gestor de la biblioteca de cantos</string>
+    <string name="shortcut_description_open_converter">Abrir el conversor de cantos y Biblias</string>
+    <string name="shortcut_description_open_calendar_manager">Abrir el gestor de calendario</string>
     <string name="shortcut_description_f6_bible">Ir a la pestaña Biblia</string>
     <string name="shortcut_description_f7_songs">Ir a la pestaña Cantos</string>
     <string name="shortcut_description_f8_pictures">Ir a la pestaña Imágenes</string>
@@ -488,6 +491,8 @@
     <string name="tooltip_remove_from_schedule">Eliminar del programa</string>
     <string name="tooltip_clear_schedule">Borrar programa</string>
     <string name="tooltip_clear_display">Limpiar pantalla</string>
+    <string name="remote_action_clear_display">Limpiar pantalla</string>
+    <string name="schedule_add_files_title">Añadir archivos al programa</string>
     <string name="tooltip_toggle_displays">Alternar pantallas del presentador</string>
     <string name="tooltip_settings">Configuración</string>
     <string name="tooltip_theme_light">Tema claro</string>
@@ -710,6 +715,7 @@
     <string name="vlc_custom_path">Ruta personalizada de VLC</string>
     <string name="vlc_browse">Examinar</string>
     <string name="vlc_path_hint">Seleccionar directorio de instalación de VLC</string>
+    <string name="vlc_directory_chooser_title">Seleccionar directorio de instalación de VLC</string>
     <string name="vlc_path_invalid">El directorio no contiene bibliotecas de VLC</string>
     <string name="media_audio_continues">El audio continuará reproduciéndose en segundo plano al cambiar de pestaña o mostrar otro contenido</string>
     <string name="media_now_playing">Reproduciendo ahora:</string>
@@ -1156,6 +1162,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Vista del presentador %1$d</string>
     <string name="key_output_title">Salida de clave %1$d</string>
+    <string name="decklink_output_title">Salida DeckLink %1$d</string>
     <string name="lower_third_generator">Generador de rótulo inferior</string>
     <string name="pause_duration_ms">Pausa %1$dms</string>
     <string name="aspect_ratio_mismatch">Desajuste de relación de aspecto: el archivo es %1$dx%2$d (%3$s) pero la salida es %4$dx%5$d (%6$s)</string>
@@ -1833,7 +1840,7 @@
     <string name="clear_recents">Borrar recientes</string>
     <string name="recent">Recientes:</string>
     <string name="menu_getting_started">Primeros pasos…</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter: Conversor de cantos y Biblias</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="warm_theme">Tema Cálido</string>
     <string name="ocean_theme">Tema Océano</string>
@@ -1877,7 +1884,7 @@
     <string name="setup_step2_step4">4. Seleccione una carpeta que contenga sus archivos de Biblia (.db3)</string>
     <string name="setup_step2_step5">5. Vaya a la pestaña Biblia y elija una Biblia principal</string>
     <string name="setup_step2_tip">Busque en Internet un archivo XML de la Biblia en su idioma.</string>
-    <string name="setup_step2_tip2">Una vez que tenga un archivo XML, use la Herramienta de conversión (Ayuda → Converter) para convertirlo al formato requerido.</string>
+    <string name="setup_step2_tip2">¿Tiene una Biblia en otro formato? El Conversor de cantos y Biblias (Ayuda → Conversor de cantos y Biblias) puede convertirla.</string>
     <string name="setup_step3_title">Agregar cancioneros</string>
     <string name="setup_step3_subtitle">Indique a la app la carpeta de su biblioteca de canciones</string>
     <string name="setup_step3_step1">1. Abra Configuración usando el botón ⚙ en la barra de herramientas</string>
@@ -2673,8 +2680,8 @@
     <string name="setup_bible_choose_folder">Haga clic en «Examinar...» junto a la carpeta de Biblias y elija una carpeta para guardar sus archivos de Biblia.</string>
     <string name="setup_bible_pick_translations">Vaya a la pestaña Biblia y elija sus traducciones: la primera es la principal.</string>
     <string name="setup_songs_format_note">La carpeta de la biblioteca de canciones lee archivos .song. Las canciones guardadas en otro formato deben convertirse primero.</string>
-    <string name="setup_songs_converter_body">¿Viene de SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? El conversor integrado los lee todos —y también las letras de PDF, Word, PowerPoint y Keynote— y escribe los archivos .song que esta carpeta espera.</string>
-    <string name="setup_songs_converter_button">Abrir el conversor</string>
+    <string name="setup_songs_converter_body">¿Viene de SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? El conversor de cantos y Biblias integrado los lee todos —y también las letras de PDF, Word, PowerPoint y Keynote— y escribe los archivos .song que esta carpeta espera.</string>
+    <string name="setup_songs_converter_button">Abrir el conversor de cantos y Biblias</string>
     <string name="setup_songs_samples_note">¿Aún no tiene canciones? «Añadir canciones de ejemplo» en la pestaña Sistema llena la carpeta con un conjunto funcional.</string>
     <string name="setup_proj_rows_note">Cada pantalla conectada obtiene su propia fila abajo. El número de ventanas de proyección se deriva de lo que asigne allí, así que no hay nada que ajustar a mano.</string>
     <string name="setup_proj_assign_note">Para cada pantalla elija un dispositivo y un modo de visualización, y luego use «Salidas de contenido» para decidir qué aparece allí. «Sobrescribir estilos» da a esa pantalla su propio aspecto.</string>

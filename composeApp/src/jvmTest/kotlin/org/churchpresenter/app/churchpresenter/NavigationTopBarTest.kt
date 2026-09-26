@@ -17,7 +17,9 @@ import javax.swing.JRadioButtonMenuItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import java.awt.event.KeyEvent
 
 private fun navigationTopBar(
     theme: (ThemeMode) -> Unit = {},
@@ -442,6 +444,12 @@ class NavigationTopBarTest {
             assertEquals("Help", helpMenu.getItem(7).text)
             assertEquals("Contact", helpMenu.getItem(8).text)
             assertEquals("Check for Updates…", helpMenu.getItem(9).text)
+            assertNotNull(helpMenu.getItem(3).accelerator, "the converter has a shortcut")
+            assertNotNull(helpMenu.getItem(4).accelerator, "the song library has a shortcut")
+            assertNotNull(helpMenu.getItem(5).accelerator, "the calendar has a shortcut")
+            assertEquals(KeyEvent.VK_K, helpMenu.getItem(3).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_L, helpMenu.getItem(4).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_D, helpMenu.getItem(5).accelerator.keyCode)
             for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick()
         }
         assertEquals(1, gettingStarted)

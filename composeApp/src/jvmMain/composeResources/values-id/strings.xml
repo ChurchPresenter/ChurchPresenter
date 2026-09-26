@@ -178,13 +178,13 @@
     <string name="menu_about">Tentang</string>
     <string name="about_title">Tentang Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter Konverter Lagu dan Alkitab</string>
     <string name="lottie_gen_window_title">Generator Lower Third Lottie</string>
     <string name="open_crash_logs">Buka Log Kerusakan</string>
     <string name="save_diagnostic_info">Simpan Info Diagnostik…</string>
     <string name="diagnostic_info_saved">Info diagnostik berhasil disimpan.</string>
     <string name="diagnostic_info_save_failed">Gagal menyimpan info diagnostik.</string>
-    <string name="open_converter">Converter</string>
+    <string name="open_converter">Konverter Lagu dan Alkitab</string>
     <string name="open_song_library">Pengelola Pustaka Lagu</string>
     <string name="report_bug">Laporkan Bug</string>
     <string name="submit_feature_request">Permintaan Fitur</string>
@@ -225,6 +225,9 @@
     <string name="shortcut_description_next_slide">Slide berikutnya</string>
     <string name="shortcut_category_tab_switching">Perpindahan Tab</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Buka pintasan keyboard</string>
+    <string name="shortcut_description_open_song_library">Buka Pengelola Pustaka Lagu</string>
+    <string name="shortcut_description_open_converter">Buka Konverter Lagu dan Alkitab</string>
+    <string name="shortcut_description_open_calendar_manager">Buka Pengelola Kalender</string>
     <string name="shortcut_description_f6_bible">Pindah ke tab Alkitab</string>
     <string name="shortcut_description_f7_songs">Pindah ke tab Lagu</string>
     <string name="shortcut_description_f8_pictures">Pindah ke tab Gambar</string>
@@ -661,6 +664,8 @@
     <string name="tooltip_remove_from_schedule">Hapus dari Jadwal</string>
     <string name="tooltip_clear_schedule">Bersihkan Jadwal</string>
     <string name="tooltip_clear_display">Bersihkan Tampilan</string>
+    <string name="remote_action_clear_display">Bersihkan Tampilan</string>
+    <string name="schedule_add_files_title">Tambahkan Berkas ke Jadwal</string>
     <string name="tooltip_toggle_displays">Alihkan Layar Presenter</string>
     <string name="tooltip_settings">Pengaturan</string>
     <string name="tooltip_theme_light">Tema Terang</string>
@@ -951,6 +956,7 @@
     <string name="vlc_custom_path">Lokasi VLC khusus</string>
     <string name="vlc_browse">Telusuri</string>
     <string name="vlc_path_hint">Pilih folder pemasangan VLC</string>
+    <string name="vlc_directory_chooser_title">Pilih folder pemasangan VLC</string>
     <string name="vlc_path_invalid">Folder ini tidak memuat pustaka VLC</string>
     <string name="media_audio_continues">Audio akan terus diputar di latar belakang saat Anda berpindah tab atau menampilkan konten lain</string>
     <string name="media_now_playing">Sedang diputar:</string>
@@ -1413,6 +1419,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Tampilan Presenter %1$d</string>
     <string name="key_output_title">Keluaran Key %1$d</string>
+    <string name="decklink_output_title">Keluaran DeckLink %1$d</string>
     <string name="lower_third_generator">Generator Lower Third</string>
     <string name="pause_duration_ms">Jeda %1$dms</string>
     <string name="aspect_ratio_mismatch">Rasio aspek tidak cocok: file %1$dx%2$d (%3$s) tetapi keluaran %4$dx%5$d (%6$s)</string>
@@ -2127,7 +2134,7 @@
     <string name="setup_step2_step6">6. Buka tab Alkitab dan pilih Alkitab utama</string>
     <string name="setup_step2_download_hint">Lebih dari 1.500 terjemahan dalam lebih dari 1.000 bahasa tersedia dari eBible.org dan arsip Zefania. Masing-masing menampilkan hak ciptanya sebelum Anda memasangnya.</string>
     <string name="setup_step2_tip">Sudah punya berkas Alkitab? Arahkan foldernya ke sana dan berkas itu akan terbaca otomatis.</string>
-    <string name="setup_step2_tip2">Punya Alkitab dalam format lain? Alat Konversi (Bantuan → Konverter) dapat mengubahnya.</string>
+    <string name="setup_step2_tip2">Punya Alkitab dalam format lain? Konverter Lagu dan Alkitab (Bantuan → Konverter Lagu dan Alkitab) dapat mengubahnya.</string>
     <string name="setup_step3_title">Tambahkan buku lagu</string>
     <string name="setup_step3_subtitle">Arahkan aplikasi ke folder koleksi lagu Anda</string>
     <string name="setup_step3_step1">1. Buka Pengaturan dengan tombol ⚙ di bilah alat</string>
@@ -2690,8 +2697,8 @@
     <string name="setup_bible_choose_folder">Klik «Telusuri...» di samping folder Alkitab dan pilih folder untuk menyimpan berkas Alkitab Anda.</string>
     <string name="setup_bible_pick_translations">Buka tab Alkitab dan pilih terjemahan Anda — yang pertama menjadi terjemahan utama.</string>
     <string name="setup_songs_format_note">Folder perpustakaan lagu membaca berkas .song. Lagu yang disimpan dalam format lain harus dikonversi terlebih dahulu.</string>
-    <string name="setup_songs_converter_body">Beralih dari SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm, atau SoftProjector? Konverter bawaan membaca semuanya — juga lirik dari PDF, Word, PowerPoint, dan Keynote — lalu menulis berkas .song yang diharapkan folder ini.</string>
-    <string name="setup_songs_converter_button">Buka konverter</string>
+    <string name="setup_songs_converter_body">Beralih dari SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm, atau SoftProjector? Konverter Lagu dan Alkitab bawaan membaca semuanya — juga lirik dari PDF, Word, PowerPoint, dan Keynote — lalu menulis berkas .song yang diharapkan folder ini.</string>
+    <string name="setup_songs_converter_button">Buka Konverter Lagu dan Alkitab</string>
     <string name="setup_songs_samples_note">Belum punya lagu? «Tambahkan lagu contoh» di tab Sistem akan mengisi folder dengan satu set yang siap pakai.</string>
     <string name="setup_proj_rows_note">Setiap layar yang terhubung mendapat barisnya sendiri di bawah. Jumlah jendela presentasi mengikuti apa yang Anda tetapkan di sana, jadi tidak ada yang perlu diatur manual.</string>
     <string name="setup_proj_assign_note">Untuk tiap layar pilih perangkat tampilan dan mode tampilan, lalu gunakan «Keluaran konten» untuk menentukan apa yang muncul di sana. «Timpa gaya» memberi layar itu tampilannya sendiri.</string>

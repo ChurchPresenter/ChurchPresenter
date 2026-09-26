@@ -111,7 +111,7 @@
     <string name="menu_about">O programu</string>
     <string name="about_title">O Church Presenter</string>
     <string name="about_copyright">© %1$s Church Presenter</string>
-    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="converter_window_title">ChurchPresenter – Převodník písní a Bible</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="clear_recents">Vymazat nedávné</string>
     <string name="recent">Nedávné:</string>
@@ -688,6 +688,9 @@
     <string name="shortcut_description_prev_slide">Předchozí snímek</string>
     <string name="shortcut_description_next_slide">Další snímek</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Otevřít klávesové zkratky</string>
+    <string name="shortcut_description_open_song_library">Otevřít správce knihovny písní</string>
+    <string name="shortcut_description_open_converter">Otevřít převodník písní a Bible</string>
+    <string name="shortcut_description_open_calendar_manager">Otevřít správce kalendáře</string>
     <string name="shortcut_description_f6_bible">Záložka Bible</string>
     <string name="shortcut_description_f7_songs">Záložka Písně</string>
     <string name="shortcut_description_f8_pictures">Záložka Fotky</string>
@@ -752,6 +755,7 @@
     <string name="fill_badge">FILL</string>
     <string name="presenter_view_title">Zobrazení prezentéra %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
+    <string name="decklink_output_title">Výstup DeckLink %1$d</string>
     <string name="lower_third_generator">Generátor dolní třetiny</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
     <string name="aspect_ratio_mismatch">Nesoulad poměru stran: soubor je %1$dx%2$d (%3$s), ale výstup je %4$dx%5$d (%6$s)</string>
@@ -859,6 +863,7 @@
     <string name="vlc_custom_path">Vlastní cesta k VLC</string>
     <string name="vlc_browse">Procházet</string>
     <string name="vlc_path_hint">Vyberte instalační adresář VLC</string>
+    <string name="vlc_directory_chooser_title">Vyberte instalační adresář VLC</string>
     <string name="vlc_path_invalid">Adresář neobsahuje knihovny VLC</string>
     <string name="menu_view">Zobrazení</string>
     <string name="output_role_fill">Výplň</string>
@@ -944,6 +949,8 @@
     <string name="timer_target_time">Odpočítávat do</string>
     <string name="tooltip_add_website">Přidat webovou stránku</string>
     <string name="tooltip_clear_display">Vymazat zobrazení</string>
+    <string name="remote_action_clear_display">Vymazat zobrazení</string>
+    <string name="schedule_add_files_title">Přidat soubory do programu</string>
     <string name="tooltip_toggle_displays">Přepnout zobrazení prezentace</string>
     <string name="tooltip_collapse_schedule">Sbalit program</string>
     <string name="tooltip_expand_schedule">Rozbalit program</string>
@@ -1787,7 +1794,7 @@
     <string name="lottie_select_json_file">Vybrat soubor Lottie JSON</string>
     <string name="media_vlc_arch_mismatch">Špatná architektura VLC. Tvůj Mac používá Apple Silicon (arm64), ale nainstalované VLC je pouze pro Intel (x86_64). Stáhni verzi VLC pro Apple Silicon z videolan.org a restartuj.</string>
     <string name="media_vlc_load_failed">VLC bylo nalezeno, ale nepodařilo se jej načíst. Zkuste VLC přeinstalovat z videolan.org (ve Windows nainstalujte také Microsoft Visual C++ Redistributable) a poté aplikaci restartujte.</string>
-    <string name="open_converter">Konvertor</string>
+    <string name="open_converter">Převodník písní a Bible</string>
     <string name="open_song_library">Správce knihovny písní</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Pozadí</string>
@@ -1865,7 +1872,7 @@
     <string name="setup_step2_step4">4. Vyberte složku s vašimi soubory Bible (.db3)</string>
     <string name="setup_step2_step5">5. Přejděte na záložku Bible a vyberte primární Bibli</string>
     <string name="setup_step2_tip">Hledejte na internetu XML soubor Bible ve vašem jazyce.</string>
-    <string name="setup_step2_tip2">Jakmile máte XML soubor, použijte Nástroj pro převod (Nápověda → Konvertor) k převodu do požadovaného formátu.</string>
+    <string name="setup_step2_tip2">Máte Bibli v jiném formátu? Převodník písní a Bible (Nápověda → Převodník písní a Bible) ji dokáže převést.</string>
     <string name="setup_step3_title">Přidat zpěvníky</string>
     <string name="setup_step3_subtitle">Nasměrujte aplikaci na složku s vaší knihovnou písní</string>
     <string name="setup_step3_step1">1. Otevřete Nastavení pomocí tlačítka ⚙ v panelu nástrojů</string>
@@ -2655,8 +2662,8 @@
     <string name="setup_bible_choose_folder">Klikněte na „Procházet...“ vedle složky Biblí a vyberte složku pro soubory Biblí.</string>
     <string name="setup_bible_pick_translations">Přejděte na kartu Bible a vyberte překlady — první je hlavní.</string>
     <string name="setup_songs_format_note">Složka knihovny písní čte soubory .song. Písně uložené v jiném formátu je třeba nejprve převést.</string>
-    <string name="setup_songs_converter_body">Přecházíte ze SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm nebo SoftProjector? Vestavěný převodník čte všechny — i texty z PDF, Wordu, PowerPointu a Keynote — a zapisuje soubory .song, které tato složka očekává.</string>
-    <string name="setup_songs_converter_button">Otevřít převodník</string>
+    <string name="setup_songs_converter_body">Přecházíte ze SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm nebo SoftProjector? Vestavěný převodník písní a Bible čte všechny — i texty z PDF, Wordu, PowerPointu a Keynote — a zapisuje soubory .song, které tato složka očekává.</string>
+    <string name="setup_songs_converter_button">Otevřít převodník písní a Bible</string>
     <string name="setup_songs_samples_note">Zatím žádné písně? Tlačítko „Přidat ukázkové písně“ na kartě Systém naplní složku funkční sadou.</string>
     <string name="setup_proj_rows_note">Každá připojená obrazovka dostane níže vlastní řádek. Počet oken prezentace vyplývá z toho, co tam přiřadíte, takže se nenastavuje ručně.</string>
     <string name="setup_proj_assign_note">Pro každou obrazovku vyberte displej a režim zobrazení, poté ve „Výstupech obsahu“ určete, co se na ní objeví. „Přepsat styly“ dá této obrazovce vlastní vzhled.</string>
