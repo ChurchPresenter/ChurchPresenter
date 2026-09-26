@@ -227,6 +227,8 @@ fun PicturesTab(
             val folder = File(pictureItem.folderPath)
             if (folder.exists() && folder.isDirectory) {
                 viewModel.selectFolder(folder)
+                // A single dropped picture opens on itself rather than on the folder's first (#652).
+                viewModel.selectImagePath(pictureItem.imagePath)
                 focusRequester.requestFocus()
             } else if (instanceLinkFetchPictureImageBytes != null) {
                 // A mirrored schedule item's local path only exists on the primary's disk (e.g. a

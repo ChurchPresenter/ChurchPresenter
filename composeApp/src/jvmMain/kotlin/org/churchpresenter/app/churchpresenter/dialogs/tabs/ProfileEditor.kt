@@ -40,13 +40,10 @@ import churchpresenter.composeapp.generated.resources.output_profile_placement
 import churchpresenter.composeapp.generated.resources.output_profile_scale
 import churchpresenter.composeapp.generated.resources.output_profile_sources
 import churchpresenter.composeapp.generated.resources.output_profile_style
-import churchpresenter.composeapp.generated.resources.song_language_fourth
-import churchpresenter.composeapp.generated.resources.song_language_primary
-import churchpresenter.composeapp.generated.resources.song_language_secondary
-import churchpresenter.composeapp.generated.resources.song_language_third
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.bible.defaultTranslationAbbreviation
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputStyleScope
@@ -404,21 +401,13 @@ private fun bibleTranslationChoices(settings: AppSettings): List<TranslationChoi
         )
     }
 
-/** A song's four language slots as pickable choices, named the way the song tabs name them. */
+/** A song's four language slots as pickable choices, named as the Song settings name them. */
 @Composable
-private fun songLanguageChoices(settings: AppSettings): List<TranslationChoiceDisplay> {
-    val names = listOf(
-        stringResource(Res.string.song_language_primary),
-        stringResource(Res.string.song_language_secondary),
-        stringResource(Res.string.song_language_third),
-        stringResource(Res.string.song_language_fourth),
-    )
-    return names.mapIndexed { index, name ->
-        val configured = settings.songSettings.translations.getOrNull(index - 1)?.label.orEmpty()
+private fun songLanguageChoices(settings: AppSettings): List<TranslationChoiceDisplay> =
+    List(MAX_SONG_TRANSLATIONS) { slot ->
         TranslationChoiceDisplay(
-            code = (index + 1).toString(),
-            title = configured.ifBlank { name },
+            code = (slot + 1).toString(),
+            title = songLanguageName(settings.songSettings, slot),
             portion = "",
         )
     }
-}

@@ -84,6 +84,50 @@ fun AppSettings.withInstalledBible(fileName: String): AppSettings =
     }
 
 /**
+ * Moves the song language at position [index] of the display order by [offset] -- the Songs tab's
+ * Display order -- and has every profile that shows more than one language follow it.
+ *
+ * A song's languages are numbered by slot, not by stack position, so no selection moves under a
+ * profile the way a Bible translation's does. What changes is the *order* each profile draws its
+ * languages in: a profile showing several gets them in the new order, one showing all of them (the
+ * default, an empty selection) is given the whole order explicitly, and a profile showing one
+ * language, or no songs at all, has no order to change.
+ */
+fun AppSettings.moveSongLanguage(index: Int, offset: Int): AppSettings {
+    val order = songSettings.languageDisplayOrder()
+    val target = index + offset
+    if (index !in order.indices || target !in order.indices) return this
+    val moved = order.toMutableList().apply { add(target, removeAt(index)) }
+    return copy(
+        songSettings = songSettings.copy(languageOrder = moved),
+        projectionSettings = projectionSettings.copy(
+            outputProfiles = projectionSettings.outputProfiles.map { it.withSongLanguageOrder(moved) },
+        ),
+    )
+}
+
+/**
+ * [moveSongLanguage] as the Songs tab offers it: the panel lists only the [available] languages the
+ * selected song has, so [index] and [offset] count within those, and the move is made to the full
+ * order -- past the slots this song does not have, which keep their places relative to each other.
+ */
+fun AppSettings.moveSongLanguageAmong(available: Int, index: Int, offset: Int): AppSettings {
+    val order = songSettings.languageDisplayOrder()
+    val shown = order.filter { it < available }
+    val moving = shown.getOrNull(index) ?: return this
+    val passing = shown.getOrNull(index + offset) ?: return this
+    val from = order.indexOf(moving)
+    return moveSongLanguage(from, order.indexOf(passing) - from)
+}
+
+private fun OutputProfile.withSongLanguageOrder(order: List<Int>): OutputProfile = when {
+    songMode == Constants.SONG_LANG_OFF -> this
+    songTranslations.size >= 2 -> copy(songTranslations = songTranslations.sortedBy { order.indexOf(it) })
+    songTranslations.isEmpty() && songMode == Constants.SONG_LANG_BOTH -> copy(songTranslations = order)
+    else -> this
+}
+
+/**
  * Rewrites every profile's stored positions through [newPositionOf]; null means that translation is
  * gone.
  */

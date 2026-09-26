@@ -506,6 +506,12 @@ class PicturesViewModel(
         }
     }
 
+    /** Selects the loaded image at [path]; blank, or not in this folder, changes nothing. */
+    fun selectImagePath(path: String) {
+        if (path.isBlank()) return
+        selectImage(_images.indexOfFirst { it.absolutePath == path })
+    }
+
     private val _imageOrderVersion = mutableStateOf(0)
     val imageOrderVersion: Int get() = _imageOrderVersion.value
 

@@ -149,6 +149,7 @@ class AtemClient(
         private const val DRAIN_SOTIMEOUT_MS = 30         // short read window when draining the queue
         private const val TEMP_SESSION_ID = 0x53AB        // client's placeholder until the ATEM assigns the real one
         private const val SESSION_WAIT_MS = 1500L         // how long to wait for the real session id post-handshake
+        private const val HELLO_RESEND_MS = 500           // resend an unanswered hello this often
 
         private const val BYTE_MASK = 0xFF
         private const val BYTE_BITS = 8
@@ -356,13 +357,19 @@ class AtemClient(
 
             sendRaw(CONNECT_HELLO)
 
-            // Wait for the hello response (receiveAndProcess ACKs it and flips the flag)
+            // Wait for the hello response (receiveAndProcess ACKs it and flips the flag), sending the
+            // hello again every HELLO_RESEND_MS until it comes. It is one UDP datagram: sent once, a
+            // single loss -- a busy network, a full receive buffer on a loaded machine -- turned a
+            // switcher that was there all along into "No response" after the whole connect timeout.
+            sock.soTimeout = minOf(HELLO_RESEND_MS, connectTimeoutMs)
             val deadline = System.currentTimeMillis() + connectTimeoutMs
             while (!helloReceived) {
-                if (System.currentTimeMillis() >= deadline ||
-                    receiveAndProcess() == null
-                ) throw AtemProtocolException("No response from ATEM at $host:$port")
+                if (System.currentTimeMillis() >= deadline) {
+                    throw AtemProtocolException("No response from ATEM at $host:$port")
+                }
+                if (receiveAndProcess() == null && !helloReceived) sendRaw(CONNECT_HELLO)
             }
+            sock.soTimeout = connectTimeoutMs
 
             // The hello response still carries our placeholder session id — the ATEM only
             // sends the REAL session id in the packets right after the handshake. We must
@@ -893,14 +900,20 @@ class AtemClient(
         lastReceivedAt = System.currentTimeMillis()   // liveness signal for the keepalive loop
         if (pkt.size < HEADER_SIZE) return emptyList()
         val flags = (pkt[0].toInt() and BYTE_MASK) shr FLAGS_SHIFT
+        // A second hello reply -- the switcher answering a resent hello after it had already
+        // answered the first. Taken for real it would put the placeholder session id back and
+        // restart the packet numbering in the middle of the state dump, so it changes nothing.
+        val repeatedHello = flags and FLAG_HELLO != 0 && helloReceived
         // The ATEM assigns the real session id after the handshake — track it always
-        sessionId = u16(pkt, OFFSET_SESSION_ID)
+        if (!repeatedHello) sessionId = u16(pkt, OFFSET_SESSION_ID)
         val remoteId = u16(pkt, OFFSET_PACKET_ID)
 
         if (flags and FLAG_HELLO != 0) {
-            helloReceived = true
-            lastReceivedPacketId = remoteId
-            sendAck(remoteId)
+            if (!repeatedHello) {
+                helloReceived = true
+                lastReceivedPacketId = remoteId
+                sendAck(remoteId)
+            }
             return emptyList()
         }
 

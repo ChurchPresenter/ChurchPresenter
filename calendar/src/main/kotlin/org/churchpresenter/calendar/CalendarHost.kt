@@ -166,11 +166,14 @@ enum class CalendarUsage { SERVICE_ADDED, SERVICE_COPIED, TEMPLATE_SAVED, MISSIN
 /**
  * The cloud sync switch as the settings dialog draws it: what it reads, what a flip does, and
  * [invitePhone], which has the app show the QR a phone scans to be enrolled from anywhere.
+ * [nextSyncAt] is when the app next pulls from the relay, in epoch milliseconds -- null while it
+ * has no pull scheduled -- for the countdown in the header.
  */
 class CalendarCloudSync(
     val enabled: () -> Boolean,
     val setEnabled: (Boolean) -> Unit,
     val invitePhone: () -> Unit = {},
+    val nextSyncAt: () -> Long? = { null },
 )
 
 /**

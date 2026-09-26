@@ -12,6 +12,7 @@ import churchpresenter.composeapp.generated.resources.song_secondary_language
 import churchpresenter.composeapp.generated.resources.song_third_language
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.languageLabel
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.translationSettings
 import org.churchpresenter.settings.withTranslationSettings
@@ -46,12 +47,24 @@ internal fun SongStyleLanguage.ordinalLabel(): String = stringResource(
 
 /** The switch's label in the per-output dialog, which names them. */
 @Composable
-internal fun SongStyleLanguage.nameLabel(): String = stringResource(
-    when (this) {
-        SongStyleLanguage.PRIMARY -> Res.string.song_language_primary
-        SongStyleLanguage.SECONDARY -> Res.string.song_language_secondary
-        SongStyleLanguage.THIRD -> Res.string.song_language_third
-        SongStyleLanguage.FOURTH -> Res.string.song_language_fourth
+internal fun SongStyleLanguage.nameLabel(song: SongSettings): String = songLanguageName(song, translation)
+
+/**
+ * What language [slot] -- `0` being the primary -- is called: the name the operator gave it in the
+ * song editor, or "Language N" while it has none.
+ */
+@Composable
+internal fun songLanguageName(song: SongSettings, slot: Int): String =
+    song.languageLabel(slot).trim().ifBlank { defaultSongLanguageName(slot) }
+
+/** "Language N" for [slot] -- `0` being the primary -- which is what an unnamed language is called. */
+@Composable
+internal fun defaultSongLanguageName(slot: Int): String = stringResource(
+    when (slot) {
+        0 -> Res.string.song_language_primary
+        1 -> Res.string.song_language_secondary
+        2 -> Res.string.song_language_third
+        else -> Res.string.song_language_fourth
     },
 )
 

@@ -207,6 +207,21 @@ class SongsTabScreenshotTest {
         }
     }
 
+    /** The language Display order opened on a two-language song, its languages named. */
+    @Test
+    fun `the language display order`() = stackedThemes(SECTION, "language_order") { mode, file ->
+        songsTab(
+            songs = bilingual,
+            songSettings = SongSettings(languageNames = listOf("English", "Español")),
+            themeMode = mode,
+        ) { _, _ ->
+            clickSong("Amazing Grace")
+            onAllNodes(hasText("Languages", substring = true, ignoreCase = true))[0].performClick()
+            waitForIdle()
+            captureTo(file, rootIndex = 1)
+        }
+    }
+
     /** The first verse untranslated: it shows in one language while verse 2 shows in both. */
     @Test
     fun `a song translated only in part`() = stackedThemes(SECTION, "song_two_languages_partial") { mode, file ->

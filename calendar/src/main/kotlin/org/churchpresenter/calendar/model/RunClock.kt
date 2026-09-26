@@ -3,6 +3,7 @@ package org.churchpresenter.calendar.model
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import java.time.LocalTime
 
 /**
  * What time each row of [service] is expected to start, keyed by row id.
@@ -14,7 +15,9 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
  *
  * A row that starts on its own sits at its own time, exactly, and the rows after it flow on from
  * there; the others accumulate from the service's start. A row that plays N times takes N times
- * its length; one that loops takes its stated length.
+ * its length; one that loops takes its stated length -- except a loop that starts **before** the
+ * service, a welcome video pinned at −45, which plays until the service starts: the row after it
+ * is at the service's start, not one pass after the loop's. See [clockAfter].
  *
  * Times wrap at midnight, which is what a service running past it actually does.
  */
@@ -31,15 +34,25 @@ fun runClocks(service: PlannedService): Map<String, RowClock> {
         }
         val rowClock = RowClock(clock, exact)
         if (item !is ScheduleItem.LabelItem && item !is ScheduleItem.CueItem) {
-            val planned = service.plannedSeconds[item.id]
-            if (planned == null) {
-                exact = false
-            } else {
-                clock = clock.plusSeconds(planned.toLong() * timing.repeats.coerceAtLeast(1))
-            }
+            val after = clockAfter(clock, service.plannedSeconds[item.id], timing, start)
+            if (after == null) exact = false else clock = after
+            if (after != null && timing.loops() && clock == start) exact = true
         }
         item.id to rowClock
     }
+}
+
+/**
+ * When the row after one that starts at [rowStart] begins, or null when that cannot be known.
+ *
+ * Normally the row's [planned] length times its plays. A loop that starts before [serviceStart]
+ * is the exception: it has no end of its own and is there to fill the time until the service
+ * begins, so the row after it begins at [serviceStart] -- whatever one pass of it lasts, and even
+ * when nobody measured one.
+ */
+internal fun clockAfter(rowStart: LocalTime, planned: Int?, timing: RowTiming, serviceStart: LocalTime?): LocalTime? {
+    if (timing.loops() && serviceStart != null && rowStart.isBefore(serviceStart)) return serviceStart
+    return planned?.let { rowStart.plusSeconds(it.toLong() * timing.repeats.coerceAtLeast(1)) }
 }
 
 /**
@@ -67,8 +80,7 @@ fun PlannedService.withTimesLaidOut(): PlannedService {
         // A row that waits its turn keeps waiting: pinning it would take the hand-off away, which
         // is the one thing it was set to do.
         laid[row.id] = if (timing.followsPrevious) timing else timing.copy(startAt = storedTime(clock))
-        val planned = plannedSeconds[row.id] ?: break
-        clock = clock.plusSeconds(planned.toLong() * timing.repeats.coerceAtLeast(1))
+        clock = clockAfter(clock, plannedSeconds[row.id], timing, parseStoredTime(startTime)) ?: break
     }
     return copy(timing = laid)
 }
@@ -112,8 +124,9 @@ fun scheduleClocks(
     startTime: String? = null,
 ): Map<String, RowClock> {
     val rows = items.filter { it !is ScheduleItem.LabelItem && it !is ScheduleItem.CueItem }
+    val serviceStart = parseStoredTime(startTime.orEmpty())
     var clock = rows.firstNotNullOfOrNull { parseStoredTime(timing[it.id]?.startAt.orEmpty()) }
-        ?: parseStoredTime(startTime.orEmpty())
+        ?: serviceStart
         ?: return emptyMap()
     var exact = true
     return rows.associate { row ->
@@ -126,8 +139,9 @@ fun scheduleClocks(
             exact = true
         }
         val rowClock = RowClock(clock, exact)
-        val runs = plan.runSeconds
-        if (runs == null) exact = false else clock = clock.plusSeconds(runs.toLong() * plan.repeats.coerceAtLeast(1))
+        val after = clockAfter(clock, plan.runSeconds, plan, serviceStart)
+        if (after == null) exact = false else clock = after
+        if (after != null && plan.loops() && clock == serviceStart) exact = true
         row.id to rowClock
     }
 }

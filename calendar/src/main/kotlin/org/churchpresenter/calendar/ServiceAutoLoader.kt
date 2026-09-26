@@ -1,13 +1,22 @@
 package org.churchpresenter.calendar
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.PlannedService
+import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.calendar.model.holdsOnlyPlannedRows
+import org.churchpresenter.calendar.model.isInSchedule
+import org.churchpresenter.calendar.model.nextAutoLoad
+import org.churchpresenter.calendar.model.serviceInSchedule
+import org.churchpresenter.calendar.model.withScheduleRows
 import org.churchpresenter.calendar.model.rowsForSchedule
 import org.churchpresenter.calendar.model.serviceToAutoLoad
 import org.churchpresenter.calendar.model.storedDate
-import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.model.timingForSchedule
 import java.time.LocalDateTime
 
@@ -27,11 +36,20 @@ import java.time.LocalDateTime
  * once the rows have been seen in the Schedule, an operator who then clears it meant to, and
  * putting the service back a minute later would be no better. Editing the plan makes it a
  * different plan -- see [loadKey] -- and that one loads.
+ *
+ * It also says what it is going to do: [upcoming] is the next planned service still to load, for
+ * the Schedule tab to announce, and [loadNow] loads it early -- days early, to rehearse it.
+ *
+ * And it closes the loop the other way: [scheduleService] is the service the Schedule holds, and
+ * whether the Schedule has since been changed, and [saveScheduleToService] writes those changes
+ * back into the plan through [save] -- only when asked, so what the Schedule picks up while a
+ * service is being presented never becomes part of the plan by itself.
  */
 class ServiceAutoLoader(
     private val document: suspend () -> CalendarDocument,
     private val host: CalendarHost,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
+    private val save: suspend (CalendarDocument) -> Unit = {},
 ) {
     /**
      * Every plan whose rows have been seen in the Schedule today -- see [loadKey].
@@ -47,6 +65,25 @@ class ServiceAutoLoader(
      */
     private val landed = HashSet<String>()
     private var landedDate = ""
+
+    /** A tick and a [loadNow] both read and then write [landed]; never both at once. */
+    private val lock = Mutex()
+
+    private val _upcoming = MutableStateFlow<UpcomingLoad?>(null)
+
+    /**
+     * The next planned service still to load itself, or null -- none ahead, or auto-load off.
+     * A service whose rows are in the Schedule now is passed over; clear them, and it is back.
+     */
+    val upcoming: StateFlow<UpcomingLoad?> = _upcoming.asStateFlow()
+
+    private val _scheduleService = MutableStateFlow<ScheduleServiceLink?>(null)
+
+    /** The planned service the Schedule holds, or null when it holds none. */
+    val scheduleService: StateFlow<ScheduleServiceLink?> = _scheduleService.asStateFlow()
+
+    /** What was last read, so a change to the Schedule is answered without reading the file again. */
+    private var lastDocument: CalendarDocument? = null
 
     /** Checks and loads forever, every [tickMillis]. Cancel the coroutine to stop. */
     suspend fun run(tickMillis: Long = TICK_MILLIS, startupMillis: Long = STARTUP_MILLIS) {
@@ -64,15 +101,85 @@ class ServiceAutoLoader(
     }
 
     /** One pass at the current time. Public so a test can drive it without the loop. */
-    suspend fun tick() {
-        val calendar = document()
+    suspend fun tick() = lock.withLock {
+        val calendar = document().also { lastDocument = it }
         val at = now()
-        if (!calendar.preferences.autoLoadService) return
+        try {
+            loadIfDue(calendar, at)
+        } finally {
+            announce(calendar, at)
+        }
+    }
+
+    /**
+     * Loads the service [serviceId] now, ahead of its window. [replace] is the operator's answer --
+     * clear the Schedule first, or add to the end of it -- rather than the rule a load nobody is
+     * watching goes by. While its rows stay in the Schedule its window does not load it again;
+     * cleared before then, it loads on time, as the notice goes back to saying.
+     */
+    suspend fun loadNow(serviceId: String, replace: Boolean) = lock.withLock {
+        val calendar = document().also { lastDocument = it }
+        calendar.services.firstOrNull { it.id == serviceId }?.let { load(it, replace) }
+        announce(calendar, now())
+    }
+
+    /**
+     * Answers a change to the Schedule -- or, with [reread], to the calendar file: what the
+     * Schedule holds now, and what is still to load. A Schedule change reuses what was last read.
+     */
+    suspend fun refresh(reread: Boolean = false) = lock.withLock {
+        val calendar = lastDocument.takeUnless { reread } ?: document().also { lastDocument = it }
+        announce(calendar, now())
+    }
+
+    /**
+     * Writes the Schedule's rows back into the service it holds -- see [withScheduleRows] -- and
+     * saves the calendar. Read fresh rather than from [lastDocument], so an edit made in the
+     * Calendar Manager a moment ago is not written over.
+     */
+    suspend fun saveScheduleToService() = lock.withLock {
+        val calendar = document()
+        val schedule = host.currentSchedule()
+        val service = calendar.serviceInSchedule(schedule) ?: return@withLock
+        val updated = calendar.copy(
+            services = calendar.services.map { if (it.id == service.id) it.withScheduleRows(schedule) else it },
+        )
+        save(updated)
+        lastDocument = updated
+        announce(updated, now())
+    }
+
+    private fun startDay(at: LocalDateTime) {
         val today = storedDate(at.toLocalDate())
         if (today != landedDate) {
             landed.clear()
             landedDate = today
         }
+    }
+
+    private fun announce(calendar: CalendarDocument, at: LocalDateTime) {
+        val schedule = host.currentSchedule()
+        _upcoming.value = if (calendar.preferences.autoLoadService) {
+            calendar.nextAutoLoad(at, calendar.preferences.autoLoadLead()) { it.isInSchedule(schedule) }
+        } else {
+            null
+        }
+        _scheduleService.value = calendar.serviceInSchedule(schedule)?.let { service ->
+            val saved = service.items.map { it.id }
+            val now = service.withScheduleRows(schedule).items.map { it.id }
+            ScheduleServiceLink(service.id, service.name, hasChanges = now != saved)
+        }
+    }
+
+    private fun load(service: PlannedService, replace: Boolean) {
+        host.loadIntoSchedule(
+            service.rowsForSchedule(), service.timingForSchedule(), replace, service.armed, service.startTime,
+        )
+    }
+
+    private fun loadIfDue(calendar: CalendarDocument, at: LocalDateTime) {
+        if (!calendar.preferences.autoLoadService) return
+        startDay(at)
         val service = calendar.serviceToAutoLoad(at, calendar.preferences.autoLoadLead()) ?: return
         val key = service.loadKey()
         val current = host.currentSchedule()
@@ -83,13 +190,8 @@ class ServiceAutoLoader(
             // there, rather than whether the Schedule holds anything, is what tells a load that
             // arrived from one that called into a no-op while last week's schedule sat there.
             service.isInSchedule(current) -> landed += key
-            else -> {
-                // Last week's service goes; the operator's own rows stay, and this goes under them.
-                val replace = calendar.holdsOnlyPlannedRows(current)
-                host.loadIntoSchedule(
-                    service.rowsForSchedule(), service.timingForSchedule(), replace, service.armed, service.startTime,
-                )
-            }
+            // Last week's service goes; the operator's own rows stay, and this goes under them.
+            else -> load(service, replace = calendar.holdsOnlyPlannedRows(current))
         }
     }
 }
@@ -103,20 +205,6 @@ class ServiceAutoLoader(
  * already been loaded stayed behind the one that was: rows added to the calendar were simply not
  * there when the automation looked for the next item, and the hand-off found nothing.
  */
-/**
- * Whether [rows] hold this plan -- every one of its rows, by id.
- *
- * Every row and not just the first: a plan edited after it was loaded usually keeps its opening
- * row, so asking about that one alone reported an edited plan as already loaded and it never
- * reached the Schedule. Rows *beside* the plan's are ignored -- projecting a picture folder or a
- * clip appends one, and that must not make the plan look absent.
- */
-private fun PlannedService.isInSchedule(rows: List<ScheduleItem>): Boolean {
-    if (items.isEmpty()) return false
-    val present = rows.mapTo(HashSet()) { it.id }
-    return items.all { it.id in present }
-}
-
 private fun PlannedService.loadKey(): String =
     "$date|$id|$startTime|" + items.joinToString(",") { it.id } + "|" + timing.hashCode()
 
@@ -128,3 +216,9 @@ private const val TICK_MILLIS = 60_000L
 
 /** Long enough for the first composition to have published the Schedule's actions. */
 private const val STARTUP_MILLIS = 5_000L
+
+/**
+ * The service the Schedule holds, by [serviceId] and [serviceName], and whether rows have been
+ * added, removed or moved there since -- what the Schedule tab offers to save back.
+ */
+data class ScheduleServiceLink(val serviceId: String, val serviceName: String, val hasChanges: Boolean)

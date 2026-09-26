@@ -16,6 +16,7 @@ import androidx.compose.ui.test.runDesktopComposeUiTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.CalendarBibleBook
+import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.FiredCue
 import org.churchpresenter.calendar.CueFeed
@@ -42,6 +43,9 @@ import java.io.File
 import java.nio.file.Files
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import java.awt.Color as AwtColor
@@ -248,6 +252,48 @@ class CalendarScreenshotTest {
         clickIcon("Choose which copy to export")
     }
 
+    // ── What the window says about the app around it ──────────────────────────────────────────────
+
+    /** Auto-load off -- the default -- so the note that says so, and offers to turn it on, shows. */
+    @Test
+    fun `the note shown while services do not load by themselves`() = shoot(
+        "auto_load_off",
+        document = documentWith(sunday()).let { it.copy(preferences = it.preferences.copy(autoLoadService = false)) },
+    )
+
+    /**
+     * Sync on, so the header offers Invite a phone and counts down to the next pull. The countdown is
+     * always 4:12 ahead of whenever it is read, so the picture cannot catch it mid-tick.
+     */
+    @Test
+    fun `the header counting down to the next sync`() = shoot(
+        "sync_countdown",
+        cloudSync = CalendarCloudSync(
+            enabled = { true },
+            setEnabled = {},
+            nextSyncAt = { System.currentTimeMillis() + SYNC_COUNTDOWN_MILLIS },
+        ),
+    )
+
+    @Test
+    fun `a service's date field, with its month open`() = shoot("service_date_picker", rootIndex = 2, trim = true) {
+        clickIcon("Edit service")
+        // The day heading reads the same date, so the field is the last node that does.
+        val field = onAllNodesWithText(
+            DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault()).format(TODAY),
+        )
+        field[field.fetchSemanticsNodes().size - 1].performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `a new service starting from the Schedule tab`() =
+        shoot("service_new_from_schedule", rootIndex = 1, trim = true, scheduleInUse = true) {
+            clickText("Add service")
+            onAllNodesWithText("The Schedule tab")[0].performClick()
+            waitForIdle()
+        }
+
     /** Auto-load on, and scrolled to it, so the lead-time row it reveals is in the shot. */
     @Test
     fun `settings, on the defaults`() = shoot("settings_defaults", rootIndex = 1, trim = true) {
@@ -320,6 +366,8 @@ class CalendarScreenshotTest {
         scheduleInUse: Boolean = false,
         /** Whether the host answers how long each row usually runs -- the `usually` chips. */
         measured: Boolean = false,
+        /** The app's calendar sync, for the header's invite and next-sync countdown. */
+        cloudSync: CalendarCloudSync? = null,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name, trim) { mode, file ->
         val folder = Files.createTempDirectory("calendar-shot").toFile()
@@ -336,7 +384,7 @@ class CalendarScreenshotTest {
                             CalendarApp(
                                 storeFolder = folder,
                                 songFolder = songs,
-                                host = host(scheduleInUse, measured),
+                                host = host(scheduleInUse, measured, cloudSync),
                                 onClose = {},
                                 today = TODAY,
                                 // Pinned: the run of show draws the clock and marks which cues
@@ -377,7 +425,8 @@ class CalendarScreenshotTest {
         PresetStore(folder).save(PresetDocument(presets = STOCK_PRESETS))
     }
 
-    private fun host(scheduleInUse: Boolean, measured: Boolean) = CalendarHost(
+    private fun host(scheduleInUse: Boolean, measured: Boolean, cloudSync: CalendarCloudSync?) = CalendarHost(
+        cloudSync = cloudSync,
         bibleBooks = { BIBLE_BOOKS },
         currentSchedule = {
             if (scheduleInUse) List(4) { index -> song("s$index", 100 + index, "In the schedule") } else emptyList()
@@ -389,6 +438,9 @@ class CalendarScreenshotTest {
 
     private companion object {
         const val SECTION = "calendarManager"
+
+        /** How far ahead the sync countdown reads: 4:12. */
+        const val SYNC_COUNTDOWN_MILLIS = 252_000L
 
         /**
          * The size the app opens this window at (`CalendarWindow`), so the shots are the layout a

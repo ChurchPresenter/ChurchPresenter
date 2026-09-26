@@ -164,6 +164,8 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.calendar.model.UpcomingLoad
+import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.app.churchpresenter.dialogs.SavePresetDialog
@@ -210,6 +212,16 @@ fun MainDesktop(
     verseSequenceLog: VerseSequenceLog? = null,
     /** Fires a cue row of the Schedule by hand -- the same path the automation engine takes. */
     onPresentCue: (ScheduleItem.CueItem) -> Unit = {},
+    /** The planned service the calendar will load into the Schedule by itself next, if any. */
+    upcomingServiceLoad: UpcomingLoad? = null,
+    /** Loads [upcomingServiceLoad] now instead of waiting for it: into a cleared Schedule, or after it. */
+    onLoadServiceNow: (replace: Boolean) -> Unit = {},
+    /** The planned service the Schedule holds, and whether it has changed there since. */
+    scheduleService: ScheduleServiceLink? = null,
+    /** Writes the Schedule's rows back into [scheduleService]. */
+    onSaveScheduleToCalendar: () -> Unit = {},
+    /** Opens the Calendar Manager on a new service built from the Schedule's rows; null offers none. */
+    onAddScheduleToCalendar: (() -> Unit)? = null,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -1171,6 +1183,11 @@ fun MainDesktop(
                         scheduleViewModel = scheduleViewModel,
                         onPresenting = presenting,
                         onAddLabel = { showAddLabelDialog = true },
+                        upcomingServiceLoad = upcomingServiceLoad,
+                        onLoadServiceNow = onLoadServiceNow,
+                        scheduleService = scheduleService,
+                        onSaveScheduleToCalendar = onSaveScheduleToCalendar,
+                        onAddScheduleToCalendar = onAddScheduleToCalendar,
 
                         onPresentBible = { item ->
                             selectTab(Tabs.BIBLE)
