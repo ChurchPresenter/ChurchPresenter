@@ -697,7 +697,6 @@ private fun WelcomeStep(onGoToStep: (Int) -> Unit) {
             Image(
                 painter = painterResource(Res.drawable.ic_app_icon),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier.size(30.dp),
             )
         }
