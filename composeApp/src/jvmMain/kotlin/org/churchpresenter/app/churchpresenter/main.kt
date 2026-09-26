@@ -2126,7 +2126,11 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 onDismiss = { showStoryPrompt = false; dialogDismissSignal++ }
                             )
                             if (showServiceFoldersWindow) {
-                                ServiceFoldersWindow(theme = theme, onClose = { showServiceFoldersWindow = false })
+                                ServiceFoldersWindow(
+                                    theme = theme,
+                                    onClose = { showServiceFoldersWindow = false },
+                                    onSettingsChanged = { appSettings = it }
+                                )
                             }
                             if (showConverterWindow) {
                                 ConverterWindow(
