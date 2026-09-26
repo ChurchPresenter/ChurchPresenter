@@ -75,9 +75,6 @@ internal fun ProfileEditor(
     // All by default: one look for the whole stack is the usual case, and a single translation is
     // picked out when it needs a look of its own.
     var translationIndex by remember(profile.id) { mutableStateOf(ALL_TRANSLATIONS) }
-    // The preview's sample and background are this session's checking, never the profile.
-    var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
-    var backgroundMode by remember { mutableStateOf(PreviewBackgroundMode.ACTUAL) }
     var query by remember { mutableStateOf("") }
     var onlyChanges by remember(profile.id) { mutableStateOf(false) }
 
@@ -155,25 +152,29 @@ internal fun ProfileEditor(
             }
             VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             CompositionLocalProvider(LocalOutputStyleScope provides scope) {
-                ProfilePreviewColumn(
+                EditorPreview(
                     pane = previewPane,
                     pageLabel = previewPane?.navLabel() ?: shownPage.label(),
                     element = element,
                     draft = resolved,
                     profile = profile,
                     usedBy = usedBy,
-                    onProfileFieldChange = onProfileChange,
-                    slot = sampleSlot,
-                    onSlotChange = { sampleSlot = it },
-                    backgroundMode = backgroundMode,
-                    onBackgroundModeChange = { backgroundMode = it },
+                    onProfileChange = onProfileChange,
                     onOpenOutputs = { onPageChange(ProfilePage.Outputs) },
-                    contextCard = {
-                        LinkContextCard(link, linkActions, onPageChange) { path, value ->
-                            onProfileChange(profile.withValueAt(path, value))
-                        }
-                    },
-                )
+                    // The handles act on the page being edited only, never on the picture another shows.
+                    adjustModel = adjustModelFor(
+                        pane,
+                        resolved,
+                        profile,
+                        translationIndex,
+                        element,
+                        onDraftSettingsChange,
+                    ),
+                ) {
+                    LinkContextCard(link, linkActions, onPageChange) { path, value ->
+                        onProfileChange(profile.withValueAt(path, value))
+                    }
+                }
             }
         }
     }

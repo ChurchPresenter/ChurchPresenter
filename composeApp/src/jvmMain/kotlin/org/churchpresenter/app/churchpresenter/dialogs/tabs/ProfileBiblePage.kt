@@ -501,3 +501,40 @@ private fun TranslationsGroup(
 /** Test handle for one Bible element's positioning switch. */
 internal fun bibleOffsetTag(element: BibleStyleElement): String =
     if (element == BibleStyleElement.REFERENCE) "bible_reference_offset" else "bible_text_offset"
+
+/** The Adjust handles on the Bible page: its margins and block, and the text its Text rows are pointed at. */
+internal fun bibleAdjustModel(
+    draft: AppSettings,
+    profile: OutputProfile,
+    translationIndex: Int,
+    element: CustomizeElement,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+): AdjustModel {
+    val edit = BibleEdit(draft.bibleSettings, translationIndex, element, profile.isLowerThird, onSettingsChange)
+    val bs = edit.bs
+    val margins = Margins(bs.marginTop, bs.marginBottom, bs.marginLeft, bs.marginRight)
+    return AdjustModel(
+        margins = Adjustable(margins) { m ->
+            edit.updateBible {
+                it.copy(marginTop = m.top, marginBottom = m.bottom, marginLeft = m.left, marginRight = m.right)
+            }
+        },
+        verticalAlignment = bs.verticalAlignment,
+        onSnap = { a ->
+            edit.updateBible {
+                it.copy(verticalAlignment = a, contentRegion = it.contentRegion.copy(yOffsetPercent = 0))
+            }
+        },
+        region = if (edit.lowerThird) {
+            null
+        } else {
+            Adjustable(bs.contentRegion) { r -> edit.updateBible { it.copy(contentRegion = r) } }
+        },
+        textSize = Adjustable(edit.style.fontSize) { v -> edit.writeStyle(edit.style.copy(fontSize = v)) },
+        band = if (edit.lowerThird) {
+            Adjustable(bs.lowerThirdHeightPercent) { v -> edit.updateBible { it.copy(lowerThirdHeightPercent = v) } }
+        } else {
+            null
+        },
+    )
+}

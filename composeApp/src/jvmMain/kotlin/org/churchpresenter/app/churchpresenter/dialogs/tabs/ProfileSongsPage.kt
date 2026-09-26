@@ -508,3 +508,51 @@ private fun songLookPaths(
         }
     }
 }
+
+/** The Adjust handles on the Songs page: its margins and block, and the first language's [element]. */
+internal fun songAdjustModel(
+    draft: AppSettings,
+    profile: OutputProfile,
+    element: CustomizeElement,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+): AdjustModel {
+    val song = draft.songSettings
+    val lowerThird = profile.isLowerThird
+    val target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
+    val styleElement = element.toSongStyleElement()
+    val style = song.elementStyle(styleElement, target, SongStyleLanguage.PRIMARY)
+    val update: ((SongSettings) -> SongSettings) -> Unit = { transform ->
+        onSettingsChange { s -> s.copy(songSettings = transform(s.songSettings)) }
+    }
+    val margins = Margins(song.marginTop, song.marginBottom, song.marginLeft, song.marginRight)
+    return AdjustModel(
+        margins = Adjustable(margins) { m ->
+            update { it.copy(marginTop = m.top, marginBottom = m.bottom, marginLeft = m.left, marginRight = m.right) }
+        },
+        verticalAlignment = song.lyricsAlignment,
+        onSnap = { a ->
+            update {
+                val extras = it.layoutExtras
+                it.copy(
+                    lyricsAlignment = a,
+                    layoutExtras = extras.copy(contentRegion = extras.contentRegion.copy(yOffsetPercent = 0)),
+                )
+            }
+        },
+        region = if (lowerThird) {
+            null
+        } else {
+            Adjustable(song.layoutExtras.contentRegion) { r ->
+                update { it.copy(layoutExtras = it.layoutExtras.copy(contentRegion = r)) }
+            }
+        },
+        textSize = Adjustable(style.fontSize) { v ->
+            update { it.withElementStyle(styleElement, target, SongStyleLanguage.PRIMARY, style.copy(fontSize = v)) }
+        },
+        band = if (lowerThird) {
+            Adjustable(song.lowerThirdHeightPercent) { v -> update { it.copy(lowerThirdHeightPercent = v) } }
+        } else {
+            null
+        },
+    )
+}
