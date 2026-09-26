@@ -37,6 +37,8 @@ import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.composables.HideOutputWindowCursor
+import org.churchpresenter.app.churchpresenter.composables.hiddenOutputCursor
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.OutputKind
@@ -98,6 +100,9 @@ internal fun PresenterWindows(
     val proj = appSettings.projectionSettings
 
     val modeCrossfadeDuration = modeCrossfadeDuration(appSettings.bibleSettings, appSettings.songSettings)
+    // The full-screen outputs below hide the mouse pointer while this is on (#663). The windowed dev
+    // fallback does not: it is a window on the operator's own screen, not a projector.
+    val hideCursor = appSettings.projectionSettings.hideCursorOnOutputs
 
     PresenterTransitionEffects(presenterManager, appSettings)
 
@@ -274,9 +279,10 @@ internal fun PresenterWindows(
                             resizable = false,
                             alwaysOnTop = true,
                         ) {
+                            HideOutputWindowCursor(window, hideCursor)
                             CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
                                 PresenterScreen(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor),
                                     appSettings = appSettings,
                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                 ) {
@@ -361,7 +367,10 @@ internal fun PresenterWindows(
                 resizable = false,
                 alwaysOnTop = true,
             ) {
-                presenterOutputContent(screenAssignment, effectiveMode, i + 1)
+                HideOutputWindowCursor(window, hideCursor)
+                Box(modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor)) {
+                    presenterOutputContent(screenAssignment, effectiveMode, i + 1)
+                }
             }
 
             if (screenAssignment.hasKeyOutput && !isDeckLinkKeyOutput(screenAssignment)) {
@@ -397,9 +406,10 @@ internal fun PresenterWindows(
                         resizable = false,
                         alwaysOnTop = true,
                     ) {
+                        HideOutputWindowCursor(window, hideCursor)
                         CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
                             PresenterScreen(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor),
                                 appSettings = appSettings,
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             ) {

@@ -30,6 +30,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -70,9 +71,9 @@ import java.nio.file.Path as NioPath
  * Both are undone in [tidy]; a leaked object mock is a cross-test flake, not a local failure.
  *
  * The auto-start switch is off under Gradle (`jpackage.app-path` is unset, so `AutoStartManager` is
- * unsupported), which leaves the analytics switch as the only toggle whose state comes from the
- * passed-in [AppSettings] — that is what lets these tests locate switches by state and by
- * declaration order without a test tag.
+ * unsupported), and [analytics] builds its settings with the hide-cursor switch off, which leaves
+ * the analytics switch as the only toggle that can be on — that is what lets these tests locate
+ * switches by state and by declaration order without a test tag.
  *
  * Two buttons cannot be carried through to their end: **Import Settings** and **Reset All Settings**
  * both finish with `ProcessBuilder(…).start()` and `Runtime.exit(0)`, which would restart the app and
@@ -89,6 +90,15 @@ import java.nio.file.Path as NioPath
 class SystemSettingsTabTest {
 
     private val temps = mutableListOf<File>()
+
+    /**
+     * Settings with analytics [enabled] and the hide-cursor switch off -- it defaults to on, and
+     * left on it would be a second "on" switch for the state-based lookups below to trip over.
+     */
+    private fun analytics(enabled: Boolean) = AppSettings(
+        analyticsReportingEnabled = enabled,
+        projectionSettings = ProjectionSettings(hideCursorOnOutputs = false),
+    )
 
     @AfterTest
     fun tidy() {
@@ -241,7 +251,7 @@ class SystemSettingsTabTest {
     @Test
     fun `toggling the analytics switch off flips the setting through the callback`() = runComposeUiTest {
         var applied: AppSettings? = null
-        val initial = AppSettings(analyticsReportingEnabled = true)
+        val initial = analytics(true)
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
@@ -260,7 +270,7 @@ class SystemSettingsTabTest {
     @Test
     fun `toggling the analytics switch on flips the setting through the callback`() = runComposeUiTest {
         var applied: AppSettings? = null
-        val initial = AppSettings(analyticsReportingEnabled = false)
+        val initial = analytics(false)
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
@@ -270,8 +280,8 @@ class SystemSettingsTabTest {
             }
         }
 
-        // All switches are off here; analytics is the third one declared, after launch-at-login and start-hidden.
-        onAllNodes(isToggleable())[2].performScrollTo().performClick()
+        // Analytics is the fourth switch declared, after launch-at-login, start-hidden and hide-cursor.
+        onAllNodes(isToggleable())[3].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -282,7 +292,7 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = false),
+                    settings = analytics(false),
                 )
             }
         }
@@ -295,7 +305,7 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = true),
+                    settings = analytics(true),
                 )
             }
         }
@@ -310,7 +320,7 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = true),
+                    settings = analytics(true),
                 )
             }
         }
@@ -330,12 +340,12 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = false),
+                    settings = analytics(false),
                 )
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(3)
+        onAllNodes(isToggleable()).assertCountEquals(4)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.
@@ -707,7 +717,7 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = true),
+                    settings = analytics(true),
                 )
             }
         }
@@ -729,7 +739,7 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = true),
+                    settings = analytics(true),
                 )
             }
         }
@@ -745,7 +755,7 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    settings = AppSettings(analyticsReportingEnabled = false),
+                    settings = analytics(false),
                 )
             }
         }
