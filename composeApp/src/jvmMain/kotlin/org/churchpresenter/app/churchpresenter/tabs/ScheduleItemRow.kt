@@ -85,6 +85,7 @@ import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.isDarkScheme
 import org.churchpresenter.theme.RaisedFill
 import androidx.compose.ui.graphics.lerp
 private const val PALETTE_SIZE = 4
@@ -258,19 +259,22 @@ internal fun ScheduleItemRow(
 
     val cardBg = when {
         isSection -> Utils.parseHexColor(item.backgroundColor)
-        isSelected -> MaterialTheme.colorScheme.surfaceContainerHigh
+        // Tinted toward the accent, and opaque so the raised gradient still reads.
+        isSelected -> lerp(
+            MaterialTheme.colorScheme.surfaceContainer,
+            MaterialTheme.colorScheme.primary,
+            if (isDarkScheme(MaterialTheme.colorScheme)) SELECTED_CARD_TINT_DARK else SELECTED_CARD_TINT_LIGHT,
+        )
         else -> MaterialTheme.colorScheme.surfaceContainer
     }
 
     val sectionText = if (isSection) Utils.ensureContrast(sectionAccent, cardBg, minRatio = 7.0) else sectionAccent
     val cardBorder = when {
         isSection -> sectionAccent.copy(alpha = 0.35f)
-        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
         else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     }
     val leftAccent = when {
         isSection -> sectionAccent
-        isSelected -> MaterialTheme.colorScheme.primary
         else -> Color.Transparent
     }
 
@@ -685,3 +689,6 @@ internal fun ScheduleItemContent(
 private val CARD_LIFT = 2.dp
 private val CARD_LIFT_SELECTED = 4.dp
 private const val CARD_TOP_LIFT = 0.05f
+
+private const val SELECTED_CARD_TINT_DARK = 0.18f
+private const val SELECTED_CARD_TINT_LIGHT = 0.10f
