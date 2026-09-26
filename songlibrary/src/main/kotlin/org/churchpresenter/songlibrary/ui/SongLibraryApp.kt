@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,11 @@ fun SongLibraryApp(
      */
     io: CoroutineDispatcher = Dispatchers.IO,
     onUsage: (usage: SongLibraryUsage, count: Int) -> Unit = { _, _ -> },
+    /**
+     * Whether a problem song's `!` flashes. Off, it holds one steady frame -- which is what a
+     * screenshot needs, since a flash caught at a different moment on each run is a different image.
+     */
+    animateProblems: Boolean = true,
 ) {
     val state = remember(libraryFolder) { SongLibraryState(libraryFolder, onUsage, typicalSeconds) }
     LaunchedEffect(libraryFolder) { state.reloadAsync(io) }
@@ -69,27 +75,29 @@ fun SongLibraryApp(
     var batchOpen by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<List<SongItem>>(emptyList()) }
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        LibraryHeader(state, io = io, onNewBook = { newBookOpen = true })
-        if (state.selected.isNotEmpty()) {
-            BulkBar(
+    CompositionLocalProvider(LocalAnimateProblems provides animateProblems) {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            LibraryHeader(state, io = io, onNewBook = { newBookOpen = true })
+            if (state.selected.isNotEmpty()) {
+                BulkBar(
+                    state = state,
+                    onBatchEdit = { batchOpen = true },
+                    onDelete = { pendingDelete = state.selectedSongs() },
+                )
+            }
+            SongTable(
                 state = state,
-                onBatchEdit = { batchOpen = true },
-                onDelete = { pendingDelete = state.selectedSongs() },
+                modifier = Modifier.weight(1f),
+                // Null when the host supplied no editor: the row then has nothing to open, so it
+                // shows no Edit button rather than one that does nothing. The cells are still typed in
+                // directly, which is what the grid is for.
+                onCompareRow = { state.comparing = it.sourceFile },
+                onEditRow = songEditor?.let { { song: SongItem -> state.editing = song.sourceFile } },
+                onDeleteRow = { pendingDelete = listOf(it) },
+                onNewBook = { newBookOpen = true },
             )
+            LibraryFooter(state, io = io, onClose = onClose)
         }
-        SongTable(
-            state = state,
-            modifier = Modifier.weight(1f),
-            // Null when the host supplied no editor: the row then has nothing to open, so it
-            // shows no Edit button rather than one that does nothing. The cells are still typed in
-            // directly, which is what the grid is for.
-            onCompareRow = { state.comparing = it.sourceFile },
-            onEditRow = songEditor?.let { { song: SongItem -> state.editing = song.sourceFile } },
-            onDeleteRow = { pendingDelete = listOf(it) },
-            onNewBook = { newBookOpen = true },
-        )
-        LibraryFooter(state, io = io, onClose = onClose)
     }
 
     if (newBookOpen) {

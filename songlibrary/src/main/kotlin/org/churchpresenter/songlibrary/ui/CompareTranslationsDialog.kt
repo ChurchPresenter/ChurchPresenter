@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
@@ -102,16 +106,20 @@ fun CompareTranslationsDialog(
 ) {
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(size = DpSize(1320.dp, 800.dp)),
+        state = rememberDialogState(size = DpSize(COMPARE_WINDOW_WIDTH, COMPARE_WINDOW_HEIGHT)),
         title = stringResource(Res.string.compare_window_title),
         resizable = true,
     ) {
-        CompareContent(song, onDismiss, onSave)
+        CompareTranslationsContent(song, onDismiss, onSave)
     }
 }
 
+/**
+ * What the comparison window holds, apart from the window itself — which is also what the
+ * screenshot suite shoots, since a headless run has no window to put a [DialogWindow] in.
+ */
 @Composable
-private fun CompareContent(song: SongItem, onDismiss: () -> Unit, onSave: (SongItem) -> Unit) {
+fun CompareTranslationsContent(song: SongItem, onDismiss: () -> Unit, onSave: (SongItem) -> Unit) {
     val translations = remember(song) { song.translationList() }
     val original = remember(song) { translations.map { TranslationComparison.sectionsOf(it.lyrics) } }
     val rowCount = original.maxOf { it.size }
@@ -340,30 +348,41 @@ private fun SectionEditor(cell: CompareCell, section: String, lines: Int, onChan
         SectionStatus.OK -> scheme.outlineVariant
         else -> statusColor(cell.status).copy(alpha = CARD_BORDER_ALPHA)
     }
-    BasicTextField(
-        value = cell.text,
-        onValueChange = onChange,
-        textStyle = LibraryType.body.copy(color = scheme.onSurface, lineHeight = 20.sp),
-        cursorBrush = SolidColor(scheme.primary),
-        minLines = lines,
-        modifier = Modifier.fillMaxWidth()
+    // Lines never wrap: a wrapped line would read as two, and sit beside the wrong line of the
+    // language next to it. A line wider than the cell scrolls sideways instead.
+    BoxWithConstraints(
+        Modifier.fillMaxWidth()
             .clip(shape)
             .background(scheme.background)
-            .border(1.dp, border, shape)
-            .padding(horizontal = 10.dp, vertical = 9.dp),
-        decorationBox = { field ->
-            Box {
-                if (cell.text.isEmpty()) {
-                    Text(
-                        stringResource(Res.string.compare_placeholder, cell.language.name, section),
-                        style = LibraryType.body.copy(lineHeight = 20.sp),
-                        color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
-                    )
-                }
-                field()
-            }
-        },
-    )
+            .border(1.dp, border, shape),
+    ) {
+        val fill = maxWidth - EDITOR_PADDING_H * 2
+        Box(
+            Modifier.horizontalScroll(rememberScrollState())
+                .padding(horizontal = EDITOR_PADDING_H, vertical = EDITOR_PADDING_V),
+        ) {
+            BasicTextField(
+                value = cell.text,
+                onValueChange = onChange,
+                textStyle = LibraryType.body.copy(color = scheme.onSurface, lineHeight = 20.sp),
+                cursorBrush = SolidColor(scheme.primary),
+                minLines = lines,
+                modifier = Modifier.widthIn(min = fill),
+                decorationBox = { field ->
+                    Box {
+                        if (cell.text.isEmpty()) {
+                            Text(
+                                stringResource(Res.string.compare_placeholder, cell.language.name, section),
+                                style = LibraryType.body.copy(lineHeight = 20.sp),
+                                color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+                            )
+                        }
+                        field()
+                    }
+                },
+            )
+        }
+    }
 }
 
 @Composable
@@ -398,5 +417,11 @@ private fun CellNote(cell: CompareCell, reference: CompareCell) {
     }
 }
 
+/** The size the comparison window opens at: room for four languages side by side. */
+val COMPARE_WINDOW_WIDTH = 1320.dp
+val COMPARE_WINDOW_HEIGHT = 800.dp
+
 internal const val TAG_ALPHA = 0.16f
 private const val CARD_BORDER_ALPHA = 0.55f
+private val EDITOR_PADDING_H = 10.dp
+private val EDITOR_PADDING_V = 9.dp

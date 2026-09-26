@@ -1,11 +1,18 @@
 package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
@@ -13,9 +20,12 @@ import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.DpOffset
@@ -32,6 +42,8 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.PI
+import kotlin.math.sin
 
 // The small controls on a song row: its buttons, and the mark that flags a translation problem.
 
@@ -81,15 +93,52 @@ internal fun ProblemMark(problems: TranslationProblems?) {
         }
         val text = lines.joinToString("\n")
         WithTooltip(text) {
-            Icon(
-                Icons.Default.PriorityHigh,
-                contentDescription = text,
-                tint = MaterialTheme.semantic.warning,
-                modifier = Modifier.size(14.dp),
-            )
+            SirenIcon(text)
         }
     }
 }
+
+/**
+ * The `!` itself, flashing like a police light — red, then blue — with a glow behind it, so a
+ * problem song catches the eye while scrolling. One red and one blue flash take [SIREN_CYCLE_MS]:
+ * under two flashes a second, clear of the three a second that flashing content must stay below.
+ */
+@Composable
+private fun SirenIcon(description: String) {
+    // Held at the peak of the red flash when animation is off -- see [LocalAnimateProblems].
+    val cycle = if (LocalAnimateProblems.current) sirenCycle() else HALF / 2
+    val red = cycle < HALF
+    // How far into its own flash each colour is: up to full brightness and back down.
+    val flash = sin((cycle % HALF) / HALF * PI).toFloat()
+    val color = if (red) MaterialTheme.colorScheme.error else MaterialTheme.semantic.info
+    Box(Modifier.size(PROBLEM_WIDTH), contentAlignment = Alignment.Center) {
+        Box(Modifier.matchParentSize().clip(CircleShape).background(color.copy(alpha = GLOW_ALPHA * flash)))
+        Icon(
+            Icons.Default.PriorityHigh,
+            contentDescription = description,
+            tint = color,
+            modifier = Modifier.size(14.dp).scale(1f + SIREN_GROWTH * flash),
+        )
+    }
+}
+
+@Composable
+private fun sirenCycle(): Float {
+    val cycle by rememberInfiniteTransition().animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(SIREN_CYCLE_MS, easing = LinearEasing)),
+    )
+    return cycle
+}
+
+/** Whether a problem song's `!` flashes; see `SongLibraryApp`'s `animateProblems`. */
+internal val LocalAnimateProblems = staticCompositionLocalOf { true }
+
+private const val SIREN_CYCLE_MS = 1200
+private const val HALF = 0.5f
+private const val SIREN_GROWTH = 0.2f
+private const val GLOW_ALPHA = 0.35f
 
 /** A row's icon button, with [description] as both its tooltip and what a screen reader says. */
 @Composable
