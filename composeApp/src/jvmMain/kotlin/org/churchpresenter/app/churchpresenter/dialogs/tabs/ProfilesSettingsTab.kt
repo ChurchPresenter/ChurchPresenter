@@ -8,7 +8,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,23 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,27 +31,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
-import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
-import churchpresenter.composeapp.generated.resources.output_profile_create_default
-import churchpresenter.composeapp.generated.resources.output_profile_create_default_tooltip
-import churchpresenter.composeapp.generated.resources.output_profile_delete
-import churchpresenter.composeapp.generated.resources.output_profile_duplicate
 import churchpresenter.composeapp.generated.resources.output_profile_empty_state
-import churchpresenter.composeapp.generated.resources.output_profile_identify_tooltip
 import churchpresenter.composeapp.generated.resources.output_profile_list_header
-import churchpresenter.composeapp.generated.resources.output_profile_new
 import churchpresenter.composeapp.generated.resources.output_profile_new_name_default
+import churchpresenter.composeapp.generated.resources.profile_list_hint
+import churchpresenter.composeapp.generated.resources.profile_list_new
 import churchpresenter.composeapp.generated.resources.screen_number
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.settings.AppSettings
@@ -73,23 +56,18 @@ import org.churchpresenter.settings.duplicateOutputProfile
 import org.churchpresenter.settings.newOutputProfile
 import org.churchpresenter.settings.renameOutputProfile
 import org.churchpresenter.settings.updateOutputProfile
-import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The Profiles tab: every named [OutputProfile] in one place, with a full editing surface for the
- * one selected.
+ * The Profiles tab: every named [OutputProfile] down the left, and the one selected in four
+ * columns -- the list, its pages, the page's settings and the preview.
  *
- * An output only ever *assigns* a profile now (see the pickers on the Projection tab and in
- * `LivePreviewPanel`'s sidebar) -- there is nothing left to edit per-output, so this is the only
- * place a profile's styling is changed. The shipped "Default" profile is not protected: it is
- * exactly as editable and deletable as one made here, which is why [output_profile_create_default]
- * exists -- a plain, explicit way to get a fresh factory-default profile back as a starting point
- * or a backup, rather than a special-cased entry nothing else can touch.
- *
- * A profile is a reusable style, not a display: several outputs of different sizes can share one,
- * so the list says what uses each profile rather than naming a connection or a resolution.
+ * An output only ever *assigns* a profile (on the Projection tab, in the live preview's sidebar, or
+ * on the Outputs page here), so this is the only place a profile's styling is changed. A profile is
+ * a reusable style, not a display: several outputs of different sizes can share one, so the list
+ * says what uses each profile rather than naming a connection or a resolution.
  */
 @Composable
 internal fun ProfilesSettingsTab(
@@ -100,21 +78,18 @@ internal fun ProfilesSettingsTab(
 ) {
     val proj = settings.projectionSettings
     var selectedId by remember { mutableStateOf(proj.outputProfiles.firstOrNull()?.id) }
-    // Clamped rather than stored: a profile can disappear out from under the stored id (deleted
-    // here, or by another operator on a shared document), and this must fall back the moment that
-    // happens rather than pointing at nothing.
+    // Clamped rather than stored: a profile can disappear out from under the stored id, and this
+    // must fall back the moment that happens rather than pointing at nothing.
     val effectiveId = selectedId?.takeIf { id -> proj.outputProfiles.any { it.id == id } }
         ?: proj.outputProfiles.firstOrNull()?.id
     val profile = proj.outputProfiles.find { it.id == effectiveId }
+    // Held here rather than in the editor, so moving between profiles keeps the page -- comparing
+    // two profiles' Bible styling is one of the reasons to move between them.
+    var page by remember { mutableStateOf<ProfilePage>(ProfilePage.General) }
 
-    // Set by the list's own Delete button, so one dialog and one confirm path covers deleting the
-    // open profile and deleting any other one without selecting it first.
+    // Set by the Delete action, so one dialog and one confirm path covers every way of deleting.
     var pendingDeleteId by remember { mutableStateOf<String?>(null) }
     val pendingDelete = proj.outputProfiles.find { it.id == pendingDeleteId }
-
-    // Held here rather than in the editor, so it stays as the operator left it when they move
-    // between profiles -- comparing what two profiles show is one of the reasons to open it.
-    var contentOpen by remember { mutableStateOf(false) }
 
     fun updateProjection(transform: (ProjectionSettings) -> ProjectionSettings) {
         onSettingsChange { s -> s.copy(projectionSettings = transform(s.projectionSettings)) }
@@ -129,23 +104,13 @@ internal fun ProfilesSettingsTab(
             selectedId = effectiveId,
             usageOf = { id -> usage[id].orEmpty() },
             onSelect = { selectedId = it },
-            onIdentify = onIdentify,
             onNew = {
+                // Unnamed: General opens on it, with its name field waiting to be filled in.
                 val fresh = newOutputProfile(proj.outputProfiles)
                 updateProjection { it.copy(outputProfiles = it.outputProfiles + fresh) }
                 selectedId = fresh.id
+                page = ProfilePage.General
             },
-            onCreateDefault = {
-                val fresh = newOutputProfile(proj.outputProfiles, defaultProfileName)
-                updateProjection { it.copy(outputProfiles = it.outputProfiles + fresh) }
-                selectedId = fresh.id
-            },
-            onDuplicate = { id ->
-                val source = proj.outputProfiles.find { it.id == id } ?: return@ProfilesList
-                val copyName = duplicateName(source.name.ifBlank { defaultProfileName })
-                updateProjection { it.duplicateOutputProfile(id, copyName) }
-            },
-            onRequestDelete = { pendingDeleteId = it },
         )
         VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         if (profile != null) {
@@ -153,13 +118,17 @@ internal fun ProfilesSettingsTab(
                 settings = settings,
                 profile = profile,
                 usedBy = usage[profile.id].orEmpty(),
+                page = page,
+                onPageChange = { page = it },
                 onSettingsChange = onSettingsChange,
-                onProfileChange = { updated ->
-                    updateProjection { it.updateOutputProfile(profile.id) { updated } }
-                },
+                onProfileChange = { updated -> updateProjection { it.updateOutputProfile(profile.id) { updated } } },
                 onRename = { name -> updateProjection { it.renameOutputProfile(profile.id, name) } },
-                contentOpen = contentOpen,
-                onContentOpenChange = { contentOpen = it },
+                onDuplicate = {
+                    val copyName = duplicateName(profile.name.ifBlank { defaultProfileName })
+                    updateProjection { it.duplicateOutputProfile(profile.id, copyName) }
+                },
+                onRequestDelete = { pendingDeleteId = profile.id },
+                onIdentify = onIdentify,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         } else {
@@ -188,11 +157,11 @@ internal fun ProfilesSettingsTab(
 }
 
 /** "Foyer TV" → "Foyer TV copy", "Foyer TV copy" → "Foyer TV copy copy": no de-duplication attempted. */
-private fun duplicateName(name: String): String = "$name copy"
+internal fun duplicateName(name: String): String = "$name copy"
 
 /** Every output currently following [id], labeled the way its own card labels it. */
 @Composable
-private fun profileUserLabels(proj: ProjectionSettings, id: String): List<String> {
+internal fun profileUserLabels(proj: ProjectionSettings, id: String): List<String> {
     val labels = mutableListOf<String>()
     proj.screenAssignments.forEachIndexed { index, assignment ->
         if (assignment.activeProfileId == id) {
@@ -214,69 +183,40 @@ private fun profileUserLabels(proj: ProjectionSettings, id: String): List<String
     return labels
 }
 
-// Wide enough for a name and its badge side by side, with the usage line under it.
-private val LIST_WIDTH = 248.dp
-private const val UNASSIGNED_ALPHA = 0.7f
+/** The profile list is this wide: a name, its badge, and what uses it under them. */
+internal val PROFILE_LIST_WIDTH = 250.dp
 
-/** The left column: every profile, with Identify, New and Create Default above them. */
+/** The left column: every profile in order, with "+" above them and a hint below. */
 @Composable
 private fun ProfilesList(
     profiles: List<OutputProfile>,
     selectedId: String?,
     usageOf: (String) -> List<String>,
     onSelect: (String) -> Unit,
-    onIdentify: () -> Unit,
     onNew: () -> Unit,
-    onCreateDefault: () -> Unit,
-    onDuplicate: (String) -> Unit,
-    onRequestDelete: (String) -> Unit,
 ) {
+    val palette = profilesPalette()
     Column(
         modifier = Modifier
-            .width(LIST_WIDTH)
+            .width(PROFILE_LIST_WIDTH)
             .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceContainer),
+            .background(palette.rail),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 10.dp, top = 12.dp, bottom = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 10.dp, top = 12.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CustomizeCaption(stringResource(Res.string.output_profile_list_header))
-            Spacer(modifier = Modifier.weight(1f))
-            WithTooltip(stringResource(Res.string.output_profile_identify_tooltip)) {
-                SmallKey(label = stringResource(Res.string.identify_screen), onClick = onIdentify)
-            }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            KeyButton(
-                onClick = onNew,
-                shape = AppShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp),
-                modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    stringResource(Res.string.output_profile_new),
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            WithTooltip(stringResource(Res.string.output_profile_create_default_tooltip)) {
-                ListIconKey(
-                    icon = Icons.Filled.RestartAlt,
-                    description = stringResource(Res.string.output_profile_create_default),
-                    onClick = onCreateDefault,
+            GroupCaption(stringResource(Res.string.output_profile_list_header), Modifier.weight(1f))
+            KeyIconButton(onClick = onNew, modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG)) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = stringResource(Res.string.profile_list_new),
+                    modifier = Modifier.size(17.dp),
                 )
             }
         }
         val scrollState = rememberScrollState()
-        Box(modifier = Modifier.weight(1f).padding(top = 4.dp)) {
+        Box(modifier = Modifier.weight(1f)) {
             Column(
                 modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
@@ -287,35 +227,37 @@ private fun ProfilesList(
                         selected = profile.id == selectedId,
                         usedBy = usageOf(profile.id),
                         onSelect = { onSelect(profile.id) },
-                        onDuplicate = { onDuplicate(profile.id) },
-                        onRequestDelete = { onRequestDelete(profile.id) },
                     )
                 }
             }
             SettingsScrollbar(scrollState)
         }
+        Text(
+            text = stringResource(Res.string.profile_list_hint),
+            fontSize = 11.sp,
+            lineHeight = 15.sp,
+            color = palette.faintText,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 14.dp),
+        )
     }
 }
 
-/**
- * One profile: a dot in its display mode's colour, its name, what uses it and its mode's badge.
- * Duplicate and Delete appear under the pointer, and stay on the selected row.
- */
+private const val HOVER_WASH_ALPHA = 0.06f
+
+/** One profile: its mode's dot, its name, what uses it, and its mode's badge. */
 @Composable
 private fun ProfileListRow(
     profile: OutputProfile,
     selected: Boolean,
     usedBy: List<String>,
     onSelect: () -> Unit,
-    onDuplicate: () -> Unit,
-    onRequestDelete: () -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    val ink = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+    val scheme = MaterialTheme.colorScheme
     val background = when {
-        selected -> MaterialTheme.colorScheme.secondaryContainer
-        hovered -> MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_WASH_ALPHA)
+        selected -> scheme.secondaryContainer
+        hovered -> scheme.onSurface.copy(alpha = HOVER_WASH_ALPHA)
         else -> Color.Transparent
     }
     Row(
@@ -325,83 +267,36 @@ private fun ProfileListRow(
             .background(background)
             .hoverable(interaction)
             .clickable(onClick = onSelect)
-            .padding(start = 10.dp, end = 6.dp, top = 8.dp, bottom = 8.dp),
+            .testTag(profileRowTag(profile.id))
+            .padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ProfileModeDot(profile.displayMode)
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = profile.name.ifBlank { profile.id },
-                style = MaterialTheme.typography.bodyMedium,
+                text = profile.displayName(),
+                fontSize = 14.sp,
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                color = ink,
+                color = if (selected) scheme.onSecondaryContainer else scheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = usageText(usedBy),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp,
+                color = scheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.alpha(if (usedBy.isEmpty()) UNASSIGNED_ALPHA else 1f),
             )
         }
-        if (hovered || selected) {
-            ListIconKey(
-                icon = Icons.Filled.ContentCopy,
-                description = stringResource(Res.string.output_profile_duplicate),
-                onClick = onDuplicate,
-                size = ROW_KEY_SIZE,
-            )
-            ListIconKey(
-                icon = Icons.Filled.Delete,
-                description = stringResource(Res.string.output_profile_delete),
-                onClick = onRequestDelete,
-                size = ROW_KEY_SIZE,
-                tint = MaterialTheme.colorScheme.error,
-            )
-        } else {
-            ProfileModeBadge(profile.displayMode)
-        }
+        Spacer(Modifier.width(2.dp))
+        ProfileModeBadge(profile.displayMode)
     }
 }
 
-private const val HOVER_WASH_ALPHA = 0.06f
-private val ROW_KEY_SIZE = 26.dp
+/** Test handle for one row of the profile list. */
+internal fun profileRowTag(id: String): String = "profile_row_$id"
 
-@Composable
-private fun ListIconKey(
-    icon: ImageVector,
-    description: String,
-    onClick: () -> Unit,
-    size: Dp = 32.dp,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
-) {
-    KeyIconButton(onClick = onClick, modifier = Modifier.size(size)) {
-        Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(15.dp))
-    }
-}
-
-@Composable
-private fun SmallKey(label: String, onClick: () -> Unit) {
-    KeyButton(
-        onClick = onClick,
-        shape = AppShape(7.dp),
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-    ) {
-        Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WithTooltip(text: String, content: @Composable () -> Unit) {
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(text) } },
-        state = rememberTooltipState(),
-        content = content,
-    )
-}
+/** Test handle for the "+" that makes a new profile. */
+internal const val NEW_PROFILE_TAG = "profile_new"

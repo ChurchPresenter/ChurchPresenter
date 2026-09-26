@@ -72,6 +72,29 @@ data class SemanticColors(
     val contentPresentation: Color,
     val contentMedia: Color,
     val contentCalendar: Color,
+    /**
+     * A setting a linked profile has changed from its master: the dot beside its label, and the
+     * "3 changes" chip in the profile list.
+     */
+    val override: Color,
+    val overrideContainer: Color,
+    val onOverrideContainer: Color,
+    /** The dashed edge round a value a linked profile takes from its master. */
+    val inherited: Color,
+    /** A value set for one translation or language rather than all of them -- the "Only KJV" chip. */
+    val targetContainer: Color,
+    val onTargetContainer: Color,
+    /**
+     * Handles drawn over a settings preview: margins and moving in [adjustHandle], size and band
+     * height in [adjustAccent]. The preview is always a dark picture of an output, so these are
+     * the same in every theme.
+     */
+    val adjustHandle: Color,
+    val onAdjustHandle: Color,
+    val adjustAccent: Color,
+    val onAdjustAccent: Color,
+    /** The line showing where a dragged row will land. */
+    val dropIndicator: Color,
 )
 
 private val LightSemanticColors = SemanticColors(
@@ -99,6 +122,17 @@ private val LightSemanticColors = SemanticColors(
     contentPresentation = Color(0xFFB23F70),
     contentMedia = Color(0xFF1D78B4),
     contentCalendar = Color(0xFFC0392B),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
 )
 
 private val DarkSemanticColors = SemanticColors(
@@ -126,6 +160,17 @@ private val DarkSemanticColors = SemanticColors(
     contentPresentation = Color(0xFFE88BAD),
     contentMedia = Color(0xFF6CBDF0),
     contentCalendar = Color(0xFFF08A7E),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
 )
 
 /**

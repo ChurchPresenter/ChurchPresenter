@@ -3,8 +3,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.SkikoComposeUiTest
-import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
@@ -17,6 +15,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile
@@ -53,6 +52,7 @@ class ProfilesRedesignTest {
     }
 
     private fun SkikoComposeUiTest.displayMode(label: String) {
+        openProfilePage(ProfilePage.General)
         onNode(hasTextExactly(label) and hasClickAction() and !isToggleable()).performClick()
         waitForIdle()
     }
@@ -60,20 +60,9 @@ class ProfilesRedesignTest {
     // ── Content on this output ──────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the content switches are folded away until asked for`() {
-        profilesTab(profileDocument()) { _ ->
-            onNodeWithTag(PROFILE_CONTENT_LIST_TAG).assertDoesNotExist()
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
-            waitForIdle()
-            onNodeWithTag(PROFILE_CONTENT_LIST_TAG).assertExists()
-        }
-    }
-
-    @Test
     fun `Hide all switches every kind of content off, scripture and songs included`() {
         profilesTab(profileDocument()) { get ->
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
-            waitForIdle()
+            openProfilePage(ProfilePage.Content)
             onNodeWithText("Hide all").performClick()
             waitForIdle()
 
@@ -86,8 +75,7 @@ class ProfilesRedesignTest {
     @Test
     fun `Hide all keeps the preview column in place`() {
         profilesTab(profileDocument()) { _ ->
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
-            waitForIdle()
+            openProfilePage(ProfilePage.Content)
             onNodeWithText("Hide all").performClick()
             waitForIdle()
 
@@ -100,8 +88,7 @@ class ProfilesRedesignTest {
     fun `Show all switches them back on`() {
         val off = OutputProfile(bibleMode = Constants.SONG_LANG_OFF, showMedia = false, showQA = false)
         profilesTab(profileDocument(profile = off)) { get ->
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
-            waitForIdle()
+            openProfilePage(ProfilePage.Content)
             onNodeWithText("Show all").performClick()
             waitForIdle()
 
@@ -113,9 +100,8 @@ class ProfilesRedesignTest {
     @Test
     fun `switching songs off switches the look-ahead off with them`() {
         profilesTab(profileDocument(profile = OutputProfile(songLookAhead = true))) { get ->
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
-            waitForIdle()
-            onNode(isToggleable() and hasTextExactly("Songs")).performClick()
+            openProfilePage(ProfilePage.Content)
+            contentSwitch("Songs").performClick()
             waitForIdle()
 
             assertFalse(get().profile().showSongs)
@@ -126,7 +112,8 @@ class ProfilesRedesignTest {
     @Test
     fun `the summary names what is hidden`() {
         profilesTab(profileDocument(profile = OutputProfile(showCanvas = false))) { _ ->
-            // Song LA ships off, so it is named too; what matters is that Canvas is.
+            openProfilePage(ProfilePage.Content)
+            // Song look-ahead ships off, so it is named too; what matters is that Canvas is.
             onNode(hasText("hidden:", substring = true) and hasText("Canvas", substring = true)).assertExists()
         }
     }
@@ -136,6 +123,7 @@ class ProfilesRedesignTest {
     @Test
     fun `moving a translation down stores the profile's own order`() {
         profilesTab(twoTranslations()) { get ->
+            openProfilePage(ProfilePage.Content)
             onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
             waitForIdle()
             onNode(hasContentDescription("Move down") and hasAnyAncestor(hasTestTag(bibleOrderRowTag(0))))
@@ -149,6 +137,7 @@ class ProfilesRedesignTest {
     @Test
     fun `the first translation cannot move further up`() {
         profilesTab(twoTranslations()) { get ->
+            openProfilePage(ProfilePage.Content)
             onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
             waitForIdle()
             onNode(hasContentDescription("Move up") and hasAnyAncestor(hasTestTag(bibleOrderRowTag(0))))
@@ -162,6 +151,7 @@ class ProfilesRedesignTest {
     @Test
     fun `with no Bibles loaded the source menu says where to add them`() {
         profilesTab(profileDocument()) { _ ->
+            openProfilePage(ProfilePage.Content)
             onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
             waitForIdle()
             onNodeWithText("No Bibles loaded", substring = true).assertExists()
@@ -247,9 +237,10 @@ class ProfilesRedesignTest {
     @Test
     fun `the Scale row sets pictures and media for this profile`() {
         profilesTab(profileDocument()) { get ->
-            onAllNodesWithText("Fill")[0].performClick()
+            openProfilePage(ProfilePage.Content)
+            onAllNodesWithText("Fill")[0].performScrollTo().performClick()
             waitForIdle()
-            onAllNodesWithText("Stretch")[1].performClick()
+            onAllNodesWithText("Stretch")[1].performScrollTo().performClick()
             waitForIdle()
 
             assertEquals(OutputScaleMode.FILL, get().profile().pictureScaleMode)
@@ -272,22 +263,22 @@ class ProfilesRedesignTest {
         profilesTab(profileDocument()) { _ ->
             // Q&A is one of the stage monitor's tabs too, so a pick carried across would stay on it.
             clickTab(CustomizePane.QA)
-            displayMode("Stage Monitor")
+            displayMode("Stage monitor")
+            // The section list now leads with the stage monitor's own layout page.
+            clickTab(CustomizePane.STAGE_MONITOR)
 
-            onNodeWithText("Screen Layout").assertExists()
+            onNodeWithText("Screen Layout", substring = true).assertExists()
         }
     }
 
     @Test
-    fun `switching Q&A off under Content takes its Style tab away`() {
+    fun `switching Q&A off under Content keeps its page, saying it is not shown`() {
         profilesTab(profileDocument()) { _ ->
-            onNodeWithTag(railTag(CustomizePane.QA.name)).assertExists()
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
+            contentSwitch("Q&A").performClick()
             waitForIdle()
-            onNode(isToggleable() and hasTextExactly("Q&A")).performClick()
-            waitForIdle()
+            openProfilePage(ProfilePage.Appearance(CustomizePane.QA))
 
-            onNodeWithTag(railTag(CustomizePane.QA.name)).assertDoesNotExist()
+            onNodeWithText("is not shown on this profile", substring = true).assertExists()
         }
     }
 
@@ -323,6 +314,7 @@ class ProfilesRedesignTest {
     @Test
     fun `the Bible tab opens on All, and an edit there reaches every translation`() {
         profilesTab(twoTranslations()) { get ->
+            clickTab(CustomizePane.BIBLE)
             onNodeWithTag(translationChipTag(ALL_TRANSLATIONS)).assertExists()
             retypeNumberField(showing = 70, to = 90)
 
@@ -333,6 +325,7 @@ class ProfilesRedesignTest {
     @Test
     fun `picking one translation styles that one alone`() {
         profilesTab(twoTranslations()) { get ->
+            clickTab(CustomizePane.BIBLE)
             onNodeWithTag(translationChipTag(1)).performClick()
             waitForIdle()
             retypeNumberField(showing = 70, to = 90)
@@ -347,28 +340,13 @@ class ProfilesRedesignTest {
     fun `Identify shows each display's number`() {
         var identified = 0
         profilesTab(profileDocument(), onIdentify = { identified++ }) { _ ->
+            openProfilePage(ProfilePage.Outputs)
             onNodeWithText("Identify").performClick()
             waitForIdle()
             assertEquals(1, identified)
         }
     }
 
-    @Test
-    fun `hovering a row that is not open shows its actions`() {
-        val doc = profileDocument().let { d ->
-            d.copy(
-                projectionSettings = d.projectionSettings.copy(
-                    outputProfiles = d.projectionSettings.outputProfiles + OutputProfile(id = "foyer", name = "Foyer"),
-                ),
-            )
-        }
-        profilesTab(doc) { _ ->
-            onAllNodes(hasContentDescription("Duplicate")).assertCountEquals(1)
-            onNodeWithText("Foyer").performMouseInput { moveTo(center) }
-            waitForIdle()
-            onAllNodes(hasContentDescription("Duplicate")).assertCountEquals(2)
-        }
-    }
 
     @Test
     fun `a profile used by a Browser Source and an NDI output names both`() {
@@ -381,14 +359,14 @@ class ProfilesRedesignTest {
             )
         }
         profilesTab(doc) { _ ->
-            onAllNodesWithText("Used by Browser Source 1, NDI Output 1")[0].assertExists()
+            onAllNodesWithText("Browser Source 1, NDI Output 1")[0].assertExists()
         }
     }
 
     @Test
     fun `a profile no output uses says so`() {
         profilesTab(profileDocument()) { _ ->
-            onAllNodesWithText("Not assigned")[0].assertExists()
+            onAllNodesWithText("Not in use")[0].assertExists()
         }
     }
 }

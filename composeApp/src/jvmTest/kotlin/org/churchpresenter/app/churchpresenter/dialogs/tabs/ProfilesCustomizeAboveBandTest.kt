@@ -2,7 +2,6 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
@@ -10,7 +9,6 @@ import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * The wash above a lower-third band: the area of the screen the band does not cover, which a
@@ -23,7 +21,7 @@ class ProfilesCustomizeAboveBandTest {
     private companion object {
         const val CAPTION = "Above The Band"
         // ColorPickerField uppercases the label it is handed; CustomizeRow does not.
-        const val FILL_COLOR = "FILL COLOR"
+        const val FILL_COLOR = "Fill Color"
         const val FILL_OPACITY = "Fill Opacity"
     }
 
@@ -94,16 +92,6 @@ class ProfilesCustomizeAboveBandTest {
         }
     }
 
-    @Test
-    fun `the Background chips name the lower-third surfaces they write`() {
-        profilesTab(output()) { _ ->
-            openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE, own = false)
-            assertTrue(
-                onAllNodesWithText("Bible · Lower Third").fetchSemanticsNodes().isNotEmpty(),
-                "the chip must say which of the pair it edits",
-            )
-        }
-    }
 
     @Test
     fun `the wash can be told to fill behind the band as well`() {
@@ -141,7 +129,7 @@ class ProfilesCustomizeAboveBandTest {
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
             chooseSegment("Color", nth = 1)
             val bandOpacity = get().storedBand().backgroundOpacity
-            tapSliderTrack(FILL_OPACITY, "100%", fraction = 0.25f)
+            setProfileStepper(FILL_OPACITY, "100%", fraction = 0.25f)
 
             assertEquals(0.25f, get().storedBand().aboveBandOpacity, absoluteTolerance = 0.02f)
             assertEquals(bandOpacity, get().storedBand().backgroundOpacity, "the band's own opacity must not move")

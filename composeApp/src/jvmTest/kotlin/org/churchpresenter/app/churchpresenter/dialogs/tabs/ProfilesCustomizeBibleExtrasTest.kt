@@ -82,7 +82,7 @@ class ProfilesCustomizeBibleExtrasTest {
     fun `the horizontal alignment writes the full screen's verse text`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            horizontalAlignButton(group = 0, which = HAlign.CENTER).performScrollTo().performClick()
+            segment("Center").performScrollTo().performClick()
             waitForIdle()
 
             val stored = get().storedTranslation()
@@ -99,7 +99,7 @@ class ProfilesCustomizeBibleExtrasTest {
     fun `the horizontal alignment writes the band's verse text instead`() {
         profilesTab(output(band)) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            horizontalAlignButton(group = 0, which = HAlign.RIGHT).performScrollTo().performClick()
+            segment("Right").performScrollTo().performClick()
             waitForIdle()
 
             val stored = get().storedTranslation()
@@ -112,7 +112,7 @@ class ProfilesCustomizeBibleExtrasTest {
     fun `the vertical alignment is one value, not a pair`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            onNodeWithContentDescription("Align Top").performScrollTo().performClick()
+            segment("Top").performScrollTo().performClick()
             waitForIdle()
 
             assertEquals(

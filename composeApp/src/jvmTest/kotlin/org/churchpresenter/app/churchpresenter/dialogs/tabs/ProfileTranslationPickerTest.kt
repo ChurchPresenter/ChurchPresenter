@@ -50,6 +50,7 @@ class ProfileTranslationPickerTest {
     )
 
     private fun SkikoComposeUiTest.openPicker() {
+        openProfilePage(ProfilePage.Content)
         onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
         waitForIdle()
     }
@@ -132,6 +133,7 @@ class ProfileTranslationPickerTest {
         )
         profilesTab(doc) { _ ->
             // One real translation, one stale position: the stale one must not be counted.
+            openProfilePage(ProfilePage.Content)
             onNodeWithText("1 of 1 translations").assertExists()
         }
     }
@@ -143,6 +145,7 @@ class ProfileTranslationPickerTest {
             profile = OutputProfile(bibleTranslations = listOf(4, 5)),
         )
         profilesTab(doc) { _ ->
+            openProfilePage(ProfilePage.Content)
             onNodeWithText("0 of 1 translations").assertExists()
         }
     }
@@ -150,6 +153,7 @@ class ProfileTranslationPickerTest {
     // ── The song-language picker, which is the same widget over the language slots ──────────────
 
     private fun SkikoComposeUiTest.openSongPicker() {
+        openProfilePage(ProfilePage.Content)
         onNodeWithTag(SONG_SOURCE_TRIGGER_TAG).performClick()
         waitForIdle()
     }

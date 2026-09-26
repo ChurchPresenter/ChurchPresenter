@@ -26,7 +26,8 @@ import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BIBLE_SOURCE_TRIGGER_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.PROFILE_CONTENT_TOGGLE_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilePage
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.openProfilePage
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilesSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickPreviewShape
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
@@ -73,11 +74,12 @@ class ProfilesTabScreenshotTest {
 
     @Test
     fun `the content section open`() = shoot("content_open") {
-        onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
+        openProfilePage(ProfilePage.Content)
     }
 
     @Test
     fun `the Bible source menu open`() = shoot("bible_source_menu", rootIndex = 1) {
+        openProfilePage(ProfilePage.Content)
         onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
     }
 
@@ -87,7 +89,7 @@ class ProfilesTabScreenshotTest {
     }
 
     @Test
-    fun `a lower third`() = shoot("lower_third") { displayMode("Lower Third") }
+    fun `a lower third`() = shoot("lower_third") { displayMode("Lower third") }
 
     @Test
     fun `nothing left to style`() = shoot(
@@ -128,7 +130,7 @@ class ProfilesTabScreenshotTest {
     fun `the Dictionary tab`() = shoot("style_dictionary") { tab(CustomizePane.DICTIONARY) }
 
     @Test
-    fun `a stage monitor`() = shoot("stage_monitor") { displayMode("Stage Monitor") }
+    fun `a stage monitor`() = shoot("stage_monitor") { displayMode("Stage monitor") }
 
     // ── Harness ─────────────────────────────────────────────────────────────────────────────────
 

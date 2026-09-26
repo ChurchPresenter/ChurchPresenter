@@ -175,7 +175,7 @@ fun TextStyleButtons(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TextOutlineButton(
+internal fun TextOutlineButton(
     outline: TextOutline,
     onOutlineChange: (TextOutline) -> Unit,
     buttonSize: Dp,
@@ -235,7 +235,7 @@ private fun TextOutlineButton(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TextBackdropButton(
+internal fun TextBackdropButton(
     backdrop: TextBackdrop,
     onBackdropChange: (TextBackdrop) -> Unit,
     buttonSize: Dp,

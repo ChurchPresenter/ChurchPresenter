@@ -2,10 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.AppSettings
@@ -136,12 +134,7 @@ class ProfilesCustomizeBackgroundTypesTest {
     fun `choosing Default hands the surface back to the one above it`() {
         profilesTab(output(Constants.BACKGROUND_COLOR)) { get ->
             openBackgroundSurface()
-            // "Default" is also the Default *chip* in the strip above, so the segment is the one
-            // that is not that chip.
-            onNode(
-                hasText("Default") and hasClickAction() and
-                    !hasTestTag(elementChipTag(CustomizeElement.BACKGROUND_DEFAULT.name)),
-            ).performScrollTo().performClick()
+            onNodeWithTag(BG_PROFILE_DEFAULT_TAG).performScrollTo().performClick()
             waitForIdle()
 
             assertEquals(Constants.BACKGROUND_DEFAULT, get().stored().backgroundType)

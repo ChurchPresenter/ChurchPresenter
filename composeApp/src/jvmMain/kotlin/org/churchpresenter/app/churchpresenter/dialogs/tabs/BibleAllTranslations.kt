@@ -51,5 +51,6 @@ internal fun BibleElementStyle.withChangesFrom(before: BibleElementStyle, after:
         transform = pick(transform, before.transform, after.transform),
         backdrop = pick(backdrop, before.backdrop, after.backdrop),
         outline = pick(outline, before.outline, after.outline),
+        offset = pick(offset, before.offset, after.offset),
     )
 }

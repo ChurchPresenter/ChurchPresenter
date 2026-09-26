@@ -73,31 +73,7 @@ class ProfilesCustomizeElementsTest {
         }
     }
 
-    @Test
-    fun `every Background chip draws on both shapes`() {
-        for (mode in shapes) {
-            profilesTab(doc(mode)) { _ ->
-                for (element in customizeElements(CustomizePane.BACKGROUND)) {
-                    openCustomizePane(CustomizePane.BACKGROUND, element)
-                    onNodeWithTag(elementChipTag(element.name)).assertExists()
-                }
-            }
-        }
-    }
 
-    @Test
-    fun `every Background chip draws once taken over as well`() {
-        // Taking a surface over swaps a dimmed, untouchable column for a live one, which is a
-        // different composition -- so both halves are rendered here.
-        for (mode in shapes) {
-            profilesTab(doc(mode)) { _ ->
-                for (element in customizeElements(CustomizePane.BACKGROUND)) {
-                    openBackgroundSurface(element)
-                    onNodeWithTag(elementChipTag(element.name)).assertExists()
-                }
-            }
-        }
-    }
 
     @Test
     fun `the stage monitor pane draws`() {

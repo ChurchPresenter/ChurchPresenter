@@ -3,8 +3,10 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.media_subtitle_settings_hint
+import churchpresenter.composeapp.generated.resources.profile_group_look
 import org.churchpresenter.app.churchpresenter.composables.SubtitleStyleSettings
 import org.churchpresenter.app.churchpresenter.dialogs.QADisplaySettings
 import org.churchpresenter.app.churchpresenter.dialogs.STTDisplaySettings
@@ -13,48 +15,48 @@ import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The editor for one of the whole-form style categories -- captions, subtitles, Q&A and the
- * dictionary card -- over this profile's own copy.
+ * The pages for the whole-form categories -- live captions, subtitles, Q&A, the dictionary card and
+ * the stage monitor's layout -- over this profile's own copy.
  *
- * Each is the form that used to live on its own tab or dialog, unchanged, handed the profile's
- * resolved settings and the editor's write-back ([ProfileEditor]'s `onDraftSettingsChange`), so a
- * control edits exactly one profile and nothing global. The stage monitor has its own branch in
- * [CustomizeControls], as it always has.
+ * Each is the form that used to live on its own tab or dialog, handed the profile's resolved
+ * settings and the editor's write-back, so a control edits exactly one profile and nothing global.
+ * They sit in one card each, on the page like every other group, until each is broken into rows
+ * of its own.
  */
 @Composable
-internal fun ProfileFormPane(
+internal fun ProfileFormPage(
     pane: CustomizePane,
     draft: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
-    when (pane) {
-        // Scrolls and pads itself -- it was a whole settings tab.
-        CustomizePane.DICTIONARY -> DictionarySettingsTab(settings = draft, onSettingsChange = onSettingsChange)
-        CustomizePane.CAPTIONS -> PaneScaffold {
-            STTDisplaySettings(
-                appSettings = draft,
-                onSettingsChange = onSettingsChange,
-                availableFonts = rememberSystemFonts(),
-            )
+    SettingsGroup(stringResource(Res.string.profile_group_look)) {
+        SettingsWideRow {
+            when (pane) {
+                CustomizePane.STAGE_MONITOR ->
+                    StageMonitorSettingsTab(settings = draft, onSettingsChange = onSettingsChange, embedded = true)
+                CustomizePane.CAPTIONS -> STTDisplaySettings(
+                    appSettings = draft,
+                    onSettingsChange = onSettingsChange,
+                    availableFonts = rememberSystemFonts(),
+                )
+                CustomizePane.QA -> QADisplaySettings(
+                    appSettings = draft,
+                    onSettingsChange = onSettingsChange,
+                    availableFonts = rememberSystemFonts(),
+                )
+                CustomizePane.SUBTITLES -> {
+                    // Which subtitles this reaches: only the files the app draws itself. Without it an
+                    // embedded track ignoring every control here reads as a broken page.
+                    Text(
+                        text = stringResource(Res.string.media_subtitle_settings_hint),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    SubtitleStyleSettings(settings = draft, onSettingsChange = onSettingsChange)
+                }
+                // Pages of their own; the editor never sends them here.
+                CustomizePane.BIBLE, CustomizePane.SONGS, CustomizePane.BACKGROUND, CustomizePane.DICTIONARY -> Unit
+            }
         }
-        CustomizePane.QA -> PaneScaffold {
-            QADisplaySettings(
-                appSettings = draft,
-                onSettingsChange = onSettingsChange,
-                availableFonts = rememberSystemFonts(),
-            )
-        }
-        CustomizePane.SUBTITLES -> PaneScaffold {
-            // Which subtitles this reaches: only the files the app draws itself. Without it an
-            // embedded track ignoring every control here reads as a broken tab.
-            Text(
-                text = stringResource(Res.string.media_subtitle_settings_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            SubtitleStyleSettings(settings = draft, onSettingsChange = onSettingsChange)
-        }
-        // Not whole-form categories; [CustomizeControls] never sends them here.
-        CustomizePane.STAGE_MONITOR, CustomizePane.BIBLE, CustomizePane.SONGS, CustomizePane.BACKGROUND -> Unit
     }
 }
