@@ -257,6 +257,8 @@ fun ScheduleTab(
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
     hiddenToolbarButtons: Set<String> = emptySet(),
     onToggleToolbarButton: (ScheduleToolbarButton) -> Unit = {},
+    toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
+    onToolbarIconSizeChange: (ScheduleToolbarIconSize) -> Unit = {},
     planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
     onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit = { _, _, _ -> },
     onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit = { _, _, _, _ -> },
@@ -387,7 +389,9 @@ fun ScheduleTab(
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             hiddenButtons = hiddenToolbarButtons,
-            onToggleButton = onToggleToolbarButton
+            onToggleButton = onToggleToolbarButton,
+            toolbarIconSize = toolbarIconSize,
+            onToolbarIconSizeChange = onToolbarIconSizeChange
         )
 
         // When each row is expected to go live, reckoned from the first pinned row across the

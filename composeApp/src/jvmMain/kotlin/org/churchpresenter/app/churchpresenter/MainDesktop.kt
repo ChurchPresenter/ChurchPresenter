@@ -141,6 +141,7 @@ import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.tabs.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
@@ -1425,6 +1426,10 @@ fun MainDesktop(
                         legacyRowActions = appSettings.scheduleLegacyRowActions,
                         onLegacyRowActionsChange = { legacy ->
                             onSettingsChange { settings -> settings.copy(scheduleLegacyRowActions = legacy) }
+                        },
+                        toolbarIconSize = ScheduleToolbarIconSize.fromName(appSettings.scheduleToolbarIconSize),
+                        onToolbarIconSizeChange = { size ->
+                            onSettingsChange { settings -> settings.copy(scheduleToolbarIconSize = size.name) }
                         },
                         hiddenToolbarButtons = appSettings.hiddenScheduleButtons,
                         onToggleToolbarButton = { button ->

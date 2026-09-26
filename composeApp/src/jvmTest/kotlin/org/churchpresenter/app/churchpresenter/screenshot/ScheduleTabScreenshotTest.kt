@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarTags
 import org.churchpresenter.app.churchpresenter.tabs.scheduleTab
 import org.churchpresenter.settings.utils.Constants
@@ -37,6 +38,7 @@ class ScheduleTabScreenshotTest {
         width: Dp? = null,
         legacyRowActions: Boolean = false,
         hiddenToolbarButtons: Set<String> = emptySet(),
+        toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
         rootIndex: Int = 0,
         seed: ScheduleViewModel.() -> Unit = { everyItemType() },
         clock: () -> LocalTime = { NOW },
@@ -52,6 +54,7 @@ class ScheduleTabScreenshotTest {
             width = width,
             legacyRowActions = legacyRowActions,
             hiddenToolbarButtons = hiddenToolbarButtons,
+            toolbarIconSize = toolbarIconSize,
             seed = seed,
             themeMode = mode,
             clock = clock,
@@ -317,6 +320,18 @@ class ScheduleTabScreenshotTest {
             ScheduleToolbarButton.ITEM_COUNT.name,
         ),
     )
+
+    /**
+     * The toolbar at its two larger icon sizes, every button turned on so the Calendar Manager's is
+     * among them. Small is every other shot in this class.
+     */
+    @Test
+    fun `toolbar icons medium`() =
+        shoot("toolbar_icons_medium", toolbarIconSize = ScheduleToolbarIconSize.MEDIUM, width = 400.dp)
+
+    @Test
+    fun `toolbar icons large`() =
+        shoot("toolbar_icons_large", toolbarIconSize = ScheduleToolbarIconSize.LARGE, width = 400.dp)
 
     /** The options menu itself — an open menu is its own compose root, hence [rootIndex] 1. */
     @Test
