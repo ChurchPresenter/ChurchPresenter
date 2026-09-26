@@ -161,6 +161,7 @@ internal const val SCHEDULE_SKIPPED_FILES_TAG = "schedule_skipped_files"
 data class ScheduleTabActions(
     val newSchedule: () -> Unit = {},
     val openSchedule: () -> Unit = {},
+    val openScheduleFile: (String) -> Unit = {},
     val saveSchedule: () -> Unit = {},
     val saveScheduleAs: () -> Unit = {},
     val removeSelected: () -> Unit = {},
@@ -308,6 +309,7 @@ fun ScheduleTab(
             ScheduleTabActions(
                 newSchedule      = { viewModel.newSchedule() },
                 openSchedule     = { scope.launch { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) } },
+                openScheduleFile  = { path -> scope.launch { viewModel.loadScheduleFile(java.nio.file.Path.of(path)) } },
                 saveSchedule     = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } },
                 saveScheduleAs   = { scope.launch { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) } },
                 removeSelected   = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },

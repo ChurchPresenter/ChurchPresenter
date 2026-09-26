@@ -7,6 +7,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 data class ScheduleActions(
     val newSchedule: () -> Unit = {},
     val openSchedule: () -> Unit = {},
+    val openScheduleFile: (String) -> Unit = {},
     val saveSchedule: () -> Unit = {},
     val saveScheduleAs: () -> Unit = {},
     val removeSelected: () -> Unit = {},

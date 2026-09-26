@@ -20,6 +20,7 @@ import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
+import java.nio.file.Path
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.time.LocalTime
@@ -452,6 +453,12 @@ class ScheduleViewModel(
             selectDirectory = false
         )
         if (file == null || !file.exists()) return
+        loadScheduleFile(file)
+    }
+
+    /** Loads a known schedule path without showing a second file chooser. */
+    suspend fun loadScheduleFile(file: Path) {
+        if (_isFollowingRemote.value || !file.exists()) return
         try {
             val raw = file.readText()
             val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }

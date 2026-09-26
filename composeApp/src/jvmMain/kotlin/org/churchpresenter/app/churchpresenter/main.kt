@@ -2129,7 +2129,8 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 ServiceFoldersWindow(
                                     theme = theme,
                                     onClose = { showServiceFoldersWindow = false },
-                                    onSettingsChanged = { appSettings = it }
+                                    onSettingsChanged = { appSettings = it },
+                                    onLoadPlan = currentScheduleActions.openScheduleFile
                                 )
                             }
                             if (showConverterWindow) {

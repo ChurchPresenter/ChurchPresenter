@@ -3,11 +3,7 @@ package org.churchpresenter.app.churchpresenter.data
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.time.format.ResolverStyle
-import java.util.Locale
+import java.util.prefs.Preferences
 
 data class RepositoryStatus(
     val kind: String,
@@ -20,12 +16,11 @@ data class RepositoryStatus(
 )
 
 data class ServiceEntry(val date: String, val directory: Path, val plan: Path?)
+data class ConflictEntry(val path: String)
+data class RepositoryConfiguration(val root: Path, val remote: String, val branch: String)
 
 /** JVM implementation of the repository and service actions previously provided by the updater. */
 class ContentRepositoryManager(private val root: Path) {
-    private val formatter = DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.ROOT)
-        .withResolverStyle(ResolverStyle.STRICT)
-
     private fun git(vararg args: String, allowFailure: Boolean = false): String {
         val process = ProcessBuilder(listOf("git", "-C", root.toString()) + args)
             .redirectErrorStream(true)
@@ -36,17 +31,28 @@ class ContentRepositoryManager(private val root: Path) {
         return output
     }
 
-    fun initialize(remote: String, branch: String) {
-        require(remote.isNotBlank() && branch.matches(Regex("[A-Za-z0-9._/-]+")))
+    /** Clones the selected GitHub repository into the chosen parent folder. */
+    fun clone(remote: String, branch: String): Path {
+        require(remote.matches(Regex("https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\\.git")))
+        require(branch.matches(Regex("[A-Za-z0-9._/-]+")) && !branch.startsWith('-'))
         Files.createDirectories(root)
-        if (!Files.exists(root.resolve(".git"))) {
-            git("init", "--quiet")
-            git("remote", "add", "origin", remote)
-        } else if (git("remote", "get-url", "origin") != remote) {
-            git("remote", "set-url", "origin", remote)
+        val repositoryName = remote.substringAfterLast('/').removeSuffix(".git")
+        val destination = root.resolve(repositoryName)
+        if (Files.exists(destination)) {
+            val existingContent = Files.list(destination)
+            val isEmpty = try { !existingContent.findAny().isPresent } finally { existingContent.close() }
+            require(isEmpty) { "The destination already contains files: $destination" }
         }
-        git("fetch", "origin", branch)
-        git("checkout", "-B", branch, "FETCH_HEAD")
+        val process = ProcessBuilder("git", "clone", "--branch", branch, "--single-branch", remote, destination.toString())
+            .redirectErrorStream(true)
+            .start()
+        val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
+        val code = process.waitFor()
+        check(code == 0) { output.ifBlank { "Could not clone the GitHub repository." } }
+        val cloneManager = ContentRepositoryManager(destination)
+        cloneManager.git("branch", "--set-upstream-to=origin/$branch", branch, allowFailure = true)
+        saveConfiguration(RepositoryConfiguration(destination.toAbsolutePath(), remote, branch))
+        return destination
     }
 
     fun status(): RepositoryStatus {
@@ -76,22 +82,41 @@ class ContentRepositoryManager(private val root: Path) {
         git("commit", "-m", message)
     }
 
-    fun synchronize() {
+    fun synchronize(commitMessage: String = "chore: sync ChurchPresenter content") {
         val current = status()
         if (current.kind == "conflict") error("Resolve the existing merge conflicts first.")
-        if (current.staged + current.unstaged > 0) commit("chore: sync ChurchPresenter content")
+        if (current.staged + current.unstaged > 0) commit(commitMessage)
         if (current.behind > 0) git("merge", "--no-edit", "origin/${current.branch}")
         if (current.ahead > 0 || current.behind > 0) git("push", "origin", "HEAD:${current.branch}")
         git("lfs", "pull", allowFailure = true)
     }
 
+    fun conflicts(): List<ConflictEntry> = git("diff", "--name-only", "--diff-filter=U", allowFailure = true)
+        .lineSequence().filter { it.isNotBlank() }.map(::ConflictEntry).toList()
+
+    fun resolveConflict(path: String, useRemote: Boolean) {
+        require(path.isNotBlank() && !path.contains("..") && !path.startsWith('/'))
+        git("checkout", if (useRemote) "--theirs" else "--ours", "--", path)
+        git("add", "--", path)
+    }
+
+    fun finishConflictMerge() {
+        check(conflicts().isEmpty()) { "There are unresolved conflicts." }
+        git("commit", "--no-edit")
+    }
+
     fun services(): List<ServiceEntry> = root.resolve("Services").toFile().let { services ->
         if (!services.isDirectory) return emptyList()
         services.listFiles().orEmpty().asSequence()
-            .filter { it.isDirectory && isDate(it.name) }
+            .filter { it.isDirectory }
             .map { directory -> ServiceEntry(directory.name, directory.toPath(), directory.resolve("plan.cps").takeIf(File::isFile)?.toPath()) }
             .sortedByDescending { it.date }
             .toList()
+    }
+
+    fun createService(date: String): Path {
+        val plan = ServiceFolders.create(root.resolve("Services"), date)
+        return plan
     }
 
     fun connect(service: ServiceEntry, contentRoot: Path, saveSettings: (Path, Path, Path, Path, Path) -> Unit) {
@@ -102,13 +127,32 @@ class ContentRepositoryManager(private val root: Path) {
         Files.createDirectories(contentRoot.resolve("Songs"))
         Files.createDirectories(contentRoot.resolve("Bibles"))
         saveSettings(contentRoot.resolve("Songs"), contentRoot.resolve("Bibles"), pictures, presentations, media)
-        java.awt.Desktop.getDesktop().open(plan.toFile())
     }
 
-    private fun isDate(value: String): Boolean = try {
-        LocalDate.parse(value, formatter)
-        true
-    } catch (_: DateTimeParseException) {
-        false
+    companion object {
+        private val preferences = Preferences.userNodeForPackage(ContentRepositoryManager::class.java)
+
+        fun savedConfiguration(): RepositoryConfiguration? {
+            val root = preferences.get("root", "").trim()
+            val remote = preferences.get("remote", "").trim()
+            val branch = preferences.get("branch", "").trim()
+            if (root.isEmpty() || remote.isEmpty() || branch.isEmpty()) return null
+            return RepositoryConfiguration(Path.of(root), remote, branch)
+        }
+
+        /** Forgets the app's repository link while leaving the working copy untouched. */
+        fun clearSavedConfiguration() {
+            preferences.remove("root")
+            preferences.remove("remote")
+            preferences.remove("branch")
+            preferences.flush()
+        }
+
+        private fun saveConfiguration(configuration: RepositoryConfiguration) {
+            preferences.put("root", configuration.root.toString())
+            preferences.put("remote", configuration.remote)
+            preferences.put("branch", configuration.branch)
+            preferences.flush()
+        }
     }
 }

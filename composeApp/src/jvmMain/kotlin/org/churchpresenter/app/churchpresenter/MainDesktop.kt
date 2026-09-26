@@ -1364,6 +1364,7 @@ fun MainDesktop(
                                 ScheduleActions(
                                     newSchedule = actions.newSchedule,
                                     openSchedule = actions.openSchedule,
+                                    openScheduleFile = actions.openScheduleFile,
                                     saveSchedule = actions.saveSchedule,
                                     saveScheduleAs = actions.saveScheduleAs,
                                     removeSelected = actions.removeSelected,
