@@ -264,7 +264,7 @@ internal fun BibleProperties(
             source.fontSize.toString(),
             Modifier.weight(1f)
         ) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
+            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))) }
         }
     }
     PropertySliderWithInput(
@@ -324,7 +324,9 @@ internal fun BibleProperties(
             source.referenceFontSize.toString(),
             Modifier.weight(1f)
         ) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(referenceFontSize = it)) }
+            v.toIntOrNull()?.let {
+                onUpdate(source.copy(referenceFontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE)))
+            }
         }
         ColorPickerField(
             color = source.referenceFontColor,
