@@ -2107,6 +2107,7 @@
     <string name="song_pane_secondary">Language 2</string>
     <string name="song_pane_translation">Language %1$d</string>
     <string name="song_translation_title">Language %1$d Title</string>
+    <string name="song_named_title">%1$s Title</string>
     <string name="enter_translation_lyrics_here">Enter translation %1$d lyrics here...</string>
     <string name="song_add_translation">Add a language</string>
     <string name="song_remove_translation">Remove this language</string>
