@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -230,7 +230,7 @@ private fun PresetsTab(presets: List<ItemPreset>, onRemove: (String) -> Unit) {
                 Box(
                     Modifier
                         .size(CalendarMetrics.rowIcon)
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(AppShape(6.dp))
                         .background(look.color.copy(alpha = WHEN_TINT)),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -322,9 +322,9 @@ private fun SectionRow(
             Box(
                 Modifier
                     .size(SWATCH_BUTTON)
-                    .clip(RoundedCornerShape(7.dp))
+                    .clip(AppShape(7.dp))
                     .background(parseHex(section.colorHex))
-                    .border(1.dp, scheme.outlineVariant, RoundedCornerShape(7.dp))
+                    .border(1.dp, scheme.outlineVariant, AppShape(7.dp))
                     .clickable(onClick = onPickColor)
             )
             // Transparent and unbordered: the design edits the name in place, not in a box.
@@ -375,12 +375,12 @@ private fun SectionRow(
                     Box(
                         Modifier
                             .size(22.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .clip(AppShape(6.dp))
                             .background(parseHex(swatch))
                             .border(
                                 width = 2.dp,
                                 color = if (on) scheme.onSurface else scheme.outlineVariant,
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                             )
                             .clickable { onColor(swatch) }
                     )
@@ -394,7 +394,7 @@ private fun SectionRow(
 @Composable
 private fun HexReadout(hex: String, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(7.dp)
+    val shape = AppShape(7.dp)
     Box(
         Modifier
             .width(HEX_FIELD)

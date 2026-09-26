@@ -32,7 +32,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -364,7 +364,7 @@ fun MediaTab(
                                 }
                             },
                             modifier = Modifier.height(32.dp),
-                            shape = RoundedCornerShape(7.dp),
+                            shape = AppShape(7.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -392,8 +392,8 @@ fun MediaTab(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(42.dp)
-                                .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                                .hoverTint(RoundedCornerShape(8.dp)),
+                                .sunken(AppShape(8.dp), elevationPalette())
+                                .hoverTint(AppShape(8.dp)),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -424,7 +424,7 @@ fun MediaTab(
                             },
                             enabled = urlInput.isNotBlank(),
                             modifier = Modifier.height(32.dp),
-                            shape = RoundedCornerShape(7.dp),
+                            shape = AppShape(7.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -885,8 +885,8 @@ fun MediaTab(
                 Box(
                     modifier = Modifier
                         .aspectRatio(previewOutput.size.aspectRatio)
-                        .background(Color.Black, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                        .background(Color.Black, AppShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     when {

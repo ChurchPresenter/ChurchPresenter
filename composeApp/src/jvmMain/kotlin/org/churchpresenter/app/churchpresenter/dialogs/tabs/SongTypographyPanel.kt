@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -174,7 +174,7 @@ internal fun SongTypographyPanel(
             Spacer(modifier = Modifier.weight(1f))
             GhostButton(
                 onClick = onReset,
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 modifier = Modifier.height(32.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp),
             ) {

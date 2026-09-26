@@ -2,13 +2,17 @@ package org.churchpresenter.app.churchpresenter.ui.theme
 
 import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
 import org.churchpresenter.app.churchpresenter.composables.cpTryParseHex
+import org.churchpresenter.app.churchpresenter.dialogs.defaultChoice
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CustomThemeColors
+import org.churchpresenter.settings.ListRowSpacing
+import org.churchpresenter.theme.DEFAULT_ROW_SPACING
 import org.churchpresenter.theme.DefaultCustomAccent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * The one place the stored theme strings become the values the theme module paints with.
@@ -30,6 +34,7 @@ class ThemeCustomizationSettingsTest {
         assertNull(custom.selection)
         assertNull(custom.fontFamily)
         assertEquals(1f, custom.fontScale)
+        assertEquals(DEFAULT_ROW_SPACING, custom.rowSpacing, "no Margin saved is Normal")
     }
 
     @Test
@@ -87,6 +92,7 @@ class ThemeCustomizationSettingsTest {
             customThemeColors = CustomThemeColors(warning = "#E0A020"),
             uiFontFamily = "Serif",
             uiFontScale = 1.15f,
+            uiRowSpacing = ListRowSpacing.THIN,
         )
 
         val choice = themeChoiceFrom(settings, useCustomColors = false)
@@ -97,6 +103,22 @@ class ThemeCustomizationSettingsTest {
         assertEquals(CustomThemeColors(warning = "#E0A020"), choice.colors)
         assertEquals("Serif", choice.fontFamily)
         assertEquals(1.15f, choice.fontScale)
+        assertEquals(ListRowSpacing.THIN, choice.rowSpacing)
+    }
+
+    @Test
+    fun `each Margin step is tighter than the one before, and Normal is the theme's default`() {
+        val factors = ListRowSpacing.entries.map { themeCustomizationFrom(AppSettings(uiRowSpacing = it)).rowSpacing }
+
+        assertEquals(DEFAULT_ROW_SPACING, factors.first(), "Normal is what the theme draws without settings")
+        assertEquals(factors.sortedDescending(), factors, "Normal, Thin, Thinner, each tighter: $factors")
+        assertEquals(factors.size, factors.distinct().size, "no two steps look the same: $factors")
+        assertTrue(factors.all { it > 0f }, "even Thinner keeps some room: $factors")
+    }
+
+    @Test
+    fun `resetting the window puts the Margin back to Normal`() {
+        assertEquals(ListRowSpacing.NORMAL, defaultChoice(useCustomColors = true).rowSpacing)
     }
 
     @Test

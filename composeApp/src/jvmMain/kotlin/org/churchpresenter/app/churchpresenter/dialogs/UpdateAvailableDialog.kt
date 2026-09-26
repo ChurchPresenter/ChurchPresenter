@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.participate_in_prereleases
@@ -211,7 +211,7 @@ private fun UpdateIntervalDropdown(
     var expanded by remember { mutableStateOf(false) }
     Box {
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp)
         ) {
@@ -404,7 +404,7 @@ internal fun UpdateAvailableContent(
                         MaterialTheme.colorScheme.tertiaryContainer
                     else
                         MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(4.dp)
+                    shape = AppShape(4.dp)
                 ) {
                     Text(
                         text = if (updateInfo.isPrerelease)
@@ -541,26 +541,26 @@ internal fun UpdateAvailableContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    KeyButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    KeyButton(shape = AppShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.update_dialog_dismiss))
                     }
                     when {
                         downloadState is DownloadState.Done -> {
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = { onInstall((downloadState as DownloadState.Done).file) }
                             ) {
                                 Text(stringResource(Res.string.update_dialog_install_now))
                             }
                         }
                         downloadState is DownloadState.Downloading -> {
-                            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = {}, enabled = false) {
+                            RaisedButton(shape = AppShape(6.dp), onClick = {}, enabled = false) {
                                 Text(stringResource(Res.string.update_dialog_downloading))
                             }
                         }
                         downloadState is DownloadState.Error || updateInfo.downloadUrl == null -> {
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = {
                                     onOpenReleasePage(updateInfo.releaseUrl)
                                     onDismiss()
@@ -571,7 +571,7 @@ internal fun UpdateAvailableContent(
                             CopyLinkIconButton(url = updateInfo.releaseUrl, onCopy = copyText)
                         }
                         else -> {
-                            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDownload) {
+                            RaisedButton(shape = AppShape(6.dp), onClick = onDownload) {
                                 Text(stringResource(Res.string.update_dialog_download_install))
                             }
                         }
@@ -585,7 +585,7 @@ internal fun UpdateAvailableContent(
                 ) {
                     KeyButton(
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             onOpenReleasePage(UpdateChecker.RELEASES_URL)
                             onDismiss()
@@ -594,7 +594,7 @@ internal fun UpdateAvailableContent(
                         Text(stringResource(Res.string.update_dialog_view_on_github))
                     }
                     CopyLinkIconButton(url = UpdateChecker.RELEASES_URL, onCopy = copyText)
-                    RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    RaisedButton(shape = AppShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.ok))
                     }
                 }

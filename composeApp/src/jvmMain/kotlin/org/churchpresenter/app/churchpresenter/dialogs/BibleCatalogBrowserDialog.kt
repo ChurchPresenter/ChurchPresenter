@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
@@ -263,7 +263,7 @@ internal fun BibleCatalogBrowserDialogContent(
                 )
                 Spacer(Modifier.width(12.dp))
 
-                RaisedButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
+                RaisedButton(onClick = onDismiss, shape = AppShape(6.dp)) {
                     Text(stringResource(Res.string.bible_catalog_done))
                 }
             }

@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,7 +87,7 @@ private fun Crumb(label: String, onClick: () -> Unit) {
     Box(
         Modifier
             .height(23.dp)
-            .raisedKey(RoundedCornerShape(6.dp), elevationPalette().key, onClick = onClick)
+            .raisedKey(AppShape(6.dp), elevationPalette().key, onClick = onClick)
             .padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -182,7 +182,7 @@ private fun BookTile(book: CalendarBibleBook, onClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .height(34.dp)
-            .raisedKey(RoundedCornerShape(8.dp), elevationPalette().key, onClick = onClick)
+            .raisedKey(AppShape(8.dp), elevationPalette().key, onClick = onClick)
             .padding(horizontal = 9.dp),
     ) {
         Text(
@@ -223,7 +223,7 @@ private fun NumberGrid(values: List<Int>, selected: IntRange?, onPick: (Int) -> 
             Box(
                 Modifier
                     .height(32.dp)
-                    .raisedKey(RoundedCornerShape(7.dp), if (on) palette.accent else palette.key) { onPick(value) },
+                    .raisedKey(AppShape(7.dp), if (on) palette.accent else palette.key) { onPick(value) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(

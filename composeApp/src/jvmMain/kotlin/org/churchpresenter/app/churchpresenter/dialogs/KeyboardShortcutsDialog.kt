@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.RaisedFilterChip
@@ -313,7 +313,7 @@ internal fun KeyboardShortcutsDialogContent(
                             .weight(1f)
                             .height(42.dp)
                             .sunken(
-                                RoundedCornerShape(8.dp),
+                                AppShape(8.dp),
                                 elevationPalette(),
                                 rim = MaterialTheme.colorScheme.primary,
                             )
@@ -487,7 +487,7 @@ internal fun KeyboardShortcutsDialogContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KeyButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = { editOverrides { emptyMap() }; recording = null },
                     modifier = Modifier.testTag(SHORTCUT_RESET_ALL_TAG)
                 ) { Text(stringResource(Res.string.shortcut_settings_reset_all), maxLines = 1) }
@@ -507,7 +507,7 @@ internal fun KeyboardShortcutsDialogContent(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                     Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
                 }
                 // A map with two actions on one combination cannot be saved: one of them would
@@ -515,14 +515,14 @@ internal fun KeyboardShortcutsDialogContent(
                 // count is the way back to the rows that have to be settled first.
                 val savable = conflicts.isEmpty()
                 KeyButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     enabled = savable,
                     onClick = { onSave(currentSettings) },
                 ) {
                     Text(stringResource(Res.string.apply))
                 }
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     enabled = savable,
                     onClick = { onSave(currentSettings); onDismiss() }
                 ) {
@@ -544,7 +544,7 @@ private fun SectionHeading(title: String, subtitle: String) {
         Box(
             modifier = Modifier
                 .size(width = 3.dp, height = 15.dp)
-                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.primary, AppShape(2.dp))
         )
         Text(
             text = title,

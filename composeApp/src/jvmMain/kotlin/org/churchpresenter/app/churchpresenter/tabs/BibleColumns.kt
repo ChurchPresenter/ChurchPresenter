@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
@@ -87,7 +88,7 @@ internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifi
         modifier = modifier,
         color = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer,
-        shape = RoundedCornerShape(8.dp),
+        shape = AppShape(8.dp),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -167,7 +168,7 @@ internal fun LiveChapterPanel(
             state = listState,
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(start = 8.dp, top = 8.dp, end = 12.dp, bottom = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
         ) {
             itemsIndexed(verses) { _, verseStr ->
                 val verseNum = verseNumberOf(verseStr)
@@ -198,7 +199,7 @@ internal fun LiveChapterPanel(
                                 }
                             else Modifier
                         )
-                        .padding(start = 12.dp, top = 8.dp, end = 10.dp, bottom = 8.dp)
+                        .padding(start = rowPad(12.dp), top = rowPad(8.dp), end = rowPad(10.dp), bottom = rowPad(8.dp))
                 )
             }
         }
@@ -223,8 +224,8 @@ internal fun BibleSearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(8.dp)),
+            .sunken(AppShape(8.dp), elevationPalette())
+            .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -298,7 +299,7 @@ internal fun BibleBrowserColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 6.dp, end = 10.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
         ) {
             itemsIndexed(items) { index, item ->
                 val isSelected = index == selectedIndex
@@ -307,12 +308,12 @@ internal fun BibleBrowserColumn(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(rowHeight)
+                        .heightIn(min = rowSpan(rowHeight))
                         .clip(BibleListRowShape)
                         .background(colors.background)
                         .hoverable(hover)
                         .clickable(interactionSource = hover, indication = null) { onItemSelected(index) }
-                        .padding(horizontal = 10.dp),
+                        .padding(horizontal = rowPad(10.dp)),
                     contentAlignment = if (centerText) Alignment.Center else Alignment.CenterStart
                 ) {
                     Text(
@@ -392,7 +393,7 @@ internal fun BibleVerseColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 8.dp, end = 12.dp, bottom = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
         ) {
             itemsIndexed(verses) { index, verseStr ->
                 VerseRow(
@@ -490,7 +491,7 @@ private fun VerseRow(
                         }
                     }
                 }
-                .padding(start = 12.dp, top = 8.dp, end = 10.dp, bottom = 8.dp)
+                .padding(start = rowPad(12.dp), top = rowPad(8.dp), end = rowPad(10.dp), bottom = rowPad(8.dp))
         )
         if (refCount > 0) {
             Box(modifier = Modifier.padding(top = 10.dp, end = 8.dp)) {

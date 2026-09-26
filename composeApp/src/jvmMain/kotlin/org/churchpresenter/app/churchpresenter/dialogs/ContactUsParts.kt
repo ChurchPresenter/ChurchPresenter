@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -59,7 +59,7 @@ internal fun ContactUsActions(
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         // Always available: fall back to the full web contact form in a browser.
-        GhostButton(shape = RoundedCornerShape(6.dp), onClick = onOpenInBrowser) {
+        GhostButton(shape = AppShape(6.dp), onClick = onOpenInBrowser) {
             Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)
         }
         // And a way out when that browser opens where the operator cannot reach it: the operating
@@ -68,14 +68,14 @@ internal fun ContactUsActions(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+        GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
             Text(stringResource(Res.string.cancel), style = MaterialTheme.typography.labelLarge)
         }
 
         Spacer(modifier = Modifier.width(8.dp))
 
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             enabled = canSend,
             onClick = onSend,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),

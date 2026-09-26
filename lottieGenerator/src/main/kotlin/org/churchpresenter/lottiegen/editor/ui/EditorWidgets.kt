@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.DropdownMenuItem
@@ -47,7 +47,7 @@ fun EditorTooltip(text: String, content: @Composable () -> Unit) {
     TooltipArea(
         tooltip = {
             Surface(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 color = MaterialTheme.colorScheme.inverseSurface,
                 contentColor = MaterialTheme.colorScheme.inverseOnSurface
             ) {

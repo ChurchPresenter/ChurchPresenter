@@ -27,7 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.AttachFile
@@ -319,7 +319,7 @@ internal fun PlanningCenterConnectDialogContent(
                     Text(stringResource(Res.string.cancel))
                 }
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     enabled = !isConnecting,
                     onClick = onConnectClick
                 ) {
@@ -401,7 +401,7 @@ internal fun PlanningCenterImportDialogContent(
                 Spacer(Modifier.width(10.dp))
                 KeyButton(
                     onClick = onDisconnect,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = AppShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                     modifier = Modifier.height(32.dp)
                 ) {
@@ -510,7 +510,7 @@ internal fun PlanningCenterImportDialogContent(
                                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                                             } else {
                                                 RaisedButton(
-                                                    shape = RoundedCornerShape(8.dp),
+                                                    shape = AppShape(8.dp),
                                                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
                                                     modifier = Modifier.height(32.dp),
                                                     onClick = {
@@ -602,9 +602,9 @@ internal fun PlanningCenterImportDialogContent(
                                                 // for expand/collapse (see isExpandable above).
                                                 Box(
                                                     modifier = Modifier
-                                                        .clip(RoundedCornerShape(PILL_CORNER_PERCENT))
+                                                        .clip(AppShape(PILL_CORNER_PERCENT))
                                                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(PILL_CORNER_PERCENT))
+                                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), AppShape(PILL_CORNER_PERCENT))
                                                         .padding(horizontal = 12.dp, vertical = 5.dp)
                                                 ) {
                                                     Text(
@@ -684,7 +684,7 @@ internal fun PlanningCenterImportDialogContent(
             ) {
                 KeyButton(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = AppShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
@@ -693,7 +693,7 @@ internal fun PlanningCenterImportDialogContent(
                 var isImporting by remember { mutableStateOf(false) }
                 val planId = viewModel.selectedPlanId
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     enabled = !isImporting && planId != null && viewModel.planItems.any { entry ->
                         val pco = entry.pco
                         val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
@@ -849,7 +849,7 @@ private fun attachmentExtensionIcon(ext: String): ImageVector = when (ext) {
 private fun MatchedTag() {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(PILL_CORNER_PERCENT))
+            .clip(AppShape(PILL_CORNER_PERCENT))
             .background(MaterialTheme.semantic.successContainer)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
@@ -871,7 +871,7 @@ private fun PlanItemTypeIcon(
     Box(
         modifier = Modifier
             .size(28.dp)
-            .clip(RoundedCornerShape(7.dp))
+            .clip(AppShape(7.dp))
             .background(tint.copy(alpha = 0.15f)),
         contentAlignment = Alignment.Center
     ) {

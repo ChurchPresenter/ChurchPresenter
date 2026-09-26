@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,14 +107,14 @@ fun LottieSlider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(trackHeight)
-                .sunken(RoundedCornerShape(99.dp), palette, fill = trackColor)
+                .sunken(AppShape(99.dp), palette, fill = trackColor)
         ) {
             // Fill
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction)
                     .height(trackHeight)
-                    .clip(RoundedCornerShape(99.dp))
+                    .clip(AppShape(99.dp))
                     .background(fillBrush ?: defaultFill)
             )
         }

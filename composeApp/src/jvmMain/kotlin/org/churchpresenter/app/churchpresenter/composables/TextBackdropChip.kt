@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,7 +72,7 @@ internal fun TextBackdropChip(
         mode == TextBackdropMode.OFF -> emptyInk
         else -> Color.White
     }
-    val shape = RoundedCornerShape(3.dp)
+    val shape = AppShape(3.dp)
     Box(
         modifier = modifier
             // A backing is drawn over a photo or a video, never over the settings panel, so the
@@ -88,7 +89,7 @@ internal fun TextBackdropChip(
         contentAlignment = Alignment.Center,
     ) {
         if (label == null) {
-            Box(Modifier.width(CHIP_BAR_WIDTH).height(CHIP_BAR_HEIGHT).background(ink, RoundedCornerShape(2.dp)))
+            Box(Modifier.width(CHIP_BAR_WIDTH).height(CHIP_BAR_HEIGHT).background(ink, AppShape(2.dp)))
         } else {
             ChipLabel(label, ink, fontSize)
         }
@@ -143,7 +144,7 @@ internal fun BackdropTooltip(text: String) = ControlTooltip(text)
 internal fun segmentShape(index: Int, count: Int): RoundedCornerShape {
     val rounded = 8.dp
     val square = 0.dp
-    return RoundedCornerShape(
+    return AppShape(
         topStart = if (index == 0) rounded else square,
         bottomStart = if (index == 0) rounded else square,
         topEnd = if (index == count - 1) rounded else square,

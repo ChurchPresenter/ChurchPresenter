@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -45,7 +45,7 @@ fun HoverTooltip(text: String, content: @Composable () -> Unit) {
     TooltipArea(
         tooltip = {
             Surface(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 color = MaterialTheme.colorScheme.inverseSurface,
                 contentColor = MaterialTheme.colorScheme.inverseOnSurface
             ) {
@@ -92,7 +92,7 @@ fun LottieCheckbox(
     modifier: Modifier = Modifier
 ) {
     val palette = elevationPalette()
-    val boxShape = RoundedCornerShape(5.dp)
+    val boxShape = AppShape(5.dp)
     Row(
         modifier = modifier.clickable { onCheckedChange(!checked) },
         verticalAlignment = Alignment.CenterVertically,
@@ -139,7 +139,7 @@ fun SegmentedButtons(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    SegmentTrack(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(9.dp)) {
+    SegmentTrack(modifier = modifier.fillMaxWidth(), shape = AppShape(9.dp)) {
         labels.forEachIndexed { i, label ->
             val active = i == selectedIndex
             SegmentTrackItem(
@@ -186,7 +186,7 @@ fun SubtleButton(
     compact: Boolean = false
 ) {
     val fill = elevationPalette().key
-    val shape = if (compact) RoundedCornerShape(7.dp) else Tokens.ButtonShape
+    val shape = if (compact) AppShape(7.dp) else Tokens.ButtonShape
 
     Box(
         modifier = modifier
@@ -223,7 +223,7 @@ private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescr
     Box(
         modifier = Modifier
             .size(24.dp)
-            .raisedKey(RoundedCornerShape(6.dp), fill, onClick = onClick),
+            .raisedKey(AppShape(6.dp), fill, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(

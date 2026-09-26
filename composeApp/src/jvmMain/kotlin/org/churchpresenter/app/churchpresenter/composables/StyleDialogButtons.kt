@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,14 +42,14 @@ internal fun StyleDialogButtons(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GhostButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         ) {
             Text(stringResource(Res.string.cancel))
         }
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onApply,
             enabled = changed,
             colors = ButtonDefaults.buttonColors(
@@ -60,7 +60,7 @@ internal fun StyleDialogButtons(
             Text(stringResource(Res.string.apply))
         }
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onOk,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

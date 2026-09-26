@@ -13,6 +13,9 @@ import kotlin.math.abs
 /** The accent [ThemeMode.CUSTOM] paints with until the user has picked one of their own. */
 val DefaultCustomAccent = Color(0xFF3F7FBF)
 
+/** The Normal Margin: the lists draw their rows at this fraction of the padding they are written with. */
+const val DEFAULT_ROW_SPACING = 0.6f
+
 /** The UI text sizes offered, as multipliers of the platform's own font scale. */
 val UI_FONT_SCALES = listOf(0.9f, 1f, 1.15f, 1.3f)
 
@@ -42,6 +45,8 @@ data class ThemeCustomization(
     val selection: Color? = null,
     val fontFamily: FontFamily? = null,
     val fontScale: Float = 1f,
+    /** The padding around list rows' text, as a multiplier of the amount each row is written with. */
+    val rowSpacing: Float = DEFAULT_ROW_SPACING,
 )
 
 val LocalThemeCustomization = compositionLocalOf { ThemeCustomization() }

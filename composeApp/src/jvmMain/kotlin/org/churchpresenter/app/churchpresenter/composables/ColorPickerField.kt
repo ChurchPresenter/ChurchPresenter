@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,8 +71,8 @@ fun ColorPickerField(
         modifier = modifier
             .heightIn(min = 42.dp)
             // The same sunken well as every field it sits beside in a settings form.
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(8.dp))
+            .sunken(AppShape(8.dp), elevationPalette())
+            .hoverTint(AppShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
         verticalArrangement = Arrangement.Center
@@ -99,8 +99,8 @@ fun ColorPickerField(
             Box(
                 modifier = Modifier
                     .size(SWATCH_SIZE)
-                    .clip(RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                    .clip(AppShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), AppShape(4.dp))
             ) {
                 Canvas(modifier = Modifier.matchParentSize()) {
                     val sq = size.width / CHECKER_CELLS

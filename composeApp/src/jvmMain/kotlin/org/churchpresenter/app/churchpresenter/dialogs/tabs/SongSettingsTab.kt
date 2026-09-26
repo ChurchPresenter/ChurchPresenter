@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -426,9 +426,9 @@ private fun SongNumberOffsetControls(
 internal fun segmentedItemShape(index: Int, count: Int): Shape {
     val r = 4.dp
     return when {
-        count == 1 -> RoundedCornerShape(r)
-        index == 0 -> RoundedCornerShape(topStart = r, bottomStart = r, topEnd = 0.dp, bottomEnd = 0.dp)
-        index == count - 1 -> RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = r, bottomEnd = r)
-        else -> RoundedCornerShape(0.dp)
+        count == 1 -> AppShape(r)
+        index == 0 -> AppShape(topStart = r, bottomStart = r, topEnd = 0.dp, bottomEnd = 0.dp)
+        index == count - 1 -> AppShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = r, bottomEnd = r)
+        else -> AppShape(0.dp)
     }
 }

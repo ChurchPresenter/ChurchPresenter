@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -254,7 +254,7 @@ private fun ProfilesList(
         ) {
             KeyButton(
                 onClick = onNew,
-                shape = RoundedCornerShape(8.dp),
+                shape = AppShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp),
                 modifier = Modifier.weight(1f),
             ) {
@@ -321,7 +321,7 @@ private fun ProfileListRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(9.dp))
+            .clip(AppShape(9.dp))
             .background(background)
             .hoverable(interaction)
             .clickable(onClick = onSelect)
@@ -388,7 +388,7 @@ private fun ListIconKey(
 private fun SmallKey(label: String, onClick: () -> Unit) {
     KeyButton(
         onClick = onClick,
-        shape = RoundedCornerShape(7.dp),
+        shape = AppShape(7.dp),
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
     ) {
         Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1)

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +32,7 @@ fun PaneTabRow(
 ) {
     Row(
         modifier = modifier
-            .sunken(RoundedCornerShape(9.dp), elevationPalette())
+            .sunken(AppShape(9.dp), elevationPalette())
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -57,7 +57,7 @@ fun PaneTab(label: String, selected: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .background(
                 if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                RoundedCornerShape(7.dp),
+                AppShape(7.dp),
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 13.dp, vertical = 5.dp),

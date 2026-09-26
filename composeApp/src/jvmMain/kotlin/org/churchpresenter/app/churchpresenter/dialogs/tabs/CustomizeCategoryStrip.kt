@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
@@ -229,7 +229,7 @@ private fun LottieBandStripRow(lottiePath: String, isLottie: Boolean, onOpen: ()
         )
         KeyButton(
             onClick = onOpen,
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
         ) {
             Text(

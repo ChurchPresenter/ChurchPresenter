@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -19,11 +20,13 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
 import org.churchpresenter.settings.CustomThemeColors
+import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.customColorScheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * The Customize Theme window: every control, and what Apply, OK, Cancel and Reset each hand back.
@@ -126,6 +129,7 @@ class CustomizeThemeContentTest {
             colors = CustomThemeColors(warning = "#E0A020"),
             fontFamily = "Serif",
             fontScale = 1.3f,
+            rowSpacing = ListRowSpacing.THINNER,
         ),
     ) { result ->
         click("Reset to defaults")
@@ -194,6 +198,28 @@ class CustomizeThemeContentTest {
             click("Apply")
             assertEquals(scale, result.applied.last().fontScale, label)
         }
+    }
+
+    @Test
+    fun `every margin is offered and the chosen one is handed back`() = content { result ->
+        listOf("Thinner" to ListRowSpacing.THINNER, "Thin" to ListRowSpacing.THIN, "Normal" to ListRowSpacing.NORMAL)
+            .forEach { (label, spacing) ->
+                click(label)
+                click("Apply")
+                assertEquals(spacing, result.applied.last().rowSpacing, label)
+            }
+    }
+
+    @Test
+    fun `the preview's rows follow the margin being chosen, before it is applied`() = content { result ->
+        fun songTextLeft() = onAllNodes(hasText("How Great Thou Art")).onFirst().getUnclippedBoundsInRoot().left
+
+        val normal = songTextLeft()
+        click("Thinner")
+        val thinner = songTextLeft()
+
+        assertTrue(thinner < normal, "the row's text moves in as its padding shrinks: $normal -> $thinner")
+        assertTrue(result.applied.isEmpty(), "and nothing was applied to get there")
     }
 
     @Test

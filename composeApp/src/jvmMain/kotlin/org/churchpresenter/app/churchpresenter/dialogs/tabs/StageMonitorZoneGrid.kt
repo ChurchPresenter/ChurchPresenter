@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -345,7 +345,7 @@ private fun ResizeDivider(
                     width = if (horizontal) SIZE_GRIP_THICKNESS else SIZE_GRIP_LENGTH,
                     height = if (horizontal) SIZE_GRIP_LENGTH else SIZE_GRIP_THICKNESS
                 )
-                .background(Color.White.copy(alpha = SIZE_GRIP_ALPHA), RoundedCornerShape(2.dp))
+                .background(Color.White.copy(alpha = SIZE_GRIP_ALPHA), AppShape(2.dp))
         )
     }
 }
@@ -356,7 +356,7 @@ private fun SelectedZoneField(label: String, value: String, modifier: Modifier =
     Column(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(6.dp), elevationPalette())
+            .sunken(AppShape(6.dp), elevationPalette())
             // One item, caption and value together — the number fields beside it read that way too.
             .semantics(mergeDescendants = true) {}
             .padding(horizontal = 11.dp),
@@ -385,7 +385,7 @@ private fun SelectedZoneField(label: String, value: String, modifier: Modifier =
 private fun EvenOutButton(label: String, onClick: () -> Unit) {
     KeyButton(
         onClick = onClick,
-        shape = RoundedCornerShape(6.dp),
+        shape = AppShape(6.dp),
         modifier = Modifier.height(26.dp),
         contentPadding = PaddingValues(horizontal = 11.dp),
     ) {
@@ -405,7 +405,7 @@ private fun ZoneLabelCell(
     modifier: Modifier = Modifier,
 ) {
     val accent = MaterialTheme.colorScheme.primary
-    val shape = RoundedCornerShape(3.dp)
+    val shape = AppShape(3.dp)
     // Content on a lit screen — a translucent panel over the black, not an opaque tile. The one
     // that is selected is lifted to the accent, since the fields below it are pointed at it.
     Box(

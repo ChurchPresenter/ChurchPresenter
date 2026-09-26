@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -193,7 +193,7 @@ internal fun SongBackgroundPanel(
             .fillMaxHeight()
             // A click inside the panel must not reach the dismiss handler outside it.
             .pointerInput(Unit) { detectTapGestures { } },
-        shape = RoundedCornerShape(13.dp),
+        shape = AppShape(13.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 16.dp,
@@ -319,7 +319,7 @@ private fun PanelHeader(
         }
         Spacer(Modifier.weight(1f))
         Box(
-            modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).clickable(onClick = onDismiss),
+            modifier = Modifier.size(24.dp).clip(AppShape(6.dp)).clickable(onClick = onDismiss),
             contentAlignment = Alignment.Center,
         ) {
             Text("✕", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
@@ -58,7 +58,7 @@ fun InstanceLinkToastHost(
                     modifier = Modifier
                         .padding(bottom = 96.dp, start = 16.dp, end = 16.dp)
                         .widthIn(max = 560.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AppShape(12.dp),
                     shadowElevation = 8.dp,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
@@ -90,7 +90,7 @@ fun InstanceLinkToastHost(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         Spacer(Modifier.width(8.dp))
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { onDismiss(current) }) {
+                        GhostButton(shape = AppShape(6.dp), onClick = { onDismiss(current) }) {
                             Text(
                                 stringResource(Res.string.remote_activity_dismiss),
                                 color = MaterialTheme.colorScheme.primary

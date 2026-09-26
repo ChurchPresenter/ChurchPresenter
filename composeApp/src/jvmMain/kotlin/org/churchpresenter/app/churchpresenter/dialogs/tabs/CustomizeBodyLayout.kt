@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -216,8 +216,8 @@ internal fun CustomizePreviewColumn(
                 Box(
                     modifier = stageWidth
                         .aspectRatio(output.aspectRatio)
-                        .background(Color(PREVIEW_BACKGROUND), RoundedCornerShape(6.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
+                        .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
                 )
             } else {
                 CustomizeStagePanel(

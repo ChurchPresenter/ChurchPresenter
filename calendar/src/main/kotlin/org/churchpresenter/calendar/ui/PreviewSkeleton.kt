@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,7 +54,7 @@ internal fun SkeletonBox(modifier: Modifier) {
     )
     Box(
         modifier
-            .clip(RoundedCornerShape(5.dp))
+            .clip(AppShape(5.dp))
             .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)),
     )
 }

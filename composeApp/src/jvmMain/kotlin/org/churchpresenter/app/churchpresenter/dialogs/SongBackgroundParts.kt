@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
@@ -63,7 +63,7 @@ internal fun PanelCaption(text: String, modifier: Modifier = Modifier) {
 internal fun SegmentedRow(content: @Composable RowScope.() -> Unit) {
     Row(
         modifier = Modifier
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+            .sunken(AppShape(8.dp), elevationPalette())
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -77,7 +77,7 @@ internal fun Segment(label: String, selected: Boolean, enabled: Boolean = true, 
         modifier = Modifier
             .height(24.dp)
             .alpha(if (enabled) 1f else DISABLED_SEGMENT_ALPHA)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 11.dp),
@@ -103,7 +103,7 @@ internal fun CategoryPill(label: String, selected: Boolean, onClick: () -> Unit)
     Box(
         modifier = Modifier
             .height(24.dp)
-            .clip(RoundedCornerShape(7.dp))
+            .clip(AppShape(7.dp))
             .background(
                 if (selected) MaterialTheme.colorScheme.secondaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLowest
@@ -111,7 +111,7 @@ internal fun CategoryPill(label: String, selected: Boolean, onClick: () -> Unit)
             .border(
                 1.dp,
                 if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(7.dp),
+                AppShape(7.dp),
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 9.dp),
@@ -134,7 +134,7 @@ internal fun PresetButton(label: String, selected: Boolean, modifier: Modifier =
     Box(
         modifier = modifier
             .height(23.dp)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(
                 if (selected) MaterialTheme.colorScheme.secondaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLowest
@@ -142,7 +142,7 @@ internal fun PresetButton(label: String, selected: Boolean, modifier: Modifier =
             .border(
                 1.dp,
                 if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(6.dp),
+                AppShape(6.dp),
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -179,11 +179,11 @@ internal fun SwatchTile(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(swatchAspect)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(AppShape(8.dp))
                 .border(
                     2.dp,
                     if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                    RoundedCornerShape(8.dp),
+                    AppShape(8.dp),
                 )
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,

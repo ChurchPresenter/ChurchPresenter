@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -289,7 +289,7 @@ fun QATab(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
                             ),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = AppShape(8.dp)
                         ) {
                             Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(4.dp))
@@ -302,7 +302,7 @@ fun QATab(
                                 containerColor = MaterialTheme.colorScheme.inverseSurface,
                                 contentColor = MaterialTheme.colorScheme.inverseOnSurface
                             ),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = AppShape(8.dp)
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(4.dp))
@@ -310,7 +310,7 @@ fun QATab(
                         }
                         if (qaManager.history.isNotEmpty()) {
                             KeyButton(onClick = { qaManager.restoreFromHistory() },
-                                shape = RoundedCornerShape(8.dp)
+                                shape = AppShape(8.dp)
                             ) {
                                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(4.dp))
@@ -368,7 +368,7 @@ fun QATab(
                     KeyButton(
                         onClick = { showClearConfirm = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = AppShape(8.dp)
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
@@ -418,7 +418,7 @@ fun QATab(
                     colors = if (selectedFilter == 6) ButtonDefaults.outlinedButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                     ) else ButtonDefaults.outlinedButtonColors(),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = AppShape(8.dp)
                 ) {
                     Text("${stringResource(Res.string.qa_history)} ($historyCount)", style = MaterialTheme.typography.labelMedium)
                 }
@@ -435,8 +435,8 @@ fun QATab(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                            .hoverTint(RoundedCornerShape(8.dp)),
+                            .sunken(AppShape(8.dp), elevationPalette())
+                            .hoverTint(AppShape(8.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -459,7 +459,7 @@ fun QATab(
                             RaisedIconButton(
                                 onClick = { addQuestionText = "" },
                                 modifier = Modifier.size(30.dp),
-                                shape = RoundedCornerShape(5.dp),
+                                shape = AppShape(5.dp),
                                 colors = IconButtonDefaults.filledIconButtonColors(
                                     containerColor = Color.Transparent,
                                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -475,7 +475,7 @@ fun QATab(
                             addQuestionText = ""
                         },
                         enabled = addQuestionText.isNotBlank(),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = AppShape(8.dp)
                     ) {
                         Text(stringResource(Res.string.qa_add))
                     }
@@ -506,7 +506,7 @@ fun QATab(
                             presenterManager.setShowQRCodeOnDisplay(false)
                             presenting(Presenting.NONE)
                         },
-                        shape = RoundedCornerShape(8.dp)
+                        shape = AppShape(8.dp)
                     ) {
                         Text(stringResource(Res.string.tooltip_clear_display))
                     }
@@ -560,7 +560,7 @@ fun QATab(
                                 }
                             }
                         },
-                            shape = RoundedCornerShape(8.dp)
+                            shape = AppShape(8.dp)
                         ) {
                             Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)
                         }
@@ -586,14 +586,14 @@ fun QATab(
                                 }
                             }
                         },
-                            shape = RoundedCornerShape(8.dp)
+                            shape = AppShape(8.dp)
                         ) {
                             Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)
                         }
                         KeyButton(
                             onClick = { qaManager.clearHistory() },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = AppShape(8.dp)
                         ) {
                             Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
@@ -605,7 +605,7 @@ fun QATab(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 6.dp, top = 6.dp, end = 6.dp, bottom = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
                 ) {
                     items(filteredQuestions.distinctBy { it.id }, key = { it.id }) { question ->
                         QuestionRow(
@@ -656,7 +656,7 @@ fun QATab(
                 text = { Text(stringResource(Res.string.qa_clear_all_confirm_message)) },
                 confirmButton = {
                     GhostButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                         qaManager.clearAll()
                         presenterManager.setDisplayedQuestion(null)
@@ -668,7 +668,7 @@ fun QATab(
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         GhostButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = {
                             // Close the confirm dialog before the save dialog opens and snapshot
                             // the questions so a concurrent clear cannot empty the export
@@ -702,7 +702,7 @@ fun QATab(
                                 }
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) {
+                        GhostButton(shape = AppShape(6.dp), onClick = { showClearConfirm = false }) {
                             Text(stringResource(Res.string.cancel))
                         }
                     }
@@ -784,10 +784,10 @@ private fun QuestionRow(
             .clip(BibleListRowShape)
             .background(bgColor)
             .hoverable(hover)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = rowPad(12.dp), vertical = rowPad(8.dp))
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(statusColor))
+            Box(modifier = Modifier.size(8.dp).clip(AppShape(4.dp)).background(statusColor))
             Spacer(Modifier.width(8.dp))
             Text(
                 text = timeFormat.format(Date(question.timestamp)),
@@ -800,7 +800,7 @@ private fun QuestionRow(
                 if (question.upvotes > 0 || question.downvotes > 0) {
                     Row(modifier = Modifier.padding(end = 6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         if (question.upvotes > 0) {
-                            Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+                            Surface(shape = AppShape(4.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
                                 Text(
                                     text = "\u25B2 ${question.upvotes}",
                                     style = MaterialTheme.typography.labelSmall,
@@ -810,7 +810,7 @@ private fun QuestionRow(
                             }
                         }
                         if (question.downvotes > 0) {
-                            Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.errorContainer) {
+                            Surface(shape = AppShape(4.dp), color = MaterialTheme.colorScheme.errorContainer) {
                                 Text(
                                     text = "\u25BC ${question.downvotes}",
                                     style = MaterialTheme.typography.labelSmall,
@@ -992,8 +992,8 @@ private fun QuestionRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 50.dp, top = 4.dp)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                    .hoverTint(RoundedCornerShape(8.dp))
+                    .sunken(AppShape(8.dp), elevationPalette())
+                    .hoverTint(AppShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 BasicTextField(
@@ -1045,7 +1045,7 @@ private fun QAIconButton(
             onClick = onClick,
             enabled = enabled,
             modifier = modifier,
-            shape = RoundedCornerShape(5.dp),
+            shape = AppShape(5.dp),
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,

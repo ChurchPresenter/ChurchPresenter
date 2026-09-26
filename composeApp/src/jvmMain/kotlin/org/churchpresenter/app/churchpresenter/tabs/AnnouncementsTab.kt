@@ -61,7 +61,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -342,8 +342,8 @@ fun AnnouncementsTab(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                        .hoverTint(RoundedCornerShape(8.dp))
+                        .sunken(AppShape(8.dp), elevationPalette())
+                        .hoverTint(AppShape(8.dp))
                         .padding(horizontal = 12.dp, vertical = 10.dp)
                 ) {
                     BasicTextField(
@@ -502,7 +502,7 @@ fun AnnouncementsTab(
                                 modifier = Modifier
                                     .height(32.dp)
                                     .clickable { viewModel.setBackgroundColor("#000000"); viewModel.saveToSettings(onSettingsChange) }
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), AppShape(8.dp))
                                     .padding(horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -510,7 +510,7 @@ fun AnnouncementsTab(
                                 Box(
                                     modifier = Modifier
                                         .size(19.dp)
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, AppShape(2.dp))
                                 )
                                 Text(
                                     text = stringResource(Res.string.transparent_default),
@@ -537,7 +537,7 @@ fun AnnouncementsTab(
                                         viewModel.setBackgroundColor("transparent")
                                         viewModel.saveToSettings(onSettingsChange)
                                     },
-                                    shape = RoundedCornerShape(8.dp),
+                                    shape = AppShape(8.dp),
                                     // Compact, so the color field beside it keeps its width.
                                     contentPadding = PaddingValues(horizontal = TRANSPARENT_KEY_PADDING),
                                     modifier = Modifier.height(42.dp)
@@ -590,7 +590,7 @@ fun AnnouncementsTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(end = 8.dp)
-                            .background(bibleInsetFill(), RoundedCornerShape(11.dp))
+                            .background(bibleInsetFill(), AppShape(11.dp))
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -875,8 +875,8 @@ fun AnnouncementsTab(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                                    .hoverTint(RoundedCornerShape(8.dp))
+                                    .sunken(AppShape(8.dp), elevationPalette())
+                                    .hoverTint(AppShape(8.dp))
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 BasicTextField(
@@ -995,11 +995,11 @@ fun AnnouncementsTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(previewOutput.size.aspectRatio)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(AppShape(4.dp))
                             .background(Color.Black)
                             .border(
                                 BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                                RoundedCornerShape(4.dp)
+                                AppShape(4.dp)
                             )
                             .onSizeChanged { size ->
                                 previewWidthPx = size.width
@@ -1028,7 +1028,7 @@ fun AnnouncementsTab(
                                             .background(
                                                 if (viewModel.backgroundColor == "transparent") Color.Transparent
                                                 else Utils.parseHexColor(viewModel.backgroundColor),
-                                                RoundedCornerShape(2.dp)
+                                                AppShape(2.dp)
                                             )
                                             .padding(horizontal = scaledPadH, vertical = scaledPadV),
                                         contentAlignment = Alignment.Center
@@ -1105,7 +1105,7 @@ fun AnnouncementsTab(
                                                 .background(
                                                     if (viewModel.backgroundColor == "transparent") Color.Transparent
                                                     else Utils.parseHexColor(viewModel.backgroundColor),
-                                                    RoundedCornerShape(2.dp)
+                                                    AppShape(2.dp)
                                                 )
                                                 .padding(horizontal = scaledPadH, vertical = scaledPadV),
                                             contentAlignment = Alignment.Center
@@ -1221,7 +1221,7 @@ private fun TimerModeTrack(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .sunken(RoundedCornerShape(10.dp), elevationPalette())
+            .sunken(AppShape(10.dp), elevationPalette())
             .padding(3.dp),
         verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
@@ -1257,7 +1257,7 @@ private fun TimerColumn(
     onDecrement: () -> Unit,
     onValueChange: (String) -> Unit
 ) {
-    val keyShape = RoundedCornerShape(9.dp)
+    val keyShape = AppShape(9.dp)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(STEP_GAP)
@@ -1283,7 +1283,7 @@ private fun TimerColumn(
             singleLine = true,
             modifier = Modifier
                 .size(WELL_WIDTH, WELL_HEIGHT)
-                .sunken(RoundedCornerShape(10.dp), elevationPalette())
+                .sunken(AppShape(10.dp), elevationPalette())
                 .padding(horizontal = 2.dp),
             decorationBox = { inner ->
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { inner() }
@@ -1316,7 +1316,7 @@ private fun AmPmToggle(isPm: Boolean, onToggle: () -> Unit) {
         KeyButton(
             onClick = onToggle,
             modifier = Modifier.size(40.dp, WELL_HEIGHT),
-            shape = RoundedCornerShape(10.dp),
+            shape = AppShape(10.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(

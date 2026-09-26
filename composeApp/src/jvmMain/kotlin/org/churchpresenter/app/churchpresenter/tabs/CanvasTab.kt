@@ -35,7 +35,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -277,7 +277,7 @@ fun CanvasTab(
             @OptIn(ExperimentalFoundationApi::class)
             LazyColumn(
                 modifier = Modifier.weight(SCENE_LIST_WEIGHT).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
             ) {
                 items(sceneViewModel.scenes) { scene ->
                     val isSelected = scene.id == sceneViewModel.currentSceneId.value
@@ -292,7 +292,7 @@ fun CanvasTab(
                             .clip(BibleListRowShape)
                             .background(sceneColors.background)
                             .hoverable(sceneHover)
-                            .padding(start = 10.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+                            .padding(start = 10.dp, end = 8.dp, top = rowPad(4.dp), bottom = rowPad(4.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isRenaming) {
@@ -305,7 +305,7 @@ fun CanvasTab(
                                 ),
                                 modifier = Modifier
                                     .weight(1f)
-                                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.primary, AppShape(4.dp))
                                     .padding(horizontal = 6.dp, vertical = 4.dp)
                             )
                             KeyIconButton(
@@ -412,7 +412,7 @@ fun CanvasTab(
                 RaisedButton(
                     onClick = { sceneViewModel.addScene() },
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = AppShape(8.dp),
                     contentPadding = ButtonDefaults.ContentPadding
                 ) {
                     Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
@@ -434,7 +434,7 @@ fun CanvasTab(
             if (currentScene != null) {
                 LazyColumn(
                     modifier = Modifier.weight(SOURCE_LIST_WEIGHT).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
                 ) {
                     // Render in reverse order so top item = front
                     items(currentScene.sources.reversed()) { source ->
@@ -447,7 +447,7 @@ fun CanvasTab(
                                 .clip(BibleListRowShape)
                                 .background(sourceColors.background)
                                 .hoverable(sourceHover)
-                                .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+                                .padding(start = 4.dp, end = 4.dp, top = rowPad(2.dp), bottom = rowPad(2.dp)),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Visibility toggle
@@ -913,7 +913,7 @@ fun CanvasTab(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.errorContainer, AppShape(4.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -936,7 +936,7 @@ fun CanvasTab(
                                 contentColor = MaterialTheme.colorScheme.onError
                             ),
                             modifier = Modifier.height(28.dp),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = AppShape(8.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
                         ) {
                             Text(stringResource(Res.string.canvas_fix_aspect_ratio), style = MaterialTheme.typography.labelSmall)
@@ -982,7 +982,7 @@ fun CanvasTab(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
-                        RaisedButton(onClick = { sceneViewModel.addScene() }, shape = RoundedCornerShape(8.dp)) {
+                        RaisedButton(onClick = { sceneViewModel.addScene() }, shape = AppShape(8.dp)) {
                             Text(stringResource(Res.string.canvas_create_scene))
                         }
                     }

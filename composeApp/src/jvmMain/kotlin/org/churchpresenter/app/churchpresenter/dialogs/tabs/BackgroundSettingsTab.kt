@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -309,7 +309,7 @@ private fun BackgroundScopeRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(9.dp))
+            .clip(AppShape(9.dp))
             .background(
                 if (selected) MaterialTheme.colorScheme.primary.copy(alpha = SELECTED_TINT_ALPHA)
                 else Color.Transparent
@@ -317,7 +317,7 @@ private fun BackgroundScopeRow(
             .border(
                 1.dp,
                 if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(9.dp)
+                AppShape(9.dp)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 7.dp),
@@ -327,11 +327,11 @@ private fun BackgroundScopeRow(
         Box(
             modifier = Modifier
                 .size(width = SCOPE_CHIP_WIDTH, height = SCOPE_CHIP_HEIGHT)
-                .clip(RoundedCornerShape(5.dp))
+                .clip(AppShape(5.dp))
                 // Black under the fill, so the part of the screen this surface does not paint
                 // reads as unpainted output rather than as the rail showing through.
                 .background(Color.Black)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(5.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(5.dp))
         ) {
             BackgroundCoverageFill(
                 config = backgrounds.resolvedConfigFor(scope),
@@ -442,7 +442,7 @@ private fun InheritToggleButton(inheriting: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .height(27.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(AppShape(8.dp))
             .background(
                 if (inheriting) MaterialTheme.colorScheme.primary.copy(alpha = SELECTED_TINT_ALPHA)
                 else Color.Transparent
@@ -451,7 +451,7 @@ private fun InheritToggleButton(inheriting: Boolean, onClick: () -> Unit) {
                 1.dp,
                 if (inheriting) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(8.dp)
+                AppShape(8.dp)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 11.dp),
@@ -513,7 +513,7 @@ private fun BackgroundStagePreview(
                 // Clipped to TvScreenBox's own screen corner radius. Without it a picture's square
                 // corners poke past the rounded border, and a blurred one — overscanned 8% the way
                 // the presenter overscans it — spills out over the bezel entirely.
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(TV_SCREEN_RADIUS)),
+                modifier = Modifier.fillMaxSize().clip(AppShape(TV_SCREEN_RADIUS)),
                 blurRadius = backgroundBlurRadius(config.blur, width)
             )
             if (config.backgroundType != Constants.BACKGROUND_LOTTIE) Text(
@@ -551,7 +551,7 @@ private fun BackgroundStagePreview(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(7.dp)
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(AppShape(5.dp))
                     .background(Color.Black.copy(alpha = STAGE_BADGE_SCRIM_ALPHA))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             )
@@ -737,7 +737,7 @@ private fun QuickBackgroundsRail(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(AppShape(5.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .padding(horizontal = 6.dp, vertical = 1.dp)
             )
@@ -1169,7 +1169,7 @@ private fun QuickBackgroundStripTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(tileAspect)
-                    .clip(RoundedCornerShape(7.dp))
+                    .clip(AppShape(7.dp))
                     .clickable { onOpenChange(!open) }
                     .border(
                         width = 2.dp,
@@ -1178,7 +1178,7 @@ private fun QuickBackgroundStripTile(
                             dragging -> MaterialTheme.colorScheme.outline
                             else -> MaterialTheme.colorScheme.outlineVariant
                         },
-                        shape = RoundedCornerShape(7.dp)
+                        shape = AppShape(7.dp)
                     )
             ) {
                 SongBackgroundFill(shown.background, Modifier.fillMaxSize())
@@ -1256,14 +1256,14 @@ private fun QuickBackgroundPanelFooter(onCancel: () -> Unit, onConfirm: () -> Un
         verticalAlignment = Alignment.CenterVertically
     ) {
         GhostButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
         ) {
             Text(stringResource(Res.string.cancel))
         }
         Spacer(Modifier.width(8.dp))
-        RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+        RaisedButton(shape = AppShape(6.dp), onClick = onConfirm) {
             Text(stringResource(Res.string.ok))
         }
     }
@@ -1280,9 +1280,9 @@ private fun QuickBackgroundAddTile(tileAspect: Float, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(tileAspect)
-                .clip(RoundedCornerShape(7.dp))
+                .clip(AppShape(7.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(7.dp))
                 .clickable(onClick = onClick)
                 .testTag(QUICK_BACKGROUND_ADD_TAG),
             contentAlignment = Alignment.Center
@@ -1309,7 +1309,7 @@ private fun QuickBackgroundAddTile(tileAspect: Float, onClick: () -> Unit) {
 private fun SlotChip(slot: Int, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(3.dp))
+            .clip(AppShape(3.dp))
             .background(Color.Black.copy(alpha = QUICK_SCRIM_ALPHA))
             .padding(horizontal = 4.dp, vertical = 1.dp)
     ) {

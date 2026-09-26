@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,9 +47,9 @@ private const val HEX_LENGTH = 6
 private const val HEX_RADIX = 16
 private const val OPAQUE = 0xFF000000
 private const val CAPTION_TRACKING = 0.1f
-internal val FIELD_SHAPE = RoundedCornerShape(7.dp)
-internal val CARD_SHAPE = RoundedCornerShape(9.dp)
-internal val MENU_SHAPE = RoundedCornerShape(10.dp)
+internal val FIELD_SHAPE = AppShape(7.dp)
+internal val CARD_SHAPE = AppShape(9.dp)
+internal val MENU_SHAPE = AppShape(10.dp)
 internal val FIELD_HEIGHT = 29.dp
 
 /** The tiny uppercase heading over a group of controls. */
@@ -125,7 +125,7 @@ internal fun InlineSlider(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
-        if (swatch != null) Box(Modifier.size(13.dp).clip(RoundedCornerShape(4.dp)).background(swatch))
+        if (swatch != null) Box(Modifier.size(13.dp).clip(AppShape(4.dp)).background(swatch))
         Text(
             label, fontSize = 11.5.sp, color = Tokens.LabelText, maxLines = 1,
             overflow = TextOverflow.Ellipsis, modifier = Modifier.width(labelWidth),
@@ -182,9 +182,9 @@ internal fun OwnColorField(label: String, color: String, onColorChange: (String)
             Box(
                 Modifier
                     .size(14.dp)
-                    .clip(RoundedCornerShape(3.dp))
+                    .clip(AppShape(3.dp))
                     .background(parseBandHex(color) ?: Color.Transparent)
-                    .border(1.dp, Tokens.BorderHover, RoundedCornerShape(3.dp))
+                    .border(1.dp, Tokens.BorderHover, AppShape(3.dp))
                     .clickable { showPicker = true },
             )
         },

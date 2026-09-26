@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.CropSquare
@@ -113,7 +113,7 @@ private fun ElementRow(state: EditorState, element: ElementSpec) {
             .background(
                 if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                 else MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(4.dp)
+                AppShape(4.dp)
             )
             .clickable { state.selectElement(if (selected) null else element.id) }
             .padding(horizontal = 4.dp, vertical = 2.dp),

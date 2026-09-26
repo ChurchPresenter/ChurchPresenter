@@ -53,6 +53,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
+import org.churchpresenter.theme.AppShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Tune
@@ -193,6 +195,10 @@ import org.churchpresenter.app.churchpresenter.viewmodel.setInstanceLinkSource
 private const val PANEL_COLLAPSE_ANIM_MS = 220
 private const val CLOCK_TICK_MS = 1000L
 private const val CONTENT_CROSSFADE_MS = 120
+
+/** The tab bar's bottom corners, matching the cards below it; the divider under it stops where they start. */
+private val TAB_BAR_CORNER_RADIUS = 14.dp
+private val TAB_BAR_SHAPE = AppShape(bottomStart = TAB_BAR_CORNER_RADIUS, bottomEnd = TAB_BAR_CORNER_RADIUS)
 
 @Composable
 fun MainDesktop(
@@ -1507,6 +1513,7 @@ fun MainDesktop(
                 Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                     Row(
                         modifier = Modifier.fillMaxWidth()
+                            .clip(TAB_BAR_SHAPE)
                             .background(MaterialTheme.colorScheme.surface),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1571,7 +1578,11 @@ fun MainDesktop(
                             buttonSize = 40.dp,
                         )
                     }
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = TAB_BAR_CORNER_RADIUS),
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 1.dp,
+                    )
 
                     AnimatedContent(
                         targetState = currentTab,

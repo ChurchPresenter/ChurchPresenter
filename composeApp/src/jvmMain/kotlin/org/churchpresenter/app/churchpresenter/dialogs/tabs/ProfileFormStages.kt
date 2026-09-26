@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -121,8 +121,8 @@ private fun FormStageFrame(output: PreviewOutputSize, badge: String, content: @C
             .fillMaxWidth()
             .aspectRatio(output.aspectRatio)
             .clipToBounds()
-            .background(Color(PREVIEW_BACKGROUND), RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
+            .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
     ) {
         ScaledPresenterBox(output) { content() }
         PreviewBadge(label = badge, modifier = Modifier.align(Alignment.TopStart).padding(6.dp))

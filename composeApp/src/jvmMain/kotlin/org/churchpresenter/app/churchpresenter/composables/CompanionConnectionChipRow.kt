@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,12 +35,12 @@ fun CompanionConnectionChipRow(
                 modifier = Modifier
                     .background(
                         if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
-                        RoundedCornerShape(6.dp)
+                        AppShape(6.dp)
                     )
                     .border(
                         1.dp,
                         if (isSelected) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
-                        RoundedCornerShape(6.dp)
+                        AppShape(6.dp)
                     )
                     .clickable { onSelect(connection.id) }
                     .padding(horizontal = 10.dp, vertical = 5.dp)

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.DropdownMenu
@@ -491,7 +491,7 @@ private fun AudioDeviceRow(
                 // also what the matching menu item reads -- and with no device selected both
                 // read "System Default". There is no text that picks out the button alone.
                 KeyButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = { expanded = true },
                     modifier = Modifier.testTag(AUDIO_DEVICE_BUTTON_TAG),
                 ) {
@@ -536,7 +536,7 @@ private fun AudioDeviceRow(
                 .fillMaxWidth()
                 .background(
                     MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-                    RoundedCornerShape(4.dp)
+                    AppShape(4.dp)
                 )
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -595,7 +595,7 @@ private fun VlcPathRow(
             modifier = Modifier.weight(1f)
         )
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = {
             scope.launch {
                 val file = FileChooser.platformInstance.chooseSingle(

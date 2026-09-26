@@ -9,7 +9,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +75,7 @@ fun TooltipIconButton(
         }
     ) {
         val palette = elevationPalette()
-        val shape = RoundedCornerShape(ICON_KEY_RADIUS)
+        val shape = AppShape(ICON_KEY_RADIUS)
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
         val pressed by interaction.collectIsPressedAsState()

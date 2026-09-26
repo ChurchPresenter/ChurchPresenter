@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -243,7 +243,7 @@ internal fun QARemoteContent(
                         }
                         Spacer(Modifier.height(8.dp))
                         RaisedButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { copyText(submissionUrl) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -276,7 +276,7 @@ internal fun QARemoteContent(
                                 RaisedButton(
                                     onClick = onStartTunnel,
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(6.dp)
+                                    shape = AppShape(6.dp)
                                 ) {
                                     Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)
                                 }
@@ -309,7 +309,7 @@ internal fun QARemoteContent(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                         ),
-                                        shape = RoundedCornerShape(6.dp)
+                                        shape = AppShape(6.dp)
                                     ) {
                                         Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall)
                                     }
@@ -323,7 +323,7 @@ internal fun QARemoteContent(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                         ),
-                                        shape = RoundedCornerShape(6.dp)
+                                        shape = AppShape(6.dp)
                                     ) {
                                         Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall)
                                     }
@@ -340,7 +340,7 @@ internal fun QARemoteContent(
                                         contentColor = MaterialTheme.colorScheme.onError
                                     ),
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(6.dp)
+                                    shape = AppShape(6.dp)
                                 ) {
                                     Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)
                                 }
@@ -356,7 +356,7 @@ internal fun QARemoteContent(
                                 RaisedButton(
                                     onClick = onStartTunnel,
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(6.dp)
+                                    shape = AppShape(6.dp)
                                 ) {
                                     Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
                                 }
@@ -400,7 +400,7 @@ internal fun QARemoteContent(
                         }
                         Spacer(Modifier.height(8.dp))
                         RaisedButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { copyText(adminQrUrl.ifEmpty { adminDisplayUrl }) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -424,8 +424,8 @@ internal fun QARemoteContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(42.dp)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                            .hoverTint(RoundedCornerShape(8.dp)),
+                            .sunken(AppShape(8.dp), elevationPalette())
+                            .hoverTint(AppShape(8.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -447,7 +447,7 @@ internal fun QARemoteContent(
                         RaisedIconButton(
                             onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
                             modifier = Modifier.size(30.dp),
-                            shape = RoundedCornerShape(5.dp),
+                            shape = AppShape(5.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
@@ -467,7 +467,7 @@ internal fun QARemoteContent(
 
             Spacer(Modifier.height(16.dp))
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -61,7 +61,7 @@ private const val SEXTANT_BLUE_TO_MAGENTA = 4
 private const val HEX_RGB_LENGTH = 6
 
 
-private val ButtonShape = RoundedCornerShape(6.dp)
+private val ButtonShape = AppShape(6.dp)
 
 /** Shared recent colors, persisted to the same file as ChurchPresenter's color picker. */
 private object RecentColors {
@@ -131,7 +131,7 @@ fun ColorPickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = AppShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp,
             modifier = Modifier.width(300.dp),
@@ -158,7 +158,7 @@ fun ColorPickerDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(AppShape(8.dp)),
                 )
 
                 HueBar(
@@ -170,7 +170,7 @@ fun ColorPickerDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(24.dp)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .clip(AppShape(12.dp)),
                 )
 
                 HexRow(
@@ -223,12 +223,12 @@ private fun HexRow(
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(AppShape(8.dp))
                 .background(currentColor)
                 .border(
                     1.dp,
                     MaterialTheme.colorScheme.outline.copy(alpha = SWATCH_BORDER_ALPHA),
-                    RoundedCornerShape(8.dp),
+                    AppShape(8.dp),
                 ),
         )
         LottieTextField(
@@ -258,11 +258,11 @@ private fun RecentColorsRow(onPick: (Color) -> Unit) {
             Box(
                 modifier = Modifier
                     .size(24.dp)
-                    .background(recentColor, RoundedCornerShape(4.dp))
+                    .background(recentColor, AppShape(4.dp))
                     .border(
                         1.dp,
                         MaterialTheme.colorScheme.outline.copy(alpha = RECENT_BORDER_ALPHA),
-                        RoundedCornerShape(4.dp),
+                        AppShape(4.dp),
                     )
                     .clickable { onPick(recentColor) }
             )

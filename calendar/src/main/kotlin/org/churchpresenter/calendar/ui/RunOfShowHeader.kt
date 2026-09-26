@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.onClick
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
@@ -151,7 +151,7 @@ private fun ClockChip(now: LocalTime?, previewing: Boolean, onStep: () -> Unit, 
             modifier = Modifier
                 .height(HEADER_ACTION_HEIGHT)
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), onClick = onReset)
-                .raisedKey(RoundedCornerShape(6.dp), key, onClick = onStep)
+                .raisedKey(AppShape(6.dp), key, onClick = onStep)
                 .padding(horizontal = 8.dp),
         ) {
             Icon(
@@ -173,7 +173,7 @@ private fun ClockChip(now: LocalTime?, previewing: Boolean, onStep: () -> Unit, 
                 Box(
                     Modifier
                         .size(CLOCK_RESET_BOX)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(AppShape(4.dp))
                         .clickable(onClick = onReset),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -230,7 +230,7 @@ private fun HeaderIcon(icon: ImageVector, tooltip: String, tint: Color, onClick:
         Box(
             modifier = Modifier
                 .size(HEADER_ACTION_HEIGHT)
-                .raisedKey(RoundedCornerShape(6.dp), elevationPalette().key, onClick = onClick),
+                .raisedKey(AppShape(6.dp), elevationPalette().key, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = tooltip, tint = tint, modifier = Modifier.size(11.dp))
@@ -274,7 +274,7 @@ private fun AttentionChip(count: Int) {
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .height(HEADER_ACTION_HEIGHT)
-                .clip(RoundedCornerShape(CalendarMetrics.chipRadius))
+                .clip(AppShape(CalendarMetrics.chipRadius))
                 .background(danger.bottom)
                 .padding(horizontal = 7.dp),
         ) {

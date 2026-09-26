@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -57,7 +57,7 @@ private const val MAX_SCALE_PERCENT = 400f
 private const val MAX_ROTATION_DEGREES = 180f
 private const val DEFAULT_SCALE_PERCENT = 100
 private val POPOVER_WIDTH = 296.dp
-private val POPOVER_SHAPE = RoundedCornerShape(11.dp)
+private val POPOVER_SHAPE = AppShape(11.dp)
 private const val POPOVER_OFFSET_PX = 34
 
 /**
@@ -118,7 +118,7 @@ internal fun LookPopover(
                 if (image != null) {
                     Icon(
                         Icons.Default.Close, contentDescription = Strings.bandImageClear, tint = Tokens.LabelText,
-                        modifier = Modifier.size(20.dp).clip(RoundedCornerShape(6.dp))
+                        modifier = Modifier.size(20.dp).clip(AppShape(6.dp))
                             .clickable { viewModel.clearBandImage(role) }.padding(5.dp),
                     )
                 }
@@ -139,7 +139,7 @@ internal fun LookPopover(
                 Box(
                     modifier = Modifier
                         .height(33.dp)
-                        .raisedKey(RoundedCornerShape(17.dp), okFill, onClick = onDismiss)
+                        .raisedKey(AppShape(17.dp), okFill, onClick = onDismiss)
                         .padding(horizontal = 24.dp),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -166,7 +166,7 @@ private fun PictureTransformSliders(viewModel: BibleLottieGenViewModel, role: Ba
         Icon(
             Icons.Default.RestartAlt, contentDescription = Strings.bandLookReset,
             tint = if (isDefault) Tokens.HintText else Tokens.LabelText,
-            modifier = Modifier.size(18.dp).clip(RoundedCornerShape(6.dp))
+            modifier = Modifier.size(18.dp).clip(AppShape(6.dp))
                 .clickable(enabled = !isDefault) {
                     update {
                         it.copy(
@@ -219,7 +219,7 @@ private fun PictureButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .height(30.dp)
-            .raisedKey(RoundedCornerShape(8.dp), fill, onClick = onClick)
+            .raisedKey(AppShape(8.dp), fill, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {

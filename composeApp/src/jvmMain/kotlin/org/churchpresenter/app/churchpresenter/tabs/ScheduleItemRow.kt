@@ -7,7 +7,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
@@ -341,7 +341,7 @@ internal fun ScheduleItemRow(
                         Box(
                             modifier = Modifier
                                 .size(26.dp)
-                                .background(chipBg, RoundedCornerShape(7.dp)),
+                                .background(chipBg, AppShape(7.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -454,7 +454,7 @@ internal fun ScheduleItemRow(
                     .width(ACCENT_WIDTH)
                     .fillMaxHeight()
                     .testTag(SCHEDULE_ROW_ACCENT_TAG)
-                    .background(leftAccent, RoundedCornerShape(2.dp))
+                    .background(leftAccent, AppShape(2.dp))
             )
         }
     }
@@ -569,7 +569,7 @@ private fun ScheduleRowNoteChip(note: String, onEdit: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-            .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
+            .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), AppShape(6.dp))
             .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -609,11 +609,11 @@ private fun ScheduleRowNoteEditor(
             .fillMaxWidth()
             .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
             .sunken(
-                RoundedCornerShape(7.dp),
+                AppShape(7.dp),
                 elevationPalette(),
                 rim = if (noteFieldFocused) MaterialTheme.colorScheme.primary else Color.Unspecified
             )
-            .hoverTint(RoundedCornerShape(7.dp)),
+            .hoverTint(AppShape(7.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         BasicTextField(

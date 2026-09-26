@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -92,7 +92,7 @@ fun DropdownSettingsField(
         modifier = modifier
             .then(if (width != null) Modifier.width(width) else Modifier)
             .heightIn(min = 42.dp)
-            .dropdownField(RoundedCornerShape(8.dp), open = expanded)
+            .dropdownField(AppShape(8.dp), open = expanded)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
             .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
         contentAlignment = Alignment.CenterStart

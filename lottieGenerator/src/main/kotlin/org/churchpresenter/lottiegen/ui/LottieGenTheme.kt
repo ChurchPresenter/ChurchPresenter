@@ -2,7 +2,7 @@ package org.churchpresenter.lottiegen.ui
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollbarStyle
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.dp
@@ -50,7 +50,7 @@ fun ProvideLottieGenPalette(palette: LottieGenPalette, content: @Composable () -
         LocalScrollbarStyle provides ScrollbarStyle(
             minimalHeight = 16.dp,
             thickness = 6.dp,
-            shape = RoundedCornerShape(4.dp),
+            shape = AppShape(4.dp),
             hoverDurationMillis = 150,
             unhoverColor = palette.interaction.scrollbar.scrollThumb,
             hoverColor = palette.interaction.scrollbar.scrollThumbHover

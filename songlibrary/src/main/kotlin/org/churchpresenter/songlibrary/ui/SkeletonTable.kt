@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -102,7 +102,7 @@ private fun SkeletonBar(barWidth: Dp, sweep: State<Float>, xOffset: Dp, tableWid
     Box(
         Modifier.width(barWidth)
             .height(SKELETON_BAR_HEIGHT)
-            .clip(RoundedCornerShape(3.dp))
+            .clip(AppShape(3.dp))
             // Read in the draw phase, not composition: `sweep.value` changes every frame, and read
             // up in the composable it would recompose eighty cells sixty times a second.
             .drawBehind {

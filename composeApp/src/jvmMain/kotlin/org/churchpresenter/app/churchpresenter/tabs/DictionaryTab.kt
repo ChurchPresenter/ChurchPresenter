@@ -32,7 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
@@ -375,7 +375,7 @@ private fun DictionaryListPane(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 6.dp, top = 6.dp, end = 10.dp, bottom = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
                 ) {
                     items(results, key = { it.number }) { entry ->
                         DictionaryEntryRow(
@@ -414,13 +414,13 @@ private fun DictionaryEntryRow(
             .background(colors.background)
             .hoverable(hover)
             .clickable(interactionSource = hover, indication = null, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(horizontal = rowPad(10.dp), vertical = rowPad(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         // Number badge
         Surface(
-            shape = RoundedCornerShape(4.dp),
+            shape = AppShape(4.dp),
             color = numberColor.copy(alpha = 0.12f),
             modifier = Modifier.widthIn(min = 44.dp),
         ) {
@@ -617,7 +617,7 @@ private fun DictionaryDetailActionRow(
                 Box(
                     modifier = Modifier
                         .height(32.dp)
-                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                        .sunken(AppShape(8.dp), elevationPalette())
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -677,7 +677,7 @@ private fun StrongsEntrySummary(
             color = numberColor,
         )
         Surface(
-            shape = RoundedCornerShape(4.dp),
+            shape = AppShape(4.dp),
             color = numberColor.copy(alpha = 0.12f),
         ) {
             Text(
@@ -837,7 +837,7 @@ private fun InScriptureSection(
         }
         if (interlinearVerses.size > interlinearDisplayLimit) {
             val remaining = interlinearVerses.size - interlinearDisplayLimit
-            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onShowMore) {
+            GhostButton(shape = AppShape(6.dp), onClick = onShowMore) {
                 Text(
                     text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
                     style = MaterialTheme.typography.labelMedium,
@@ -868,7 +868,7 @@ private fun InterlinearVerseRow(
             .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(8.dp),
+                shape = AppShape(8.dp),
             )
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -1064,8 +1064,8 @@ private fun DictionarySearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(8.dp)),
+            .sunken(AppShape(8.dp), elevationPalette())
+            .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

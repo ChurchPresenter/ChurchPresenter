@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
@@ -83,7 +83,7 @@ internal fun ModuleRow(
         modifier = Modifier
             .fillMaxWidth()
             .hoverable(interactionSource)
-            .background(rowBackground, RoundedCornerShape(6.dp))
+            .background(rowBackground, AppShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -158,7 +158,7 @@ internal fun ModuleRow(
                 isInstalled -> KeyButton(
                     onClick = onInstall,
                     enabled = !anyInstallRunning,
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
@@ -171,7 +171,7 @@ internal fun ModuleRow(
                 else -> RaisedButton(
                     onClick = onInstall,
                     enabled = !anyInstallRunning,
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(14.dp))

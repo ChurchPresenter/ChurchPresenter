@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -127,7 +127,7 @@ internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource
         // waiting behind the first, with nothing on screen to say anything happened.
         enabled = !looking,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
+        shape = AppShape(8.dp)
     ) {
         Text(stringResource(Res.string.canvas_ndi_refresh), style = MaterialTheme.typography.labelSmall)
     }
@@ -235,7 +235,7 @@ internal fun CameraProperties(
     RaisedButton(
         onClick = { scope.launch { CameraDeviceCatalog.refresh(deckLinkDeviceFormat) } },
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
+        shape = AppShape(8.dp)
     ) {
         Text(stringResource(Res.string.canvas_camera_refresh), style = MaterialTheme.typography.labelSmall)
     }
@@ -466,7 +466,7 @@ internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, on
         RaisedButton(
             onClick = { windows = listOpenWindows() },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)
+            shape = AppShape(8.dp)
         ) {
             Text(stringResource(Res.string.canvas_capture_refresh_windows), style = MaterialTheme.typography.labelSmall)
         }

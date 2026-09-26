@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -179,7 +179,7 @@ private fun ServiceChip(
     val ink = fill.ink
     val meta = fill.ink.copy(alpha = META_ALPHA)
     val border = fill.ink.copy(alpha = DIVIDER_ALPHA)
-    val shape = RoundedCornerShape(CalendarMetrics.chipRadius)
+    val shape = AppShape(CalendarMetrics.chipRadius)
 
     Row(
         modifier = Modifier
@@ -197,7 +197,7 @@ private fun ServiceChip(
             Box(
                 Modifier
                     .size(width = CalendarMetrics.accentBarWidth, height = CalendarMetrics.chipAccentHeight)
-                    .clip(RoundedCornerShape(2.dp))
+                    .clip(AppShape(2.dp))
                     .background(kindColor(kind))
             )
             Column {

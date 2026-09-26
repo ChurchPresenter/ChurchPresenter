@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
@@ -195,7 +195,7 @@ private fun StoryIllustrationColumn() {
                 modifier = Modifier
                     .width(30.dp)
                     .height(2.dp)
-                    .background(palette.accent, RoundedCornerShape(2.dp))
+                    .background(palette.accent, AppShape(2.dp))
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -222,9 +222,9 @@ private fun StoryMonitor(palette: StoryPanelPalette) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(18.dp, RoundedCornerShape(10.dp))
-                .background(palette.bezel, RoundedCornerShape(10.dp))
-                .border(1.dp, palette.bezelBorder, RoundedCornerShape(10.dp))
+                .shadow(18.dp, AppShape(10.dp))
+                .background(palette.bezel, AppShape(10.dp))
+                .border(1.dp, palette.bezelBorder, AppShape(10.dp))
                 .padding(5.dp)
         ) {
             val screenshot = if (isDarkScheme(MaterialTheme.colorScheme)) {
@@ -236,7 +236,7 @@ private fun StoryMonitor(palette: StoryPanelPalette) {
                 painter = painterResource(screenshot),
                 contentDescription = stringResource(Res.string.story_prompt_screenshot),
                 contentScale = ContentScale.FillWidth,
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)),
+                modifier = Modifier.fillMaxWidth().clip(AppShape(6.dp)),
             )
         }
         Box(
@@ -249,7 +249,7 @@ private fun StoryMonitor(palette: StoryPanelPalette) {
             modifier = Modifier
                 .fillMaxWidth(STORY_MONITOR_BASE_FRACTION)
                 .height(5.dp)
-                .background(palette.standTop, RoundedCornerShape(3.dp))
+                .background(palette.standTop, AppShape(3.dp))
         )
     }
 }
@@ -310,14 +310,14 @@ private fun StoryBadge() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .clip(RoundedCornerShape(percent = 50))
+            .clip(AppShape(percent = 50))
             .background(MaterialTheme.semantic.successContainer)
             .padding(horizontal = 12.dp, vertical = 5.dp),
     ) {
         Box(
             modifier = Modifier
                 .size(6.dp)
-                .background(MaterialTheme.semantic.success, RoundedCornerShape(percent = 50))
+                .background(MaterialTheme.semantic.success, AppShape(percent = 50))
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
@@ -341,7 +341,7 @@ private fun StoryExamples() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+            .clip(AppShape(10.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 12.dp, vertical = 10.dp),
     ) {
@@ -388,7 +388,7 @@ private fun StoryFooter(onShare: () -> Unit, onDismiss: () -> Unit) {
                 containerColor = MaterialTheme.semantic.success,
                 contentColor = MaterialTheme.semantic.onSuccess,
             ),
-            shape = RoundedCornerShape(10.dp),
+            shape = AppShape(10.dp),
             modifier = Modifier.height(STORY_BUTTON_HEIGHT),
         ) {
             Icon(
@@ -407,7 +407,7 @@ private fun StoryFooter(onShare: () -> Unit, onDismiss: () -> Unit) {
 
         KeyButton(
             onClick = onDismiss,
-            shape = RoundedCornerShape(10.dp),
+            shape = AppShape(10.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface,

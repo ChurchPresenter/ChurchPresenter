@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -53,9 +53,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-internal val CardShape = RoundedCornerShape(10.dp)
-internal val FieldShape = RoundedCornerShape(8.dp)
-private val TileShape = RoundedCornerShape(7.dp)
+internal val CardShape = AppShape(10.dp)
+internal val FieldShape = AppShape(8.dp)
+private val TileShape = AppShape(7.dp)
 
 /** A file (or folder) shown inside [SelectedFilesCard]. */
 data class SelectedEntry(val name: String, val meta: String)
@@ -226,7 +226,7 @@ fun RequestFormatNote() {
 @Composable
 fun ExtensionBadge(text: String, emphasized: Boolean = false) {
     Surface(
-        shape = RoundedCornerShape(5.dp),
+        shape = AppShape(5.dp),
         color = if (emphasized) MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.surfaceContainerHigh,
         border = null
@@ -553,7 +553,7 @@ fun OptionToggleRow(
         Box(
             modifier = Modifier
                 .size(16.dp)
-                .clip(RoundedCornerShape(5.dp))
+                .clip(AppShape(5.dp))
                 .background(
                     if (checked) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.surfaceContainerHighest
@@ -561,7 +561,7 @@ fun OptionToggleRow(
                 .border(
                     1.dp,
                     if (checked) Color.Transparent else MaterialTheme.colorScheme.outline,
-                    RoundedCornerShape(5.dp)
+                    AppShape(5.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -644,9 +644,9 @@ fun EmptyStatePanel(icon: ImageVector, message: String, modifier: Modifier = Mod
             Box(
                 modifier = Modifier
                     .size(46.dp)
-                    .clip(RoundedCornerShape(13.dp))
+                    .clip(AppShape(13.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(13.dp)),
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(13.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

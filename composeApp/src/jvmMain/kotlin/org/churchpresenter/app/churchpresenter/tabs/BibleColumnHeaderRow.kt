@@ -3,23 +3,16 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
@@ -29,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +56,7 @@ import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.bible.bibleDisplayNames
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.RaisedFilterChip
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -84,6 +77,7 @@ internal fun BibleVerseHeader(
     onMoveTranslation: (index: Int, offset: Int) -> Unit,
     onAddToSchedule: () -> Unit,
     onGoLive: () -> Unit,
+    showLabel: Boolean = true,
 ) {
     val holdLiveStr = stringResource(Res.string.hold_live)
     val verseSelectionHint = stringResource(Res.string.bible_verse_selection_hint)
@@ -98,7 +92,9 @@ internal fun BibleVerseHeader(
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
     ) {
-        BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f))
+        // Without the label the spacer keeps the actions right-aligned, as the label's weight did.
+        if (showLabel) BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f))
+        else Spacer(Modifier.weight(1f))
 
         if (crossRefsVisible) CrossRefsPill(crossRefsDocked, onCrossReferencesToggle)
 
@@ -155,58 +151,22 @@ internal fun BibleListHeaderLabel(text: String, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CrossRefsPill(crossRefsDocked: Boolean, onCrossReferencesToggle: () -> Unit) {
-    val crossRefsLabel = stringResource(Res.string.bible_cross_references_title)
     TooltipArea(
-        tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                Text(
-                    stringResource(Res.string.bible_cross_references),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
+        tooltip = { HeaderTooltip(stringResource(Res.string.bible_cross_references)) },
         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
     ) {
-        Row(
-            modifier = Modifier
-                .height(27.dp)
-                .background(
-                    if (crossRefsDocked) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceVariant,
-                    RoundedCornerShape(6.dp),
+        RaisedFilterChip(
+            selected = crossRefsDocked,
+            onClick = onCrossReferencesToggle,
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_link),
+                    contentDescription = stringResource(Res.string.bible_cross_references),
+                    modifier = Modifier.size(12.dp),
                 )
-                .border(
-                    1.dp,
-                    if (crossRefsDocked) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.outlineVariant,
-                    RoundedCornerShape(6.dp),
-                )
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                ) {
-                    onCrossReferencesToggle()
-                }
-                .padding(horizontal = 9.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_link),
-                contentDescription = stringResource(Res.string.bible_cross_references),
-                modifier = Modifier.size(12.dp),
-                tint = if (crossRefsDocked) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            )
-            Text(
-                crossRefsLabel,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp),
-                color = if (crossRefsDocked) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            )
-        }
+            },
+            label = { HeaderChipLabel(stringResource(Res.string.bible_cross_references_title)) },
+        )
     }
 }
 
@@ -219,79 +179,33 @@ private fun HoldLivePill(
     verseSelectionHint: String,
     onHoldLiveToggle: () -> Unit,
 ) {
-    val holdPillActive = holdAvailable
-    val holdLiveState = holdLive
     TooltipArea(
-        tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                Text(
-                    if (holdPillActive) holdLiveStr else verseSelectionHint,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        tooltip = { HeaderTooltip(if (holdAvailable) holdLiveStr else verseSelectionHint) },
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
     ) {
-        Box(
-            modifier = Modifier
-                .height(27.dp)
-                .background(
-                    when {
-                        holdLiveState -> MaterialTheme.colorScheme.error
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    RoundedCornerShape(6.dp)
-                )
-                .border(
-                    1.dp,
-                    when {
-                        holdLiveState -> MaterialTheme.colorScheme.error
-                        else -> MaterialTheme.colorScheme.outlineVariant
-                    },
-                    RoundedCornerShape(6.dp)
-                )
-                .then(
-                    if (holdPillActive)
-                        Modifier.clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            onHoldLiveToggle()
-                        }
-                    else Modifier
-                )
-                .padding(horizontal = 10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_pause),
-                    contentDescription = null,
-                    modifier = Modifier.size(10.dp),
-                    tint = when {
-                        holdLiveState -> MaterialTheme.colorScheme.onError
-                        holdPillActive -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                    }
-                )
-                Text(
-                    stringResource(Res.string.hold_live_modifier_hint),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp),
-                    color = when {
-                        holdLiveState -> MaterialTheme.colorScheme.onError
-                        holdPillActive -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
-                    }
-                )
-            }
+        val icon: @Composable () -> Unit = {
+            Icon(
+                painter = painterResource(Res.drawable.ic_pause),
+                contentDescription = null,
+                modifier = Modifier.size(10.dp),
+            )
+        }
+        val label: @Composable () -> Unit = { HeaderChipLabel(stringResource(Res.string.hold_live_modifier_hint)) }
+        // Red while the hold is live. Where it cannot apply it is shown but not pressable -- its
+        // tooltip then explains Ctrl/Shift selection instead.
+        if (holdAvailable) {
+            RaisedFilterChip(
+                selected = holdLive,
+                onClick = onHoldLiveToggle,
+                selectedContainerColor = MaterialTheme.colorScheme.error,
+                selectedLabelColor = MaterialTheme.colorScheme.onError,
+                leadingIcon = icon,
+                label = label,
+            )
+        } else {
+            InertChip(leadingIcon = icon, label = label)
         }
     }
-
 }
 
 @Composable
@@ -360,4 +274,21 @@ private fun TranslationControls(
         )
     }
 
+}
+
+@Composable
+private fun HeaderTooltip(text: String) {
+    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+        Text(
+            text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
+private fun HeaderChipLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), maxLines = 1)
 }

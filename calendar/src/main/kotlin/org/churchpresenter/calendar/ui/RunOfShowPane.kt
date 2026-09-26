@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -302,7 +302,7 @@ private fun RunRow(
         Box(
             Modifier
                 .size(CalendarMetrics.rowIcon)
-                .clip(RoundedCornerShape(6.dp))
+                .clip(AppShape(6.dp))
                 .background(look.color.copy(alpha = BADGE_ALPHA)),
             contentAlignment = Alignment.Center,
         ) {
@@ -551,7 +551,7 @@ private fun SectionRow(
         Box(
             Modifier
                 .size(width = CalendarMetrics.accentBarWidth, height = CalendarMetrics.sectionBarHeight)
-                .clip(RoundedCornerShape(2.dp))
+                .clip(AppShape(2.dp))
                 .background(color)
         )
         Text(
@@ -722,9 +722,9 @@ fun NoServicesPane(
         Box(
             Modifier
                 .size(42.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(AppShape(12.dp))
                 .background(scheme.surfaceVariant.copy(alpha = ROW_ALPHA))
-                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(12.dp)),
+                .border(1.dp, scheme.outlineVariant, AppShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

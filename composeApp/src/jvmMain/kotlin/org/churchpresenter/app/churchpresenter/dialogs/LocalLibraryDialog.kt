@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.CircularProgressIndicator
@@ -311,7 +311,7 @@ private fun LibraryThumbnail(
     Box(
         modifier = Modifier
             .aspectRatio(THUMB_ASPECT_W / THUMB_ASPECT_H)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(AppShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onClick)
     ) {

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -33,9 +33,9 @@ import androidx.compose.ui.unit.dp
 import java.awt.Cursor
 import org.churchpresenter.theme.isDarkScheme
 
-internal val BibleListCardShape = RoundedCornerShape(14.dp)
-internal val BibleListRowShape = RoundedCornerShape(9.dp)
-internal val BibleVerseRowShape = RoundedCornerShape(10.dp)
+internal val BibleListCardShape = AppShape(14.dp)
+internal val BibleListRowShape = AppShape(9.dp)
+internal val BibleVerseRowShape = AppShape(10.dp)
 
 private const val SELECTED_ALPHA_DARK = 0.18f
 private const val SELECTED_ALPHA_LIGHT = 0.10f
@@ -131,7 +131,7 @@ internal fun DragHandle(onDragEnd: () -> Unit, onDrag: (Float) -> Unit) {
             .fillMaxHeight()
             .background(
                 if (hovered && !dragging) scheme.onSurface.copy(alpha = ROW_HOVER_ALPHA) else Color.Transparent,
-                RoundedCornerShape(6.dp),
+                AppShape(6.dp),
             )
             .hoverable(interaction)
             .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
@@ -149,7 +149,7 @@ internal fun DragHandle(onDragEnd: () -> Unit, onDrag: (Float) -> Unit) {
                 .height(40.dp)
                 .background(
                     if (dragging) scheme.primary else scheme.onSurface.copy(alpha = GRIP_ALPHA),
-                    RoundedCornerShape(3.dp),
+                    AppShape(3.dp),
                 )
         )
     }

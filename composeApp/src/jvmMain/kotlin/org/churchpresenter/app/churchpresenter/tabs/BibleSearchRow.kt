@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -105,7 +105,7 @@ internal fun BibleSearchRow(
                     )
                     Box(
                         modifier = Modifier.size(42.dp)
-                            .raisedHover(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
+                            .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
                             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                                 onSubmit()
                             },
@@ -150,7 +150,7 @@ internal fun BibleSearchRow(
                 )
                 Box(
                     modifier = Modifier.size(42.dp)
-                        .raisedHover(RoundedCornerShape(10.dp), elevationPalette().accent, elevationPalette())
+                        .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
                         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                             onSubmit()
                         },
@@ -207,7 +207,7 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
         val pressed by interaction.collectIsPressedAsState()
         Box(
             modifier = modifier
-                .raisedHover(RoundedCornerShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
+                .raisedHover(AppShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
                 .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onCycle),
             contentAlignment = Alignment.Center
         ) {

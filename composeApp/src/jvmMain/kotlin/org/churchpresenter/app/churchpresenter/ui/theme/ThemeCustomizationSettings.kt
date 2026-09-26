@@ -21,6 +21,7 @@ fun themeChoiceFrom(settings: AppSettings, useCustomColors: Boolean): ThemeCusto
         colors = settings.customThemeColors,
         fontFamily = settings.uiFontFamily,
         fontScale = settings.uiFontScale.coerceIn(UI_FONT_SCALES.first(), UI_FONT_SCALES.last()),
+        rowSpacing = settings.uiRowSpacing,
     )
 
 /**

@@ -3,7 +3,6 @@ package org.churchpresenter.theme
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -598,11 +597,11 @@ fun ChurchPresenterTheme(
         colorScheme = colorScheme,
         typography = typography,
         shapes = Shapes(
-            extraSmall = RoundedCornerShape(4.dp),
-            small = RoundedCornerShape(6.dp),
-            medium = RoundedCornerShape(8.dp),
-            large = RoundedCornerShape(10.dp),
-            extraLarge = RoundedCornerShape(12.dp)
+            extraSmall = AppShape(4.dp),
+            small = AppShape(6.dp),
+            medium = AppShape(8.dp),
+            large = AppShape(10.dp),
+            extraLarge = AppShape(12.dp)
         )
     ) {
         CompositionLocalProvider(
@@ -610,7 +609,7 @@ fun ChurchPresenterTheme(
             LocalScrollbarStyle provides ScrollbarStyle(
                 minimalHeight = 16.dp,
                 thickness = 5.dp,
-                shape = RoundedCornerShape(4.dp),
+                shape = AppShape(4.dp),
                 hoverDurationMillis = 150,
                 unhoverColor = colorScheme.onSurface.copy(alpha = 0.25f),
                 hoverColor = colorScheme.onSurface.copy(alpha = 0.45f)

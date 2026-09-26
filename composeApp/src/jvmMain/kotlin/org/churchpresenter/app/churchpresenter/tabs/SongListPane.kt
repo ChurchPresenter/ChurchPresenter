@@ -8,7 +8,7 @@ import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
@@ -284,8 +284,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     .weight(1f)
                     .widthIn(min = 120.dp)
                     .height(42.dp)
-                    .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                    .hoverTint(RoundedCornerShape(8.dp)),
+                    .sunken(AppShape(8.dp), elevationPalette())
+                    .hoverTint(AppShape(8.dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -368,7 +368,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(42.dp)
-                    .raisedHover(RoundedCornerShape(8.dp), elevationPalette().accent, elevationPalette())
+                    .raisedHover(AppShape(8.dp), elevationPalette().accent, elevationPalette())
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                         val now = System.currentTimeMillis()
                         if (now - rebuildClickTime > REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0
@@ -661,7 +661,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     .fillMaxHeight()
                     .padding(start = 6.dp, end = 8.dp),
                 contentPadding = PaddingValues(bottom = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(1.dp),
+                verticalArrangement = Arrangement.spacedBy(rowPad(1.dp)),
             ) {
                 itemsIndexed(filteredSongs) { index, song ->
                     var showContextMenu by remember { mutableStateOf(false) }
@@ -694,7 +694,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     tabFocusRequester.requestFocus()
                                 },
                             )
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = rowPad(8.dp))
                             .pointerInput(Unit) {
                                 awaitPointerEventScope {
                                     while (true) {

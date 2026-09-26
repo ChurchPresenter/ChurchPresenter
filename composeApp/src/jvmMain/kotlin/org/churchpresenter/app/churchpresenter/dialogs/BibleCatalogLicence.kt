@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Copyright
 import androidx.compose.material.icons.filled.Download
@@ -142,7 +142,7 @@ internal fun LicenceConfirmation(
                         modifier = Modifier
                             .width(3.dp)
                             .fillMaxHeight()
-                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.primary, AppShape(2.dp))
                     )
                     Spacer(Modifier.width(10.dp))
                     Column {
@@ -177,14 +177,14 @@ internal fun LicenceConfirmation(
             }
         },
         confirmButton = {
-            RaisedButton(onClick = onConfirm, shape = RoundedCornerShape(6.dp)) {
+            RaisedButton(onClick = onConfirm, shape = AppShape(6.dp)) {
                 Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(stringResource(Res.string.bible_catalog_license_accept))
             }
         },
         dismissButton = {
-            KeyButton(onClick = onDismiss, shape = RoundedCornerShape(6.dp)) {
+            KeyButton(onClick = onDismiss, shape = AppShape(6.dp)) {
                 Text(stringResource(Res.string.cancel))
             }
         }

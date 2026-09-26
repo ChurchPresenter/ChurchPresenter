@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
@@ -54,8 +54,8 @@ fun SearchField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(8.dp)),
+            .sunken(AppShape(8.dp), elevationPalette())
+            .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
