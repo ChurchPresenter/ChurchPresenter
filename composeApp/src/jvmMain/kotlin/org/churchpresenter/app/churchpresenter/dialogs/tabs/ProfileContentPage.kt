@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -49,6 +50,7 @@ import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.changedPaths
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -175,8 +177,8 @@ internal fun ProfileContentPage(
     val groups = contentSwitches(profile)
     ContentSummary(profile, groups.all, onProfileChange)
     ContentGroup(groups.scripture, profile, onProfileChange)
-    SettingsGroup(stringResource(Res.string.output_profile_sources)) {
-        SettingsRow(stringResource(Res.string.profile_source_bible)) {
+    SettingsGroup(stringResource(Res.string.output_profile_sources), paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS) {
+        SettingsRow(stringResource(Res.string.profile_source_bible), paths = BIBLE_SOURCE_PATHS) {
             BibleSourcePicker(
                 profile = profile,
                 stack = bibleTranslationChoices(settings),
@@ -184,7 +186,7 @@ internal fun ProfileContentPage(
                 modifier = Modifier.width(SOURCE_PICKER_WIDTH),
             )
         }
-        SettingsRow(stringResource(Res.string.profile_source_songs)) {
+        SettingsRow(stringResource(Res.string.profile_source_songs), paths = SONG_SOURCE_PATHS) {
             SongSourcePicker(
                 profile = profile,
                 languages = songLanguageChoices(settings),
@@ -198,16 +200,27 @@ internal fun ProfileContentPage(
     // Only for what this profile shows: a screen that never draws a picture has nothing to fit.
     // Nor on a stage monitor, which always fits its slide and video into their zone.
     if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR) {
-        SettingsGroup(stringResource(Res.string.output_profile_scale)) { ScaleRows(profile, onProfileChange) }
+        SettingsGroup(stringResource(Res.string.output_profile_scale), paths = SCALE_PATHS) {
+            ScaleRows(profile, onProfileChange)
+        }
     }
     // A lower third only: on a full screen there is nowhere else for the content to go.
     if (profile.isLowerThird) {
-        SettingsGroup(stringResource(Res.string.profile_group_placement)) { PlacementRows(profile, onProfileChange) }
+        SettingsGroup(stringResource(Res.string.profile_group_placement), paths = listOf(PLACEMENTS_PATH)) {
+            PlacementRows(profile, onProfileChange)
+        }
     }
     ContentGroup(groups.backgrounds, profile, onProfileChange, advanced = true)
 }
 
 private val SOURCE_PICKER_WIDTH = 260.dp
+
+private val BIBLE_SOURCE_PATHS = listOf("bibleMode", "bibleTranslations")
+private val SONG_SOURCE_PATHS = listOf("songMode", "songTranslations")
+private val SCALE_PATHS = listOf("pictureScaleMode", "mediaScaleMode")
+
+/** Where a lower third's band-less content is placed, by kind. */
+internal const val PLACEMENTS_PATH = "lowerThirdPlacements"
 
 @Composable
 private fun ContentGroup(
@@ -216,13 +229,24 @@ private fun ContentGroup(
     onProfileChange: (OutputProfile) -> Unit,
     advanced: Boolean = false,
 ) {
-    SettingsGroup(group.first, advanced = advanced) {
+    // Where each switch is stored, found by flipping it: a switch can write more than one field
+    // (Songs off takes the look-ahead with it), and only a linked profile needs to know.
+    val linked = LocalProfileLink.current?.isLinked == true
+    val paths = if (linked) {
+        remember(profile, group.second.map { it.label }) {
+            group.second.associate { it.label to changedPaths(profile, it.edit(profile, !it.checked)).toList() }
+        }
+    } else {
+        emptyMap()
+    }
+    SettingsGroup(group.first, advanced = advanced, paths = paths.values.flatten().distinct()) {
         group.second.forEach { switch ->
             SettingsSwitchRow(
                 label = switch.label,
                 checked = switch.checked,
                 onCheckedChange = { onProfileChange(switch.edit(profile, it)) },
                 modifier = Modifier.testTag(contentSwitchTag(switch.label)),
+                paths = paths[switch.label].orEmpty(),
             )
         }
     }

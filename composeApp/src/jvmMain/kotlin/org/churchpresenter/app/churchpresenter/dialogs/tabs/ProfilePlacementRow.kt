@@ -46,7 +46,7 @@ private fun LowerThirdPlacement.label(): StringResource = when (this) {
 @Composable
 internal fun PlacementRows(profile: OutputProfile, onProfileChange: (OutputProfile) -> Unit) {
     profile.placeableShown().forEach { content ->
-        SettingsRow(stringResource(content.label())) {
+        SettingsRow(stringResource(content.label()), paths = listOf("$PLACEMENTS_PATH.${content.name}")) {
             RowSegmented(
                 options = LowerThirdPlacement.entries.map { RowOption(it, stringResource(it.label())) },
                 selected = profile.placementFor(content),

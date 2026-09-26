@@ -27,6 +27,7 @@ import churchpresenter.composeapp.generated.resources.profile_mode_full
 import churchpresenter.composeapp.generated.resources.profile_mode_lower_third
 import churchpresenter.composeapp.generated.resources.profile_mode_stage
 import churchpresenter.composeapp.generated.resources.profile_name
+import org.churchpresenter.settings.DISPLAY_MODE_PATH
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.AppShape
@@ -66,7 +67,7 @@ internal fun ProfileGeneralPage(
                 fillWidth = true,
             )
         }
-        SettingsRow(stringResource(Res.string.profile_display_mode), sub = modeSub) {
+        SettingsRow(stringResource(Res.string.profile_display_mode), sub = modeSub, paths = listOf(DISPLAY_MODE_PATH)) {
             DisplayModeSegments(profile, onProfileChange, enabled = !modeLocked)
         }
     }

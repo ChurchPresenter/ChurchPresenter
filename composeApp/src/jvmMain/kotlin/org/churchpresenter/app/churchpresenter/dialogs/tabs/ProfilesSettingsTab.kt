@@ -19,16 +19,24 @@ import churchpresenter.composeapp.generated.resources.browser_source_output_labe
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.output_profile_empty_state
 import churchpresenter.composeapp.generated.resources.output_profile_new_name_default
+import churchpresenter.composeapp.generated.resources.profile_linked_name
 import churchpresenter.composeapp.generated.resources.screen_number
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.deleteOutputProfile
 import org.churchpresenter.settings.duplicateOutputProfile
-import org.churchpresenter.settings.moveOutputProfile
+import org.churchpresenter.settings.createLinkedProfile
+import org.churchpresenter.settings.dropOutputProfile
+import org.churchpresenter.settings.editProfile
+import org.churchpresenter.settings.linkProfile
+import org.churchpresenter.settings.masterOf
+import org.churchpresenter.settings.moveOutputProfileBy
+import org.churchpresenter.settings.revertToMaster
+import org.churchpresenter.settings.unlinkProfile
+import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.settings.newOutputProfile
 import org.churchpresenter.settings.renameOutputProfile
-import org.churchpresenter.settings.updateOutputProfile
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -66,8 +74,27 @@ internal fun ProfilesSettingsTab(
         onSettingsChange { s -> s.copy(projectionSettings = transform(s.projectionSettings)) }
     }
 
+    // The link a profile had just before it was unlinked, for the banner's Undo. Forgotten by the
+    // next link action and by selecting another profile.
+    val unlink = remember { UnlinkState() }
+
     val defaultProfileName = stringResource(Res.string.output_profile_new_name_default)
     val usage = proj.outputProfiles.associate { it.id to profileUserLabels(proj, it.id) }
+    // What a profile linked to each one is called: "Sanctuary (linked)".
+    val linkedNames = proj.outputProfiles.associate { p ->
+        p.id to stringResource(Res.string.profile_linked_name, p.displayNameOr(defaultProfileName))
+    }
+    // A value rather than a local `fun`, for the reason ProfileSongsPage gives.
+    val createLinked: (String) -> Unit = { masterId ->
+        val master = proj.outputProfiles.find { it.id == masterId }
+        if (master != null && master.parentId == null) {
+            val fresh = newOutputProfile(proj.outputProfiles, linkedNames[masterId].orEmpty())
+            unlink.last = null
+            updateProjection { it.createLinkedProfile(masterId, fresh) }
+            selectedId = fresh.id
+            page = ProfilePage.General
+        }
+    }
 
     Row(modifier = Modifier.fillMaxSize()) {
         ProfilesList(
@@ -75,7 +102,10 @@ internal fun ProfilesSettingsTab(
             selectedId = effectiveId,
             usageOf = { id -> usage[id].orEmpty() },
             actions = ProfileListActions(
-                onSelect = { selectedId = it },
+                onSelect = {
+                    selectedId = it
+                    if (unlink.last?.id != it) unlink.last = null
+                },
                 onNew = {
                     // Unnamed: General opens on it, with its name field waiting to be filled in.
                     val fresh = newOutputProfile(proj.outputProfiles)
@@ -83,7 +113,8 @@ internal fun ProfilesSettingsTab(
                     selectedId = fresh.id
                     page = ProfilePage.General
                 },
-                onMove = { id, to -> updateProjection { it.moveOutputProfile(id, to) } },
+                onMove = { id, move -> updateProjection { it.moved(id, move) } },
+                onCreateLinked = { id -> createLinked(id) },
                 onRename = { id, name -> updateProjection { it.renameOutputProfile(id, name) } },
                 onDuplicate = { id ->
                     val source = proj.outputProfiles.find { it.id == id }
@@ -104,7 +135,7 @@ internal fun ProfilesSettingsTab(
                 page = page,
                 onPageChange = { page = it },
                 onSettingsChange = onSettingsChange,
-                onProfileChange = { updated -> updateProjection { it.updateOutputProfile(profile.id) { updated } } },
+                onProfileChange = { updated -> updateProjection { it.editProfile(profile.id) { updated } } },
                 onRename = { name -> updateProjection { it.renameOutputProfile(profile.id, name) } },
                 onDuplicate = {
                     val copyName = duplicateName(profile.name.ifBlank { defaultProfileName })
@@ -112,16 +143,17 @@ internal fun ProfilesSettingsTab(
                 },
                 onRequestDelete = { pendingDeleteId = profile.id },
                 onIdentify = onIdentify,
+                onRevert = { paths -> updateProjection { it.revertToMaster(profile.id, paths) } },
+                linkActions = unlink.actionsFor(
+                    profile,
+                    proj.masterOf(profile)?.let { it.id to it.displayNameOr(defaultProfileName) },
+                    ::updateProjection,
+                    createLinked,
+                ) { selectedId = it },
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         } else {
-            Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(Res.string.output_profile_empty_state),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            NoProfileSelected(Modifier.weight(1f).fillMaxHeight())
         }
     }
 
@@ -138,6 +170,77 @@ internal fun ProfilesSettingsTab(
         )
     }
 }
+
+/** [this] with [id] moved as the list asked. */
+private fun ProjectionSettings.moved(id: String, move: ProfileMove): ProjectionSettings = when (move) {
+    is ProfileMove.By -> moveOutputProfileBy(id, move.delta)
+    is ProfileMove.Drop -> dropOutputProfile(id, move.gap)
+}
+
+/** What the editor shows with no profile to edit. */
+@Composable
+private fun NoProfileSelected(modifier: Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(Res.string.output_profile_empty_state),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * The link actions of the profile being edited. Unlinking remembers the link it had here, so
+ * the banner can offer it back until the next link action or another profile is picked.
+ */
+private fun UnlinkState.actionsFor(
+    profile: OutputProfile,
+    /** The id and name of the master [profile] follows, if it follows one. */
+    master: Pair<String, String>?,
+    update: ((ProjectionSettings) -> ProjectionSettings) -> Unit,
+    createLinked: (String) -> Unit,
+    select: (String) -> Unit,
+): ProfileLinkActions = ProfileLinkActions(
+    onUnlink = {
+        if (master != null) {
+            last = UnlinkedProfile(profile.id, master.first, master.second, profile.overrides)
+            update { it.unlinkProfile(profile.id) }
+        }
+    },
+    onLink = { masterId, keep ->
+        last = null
+        update { it.linkProfile(profile.id, masterId, keep) }
+    },
+    onCreateLinked = { createLinked(profile.id) },
+    onSelectProfile = select,
+    unlinkedFrom = last?.takeIf { it.id == profile.id }?.masterName,
+    onUndoUnlink = {
+        last?.let { u -> update { it.relinked(u) } }
+        last = null
+    },
+)
+
+/** The link a profile had just before it was unlinked, held for the banner's Undo. */
+private class UnlinkState {
+    var last by mutableStateOf<UnlinkedProfile?>(null)
+}
+
+/** A profile just unlinked from [masterId], with the values it had of its own then -- for Undo. */
+private data class UnlinkedProfile(
+    val id: String,
+    val masterId: String,
+    val masterName: String,
+    val overrides: Set<String>,
+)
+
+/** [this] with [u]'s profile following its master again, with the values it had of its own. */
+private fun ProjectionSettings.relinked(u: UnlinkedProfile): ProjectionSettings = copy(
+    outputProfiles = outputProfiles.map { p ->
+        if (p.id == u.id) p.copy(parentId = u.masterId, overrides = u.overrides) else p
+    },
+).withLinksResolved()
+
+private fun OutputProfile.displayNameOr(fallback: String): String = name.ifBlank { fallback }
 
 /** "Foyer TV" → "Foyer TV copy", "Foyer TV copy" → "Foyer TV copy copy": no de-duplication attempted. */
 internal fun duplicateName(name: String): String = "$name copy"

@@ -28,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DragIndicator
+import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -72,6 +73,7 @@ import churchpresenter.composeapp.generated.resources.output_profile_duplicate
 import churchpresenter.composeapp.generated.resources.output_profile_list_header
 import churchpresenter.composeapp.generated.resources.profile_list_hint
 import churchpresenter.composeapp.generated.resources.profile_list_new
+import churchpresenter.composeapp.generated.resources.profile_menu_create_linked
 import churchpresenter.composeapp.generated.resources.profile_menu_move_down
 import churchpresenter.composeapp.generated.resources.profile_menu_move_up
 import churchpresenter.composeapp.generated.resources.profile_menu_rename
@@ -91,23 +93,39 @@ private const val DRAGGED_ALPHA = 0.85f
 private val DROP_LINE = 2.dp
 private val ROW_GAP = 3.dp
 
+/** How far a linked profile sits in from its master. */
+private val LINKED_INDENT = 18.dp
+
 /** What the profile list can do to a profile, from its row, its menu or the keyboard. */
 internal class ProfileListActions(
     val onSelect: (String) -> Unit,
     val onNew: () -> Unit,
-    /** Moves the profile to sit at this index of the list as it will be after the move. */
-    val onMove: (id: String, toIndex: Int) -> Unit,
+    val onMove: (id: String, move: ProfileMove) -> Unit,
+    /** Makes a new profile following this one. */
+    val onCreateLinked: (String) -> Unit = {},
     val onRename: (id: String, name: String) -> Unit,
     val onDuplicate: (String) -> Unit,
     val onDelete: (String) -> Unit,
 )
+
+/** How a profile is moved in the list. */
+internal sealed interface ProfileMove {
+    /** This many places among its peers -- negative is up. */
+    data class By(val delta: Int) : ProfileMove
+
+    /** Into the gap before this row of the list, as a drag lands. */
+    data class Drop(val gap: Int) : ProfileMove
+}
 
 /**
  * The left column: every profile, in the order every profile list in the app shows them.
  *
  * The order is the operator's. A profile is dragged by its handle, with a line showing where it will
  * land; moved a place with Alt+↑ / Alt+↓ on the selected row; or moved from its right-click menu,
- * which also renames it in place, duplicates it and deletes it.
+ * which also renames it in place, duplicates it, makes a profile linked to it and deletes it.
+ *
+ * A linked profile sits indented under its master with how many settings it has changed, and moves
+ * only among the master's other linked profiles; a master moves with all of them.
  */
 @Composable
 internal fun ProfilesList(
@@ -140,8 +158,10 @@ internal fun ProfilesList(
                 modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(ROW_GAP),
             ) {
-                profiles.forEachIndexed { index, profile ->
+                profiles.forEach { profile ->
                     val dragged = profile.id == draggingId
+                    val peers = profiles.filter { it.parentId == profile.parentId }
+                    val index = peers.indexOfFirst { it.id == profile.id }
                     ProfileListRow(
                         profile = profile,
                         selected = profile.id == selectedId,
@@ -152,16 +172,21 @@ internal fun ProfilesList(
                         menu = {
                             profileMenu(
                                 index = index,
-                                count = profiles.size,
+                                count = peers.size,
                                 onRename = { renamingId = profile.id },
                                 onDuplicate = { actions.onDuplicate(profile.id) },
-                                onMoveUp = { actions.onMove(profile.id, index - 1) },
-                                onMoveDown = { actions.onMove(profile.id, index + 1) },
+                                onCreateLinked = if (profile.parentId == null) {
+                                    { actions.onCreateLinked(profile.id) }
+                                } else {
+                                    null
+                                },
+                                onMoveUp = { actions.onMove(profile.id, ProfileMove.By(-1)) },
+                                onMoveDown = { actions.onMove(profile.id, ProfileMove.By(1)) },
                                 onDelete = { actions.onDelete(profile.id) },
                             )
                         },
                         onSelect = { actions.onSelect(profile.id) },
-                        onMoveBy = { delta -> actions.onMove(profile.id, index + delta) },
+                        onMoveBy = { delta -> actions.onMove(profile.id, ProfileMove.By(delta)) },
                         handle = Modifier.pointerInput(profile.id) {
                             detectDragGestures(
                                 onDragStart = {
@@ -176,7 +201,7 @@ internal fun ProfilesList(
                                     val to = dropIndexFor(profiles, profile.id, dragOffset, rowTops, rowHeights)
                                     draggingId = null
                                     dragOffset = 0f
-                                    if (to != null) actions.onMove(profile.id, landingIndex(index, to))
+                                    if (to != null) actions.onMove(profile.id, ProfileMove.Drop(to))
                                 },
                                 onDragCancel = {
                                     draggingId = null
@@ -249,18 +274,21 @@ private fun profileMenu(
     count: Int,
     onRename: () -> Unit,
     onDuplicate: () -> Unit,
+    onCreateLinked: (() -> Unit)?,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onDelete: () -> Unit,
 ): List<ContextMenuItem> {
     val rename = stringResource(Res.string.profile_menu_rename)
     val duplicate = stringResource(Res.string.output_profile_duplicate)
+    val createLinked = stringResource(Res.string.profile_menu_create_linked)
     val up = stringResource(Res.string.profile_menu_move_up)
     val down = stringResource(Res.string.profile_menu_move_down)
     val delete = stringResource(Res.string.output_profile_delete)
     return buildList {
         add(ContextMenuItem(rename, onRename))
         add(ContextMenuItem(duplicate, onDuplicate))
+        if (onCreateLinked != null) add(ContextMenuItem(createLinked, onCreateLinked))
         if (index > 0) add(ContextMenuItem(up, onMoveUp))
         if (index < count - 1) add(ContextMenuItem(down, onMoveDown))
         add(ContextMenuItem(delete, onDelete))
@@ -331,13 +359,24 @@ private fun ProfileListRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            val linked = profile.parentId != null
+            if (linked) Spacer(Modifier.width(LINKED_INDENT))
             Icon(
                 Icons.Filled.DragIndicator,
                 contentDescription = null,
                 tint = profilesPalette().faintText,
                 modifier = Modifier.size(18.dp).then(handle).testTag(profileHandleTag(profile.id)),
             )
-            ProfileModeDot(profile.displayMode)
+            if (linked) {
+                Icon(
+                    Icons.Filled.SubdirectoryArrowRight,
+                    contentDescription = null,
+                    tint = scheme.onSurfaceVariant,
+                    modifier = Modifier.size(15.dp),
+                )
+            } else {
+                ProfileModeDot(profile.displayMode)
+            }
             Column(modifier = Modifier.weight(1f)) {
                 if (renaming) {
                     RenameField(profile, onRename, onRenameDone)
@@ -360,7 +399,10 @@ private fun ProfileListRow(
                 )
             }
             Spacer(Modifier.width(2.dp))
-            ProfileModeBadge(profile.displayMode)
+            when {
+                !linked -> ProfileModeBadge(profile.displayMode)
+                profile.overrides.isNotEmpty() -> ChangesChip(profile.overrides.size)
+            }
         }
     }
 }

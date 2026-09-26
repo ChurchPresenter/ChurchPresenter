@@ -56,12 +56,14 @@ internal fun TextLookRows(
     autoFitScope: (@Composable () -> Unit)? = null,
     extraBasic: @Composable () -> Unit = {},
     extraAdvanced: @Composable () -> Unit = {},
+    /** Where each row's value is stored, for a linked profile to mark it -- see [probeTextLookPaths]. */
+    paths: TextLookPaths = TextLookPaths.NONE,
 ) {
     val autoFitOn = look.autoFit == true
-    SettingsRow(stringResource(Res.string.profile_text_font)) {
+    SettingsRow(stringResource(Res.string.profile_text_font), paths = paths[TextLookField.FONT]) {
         RowFont(look.fontType, fonts) { onChange(look.copy(fontType = it)) }
     }
-    SettingsRow(stringResource(Res.string.profile_text_size)) {
+    SettingsRow(stringResource(Res.string.profile_text_size), paths = paths[TextLookField.SIZE]) {
         RowStepper(
             value = look.fontSize,
             onValueChange = { onChange(look.copy(fontSize = it)) },
@@ -77,15 +79,16 @@ internal fun TextLookRows(
             autoFitOn,
             { onChange(look.copy(autoFit = it)) },
             sub = stringResource(Res.string.profile_text_autofit_sub),
+            paths = paths[TextLookField.AUTO_FIT],
         )
         if (autoFitOn && autoFitScope != null) {
             SettingsRow(stringResource(Res.string.profile_text_autofit_scope)) { autoFitScope() }
         }
     }
-    SettingsRow(stringResource(Res.string.profile_text_color)) {
+    SettingsRow(stringResource(Res.string.profile_text_color), paths = paths[TextLookField.COLOR]) {
         RowColor(look.color, { onChange(look.copy(color = it)) })
     }
-    SettingsRow(stringResource(Res.string.profile_text_style)) {
+    SettingsRow(stringResource(Res.string.profile_text_style), paths = paths[TextLookField.STYLE]) {
         TextStyleButtons(
             bold = look.bold,
             italic = look.italic,
@@ -101,7 +104,7 @@ internal fun TextLookRows(
             buttonSize = STYLE_BUTTON,
         )
     }
-    SettingsRow(stringResource(Res.string.profile_text_alignment)) {
+    SettingsRow(stringResource(Res.string.profile_text_alignment), paths = paths[TextLookField.ALIGNMENT]) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.LEFT, stringResource(Res.string.left)),
@@ -113,19 +116,27 @@ internal fun TextLookRows(
         )
     }
     extraBasic()
-    AdvancedTextRows(look, onChange)
+    AdvancedTextRows(look, onChange, paths)
     extraAdvanced()
 }
 
 /** The Text group's Advanced rows: chord colour, letter case, spacing, outline, highlight, shadow. */
 @Composable
-private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit) {
+private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths: TextLookPaths) {
     look.chordColor?.let { chord ->
-        SettingsRow(stringResource(Res.string.profile_text_chord_color), advanced = true) {
+        SettingsRow(
+            stringResource(Res.string.profile_text_chord_color),
+            advanced = true,
+            paths = paths[TextLookField.CHORD_COLOR],
+        ) {
             RowColor(chord, { onChange(look.copy(chordColor = it)) })
         }
     }
-    SettingsRow(stringResource(Res.string.profile_text_letter_case), advanced = true) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_letter_case),
+        advanced = true,
+        paths = paths[TextLookField.TRANSFORM],
+    ) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.TEXT_TRANSFORM_NONE, stringResource(Res.string.profile_text_as_typed)),
@@ -147,16 +158,32 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit) {
         )
     }
     val px = stringResource(Res.string.pixels_short)
-    SettingsRow(stringResource(Res.string.bible_letter_spacing), advanced = true) {
+    SettingsRow(
+        stringResource(Res.string.bible_letter_spacing),
+        advanced = true,
+        paths = paths[TextLookField.LETTER_SPACING],
+    ) {
         RowStepper(look.letterSpacing, { onChange(look.copy(letterSpacing = it)) }, LETTER_SPACING_RANGE, unit = px)
     }
-    SettingsRow(stringResource(Res.string.bible_word_spacing), advanced = true) {
+    SettingsRow(
+        stringResource(Res.string.bible_word_spacing),
+        advanced = true,
+        paths = paths[TextLookField.WORD_SPACING],
+    ) {
         RowStepper(look.wordSpacing, { onChange(look.copy(wordSpacing = it)) }, WORD_SPACING_RANGE, unit = px)
     }
-    SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_outline),
+        advanced = true,
+        paths = paths[TextLookField.OUTLINE],
+    ) {
         TextOutlineButton(look.outline, { onChange(look.copy(outline = it)) }, STYLE_BUTTON)
     }
-    SettingsRow(stringResource(Res.string.profile_text_highlight), advanced = true) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_highlight),
+        advanced = true,
+        paths = paths[TextLookField.BACKDROP],
+    ) {
         TextBackdropButton(look.backdrop, { onChange(look.copy(backdrop = it)) }, STYLE_BUTTON)
     }
     SettingsSwitchRow(
@@ -164,6 +191,7 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit) {
         look.shadow,
         { onChange(look.copy(shadow = it)) },
         advanced = true,
+        paths = paths[TextLookField.SHADOW] + paths[TextLookField.SHADOW_DETAIL],
     )
     if (look.shadow) {
         SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.profile_text_shadow)) {

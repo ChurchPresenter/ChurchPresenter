@@ -25,9 +25,6 @@ internal fun dropIndexFor(
     return gap.takeUnless { it == from || it == from + 1 }
 }
 
-/** Where a row taken from [from] lands for gap [gap], counted in the list without it. */
-internal fun landingIndex(from: Int, gap: Int): Int = if (gap > from) gap - 1 else gap
-
 /** The y the landing line is drawn at for [gap]: the top of the row below it, or the last row's bottom. */
 internal fun dropLineTop(
     profiles: List<OutputProfile>,

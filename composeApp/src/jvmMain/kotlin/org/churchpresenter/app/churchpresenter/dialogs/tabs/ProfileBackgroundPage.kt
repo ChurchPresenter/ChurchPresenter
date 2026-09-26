@@ -34,7 +34,7 @@ internal fun ProfileBackgroundPage(
     val scope = if (profile.isLowerThird) BackgroundScope.DEFAULT_LOWER_THIRD else BackgroundScope.DEFAULT
     val owned = scope.name in profile.backgroundOverrides
     val backgrounds = draft.backgroundSettings
-    SettingsGroup(stringResource(Res.string.profile_bg_default_group)) {
+    SettingsGroup(stringResource(Res.string.profile_bg_default_group), paths = scope.surfacePaths()) {
         SettingsRow(
             stringResource(Res.string.profile_bg_row),
             sub = if (owned) {

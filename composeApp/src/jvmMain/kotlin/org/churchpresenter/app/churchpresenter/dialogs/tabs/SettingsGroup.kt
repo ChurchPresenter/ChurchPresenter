@@ -71,10 +71,13 @@ internal fun SettingsGroup(
     action: (@Composable RowScope.() -> Unit)? = null,
     header: (@Composable () -> Unit)? = null,
     footer: (@Composable () -> Unit)? = null,
+    /** The settings the group edits: on a linked profile its caption offers to revert them instead. */
+    paths: List<String> = emptyList(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (advanced && LocalSettingsDetail.current == SettingsDetail.BASIC) return
     val palette = profilesPalette()
+    val shownAction = linkedGroupAction(LocalProfileLink.current, paths, action)
     val radius = CARD_RADIUS
     val topRounded = if (header == null) radius else 0.dp
     val bottomRounded = if (footer == null) radius else 0.dp
@@ -87,7 +90,7 @@ internal fun SettingsGroup(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     GroupCaption(caption, Modifier.weight(1f))
-                    action?.invoke(this)
+                    shownAction?.invoke(this)
                 }
             },
             { header?.let { Box(Modifier.fillMaxWidth().clip(AppShape(radius, radius, 0.dp, 0.dp))) { it() } } },
@@ -199,8 +202,9 @@ internal fun GroupCaptionAction(
  * altogether -- by returning before emitting anything, which is how [SettingsGroup] learns its
  * card is empty. [searchTerms] are extra words the search should find the row by.
  *
- * [leading] sits before the label (Phase 4's override dot), and [decorate] wraps the control --
- * both for a linked profile to mark where a value comes from without every row knowing why.
+ * [paths] are the stored settings the row edits. On a linked profile they decide how it is marked:
+ * an amber dot, the master's value and Revert when the profile has made one of them its own, a
+ * dashed frame when it takes them from its master -- and, under Only changes, whether it is drawn.
  */
 @Composable
 internal fun SettingsRow(
@@ -210,10 +214,19 @@ internal fun SettingsRow(
     advanced: Boolean = false,
     searchTerms: String? = null,
     leading: (@Composable () -> Unit)? = null,
+    paths: List<String> = emptyList(),
     control: @Composable RowScope.() -> Unit,
 ) {
     if (advanced && LocalSettingsDetail.current == SettingsDetail.BASIC) return
     if (!matchesSettingsQuery(label, sub, searchTerms)) return
+    val link = LocalProfileLink.current?.takeIf { it.isLinked }
+    val own = link?.owns(paths) == true
+    if (link != null && link.onlyChanges && !own) return
+    val shownLeading: (@Composable () -> Unit)? = if (own) {
+        { OverrideDot() }
+    } else {
+        leading
+    }
     val palette = profilesPalette()
     Box(
         modifier = modifier
@@ -226,8 +239,8 @@ internal fun SettingsRow(
         LabelAndControl(
             label = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (leading != null) {
-                        leading()
+                    if (shownLeading != null) {
+                        shownLeading()
                         Spacer(Modifier.size(7.dp))
                     }
                     Column {
@@ -251,8 +264,9 @@ internal fun SettingsRow(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    content = control,
-                )
+                ) {
+                    LinkedControl(link, paths, control)
+                }
             },
         )
     }
@@ -271,6 +285,7 @@ internal fun SettingsSwitchRow(
     sub: String? = null,
     advanced: Boolean = false,
     leading: (@Composable () -> Unit)? = null,
+    paths: List<String> = emptyList(),
     /** Controls before the switch that belong to it while it is on -- auto-fit's scope. */
     extra: @Composable RowScope.() -> Unit = {},
 ) {
@@ -279,6 +294,7 @@ internal fun SettingsSwitchRow(
         sub = sub,
         advanced = advanced,
         leading = leading,
+        paths = paths,
         modifier = modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
     ) {
         extra()

@@ -30,12 +30,16 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.output_profile_delete
 import churchpresenter.composeapp.generated.resources.output_profile_delete_blocked
 import churchpresenter.composeapp.generated.resources.output_profile_delete_confirm
+import churchpresenter.composeapp.generated.resources.profile_delete_blocked_master
+import churchpresenter.composeapp.generated.resources.profile_mode_locked_sub
 import churchpresenter.composeapp.generated.resources.profile_page_not_shown
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputStyleScope
+import org.churchpresenter.settings.overrideCount
 import org.churchpresenter.settings.resolvedFor
+import org.churchpresenter.settings.withValueAt
 import org.churchpresenter.theme.components.GhostButton
 import org.jetbrains.compose.resources.stringResource
 
@@ -60,6 +64,9 @@ internal fun ProfileEditor(
     onDuplicate: () -> Unit,
     onRequestDelete: () -> Unit,
     onIdentify: () -> Unit,
+    /** Gives the values under these paths back to the profile's master. */
+    onRevert: (Collection<String>) -> Unit,
+    linkActions: ProfileLinkActions,
     modifier: Modifier = Modifier,
 ) {
     // Forgotten when the display mode changes: a stage monitor's pages are not a full screen's.
@@ -72,6 +79,7 @@ internal fun ProfileEditor(
     var sampleSlot by remember { mutableStateOf(PreviewSampleSlot.MEDIUM) }
     var backgroundMode by remember { mutableStateOf(PreviewBackgroundMode.ACTUAL) }
     var query by remember { mutableStateOf("") }
+    var onlyChanges by remember(profile.id) { mutableStateOf(false) }
 
     // A page the profile's mode no longer offers -- the stage layout after switching to a full
     // screen -- falls back to General rather than drawing nothing.
@@ -96,80 +104,109 @@ internal fun ProfileEditor(
     val searchIndex = profileSearchIndex(profile)
     val detail = if (settings.profilesAdvanced) SettingsDetail.ADVANCED else SettingsDetail.BASIC
     val scope = if (profile.isLowerThird) OutputStyleScope.LOWER_THIRD else OutputStyleScope.FULL_SCREEN
+    val prefixes = shownPage.pathPrefixes()
+    val link = settings.projectionSettings.linkOf(profile, onlyChanges && prefixes.isNotEmpty(), onRevert)
 
-    Row(modifier = modifier) {
-        ProfileSectionNav(
-            profile = profile,
-            selected = shownPage,
-            onSelect = onPageChange,
-            query = query,
-            onQueryChange = { query = it },
-            pageMatches = { p -> searchIndex[p].orEmpty().contains(query.trim(), ignoreCase = true) },
-        )
-        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        ProfileSettingsColumn(
-            header = {
-                ProfilePageHeader(
-                    profile = profile,
-                    page = shownPage,
-                    usedBy = usedBy,
-                    detail = detail,
-                    onDetailChange = { d ->
-                        onSettingsChange { it.copy(profilesAdvanced = d == SettingsDetail.ADVANCED) }
-                    },
-                    onAssignOutput = { onPageChange(ProfilePage.Outputs) },
-                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp, bottom = 4.dp),
-                )
-            },
-            detail = if (shownPage.hasDetailSwitch) detail else SettingsDetail.ADVANCED,
-            query = query,
-            scope = scope,
-            // The dictionary form is still the tab it was, and scrolls itself.
-            selfScrolling = pane == CustomizePane.DICTIONARY,
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-        ) {
-            // Keyed on the page and the profile: one page's fields must never hand their typing to
-            // the same slot of the next.
-            key(profile.id, shownPage) {
-                PageBody(
-                    page = shownPage,
-                    settings = settings,
+    CompositionLocalProvider(LocalProfileLink provides link) {
+        Row(modifier = modifier) {
+            ProfileSectionNav(
+                profile = profile,
+                selected = shownPage,
+                onSelect = onPageChange,
+                query = query,
+                onQueryChange = { query = it },
+                pageMatches = { p -> searchIndex[p].orEmpty().contains(query.trim(), ignoreCase = true) },
+                badge = { p -> LinkNavBadge(link, p) },
+            )
+            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            ProfileSettingsColumn(
+                header = { EditorHeader(link, shownPage, usedBy, detail, onSettingsChange, onPageChange) },
+                detail = if (shownPage.hasDetailSwitch) detail else SettingsDetail.ADVANCED,
+                query = query,
+                scope = scope,
+                // The dictionary form is still the tab it was, and scrolls itself.
+                selfScrolling = pane == CustomizePane.DICTIONARY,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                // Keyed on the page and the profile: one page's fields must never hand their typing to
+                // the same slot of the next.
+                key(profile.id, shownPage) {
+                    LinkBanner(link, prefixes, linkActions, onOnlyChanges = { onlyChanges = it })
+                    PageBody(
+                        page = shownPage,
+                        settings = settings,
+                        draft = resolved,
+                        profile = profile,
+                        element = element,
+                        onElementChange = { pickedElement = it },
+                        translationIndex = translationIndex,
+                        onTranslationChange = { translationIndex = it },
+                        onDraftSettingsChange = onDraftSettingsChange,
+                        onSettingsChange = onSettingsChange,
+                        onProfileChange = onProfileChange,
+                        onRename = onRename,
+                        onDuplicate = onDuplicate,
+                        onRequestDelete = onRequestDelete,
+                        onIdentify = onIdentify,
+                        onOpenPage = onPageChange,
+                        linkActions = linkActions,
+                    )
+                }
+            }
+            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            CompositionLocalProvider(LocalOutputStyleScope provides scope) {
+                ProfilePreviewColumn(
+                    pane = previewPane,
+                    pageLabel = previewPane?.navLabel() ?: shownPage.label(),
+                    element = element,
                     draft = resolved,
                     profile = profile,
-                    element = element,
-                    onElementChange = { pickedElement = it },
-                    translationIndex = translationIndex,
-                    onTranslationChange = { translationIndex = it },
-                    onDraftSettingsChange = onDraftSettingsChange,
-                    onSettingsChange = onSettingsChange,
-                    onProfileChange = onProfileChange,
-                    onRename = onRename,
-                    onDuplicate = onDuplicate,
-                    onRequestDelete = onRequestDelete,
-                    onIdentify = onIdentify,
-                    onOpenPage = onPageChange,
+                    usedBy = usedBy,
+                    onProfileFieldChange = onProfileChange,
+                    slot = sampleSlot,
+                    onSlotChange = { sampleSlot = it },
+                    backgroundMode = backgroundMode,
+                    onBackgroundModeChange = { backgroundMode = it },
+                    onOpenOutputs = { onPageChange(ProfilePage.Outputs) },
+                    contextCard = {
+                        LinkContextCard(link, linkActions, onPageChange) { path, value ->
+                            onProfileChange(profile.withValueAt(path, value))
+                        }
+                    },
                 )
             }
         }
-        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        CompositionLocalProvider(LocalOutputStyleScope provides scope) {
-            ProfilePreviewColumn(
-                pane = previewPane,
-                pageLabel = previewPane?.navLabel() ?: shownPage.label(),
-                element = element,
-                draft = resolved,
-                profile = profile,
-                usedBy = usedBy,
-                onProfileFieldChange = onProfileChange,
-                slot = sampleSlot,
-                onSlotChange = { sampleSlot = it },
-                backgroundMode = backgroundMode,
-                onBackgroundModeChange = { backgroundMode = it },
-                onOpenOutputs = { onPageChange(ProfilePage.Outputs) },
-                contextCard = { StandaloneContextCard(onOpenGeneral = { onPageChange(ProfilePage.General) }) },
-            )
-        }
     }
+}
+
+/** The settings column's header, with Basic / Advanced written straight to the document. */
+@Composable
+private fun EditorHeader(
+    link: ProfileLink,
+    page: ProfilePage,
+    usedBy: List<String>,
+    detail: SettingsDetail,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onPageChange: (ProfilePage) -> Unit,
+) {
+    ProfilePageHeader(
+        profile = link.profile,
+        page = page,
+        usedBy = usedBy,
+        detail = detail,
+        onDetailChange = { d -> onSettingsChange { it.copy(profilesAdvanced = d == SettingsDetail.ADVANCED) } },
+        onAssignOutput = { onPageChange(ProfilePage.Outputs) },
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp, bottom = 4.dp),
+        linkState = { LinkHeaderState(link) },
+    )
+}
+
+/** How many of [page]'s settings a linked profile has changed, beside the page's name. */
+@Composable
+private fun LinkNavBadge(link: ProfileLink, page: ProfilePage) {
+    val prefixes = page.pathPrefixes()
+    val count = if (link.isLinked && prefixes.isNotEmpty()) overrideCount(link.profile, prefixes) else 0
+    if (count > 0) ChangesChip(count, short = true)
 }
 
 /**
@@ -231,15 +268,18 @@ private fun ColumnScope.PageBody(
     onRequestDelete: () -> Unit,
     onIdentify: () -> Unit,
     onOpenPage: (ProfilePage) -> Unit,
+    linkActions: ProfileLinkActions,
 ) {
     if (!page.isShownBy(profile)) NotShownNote(page)
     when (page) {
-        ProfilePage.General -> ProfileGeneralPage(
+        ProfilePage.General -> GeneralPageWithLinks(
+            settings = settings,
             profile = profile,
             onProfileChange = onProfileChange,
             onRename = onRename,
             onDuplicate = onDuplicate,
             onRequestDelete = onRequestDelete,
+            linkActions = linkActions,
         )
         ProfilePage.Outputs -> ProfileOutputsPage(
             profile = profile,
@@ -282,6 +322,38 @@ private fun ColumnScope.PageBody(
             else -> ProfileFormPage(page.pane, draft, onDraftSettingsChange)
         }
     }
+}
+
+/** General, with the profile's link: its Linking card, Create linked profile, and what the link locks. */
+@Composable
+private fun GeneralPageWithLinks(
+    settings: AppSettings,
+    profile: OutputProfile,
+    onProfileChange: (OutputProfile) -> Unit,
+    onRename: (String) -> Unit,
+    onDuplicate: () -> Unit,
+    onRequestDelete: () -> Unit,
+    linkActions: ProfileLinkActions,
+) {
+    val link = LocalProfileLink.current ?: return
+    val master = link.master
+    val candidates = settings.projectionSettings.outputProfiles.filter { it.parentId == null && it.id != profile.id }
+    ProfileGeneralPage(
+        profile = profile,
+        onProfileChange = onProfileChange,
+        onRename = onRename,
+        onDuplicate = onDuplicate,
+        onRequestDelete = onRequestDelete,
+        modeLocked = master != null,
+        modeSub = master?.let { stringResource(Res.string.profile_mode_locked_sub, it.displayName()) },
+        extraGroups = { LinkingGroup(link, candidates, linkActions) },
+        extraActions = { if (master == null) CreateLinkedAction(linkActions.onCreateLinked) },
+        deleteBlockedNote = if (link.followers.isNotEmpty()) {
+            stringResource(Res.string.profile_delete_blocked_master)
+        } else {
+            null
+        },
+    )
 }
 
 /** At the top of a page whose content the profile does not show. */

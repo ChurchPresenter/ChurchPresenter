@@ -74,6 +74,15 @@ internal fun ResetAction(changed: Boolean, onReset: () -> Unit): (@Composable Ro
 /** The four margins, the way a page's margin fields are read: top, bottom, left, right. */
 internal data class Margins(val top: Int, val bottom: Int, val left: Int, val right: Int)
 
+/** Which stored settings the Position group's rows write, for a linked profile to mark them. */
+internal data class PositionPaths(
+    val vertical: List<String> = emptyList(),
+    val margins: List<String> = emptyList(),
+    val region: List<String> = emptyList(),
+) {
+    val all: List<String> get() = vertical + margins + region
+}
+
 /**
  * POSITION ON SCREEN: where the block sits top to bottom and how far in from each edge, then --
  * Advanced, and on a full screen only -- the narrower region the content can be confined to.
@@ -91,10 +100,11 @@ internal fun PositionGroup(
     onRegion: (ContentRegion) -> Unit,
     reset: (@Composable RowScope.() -> Unit)?,
     extraAdvanced: @Composable () -> Unit = {},
+    paths: PositionPaths = PositionPaths(),
 ) {
-    SettingsGroup(stringResource(Res.string.profile_group_position), action = reset) {
+    SettingsGroup(stringResource(Res.string.profile_group_position), action = reset, paths = paths.all) {
         if (verticalAlignment != null) {
-            SettingsRow(stringResource(Res.string.profile_vertical_alignment)) {
+            SettingsRow(stringResource(Res.string.profile_vertical_alignment), paths = paths.vertical) {
                 RowSegmented(
                     options = listOf(
                         RowOption(Constants.TOP, stringResource(Res.string.top)),
@@ -106,12 +116,12 @@ internal fun PositionGroup(
                 )
             }
         }
-        SettingsRow(stringResource(Res.string.profile_margins)) {
+        SettingsRow(stringResource(Res.string.profile_margins), paths = paths.margins) {
             MarginFields(margins, onMargins)
         }
         if (region != null) {
             val percent = stringResource(Res.string.percent_suffix)
-            SettingsRow(stringResource(Res.string.profile_content_width), advanced = true) {
+            SettingsRow(stringResource(Res.string.profile_content_width), advanced = true, paths = paths.region) {
                 RowStepper(
                     region.widthPercent,
                     { onRegion(region.copy(widthPercent = it)) },
@@ -120,7 +130,7 @@ internal fun PositionGroup(
                     unit = percent,
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_content_align), advanced = true) {
+            SettingsRow(stringResource(Res.string.profile_content_align), advanced = true, paths = paths.region) {
                 RowSegmented(
                     options = listOf(
                         RowOption(ContentRegion.OFFSET_RANGE.first, stringResource(Res.string.left)),
@@ -131,7 +141,7 @@ internal fun PositionGroup(
                     onSelect = { onRegion(region.copy(xOffsetPercent = it)) },
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_x_offset), advanced = true) {
+            SettingsRow(stringResource(Res.string.profile_x_offset), advanced = true, paths = paths.region) {
                 RowStepper(
                     region.xOffsetPercent,
                     { onRegion(region.copy(xOffsetPercent = it)) },
@@ -139,7 +149,7 @@ internal fun PositionGroup(
                     unit = percent,
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_y_offset), advanced = true) {
+            SettingsRow(stringResource(Res.string.profile_y_offset), advanced = true, paths = paths.region) {
                 RowStepper(
                     region.yOffsetPercent,
                     { onRegion(region.copy(yOffsetPercent = it)) },
@@ -204,11 +214,13 @@ internal fun ElementPlacementRows(
     onChange: (ElementOffset?) -> Unit,
     verticalOnly: Boolean = false,
     tagPrefix: String,
+    paths: List<String> = emptyList(),
 ) {
     SettingsRow(
         stringResource(Res.string.profile_place_freely),
         sub = stringResource(Res.string.profile_place_freely_sub),
         advanced = true,
+        paths = paths,
     ) {
         if (offset != null) {
             val percent = stringResource(Res.string.percent_suffix)
@@ -252,11 +264,18 @@ internal fun TransitionGroup(
     onCrossfade: (Boolean) -> Unit,
     onDuration: (Float) -> Unit,
     reset: (@Composable RowScope.() -> Unit)?,
+    /** The settings object the four live in -- `bibleSettings`, `songSettings`. */
+    prefix: String? = null,
 ) {
-    SettingsGroup(stringResource(Res.string.profile_group_transition), action = reset) {
-        SettingsSwitchRow(stringResource(Res.string.profile_fade_in), fadeIn, onFadeIn)
-        SettingsSwitchRow(stringResource(Res.string.profile_fade_out), fadeOut, onFadeOut)
-        SettingsRow(stringResource(Res.string.profile_duration)) {
+    val path = { field: String -> listOfNotNull(prefix?.let { "$it.$field" }) }
+    SettingsGroup(
+        stringResource(Res.string.profile_group_transition),
+        action = reset,
+        paths = listOf("fadeIn", "fadeOut", "crossfade", "transitionDuration").flatMap(path),
+    ) {
+        SettingsSwitchRow(stringResource(Res.string.profile_fade_in), fadeIn, onFadeIn, paths = path("fadeIn"))
+        SettingsSwitchRow(stringResource(Res.string.profile_fade_out), fadeOut, onFadeOut, paths = path("fadeOut"))
+        SettingsRow(stringResource(Res.string.profile_duration), paths = path("transitionDuration")) {
             RowStepper(
                 durationMs.toInt(),
                 { onDuration(it.toFloat()) },
@@ -267,7 +286,13 @@ internal fun TransitionGroup(
             )
         }
         if (crossfade != null) {
-            SettingsSwitchRow(stringResource(Res.string.profile_crossfade), crossfade, onCrossfade, advanced = true)
+            SettingsSwitchRow(
+                stringResource(Res.string.profile_crossfade),
+                crossfade,
+                onCrossfade,
+                advanced = true,
+                paths = path("crossfade"),
+            )
         }
     }
 }
@@ -289,14 +314,18 @@ internal fun BandGroup(
     onProfileChange: (OutputProfile) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     reset: (@Composable RowScope.() -> Unit)?,
+    /** The settings object the band's height lives in -- `bibleSettings`, `songSettings`. */
+    prefix: String? = null,
 ) {
     val backgrounds = draft.backgroundSettings
     val config = backgrounds.configFor(scope)
     val animated = config.backgroundType == Constants.BACKGROUND_LOTTIE
-    SettingsGroup(stringResource(Res.string.profile_group_band), action = reset) {
+    val heightPaths = listOfNotNull(prefix?.let { "$it.lowerThirdHeightPercent" })
+    SettingsGroup(stringResource(Res.string.profile_group_band), action = reset, paths = heightPaths) {
         SettingsRow(
             stringResource(Res.string.profile_band_height),
             sub = stringResource(Res.string.profile_band_height_sub),
+            paths = heightPaths,
         ) {
             RowStepper(
                 heightPercent,

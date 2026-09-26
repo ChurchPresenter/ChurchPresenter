@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
 import churchpresenter.composeapp.generated.resources.customize_bible
@@ -116,10 +117,28 @@ private class BibleEdit(
      * keeps everything else it had of its own.
      */
     fun writeStyle(edited: BibleElementStyle, of: BibleStyleElement = styleElement) {
+        onSettingsChange { s -> s.copy(bibleSettings = styled(s.bibleSettings, edited, of)) }
+    }
+
+    /** [bible] with [edited] written the way [writeStyle] writes it. */
+    fun styled(bible: BibleSettings, edited: BibleElementStyle, of: BibleStyleElement = styleElement): BibleSettings {
         val before = shown.elementStyle(of, target)
-        updateEntry {
-            val next = if (all) it.elementStyle(of, target).withChangesFrom(before, edited) else edited
-            it.withElementStyle(of, target, next)
+        val write = { t: BibleTranslationSettings ->
+            val next = if (all) t.elementStyle(of, target).withChangesFrom(before, edited) else edited
+            t.withElementStyle(of, target, next)
+        }
+        return if (all) bible.updateEveryTranslation(write) else bible.updateTranslation(index, write)
+    }
+
+    /** Where the Text group's rows store their values, on a linked profile; none elsewhere. */
+    @Composable
+    fun lookPaths(): TextLookPaths {
+        val link = LocalProfileLink.current?.takeIf { it.isLinked } ?: return TextLookPaths.NONE
+        val base = link.profile.copy(bibleSettings = bs)
+        return remember(link.profile.id, index, styleElement, target, stack.map { it.fileName }) {
+            probeTextLookPaths(base, style.toLook()) { p, look ->
+                p.copy(bibleSettings = styled(p.bibleSettings, style.withLook(look)))
+            }
         }
     }
 }
@@ -134,8 +153,10 @@ private fun BibleTextGroup(
 ) {
     val style = edit.style
     val defaults = defaultElementStyle(edit.styleElement, edit.target)
+    val lookPaths = edit.lookPaths()
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
+        paths = lookPaths.all,
         action = ResetAction(style.copy(offset = null) != defaults.copy(offset = null)) {
             edit.writeStyle(defaults.copy(offset = style.offset))
         },
@@ -168,6 +189,7 @@ private fun BibleTextGroup(
                 look = style.toLook(),
                 onChange = { look -> edit.writeStyle(style.withLook(look)) },
                 fonts = rememberSystemFonts(),
+                paths = lookPaths,
                 extraBasic = {
                     if (edit.styleElement == BibleStyleElement.REFERENCE) {
                         SettingsSwitchRow(
@@ -194,6 +216,11 @@ private fun BiblePlacementGroups(
     val bs = edit.bs
     val d = BibleSettings()
     PositionGroup(
+        paths = PositionPaths(
+            vertical = listOf("bibleSettings.verticalAlignment"),
+            margins = listOf("marginTop", "marginBottom", "marginLeft", "marginRight").map { "bibleSettings.$it" },
+            region = listOf("bibleSettings.contentRegion"),
+        ),
         verticalAlignment = bs.verticalAlignment,
         onVerticalAlignment = { v -> edit.updateBible { it.copy(verticalAlignment = v) } },
         margins = Margins(bs.marginTop, bs.marginBottom, bs.marginLeft, bs.marginRight),
@@ -233,6 +260,7 @@ private fun BiblePlacementGroups(
     )
     if (edit.lowerThird) {
         BandGroup(
+            prefix = "bibleSettings",
             scope = BackgroundScope.BIBLE_LOWER_THIRD,
             heightPercent = bs.lowerThirdHeightPercent,
             onHeight = { v -> edit.updateBible { it.copy(lowerThirdHeightPercent = v) } },
@@ -246,6 +274,7 @@ private fun BiblePlacementGroups(
         )
     }
     TransitionGroup(
+        prefix = "bibleSettings",
         fadeIn = bs.fadeIn,
         fadeOut = bs.fadeOut,
         crossfade = bs.crossfade,
@@ -287,6 +316,12 @@ private fun bibleTargets(stack: List<BibleTranslationSettings>): List<RowOption<
     }
 
 private val SPACING_RANGE = -20..160
+
+/** Everything the Translations group writes. */
+private val TRANSLATIONS_PATHS = listOf(
+    "bilingualLayout", "bilingualLayoutLowerThird", "multiTranslationDivider", "multiTranslationSpacing",
+    "splitLongVerses", "longVerseWordCount",
+).map { "bibleSettings.$it" }
 private const val SPACING_STEP = 4
 
 /**
@@ -310,6 +345,7 @@ private fun TranslationsGroup(
     val d = BibleSettings()
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_translations),
+        paths = TRANSLATIONS_PATHS,
         action = ResetAction(
             bs.bilingualLayout != d.bilingualLayout || bs.bilingualLayoutLowerThird != d.bilingualLayoutLowerThird ||
                 bs.multiTranslationDivider != d.multiTranslationDivider ||
@@ -328,7 +364,12 @@ private fun TranslationsGroup(
         },
     ) {
         if (parallel) {
-            SettingsRow(stringResource(Res.string.profile_layout)) {
+            SettingsRow(
+                stringResource(Res.string.profile_layout),
+                paths = listOf(
+                    if (lowerThird) "bibleSettings.bilingualLayoutLowerThird" else "bibleSettings.bilingualLayout",
+                ),
+            ) {
                 RowSegmented(
                     options = bilingualLayoutRowOptions(),
                     selected = if (lowerThird) bs.bilingualLayoutLowerThird else bs.bilingualLayout,
@@ -358,8 +399,13 @@ private fun TranslationsGroup(
             bs.multiTranslationDivider,
             { v -> updateBible { it.copy(multiTranslationDivider = v) } },
             advanced = true,
+            paths = listOf("bibleSettings.multiTranslationDivider"),
         )
-        SettingsRow(stringResource(Res.string.profile_space_between_translations), advanced = true) {
+        SettingsRow(
+            stringResource(Res.string.profile_space_between_translations),
+            advanced = true,
+            paths = listOf("bibleSettings.multiTranslationSpacing"),
+        ) {
             RowStepper(
                 bs.multiTranslationSpacing,
                 { v -> updateBible { it.copy(multiTranslationSpacing = v) } },
@@ -374,6 +420,7 @@ private fun TranslationsGroup(
             { v -> updateBible { it.copy(splitLongVerses = v) } },
             sub = if (bs.splitLongVerses) stringResource(Res.string.profile_split_words) else null,
             advanced = true,
+            paths = listOf("bibleSettings.splitLongVerses", "bibleSettings.longVerseWordCount"),
             extra = {
                 if (bs.splitLongVerses) {
                     RowStepper(

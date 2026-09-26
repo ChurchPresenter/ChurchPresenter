@@ -80,8 +80,8 @@ internal fun ProfileSongsPage(
     )
     SongTextGroup(draft, profile, element, onElementChange, updateSong, onSettingsChange, onProfileChange)
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
-        SettingsGroup(stringResource(Res.string.profile_group_languages)) {
-            SettingsRow(stringResource(Res.string.profile_layout)) {
+        SettingsGroup(stringResource(Res.string.profile_group_languages), paths = SONG_LAYOUT_PATHS) {
+            SettingsRow(stringResource(Res.string.profile_layout), paths = SONG_LAYOUT_PATHS) {
                 RowSegmented(
                     options = bilingualLayoutRowOptions(),
                     selected = song.bilingualLayout,
@@ -128,8 +128,10 @@ private fun SongTextGroup(
 
     val style = song.elementStyle(styleElement, target, editingLanguage)
     val elements = styleElementsFor(CustomizePane.SONGS, profile)
+    val lookPaths = songLookPaths(song, styleElement, target, editingLanguage)
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
+        paths = lookPaths.all,
         action = ResetAction(style != defaultSongElementStyle(styleElement, target)) {
             updateSong { it.withElementReset(styleElement, target, editingLanguage) }
         },
@@ -148,15 +150,7 @@ private fun SongTextGroup(
             )
         },
     ) {
-        if (titleSlideView) {
-            SettingsRow(stringResource(Res.string.profile_slide_element)) {
-                RowSegmented(
-                    options = TITLE_SLIDE_ELEMENTS.map { RowOption(it, it.label()) },
-                    selected = slideElement,
-                    onSelect = { slideElement = it },
-                )
-            }
-        }
+        if (titleSlideView) SlideElementRow(slideElement) { slideElement = it }
         key(styleElement, editingLanguage) {
             TextLookRows(
                 look = style.toLook(styleElement),
@@ -164,6 +158,7 @@ private fun SongTextGroup(
                     updateSong { it.withElementStyle(styleElement, target, editingLanguage, style.withLook(look)) }
                 },
                 fonts = rememberSystemFonts(),
+                paths = lookPaths,
                 autoFitScope = if (!titleSlideView && styleElement.hasAutoFit) {
                     {
                         AutoFitScopeControl(
@@ -217,6 +212,18 @@ private fun SongTextGroup(
     }
 }
 
+/** Which element of the title slide the Text rows edit. */
+@Composable
+private fun SlideElementRow(selected: SongStyleElement, onSelect: (SongStyleElement) -> Unit) {
+    SettingsRow(stringResource(Res.string.profile_slide_element)) {
+        RowSegmented(
+            options = TITLE_SLIDE_ELEMENTS.map { RowOption(it, it.label()) },
+            selected = selected,
+            onSelect = onSelect,
+        )
+    }
+}
+
 /** Where the lyrics sit, the band, and the fades -- the groups the Bible page shares. */
 @Composable
 private fun SongPlacementGroups(
@@ -231,6 +238,11 @@ private fun SongPlacementGroups(
     val song = draft.songSettings
     val d = SongSettings()
     PositionGroup(
+        paths = PositionPaths(
+            vertical = listOf("songSettings.lyricsAlignment"),
+            margins = listOf("marginTop", "marginBottom", "marginLeft", "marginRight").map { "songSettings.$it" },
+            region = listOf("songSettings.layoutExtras.contentRegion"),
+        ),
         verticalAlignment = song.lyricsAlignment,
         onVerticalAlignment = { v -> updateSong { it.copy(lyricsAlignment = v) } },
         margins = Margins(song.marginTop, song.marginBottom, song.marginLeft, song.marginRight),
@@ -268,6 +280,7 @@ private fun SongPlacementGroups(
                     onChange = { v -> updateSong { it.copy(layoutExtras = it.layoutExtras.copy(lyricsOffset = v)) } },
                     verticalOnly = true,
                     tagPrefix = LYRICS_OFFSET_TAG,
+                    paths = listOf("songSettings.layoutExtras.lyricsOffset"),
                 )
             }
         },
@@ -275,6 +288,7 @@ private fun SongPlacementGroups(
 
     if (lowerThird) {
         BandGroup(
+            prefix = "songSettings",
             scope = BackgroundScope.SONG_LOWER_THIRD,
             heightPercent = song.lowerThirdHeightPercent,
             onHeight = { v -> updateSong { it.copy(lowerThirdHeightPercent = v) } },
@@ -289,6 +303,7 @@ private fun SongPlacementGroups(
     }
 
     TransitionGroup(
+        prefix = "songSettings",
         fadeIn = song.fadeIn,
         fadeOut = song.fadeOut,
         crossfade = song.crossfade,
@@ -322,17 +337,22 @@ private val END_MARKER_SPACING = 0..20
  */
 @Composable
 private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
-    SettingsGroup(stringResource(Res.string.profile_group_slides)) {
+    SettingsGroup(stringResource(Res.string.profile_group_slides), paths = SLIDES_PATHS) {
         SettingsSwitchRow(
             stringResource(Res.string.profile_title_slide),
             song.titleSlideEnabled,
             { v -> updateSong { it.copy(titleSlideEnabled = v) } },
             sub = stringResource(Res.string.profile_title_slide_sub),
             modifier = Modifier.testTag("song_titleSlideEnabled"),
+            paths = listOf("songSettings.titleSlideEnabled"),
         )
         // A band keeps the title slide at its own bottom whatever this says.
         if (!lowerThird && song.titleSlideEnabled) {
-            SettingsRow(stringResource(Res.string.profile_title_slide_valign), advanced = true) {
+            SettingsRow(
+                stringResource(Res.string.profile_title_slide_valign),
+                advanced = true,
+                paths = listOf("songSettings.titleSlideVerticalAlignment"),
+            ) {
                 RowSegmented(
                     options = listOf(
                         RowOption(Constants.TOP, stringResource(Res.string.top)),
@@ -348,17 +368,20 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
             stringResource(Res.string.profile_word_wrap),
             song.wordWrap,
             { v -> updateSong { it.copy(wordWrap = v) } },
+            paths = listOf("songSettings.wordWrap"),
         )
         SettingsSwitchRow(
             stringResource(Res.string.profile_repeat_chorus),
             song.autoRepeatChorus,
             { v -> updateSong { it.copy(autoRepeatChorus = v) } },
+            paths = listOf("songSettings.autoRepeatChorus"),
         )
         SettingsSwitchRow(
             stringResource(Res.string.profile_end_marker),
             song.showEndOfSongIndicator,
             { v -> updateSong { it.copy(showEndOfSongIndicator = v) } },
             advanced = true,
+            paths = listOf("songSettings.showEndOfSongIndicator", "songSettings.endOfSongIndicatorSpacing"),
             extra = {
                 if (song.showEndOfSongIndicator) {
                     RowStepper(
@@ -393,11 +416,13 @@ private fun SectionLabelRows(
         label.enabled,
         { v -> update { it.copy(enabled = v) } },
         sub = stringResource(Res.string.profile_section_label_sub),
+        paths = listOf("$SECTION_LABEL_PATH.enabled"),
     )
     if (!label.enabled) return
     SettingsRow(
         stringResource(Res.string.profile_section_label) + " · " + stringResource(Res.string.lyrics),
         advanced = true,
+        paths = listOf("$SECTION_LABEL_PATH.fontSize", "$SECTION_LABEL_PATH.color"),
     ) {
         RowStepper(
             label.fontSize,
@@ -411,6 +436,7 @@ private fun SectionLabelRows(
     SettingsRow(
         stringResource(Res.string.profile_section_label) + " · " + stringResource(Res.string.profile_text_style),
         advanced = true,
+        paths = listOf("bold", "italic", "underline", "shadow").map { "$SECTION_LABEL_PATH.$it" },
     ) {
         TextStyleButtons(
             bold = label.bold,
@@ -429,6 +455,7 @@ private fun SectionLabelRows(
             offset = label.offset,
             onChange = { v -> update { it.copy(offset = v) } },
             tagPrefix = SECTION_LABEL_OFFSET_TAG,
+            paths = listOf("$SECTION_LABEL_PATH.offset"),
         )
     }
 }
@@ -450,3 +477,34 @@ internal const val LYRICS_OFFSET_TAG = "song_lyrics_offset"
 
 /** Test handle for the section label's positioning switch. */
 internal const val SECTION_LABEL_OFFSET_TAG = "song_section_label_offset"
+
+/** Where the languages' layout is stored. */
+private val SONG_LAYOUT_PATHS = listOf("songSettings.bilingualLayout")
+
+/** Where the section label above the lyrics is stored. */
+private const val SECTION_LABEL_PATH = "songSettings.layoutExtras.sectionLabel"
+
+/** Everything the Slides group writes. */
+private val SLIDES_PATHS = listOf(
+    "songSettings.titleSlideEnabled", "songSettings.titleSlideVerticalAlignment", "songSettings.wordWrap",
+    "songSettings.autoRepeatChorus", "songSettings.showEndOfSongIndicator",
+    "songSettings.endOfSongIndicatorSpacing", SECTION_LABEL_PATH,
+)
+
+/** Where the Text group's rows store [element]'s look, on a linked profile; none elsewhere. */
+@Composable
+private fun songLookPaths(
+    song: SongSettings,
+    element: SongStyleElement,
+    target: SongStyleTarget,
+    language: SongStyleLanguage,
+): TextLookPaths {
+    val link = LocalProfileLink.current?.takeIf { it.isLinked } ?: return TextLookPaths.NONE
+    val base = link.profile.copy(songSettings = song)
+    return remember(link.profile.id, element, target, language) {
+        val style = song.elementStyle(element, target, language)
+        probeTextLookPaths(base, style.toLook(element)) { p, look ->
+            p.copy(songSettings = p.songSettings.withElementStyle(element, target, language, style.withLook(look)))
+        }
+    }
+}

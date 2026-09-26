@@ -47,6 +47,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.BackgroundSurface
+import org.churchpresenter.settings.fieldKeys
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.AppShape
 import org.jetbrains.compose.resources.stringResource
@@ -66,6 +68,10 @@ internal fun OutputProfile.withOwnSurface(
     backgroundOverrides = backgroundOverrides + scope.name,
     backgroundSettings = draft.withConfigFor(scope, config),
 )
+
+/** Where the background of [this] surface is stored on a profile. */
+internal fun BackgroundScope.surfacePaths(): List<String> =
+    BackgroundSurface.valueOf(name).fieldKeys.map { "backgroundSettings.$it" }
 
 /** Where a content surface's background comes from: the profile's default, or its own. */
 private enum class ContentBackgroundSource { PROFILE_DEFAULT, OWN }
@@ -110,6 +116,7 @@ internal fun ContentBackgroundGroup(
     }
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_background),
+        paths = scope.surfacePaths(),
         footer = {
             ComesFromStrip(
                 scope = scope,
