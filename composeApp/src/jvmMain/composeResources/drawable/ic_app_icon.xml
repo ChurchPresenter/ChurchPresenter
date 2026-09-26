@@ -11,22 +11,22 @@
         android:translateY="-3.84">
         <!-- soft dark edge so the white outline reads on light backgrounds -->
         <path android:pathData="M110 262L256 172L402 262H372V404H140V262Z M228 196V124H284V196Z M216 128L256 80L296 128Z M250 44h12v44h-12z M238 56h36v12h-36z"
-            android:fillColor="#800B0F24" android:strokeColor="#800B0F24"
+            android:fillColor="#590B1234" android:strokeColor="#590B1234"
             android:strokeWidth="42" android:strokeLineJoin="round" />
         <!-- white outline so it reads on dark taskbars -->
         <path android:pathData="M110 262L256 172L402 262H372V404H140V262Z M228 196V124H284V196Z M216 128L256 80L296 128Z M250 44h12v44h-12z M238 56h36v12h-36z"
             android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF"
             android:strokeWidth="30" android:strokeLineJoin="round" />
-        <!-- gold church -->
+        <!-- navy church -->
         <path android:pathData="M110 262L256 172L402 262H372V404H140V262Z M228 196V124H284V196Z M216 128L256 80L296 128Z"
-            android:fillColor="#FFE3A443" android:strokeColor="#FFE3A443"
+            android:fillColor="#FF1F2C62" android:strokeColor="#FF1F2C62"
             android:strokeWidth="12" android:strokeLineJoin="round" />
-        <path android:pathData="M250 44h12v44h-12z M238 56h36v12h-36z" android:fillColor="#FFE3A443" />
+        <path android:pathData="M250 44h12v44h-12z M238 56h36v12h-36z" android:fillColor="#FF1F2C62" />
         <!-- highlight along roof and spire -->
         <path android:pathData="M114 260L256 172L398 260M220 130L256 84L292 130"
-            android:strokeColor="#B3FFF8E0" android:strokeWidth="3"
+            android:strokeColor="#CCC9D4F2" android:strokeWidth="3"
             android:strokeLineJoin="round" android:strokeLineCap="round" />
-        <!-- windows and door -->
-        <path android:pathData="M176 340V294A18 18 0 0 1 212 294V340Z M300 340V294A18 18 0 0 1 336 294V340Z M234 404V336A22 22 0 0 1 278 336V404Z M246 180V160A10 10 0 0 1 266 160V180Z" android:fillColor="#FF0B0F24" />
+        <!-- lit windows and door -->
+        <path android:pathData="M176 340V294A18 18 0 0 1 212 294V340Z M300 340V294A18 18 0 0 1 336 294V340Z M234 404V336A22 22 0 0 1 278 336V404Z M246 180V160A10 10 0 0 1 266 160V180Z" android:fillColor="#FFFFD98A" />
     </group>
 </vector>
