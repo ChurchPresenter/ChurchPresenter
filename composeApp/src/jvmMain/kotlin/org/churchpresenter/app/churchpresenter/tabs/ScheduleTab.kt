@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.calendar.model.UpcomingLoad
+import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -237,6 +239,15 @@ fun ScheduleTab(
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
     onAddLabel: () -> Unit = {},
+    /** The planned service the calendar will load here by itself next -- announced under Add Files. */
+    upcomingServiceLoad: UpcomingLoad? = null,
+    /** Loads [upcomingServiceLoad] now: into a cleared Schedule, or after what is there. */
+    onLoadServiceNow: (replace: Boolean) -> Unit = {},
+    /** The planned service these rows came from, offered a save when they have changed. */
+    scheduleService: ScheduleServiceLink? = null,
+    onSaveScheduleToCalendar: () -> Unit = {},
+    /** Offers to put a Schedule built here by hand on the calendar; null where there is no calendar. */
+    onAddScheduleToCalendar: (() -> Unit)? = null,
     theme: ThemeMode = ThemeMode.SYSTEM,
     itemZoomPercent: Int = ZOOM_DEFAULT,
     onItemZoomChange: (Int) -> Unit = {},
@@ -255,6 +266,7 @@ fun ScheduleTab(
     val scope = rememberCoroutineScope()
 
     var showAutoRestoreDialog by remember { mutableStateOf(viewModel.shouldPromptAutoRestore()) }
+    var confirmLoadNow by remember { mutableStateOf(false) }
     if (showAutoRestoreDialog) {
         val savedAt = remember { viewModel.autoSaveSavedAt() }
         val timeStr = remember(savedAt) {
@@ -758,10 +770,11 @@ fun ScheduleTab(
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(10.dp),
-            horizontalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ScheduleAddFilesButton(
                 onClick = {
@@ -779,6 +792,34 @@ fun ScheduleTab(
                     }
                 }
             )
+            if (upcomingServiceLoad != null) {
+                ScheduleAutoLoadNotice(
+                    upcoming = upcomingServiceLoad,
+                    onLoadNow = {
+                        // Nothing to lose, nothing to ask.
+                        if (viewModel.scheduleItems.isEmpty()) onLoadServiceNow(true) else confirmLoadNow = true
+                    },
+                )
+                if (confirmLoadNow) {
+                    LoadServiceNowConfirm(
+                        serviceName = upcomingServiceLoad.serviceName,
+                        // Counted as the header counts them, so the two never disagree.
+                        itemCount = viewModel.scheduleItems.count { it !is ScheduleItem.LabelItem },
+                        onChoose = { replace ->
+                            confirmLoadNow = false
+                            onLoadServiceNow(replace)
+                        },
+                        onDismiss = { confirmLoadNow = false },
+                    )
+                }
+            }
+            if (scheduleService?.hasChanges == true) {
+                ScheduleSaveToCalendarNotice(service = scheduleService, onSave = onSaveScheduleToCalendar)
+            }
+            // Built here by hand rather than loaded from the calendar: offer to put it there.
+            if (onAddScheduleToCalendar != null && scheduleService == null && viewModel.scheduleItems.isNotEmpty()) {
+                ScheduleAddToCalendarNotice(onAdd = onAddScheduleToCalendar)
+            }
         }
 
         PlanningCenterImportDialog(

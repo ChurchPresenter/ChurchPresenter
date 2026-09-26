@@ -26,6 +26,9 @@
     <string name="calendar_add_service">Add service</string>
     <string name="calendar_new_service">New service</string>
     <string name="calendar_edit_service">Edit service</string>
+    <string name="calendar_service_date">Date</string>
+    <string name="calendar_template_schedule">The Schedule tab</string>
+    <string name="calendar_template_schedule_sub">%1$d rows, as they are there now</string>
     <string name="calendar_service_name">Name</string>
     <string name="calendar_service_start">Start time</string>
     <string name="calendar_service_type">Type</string>
@@ -90,6 +93,8 @@
     <string name="calendar_header_sub_one">%1$d service planned · %2$s</string>
     <string name="calendar_header_sub_other">%1$d services planned · %2$s</string>
     <string name="calendar_all_saved">All changes saved</string>
+    <string name="calendar_next_sync_in">Next sync in %1$s</string>
+    <string name="calendar_syncing">Syncing…</string>
     <string name="calendar_day_services_one">%1$d service</string>
     <string name="calendar_day_services_other">%1$d services</string>
     <string name="calendar_day_no_services">No services</string>
@@ -199,6 +204,8 @@
     <string name="calendar_cloud_sync_sub">Keeps this calendar in step with phones through the relay. Off, nothing about it leaves this computer</string>
     <string name="calendar_auto_load">Load the service automatically</string>
     <string name="calendar_auto_load_sub">Puts the run of show into the Schedule tab before its first item, clearing whatever is there</string>
+    <string name="calendar_auto_load_off">Services don’t load into the Schedule by themselves. Turn on “Load the service automatically” to have each one there before it starts.</string>
+    <string name="calendar_auto_load_turn_on">Turn on</string>
     <string name="calendar_auto_load_lead">How far ahead</string>
     <string name="calendar_auto_load_lead_sub">Minutes before the first item, from %1$d to %2$d</string>
     <string name="calendar_default_sermon">Default sermon length</string>
@@ -247,6 +254,8 @@
     <string name="calendar_cue_skipped_title">Cue skipped</string>
     <string name="calendar_cue_skipped_reason">Something else was live — fire it by hand if it should still go</string>
     <string name="calendar_cue_toast_close">Dismiss</string>
+    <string name="calendar_export_saved_title">PDF saved</string>
+    <string name="calendar_export_failed_title">Couldn’t save the PDF</string>
     <!-- The Presets tab's kind chips -->
     <string name="calendar_preset_kind_all">All</string>
     <string name="calendar_preset_kind_slides">Slideshows</string>

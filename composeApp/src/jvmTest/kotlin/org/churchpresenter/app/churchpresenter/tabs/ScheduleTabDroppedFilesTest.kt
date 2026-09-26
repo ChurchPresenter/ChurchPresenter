@@ -83,9 +83,10 @@ class ScheduleTabDroppedFilesTest {
     }
 
     @Test
-    fun `dropping one image adds the folder it lives in, not just that image`() {
+    fun `dropping one image adds the folder it lives in, opening on that image`() {
         // An operator dropping a photo means "show these photos" — a one-image slideshow would be
-        // useless, so the whole folder becomes the picture source.
+        // useless, so the whole folder becomes the picture source. But it is *this* photo they
+        // dropped, so the row opens on it rather than on the folder's first (#652).
         val photos = folder("photos", "a.jpg", "b.jpg", "c.png")
 
         drop(File(photos, "b.jpg"))
@@ -94,6 +95,8 @@ class ScheduleTabDroppedFilesTest {
         assertEquals(photos.absolutePath, item.folderPath)
         assertEquals("photos", item.folderName)
         assertEquals(3, item.imageCount, "every image in the folder is counted, not just the one")
+        assertEquals(File(photos, "b.jpg").absolutePath, item.imagePath, "and it opens on the one dropped")
+        assertEquals("b.jpg", item.displayText, "named for the picture, not the folder")
     }
 
     @Test

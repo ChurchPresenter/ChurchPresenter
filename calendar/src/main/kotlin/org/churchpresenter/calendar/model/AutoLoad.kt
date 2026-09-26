@@ -47,6 +47,38 @@ fun CalendarDocument.serviceToAutoLoad(at: LocalDateTime, lead: Int = AUTO_LOAD_
         .lastOrNull { it.isDueToLoad(at, lead) }
 }
 
+/** A planned service that will load itself later, and when: what the Schedule tab announces. */
+data class UpcomingLoad(val serviceId: String, val serviceName: String, val loadAt: LocalDateTime)
+
+/**
+ * The next planned service still to load itself after [at] -- the one whose loading window,
+ * [lead] minutes before its first row, opens soonest -- or null when nothing is planned ahead.
+ *
+ * Not only today's: [serviceToAutoLoad] loads a service on its own day, but announcing Sunday's
+ * on a Wednesday is what lets the operator load it early to rehearse. [skip] leaves out services
+ * already in hand -- loaded early -- so the one after is announced instead.
+ *
+ * Services are taken a day at a time, earliest first, so only the nearest day that has one is
+ * worked out -- a calendar planned months ahead costs no more than one planned a week ahead.
+ */
+fun CalendarDocument.nextAutoLoad(
+    at: LocalDateTime,
+    lead: Int = AUTO_LOAD_LEAD_MINUTES,
+    skip: (PlannedService) -> Boolean = { false },
+): UpcomingLoad? = services
+    .mapNotNull { service -> parseStoredDate(service.date)?.let { it to service } }
+    .filter { (date, service) -> !date.isBefore(at.toLocalDate()) && !skip(service) }
+    .groupBy({ it.first }, { it.second })
+    .toSortedMap()
+    .asSequence()
+    .firstNotNullOfOrNull { (date, onDay) ->
+        onDay.mapNotNull { service ->
+            val start = service.firstRowStart() ?: return@mapNotNull null
+            val loadAt = date.atTime(start).minusMinutes(lead.coerceAtLeast(0).toLong())
+            UpcomingLoad(service.id, service.name, loadAt).takeIf { loadAt.isAfter(at) }
+        }.minByOrNull { it.loadAt }
+    }
+
 /**
  * When the service actually begins: its first content row's clock time.
  *

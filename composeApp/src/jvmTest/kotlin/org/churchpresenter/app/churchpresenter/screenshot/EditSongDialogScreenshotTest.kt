@@ -43,6 +43,8 @@ class EditSongDialogScreenshotTest {
         tuning: SongTuning = SongTuning(),
         showTuningFields: Boolean = false,
         chordsVisible: Boolean = true,
+        /** The install's language names, and the Language name field that edits them; null hides it. */
+        languageNames: List<String>? = null,
         rootIndex: Int = 0,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
@@ -60,6 +62,8 @@ class EditSongDialogScreenshotTest {
                             showTuningFields = showTuningFields,
                             chordsVisible = chordsVisible,
                             onChordsVisibleChange = {},
+                            languageNames = languageNames.orEmpty(),
+                            onLanguageNamesChange = if (languageNames != null) ({}) else null,
                             onDismiss = {},
                             onSave = { _, _ -> },
                         )
@@ -109,6 +113,11 @@ class EditSongDialogScreenshotTest {
 
     @Test
     fun `a bilingual song on its primary pane`() = shoot("bilingual", song = bilingual())
+
+    /** The languages named for the install: the pane tabs and the Language name field carry them. */
+    @Test
+    fun `a bilingual song with named languages`() =
+        shoot("language_names", song = bilingual(), languageNames = listOf("English", "Español"))
 
     // ── Things that stop a save ─────────────────────────────────────────────────────────────────
 

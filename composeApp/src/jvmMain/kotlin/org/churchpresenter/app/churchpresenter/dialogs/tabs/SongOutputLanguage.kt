@@ -5,10 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_language_both
-import churchpresenter.composeapp.generated.resources.song_language_primary
-import churchpresenter.composeapp.generated.resources.song_language_fourth
-import churchpresenter.composeapp.generated.resources.song_language_secondary
-import churchpresenter.composeapp.generated.resources.song_language_third
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.AppSettings
@@ -117,13 +113,14 @@ internal fun SongLanguageScopeButtons(
     outputMode: String? = null,
     onOutputModeChange: ((String) -> Unit)? = null,
 ) {
+    val song = settings.songSettings
     SegmentedButton(
         items = listOf(
             SegmentedButtonItem(Constants.SONG_LANG_BOTH, stringResource(Res.string.song_language_both)),
-            SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, stringResource(Res.string.song_language_primary)),
-            SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, stringResource(Res.string.song_language_secondary)),
-            SegmentedButtonItem(Constants.SONG_LANG_THIRD, stringResource(Res.string.song_language_third)),
-            SegmentedButtonItem(Constants.SONG_LANG_FOURTH, stringResource(Res.string.song_language_fourth)),
+            SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, SongStyleLanguage.PRIMARY.nameLabel(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, SongStyleLanguage.SECONDARY.nameLabel(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_THIRD, SongStyleLanguage.THIRD.nameLabel(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_FOURTH, SongStyleLanguage.FOURTH.nameLabel(song)),
         ),
         selectedValue = outputMode ?: settings.songLanguageFor(target),
         onValueChange = { lang ->

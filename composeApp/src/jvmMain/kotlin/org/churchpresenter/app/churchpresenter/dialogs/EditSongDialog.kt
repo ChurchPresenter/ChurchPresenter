@@ -54,11 +54,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -103,6 +109,7 @@ import churchpresenter.composeapp.generated.resources.song_chords
 import churchpresenter.composeapp.generated.resources.song_chords_toggle
 import churchpresenter.composeapp.generated.resources.song_insert_section
 import churchpresenter.composeapp.generated.resources.song_insert_slide_break
+import churchpresenter.composeapp.generated.resources.song_language_name_hint
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_pane_lyrics
 import churchpresenter.composeapp.generated.resources.song_pane_secondary
@@ -114,6 +121,7 @@ import churchpresenter.composeapp.generated.resources.song_syntax
 import churchpresenter.composeapp.generated.resources.song_syntax_chord_hint
 import churchpresenter.composeapp.generated.resources.song_tempo
 import churchpresenter.composeapp.generated.resources.song_title
+import churchpresenter.composeapp.generated.resources.song_translation_label
 import churchpresenter.composeapp.generated.resources.song_translation_title
 import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.unit_bpm
@@ -129,8 +137,10 @@ import org.churchpresenter.app.churchpresenter.composables.buildPreviewSections
 import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
 import org.churchpresenter.app.churchpresenter.composables.SongStats
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.defaultSongLanguageName
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.SongBackground
@@ -178,6 +188,14 @@ fun EditSongDialog(
     onChordsVisibleChange: (Boolean) -> Unit = {},
     onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
                                   lowerThirdBackground: SongBackground) -> Unit)? = null,
+    /**
+     * What the operator calls each of the song's languages, `0` being the primary -- blank where
+     * unnamed. Install-wide rather than this song's: it is the name the profiles' song languages
+     * and the output language switch show too.
+     */
+    languageNames: List<String> = emptyList(),
+    /** Stores renamed [languageNames] on Save. Null leaves the names out of the editor. */
+    onLanguageNamesChange: ((List<String>) -> Unit)? = null,
     onDismiss: () -> Unit,
     onSave: (SongItem, SongTuning) -> Unit
 ) {
@@ -207,6 +225,8 @@ fun EditSongDialog(
             onChordsVisibleChange = onChordsVisibleChange,
             isVisible = isVisible,
             onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
+            languageNames = languageNames,
+            onLanguageNamesChange = onLanguageNamesChange,
             onDismiss = onDismiss,
             onSave = onSave
         )
@@ -310,6 +330,9 @@ internal fun EditSongContent(
     isVisible: Boolean = true,
     onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
                                   lowerThirdBackground: SongBackground) -> Unit)? = null,
+    /** What each language is called install-wide -- see [EditSongDialog]. */
+    languageNames: List<String> = emptyList(),
+    onLanguageNamesChange: ((List<String>) -> Unit)? = null,
     onDismiss: () -> Unit,
     onSave: (SongItem, SongTuning) -> Unit
 ) {
@@ -363,6 +386,10 @@ internal fun EditSongContent(
 
     // 0 is the primary; 1.. are the extra languages, in the order they are written.
     var pane by remember(isVisible, song) { mutableStateOf(0) }
+    // The install-wide language names, one per pane, edited here and stored only on Save.
+    var editedLanguageNames by remember(isVisible, song, languageNames) {
+        mutableStateOf(List(MAX_SONG_TRANSLATIONS) { languageNames.getOrElse(it) { "" } })
+    }
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
@@ -537,9 +564,15 @@ internal fun EditSongContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             PaneTabRow {
-                                PaneTab(stringResource(Res.string.song_pane_lyrics), pane == 0) { pane = 0 }
+                                val primaryName = editedLanguageNames[0].trim()
+                                    .ifBlank { stringResource(Res.string.song_pane_lyrics) }
+                                PaneTab(primaryName, pane == 0) { pane = 0 }
                                 repeat(visibleTranslations) { index ->
-                                    val paneLabel = translationPaneLabel(index, editedTranslations[index].label)
+                                    // The install-wide name first; a label the song file carries
+                                    // itself (an import's) only while the language has none.
+                                    val name = editedLanguageNames[index + 1].trim()
+                                        .ifBlank { editedTranslations[index].label }
+                                    val paneLabel = translationPaneLabel(index, name)
                                     PaneTab(paneLabel, pane == index + 1) {
                                         pane = index + 1
                                     }
@@ -585,6 +618,19 @@ internal fun EditSongContent(
                                 showChords = !showChords
                                 onChordsVisibleChange(showChords)
                             }
+                        }
+
+                        if (onLanguageNamesChange != null) {
+                            LanguageNameField(
+                                name = editedLanguageNames[pane],
+                                placeholder = defaultSongLanguageName(pane),
+                                onNameChange = { value ->
+                                    editedLanguageNames = editedLanguageNames.mapIndexed { index, old ->
+                                        if (index == pane) value else old
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 8.dp),
+                            )
                         }
 
                         // Section markers, inserted at the caret.
@@ -675,6 +721,12 @@ internal fun EditSongContent(
                             background = editedBackground,
                             lowerThirdBackground = editedLowerThirdBackground,
                         ).withTranslations(editedTranslations.map { it.toTranslation() })
+                        val names = editedLanguageNames.map { it.trim() }
+                        if (onLanguageNamesChange != null &&
+                            names != List(MAX_SONG_TRANSLATIONS) { languageNames.getOrElse(it) { "" }.trim() }
+                        ) {
+                            onLanguageNamesChange(names)
+                        }
                         onSave(
                             updatedSong,
                             SongTuning(
@@ -816,6 +868,73 @@ private fun RowScope.FieldCard(
         )
     }
 }
+
+/**
+ * The open pane's language name: a small card like the metadata ones, with a line saying the name
+ * is not this song's alone. Blank shows [placeholder], which is what an unnamed language is called.
+ */
+@Composable
+private fun LanguageNameField(
+    name: String,
+    placeholder: String,
+    onNameChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // The whole card takes the click, not just the line of text inside it: an empty field is one
+    // grey placeholder word in a box three times its height, and a click on the caption or the
+    // padding around it otherwise did nothing -- no cursor, nowhere to type.
+    val focus = remember { FocusRequester() }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .width(LANGUAGE_NAME_FIELD_WIDTH)
+                .clip(CardShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, CardShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CardShape)
+                .clickable(interactionSource = null, indication = null) { focus.requestFocus() }
+                .pointerHoverIcon(PointerIcon.Text)
+                .padding(horizontal = 11.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(1.dp),
+        ) {
+            CardLabel(stringResource(Res.string.song_translation_label))
+            BasicTextField(
+                value = name,
+                onValueChange = onNameChange,
+                singleLine = true,
+                textStyle = FieldValueStyle(),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus).testTag(LANGUAGE_NAME_FIELD_TAG),
+                decorationBox = { field ->
+                    Box {
+                        if (name.isEmpty()) {
+                            Text(
+                                text = placeholder,
+                                style = FieldValueStyle(),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        field()
+                    }
+                },
+            )
+        }
+        Text(
+            text = stringResource(Res.string.song_language_name_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+private val LANGUAGE_NAME_FIELD_WIDTH = 220.dp
+
+/** Test handle for the open pane's language-name field. */
+internal const val LANGUAGE_NAME_FIELD_TAG = "song_editor_language_name"
 
 /**
  * The song book card: the one metadata field that picks from what already exists rather than

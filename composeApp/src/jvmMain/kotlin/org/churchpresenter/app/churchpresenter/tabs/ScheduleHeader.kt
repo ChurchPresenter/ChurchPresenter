@@ -446,16 +446,12 @@ internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel)
             DroppedFileAction.MEDIA ->
                 viewModel.addMedia(file.absolutePath, file.nameWithoutExtension, "local")
             DroppedFileAction.PICTURE -> {
-
-                val parentFolder = file.parentFile
-                val imageCount = parentFolder?.listFiles()?.count { child ->
+                // The picture that was dropped, not its whole folder: a row for the folder presented
+                // the folder's first picture, whichever one was dropped (#652).
+                val imageCount = file.parentFile?.listFiles()?.count { child ->
                     child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS
                 } ?: 1
-                viewModel.addPicture(
-                    parentFolder?.absolutePath ?: file.absolutePath,
-                    parentFolder?.name ?: file.name,
-                    imageCount
-                )
+                viewModel.addSinglePicture(file, imageCount)
             }
             DroppedFileAction.LOWER_THIRD ->
                 viewModel.addLowerThird(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)

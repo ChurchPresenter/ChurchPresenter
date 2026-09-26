@@ -20,9 +20,13 @@ import org.churchpresenter.calendar.generated.resources.calendar_template_blank
 import org.churchpresenter.calendar.generated.resources.calendar_template_blank_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_copy_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
+import org.churchpresenter.calendar.generated.resources.calendar_template_schedule
+import org.churchpresenter.calendar.generated.resources.calendar_template_schedule_sub
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.ServiceTemplate
+import org.churchpresenter.calendar.model.storedDate
+import java.time.LocalDate
 import org.churchpresenter.calendar.model.parseStoredDate
 import org.churchpresenter.calendar.model.rowsForSchedule
 import org.churchpresenter.calendar.model.sectionItem
@@ -48,6 +52,8 @@ internal fun CalendarDialogs(
     songEditor: (@Composable (SongEditRequest) -> Unit)?,
     /** Called once a run of show has been put into the Schedule -- the window closes behind it. */
     onLoaded: () -> Unit,
+    /** The window's today, which the date picker marks -- the same day its month grid marks. */
+    today: LocalDate = LocalDate.now(),
 ) {
     val openService = state.selectedService
     val scope = rememberCoroutineScope()
@@ -86,9 +92,14 @@ internal fun CalendarDialogs(
     }
 
     if (dialogs.creatingService || dialogs.editingService != null) {
+        // What is in the app's Schedule tab can start a new service, when there is anything there.
+        val fromSchedule = host.currentSchedule().takeIf { it.isNotEmpty() }?.let { ServiceTemplate.FromSchedule(it) }
         ServiceDialog(
             state,
             dialogs.editingService,
+            fromSchedule = fromSchedule,
+            startFromSchedule = dialogs.startFromSchedule,
+            today = today,
             onServiceAdded = { host.recordUsage(CalendarUsage.SERVICE_ADDED) },
             onClose = dialogs::closeServiceSheet,
         )
@@ -155,23 +166,36 @@ internal fun CalendarDialogs(
 private fun ServiceDialog(
     state: CalendarState,
     existing: PlannedService?,
+    fromSchedule: ServiceTemplate.FromSchedule?,
+    startFromSchedule: Boolean,
+    today: LocalDate,
     onServiceAdded: () -> Unit,
     onClose: () -> Unit,
 ) {
+    val templates = state.templateOptions()
     ServiceSheet(
         existing = existing,
         defaultStartTime = state.document.preferences.defaultStartTime,
         date = state.selectedDate,
         seriesSize = existing?.let { state.document.servicesInSeries(it.seriesId).size } ?: 0,
-        templates = state.templateOptions(),
+        // Second, after Blank: the Schedule is what is in front of the operator right now.
+        templates = templates.take(1) + listOfNotNull(fromSchedule) + templates.drop(1),
         templateLabel = { templateLabel(it) },
+        servicesOn = state::servicesOn,
+        initialTemplate = fromSchedule?.takeIf { startFromSchedule },
+        today = today,
         onSave = { form ->
             if (existing == null) {
-                state.addService(form.name, form.startTime, form.kind, form.template)
+                state.addService(form.name, form.startTime, form.kind, form.template, form.date)
                 onServiceAdded()
             } else {
                 state.updateService(
-                    existing.copy(name = form.name, startTime = form.startTime, kind = form.kind.id),
+                    existing.copy(
+                        name = form.name,
+                        startTime = form.startTime,
+                        kind = form.kind.id,
+                        date = storedDate(form.date),
+                    ),
                     wholeSeries = form.wholeSeries,
                 )
             }
@@ -274,6 +298,9 @@ private fun templateLabel(option: ServiceTemplate): Pair<String, String> = when 
         option.template.startTime,
         option.template.contentItems().size,
     )
+
+    is ServiceTemplate.FromSchedule -> stringResource(Res.string.calendar_template_schedule) to
+        stringResource(Res.string.calendar_template_schedule_sub, option.items.size)
 }
 
 @Composable

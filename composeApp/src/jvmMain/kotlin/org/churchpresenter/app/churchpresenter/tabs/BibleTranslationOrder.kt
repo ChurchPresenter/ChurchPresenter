@@ -80,11 +80,36 @@ internal fun TranslationOrderSelector(
     displayNames: Map<String, String>,
     onMove: (index: Int, offset: Int) -> Unit,
     modifier: Modifier = Modifier,
+) = OrderSelector(
+    label = label,
+    entries = translations.map { OrderEntry(it.fileName, translationTitle(displayNames, it), detail = it.fileName) },
+    subtitle = stringResource(Res.string.bible_translation_order_panel_subtitle),
+    moveUpLabel = stringResource(Res.string.move_translation_up),
+    moveDownLabel = stringResource(Res.string.move_translation_down),
+    onMove = onMove,
+    modifier = modifier,
+)
+
+/** One row of a Display order panel: [key] follows it through a drag, [detail] is its second line. */
+internal data class OrderEntry(val key: String, val name: String, val detail: String = "")
+
+/**
+ * A header button naming the first of [entries], opening a Display order panel that reorders them
+ * by drag or by arrow -- the Bible tab's translations, and the Songs tab's languages.
+ */
+@Composable
+internal fun OrderSelector(
+    label: String,
+    entries: List<OrderEntry>,
+    subtitle: String,
+    moveUpLabel: String,
+    moveDownLabel: String,
+    onMove: (index: Int, offset: Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val primary = translations.first()
-    val primaryName = translationTitle(displayNames, primary)
-    val extraCount = translations.size - 1
+    val primaryName = entries.first().name
+    val extraCount = entries.size - 1
 
     Box(modifier = modifier) {
         Row(
@@ -144,15 +169,23 @@ internal fun TranslationOrderSelector(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             offset = DpOffset(0.dp, 8.dp),
         ) {
-            TranslationOrderPanel(translations = translations, displayNames = displayNames, onMove = onMove)
+            OrderPanel(
+                entries = entries,
+                subtitle = subtitle,
+                moveUpLabel = moveUpLabel,
+                moveDownLabel = moveDownLabel,
+                onMove = onMove,
+            )
         }
     }
 }
 
 @Composable
-private fun TranslationOrderPanel(
-    translations: List<BibleTranslationSettings>,
-    displayNames: Map<String, String>,
+private fun OrderPanel(
+    entries: List<OrderEntry>,
+    subtitle: String,
+    moveUpLabel: String,
+    moveDownLabel: String,
     onMove: (index: Int, offset: Int) -> Unit,
 ) {
     Column(modifier = Modifier.width(320.dp)) {
@@ -163,7 +196,7 @@ private fun TranslationOrderPanel(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = stringResource(Res.string.bible_translation_order_panel_subtitle),
+                text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -172,15 +205,15 @@ private fun TranslationOrderPanel(
 
         val density = LocalDensity.current
         val rowHeightPx = with(density) { TRANSLATION_ORDER_ROW_HEIGHT.toPx() }
-        val translationsState = rememberUpdatedState(translations)
-        var draggingFileName by remember { mutableStateOf<String?>(null) }
+        val entriesState = rememberUpdatedState(entries)
+        var draggingKey by remember { mutableStateOf<String?>(null) }
         var dragOffsetY by remember { mutableStateOf(0f) }
 
         Column(modifier = Modifier.padding(6.dp)) {
-            translations.forEachIndexed { index, translation ->
+            entries.forEachIndexed { index, entry ->
                 val isPrimary = index == 0
-                val isDragged = translation.fileName == draggingFileName
-                val name = translationTitle(displayNames, translation)
+                val isDragged = entry.key == draggingKey
+                val name = entry.name
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -207,25 +240,25 @@ private fun TranslationOrderPanel(
                         modifier = Modifier
                             .size(width = 4.dp, height = 16.dp)
                             .pointerHoverIcon(PointerIcon.Hand)
-                            .pointerInput(translation.fileName) {
+                            .pointerInput(entry.key) {
                                 detectDragGestures(
                                     onDragStart = {
-                                        draggingFileName = translation.fileName
+                                        draggingKey = entry.key
                                         dragOffsetY = 0f
                                     },
                                     onDragEnd = {
-                                        val current = translationsState.value
-                                        val from = current.indexOfFirst { it.fileName == draggingFileName }
+                                        val current = entriesState.value
+                                        val from = current.indexOfFirst { it.key == draggingKey }
                                         if (from >= 0) {
                                             val steps = (dragOffsetY / rowHeightPx).roundToInt()
                                             val to = (from + steps).coerceIn(0, current.lastIndex)
                                             if (to != from) onMove(from, to - from)
                                         }
-                                        draggingFileName = null
+                                        draggingKey = null
                                         dragOffsetY = 0f
                                     },
                                     onDragCancel = {
-                                        draggingFileName = null
+                                        draggingKey = null
                                         dragOffsetY = 0f
                                     },
                                 ) { change, dragAmount ->
@@ -266,30 +299,32 @@ private fun TranslationOrderPanel(
                                 modifier = Modifier.weight(1f, fill = false),
                             )
                         }
-                        Text(
-                            text = translation.fileName,
-                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            maxLines = 1,
-                        )
+                        if (entry.detail.isNotEmpty()) {
+                            Text(
+                                text = entry.detail,
+                                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                maxLines = 1,
+                            )
+                        }
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         ReorderArrowButton(
                             icon = painterResource(Res.drawable.ic_arrow_up),
-                            contentDescription = stringResource(Res.string.move_translation_up),
+                            contentDescription = moveUpLabel,
                             enabled = index > 0,
                             onClick = { onMove(index, -1) },
                         )
                         ReorderArrowButton(
                             icon = painterResource(Res.drawable.ic_arrow_down),
-                            contentDescription = stringResource(Res.string.move_translation_down),
-                            enabled = index < translations.lastIndex,
+                            contentDescription = moveDownLabel,
+                            enabled = index < entries.lastIndex,
                             onClick = { onMove(index, 1) },
                         )
                     }
                 }
-                if (index != translations.lastIndex) Spacer(Modifier.height(4.dp))
+                if (index != entries.lastIndex) Spacer(Modifier.height(4.dp))
             }
         }
 

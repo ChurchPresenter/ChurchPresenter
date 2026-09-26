@@ -51,6 +51,46 @@ class CalendarStateTest {
     // ── Services ────────────────────────────────────────────────────────────────
 
     @Test
+    fun `a service can be added on another day than the one selected, and the calendar goes there`() {
+        val state = state().apply { select(today) }
+        val sunday = today.plusDays(7)
+
+        val service = state.addService("Sunday Morning", "10:00", ServiceKind.SUNDAY, date = sunday)
+
+        assertEquals(sunday.toString(), service.date)
+        assertEquals(sunday, state.selectedDate)
+        assertEquals(service.id, state.selectedService?.id)
+    }
+
+    @Test
+    fun `a service moved to another day is saved there, and the calendar follows it`() {
+        val state = state()
+        val service = state.addSunday()
+        val nextWeek = today.plusDays(7)
+
+        state.updateService(service.copy(date = nextWeek.toString()))
+
+        assertEquals(nextWeek.toString(), CalendarStore(folder).load().document.serviceById(service.id)?.date)
+        assertEquals(nextWeek, state.selectedDate)
+        assertEquals(service.id, state.selectedService?.id)
+    }
+
+    @Test
+    fun `a service started from the Schedule keeps its rows' ids, unless another service has them`() {
+        val state = state()
+        val planned = state.addSunday()
+        state.addItems(planned.id, listOf(song("loaded")))
+
+        val service = state.addService(
+            "Built by hand", "18:00", ServiceKind.SUNDAY,
+            ServiceTemplate.FromSchedule(listOf(song("by-hand"), song("loaded"))),
+        )
+
+        assertEquals("by-hand", service.items[0].id, "the Schedule is this service from now on")
+        assertNotEquals("loaded", service.items[1].id, "a row another service holds is re-keyed")
+    }
+
+    @Test
     fun `a service is added to the selected day and written out`() {
         val state = state()
 

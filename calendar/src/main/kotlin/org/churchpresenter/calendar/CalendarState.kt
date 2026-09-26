@@ -20,6 +20,7 @@ import org.churchpresenter.calendar.model.SectionStyle
 import org.churchpresenter.calendar.model.ServiceKind
 import org.churchpresenter.calendar.model.ServiceRepeat
 import org.churchpresenter.calendar.model.isDurationTimer
+import org.churchpresenter.calendar.model.withNewId
 import org.churchpresenter.calendar.model.withStartMovedFrom
 import org.churchpresenter.calendar.model.withTimesLaidOut
 import org.churchpresenter.calendar.model.withTimerSeconds
@@ -262,12 +263,13 @@ class CalendarState(
         return listOf(ServiceTemplate.Blank) + saved + recentByKind.map { ServiceTemplate.CopyOf(it) }
     }
 
-    /** Adds a service to [selectedDate] and opens it. Returns the new service. */
+    /** Adds a service on [date] -- the selected day unless another was chosen -- and opens it. */
     fun addService(
         name: String,
         startTime: String,
         kind: ServiceKind,
         template: ServiceTemplate = ServiceTemplate.Blank,
+        date: LocalDate = selectedDate,
     ): PlannedService {
         // Copied rows are re-keyed, or the new service and the one it came from share row ids — and
         // plannedSeconds is keyed by them, so editing one estimate would move the other's too.
@@ -277,10 +279,11 @@ class CalendarState(
                 copiedRows(template.service.items, template.service.plannedSeconds, template.service.timing)
             is ServiceTemplate.Saved ->
                 copiedRows(template.template.items, template.template.plannedSeconds, template.template.timing)
+            is ServiceTemplate.FromSchedule -> scheduleRows(template.items)
         }
         val service = PlannedService(
             id = UUID.randomUUID().toString(),
-            date = storedDate(selectedDate),
+            date = storedDate(date),
             name = name,
             startTime = startTime,
             kind = kind.id,
@@ -290,8 +293,19 @@ class CalendarState(
             armed = document.preferences.armByDefault,
         )
         commit(document.withService(service))
+        select(date)
         selectedServiceId = service.id
         return service
+    }
+
+    /**
+     * The Schedule tab's rows as a new service's, **ids kept** so the Schedule is recognised as
+     * this service afterwards. A row whose id another service already holds -- one loaded from the
+     * calendar and kept -- is the one exception: sharing it would tie the two services together.
+     */
+    private fun scheduleRows(items: List<ScheduleItem>): CopiedRows {
+        val taken = document.services.flatMapTo(HashSet()) { service -> service.items.map { it.id } }
+        return CopiedRows(items.map { if (it.id in taken) it.withNewId() else it }, emptyMap())
     }
 
     /**
@@ -305,6 +319,9 @@ class CalendarState(
      * pre-service sequence built as `−20 / −15 / −5` still reads that way after the service moves.
      * See [withStartMovedFrom]. Each service of a series is shifted by its *own* difference, not
      * by the edited one's.
+     *
+     * A new date moves this service alone, never the rest of its series, and the calendar follows
+     * it to its new day.
      */
     fun updateService(service: PlannedService, wholeSeries: Boolean = false) {
         val target = document.serviceById(service.id)
@@ -318,6 +335,10 @@ class CalendarState(
                     .withStartMovedFrom(it.startTime)
             }
         commit(document.withServices(listOf(target) + updated))
+        if (target.date != storedDate(selectedDate)) {
+            parseStoredDate(target.date)?.let(::select)
+            selectedServiceId = target.id
+        }
     }
 
     fun deleteService(id: String, wholeSeries: Boolean = false) {

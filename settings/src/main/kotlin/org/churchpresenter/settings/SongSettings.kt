@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -298,6 +299,25 @@ data class SongSettings(
      */
     val translations: List<SongTranslationSettings> = emptyList(),
 
+    /**
+     * What the operator calls each of a song's languages -- "English", "Yoruba" -- where the app
+     * would otherwise say "Language N". Position `n` is language `n + 1`, the primary first; absent
+     * or blank means unnamed.
+     *
+     * One list for the install, in [SONG_GLOBAL_KEYS]: a language is called the same thing on every
+     * output. Not [translations]' `label`, which sits inside per-profile styling, so every profile
+     * would carry a stale copy of its own.
+     */
+    val languageNames: List<String> = emptyList(),
+
+    /**
+     * The order a song's languages are shown in, by slot -- `0` the primary -- as the Songs tab's
+     * Display order sets it. One order for the install, in [SONG_GLOBAL_KEYS]; each profile's own
+     * `songTranslations` is rewritten to follow it when it changes. Read through
+     * [languageDisplayOrder], which fills in whatever this leaves out.
+     */
+    val languageOrder: List<Int> = emptyList(),
+
     // Look-ahead styling — fullscreen
     val lookAheadDisplayMode: String = Constants.SONG_DISPLAY_MODE_VERSE,
     val lookAheadLanguageDisplay: String = Constants.SONG_LANG_PRIMARY,
@@ -513,6 +533,29 @@ fun SongSettings.withTranslationSettings(
     val grown = List(maxOf(translations.size, index + 1)) { translationSettings(it) }
     return copy(translations = grown.mapIndexed { i, t -> if (i == index) transform(t) else t })
 }
+
+/**
+ * Every language slot once, in the order [SongSettings.languageOrder] puts them: the stored order
+ * first, anything it does not name after it in slot order. Empty -- a settings file from before
+ * this existed -- reads as `0, 1, 2, 3`.
+ */
+fun SongSettings.languageDisplayOrder(): List<Int> {
+    val slots = 0 until MAX_SONG_TRANSLATIONS
+    val named = languageOrder.filter { it in slots }.distinct()
+    return named + slots.filterNot { it in named }
+}
+
+/**
+ * What the operator has named language [slot] -- `0` being the primary -- or blank when unnamed.
+ */
+fun SongSettings.languageLabel(slot: Int): String = languageNames.getOrNull(slot).orEmpty()
+
+/**
+ * These settings with the languages named [names], the primary first. Trailing blanks are dropped,
+ * so naming nothing stores nothing.
+ */
+fun SongSettings.withLanguageNames(names: List<String>): SongSettings =
+    copy(languageNames = names.map { it.trim() }.dropLastWhile { it.isEmpty() })
 
 /**
  * What language [translation] draws [element] with on this output -- `0` is the primary.

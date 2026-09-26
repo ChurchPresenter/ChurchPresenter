@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.time.LocalTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** The window's own paths: exporting, loading over something, and saying what has fired. */
@@ -35,6 +36,61 @@ class AppPathsTest {
             }
         } finally {
             target.delete()
+        }
+    }
+
+    @Test
+    fun `a saved export says so, with the file's name`() {
+        val target = Files.createTempFile("run-of-show", ".pdf").toFile()
+        try {
+            val host = CalendarHost(chooseExportFile = { _, _ -> target }, pdfFont = { null })
+
+            withCalendar(documentWith(service()), host = host) {
+                awaitText("Amazing Grace")
+                clickFirst("Export PDF")
+
+                awaitText("PDF saved")
+                assertTrue(shows(target.name))
+
+                clickIcon("Dismiss")
+                assertFalse(shows("PDF saved"))
+            }
+        } finally {
+            target.delete()
+        }
+    }
+
+    @Test
+    fun `an export that cannot be written says so rather than nothing`() {
+        // A file inside a folder that does not exist: the chooser answered, the write cannot happen.
+        val target = File(Files.createTempDirectory("gone").toFile().also { it.delete() }, "run.pdf")
+        val reported = mutableListOf<String>()
+        val host = CalendarHost(
+            chooseExportFile = { _, _ -> target },
+            pdfFont = { null },
+            reportError = { context, _ -> reported += context },
+        )
+
+        withCalendar(documentWith(service()), host = host) {
+            awaitText("Amazing Grace")
+            clickFirst("Export PDF")
+
+            awaitText("Couldn’t save the PDF")
+            assertEquals(listOf("Calendar run-of-show PDF export"), reported, "and it is still reported")
+        }
+    }
+
+    @Test
+    fun `the name offered to the save dialog is one Windows will save`() {
+        var offered = ""
+        val host = CalendarHost(chooseExportFile = { name, _ -> offered = name; null })
+
+        withCalendar(documentWith(service().copy(name = "Revival: Night 1/2")), host = host) {
+            awaitText("Amazing Grace")
+            clickFirst("Export PDF")
+            waitUntil("the save dialog was asked") { offered.isNotEmpty() }
+
+            assertEquals("Revival- Night 1-2 - 2026-09-20.pdf", offered)
         }
     }
 

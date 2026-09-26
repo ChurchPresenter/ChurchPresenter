@@ -68,7 +68,13 @@ sealed class ScheduleItem {
         val folderPath: String,
         val folderName: String,
         val imageCount: Int,
-        override val displayText: String = "$folderName ($imageCount images)"
+        override val displayText: String = "$folderName ($imageCount images)",
+        /**
+         * The one picture this row is for, when it was a single image dropped onto the Schedule;
+         * empty for a whole folder. Presenting the row opens [folderPath] on this picture, not on
+         * the folder's first -- which is what it did before this existed (#652).
+         */
+        val imagePath: String = "",
     ) : ScheduleItem()
 
     @Serializable

@@ -96,7 +96,7 @@ internal fun SongCustomizePane(
         if (hasSecondLanguage) {
             LabeledControl(stringResource(Res.string.song_style_language)) {
                 SegmentedButton(
-                    items = styleLanguages.map { SegmentedButtonItem(it, it.nameLabel()) },
+                    items = styleLanguages.map { SegmentedButtonItem(it, it.nameLabel(settings.songSettings)) },
                     selectedValue = editingLanguage,
                     onValueChange = { language = it },
                     buttonWidth = STYLE_LANGUAGE_BUTTON_WIDTH,

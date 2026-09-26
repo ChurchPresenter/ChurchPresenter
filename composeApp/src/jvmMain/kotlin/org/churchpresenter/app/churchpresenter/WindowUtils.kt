@@ -104,5 +104,3 @@ internal fun areaInside(bounds: Rectangle, insets: Insets): ScreenArea = ScreenA
     height = (bounds.height - insets.top - insets.bottom).dp,
 )
 
-internal fun staysAboveMainWindow(active: Any?, mainWindow: Any?, own: Any?): Boolean =
-    mainWindow != null && active != null && (active === mainWindow || active === own)

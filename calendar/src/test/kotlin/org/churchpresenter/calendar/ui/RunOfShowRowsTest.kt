@@ -50,7 +50,11 @@ class RunOfShowRowsTest {
     )
 
     @Test
-    fun `every kind of row is drawn with its own second line`() = withCalendar(documentWith(everyKind())) {
+    fun `every kind of row is drawn with its own second line`() = withCalendar(
+        // Auto-load on, so its "off" note is not drawn: this asks every row at once, and the rows
+        // only just fit the test window without the note's height above them.
+        documentWith(everyKind()).let { it.copy(preferences = it.preferences.copy(autoLoadService = true)) },
+    ) {
         awaitText("Amazing Grace")
 
         listOf(

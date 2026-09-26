@@ -538,6 +538,20 @@ class ScheduleViewModel(
         addOrPush(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
     }
 
+    /** One picture, [image], as its own row: presented, it opens its folder on this picture. */
+    fun addSinglePicture(image: File, folderImageCount: Int) {
+        addOrPush(
+            ScheduleItem.PictureItem(
+                id = UUID.randomUUID().toString(),
+                folderPath = image.parentFile?.absolutePath ?: image.absolutePath,
+                folderName = image.parentFile?.name ?: image.name,
+                imageCount = folderImageCount,
+                displayText = image.name,
+                imagePath = image.absolutePath,
+            )
+        )
+    }
+
     fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
         addOrPush(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
     }
