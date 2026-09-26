@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -219,7 +219,7 @@ private fun SubtitlePositionGrid(position: String, onPositionChange: (String) ->
                 rowItems.forEach { (posConst, posLabel) ->
                     val isSelected = position == posConst
                     Box(
-                        modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
+                        modifier = Modifier.weight(1f).height(28.dp).clip(AppShape(3.dp))
                             .background(
                                 if (isSelected) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.surfaceVariant

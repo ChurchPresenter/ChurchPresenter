@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -264,7 +264,7 @@ private fun SongRow(
 @Composable
 private fun RowAction(icon: ImageVector, description: String, tint: Color, onClick: () -> Unit) {
     Box(
-        Modifier.size(26.dp).clip(RoundedCornerShape(7.dp)).clickable(onClick = onClick),
+        Modifier.size(26.dp).clip(AppShape(7.dp)).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(14.dp))
@@ -280,7 +280,7 @@ private fun EmptyState(state: SongLibraryState, width: Dp) {
         verticalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Box(
-            Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(scheme.surfaceContainer),
+            Modifier.size(44.dp).clip(AppShape(12.dp)).background(scheme.surfaceContainer),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

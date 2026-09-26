@@ -3,7 +3,7 @@ package org.churchpresenter.calendar.ui
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +40,7 @@ fun <T> SegmentedSelector(
     modifier: Modifier = Modifier,
     height: Dp = SELECTOR_HEIGHT,
 ) {
-    SegmentTrack(modifier = modifier.fillMaxWidth().height(height), shape = RoundedCornerShape(9.dp)) {
+    SegmentTrack(modifier = modifier.fillMaxWidth().height(height), shape = AppShape(9.dp)) {
         options.forEach { option ->
             val on = option == selected
             SegmentTrackItem(
@@ -78,6 +78,6 @@ fun OptionChip(label: String, selected: Boolean, onClick: () -> Unit) {
             )
         },
         modifier = Modifier.height(CHIP_HEIGHT),
-        shape = RoundedCornerShape(6.dp),
+        shape = AppShape(6.dp),
     )
 }

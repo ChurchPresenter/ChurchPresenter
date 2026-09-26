@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -106,7 +106,7 @@ fun ColorPickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = AppShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp,
             // No fixed heightIn cap: this Dialog is a Compose overlay layer bounded by whatever
@@ -148,7 +148,7 @@ fun ColorPickerDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(AppShape(8.dp))
                         .testTag("colorPickerSvPanel"),
                 )
 
@@ -162,7 +162,7 @@ fun ColorPickerDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(24.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(AppShape(12.dp))
                         .testTag("colorPickerHueBar"),
                 )
 
@@ -175,12 +175,12 @@ fun ColorPickerDialog(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(AppShape(8.dp))
                             .background(currentColor)
                             .border(
                                 1.dp,
                                 MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                RoundedCornerShape(8.dp),
+                                AppShape(8.dp),
                             ),
                     )
                     SettingsTextField(
@@ -220,8 +220,8 @@ fun ColorPickerDialog(
                             Box(
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .background(recentColor, RoundedCornerShape(4.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                    .background(recentColor, AppShape(4.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), AppShape(4.dp))
                                     .testTag("recentColor_$recentHex")
                                     .clickable {
                                         val (h, s, v) = cpColorToHsv(recentColor)
@@ -240,12 +240,12 @@ fun ColorPickerDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.cancel))
                     }
                     Spacer(Modifier.width(8.dp))
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             val hex = cpColorToHex(currentColor)
                             RecentColors.add(hex)

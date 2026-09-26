@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -134,9 +134,9 @@ fun SearchableDropdownField(
     Box(
         modifier = modifier
             .heightIn(min = 42.dp)
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(8.dp))
-            .hoverOutline(RoundedCornerShape(8.dp))
+            .sunken(AppShape(8.dp), elevationPalette())
+            .hoverTint(AppShape(8.dp))
+            .hoverOutline(AppShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 focusRequester.requestFocus()
                 expanded = true

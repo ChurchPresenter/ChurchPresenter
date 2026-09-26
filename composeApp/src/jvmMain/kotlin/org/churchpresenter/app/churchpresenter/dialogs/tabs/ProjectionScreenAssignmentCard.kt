@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -130,7 +130,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        RaisedButton(shape = RoundedCornerShape(6.dp), onClick = { onIdentifyScreen() }) {
+        RaisedButton(shape = AppShape(6.dp), onClick = { onIdentifyScreen() }) {
             Text(
                 text = stringResource(Res.string.identify_screen),
                 style = MaterialTheme.typography.labelSmall
@@ -258,7 +258,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         state = rememberTooltipState()
                     ) {
                         KeyButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { dropdownExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
@@ -274,7 +274,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     }
                 } else {
                     KeyButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { dropdownExpanded = true },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
@@ -415,7 +415,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         state = rememberTooltipState()
                     ) {
                         KeyButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { keyExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
@@ -431,7 +431,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     }
                 } else {
                     KeyButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { keyExpanded = true },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {

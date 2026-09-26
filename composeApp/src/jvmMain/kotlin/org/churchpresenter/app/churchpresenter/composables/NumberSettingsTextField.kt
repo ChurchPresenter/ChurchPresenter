@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,11 +61,11 @@ fun NumberSettingsTextField(
         modifier = modifier
             .height(42.dp)
             .sunken(
-                RoundedCornerShape(8.dp),
+                AppShape(8.dp),
                 elevationPalette(),
                 rim = if (isError) MaterialTheme.colorScheme.error else Color.Unspecified
             )
-            .hoverTint(RoundedCornerShape(8.dp)),
+            .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(

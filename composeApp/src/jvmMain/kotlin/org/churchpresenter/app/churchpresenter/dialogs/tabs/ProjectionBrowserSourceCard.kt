@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
@@ -114,7 +114,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), AppShape(4.dp))
                 .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -190,14 +190,14 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (overlayUrl != null) {
                         RaisedButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { copyText(urlWithBg("transparent")) },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(stringResource(Res.string.copy_url_transparent), style = MaterialTheme.typography.labelSmall)
                         }
                         RaisedButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { copyText(urlWithBg("black")) },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
@@ -205,14 +205,14 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                     }
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { onIdentifyBrowserSource(i) },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
                     }
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { showRemoveConfirm = true },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -234,7 +234,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                     },
                     confirmButton = {
                         GhostButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = {
                                 showRemoveConfirm = false
                                 onSettingsChange { s ->
@@ -246,7 +246,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                     },
                     dismissButton = {
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
+                        GhostButton(shape = AppShape(6.dp), onClick = { showRemoveConfirm = false }) {
                             Text(stringResource(Res.string.cancel))
                         }
                     }
@@ -309,7 +309,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                         var fpsExpanded by remember { mutableStateOf(false) }
                         KeyButton(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = AppShape(6.dp),
                             onClick = { fpsExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -373,7 +373,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
     }
 
     RaisedButton(
-        shape = RoundedCornerShape(6.dp),
+        shape = AppShape(6.dp),
         onClick = {
             onSettingsChange { s ->
                 s.copy(projectionSettings = s.projectionSettings.addBrowserSourceOutput())

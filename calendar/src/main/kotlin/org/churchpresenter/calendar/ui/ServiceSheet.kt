@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EventNote
@@ -322,8 +322,8 @@ private fun DateField(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(DATE_FIELD_HEIGHT)
-                .clip(RoundedCornerShape(DATE_FIELD_RADIUS))
-                .sunken(RoundedCornerShape(DATE_FIELD_RADIUS), elevationPalette())
+                .clip(AppShape(DATE_FIELD_RADIUS))
+                .sunken(AppShape(DATE_FIELD_RADIUS), elevationPalette())
                 .clickable { open = true }
                 .padding(horizontal = 10.dp),
         ) {

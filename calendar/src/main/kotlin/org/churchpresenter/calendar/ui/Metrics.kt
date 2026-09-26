@@ -1,6 +1,6 @@
 package org.churchpresenter.calendar.ui
 
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -41,11 +41,11 @@ object CalendarMetrics {
     val rowTimeColumnWide = 58.dp
     val durationFieldWidth = 44.dp
 
-    val dayCellRadius = RoundedCornerShape(7.dp)
-    val rowRadius = RoundedCornerShape(9.dp)
+    val dayCellRadius = AppShape(7.dp)
+    val rowRadius = AppShape(9.dp)
     val chipRadius = 9.dp
-    val smallRadius = RoundedCornerShape(5.dp)
-    val buttonRadius = RoundedCornerShape(8.dp)
+    val smallRadius = AppShape(5.dp)
+    val buttonRadius = AppShape(8.dp)
 
     val dayDot = 4.dp
     val legendDot = 7.dp
@@ -62,8 +62,8 @@ object CalendarMetrics {
 
 /** The dialogs' own sizes -- the header, the tab strip, the row card and their buttons. */
 object SheetMetrics {
-    val radius = RoundedCornerShape(13.dp)
-    val cardRadius = RoundedCornerShape(9.dp)
+    val radius = AppShape(13.dp)
+    val cardRadius = AppShape(9.dp)
     val headerIcon = 28.dp
     val closeButton = 26.dp
     val tabHeight = 27.dp

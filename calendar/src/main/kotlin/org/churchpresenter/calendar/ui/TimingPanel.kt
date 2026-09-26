@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -388,7 +388,7 @@ private fun TimingChip(
         Box(
             Modifier
                 .height(FIELD_HEIGHT)
-                .raisedKey(RoundedCornerShape(7.dp), fill, onClick = onClick)
+                .raisedKey(AppShape(7.dp), fill, onClick = onClick)
                 .padding(horizontal = CHIP_PADDING),
             contentAlignment = Alignment.Center,
         ) {

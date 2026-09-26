@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
@@ -49,7 +49,7 @@ private fun SectionTick() {
         modifier = Modifier
             .width(3.dp)
             .height(14.dp)
-            .clip(RoundedCornerShape(2.dp))
+            .clip(AppShape(2.dp))
             .background(Tokens.Tick)
     )
 }

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -232,7 +232,7 @@ private fun StageMonitorPreviewSection(
             GhostButton(
                 onClick = { update { withDefaultZoneSizes() } },
                 enabled = sm.hasCustomZoneSizes(),
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 modifier = Modifier.height(24.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp),
             ) {

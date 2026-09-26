@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -300,8 +300,8 @@ fun WebTab(
                         .weight(1f)
                         .widthIn(min = minUrlWidth)
                         .height(42.dp)
-                        .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                        .hoverTint(RoundedCornerShape(8.dp)),
+                        .sunken(AppShape(8.dp), elevationPalette())
+                        .hoverTint(AppShape(8.dp)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -476,7 +476,7 @@ fun WebTab(
                         .horizontalScroll(rememberScrollState())
                         .background(
                             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            RoundedCornerShape(4.dp),
+                            AppShape(4.dp),
                         )
                         .padding(horizontal = 4.dp, vertical = 2.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -484,7 +484,7 @@ fun WebTab(
                 ) {
                     bookmarks.forEach { bookmark ->
                         Surface(
-                            shape = RoundedCornerShape(4.dp),
+                            shape = AppShape(4.dp),
                             color = if (liveUrl == bookmark.url) MaterialTheme.colorScheme.primaryContainer
                             else MaterialTheme.colorScheme.surface,
                             modifier = Modifier.clickable {
@@ -532,7 +532,7 @@ fun WebTab(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
+                        shape = AppShape(4.dp),
                         color = MaterialTheme.colorScheme.error
                     ) {
                         Text(
@@ -551,7 +551,7 @@ fun WebTab(
                     )
                     // Toggle between screenshot mirror and interactive preview
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
+                        shape = AppShape(4.dp),
                         color = if (useInteractivePreview) MaterialTheme.colorScheme.tertiaryContainer
                                 else MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
@@ -575,8 +575,8 @@ fun WebTab(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(42.dp)
-                                .sunken(RoundedCornerShape(8.dp), elevationPalette())
-                                .hoverTint(RoundedCornerShape(8.dp)),
+                                .sunken(AppShape(8.dp), elevationPalette())
+                                .hoverTint(AppShape(8.dp)),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -675,7 +675,7 @@ fun WebTab(
                     width = if (isLive) 2.dp else 1.dp,
                     color = if (isLive) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp)
+                    shape = AppShape(4.dp)
                 )
         ) {
             if (isLive && !useInteractivePreview) {
@@ -1050,7 +1050,7 @@ private fun RowScope.NavButtons(
     )
     // Mobile / Desktop toggle
     Surface(
-        shape = RoundedCornerShape(4.dp),
+        shape = AppShape(4.dp),
         color = if (isMobileView) MaterialTheme.colorScheme.tertiaryContainer
                 else MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier.clickable { onMobileToggle(!isMobileView) }

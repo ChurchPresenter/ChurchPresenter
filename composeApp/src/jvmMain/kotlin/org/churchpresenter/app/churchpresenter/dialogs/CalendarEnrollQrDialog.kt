@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -93,7 +93,7 @@ internal fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: 
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
             )
-            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            RaisedButton(shape = AppShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
             }
         }
@@ -121,7 +121,7 @@ internal fun CalendarInviteFailedContent(status: CalendarSyncStatus, onDismiss: 
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.error,
             )
-            RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            RaisedButton(shape = AppShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
             }
         }

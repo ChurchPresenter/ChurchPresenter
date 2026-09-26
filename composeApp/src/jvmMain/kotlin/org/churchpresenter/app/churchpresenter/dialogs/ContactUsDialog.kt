@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -291,8 +291,8 @@ internal fun ContactUsDialogContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(140.dp)
-                                .sunken(RoundedCornerShape(6.dp), elevationPalette())
-                                .hoverTint(RoundedCornerShape(6.dp))
+                                .sunken(AppShape(6.dp), elevationPalette())
+                                .hoverTint(AppShape(6.dp))
                                 .padding(horizontal = 9.dp, vertical = 7.dp),
                             textStyle = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 12.sp,
@@ -333,7 +333,7 @@ private fun FieldLabel(text: String) {
 
 @Composable
 private fun TypePill(label: String, selected: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(100.dp)
+    val shape = AppShape(100.dp)
     val borderColor = if (selected) MaterialTheme.colorScheme.primary
                       else MaterialTheme.colorScheme.outlineVariant
     Box(

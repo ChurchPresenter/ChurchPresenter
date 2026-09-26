@@ -720,6 +720,7 @@ fun BibleTab(
                         ?.let { viewModel.applyDetectedReference(it, goLiveSource = "detection") }
                     focusRequester.requestFocus()
                 },
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 8.dp).bibleListCard(),
             )
         }
 
@@ -820,10 +821,10 @@ fun BibleTab(
                     chapterWidthPx = colWChapter,
                     crossRefWidthPx = colWCrossRef,
                     splitWidthPx = colWSplit,
-                    onBookWidthChange = { colWBook = it },
-                    onChapterWidthChange = { colWChapter = it },
-                    onCrossRefWidthChange = { colWCrossRef = it },
-                    onSplitWidthChange = { colWSplit = it },
+                    onBookWidthChange = { update -> colWBook = update(colWBook) },
+                    onChapterWidthChange = { update -> colWChapter = update(colWChapter) },
+                    onCrossRefWidthChange = { update -> colWCrossRef = update(colWCrossRef) },
+                    onSplitWidthChange = { update -> colWSplit = update(colWSplit) },
                     onSaveColumnWidths = ::saveColWidths,
                     onSaveCrossRefWidth = ::saveColWCrossRef,
                     onSaveSplitWidth = ::saveColWSplit,
@@ -941,8 +942,9 @@ fun BibleTab(
                             }
                         }
                     },
-                    verseHeader = {
+                    verseHeader = { showLabel ->
                     BibleVerseHeader(
+                        showLabel = showLabel,
                         crossRefsVisible = crossRefsAvailable,
                         crossRefsDocked = crossRefsDocked,
                         holdAvailable = presenterManager != null && !splitBrowseMode,

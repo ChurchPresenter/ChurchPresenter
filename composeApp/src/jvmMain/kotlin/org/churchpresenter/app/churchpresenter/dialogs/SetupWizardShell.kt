@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -58,7 +58,7 @@ import org.jetbrains.compose.resources.stringResource
  */
 
 private val WIZARD_RAIL_WIDTH = 268.dp
-private val RAIL_ROW_SHAPE = RoundedCornerShape(9.dp)
+private val RAIL_ROW_SHAPE = AppShape(9.dp)
 private val PANEL_FOOTER_HEIGHT = 72.dp
 private val STEP_MARKER_SIZE = 26.dp
 private const val PENDING_ALPHA = 0.45f
@@ -136,7 +136,7 @@ internal fun WizardRail(
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onSkip) {
+            GhostButton(shape = AppShape(6.dp), onClick = onSkip) {
                 Text(
                     text = stringResource(Res.string.setup_wizard_skip),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -280,7 +280,7 @@ internal fun WizardPanelHeader(
         Box(
             modifier = Modifier
                 .size(52.dp)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(AppShape(14.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -307,7 +307,7 @@ internal fun WizardPanelHeader(
         if (instructionCount != null) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(AppShape(6.dp))
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
                     .padding(horizontal = 9.dp, vertical = 4.dp),
             ) {
@@ -344,7 +344,7 @@ internal fun WizardPanelFooter(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (canGoBack) {
-            KeyButton(shape = RoundedCornerShape(8.dp), onClick = onBack) {
+            KeyButton(shape = AppShape(8.dp), onClick = onBack) {
                 Text(stringResource(Res.string.setup_wizard_back))
             }
         }
@@ -357,7 +357,7 @@ internal fun WizardPanelFooter(
                 modifier = Modifier.padding(end = 14.dp),
             )
         }
-        RaisedButton(shape = RoundedCornerShape(8.dp), onClick = onContinue) {
+        RaisedButton(shape = AppShape(8.dp), onClick = onContinue) {
             Text(
                 text = if (isLastStep) continueLabel else stringResource(Res.string.setup_wizard_next),
                 fontWeight = FontWeight.SemiBold,
@@ -376,8 +376,8 @@ internal fun WizardMockPanel(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(9.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(9.dp))
+            .clip(AppShape(9.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(9.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Row(

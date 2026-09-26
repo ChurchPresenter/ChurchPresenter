@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -263,7 +263,7 @@ private fun CountStepper(count: Int, onChange: (Int) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .height(TARGET_HEIGHT)
-                .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                .sunken(AppShape(8.dp), elevationPalette())
                 .padding(start = 6.dp, end = 4.dp),
         ) {
             CompactTextField(
@@ -299,7 +299,7 @@ private fun StepButton(
     Box(
         Modifier
             .size(width = STEPPER_BUTTON, height = STEPPER_BUTTON - 2.dp)
-            .clip(RoundedCornerShape(3.dp))
+            .clip(AppShape(3.dp))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -346,7 +346,7 @@ private fun DatePreview(dates: List<LocalDate>, monthly: Boolean, hasServices: (
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(AppShape(6.dp))
                         .background(if (clash) scheme.tertiary.copy(alpha = CLASH_TINT) else Color.Transparent)
                         .padding(horizontal = 6.dp, vertical = 5.dp),
                 ) {
@@ -372,7 +372,7 @@ private fun DatePreview(dates: List<LocalDate>, monthly: Boolean, hasServices: (
                             fontWeight = FontWeight.Bold,
                             color = scheme.tertiary,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
+                                .clip(AppShape(4.dp))
                                 .background(scheme.tertiary.copy(alpha = CLASH_TINT))
                                 .padding(horizontal = 5.dp, vertical = 1.5.dp),
                         )

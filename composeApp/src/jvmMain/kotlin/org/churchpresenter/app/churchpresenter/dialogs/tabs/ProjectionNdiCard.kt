@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
@@ -191,7 +191,7 @@ internal fun NdiOutputsCard(
                 )
             }
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = {
                     onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.addNdiOutput()) }
                 },
@@ -254,7 +254,7 @@ private fun NdiRuntimeRow(
                 modifier = Modifier.width(PATH_FIELD_WIDTH),
             )
             KeyButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = {
                     scope.launch {
                         val chosen = FileChooser.platformInstance.chooseSingle(
@@ -275,7 +275,7 @@ private fun NdiRuntimeRow(
                 Text(stringResource(Res.string.ndi_runtime_browse), style = MaterialTheme.typography.labelSmall)
             }
             KeyButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 // Off the UI thread for the same reason main.kt's first start is: this is a
                 // `Native.load`, and on the click handler it would freeze the dialog while it ran.
                 onClick = { scope.launch(Dispatchers.IO) { NdiManager.ensureStarted(path) } },
@@ -285,7 +285,7 @@ private fun NdiRuntimeRow(
             }
             if (!status.isReady) {
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = { openUrl(NDI_RUNTIME_URL) },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 ) {
@@ -420,7 +420,7 @@ private fun NdiOutputRow(
                 // Only enabled once the draft differs, so it reads as "there is something to
                 // commit" rather than as a button that might do nothing.
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     enabled = nameChanged,
                     onClick = { update(output.copy(ndiName = draftName)) },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -455,14 +455,14 @@ private fun NdiOutputRow(
             // does. Worth having even though an NDI source is named in the receiver's list: with
             // several outputs live, it answers "which of these am I actually looking at".
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = { onIdentifyNdi(index) },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             ) {
                 Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
             }
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = { showRemoveConfirm = true },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -481,7 +481,7 @@ private fun NdiOutputRow(
                 text = { Text(stringResource(Res.string.ndi_confirm_remove_message, outputLabel)) },
                 confirmButton = {
                     GhostButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             showRemoveConfirm = false
                             onSettingsChange { s ->
@@ -493,7 +493,7 @@ private fun NdiOutputRow(
                     }
                 },
                 dismissButton = {
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
+                    GhostButton(shape = AppShape(6.dp), onClick = { showRemoveConfirm = false }) {
                         Text(stringResource(Res.string.cancel))
                     }
                 },
@@ -590,7 +590,7 @@ private fun NdiModePicker(
             state = rememberTooltipState(),
         ) {
             KeyButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = { expanded = true },
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 modifier = Modifier.fillMaxWidth(),
@@ -639,7 +639,7 @@ private fun NdiDropdownCell(
         }
         var expanded by remember { mutableStateOf(false) }
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = { expanded = true },
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
             modifier = Modifier.fillMaxWidth(),

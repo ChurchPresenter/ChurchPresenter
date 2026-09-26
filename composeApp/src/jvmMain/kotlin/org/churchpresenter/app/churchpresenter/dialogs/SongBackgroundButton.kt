@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import org.churchpresenter.theme.components.GhostButton
@@ -95,12 +95,12 @@ internal fun SongBackgroundButton(
             modifier = Modifier
                 .testTag(SONG_BACKGROUND_BUTTON_TAG)
                 .height(28.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(AppShape(8.dp))
                 .background(
                     if (expanded || custom) MaterialTheme.colorScheme.primary.copy(alpha = CHIP_FILL_ALPHA)
                     else MaterialTheme.colorScheme.surfaceContainerHigh
                 )
-                .border(1.dp, tint, RoundedCornerShape(8.dp))
+                .border(1.dp, tint, AppShape(8.dp))
                 .clickable { onExpandedChange(!expanded) }
                 .padding(start = 5.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -189,7 +189,7 @@ private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GhostButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             modifier = Modifier.testTag(SONG_BACKGROUND_CANCEL_TAG),
@@ -198,7 +198,7 @@ private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) 
         }
         Spacer(Modifier.width(8.dp))
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onSave,
             modifier = Modifier.testTag(SONG_BACKGROUND_SAVE_TAG),
         ) {
@@ -212,8 +212,8 @@ private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) 
 private fun BackgroundChipSwatch(background: SongBackground) {
     Box(
         modifier = Modifier.size(width = 26.dp, height = 18.dp)
-            .clip(RoundedCornerShape(5.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(5.dp)),
+            .clip(AppShape(5.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(5.dp)),
     ) {
         SongBackgroundFill(background, Modifier.fillMaxSize())
         if (!background.isCustom) {

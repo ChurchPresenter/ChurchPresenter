@@ -18,7 +18,7 @@ import androidx.compose.runtime.collectAsState
 import churchpresenter.composeapp.generated.resources.schedule_cue_fired
 import churchpresenter.composeapp.generated.resources.schedule_cue_skipped
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -158,7 +158,7 @@ private fun PlanDriftBadge(drift: PlanDrift) {
         maxLines = 1,
         softWrap = false,
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(AppShape(4.dp))
             .background(tone.copy(alpha = DRIFT_TINT))
             .padding(horizontal = 5.dp, vertical = 1.dp),
     )
@@ -332,7 +332,7 @@ internal fun ScheduleRowKindChips(item: ScheduleItem, density: ScheduleDensity) 
             val (chipBg, chipFg) = scheduleChipColors(scheduleItemPaletteIndex(item))
             Box(
                 modifier = Modifier
-                    .background(chipBg, RoundedCornerShape(4.dp))
+                    .background(chipBg, AppShape(4.dp))
                     .padding(horizontal = 6.dp, vertical = 1.dp)
             ) {
                 Text(

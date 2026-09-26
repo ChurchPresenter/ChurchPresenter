@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -132,7 +132,7 @@ internal fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete:
                 stringResource(Res.string.clear),
                 style = LibraryType.button,
                 color = scheme.onSurfaceVariant,
-                modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                modifier = Modifier.clip(AppShape(8.dp))
                     .clickable { state.clearSelection() }
                     .padding(horizontal = 9.dp, vertical = 7.dp),
             )
@@ -204,9 +204,9 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
     Row(
         Modifier.width(236.dp)
             .height(LibraryMetrics.control)
-            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .clip(AppShape(LibraryMetrics.radius))
             .background(scheme.surfaceContainerHigh)
-            .border(1.dp, scheme.outlineVariant, RoundedCornerShape(LibraryMetrics.radius))
+            .border(1.dp, scheme.outlineVariant, AppShape(LibraryMetrics.radius))
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

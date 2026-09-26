@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -204,7 +204,7 @@ internal fun BackgroundTypeRow(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                .sunken(AppShape(8.dp), elevationPalette())
                 .padding(2.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -301,13 +301,13 @@ internal fun BackgroundColorPicker(caption: String, color: String, onColorChange
                     Modifier
                         .weight(1f)
                         .height(SWATCH_HEIGHT)
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(AppShape(6.dp))
                         .background(parseHexColor(hex))
                         .border(
                             2.dp,
                             if (selected) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(6.dp)
+                            AppShape(6.dp)
                         )
                         .clickable { onColorChange(hex) }
                 )

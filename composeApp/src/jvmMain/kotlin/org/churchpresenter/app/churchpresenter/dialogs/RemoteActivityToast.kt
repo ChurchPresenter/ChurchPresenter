@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Icon
@@ -176,7 +176,7 @@ private fun RemoteActivityToast(
             .padding(bottom = 48.dp, start = 16.dp, end = 16.dp)
             .widthIn(max = 680.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = AppShape(12.dp),
         shadowElevation = 8.dp,
         color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
@@ -259,21 +259,21 @@ private fun RemoteActivityToast(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                KeyButton(shape = RoundedCornerShape(6.dp), onClick = onBlockForSession) {
+                KeyButton(shape = AppShape(6.dp), onClick = onBlockForSession) {
                     Icon(
                         Icons.Filled.RemoveCircle,
                         contentDescription = stringResource(Res.string.block_for_session),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
-                GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                     Text(
                         stringResource(Res.string.remote_activity_dismiss),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (remaining > 0) {
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismissAll) {
+                    GhostButton(shape = AppShape(6.dp), onClick = onDismissAll) {
                         Text(
                             stringResource(Res.string.remote_activity_dismiss_all),
                             color = MaterialTheme.colorScheme.primary

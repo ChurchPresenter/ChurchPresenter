@@ -70,7 +70,7 @@ internal fun ColumnScope.BibleSearchResults(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 8.dp, end = 12.dp, bottom = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
                 ) {
                     itemsIndexed(results) { _, result ->
 
@@ -100,7 +100,10 @@ internal fun ColumnScope.BibleSearchResults(
                                 .background(bibleRowColors(selected = false, hovered = hovered).background)
                                 .hoverable(hover)
                                 .initialPassClickable { onResultChosen(result) }
-                                .padding(start = 12.dp, top = 8.dp, end = 10.dp, bottom = 8.dp),
+                                .padding(
+                                    start = rowPad(12.dp), top = rowPad(8.dp),
+                                    end = rowPad(10.dp), bottom = rowPad(8.dp),
+                                ),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = MaterialTheme.typography.bodyMedium.fontSize * 1.55f,
                             ),

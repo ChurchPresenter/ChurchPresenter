@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -155,7 +155,7 @@ private fun QuestionBackground(qa: QASettings, update: QaUpdate) {
             KeyButton(
                 onClick = { update { it.copy(backgroundColor = DEFAULT_BACKGROUND) } },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -172,7 +172,7 @@ private fun QuestionBackground(qa: QASettings, update: QaUpdate) {
             )
             KeyButton(
                 onClick = { update { it.copy(backgroundColor = TRANSPARENT) } },
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
             ) {
                 Text(transparentLabel, style = MaterialTheme.typography.labelSmall)
             }

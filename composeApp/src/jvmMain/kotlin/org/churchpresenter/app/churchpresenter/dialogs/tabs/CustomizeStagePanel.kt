@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -226,8 +226,8 @@ private fun StageFrame(output: PreviewOutputSize, content: @Composable () -> Uni
             .fillMaxWidth()
             .aspectRatio(output.aspectRatio)
             .clipToBounds()
-            .background(Color(PREVIEW_BACKGROUND), RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
+            .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
         content = { content() },
     )
 }
@@ -239,8 +239,8 @@ private fun NoStage() {
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(NO_STAGE_RATIO)
-            .background(Color(PREVIEW_BACKGROUND), RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
             .padding(12.dp),
         contentAlignment = Alignment.Center,
     ) {

@@ -44,10 +44,16 @@ Corollaries:
 |---|---|
 | `Theme.kt` | The nine `ColorScheme`s (Light, Warm, Ocean, Rose light; Dark, Studio, Midnight, Forest, Mocha dark), `AppTypography`, the shape scale, `colorSchemeFor(mode, systemDark)` and the `ChurchPresenterTheme` composable that also provides the scrollbar style |
 | `ThemeManager.kt` | `ThemeMode` (the fixed palettes plus `SYSTEM` and `CUSTOM`), `ThemeManager`, `LocalThemeManager`/`ProvideThemeManager`/`rememberThemeManager`, and `themeFromSettings(saved)` |
-| `ThemeCustomization.kt` | `ThemeCustomization` (accent, light/dark base, the optional background/text/secondary/selection/success/warning/error colours, UI font family, UI font scale), `LocalThemeCustomization`, `customColorScheme(custom)` — the HSL-generated palette behind `ThemeMode.CUSTOM` — `customSemanticColorsFor(custom)` and `UI_FONT_SCALES` |
+| `ThemeCustomization.kt` | `ThemeCustomization` (accent, light/dark base, the optional background/text/secondary/selection/success/warning/error colours, UI font family, UI font scale, list-row spacing — the Margin), `LocalThemeCustomization`, `customColorScheme(custom)` — the HSL-generated palette behind `ThemeMode.CUSTOM` — `customSemanticColorsFor(custom)` `UI_FONT_SCALES` and `DEFAULT_ROW_SPACING` (Normal) |
+| `AppShape.kt` | `AppShape(...)` — the app's corner: a `RoundedCornerShape` at `CORNER_SCALE` of the radius written. Percent corners are not scaled, so a pill stays a pill. Plain circular corners on purpose — a squircle was tried and drew animated screens about four times slower (see the constant's KDoc) |
 | `UiFontScale.kt` | `ProvideUiFontScale` — the UI text size as a font scale on `LocalDensity`, applied once per window |
 | `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, staged…) derived per scheme — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
+
+**Every rounded corner in the app is an `AppShape`, never a `RoundedCornerShape`** — in this module,
+the app and every module that draws UI. `CORNER_SCALE` is then the single number for how rounded
+the app is. The one standing exception is audience-facing output (`composeApp/.../presenter/`):
+those corners are part of what a church shows on its screens, not the app's own chrome.
 
 `ThemeMode.SYSTEM` is **not** a palette of its own — it resolves to Light or Dark, so anything
 listing palettes (schedule-label presets, the theme switcher) skips it. `themeFromSettings` matches

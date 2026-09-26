@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -29,12 +29,12 @@ fun ReorderArrowButton(
             .size(width = 22.dp, height = 16.dp)
             .background(
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.4f),
-                RoundedCornerShape(5.dp),
+                AppShape(5.dp),
             )
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (enabled) 1f else 0.5f),
-                RoundedCornerShape(5.dp),
+                AppShape(5.dp),
             )
             .then(
                 if (enabled) {

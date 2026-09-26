@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
@@ -208,7 +208,7 @@ private fun FfmpegPathRow(
             modifier = Modifier.width(PATH_FIELD_WIDTH),
         )
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = {
                 scope.launch {
                     val chosen = FileChooser.platformInstance.chooseSingle(
@@ -226,7 +226,7 @@ private fun FfmpegPathRow(
         }
         if (path.isNotBlank()) {
             KeyButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = { applyPath("") },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             ) {
@@ -234,7 +234,7 @@ private fun FfmpegPathRow(
             }
         }
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             // Off the UI thread: this launches `ffmpeg -version`, and on the click handler it
             // would freeze the dialog for as long as that takes to answer.
             onClick = { scope.launch { onStatus(withContext(Dispatchers.IO) { onApply(path) }) } },
@@ -244,7 +244,7 @@ private fun FfmpegPathRow(
         }
         if (status?.available == false) {
             RaisedButton(
-                shape = RoundedCornerShape(6.dp),
+                shape = AppShape(6.dp),
                 onClick = { openUrl(FFMPEG_DOWNLOAD_URL) },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             ) {

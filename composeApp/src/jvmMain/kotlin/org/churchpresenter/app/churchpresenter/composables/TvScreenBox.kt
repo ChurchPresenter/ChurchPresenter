@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -111,8 +111,8 @@ fun TvScreenBox(
                 // Weight only in the fill-the-height mode: with a ratio the bezel takes its height
                 // from the screen inside it, so the column has to wrap rather than divide.
                 .then(if (screenAspectRatio == null) Modifier.weight(1f) else Modifier)
-                .background(bezelColor, RoundedCornerShape(BEZEL_RADIUS))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(BEZEL_RADIUS))
+                .background(bezelColor, AppShape(BEZEL_RADIUS))
+                .border(1.dp, MaterialTheme.colorScheme.outline, AppShape(BEZEL_RADIUS))
                 .padding(BEZEL_PADDING)
         ) {
             Box(
@@ -122,8 +122,8 @@ fun TvScreenBox(
                         if (screenAspectRatio == null) Modifier.fillMaxHeight()
                         else Modifier.aspectRatio(screenAspectRatio)
                     )
-                    .background(screenColor, RoundedCornerShape(SCREEN_RADIUS))
-                    .border(1.dp, Color.Black.copy(alpha = 0.4f), RoundedCornerShape(SCREEN_RADIUS)),
+                    .background(screenColor, AppShape(SCREEN_RADIUS))
+                    .border(1.dp, Color.Black.copy(alpha = 0.4f), AppShape(SCREEN_RADIUS)),
                 contentAlignment = Alignment.Center,
                 content = content
             )
@@ -138,7 +138,7 @@ fun TvScreenBox(
             modifier = Modifier
                 .width(BASE_WIDTH)
                 .height(BASE_HEIGHT)
-                .background(bezelColor, RoundedCornerShape(BASE_RADIUS))
+                .background(bezelColor, AppShape(BASE_RADIUS))
         )
     }
 }

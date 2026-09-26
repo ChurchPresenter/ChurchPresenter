@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -412,7 +412,7 @@ internal fun InstanceLinkDialogContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (connectionStatus != InstanceLinkStatus.DISCONNECTED) {
-                        GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDisconnect) {
+                        GhostButton(shape = AppShape(6.dp), onClick = onDisconnect) {
                             Text(
                                 stringResource(Res.string.menu_disconnect),
                                 style = MaterialTheme.typography.labelLarge
@@ -421,7 +421,7 @@ internal fun InstanceLinkDialogContent(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
 
-                    GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                         Text(
                             stringResource(Res.string.cancel),
                             style = MaterialTheme.typography.labelLarge
@@ -434,7 +434,7 @@ internal fun InstanceLinkDialogContent(
                     // switching role, is a legitimate edit on its own and must not require a live
                     // connection to persist.
                     GhostButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             onSave(edited())
                             onDismiss()
@@ -449,7 +449,7 @@ internal fun InstanceLinkDialogContent(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             if (portText.toIntOrNull() == null) return@RaisedButton
                             onConnect(edited())

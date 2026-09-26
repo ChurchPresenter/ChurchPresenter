@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -201,9 +201,9 @@ private fun IconChoiceTrack(
     val segmentWidth = buttonSize - (TRACK_INSET * 2 + TRACK_INSET * (choices.size - 1)) / choices.size
     val segmentHeight = buttonSize - TRACK_INSET * 2
     val trackRadius = maxOf(cornerRadius, 6.dp)
-    val segmentShape = RoundedCornerShape(trackRadius - TRACK_INSET)
+    val segmentShape = AppShape(trackRadius - TRACK_INSET)
     Row(
-        modifier = Modifier.sunken(RoundedCornerShape(trackRadius), palette).padding(TRACK_INSET),
+        modifier = Modifier.sunken(AppShape(trackRadius), palette).padding(TRACK_INSET),
         horizontalArrangement = Arrangement.spacedBy(TRACK_INSET),
     ) {
         choices.forEach { choice ->

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
@@ -84,7 +84,7 @@ fun SheetScaffold(
                     Box(
                         Modifier
                             .size(SheetMetrics.headerIcon)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(AppShape(8.dp))
                             .background(scheme.primary.copy(alpha = ICON_TINT)),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -113,7 +113,7 @@ fun SheetScaffold(
                     Box(
                         Modifier
                             .size(SheetMetrics.closeButton)
-                            .raisedKey(RoundedCornerShape(7.dp), elevationPalette().key, onClick = onDismiss),
+                            .raisedKey(AppShape(7.dp), elevationPalette().key, onClick = onDismiss),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -156,7 +156,7 @@ fun SheetScaffold(
 fun SheetTab(label: String, selected: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val palette = elevationPalette()
-    val shape = RoundedCornerShape(7.dp)
+    val shape = AppShape(7.dp)
     Box(
         Modifier
             .height(SheetMetrics.tabHeight)
@@ -255,7 +255,7 @@ fun SmallIconButton(
         Box(
             Modifier
                 .size(size)
-                .raisedKey(RoundedCornerShape(6.dp), fill, onClick = onClick),
+                .raisedKey(AppShape(6.dp), fill, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -305,7 +305,7 @@ fun QuietButton(
     Box(
         modifier
             .height(height)
-            .raisedKey(RoundedCornerShape(8.dp), fill, onClick = onClick)
+            .raisedKey(AppShape(8.dp), fill, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -329,7 +329,7 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
     Box(
         Modifier
             .height(SheetMetrics.doneHeight)
-            .raisedKey(RoundedCornerShape(8.dp), palette.accent, enabled = enabled, onClick = onClick)
+            .raisedKey(AppShape(8.dp), palette.accent, enabled = enabled, onClick = onClick)
             .padding(horizontal = 17.dp),
         contentAlignment = Alignment.Center,
     ) {

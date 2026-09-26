@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The Custom theme's settings: the accent, base, per-role colours, UI font and UI text size.
+ * The Custom theme's settings: the accent, base, per-role colours, UI font, UI text size and Margin.
  *
  * None of them needed a migration step, because every one has a default that means "as before" — no
  * accent, a dark base, every role automatic, the platform font at its own size. These pin that a
@@ -27,6 +27,7 @@ class CustomThemeSettingsTest {
         assertEquals(CustomThemeColors(), old.customThemeColors)
         assertEquals("", old.uiFontFamily)
         assertEquals(1f, old.uiFontScale)
+        assertEquals(ListRowSpacing.NORMAL, old.uiRowSpacing)
     }
 
     @Test
@@ -55,6 +56,7 @@ class CustomThemeSettingsTest {
             ),
             uiFontFamily = "Inter",
             uiFontScale = 1.15f,
+            uiRowSpacing = ListRowSpacing.THINNER,
         )
 
         assertEquals(written, json.decodeFromString<AppSettings>(json.encodeToString(written)))

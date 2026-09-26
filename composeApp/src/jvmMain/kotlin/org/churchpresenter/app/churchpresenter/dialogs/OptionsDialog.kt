@@ -40,7 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.dialogSizeWithin
@@ -396,7 +396,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
         verticalAlignment = Alignment.CenterVertically
     ) {
         GhostButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onCancel,
             colors = ButtonDefaults.textButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -408,7 +408,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
         Spacer(modifier = Modifier.width(8.dp))
 
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onApply,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -421,7 +421,7 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
         Spacer(modifier = Modifier.width(8.dp))
 
         RaisedButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = onOk,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

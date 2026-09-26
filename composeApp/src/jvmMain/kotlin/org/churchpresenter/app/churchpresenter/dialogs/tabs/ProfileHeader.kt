@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,7 +100,7 @@ internal fun ProfileModeBadge(displayMode: String) {
         color = color,
         maxLines = 1,
         modifier = Modifier
-            .background(color.copy(alpha = BADGE_FILL_ALPHA), RoundedCornerShape(4.dp))
+            .background(color.copy(alpha = BADGE_FILL_ALPHA), AppShape(4.dp))
             .padding(horizontal = 5.dp, vertical = 2.dp),
     )
 }

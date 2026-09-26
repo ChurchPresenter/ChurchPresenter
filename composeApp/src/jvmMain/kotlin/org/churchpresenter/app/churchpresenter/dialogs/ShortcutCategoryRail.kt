@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,7 +35,7 @@ import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 /** Wide enough for "Presentation Tab" at the rail's text size without ellipsis. */
 internal val RAIL_WIDTH = 178.dp
 
-private val RAIL_ITEM_SHAPE = RoundedCornerShape(8.dp)
+private val RAIL_ITEM_SHAPE = AppShape(8.dp)
 
 /**
  * One entry in the rail.
@@ -139,7 +139,7 @@ private fun ShortcutCategoryItem(
                 .size(width = 3.dp, height = 15.dp)
                 .background(
                     if (active) colors.primary else Color.Transparent,
-                    RoundedCornerShape(2.dp),
+                    AppShape(2.dp),
                 )
         )
         Text(
@@ -155,7 +155,7 @@ private fun ShortcutCategoryItem(
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .background(colors.error, RoundedCornerShape(3.dp))
+                    .background(colors.error, AppShape(3.dp))
             )
         }
         Text(

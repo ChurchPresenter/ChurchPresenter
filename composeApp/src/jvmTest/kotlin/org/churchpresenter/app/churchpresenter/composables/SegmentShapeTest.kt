@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import org.churchpresenter.theme.AppShape
 
 /**
  * The corner rounding of one chip in a segmented row: round on the outside of the row, square
@@ -12,9 +12,9 @@ import kotlin.test.assertNotEquals
  */
 class SegmentShapeTest {
 
-    private val round = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 0.dp, bottomEnd = 0.dp)
-    private val square = RoundedCornerShape(0.dp)
-    private val pill = RoundedCornerShape(8.dp)
+    private val round = AppShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 0.dp, bottomEnd = 0.dp)
+    private val square = AppShape(0.dp)
+    private val pill = AppShape(8.dp)
 
     @Test
     fun `the first of several is rounded on its leading edge only`() {
@@ -24,7 +24,7 @@ class SegmentShapeTest {
     @Test
     fun `the last of several is rounded on its trailing edge only`() {
         assertEquals(
-            RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 8.dp, bottomEnd = 8.dp),
+            AppShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 8.dp, bottomEnd = 8.dp),
             segmentShape(index = 2, count = 3),
         )
     }

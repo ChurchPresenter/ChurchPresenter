@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
@@ -39,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.book
-import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.copy_verse
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_copy
@@ -74,10 +75,14 @@ internal fun ColumnScope.BibleBrowserPane(
     chapterWidthPx: Float,
     crossRefWidthPx: Float,
     splitWidthPx: Float,
-    onBookWidthChange: (Float) -> Unit,
-    onChapterWidthChange: (Float) -> Unit,
-    onCrossRefWidthChange: (Float) -> Unit,
-    onSplitWidthChange: (Float) -> Unit,
+    /**
+     * The width callbacks take an update rather than a value: a drag delivers several moves between
+     * two frames, and each has to build on the last one, not on the width this pane last saw.
+     */
+    onBookWidthChange: (update: (Float) -> Float) -> Unit,
+    onChapterWidthChange: (update: (Float) -> Float) -> Unit,
+    onCrossRefWidthChange: (update: (Float) -> Float) -> Unit,
+    onSplitWidthChange: (update: (Float) -> Float) -> Unit,
     onSaveColumnWidths: () -> Unit,
     onSaveCrossRefWidth: () -> Unit,
     onSaveSplitWidth: () -> Unit,
@@ -105,37 +110,43 @@ internal fun ColumnScope.BibleBrowserPane(
     liveChapterVerses: List<String>,
     liveVerseNumbers: Set<Int>,
     onLiveVerseClicked: (Int) -> Unit,
-    /** The verse card's header: its label and the actions beside it. */
-    verseHeader: @Composable () -> Unit,
+    /** The verse card's header: its label (when [showLabel]) and the actions beside it. */
+    verseHeader: @Composable (showLabel: Boolean) -> Unit,
     /** Drawn under the verse pane, inside the same column — the history panel. */
     footer: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
         Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp, end = 4.dp)) {
 
-            BookAndChapterCards(
+            BookCard(
                 books = books,
                 filteredBooks = filteredBooks,
-                filteredChapters = filteredChapters,
                 selectedBookIndex = selectedBookIndex,
-                selectedChapter = selectedChapter,
                 bookWidthPx = bookWidthPx,
-                chapterWidthPx = chapterWidthPx,
                 onBookWidthChange = onBookWidthChange,
-                onChapterWidthChange = onChapterWidthChange,
                 onSaveColumnWidths = onSaveColumnWidths,
                 onBookSelected = onBookSelected,
-                onChapterSelected = onChapterSelected,
             )
 
-            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+            val chapterCard: @Composable () -> Unit = {
+                ChapterCard(
+                    underHeader = isSplitActive,
+                    filteredChapters = filteredChapters,
+                    selectedChapter = selectedChapter,
+                    chapterWidthPx = chapterWidthPx,
+                    onChapterWidthChange = onChapterWidthChange,
+                    onSaveColumnWidths = onSaveColumnWidths,
+                    onChapterSelected = onChapterSelected,
+                )
+            }
+            val verseArea: @Composable ColumnScope.() -> Unit = {
                 BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 val crossRefReserve = if (crossRefsDocked) crossRefWidthPx + with(density) { 8.dp.toPx() } else 0f
-                val effectiveSplitWidth = if (isSplitActive)
-                    splitWidthPx.coerceAtMost(
-                        (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
-                    )
-                else 0f
+                // The most the live pane can take, leaving the verse card its minimum. It depends only on
+                // the space around the pane, so it holds still while the pane itself is dragged.
+                val maxSplitWidth =
+                    (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
+                val effectiveSplitWidth = if (isSplitActive) splitWidthPx.coerceAtMost(maxSplitWidth) else 0f
                 Row(modifier = Modifier.fillMaxSize()) {
 
                     VerseCard(
@@ -160,7 +171,7 @@ internal fun ColumnScope.BibleBrowserPane(
                         onVerseDoubleClicked = onVerseDoubleClicked,
                         onCopyVerse = onCopyVerse,
                         onAddToSchedule = onAddToSchedule,
-                        header = verseHeader,
+                        header = { if (!isSplitActive) verseHeader(true) },
                     )
 
                     if (crossRefsDocked) {
@@ -172,11 +183,15 @@ internal fun ColumnScope.BibleBrowserPane(
 
                     if (isSplitActive) {
                         DragHandle(onDragEnd = onSaveSplitWidth) { amount ->
-                            onSplitWidthChange(
-                                (splitWidthPx - amount).coerceIn(
-                                    with(density) { 150.dp.toPx() }, with(density) { 600.dp.toPx() },
-                                )
-                            )
+                            // Held to the room there is, going in and coming out, so the stored width
+                            // never runs ahead of the one drawn: past it, a drag would first have to
+                            // wind the difference back before anything moved. Capped by that room
+                            // rather than by the width last drawn, which is stale between frames.
+                            onSplitWidthChange { width ->
+                                (width.coerceAtMost(maxSplitWidth) - amount)
+                                    .coerceIn(with(density) { 150.dp.toPx() }, with(density) { 600.dp.toPx() })
+                                    .coerceAtMost(maxSplitWidth)
+                            }
                         }
                         Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
                             LiveChapterPanel(
@@ -194,6 +209,22 @@ internal fun ColumnScope.BibleBrowserPane(
                 footer()
             }
 
+            if (isSplitActive) {
+                // Split mode leaves the verse card narrow, so the header gets a row of its own
+                // spanning the chapters, the verses and the live pane, without the Verse label.
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).bibleListCard()) {
+                        verseHeader(false)
+                    }
+                    Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        chapterCard()
+                        Column(modifier = Modifier.weight(1f).fillMaxHeight()) { verseArea() }
+                    }
+                }
+            } else {
+                chapterCard()
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) { verseArea() }
+            }
         }
 }
 
@@ -301,20 +332,18 @@ private fun VerseCard(
     }
 }
 
+/** The chapter list's top inset under the action row -- the list's own side inset. */
+private val CHAPTER_LIST_TOP_INSET = 6.dp
+
 @Composable
-private fun BookAndChapterCards(
+private fun BookCard(
     books: List<String>,
     filteredBooks: List<String>,
-    filteredChapters: List<String>,
     selectedBookIndex: Int,
-    selectedChapter: Int,
     bookWidthPx: Float,
-    chapterWidthPx: Float,
-    onBookWidthChange: (Float) -> Unit,
-    onChapterWidthChange: (Float) -> Unit,
+    onBookWidthChange: (update: (Float) -> Float) -> Unit,
     onSaveColumnWidths: () -> Unit,
     onBookSelected: (Int) -> Unit,
-    onChapterSelected: (Int) -> Unit,
 ) {
     val density = LocalDensity.current
     Column(modifier = Modifier.width(with(density) { bookWidthPx.toDp() }).fillMaxHeight().bibleListCard()) {
@@ -331,21 +360,32 @@ private fun BookAndChapterCards(
     }
 
     DragHandle(onDragEnd = onSaveColumnWidths) { amount ->
-        onBookWidthChange(
-            (bookWidthPx + amount).coerceIn(
-                with(density) { 80.dp.toPx() }, with(density) { 400.dp.toPx() },
-            )
-        )
+        onBookWidthChange { width ->
+            (width + amount).coerceIn(with(density) { 80.dp.toPx() }, with(density) { 400.dp.toPx() })
+        }
     }
+}
 
+@Composable
+private fun ChapterCard(
+    underHeader: Boolean,
+    filteredChapters: List<String>,
+    selectedChapter: Int,
+    chapterWidthPx: Float,
+    onChapterWidthChange: (update: (Float) -> Float) -> Unit,
+    onSaveColumnWidths: () -> Unit,
+    onChapterSelected: (Int) -> Unit,
+) {
+    val density = LocalDensity.current
     Column(
         modifier = Modifier.width(with(density) { chapterWidthPx.toDp() }).fillMaxHeight().bibleListCard(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BibleListHeaderLabel(
-            stringResource(Res.string.chapter),
-            Modifier.padding(horizontal = 8.dp).padding(top = 14.dp, bottom = 8.dp),
-        )
+        // No heading. Beside the Book card an empty one holds its place -- it takes the heading's
+        // exact height at any text size, keeping chapter 1 level with the first book. Under the
+        // action row there is nothing to line up with, so the list starts at the top like the verses.
+        if (underHeader) Spacer(Modifier.height(CHAPTER_LIST_TOP_INSET))
+        else BibleListHeaderLabel("", Modifier.padding(top = 14.dp, bottom = 8.dp))
         BibleBrowserColumn(
             items = filteredChapters,
             selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
@@ -355,11 +395,9 @@ private fun BookAndChapterCards(
     }
 
     DragHandle(onDragEnd = onSaveColumnWidths) { amount ->
-        onChapterWidthChange(
-            (chapterWidthPx + amount).coerceIn(
-                with(density) { 60.dp.toPx() }, with(density) { 300.dp.toPx() },
-            )
-        )
+        onChapterWidthChange { width ->
+            (width + amount).coerceIn(with(density) { 60.dp.toPx() }, with(density) { 300.dp.toPx() })
+        }
     }
 }
 
@@ -367,7 +405,7 @@ private fun BookAndChapterCards(
 private fun DockedCrossRefs(
     crossRefs: BibleCrossReferenceState,
     crossRefWidthPx: Float,
-    onCrossRefWidthChange: (Float) -> Unit,
+    onCrossRefWidthChange: (update: (Float) -> Float) -> Unit,
     onSaveCrossRefWidth: () -> Unit,
     onOpenCrossRef: (CrossRefRow) -> Unit,
     onGoLiveCrossRef: (CrossRefRow) -> Unit,
@@ -376,12 +414,12 @@ private fun DockedCrossRefs(
 ) {
     val density = LocalDensity.current
     DragHandle(onDragEnd = onSaveCrossRefWidth) { amount ->
-        onCrossRefWidthChange(
-            (crossRefWidthPx - amount).coerceIn(
+        onCrossRefWidthChange { width ->
+            (width - amount).coerceIn(
                 with(density) { CROSS_REF_MIN_WIDTH.toPx() },
                 with(density) { CROSS_REF_MAX_WIDTH.toPx() },
             )
-        )
+        }
     }
     CrossReferencePanel(
         rows = crossRefs.rows,

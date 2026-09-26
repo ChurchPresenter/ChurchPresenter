@@ -38,7 +38,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.license_accept_button
@@ -169,7 +169,7 @@ internal fun LicenseDialogContent(licenseText: String, onAccept: () -> Unit, onD
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KeyButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = onDecline,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
@@ -180,7 +180,7 @@ internal fun LicenseDialogContent(licenseText: String, onAccept: () -> Unit, onD
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onAccept) {
+                RaisedButton(shape = AppShape(6.dp), onClick = onAccept) {
                     Text(stringResource(Res.string.license_accept_button))
                 }
             }

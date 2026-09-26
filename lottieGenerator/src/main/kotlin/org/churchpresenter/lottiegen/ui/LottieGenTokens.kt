@@ -1,6 +1,6 @@
 package org.churchpresenter.lottiegen.ui
 
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -462,10 +462,10 @@ object Tokens {
         LocalLottieGenPalette.current.interaction.scrollbar.scrollThumbHover
 
     // ── Shape / metrics ─────────────────────────────────────────────────────
-    val CardShape = RoundedCornerShape(10.dp)
-    val FieldShape = RoundedCornerShape(8.dp)
-    val ChipShape = RoundedCornerShape(7.dp)
-    val ButtonShape = RoundedCornerShape(9.dp)
+    val CardShape = AppShape(10.dp)
+    val FieldShape = AppShape(8.dp)
+    val ChipShape = AppShape(7.dp)
+    val ButtonShape = AppShape(9.dp)
 
     val HeaderHeight = 46.dp
     val SectionHeaderHeight = 36.dp

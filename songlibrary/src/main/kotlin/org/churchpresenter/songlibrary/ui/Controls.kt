@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -112,12 +112,12 @@ fun LibraryDropdown(
         Row(
             Modifier.height(LibraryMetrics.control)
                 .widthIn(max = 210.dp)
-                .clip(RoundedCornerShape(LibraryMetrics.radius))
+                .clip(AppShape(LibraryMetrics.radius))
                 .background(scheme.surfaceContainerHigh)
                 .border(
                     1.dp,
                     if (highlighted) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA) else scheme.outlineVariant,
-                    RoundedCornerShape(LibraryMetrics.radius),
+                    AppShape(LibraryMetrics.radius),
                 )
                 .clickable { open = true }
                 .padding(horizontal = 12.dp),
@@ -191,9 +191,9 @@ fun LibraryPopup(width: Dp, maxHeight: Dp, onDismiss: () -> Unit, content: @Comp
     ) {
         Box(Modifier.padding(top = 5.dp).width(width).heightIn(max = maxHeight)) {
             Column(
-                Modifier.clip(RoundedCornerShape(10.dp))
+                Modifier.clip(AppShape(10.dp))
                     .background(scheme.surfaceContainerHigh)
-                    .border(1.dp, scheme.outlineVariant, RoundedCornerShape(10.dp))
+                    .border(1.dp, scheme.outlineVariant, AppShape(10.dp))
                     .padding(4.dp)
                     .verticalScroll(scroll),
             ) {
@@ -225,7 +225,7 @@ fun MenuRow(
     val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(7.dp))
+            .clip(AppShape(7.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 9.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -303,7 +303,7 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true, i
     val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.height(LibraryMetrics.control)
-            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .clip(AppShape(LibraryMetrics.radius))
             .background(if (enabled) scheme.primary else scheme.surfaceContainerHigh)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 14.dp),
@@ -344,9 +344,9 @@ fun QuietButton(
     }
     Row(
         Modifier.height(LibraryMetrics.control)
-            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .clip(AppShape(LibraryMetrics.radius))
             .background(if (danger && enabled) scheme.errorContainer else scheme.surfaceContainerHigh)
-            .border(1.dp, border, RoundedCornerShape(LibraryMetrics.radius))
+            .border(1.dp, border, AppShape(LibraryMetrics.radius))
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -365,12 +365,12 @@ fun LibraryCheckbox(checked: Boolean, indeterminate: Boolean = false, onToggle: 
     val scheme = MaterialTheme.colorScheme
     Box(
         Modifier.size(15.dp)
-            .clip(RoundedCornerShape(4.dp))
+            .clip(AppShape(4.dp))
             .background(if (checked || indeterminate) scheme.primary else Color.Transparent)
             .border(
                 1.5.dp,
                 if (checked || indeterminate) scheme.primary else scheme.outlineVariant,
-                RoundedCornerShape(4.dp),
+                AppShape(4.dp),
             )
             .then(
                 if (onToggle == null) Modifier

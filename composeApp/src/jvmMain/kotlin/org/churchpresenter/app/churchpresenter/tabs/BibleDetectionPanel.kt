@@ -4,9 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -114,6 +110,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.RaisedFilterChip
+import androidx.compose.material3.LocalContentColor
 
 private const val SELECTION_BAR_WIDTH = 4f
 
@@ -165,8 +163,9 @@ internal fun BibleDetectionPanel(
     onClearDetections: () -> Unit,
     onDetectionClick: (Int) -> Unit,
     onDetectionDoubleClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
             val levelName = when (textMatchLevel) {
                 TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
                 TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
@@ -211,118 +210,24 @@ internal fun BibleDetectionPanel(
                     )
                 }
 
-                TooltipArea(tooltip = {
-                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Text(
-                            text = stringResource(Res.string.bible_stt_auto_follow_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }) {
-                    Box(
-                        modifier = Modifier
-                            .height(27.dp)
-                            .background(
-                                if (autoFollowEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                else MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(6.dp)
-                            )
-                            .border(
-                                1.dp,
-                                if (autoFollowEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                else MaterialTheme.colorScheme.outlineVariant,
-                                RoundedCornerShape(6.dp)
-                            )
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                onAutoFollowChange(!autoFollowEnabled)
-                            }
-                            .padding(horizontal = 11.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CheckBoxOutlineBlank,
-                                contentDescription = null,
-                                modifier = Modifier.size(11.dp),
-                                tint = if (autoFollowEnabled) MaterialTheme.colorScheme.primary
-                                       else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                            Text(
-                                text = stringResource(Res.string.bible_stt_auto_follow),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = if (autoFollowEnabled) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
-                }
+                EngineChip(
+                    label = stringResource(Res.string.bible_stt_auto_follow),
+                    icon = Icons.Default.CheckBoxOutlineBlank,
+                    selected = autoFollowEnabled,
+                    tooltip = stringResource(Res.string.bible_stt_auto_follow_hint),
+                    onClick = { onAutoFollowChange(!autoFollowEnabled) },
+                )
 
-                TooltipArea(tooltip = {
-                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Text(
-                            text = stringResource(Res.string.bible_stt_text_match_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }) {
-                Box(
-                    modifier = Modifier
-                        .height(27.dp)
-                        .background(
-                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            else MaterialTheme.colorScheme.surfaceVariant,
-                            RoundedCornerShape(6.dp)
-                        )
-                        .border(
-                            1.dp,
-                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(6.dp)
-                        )
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            val all = TextMatchLevel.values()
-                            onTextMatchLevelChange(all[(textMatchLevel.ordinal + 1) % all.size])
-                        }
-                        .padding(horizontal = 11.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.FormatAlignLeft,
-                            contentDescription = null,
-                            modifier = Modifier.size(11.dp),
-                            tint = if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = "${stringResource(Res.string.bible_stt_match_label)}: $levelName",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                }
-                }
+                EngineChip(
+                    label = "${stringResource(Res.string.bible_stt_match_label)}: $levelName",
+                    icon = Icons.AutoMirrored.Filled.FormatAlignLeft,
+                    selected = textMatchLevel != TextMatchLevel.OFF,
+                    tooltip = stringResource(Res.string.bible_stt_text_match_hint),
+                    onClick = {
+                        val all = TextMatchLevel.values()
+                        onTextMatchLevelChange(all[(textMatchLevel.ordinal + 1) % all.size])
+                    },
+                )
 
                 val verseSpeedName = when (continuationSpeed) {
                     ContinuationSpeed.BALANCED -> stringResource(Res.string.bible_next_verse_speed_balanced)
@@ -332,62 +237,16 @@ internal fun BibleDetectionPanel(
                     ContinuationSpeed.BALANCED -> stringResource(Res.string.bible_next_verse_speed_tooltip_balanced)
                     ContinuationSpeed.FAST -> stringResource(Res.string.bible_next_verse_speed_tooltip_fast)
                 }
-                TooltipArea(tooltip = {
-                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Text(
-                            text = verseSpeedHint,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }) {
-                Box(
-                    modifier = Modifier
-                        .height(27.dp)
-                        .background(
-                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            else MaterialTheme.colorScheme.surfaceVariant,
-                            RoundedCornerShape(6.dp)
-                        )
-                        .border(
-                            1.dp,
-                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(6.dp)
-                        )
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            val all = ContinuationSpeed.values()
-                            onContinuationSpeedChange(all[(continuationSpeed.ordinal + 1) % all.size])
-                        }
-                        .padding(horizontal = 11.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Speed,
-                            contentDescription = null,
-                            modifier = Modifier.size(11.dp),
-                            tint = if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = "${stringResource(Res.string.bible_next_verse_speed_label)}: $verseSpeedName",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                }
-                }
+                EngineChip(
+                    label = "${stringResource(Res.string.bible_next_verse_speed_label)}: $verseSpeedName",
+                    icon = Icons.Filled.Speed,
+                    selected = continuationSpeed != ContinuationSpeed.BALANCED,
+                    tooltip = verseSpeedHint,
+                    onClick = {
+                        val all = ContinuationSpeed.values()
+                        onContinuationSpeedChange(all[(continuationSpeed.ordinal + 1) % all.size])
+                    },
+                )
                 if (showFlagButtons) {
                     FlagPillButton(
                         icon = Icons.Filled.Flag,
@@ -602,62 +461,74 @@ private fun FlagPillButton(
         }
     }
 
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-    val contentColor = when {
-        !enabled -> muted
-        flashing -> MaterialTheme.colorScheme.surface
-        else -> tint
-    }
-    val background = when {
-        flashing -> tint
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
-    val borderColor = if (enabled) tint.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant
-
-    TooltipArea(tooltip = {
-        Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-            Text(
-                text = if (enabled) tooltip else (disabledTooltip ?: tooltip),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(8.dp)
+    TooltipArea(tooltip = { EngineTooltip(if (enabled) tooltip else (disabledTooltip ?: tooltip)) }) {
+        val leading: @Composable () -> Unit = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(12.dp),
+                tint = if (flashing || !enabled) LocalContentColor.current else tint,
             )
         }
-    }) {
-        Box(
-            modifier = Modifier
-                .height(27.dp)
-                .background(background, RoundedCornerShape(6.dp))
-                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
-                .then(
-                    if (!enabled) Modifier
-                    else Modifier.clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                    ) {
-                        flashing = true
-                        onClick()
-                    }
-                )
-                .padding(horizontal = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(11.dp),
-                    tint = contentColor
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.5.sp, fontWeight = FontWeight.Medium),
-                    color = contentColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+        val text: @Composable () -> Unit = {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        // A raised key in the neutral colour, filling with its own colour for a moment when pressed.
+        // With nothing live to describe it is shown but not pressable, rather than swallowing clicks.
+        if (enabled) {
+            RaisedFilterChip(
+                selected = flashing,
+                onClick = {
+                    flashing = true
+                    onClick()
+                },
+                selectedContainerColor = tint,
+                selectedLabelColor = MaterialTheme.colorScheme.surface,
+                leadingIcon = leading,
+                label = text,
+            )
+        } else {
+            InertChip(leadingIcon = leading, label = text)
         }
     }
 }
 
 private const val FLAG_FLASH_MS = 600L
+
+/** One of the engine's settings as a raised toggle key: the accent key while [selected]. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun EngineChip(
+    label: String,
+    icon: ImageVector,
+    selected: Boolean,
+    tooltip: String,
+    onClick: () -> Unit,
+) {
+    TooltipArea(tooltip = { EngineTooltip(tooltip) }) {
+        RaisedFilterChip(
+            selected = selected,
+            onClick = onClick,
+            leadingIcon = { Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(12.dp)) },
+            label = {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                    maxLines = 1,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun EngineTooltip(text: String) {
+    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+        Text(text = text, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(8.dp))
+    }
+}

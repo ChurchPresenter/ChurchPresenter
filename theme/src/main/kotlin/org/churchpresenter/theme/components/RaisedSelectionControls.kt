@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LocalContentColor
@@ -95,7 +95,7 @@ fun RaisedCheckbox(
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val hoverRim = MaterialTheme.colorScheme.primary.copy(alpha = HOVER_RIM_ALPHA)
-    val shape = RoundedCornerShape(BOX_RADIUS)
+    val shape = AppShape(BOX_RADIUS)
     val fill = checkedFill(colors.checkedBoxColor, colors.checkedCheckmarkColor)
     val toggle = if (onCheckedChange != null) {
         Modifier.toggleable(
@@ -240,7 +240,7 @@ fun RaisedFilterChip(
     enabled: Boolean = true,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    shape: Shape = RoundedCornerShape(CHIP_RADIUS),
+    shape: Shape = AppShape(CHIP_RADIUS),
     selectedContainerColor: Color = Color.Unspecified,
     selectedLabelColor: Color = Color.Unspecified,
     interactionSource: MutableInteractionSource? = null,
@@ -274,7 +274,7 @@ fun RaisedChip(
     enabled: Boolean = true,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    shape: Shape = RoundedCornerShape(CHIP_RADIUS),
+    shape: Shape = AppShape(CHIP_RADIUS),
     interactionSource: MutableInteractionSource? = null,
 ) {
     val palette = elevationPalette()
@@ -318,7 +318,7 @@ fun RaisedChip(
 @Composable
 fun SegmentTrack(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(10.dp),
+    shape: Shape = AppShape(10.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(
@@ -338,7 +338,7 @@ fun SegmentTrackItem(
     content: @Composable () -> Unit,
 ) {
     val palette = elevationPalette()
-    val shape = RoundedCornerShape(7.dp)
+    val shape = AppShape(7.dp)
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val ink = when {

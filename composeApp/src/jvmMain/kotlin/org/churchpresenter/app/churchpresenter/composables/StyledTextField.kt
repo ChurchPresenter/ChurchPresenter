@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,8 +49,8 @@ fun StyledTextField(
     }
     Row(
         modifier = rowModifier
-            .sunken(RoundedCornerShape(8.dp), elevationPalette())
-            .hoverTint(RoundedCornerShape(8.dp)),
+            .sunken(AppShape(8.dp), elevationPalette())
+            .hoverTint(AppShape(8.dp)),
         verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
     ) {
         Column(

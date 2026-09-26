@@ -5,7 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.components.RaisedButton
 
@@ -17,7 +17,7 @@ fun SuccessButton(
     enabled: Boolean = true
 ) {
     RaisedButton(
-        shape = RoundedCornerShape(6.dp),
+        shape = AppShape(6.dp),
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.inverseSurface,

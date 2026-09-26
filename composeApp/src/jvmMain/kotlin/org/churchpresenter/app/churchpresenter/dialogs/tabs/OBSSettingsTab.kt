@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
@@ -185,7 +185,7 @@ fun OBSSettingsTab(
                     ) {
                         if (status == OBSWebSocketManager.ConnectionStatus.CONNECTED) {
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = { obsManager.disconnect() },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error
@@ -195,7 +195,7 @@ fun OBSSettingsTab(
                             }
                         } else {
                             RaisedButton(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = AppShape(6.dp),
                                 onClick = {
                                     val port = portText.toIntOrNull() ?: 4455
                                     obsManager.connect(hostText, port, passwordText)

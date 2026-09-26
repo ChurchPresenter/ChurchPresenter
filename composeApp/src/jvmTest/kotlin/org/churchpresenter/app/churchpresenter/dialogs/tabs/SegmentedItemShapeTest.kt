@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.theme.AppShape
 
 /**
  * `segmentedItemShape` rounds the outer corners of a segmented row so the buttons read as one
@@ -30,7 +30,7 @@ class SegmentedItemShapeTest {
     @Test
     fun `a row of one item is rounded on every corner`() {
         assertEquals(
-            RoundedCornerShape(radius),
+            AppShape(radius),
             shapeOf(index = 0, count = 1),
             "a lone segment is the whole control, so all four corners are rounded",
         )
@@ -39,7 +39,7 @@ class SegmentedItemShapeTest {
     @Test
     fun `the first item of a row is rounded only on its leading edge`() {
         assertEquals(
-            RoundedCornerShape(topStart = radius, bottomStart = radius, topEnd = 0.dp, bottomEnd = 0.dp),
+            AppShape(topStart = radius, bottomStart = radius, topEnd = 0.dp, bottomEnd = 0.dp),
             shapeOf(index = 0, count = 3),
             "the first segment must stay square where it meets the next one",
         )
@@ -48,7 +48,7 @@ class SegmentedItemShapeTest {
     @Test
     fun `the last item of a row is rounded only on its trailing edge`() {
         assertEquals(
-            RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = radius, bottomEnd = radius),
+            AppShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = radius, bottomEnd = radius),
             shapeOf(index = 2, count = 3),
             "the last segment must stay square where it meets the previous one",
         )
@@ -57,7 +57,7 @@ class SegmentedItemShapeTest {
     @Test
     fun `an item between two others is square on both edges`() {
         assertEquals(
-            RoundedCornerShape(0.dp),
+            AppShape(0.dp),
             shapeOf(index = 1, count = 3),
             "a middle segment touches a neighbour on both sides",
         )
@@ -66,12 +66,12 @@ class SegmentedItemShapeTest {
     @Test
     fun `a two-item row rounds one outer edge each`() {
         assertEquals(
-            RoundedCornerShape(topStart = radius, bottomStart = radius, topEnd = 0.dp, bottomEnd = 0.dp),
+            AppShape(topStart = radius, bottomStart = radius, topEnd = 0.dp, bottomEnd = 0.dp),
             shapeOf(index = 0, count = 2),
             "the left half of a pair",
         )
         assertEquals(
-            RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = radius, bottomEnd = radius),
+            AppShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = radius, bottomEnd = radius),
             shapeOf(index = 1, count = 2),
             "the right half of a pair",
         )

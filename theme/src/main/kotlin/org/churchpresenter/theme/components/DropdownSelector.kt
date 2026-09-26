@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,7 +58,7 @@ fun DropdownSelector(
 
     Box(
         modifier = sizeModifier
-            .dropdownField(RoundedCornerShape(8.dp), open = expanded)
+            .dropdownField(AppShape(8.dp), open = expanded)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 expanded = true
             }
@@ -169,7 +169,7 @@ fun DropdownSelector(
         Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
-                .dropdownField(RoundedCornerShape(8.dp), open = expanded.value)
+                .dropdownField(AppShape(8.dp), open = expanded.value)
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                     expanded.value = true
                 }

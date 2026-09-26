@@ -7,7 +7,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -206,7 +206,7 @@ private val DRAG_HANDLE_THRESHOLD = 4.dp
 
 private val DELETE_ZONE_HEIGHT = 56.dp
 
-internal val CARD_SHAPE = RoundedCornerShape(12.dp)
+internal val CARD_SHAPE = AppShape(12.dp)
 
 internal object ScheduleToolbarTags {
     const val UNDO = "schedule_undo"
@@ -278,7 +278,7 @@ fun ScheduleTab(
             text = { Text(stringResource(Res.string.autosave_restore_message, timeStr)) },
             confirmButton = {
                 RaisedButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = {
                     viewModel.restoreAutoSave()
                     showAutoRestoreDialog = false
@@ -286,7 +286,7 @@ fun ScheduleTab(
             },
             dismissButton = {
                 GhostButton(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = AppShape(6.dp),
                     onClick = {
                     viewModel.clearAutoSave()
                     showAutoRestoreDialog = false
@@ -647,7 +647,7 @@ fun ScheduleTab(
                         .zIndex(DRAG_TARGET_Z_INDEX)
                         .background(
                             MaterialTheme.colorScheme.error.copy(alpha = if (isOverDeleteZone) 0.9f else 0.25f),
-                            RoundedCornerShape(4.dp)
+                            AppShape(4.dp)
                         ),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically

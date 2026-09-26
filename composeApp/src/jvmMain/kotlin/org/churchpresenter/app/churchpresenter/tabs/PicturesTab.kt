@@ -49,7 +49,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.KeyboardOptions
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
@@ -328,7 +328,7 @@ fun PicturesTab(
                         }
                     },
                     modifier = Modifier.height(32.dp),
-                    shape = RoundedCornerShape(7.dp),
+                    shape = AppShape(7.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -608,7 +608,7 @@ fun PicturesTab(
                         modifier = Modifier
                             .height(42.dp)
                             .width(SETTING_BOX_WIDTH)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                            .sunken(AppShape(8.dp), elevationPalette())
                             .clickable { editingInterval = true }
                             .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                         verticalArrangement = Arrangement.Center
@@ -653,7 +653,7 @@ fun PicturesTab(
                             },
                             confirmButton = {
                                 GhostButton(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = AppShape(6.dp),
                                     onClick = {
                                     intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
                                         viewModel.autoScrollInterval = v.toFloat()
@@ -663,7 +663,7 @@ fun PicturesTab(
                                 }) { Text(stringResource(Res.string.ok)) }
                             },
                             dismissButton = {
-                                GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) {
+                                GhostButton(shape = AppShape(6.dp), onClick = { editingInterval = false }) {
                                     Text(stringResource(Res.string.cancel))
                                 }
                             }
@@ -675,7 +675,7 @@ fun PicturesTab(
                         modifier = Modifier
                             .height(42.dp)
                             .width(SETTING_BOX_WIDTH)
-                            .sunken(RoundedCornerShape(8.dp), elevationPalette())
+                            .sunken(AppShape(8.dp), elevationPalette())
                             .clickable { editingTransition = true }
                             .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                         verticalArrangement = Arrangement.Center
@@ -720,7 +720,7 @@ fun PicturesTab(
                             },
                             confirmButton = {
                                 GhostButton(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = AppShape(6.dp),
                                     onClick = {
                                     transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v ->
                                         viewModel.transitionDuration = v.toFloat()
@@ -730,7 +730,7 @@ fun PicturesTab(
                                 }) { Text(stringResource(Res.string.ok)) }
                             },
                             dismissButton = {
-                                GhostButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) {
+                                GhostButton(shape = AppShape(6.dp), onClick = { editingTransition = false }) {
                                     Text(stringResource(Res.string.cancel))
                                 }
                             }
@@ -864,9 +864,9 @@ fun PicturesTab(
                             modifier = Modifier
                                 .animateItem()
                                 .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
-                                .hoverLift(RoundedCornerShape(8.dp))
-                                .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-                                .clip(RoundedCornerShape(8.dp))
+                                .hoverLift(AppShape(8.dp))
+                                .border(2.dp, borderColor, AppShape(8.dp))
+                                .clip(AppShape(8.dp))
                                 .pointerInput(imageFile) {
                                     awaitPointerEventScope {
                                         while (true) {
@@ -1012,8 +1012,8 @@ fun PicturesTab(
                                         scaleY = DRAGGED_ITEM_SCALE
                                         shadowElevation = DRAGGED_ITEM_ELEVATION
                                     }
-                                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.surface, AppShape(8.dp))
+                                    .border(2.dp, MaterialTheme.colorScheme.primary, AppShape(8.dp))
                             ) {
                                 Image(
                                     bitmap = bitmap,
@@ -1040,7 +1040,9 @@ fun PicturesTab(
         } else {
             // Empty state
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                    .bibleListCard(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(

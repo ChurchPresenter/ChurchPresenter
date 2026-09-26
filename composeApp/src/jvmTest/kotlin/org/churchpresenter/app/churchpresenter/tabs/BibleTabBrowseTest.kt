@@ -36,10 +36,10 @@ class BibleTabBrowseTest {
         }
 
     @Test
-    fun `the column headers are labelled`() = bibleTab { _, _ ->
+    fun `the book and verse columns are labelled and the chapter column is not`() = bibleTab { _, _ ->
         // Uppercased by the tab, so this also pins that they are headers rather than data rows.
         assertTrue(showsExactly(BibleLabel.BOOK.uppercase()), "BOOK header")
-        assertTrue(showsExactly(BibleLabel.CHAPTER.uppercase()), "CHAPTER header")
+        assertFalse(showsExactly(BibleLabel.CHAPTER.uppercase()), "the chapter numbers carry no header")
         assertTrue(showsExactly(BibleLabel.VERSE.uppercase()), "VERSE header")
     }
 

@@ -28,7 +28,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.AlertDialog
@@ -495,7 +495,7 @@ internal fun CCLIReportContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     KeyButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             coroutineScope.launch {
                                 val f = fromMs(); val t = toMs()
@@ -514,7 +514,7 @@ internal fun CCLIReportContent(
                     ) { Text(stringResource(Res.string.ccli_export_csv)) }
 
                     KeyButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = {
                             coroutineScope.launch {
                                 val f = fromMs(); val t = toMs()
@@ -533,7 +533,7 @@ internal fun CCLIReportContent(
                     ) { Text(stringResource(Res.string.ccli_export_xls)) }
 
                     RaisedButton(
-                        shape = RoundedCornerShape(6.dp),
+                        shape = AppShape(6.dp),
                         onClick = { confirmClearAll = true },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error,
@@ -543,7 +543,7 @@ internal fun CCLIReportContent(
 
                     Spacer(Modifier.weight(1f))
 
-                    RaisedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                    RaisedButton(shape = AppShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.close))
                     }
                 }
@@ -918,12 +918,12 @@ private fun ConfirmClearDialog(message: String, onConfirm: () -> Unit, onDismiss
         title = { Text(stringResource(Res.string.confirm_delete)) },
         text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
         confirmButton = {
-            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+            GhostButton(shape = AppShape(6.dp), onClick = onConfirm) {
                 Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
-            GhostButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+            GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
                 Text(stringResource(Res.string.cancel))
             }
         }
@@ -994,14 +994,14 @@ private fun TopItemsChart(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp))
+                            .clip(AppShape(3.dp))
                             .background(trackColor)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .fillMaxWidth(fraction = value.toFloat() / maxValue)
-                                .clip(RoundedCornerShape(3.dp))
+                                .clip(AppShape(3.dp))
                                 .background(barBrush)
                         )
                     }
@@ -1028,7 +1028,7 @@ private fun ActivityBarChart(
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val songsLabel = stringResource(Res.string.ccli_legend_songs)
     val versesLabel = stringResource(Res.string.ccli_legend_bible)
-    val barCorner = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+    val barCorner = AppShape(topStart = 4.dp, topEnd = 4.dp)
     // Lighter at the top, fading down to the series color.
     val songBrush = Brush.verticalGradient(listOf(lerp(songColor, Color.White, 0.3f), songColor))
     val verseBrush = Brush.verticalGradient(listOf(lerp(verseColor, Color.White, 0.3f), verseColor))
@@ -1232,7 +1232,7 @@ private fun DropdownPicker(
     var expanded by remember { mutableStateOf(false) }
     Box {
         KeyButton(
-            shape = RoundedCornerShape(6.dp),
+            shape = AppShape(6.dp),
             onClick = { expanded = true },
             modifier = modifier.height(36.dp),
             contentPadding = PaddingValues(start = 10.dp, end = 4.dp, top = 0.dp, bottom = 0.dp)
@@ -1265,7 +1265,7 @@ private fun PresetButton(label: String, active: Boolean, onClick: () -> Unit) {
     val contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)
     if (active) {
         RaisedButton(
-            shape = RoundedCornerShape(PILL_CORNER_PERCENT),
+            shape = AppShape(PILL_CORNER_PERCENT),
             onClick = onClick,
             contentPadding = contentPadding,
             modifier = Modifier.height(32.dp)
@@ -1274,7 +1274,7 @@ private fun PresetButton(label: String, active: Boolean, onClick: () -> Unit) {
         }
     } else {
         KeyButton(
-            shape = RoundedCornerShape(PILL_CORNER_PERCENT),
+            shape = AppShape(PILL_CORNER_PERCENT),
             onClick = onClick,
             contentPadding = contentPadding,
             modifier = Modifier.height(32.dp)
@@ -1296,8 +1296,8 @@ private fun RowScope.StatCard(label: String, value: String, color: Color) {
     Column(
         modifier = Modifier
             .weight(1f)
-            .background(color.copy(alpha = 0.10f), RoundedCornerShape(10.dp))
-            .border(1.dp, color.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+            .background(color.copy(alpha = 0.10f), AppShape(10.dp))
+            .border(1.dp, color.copy(alpha = 0.35f), AppShape(10.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Text(
@@ -1319,7 +1319,7 @@ private fun RowScope.StatCard(label: String, value: String, color: Color) {
 
 @Composable
 private fun LegendDot(color: Color) {
-    Box(modifier = Modifier.size(10.dp).background(color, RoundedCornerShape(2.dp)))
+    Box(modifier = Modifier.size(10.dp).background(color, AppShape(2.dp)))
 }
 
 @Composable
@@ -1356,7 +1356,7 @@ private fun RowScope.UsageBadgeCell(
         Box(
             modifier = Modifier
                 .widthIn(min = 24.dp)
-                .clip(RoundedCornerShape(5.dp))
+                .clip(AppShape(5.dp))
                 .background(bg)
                 .padding(horizontal = 6.dp, vertical = 2.dp),
             contentAlignment = Alignment.Center
