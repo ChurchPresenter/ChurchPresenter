@@ -4,6 +4,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTranslation
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class TranslationComparisonTest {
@@ -179,5 +180,13 @@ class TranslationComparisonTest {
 
         assertEquals(listOf(2), titlesOnly.lyriclessLanguages)
         assertEquals(listOf(1), translatedOnly.lyriclessLanguages)
+    }
+
+    @Test
+    fun `any one kind of problem is enough to make the song a problem`() {
+        assertTrue(TranslationProblems().isEmpty)
+        assertFalse(TranslationProblems(mismatchedSections = 1).isEmpty)
+        assertFalse(TranslationProblems(untitledLanguages = listOf(2)).isEmpty)
+        assertFalse(TranslationProblems(lyriclessLanguages = listOf(2)).isEmpty)
     }
 }

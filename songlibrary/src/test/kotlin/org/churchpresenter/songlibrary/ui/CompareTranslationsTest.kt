@@ -110,6 +110,77 @@ class CompareTranslationsTest {
         assertNull(saved)
     }
 
+    /**
+     * Words before the first header, a verse split across a different number of slides, and a verse
+     * the second language has not got at all.
+     */
+    private val partial = SongItem(
+        number = "2",
+        title = "Partial",
+        songbook = "Hymnal",
+        lyrics = listOf("Opening", "[Verse 1]", "One", "Two", "[---]", "Three", "", "[Verse 2]", "Four"),
+    ).withTranslations(
+        listOf(
+            SongTranslation(title = "Жарым", lyrics = listOf("Ачылыш", "", "[Verse 1]", "Бир", "Эки", "Үч")),
+        ),
+    )
+
+    @Test
+    fun `a section without a header, one split differently and one never translated are each told apart`() =
+        compare(song = partial) {
+            assertTrue(isShowing("Section 1"), "words before the first header are numbered")
+            assertTrue(isShowingText("1 slides · L1 has 2"), "same lines, different slides")
+            assertTrue(isShowing("Missing in L2"))
+            assertTrue(isShowing("Missing"))
+            assertTrue(isShowing("Add the Language 2 text for Verse 2…"))
+        }
+
+    @Test
+    fun `a verse typed into a slot the language never had is saved under that verse's header`() {
+        var saved: SongItem? = null
+        compare(song = partial, onSave = { saved = it }) {
+            clickFirst("Verse 2")
+            onAllNodes(hasSetTextAction())[5].performTextReplacement("Төрт")
+            waitForIdle()
+            click("Save Changes")
+        }
+
+        assertEquals(
+            listOf("Ачылыш", "", "[Verse 1]", "Бир", "Эки", "Үч", "", "[Verse 2]", "Төрт"),
+            checkNotNull(saved).extraTranslations()[0].lyrics,
+        )
+    }
+
+    @Test
+    fun `only problems on a song that lines up says so instead of showing nothing`() = compare(
+        song = grace.withTranslations(
+            listOf(
+                SongTranslation(
+                    title = "Благодать",
+                    lyrics = listOf("[Куплет 1]", "Один", "Два", "", "[Припев]", "Три"),
+                ),
+            ),
+        ),
+    ) {
+        assertTrue(isShowing("All sections line up"))
+        click("Only problems")
+
+        assertTrue(isShowing("Every section lines up across the languages shown."))
+        clickFirst("Verse 1")
+        assertTrue(
+            isShowing("Every section lines up across the languages shown."),
+            "a hidden section is not scrolled to",
+        )
+    }
+
+    @Test
+    fun `a hidden language can be shown again`() = compare {
+        clickFirst("Kyrgyz")
+        clickFirst("Kyrgyz")
+
+        assertEquals(2, countShowing("Kyrgyz"))
+    }
+
     // ── The grid's side of it ─────────────────────────────────────────────────
 
     @Test
@@ -126,5 +197,20 @@ class CompareTranslationsTest {
         songs = listOf(grace.copy(sourceFile = "")),
     ) { _ ->
         onNodeWithContentDescription("1 sections don’t line up across languages").assertExists()
+    }
+
+    @Test
+    fun `a song whose languages line up but lack a title or lyrics is flagged with each problem`() = withLibrary(
+        songs = listOf(
+            SongItem(number = "3", title = "Grace", lyrics = listOf("[Verse 1]", "One")).withTranslations(
+                listOf(
+                    SongTranslation(lyrics = listOf("[Куплет 1]", "Один")),
+                    SongTranslation(title = "Ырайым"),
+                ),
+            ).copy(sourceFile = ""),
+        ),
+    ) { _ ->
+        onNodeWithContentDescription("Language 2 has no title\nLanguage 3 has no lyrics").assertExists()
+        onNodeWithContentDescription("Compare translations").assertExists()
     }
 }
