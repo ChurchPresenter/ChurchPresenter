@@ -3357,6 +3357,8 @@
     <string name="profile_undo">Undo</string>
     <string name="profile_inherited_tooltip">From %1$s. Change it to set it for %2$s only.</string>
     <string name="profile_master_value">%1$s: %2$s</string>
+    <string name="profile_defaults">defaults</string>
+    <string name="profile_default_value">Default</string>
     <string name="profile_revert">Revert</string>
     <string name="profile_revert_to">Revert to %1$s</string>
     <string name="profile_different_from">Different from %1$s</string>

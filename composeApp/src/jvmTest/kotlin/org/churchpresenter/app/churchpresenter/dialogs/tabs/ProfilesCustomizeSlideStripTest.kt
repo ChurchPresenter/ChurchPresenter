@@ -83,7 +83,7 @@ class ProfilesCustomizeSlideStripTest {
 
             assertFalse(get().song().showEndOfSongIndicator)
             // A spacing for a marker that is off changes nothing, so the field goes with it.
-            onNode(hasSetTextAction() and hasText("17")).assertDoesNotExist()
+            onNode(hasSetTextAction() and hasText("17") and outsideDefaultsCard).assertDoesNotExist()
         }
     }
 

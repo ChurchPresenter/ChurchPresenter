@@ -201,22 +201,28 @@ internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: B
  * element dragged out of sight, with its handle, can still be brought back.
  */
 @Composable
-internal fun ResetPositionsKey(positions: PositionsReset) {
+internal fun ResetPositionsKey(
+    positions: PositionsReset,
+    /** Its explanation beside it -- left off in a toolbar, where the key sits among others. */
+    note: Boolean = true,
+) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         KeyButton(
             onClick = positions.onReset,
             enabled = positions.moved,
-            modifier = Modifier.height(30.dp).testTag(RESET_POSITIONS_TAG),
+            modifier = Modifier.height(if (note) 30.dp else 28.dp).testTag(RESET_POSITIONS_TAG),
             contentPadding = PaddingValues(horizontal = 10.dp),
         ) {
-            Text(stringResource(Res.string.profile_reset_positions), fontSize = 12.sp)
+            Text(stringResource(Res.string.profile_reset_positions), fontSize = if (note) 12.sp else 11.sp)
         }
-        Text(
-            stringResource(Res.string.profile_reset_positions_sub),
-            fontSize = 11.sp,
-            lineHeight = 15.sp,
-            color = profilesPalette().faintText,
-        )
+        if (note) {
+            Text(
+                stringResource(Res.string.profile_reset_positions_sub),
+                fontSize = 11.sp,
+                lineHeight = 15.sp,
+                color = profilesPalette().faintText,
+            )
+        }
     }
 }
 

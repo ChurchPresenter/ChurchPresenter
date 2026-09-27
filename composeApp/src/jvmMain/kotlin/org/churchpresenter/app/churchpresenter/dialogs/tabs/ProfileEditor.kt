@@ -168,9 +168,13 @@ internal fun ProfileEditor(
                         songTargets,
                     ),
                 ) {
-                    LinkContextCard(link, linkActions, onPageChange) { path, value ->
-                        onProfileChange(profile.withValueAt(path, value))
-                    }
+                    LinkContextCard(
+                        link = link,
+                        actions = linkActions,
+                        onOpenPage = onPageChange,
+                        onValueChange = { path, value -> onProfileChange(profile.withValueAt(path, value)) },
+                        onProfileChange = onProfileChange,
+                    )
                 }
             }
         }

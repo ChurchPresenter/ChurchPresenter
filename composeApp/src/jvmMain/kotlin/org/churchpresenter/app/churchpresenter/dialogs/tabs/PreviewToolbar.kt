@@ -57,6 +57,8 @@ internal fun PreviewToolbar(
     modifier: Modifier = Modifier,
     /** Keys that sit before the shape menu -- Larger, once there is a larger preview to open. */
     actions: @Composable RowScope.() -> Unit = {},
+    /** Keys at the end of the Background / Sample row -- Reset positions, in the large preview. */
+    trailing: @Composable RowScope.() -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -124,6 +126,8 @@ internal fun PreviewToolbar(
                         modifier = Modifier.testTag(PREVIEW_SAMPLE_ROW_TAG),
                     )
                 }
+                Spacer(modifier = Modifier.width(10.dp))
+                trailing()
             }
         }
     }
