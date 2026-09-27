@@ -814,7 +814,11 @@ fun MainDesktop(
     suspend fun pushCurrentSlideIfLive() {
         val index = presentationViewModel.selectedSlideIndex
         if (!shouldPushSlide(presenterManager.presentingMode.value, index, presentationViewModel.slideFiles.size)) return
-        val (bitmap, nextBitmap) = decodeSlideBitmaps(presentationViewModel.slideFiles, index)
+        val (bitmap, nextBitmap) = decodeSlideBitmaps(
+            presentationViewModel.slideFiles,
+            index,
+            presentationViewModel.nextShownSlideIndex(index),
+        )
         presenterManager.setSelectedSlide(bitmap)
         presenterManager.setNextSlide(nextBitmap)
         presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))

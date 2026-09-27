@@ -28,7 +28,7 @@ than dropping a file at the root.
 |---|---|
 | `schedule/` | `ScheduleItem.kt` — the sealed hierarchy, every kind of service-plan entry, plus `websiteDisplayText`; and `TimerModes.kt`, the countdown modes `ScheduleItem` reads |
 | `songs/` | The song itself and the `.song` format — `SongItem`, `SongFileParser`, `SongLibrary`, `SongGrid`, `SongEdits`, `SongFileName` — plus `LyricSection` (a verse/chorus section) and `SongTuning` |
-| `scene/` | `SceneModels.kt` — `SceneSource` (the sealed canvas-layer hierarchy), `Scene`, `SourceTransform`, `PathPoint` |
+| `scene/` | `SceneModels.kt` — `SceneSource` (the sealed canvas-layer hierarchy), `Scene`, `SourceTransform`, `PathPoint`, and `SceneAlternateLayout` with `alternateScene`/`forArea`/`turnedFor` — a scene's second, sideways layout and which one an area draws |
 | `bible/` | `SelectedVerse.kt` — one selected Bible verse |
 | `qa/` | `Question.kt` — `Question`, `QuestionStatus`, the wire types `QuestionDto`/`SubmitQuestionRequest`, and `Question.toDto()` |
 | `companion/` | `CompanionSurfaceSlot.kt`, `CompanionSurfacePlacement.kt` — where a Companion surface is docked |

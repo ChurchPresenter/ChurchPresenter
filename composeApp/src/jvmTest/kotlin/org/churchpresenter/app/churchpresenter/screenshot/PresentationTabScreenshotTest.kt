@@ -202,6 +202,13 @@ class PresentationTabScreenshotTest {
     }
 
     @Test
+    fun `a slide hidden from the slideshow`() = shoot("slide_hidden") { vm ->
+        load(vm, sermonDeck())
+        if (1 !in vm.hiddenSlides) vm.toggleSlideHidden(1)
+        waitForIdle()
+    }
+
+    @Test
     fun `the deck auto-advancing`() = shoot("playing") { vm ->
         load(vm, sermonDeck())
         onNodeWithContentDescription(PLAY).performClick()

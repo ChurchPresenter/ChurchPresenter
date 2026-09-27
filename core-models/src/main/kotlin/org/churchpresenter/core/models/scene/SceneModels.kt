@@ -36,6 +36,9 @@ sealed class SceneSource {
      */
     abstract fun withId(id: String): SceneSource
 
+    /** This source with every setting kept but a new [transform] — where it sits in another layout. */
+    abstract fun withTransform(transform: SourceTransform): SceneSource
+
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.ImageSource")
     data class ImageSource(
@@ -48,6 +51,7 @@ sealed class SceneSource {
         val contentScale: String = "FIT"
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -87,6 +91,7 @@ sealed class SceneSource {
         val curve: Float = 0f
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -106,6 +111,7 @@ sealed class SceneSource {
         val gradientPosition: Float = 0.5f
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -121,6 +127,7 @@ sealed class SceneSource {
         val volume: Float = 1f
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -140,6 +147,7 @@ sealed class SceneSource {
         val forceTransparent: Boolean = false
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -165,6 +173,7 @@ sealed class SceneSource {
         val gradientPosition: Float = 0.5f
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -207,6 +216,7 @@ sealed class SceneSource {
         val curve: Float = 0f
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -229,6 +239,7 @@ sealed class SceneSource {
         val errorCorrection: String = "M"
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -247,6 +258,7 @@ sealed class SceneSource {
         val deckLinkIndex: Int = -1
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -267,6 +279,7 @@ sealed class SceneSource {
         val windowId: String = ""
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     /**
@@ -293,6 +306,7 @@ sealed class SceneSource {
         val lowBandwidth: Boolean = false
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
     @Serializable
@@ -334,6 +348,7 @@ sealed class SceneSource {
         val curve: Float = 0f
     ) : SceneSource() {
         override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 }
 
@@ -346,5 +361,103 @@ data class Scene(
     val name: String = "Scene",
     val sources: List<SceneSource> = emptyList(),
     val canvasWidth: Int = 1920,
-    val canvasHeight: Int = 1080
+    val canvasHeight: Int = 1080,
+    /**
+     * A second layout of the same layers for screens of the other orientation, or null for a scene
+     * with one canvas. Its canvas is this one turned sideways — see [alternateScene].
+     */
+    val alternate: SceneAlternateLayout? = null
 )
+
+/**
+ * Where each layer sits in a scene's second layout. Only position and size differ between the two
+ * layouts; the layers themselves — their content and styling — are the scene's own.
+ *
+ * [transforms] is keyed by source id. A layer with no entry sits where it does in the main layout,
+ * at the same fractions of the turned canvas.
+ */
+@Serializable
+data class SceneAlternateLayout(
+    val transforms: Map<String, SourceTransform> = emptyMap()
+)
+
+/** True when the canvas is wider than it is tall. A square counts as landscape. */
+val Scene.isLandscape: Boolean get() = canvasWidth >= canvasHeight
+
+/**
+ * The scene as its second layout draws it: the canvas turned sideways (width and height swapped)
+ * and each layer moved to its [SceneAlternateLayout.transforms] entry. With no alternate layout
+ * this is the scene itself.
+ */
+fun Scene.alternateScene(): Scene {
+    val layout = alternate ?: return this
+    return copy(
+        canvasWidth = canvasHeight,
+        canvasHeight = canvasWidth,
+        sources = sources.map { source ->
+            val transform = layout.transforms[source.id]
+                ?: source.transform.turnedFor(source, canvasWidth, canvasHeight, canvasHeight, canvasWidth)
+            source.withTransform(transform)
+        },
+    )
+}
+
+/** Slack at the canvas edges, so a box flush with one still counts as inside. */
+private const val EDGE_SLACK = 0.001f
+
+/**
+ * Where [source] starts on a [toWidth]×[toHeight] canvas when this is where it sits on a
+ * [fromWidth]×[fromHeight] one — for a layer not yet moved in a scene's second layout.
+ *
+ * Copying the fractions would change the box's shape along with the canvas's, so:
+ * - Pictures, video, captures, QR codes and shapes keep their shape, scaled by as much as the whole
+ *   canvas has to shrink to fit the new one. A full-screen capture becomes a full-width band.
+ * - Text, clocks and Bible verses keep their text size (fonts are in canvas pixels): the box keeps
+ *   its pixel width, up to the canvas width, and its pixel area, so wrapped lines have room.
+ * - A colour keeps its fractions, so a full-screen background stays full screen.
+ *
+ * The box's centre stays at the same fractions, and a box that was inside the canvas is kept inside.
+ */
+fun SourceTransform.turnedFor(
+    source: SceneSource,
+    fromWidth: Int,
+    fromHeight: Int,
+    toWidth: Int,
+    toHeight: Int,
+): SourceTransform {
+    val sized = minOf(fromWidth, fromHeight, toWidth, toHeight) > 0
+    if (source is SceneSource.ColorSource || !sized) return this
+    val pixelWidth = width * fromWidth
+    val pixelHeight = height * fromHeight
+    val (newWidth, newHeight) = when (source) {
+        is SceneSource.TextSource, is SceneSource.ClockSource, is SceneSource.BibleSource -> {
+            val w = minOf(pixelWidth, toWidth.toFloat())
+            val h = if (w > 0f) pixelWidth * pixelHeight / w else pixelHeight
+            w / toWidth to h / toHeight
+        }
+        else -> {
+            val scale = minOf(toWidth.toFloat() / fromWidth, toHeight.toFloat() / fromHeight)
+            pixelWidth * scale / toWidth to pixelHeight * scale / toHeight
+        }
+    }
+    var newX = x + width / 2f - newWidth / 2f
+    var newY = y + height / 2f - newHeight / 2f
+    val wasInside = x >= -EDGE_SLACK && y >= -EDGE_SLACK &&
+        x + width <= 1f + EDGE_SLACK && y + height <= 1f + EDGE_SLACK
+    if (wasInside) {
+        newX = newX.coerceIn(0f, (1f - newWidth).coerceAtLeast(0f))
+        newY = newY.coerceIn(0f, (1f - newHeight).coerceAtLeast(0f))
+    }
+    return copy(x = newX, y = newY, width = newWidth, height = newHeight)
+}
+
+/**
+ * The layout to draw on an area of [width]×[height]: the alternate when there is one and the area
+ * is the alternate's orientation, this scene otherwise. An area with no size keeps the main layout.
+ */
+fun Scene.forArea(width: Float, height: Float): Scene {
+    val sized = width > 0f && height > 0f
+    if (alternate == null || !sized || width == height) return this
+    val areaLandscape = width > height
+    return if (areaLandscape == isLandscape) this else alternateScene()
+}

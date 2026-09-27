@@ -25,6 +25,9 @@ import org.churchpresenter.presentationengine.cache.SlideDiskCache
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.presentationengine.model.DeckFormat
 import org.churchpresenter.presentationengine.model.DeckLoadError
+import org.churchpresenter.app.churchpresenter.data.HiddenItemsStore
+import org.churchpresenter.app.churchpresenter.data.firstVisibleIndex
+import org.churchpresenter.app.churchpresenter.data.nextVisibleIndex
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import java.awt.image.BufferedImage
@@ -35,7 +38,11 @@ import java.io.File
  * the presentation engine ([PresentationLoader]/[DeckRasterizer], the :presentation-engine
  * module); this class owns UI state, the shared slide disk cache and job lifecycle only.
  */
-class PresentationViewModel(private val appSettings: AppSettings? = null) {
+class PresentationViewModel(
+    private val appSettings: AppSettings? = null,
+    /** Where hidden slides are remembered -- a parameter so a test can keep them in a temp dir. */
+    private val hiddenStore: HiddenItemsStore = HiddenItemsStore(),
+) {
 
     companion object {
         private val diskCache = SlideDiskCache()
@@ -116,6 +123,53 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     val selectedSlideIndex: Int
         get() = _selectedSlideIndex.value
 
+    private val _hiddenSlides = mutableStateOf<Set<Int>>(emptySet())
+
+    /**
+     * The slides of the selected presentation the operator has hidden (#676): Next, Previous and the
+     * slideshow pass over them, but a click still shows one. Remembered per file.
+     */
+    val hiddenSlides: Set<Int>
+        get() = _hiddenSlides.value
+
+    /**
+     * Whether the selection should still move off a hidden first slide as the deck arrives. Slides
+     * load one at a time, so the first shown one may not exist yet when the deck is selected; once
+     * the operator moves, or a shown slide is selected, this stops.
+     */
+    private var pickFirstShownSlide = false
+
+    /** Hides slide [index] of the selected presentation, or shows it again. */
+    fun toggleSlideHidden(index: Int) {
+        val path = _selectedPresentation.value?.absolutePath ?: return
+        val hidden = _hiddenSlides.value
+        _hiddenSlides.value = if (index in hidden) hidden - index else hidden + index
+        hiddenStore.setHiddenSlides(path, _hiddenSlides.value)
+    }
+
+    /** The slide Next would go to from [index] without wrapping -- what a stage monitor previews. */
+    fun nextShownSlideIndex(index: Int = _selectedSlideIndex.value): Int? =
+        nextVisibleIndex(index, 1, _slideFiles.size, _hiddenSlides.value, wrap = false)
+
+    /** Moves off a hidden slide 0 once a shown one has loaded; see [pickFirstShownSlide]. */
+    private fun settleOnShownSlide() {
+        if (!pickFirstShownSlide) return
+        val hidden = _hiddenSlides.value
+        if (_selectedSlideIndex.value !in hidden) {
+            pickFirstShownSlide = false
+            return
+        }
+        val shown = _slideFiles.indices.firstOrNull { it !in hidden } ?: return
+        _selectedSlideIndex.value = shown
+        pickFirstShownSlide = false
+    }
+
+    /** Starts the selected deck's hidden slides from what was remembered for [file]. */
+    private fun loadHiddenSlides(file: File) {
+        _hiddenSlides.value = hiddenStore.hiddenSlides(file.absolutePath)
+        pickFirstShownSlide = true
+    }
+
     /** One-shot: set by [previousSlide], consumed by the reactive slide-change effect in
      *  PresentationTab so only genuine backward navigation enters the destination slide at its
      *  last build step (matching real PowerPoint/Keynote) instead of the pre-click state. */
@@ -192,7 +246,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         passesWanted = plays
         passesDone = 0
         _isLooping.value = plays != 1
-        _selectedSlideIndex.value = 0
+        _selectedSlideIndex.value = firstVisibleIndex(_slideFiles.size, _hiddenSlides.value)
         _isPlaying.value = true
     }
 
@@ -289,6 +343,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         _selectedPresentation.value = existingFile ?: syntheticFile
         _remotePresentationPath.value = (existingFile ?: syntheticFile) to filePath
         _selectedSlideIndex.value = 0
+        loadHiddenSlides(existingFile ?: syntheticFile)
         _loadError.value = null
         activeLoadJob?.cancel()
         activeLoadJob = scope.launch {
@@ -322,6 +377,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                         withContext(Dispatchers.Main) {
                             _slideFiles.add(slideFile)
                             _slideNotes.add("")
+                            settleOnShownSlide()
                             applyPendingPlayback()
                         }
                     }
@@ -376,6 +432,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             // itself must keep showing the primary's path, not fall back to the mangled one.
             if (_remotePresentationPath.value?.first != existingFile) _remotePresentationPath.value = null
             _selectedSlideIndex.value = 0
+            loadHiddenSlides(existingFile)
             _loadError.value = null
             activeLoadJob?.cancel()
             activeLoadJob = scope.launch { loadOrCacheSlides(existingFile) }
@@ -388,33 +445,50 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
      *  still reaches the primary's own currently-live presentation. See Constants.WS_CMD_NEXT_SLIDE. */
     fun nextSlide(onInstanceLinkSendNext: (() -> Unit)? = null) {
         _enteredViaPreviousSlide.value = false
-        if (_selectedSlideIndex.value < _slideFiles.size - 1) {
-            _selectedSlideIndex.value++
-        } else if (_isLooping.value && _slideFiles.isNotEmpty() && hasAnotherPass()) {
-            passesDone++
-            _selectedSlideIndex.value = 0
+        pickFirstShownSlide = false
+        val current = _selectedSlideIndex.value
+        val count = _slideFiles.size
+        val hidden = _hiddenSlides.value
+        val ahead = nextVisibleIndex(current, 1, count, hidden, wrap = false)
+        val wrapped = if (ahead == null && _isLooping.value && hasAnotherPass()) {
+            nextVisibleIndex(current, 1, count, hidden, wrap = true)
         } else {
-            _isPlaying.value = false
-            passesWanted = 0
-            passesDone = 0
+            null
+        }
+        when {
+            ahead != null -> _selectedSlideIndex.value = ahead
+            wrapped != null -> {
+                passesDone++
+                _selectedSlideIndex.value = wrapped
+            }
+            else -> {
+                _isPlaying.value = false
+                passesWanted = 0
+                passesDone = 0
+            }
         }
         onInstanceLinkSendNext?.invoke()
     }
 
     fun previousSlide(onInstanceLinkSendPrevious: (() -> Unit)? = null) {
-        if (_selectedSlideIndex.value > 0) {
+        pickFirstShownSlide = false
+        val count = _slideFiles.size
+        val hidden = _hiddenSlides.value
+        val current = _selectedSlideIndex.value
+        val target = nextVisibleIndex(current, -1, count, hidden, wrap = false)
+            ?: if (_isLooping.value) nextVisibleIndex(current, -1, count, hidden, wrap = true) else null
+        if (target != null) {
             _enteredViaPreviousSlide.value = true
-            _selectedSlideIndex.value--
-        } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
-            _enteredViaPreviousSlide.value = true
-            _selectedSlideIndex.value = _slideFiles.size - 1
+            _selectedSlideIndex.value = target
         }
         onInstanceLinkSendPrevious?.invoke()
     }
 
+    /** Shows slide [index] -- hidden or not, since picking one is deliberate. */
     fun selectSlide(index: Int) {
         if (index in _slideFiles.indices) {
             _enteredViaPreviousSlide.value = false
+            pickFirstShownSlide = false
             _selectedSlideIndex.value = index
         }
     }
@@ -455,6 +529,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 _totalSlides.value = cached.slideFiles.size
                 _slideFiles.addAll(cached.slideFiles)
                 _slideNotes.addAll(cached.notes)
+                settleOnShownSlide()
                 _deck.value = exposableDeck(parsed)
                 _loadGeneration.value++
                 applyPendingPlayback()
@@ -509,6 +584,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                         )
                         withContext(Dispatchers.Main) {
                             _slideFiles.add(slideFile)
+                            settleOnShownSlide()
                             applyPendingPlayback()
                             _slideNotes.add(slide.notes)
                         }

@@ -179,13 +179,18 @@ internal fun shouldPushSlide(presentingMode: Presenting, selectedIndex: Int, sli
  * A file that will not decode throws, as it did inline: unlike the slide grid, which falls back to a
  * blank thumbnail, there is no sensible blank frame to put on the output here.
  */
-internal suspend fun decodeSlideBitmaps(slideFiles: List<File>, index: Int): Pair<ImageBitmap?, ImageBitmap?> {
+internal suspend fun decodeSlideBitmaps(
+    slideFiles: List<File>,
+    index: Int,
+    /** The slide shown as "next": the one after [index] unless hidden slides are passed over. */
+    nextIndex: Int? = index + 1,
+): Pair<ImageBitmap?, ImageBitmap?> {
     val current = slideFiles.getOrNull(index)?.let { f ->
         withContext(Dispatchers.IO) {
             org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
         }
     }
-    val next = slideFiles.getOrNull(index + 1)?.let { f ->
+    val next = nextIndex?.let { slideFiles.getOrNull(it) }?.let { f ->
         withContext(Dispatchers.IO) {
             org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
         }

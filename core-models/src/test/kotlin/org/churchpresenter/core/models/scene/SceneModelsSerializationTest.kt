@@ -555,6 +555,29 @@ class SceneModelsSerializationTest {
     }
 
     @Test
+    fun `a scene saved before it could have two layouts reads back with one`() {
+        val old = json.decodeFromString(
+            Scene.serializer(),
+            """{"id":"s","name":"Old","canvasWidth":1920,"canvasHeight":1080,"sources":[]}""",
+        )
+
+        assertEquals(null, old.alternate, "an existing scenes.json must not grow a second canvas")
+    }
+
+    @Test
+    fun `a scene's second layout survives being written and read back`() {
+        val scene = Scene(
+            id = "s",
+            sources = listOf(SceneSource.TextSource(id = "t", name = "Title")),
+            alternate = SceneAlternateLayout(mapOf("t" to SourceTransform(x = 0.1f, y = 0.8f, width = 0.8f))),
+        )
+
+        val back = json.decodeFromString(Scene.serializer(), json.encodeToString(Scene.serializer(), scene))
+
+        assertEquals(scene, back)
+    }
+
+    @Test
     fun `a scene written by an encoder that omits defaults still reads back the same`() {
         val terse = Json { ignoreUnknownKeys = true; encodeDefaults = false }
         val scene = Scene(

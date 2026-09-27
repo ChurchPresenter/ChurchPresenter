@@ -4,12 +4,15 @@ package org.churchpresenter.app.churchpresenter.screenshot
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.app.churchpresenter.tabs.CANVAS_DUAL_LAYOUT_TAG
+import org.churchpresenter.app.churchpresenter.tabs.CANVAS_SIZE_BUTTON_TAG
 import org.churchpresenter.app.churchpresenter.tabs.CanvasLabel
 import org.churchpresenter.app.churchpresenter.tabs.canvasButton
 import org.churchpresenter.app.churchpresenter.tabs.canvasButtonAt
@@ -115,6 +118,44 @@ class CanvasTabScreenshotTest {
     @Test
     fun `the add-source menu`() = shoot("add_source_menu", rootIndex = 1) { _ ->
         canvasButton(CanvasLabel.ADD_SOURCE).performClick()
+        waitForIdle()
+    }
+
+    // ── A landscape and a portrait layout (#608) ────────────────────────────────────────────────
+
+    @Test
+    fun `the canvas size menu, with Landscape and portrait on`() = shoot(
+        "canvas_size_menu_dual",
+        rootIndex = 1,
+        seed = { stack(); dual() },
+    ) { _ ->
+        onNodeWithTag(CANVAS_SIZE_BUTTON_TAG).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `a scene edited as a landscape and a portrait layout`() = shoot(
+        "dual_layout",
+        seed = {
+            stack()
+            dual()
+            // Moved in portrait only, so the two canvases visibly differ.
+            updateTransform("s3", SourceTransform(x = 0.05f, y = 0.05f, width = 0.9f, height = 0.08f), alternate = true)
+        },
+    ) { vm ->
+        vm.selectSource("s2")
+        waitForIdle()
+    }
+
+    @Test
+    fun `turning the second layout off asks first`() = shoot(
+        "dual_layout_off_confirm",
+        rootIndex = 1,
+        seed = { stack(); dual() },
+    ) { _ ->
+        onNodeWithTag(CANVAS_SIZE_BUTTON_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(CANVAS_DUAL_LAYOUT_TAG).performClick()
         waitForIdle()
     }
 
@@ -289,6 +330,11 @@ class CanvasTabScreenshotTest {
                 fontSize = 32,
             )
         )
+    }
+
+    /** Gives the current scene its second, portrait layout. */
+    private fun SceneViewModel.dual() {
+        currentSceneId.value?.let { setDualLayout(it, true) }
     }
 
     /** The tool buttons are drawn as the shapes they make, which is also how they are addressed. */

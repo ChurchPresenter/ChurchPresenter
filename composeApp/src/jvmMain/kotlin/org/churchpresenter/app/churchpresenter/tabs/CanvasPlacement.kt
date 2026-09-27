@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.core.models.scene.alternateScene
+import org.churchpresenter.core.models.scene.isLandscape
 
 /**
  * Where a layer sits against its scene's canvas.
@@ -46,3 +49,26 @@ internal fun SourceTransform.broughtIntoView(): SourceTransform {
         height = h,
     )
 }
+
+/**
+ * One of a scene's layouts as the editor shows it: drawn as [scene], with moves saved to the second
+ * layout when [isAlternate].
+ */
+internal data class EditorLayout(val scene: Scene, val isAlternate: Boolean)
+
+/**
+ * A scene's layouts, landscape first: the scene alone, or the scene and its second layout when it
+ * has one.
+ */
+internal fun Scene.editorLayouts(): List<EditorLayout> {
+    val main = EditorLayout(this, isAlternate = false)
+    val second = alternate?.let { EditorLayout(alternateScene(), isAlternate = true) }
+    return listOfNotNull(main, second).sortedByDescending { it.scene.isLandscape }
+}
+
+/** Where [sourceId] sits in each of these layouts it is not wholly inside, paired with that layout. */
+internal fun List<EditorLayout>.misplacements(sourceId: String): List<Pair<EditorLayout, CanvasPlacement>> =
+    mapNotNull { layout ->
+        val placement = layout.scene.sources.find { it.id == sourceId }?.transform?.placement()
+        if (placement == null || placement == CanvasPlacement.INSIDE) null else layout to placement
+    }

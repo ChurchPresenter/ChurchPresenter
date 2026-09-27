@@ -17,6 +17,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.data.HiddenItemsStore
+import org.churchpresenter.app.churchpresenter.data.firstVisibleIndex
+import org.churchpresenter.app.churchpresenter.data.nextVisibleIndex
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
@@ -74,6 +77,8 @@ class PicturesViewModel(
      * would quietly take this confinement away.
      */
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    /** Where hidden pictures are remembered -- a parameter so a test can keep them in a temp dir. */
+    private val hiddenStore: HiddenItemsStore = HiddenItemsStore(),
 ) {
     private val defaultDirectory = appSettings?.pictureSettings?.storageDirectory ?: ""
 
@@ -220,6 +225,32 @@ class PicturesViewModel(
         }
     }
 
+    private val _hiddenNames = mutableStateOf<Set<String>>(emptySet())
+
+    /**
+     * The names of the pictures in the selected folder the operator has hidden (#676): Next, Previous
+     * and the slideshow pass over them, but a click still shows one. Remembered per folder.
+     */
+    val hiddenImageNames: Set<String>
+        get() = _hiddenNames.value
+
+    fun isHidden(file: File): Boolean = file.name in _hiddenNames.value
+
+    /** Hides [file], or shows it again. */
+    fun toggleHidden(file: File) {
+        val folder = _selectedFolder.value?.absolutePath ?: return
+        val hidden = _hiddenNames.value
+        _hiddenNames.value = if (file.name in hidden) hidden - file.name else hidden + file.name
+        hiddenStore.setHiddenPictures(folder, _hiddenNames.value)
+    }
+
+    /** The positions of the hidden pictures in the current order. */
+    private fun hiddenIndexes(): Set<Int> {
+        val hidden = _hiddenNames.value
+        if (hidden.isEmpty()) return emptySet()
+        return imagesSnapshot().withIndex().filter { it.value.name in hidden }.map { it.index }.toSet()
+    }
+
     private val _selectedImageIndex = mutableStateOf(0)
     var selectedImageIndex: Int
         get() = _selectedImageIndex.value
@@ -292,7 +323,7 @@ class PicturesViewModel(
         passesWanted = plays
         passesDone = 0
         _isLooping.value = plays != 1
-        _selectedImageIndex.value = 0
+        _selectedImageIndex.value = firstVisibleIndex(_images.size, hiddenIndexes())
         _isPlaying.value = true
     }
 
@@ -363,7 +394,9 @@ class PicturesViewModel(
     fun selectFolder(folder: File) {
         _selectedFolder.value = folder
         clearImages() // also cancels the previous folder's watcher
+        _hiddenNames.value = hiddenStore.hiddenPictures(folder.absolutePath)
         loadImagesFromFolder(folder)
+        _selectedImageIndex.value = firstVisibleIndex(_images.size, hiddenIndexes())
         startWatching(folder)
         applyPendingPlayback()
     }
@@ -417,6 +450,7 @@ class PicturesViewModel(
         val displayFolder = File(folderPath)
         _selectedFolder.value = displayFolder
         _remoteFolderPath.value = displayFolder to folderPath
+        _hiddenNames.value = hiddenStore.hiddenPictures(displayFolder.absolutePath)
         val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
         cacheDir.mkdirs()
         remoteLoadJob = scope.launch {
@@ -473,11 +507,21 @@ class PicturesViewModel(
      *  still reaches the primary's own currently-live folder. See Constants.WS_CMD_NEXT_PICTURE. */
     fun nextImage(onInstanceLinkSendNext: (() -> Unit)? = null) {
         if (_images.isNotEmpty()) {
-            if (_selectedImageIndex.value < _images.size - 1) {
-                _selectedImageIndex.value = (_selectedImageIndex.value + 1)
-            } else if (_isLooping.value && (passesWanted == 0 || passesDone + 1 < passesWanted)) {
+            val current = _selectedImageIndex.value
+            val count = _images.size
+            val hidden = hiddenIndexes()
+            val ahead = nextVisibleIndex(current, 1, count, hidden, wrap = false)
+            val anotherPass = passesWanted == 0 || passesDone + 1 < passesWanted
+            val wrapped = if (ahead == null && _isLooping.value && anotherPass) {
+                nextVisibleIndex(current, 1, count, hidden, wrap = true)
+            } else {
+                null
+            }
+            if (ahead != null) {
+                _selectedImageIndex.value = ahead
+            } else if (wrapped != null) {
                 passesDone++
-                _selectedImageIndex.value = 0
+                _selectedImageIndex.value = wrapped
             } else {
                 // Stop playing if at the end and not looping — or after the pass a cue asked for.
                 clearPlaybackRequest()
@@ -491,11 +535,8 @@ class PicturesViewModel(
 
     fun previousImage(onInstanceLinkSendPrevious: (() -> Unit)? = null) {
         if (_images.isNotEmpty()) {
-            _selectedImageIndex.value = if (_selectedImageIndex.value > 0) {
-                _selectedImageIndex.value - 1
-            } else {
-                _images.size - 1
-            }
+            nextVisibleIndex(_selectedImageIndex.value, -1, _images.size, hiddenIndexes(), wrap = true)
+                ?.let { _selectedImageIndex.value = it }
         }
         onInstanceLinkSendPrevious?.invoke()
     }

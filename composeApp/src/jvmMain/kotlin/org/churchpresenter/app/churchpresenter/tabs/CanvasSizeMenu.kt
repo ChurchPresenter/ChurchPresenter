@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.canvas_dual_layout
 import churchpresenter.composeapp.generated.resources.canvas_size
 import churchpresenter.composeapp.generated.resources.canvas_size_custom
 import churchpresenter.composeapp.generated.resources.canvas_size_match_output
@@ -48,6 +49,9 @@ import org.jetbrains.compose.resources.stringResource
 
 /** Test handle for a scene row's canvas-size button. */
 internal const val CANVAS_SIZE_BUTTON_TAG = "canvas_size_button"
+
+/** Test handle for the menu's Landscape and portrait item. */
+internal const val CANVAS_DUAL_LAYOUT_TAG = "canvas_dual_layout"
 
 /** Test handle for the Custom row's Set button. */
 internal const val CANVAS_SIZE_SET_TAG = "canvas_size_set"
@@ -68,6 +72,10 @@ private fun sizeText(width: Int, height: Int) = "$width×$height"
  *
  * Choosing one hands the size to [onSetSize]; layers are fractions of the canvas, so they keep their
  * places and stretch with it. The current size is ticked wherever it appears.
+ *
+ * Above the sizes, Landscape and portrait turns the scene's second layout on or off through
+ * [onDualLayoutChange], ticked while [dualLayout] is on. The sizes always set the main canvas; the
+ * second one is the same canvas turned sideways, so it follows.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -76,6 +84,8 @@ internal fun CanvasSizeMenu(
     height: Int,
     outputs: List<CanvasOutputSize>,
     onSetSize: (Int, Int) -> Unit,
+    dualLayout: Boolean = false,
+    onDualLayoutChange: (Boolean) -> Unit = {},
 ) {
     var open by remember { mutableStateOf(false) }
     Box {
@@ -116,6 +126,18 @@ internal fun CanvasSizeMenu(
                 onSetSize(w, h)
                 open = false
             }
+            DropdownMenuItem(
+                text = {
+                    Text(stringResource(Res.string.canvas_dual_layout), style = MaterialTheme.typography.bodySmall)
+                },
+                onClick = {
+                    open = false
+                    onDualLayoutChange(!dualLayout)
+                },
+                trailingIcon = { if (dualLayout) Tick() },
+                modifier = Modifier.testTag(CANVAS_DUAL_LAYOUT_TAG),
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             PreviewShapePreset.entries.forEach { preset ->
                 SizeItem(preset.label, preset.width, preset.height, width, height, choose)
             }
@@ -160,15 +182,17 @@ private fun SizeItem(
             }
         },
         onClick = { onChoose(itemWidth, itemHeight) },
-        trailingIcon = {
-            if (itemWidth == currentWidth && itemHeight == currentHeight) {
-                Icon(
-                    painterResource(Res.drawable.ic_check),
-                    contentDescription = null,
-                    modifier = Modifier.size(CHECK_SIZE),
-                )
-            }
-        },
+        trailingIcon = { if (itemWidth == currentWidth && itemHeight == currentHeight) Tick() },
+    )
+}
+
+/** The tick beside whichever menu item is on. */
+@Composable
+private fun Tick() {
+    Icon(
+        painterResource(Res.drawable.ic_check),
+        contentDescription = null,
+        modifier = Modifier.size(CHECK_SIZE),
     )
 }
 
