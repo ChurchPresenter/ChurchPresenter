@@ -35,7 +35,7 @@ private val MOVE_HANDLE = 26.dp
 internal fun MoveHandle(model: AdjustModel, frame: AdjustFrame, scale: Float) {
     var dragged by remember { mutableStateOf<Offset?>(null) }
     var from by remember { mutableStateOf(model.region?.value) }
-    val restY = frame.top + frame.height * restingFraction(model.verticalAlignment)
+    val restY = frame.top + frame.height * restingFraction(model.alignment.value)
     val regionHeightPx = frame.height.value / scale
     val regionWidthPx = frame.width.value / scale
     dragged?.let { SnapGuides(frame) }
@@ -65,10 +65,10 @@ internal fun MoveHandle(model: AdjustModel, frame: AdjustFrame, scale: Float) {
                 },
                 onEnd = { total ->
                     dragged = null
-                    val snap = snapFor(restingFraction(model.verticalAlignment) + total.y / regionHeightPx)
+                    val snap = snapFor(restingFraction(model.alignment.value) + total.y / regionHeightPx)
                     val region = from
                     when {
-                        snap != null -> model.onSnap(snap)
+                        snap != null -> model.alignment.onChange(snap)
                         region != null -> model.region?.onChange?.invoke(region.movedBy(
                             total,
                             regionWidthPx,

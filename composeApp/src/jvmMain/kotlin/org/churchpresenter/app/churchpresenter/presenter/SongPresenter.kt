@@ -1241,14 +1241,14 @@ fun SongPresenter(
                                     LyricLine(idx, line, block.lookAheadStart, block.index)
                                 }
                             }
-                            if (shiftX == 0 && shiftY == 0) {
+                            // Wrapped only when it has to be: to move it, or for a preview to find it.
+                            if (shiftX == 0 && shiftY == 0 && LocalPresentedBlocks.current == null) {
                                 lines()
                             } else {
                                 Column(
-                                    Modifier.fillMaxWidth().offset(
-                                        (shiftX * scaleFactor).dp,
-                                        (shiftY * scaleFactor).dp,
-                                    ),
+                                    Modifier.fillMaxWidth()
+                                        .offset((shiftX * scaleFactor).dp, (shiftY * scaleFactor).dp)
+                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.LANGUAGE, block.index.toString())),
                                 ) { lines() }
                             }
                             return

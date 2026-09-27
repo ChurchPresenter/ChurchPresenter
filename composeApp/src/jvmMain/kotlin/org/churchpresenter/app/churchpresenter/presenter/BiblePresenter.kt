@@ -885,6 +885,7 @@ fun BiblePresenter(
                                 text = itemRefText(item, buildRefText(verse, item)),
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .reportsBlock(PresentedBlock(PresentedBlock.Kind.REFERENCE, item.fileName))
                                     .backdropRoom(item.referenceBackdropFor(isLowerThird)).then(itemRefPainter.modifier),
                                 outline = item.referenceOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
@@ -1089,7 +1090,10 @@ fun BiblePresenter(
                                             contentAlignment = contentAlignment,
                                         ) {
                                             if (cell != null) {
-                                                Box(Modifier.translationShift(cell.second, isLowerThird, scaleFactor)) {
+                                                Box(
+                                                    Modifier.translationShift(cell.second, isLowerThird, scaleFactor)
+                                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.TRANSLATION, cell.second.fileName)),
+                                                ) {
                                                     translationBlock(cell.first, cell.second, fitScale)
                                                 }
                                             }
@@ -1221,7 +1225,10 @@ fun BiblePresenter(
                                             contentAlignment = Alignment.BottomCenter,
                                         ) {
                                             if (cell != null) {
-                                                Box(Modifier.translationShift(cell.second, isLowerThird, scaleFactor)) {
+                                                Box(
+                                                    Modifier.translationShift(cell.second, isLowerThird, scaleFactor)
+                                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.TRANSLATION, cell.second.fileName)),
+                                                ) {
                                                     translationBlock(cell.first, cell.second, fitScale)
                                                 }
                                             }

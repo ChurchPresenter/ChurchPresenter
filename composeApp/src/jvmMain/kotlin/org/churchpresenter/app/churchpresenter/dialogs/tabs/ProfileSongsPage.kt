@@ -62,6 +62,9 @@ internal fun ProfileSongsPage(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onProfileChange: (OutputProfile) -> Unit,
     onOpenPage: (ProfilePage) -> Unit,
+    /** Which language the Text rows edit -- the first stands for All. Held by the editor, for the preview to pick. */
+    language: SongStyleLanguage,
+    onLanguageChange: (SongStyleLanguage) -> Unit,
 ) {
     val lowerThird = profile.isLowerThird
     val song = draft.songSettings
@@ -80,7 +83,17 @@ internal fun ProfileSongsPage(
         onSettingsChange = onSettingsChange,
         onOpenBackground = { onOpenPage(ProfilePage.Appearance(CustomizePane.BACKGROUND)) },
     )
-    SongTextGroup(draft, profile, element, onElementChange, updateSong, onSettingsChange, onProfileChange)
+    SongTextGroup(
+        draft,
+        profile,
+        element,
+        onElementChange,
+        updateSong,
+        onSettingsChange,
+        onProfileChange,
+        language,
+        onLanguageChange,
+    )
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
         SettingsGroup(stringResource(Res.string.profile_group_languages), paths = SONG_LAYOUT_PATHS) {
             SettingsRow(stringResource(Res.string.profile_layout), paths = SONG_LAYOUT_PATHS) {
@@ -116,19 +129,17 @@ private fun SongTextGroup(
     updateSong: ((SongSettings) -> SongSettings) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onProfileChange: (OutputProfile) -> Unit,
+    language: SongStyleLanguage,
+    onLanguageChange: (SongStyleLanguage) -> Unit,
 ) {
     val lowerThird = profile.isLowerThird
     val target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
     val song = draft.songSettings
     val titleSlideView = element == CustomizeElement.SONG_TITLE_SLIDE
-    var language by remember(profile.id) { mutableStateOf(SongStyleLanguage.PRIMARY) }
     var slideElement by remember(profile.id) { mutableStateOf(SongStyleElement.TITLE) }
     val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
-    val styleLanguages = styleLanguagesFor(profile.songMode, profile.songTranslations)
-    val perLanguage = styleLanguages.size > 1 && styleElement in SECOND_LANGUAGE_ELEMENTS
-    // Under several languages the first stands for All, and is always on the strip.
-    val offered = if (perLanguage) listOf(SongStyleLanguage.PRIMARY) + styleLanguages.filter { it.isTranslation }
-                  else styleLanguages
+    val offered = songLanguagesOffered(profile, styleElement)
+    val perLanguage = offered.size > 1
     val editingLanguage = language.takeIf { it in offered } ?: offered.first()
     val edit = SongEdit(song, styleElement, target, editingLanguage, perLanguage, updateSong)
     val style = edit.style
@@ -153,7 +164,7 @@ private fun SongTextGroup(
                     emptyList()
                 },
                 target = editingLanguage,
-                onTarget = { language = it },
+                onTarget = onLanguageChange,
                 elements = elements.map { RowOption(it, it.label(), elementChipTag(it.name)) },
                 element = element,
                 onElement = onElementChange,
@@ -463,7 +474,7 @@ private fun SectionLabelRows(
 }
 
 /** Which stored profile a Songs element stands for. */
-private fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (this) {
+internal fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (this) {
     CustomizeElement.SONG_TITLE -> SongStyleElement.TITLE
     CustomizeElement.SONG_NUMBER -> SongStyleElement.NUMBER
     CustomizeElement.SONG_LOOK_AHEAD -> SongStyleElement.LOOK_AHEAD
@@ -509,52 +520,4 @@ private fun songLookPaths(
             p.copy(songSettings = p.songSettings.withElementStyle(element, target, language, style.withLook(look)))
         }
     }
-}
-
-/** The Adjust handles on the Songs page: its margins and block, and the first language's [element]. */
-internal fun songAdjustModel(
-    draft: AppSettings,
-    profile: OutputProfile,
-    element: CustomizeElement,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-): AdjustModel {
-    val song = draft.songSettings
-    val lowerThird = profile.isLowerThird
-    val target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
-    val styleElement = element.toSongStyleElement()
-    val style = song.elementStyle(styleElement, target, SongStyleLanguage.PRIMARY)
-    val update: ((SongSettings) -> SongSettings) -> Unit = { transform ->
-        onSettingsChange { s -> s.copy(songSettings = transform(s.songSettings)) }
-    }
-    val margins = Margins(song.marginTop, song.marginBottom, song.marginLeft, song.marginRight)
-    return AdjustModel(
-        margins = Adjustable(margins) { m ->
-            update { it.copy(marginTop = m.top, marginBottom = m.bottom, marginLeft = m.left, marginRight = m.right) }
-        },
-        verticalAlignment = song.lyricsAlignment,
-        onSnap = { a ->
-            update {
-                val extras = it.layoutExtras
-                it.copy(
-                    lyricsAlignment = a,
-                    layoutExtras = extras.copy(contentRegion = extras.contentRegion.copy(yOffsetPercent = 0)),
-                )
-            }
-        },
-        region = if (lowerThird) {
-            null
-        } else {
-            Adjustable(song.layoutExtras.contentRegion) { r ->
-                update { it.copy(layoutExtras = it.layoutExtras.copy(contentRegion = r)) }
-            }
-        },
-        textSize = Adjustable(style.fontSize) { v ->
-            update { it.withElementStyle(styleElement, target, SongStyleLanguage.PRIMARY, style.copy(fontSize = v)) }
-        },
-        band = if (lowerThird) {
-            Adjustable(song.lowerThirdHeightPercent) { v -> update { it.copy(lowerThirdHeightPercent = v) } }
-        } else {
-            null
-        },
-    )
 }

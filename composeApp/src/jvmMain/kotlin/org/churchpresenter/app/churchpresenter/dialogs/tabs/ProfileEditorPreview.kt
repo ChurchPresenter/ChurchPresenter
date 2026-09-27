@@ -13,12 +13,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -27,8 +30,11 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.profile_adjust
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_band
+import churchpresenter.composeapp.generated.resources.profile_adjust_guide_blocks
 import churchpresenter.composeapp.generated.resources.profile_page_title
 import churchpresenter.composeapp.generated.resources.profile_preview_larger
+import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
+import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -45,13 +51,16 @@ internal fun adjustModelFor(
     pane: CustomizePane?,
     draft: AppSettings,
     profile: OutputProfile,
-    translationIndex: Int,
     element: CustomizeElement?,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /** The Bible page's translation and the Songs page's language, as their Text rows point at them. */
+    translation: Adjustable<Int>,
+    songLanguage: Adjustable<SongStyleLanguage>,
 ): AdjustModel? = when (pane) {
     CustomizePane.BIBLE ->
-        bibleAdjustModel(draft, profile, translationIndex, element ?: CustomizeElement.BIBLE_TEXT, onSettingsChange)
-    CustomizePane.SONGS -> songAdjustModel(draft, profile, element ?: CustomizeElement.SONG_LYRICS, onSettingsChange)
+        bibleAdjustModel(draft, profile, element ?: CustomizeElement.BIBLE_TEXT, onSettingsChange, translation)
+    CustomizePane.SONGS ->
+        songAdjustModel(draft, profile, element ?: CustomizeElement.SONG_LYRICS, onSettingsChange, songLanguage)
     else -> null
 }
 
@@ -78,7 +87,10 @@ internal fun EditorPreview(
     var adjust by remember { mutableStateOf(false) }
     var large by remember { mutableStateOf(false) }
     val output = OutputSize(profile.previewWidth, profile.previewHeight)
-    ProfilePreviewColumn(
+    // Where the presenter drew each block, for the handles to find them. The large preview keeps
+    // its own: both are on screen at once, at different sizes.
+    val blocks = remember { mutableStateMapOf<PresentedBlock, Rect>() }
+    CompositionLocalProvider(LocalPresentedBlocks provides blocks) { ProfilePreviewColumn(
         pane = pane,
         pageLabel = pageLabel,
         element = element,
@@ -95,10 +107,15 @@ internal fun EditorPreview(
         toolbarActions = { if (pane != null && pane != CustomizePane.STAGE_MONITOR) LargerKey { large = true } },
         overlay = { width -> if (adjust && adjustModel != null) PreviewAdjustOverlay(adjustModel, width, output) },
         underPreview = {
-            if (adjustModel != null) AdjustSwitch(adjust, { adjust = it }, adjustModel.band != null)
+            if (adjustModel != null) AdjustSwitch(
+                adjust,
+                { adjust = it },
+                adjustModel.band != null,
+                adjustModel.hasBlocks,
+            )
         },
         contextCard = contextCard,
-    )
+    ) }
     if (large && pane != null) {
         LargePreview(
             pane = pane,
@@ -136,7 +153,7 @@ internal fun LargerKey(onClick: () -> Unit) {
 
 /** Adjust on preview, and -- while it is on -- what the handles do. */
 @Composable
-internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: Boolean) {
+internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: Boolean, blocks: Boolean = false) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier
@@ -159,6 +176,14 @@ internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: B
                 lineHeight = 15.sp,
                 color = profilesPalette().faintText,
             )
+            if (blocks) {
+                Text(
+                    stringResource(Res.string.profile_adjust_guide_blocks),
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
+                    color = profilesPalette().faintText,
+                )
+            }
         }
     }
 }

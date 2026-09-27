@@ -25,6 +25,7 @@ import churchpresenter.composeapp.generated.resources.profile_split_long_verses
 import churchpresenter.composeapp.generated.resources.profile_split_words
 import churchpresenter.composeapp.generated.resources.profile_translation_divider
 import churchpresenter.composeapp.generated.resources.words_suffix
+import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MAX
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MIN
@@ -506,11 +507,12 @@ internal fun bibleOffsetTag(element: BibleStyleElement): String =
 internal fun bibleAdjustModel(
     draft: AppSettings,
     profile: OutputProfile,
-    translationIndex: Int,
     element: CustomizeElement,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    /** Which translation the Text rows edit, All included; the preview can pick another. */
+    translation: Adjustable<Int>,
 ): AdjustModel {
-    val edit = BibleEdit(draft.bibleSettings, translationIndex, element, profile.isLowerThird, onSettingsChange)
+    val edit = BibleEdit(draft.bibleSettings, translation.value, element, profile.isLowerThird, onSettingsChange)
     val bs = edit.bs
     val margins = Margins(bs.marginTop, bs.marginBottom, bs.marginLeft, bs.marginRight)
     return AdjustModel(
@@ -519,8 +521,7 @@ internal fun bibleAdjustModel(
                 it.copy(marginTop = m.top, marginBottom = m.bottom, marginLeft = m.left, marginRight = m.right)
             }
         },
-        verticalAlignment = bs.verticalAlignment,
-        onSnap = { a ->
+        alignment = Adjustable(bs.verticalAlignment) { a ->
             edit.updateBible {
                 it.copy(verticalAlignment = a, contentRegion = it.contentRegion.copy(yOffsetPercent = 0))
             }
@@ -535,6 +536,37 @@ internal fun bibleAdjustModel(
             Adjustable(bs.lowerThirdHeightPercent) { v -> edit.updateBible { it.copy(lowerThirdHeightPercent = v) } }
         } else {
             null
+        },
+        blocks = bibleBlocks(edit, translation.onChange),
+    )
+}
+
+/** Each translation as a block to pick and move, and the reference to drag above or after its verse. */
+private fun bibleBlocks(edit: BibleEdit, onTranslationChange: (Int) -> Unit): BlockTargets {
+    val reference = edit.shown.elementStyle(BibleStyleElement.REFERENCE, edit.target)
+    val lowerThird = edit.lowerThird
+    return BlockTargets(
+        kind = PresentedBlock.Kind.TRANSLATION,
+        keys = edit.stack.map { it.fileName },
+        selected = edit.index.takeIf { edit.picked },
+        onSelect = onTranslationChange,
+        shift = if (edit.picked) {
+            val entry = edit.shown
+            val now = if (lowerThird) entry.lowerThirdShiftX to entry.lowerThirdShiftY else entry.shiftX to entry.shiftY
+            Adjustable(now) { (x, y) ->
+                edit.updateEntry {
+                    if (lowerThird) it.copy(
+                        lowerThirdShiftX = x,
+                        lowerThirdShiftY = y,
+                    ) else it.copy(shiftX = x, shiftY = y)
+                }
+            }
+        } else {
+            null
+        },
+        referenceAbove = Adjustable(reference.position == Constants.POSITION_ABOVE) { above ->
+            val position = if (above) Constants.POSITION_ABOVE else Constants.POSITION_BELOW
+            edit.writeStyle(reference.copy(position = position), BibleStyleElement.REFERENCE)
         },
     )
 }

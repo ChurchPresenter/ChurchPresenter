@@ -22,6 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -32,16 +34,19 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.profile_adjust_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_size
 import churchpresenter.composeapp.generated.resources.profile_adjust_width
+import kotlin.math.roundToInt
+import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
+import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
 
 private val MARGIN_BAR_LONG = 32.dp
 private val MARGIN_BAR_SHORT = 10.dp
 private val WIDTH_DOT = 12.dp
+private val WIDTH_LABEL_ROOM = 52.dp
 private val SIZE_CORNER = 12.dp
 private val BAND_BAR = 4.dp
 private const val WIDTH_DOT_HEIGHT = 0.72f
@@ -71,7 +76,28 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         right = stageWidth - (m.right * scale).dp,
         bottom = stageHeight - (m.bottom * scale).dp,
     )
-    Box(Modifier.size(stageWidth, stageHeight).testTag(ADJUST_OVERLAY_TAG)) {
+    // Where the overlay sits in the window: the presenter reports its blocks in window pixels.
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    val density = LocalDensity.current.density
+    val reported = LocalPresentedBlocks.current.orEmpty()
+    val targets = model.blocks
+    val blockFrames = targets?.keys?.map { reported.frameOf(
+        PresentedBlock(targets.kind, it),
+        origin,
+        density,
+    ) }.orEmpty()
+    val referenceKey = targets?.keys?.getOrNull(targets.selected ?: 0)
+    val referenceFrame = referenceKey?.let { reported.frameOf(
+        PresentedBlock(PresentedBlock.Kind.REFERENCE, it),
+        origin,
+        density,
+    ) }
+    Box(
+        Modifier
+            .size(stageWidth, stageHeight)
+            .onGloballyPositioned { origin = it.boundsInWindow().topLeft }
+            .testTag(ADJUST_OVERLAY_TAG),
+    ) {
         Box(
             Modifier
                 .offset(frame.left, frame.top)
@@ -82,8 +108,11 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         model.band?.let { BandBar(it, bandTop, stageWidth, stageHeight) }
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
-        SizeCorner(model, inner, scale)
+        if (targets != null) BlockOutlines(targets, blockFrames)
+        // The size corner sits on the block it sizes, when one is picked.
+        SizeCorner(model, targets?.selected?.let { blockFrames.getOrNull(it) } ?: inner, scale)
         MoveHandle(model, frame, scale)
+        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, scale)
     }
 }
 
@@ -235,8 +264,9 @@ private fun WidthDots(adjustable: Adjustable<ContentRegion>, frame: AdjustFrame,
     }
     ValueChip(
         stringResource(Res.string.profile_adjust_width, region.widthPercent),
-        inner.right + 8.dp,
-        y - 2.dp,
+        // Inside the box, under its dot: the right edge of the frame is often the preview.s own.
+        inner.right - WIDTH_LABEL_ROOM,
+        y + WIDTH_DOT + 2.dp,
         accent = false,
     )
 }

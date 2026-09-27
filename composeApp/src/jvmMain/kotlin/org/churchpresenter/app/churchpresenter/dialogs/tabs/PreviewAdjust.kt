@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.settings.utils.Constants
 
@@ -15,14 +16,36 @@ import org.churchpresenter.settings.utils.Constants
  */
 internal class AdjustModel(
     val margins: Adjustable<Margins>,
-    val verticalAlignment: String,
-    /** Snaps the block to a vertical alignment, taking its own vertical offset back to none. */
-    val onSnap: (String) -> Unit,
+    /** The block's vertical alignment; writing one snaps it there, taking its vertical offset back to none. */
+    val alignment: Adjustable<String>,
     /** The narrower region the block can be confined to -- null on a lower third, whose band is one. */
     val region: Adjustable<ContentRegion>?,
     val textSize: Adjustable<Int>,
     /** The band's height in percent of the screen, on a lower third; null on a full screen. */
     val band: Adjustable<Int>?,
+    /** The translations or languages drawn as blocks of their own, to pick and move one; null where there are none. */
+    val blocks: BlockTargets? = null,
+) {
+    /** More than one block to pick from, or a reference to drag. */
+    val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.referenceAbove != null)
+}
+
+/**
+ * The blocks a page's text is drawn in -- each Bible translation, or each song language -- as the
+ * handles address them: which is picked (null for All), how to pick one, and how far the picked one
+ * is moved on its own. [reference] is the picked (or first) translation's reference, above or after
+ * its verse, on the Bible page.
+ */
+internal class BlockTargets(
+    val kind: PresentedBlock.Kind,
+    /** Each block's key, in the order the "Applies to" strip lists them. */
+    val keys: List<String>,
+    val selected: Int?,
+    val onSelect: (Int) -> Unit,
+    /** The picked block's own move, x to y in output pixels; null under All. */
+    val shift: Adjustable<Pair<Int, Int>>?,
+    /** Whether the reference sits above its verse; null on a page with no reference. */
+    val referenceAbove: Adjustable<Boolean>? = null,
 )
 
 /** One value a handle changes, and how to write it. */

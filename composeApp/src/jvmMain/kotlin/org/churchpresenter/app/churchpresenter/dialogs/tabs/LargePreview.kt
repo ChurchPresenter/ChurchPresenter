@@ -14,8 +14,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -29,6 +33,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.profile_preview_done
+import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
+import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -64,6 +70,7 @@ internal fun LargePreview(
     onClose: () -> Unit,
 ) {
     val drawsText = pane == CustomizePane.BIBLE || pane == CustomizePane.SONGS
+    val blocks = remember { mutableStateMapOf<PresentedBlock, Rect>() }
     Popup(
         onDismissRequest = onClose,
         properties = PopupProperties(focusable = true),
@@ -111,12 +118,17 @@ internal fun LargePreview(
                     slot = slot.takeIf { drawsText },
                     onSlotChange = onSlotChange,
                 )
-                if (adjustModel != null) AdjustSwitch(adjust, onAdjustChange, adjustModel.band != null)
+                if (adjustModel != null) AdjustSwitch(
+                    adjust,
+                    onAdjustChange,
+                    adjustModel.band != null,
+                    adjustModel.hasBlocks,
+                )
             }
             BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 val output = OutputSize(profile.previewWidth, profile.previewHeight)
                 val width = minOf(maxWidth - SIDE_ROOM, maxHeight * output.aspectRatio, LARGEST_PREVIEW)
-                Box(Modifier.width(width)) {
+                Box(Modifier.width(width)) { CompositionLocalProvider(LocalPresentedBlocks provides blocks) {
                     CustomizeStagePanel(
                         pane = pane,
                         element = element,
@@ -128,7 +140,7 @@ internal fun LargePreview(
                         backgroundMode = backgroundMode,
                     )
                     if (adjust && adjustModel != null) PreviewAdjustOverlay(adjustModel, width, output)
-                }
+                } }
             }
         }
     }

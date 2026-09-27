@@ -75,6 +75,8 @@ internal fun ProfileEditor(
     // All by default: one look for the whole stack is the usual case, and a single translation is
     // picked out when it needs a look of its own.
     var translationIndex by remember(profile.id) { mutableStateOf(ALL_TRANSLATIONS) }
+    // The Songs page's own: a song's languages are not a Bible's translations.
+    var songLanguage by remember(profile.id) { mutableStateOf(SongStyleLanguage.PRIMARY) }
     var query by remember { mutableStateOf("") }
     var onlyChanges by remember(profile.id) { mutableStateOf(false) }
 
@@ -138,6 +140,8 @@ internal fun ProfileEditor(
                         onElementChange = { pickedElement = it },
                         translationIndex = translationIndex,
                         onTranslationChange = { translationIndex = it },
+                        songLanguage = songLanguage,
+                        onSongLanguageChange = { songLanguage = it },
                         onDraftSettingsChange = onDraftSettingsChange,
                         onSettingsChange = onSettingsChange,
                         onProfileChange = onProfileChange,
@@ -163,12 +167,9 @@ internal fun ProfileEditor(
                     onOpenOutputs = { onPageChange(ProfilePage.Outputs) },
                     // The handles act on the page being edited only, never on the picture another shows.
                     adjustModel = adjustModelFor(
-                        pane,
-                        resolved,
-                        profile,
-                        translationIndex,
-                        element,
-                        onDraftSettingsChange,
+                        pane, resolved, profile, element, onDraftSettingsChange,
+                        Adjustable(translationIndex) { translationIndex = it },
+                        Adjustable(songLanguage) { songLanguage = it },
                     ),
                 ) {
                     LinkContextCard(link, linkActions, onPageChange) { path, value ->
@@ -261,6 +262,8 @@ private fun ColumnScope.PageBody(
     onElementChange: (CustomizeElement) -> Unit,
     translationIndex: Int,
     onTranslationChange: (Int) -> Unit,
+    songLanguage: SongStyleLanguage,
+    onSongLanguageChange: (SongStyleLanguage) -> Unit,
     onDraftSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onProfileChange: (OutputProfile) -> Unit,
@@ -312,6 +315,8 @@ private fun ColumnScope.PageBody(
                 onSettingsChange = onDraftSettingsChange,
                 onProfileChange = onProfileChange,
                 onOpenPage = onOpenPage,
+                language = songLanguage,
+                onLanguageChange = onSongLanguageChange,
             )
             CustomizePane.BACKGROUND ->
                 ProfileBackgroundPage(draft, profile, onProfileChange, onDraftSettingsChange, onOpenPage)
