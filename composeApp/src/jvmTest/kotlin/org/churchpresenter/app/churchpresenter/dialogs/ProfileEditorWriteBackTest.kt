@@ -4,10 +4,9 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.SkikoComposeUiTest
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -15,6 +14,9 @@ import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.segment
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -128,9 +130,11 @@ class ProfileEditorWriteBackTest {
      * click to the `OutlinedButton` around it.
      */
     private fun SkikoComposeUiTest.alignVerseBlockTop() =
-        onNode(hasContentDescription("Align Top") and hasClickAction())
-            .performScrollTo()
-            .performClick()
+        run {
+        onNodeWithTag(railTag(CustomizePane.BIBLE.name)).performClick()
+        waitForIdle()
+        segment("Top").performScrollTo().performClick()
+    }
 
     @Test
     fun `an edit in the profile pane reaches the profile`() = profilesTab(twoProfiles()) { saved ->

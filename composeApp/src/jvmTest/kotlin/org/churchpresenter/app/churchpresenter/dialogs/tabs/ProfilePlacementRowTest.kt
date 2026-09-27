@@ -33,7 +33,7 @@ class ProfilePlacementRowTest {
     @Test
     fun `picking In band puts that content in the band and nothing else`() = runComposeUiTest {
         var profile by mutableStateOf(lowerThird.copy(showPictures = false, showWebsite = false, showCanvas = false))
-        setContent { ProfilePlacementRow(profile) { profile = it } }
+        setContent { PlacementRows(profile) { profile = it } }
         onAllNodesWithText("In band")[0].performClick()
         waitForIdle()
 
@@ -48,7 +48,7 @@ class ProfilePlacementRowTest {
                 lowerThirdPlacements = mapOf(PlaceableContent.MEDIA to LowerThirdPlacement.IN_BAND),
             ),
         )
-        setContent { ProfilePlacementRow(profile) { profile = it } }
+        setContent { PlacementRows(profile) { profile = it } }
         onAllNodesWithText("Full screen")[0].performClick()
         waitForIdle()
 

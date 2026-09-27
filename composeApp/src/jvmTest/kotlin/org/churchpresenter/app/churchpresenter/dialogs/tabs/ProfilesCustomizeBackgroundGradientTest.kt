@@ -69,14 +69,8 @@ class ProfilesCustomizeBackgroundGradientTest {
         profilesTab(output()) { _ ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE, own = false)
             assertTrue(
-                onAllNodesWithText("Default").fetchSemanticsNodes().isNotEmpty(),
-                "the type row must offer the surface above",
-            )
-            // And the caption names *which* Default that is. This profile is a band, so the surface
-            // above it is the lower-third Default.
-            assertTrue(
-                onAllNodesWithText("Default Lower Third").fetchSemanticsNodes().isNotEmpty(),
-                "the caption must name the lower-third surface it writes",
+                onAllNodesWithText("Profile default").fetchSemanticsNodes().isNotEmpty(),
+                "the Background row must offer the profile's default as the level above",
             )
         }
     }
@@ -91,7 +85,7 @@ class ProfilesCustomizeBackgroundGradientTest {
             // captions elsewhere, and the finder spans every root.
             onNodeWithText("#101010").assertExists()
             onNodeWithText("#202020").assertExists()
-            onNodeWithText("POSITION").assertExists()
+            onNodeWithText("Position").assertExists()
         }
     }
 
@@ -111,7 +105,7 @@ class ProfilesCustomizeBackgroundGradientTest {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
             val before = get().storedBand().gradientBottomOpacity
-            tapSliderTrack("Top Opacity", "80%", fraction = 0.5f)
+            setProfileStepper("Top Opacity", "80%", fraction = 0.5f)
 
             assertEquals(0.5f, get().storedBand().gradientTopOpacity)
             assertEquals(before, get().storedBand().gradientBottomOpacity, "the lower end must not move")
@@ -160,7 +154,7 @@ class ProfilesCustomizeBackgroundGradientTest {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
             val before = get().storedBand().gradientTopOpacity
-            tapSliderTrack("Bottom Opacity", "40%", fraction = 0.75f)
+            setProfileStepper("Bottom Opacity", "40%", fraction = 0.75f)
 
             assertEquals(0.75f, get().storedBand().gradientBottomOpacity, absoluteTolerance = 0.02f)
             assertEquals(before, get().storedBand().gradientTopOpacity, "the upper end must not move")

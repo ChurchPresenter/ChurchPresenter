@@ -41,33 +41,20 @@ class ProfilesCustomizeStripRowsTest {
     fun `a lyric slide is offered the lyric-slide rows`() {
         profilesTab(screen()) {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onNodeWithText("Word Wrap").assertExists()
+            onNodeWithText("Word wrap").assertExists()
             onNodeWithText("Repeat chorus after each verse").assertExists()
-            onNodeWithText("MARKER").assertExists()
+            onNodeWithText("End-of-song marker").assertExists()
         }
     }
 
-    /**
-     * The title slide is a heading and its credits: it wraps no lyrics, repeats no chorus, carries
-     * no end-of-song marker, and takes its vertical alignment from its own control in the pane.
-     */
-    @Test
-    fun `the title slide is not offered rows that cannot move it`() {
-        profilesTab(screen()) {
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            onNodeWithText("Word Wrap").assertDoesNotExist()
-            onNodeWithText("Repeat chorus after each verse").assertDoesNotExist()
-            onNodeWithText("MARKER").assertDoesNotExist()
-        }
-    }
 
     /** What is left under that chip is what still redraws it. */
     @Test
     fun `the title slide keeps the rows that do move it`() {
         profilesTab(screen()) {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            onNodeWithText("MARGINS").assertExists()
-            onNodeWithText("MOTION").assertExists()
+            onNodeWithText("Margins").assertExists()
+            onNodeWithText("TRANSITION").assertExists()
         }
     }
 
@@ -75,11 +62,11 @@ class ProfilesCustomizeStripRowsTest {
     fun `a full screen is offered a content region and a band is not`() {
         profilesTab(screen()) {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onNodeWithText("CONTENT REGION").assertExists()
+            onNodeWithText("Content width").assertExists()
         }
         profilesTab(screen(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onNodeWithText("CONTENT REGION").assertDoesNotExist()
+            onNodeWithText("Content width").assertDoesNotExist()
         }
     }
 
@@ -87,9 +74,9 @@ class ProfilesCustomizeStripRowsTest {
     fun `the Bible pane is offered the same slide-wide rows`() {
         profilesTab(screen()) {
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("MARGINS").assertExists()
-            onNodeWithText("MOTION").assertExists()
-            onNodeWithText("CONTENT REGION").assertExists()
+            onNodeWithText("Margins").assertExists()
+            onNodeWithText("TRANSITION").assertExists()
+            onNodeWithText("Content width").assertExists()
         }
     }
 
@@ -97,7 +84,7 @@ class ProfilesCustomizeStripRowsTest {
     fun `a band is offered its own height where a full screen is not`() {
         profilesTab(screen(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)) {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onNodeWithText("LAYOUT").assertExists()
+            onNodeWithText("Band height").assertExists()
         }
     }
 }

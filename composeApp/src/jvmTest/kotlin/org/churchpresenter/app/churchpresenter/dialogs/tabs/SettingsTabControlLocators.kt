@@ -36,7 +36,7 @@ import kotlin.test.assertTrue
  *
  * These lived in `SongSettingsTabTestSupport` until that tab was rebuilt around a single set of
  * controls. They describe the shared composables — `TextStyleButtons`, `HorizontalAlignmentButtons`,
- * `PositionButtons`, `NumberSettingsTextField`, `FontSettingsDropdown` — rather than any one tab,
+ * `NumberSettingsTextField`, `FontSettingsDropdown` — rather than any one tab,
  * and the Stage Monitor, Source Properties and QA suites all use them.
  *
  * The ordinal maps that went with them did not survive: `StyleGroup`, `HAlignGroup`,

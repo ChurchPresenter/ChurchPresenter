@@ -15,21 +15,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_SWITCH_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BIBLE_SOURCE_TRIGGER_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.PROFILE_CONTENT_TOGGLE_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.DETAIL_ADVANCED_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ONLY_CHANGES_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.PREVIEW_LARGER_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilePage
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilesSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewShapeTag
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleLanguage
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.TEXT_SIZE_FIELD_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.openProfilePage
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickPreviewShape
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.profileRowTag
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.songLanguageTag
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.translationChipTag
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
@@ -37,10 +55,8 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.theme.ChurchPresenterTheme
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 
 /**
  * The Profiles tab of the settings dialog, in both themes.
@@ -73,21 +89,22 @@ class ProfilesTabScreenshotTest {
 
     @Test
     fun `the content section open`() = shoot("content_open") {
-        onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
+        openProfilePage(ProfilePage.Content)
     }
 
     @Test
     fun `the Bible source menu open`() = shoot("bible_source_menu", rootIndex = 1) {
+        openProfilePage(ProfilePage.Content)
         onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()
     }
 
     @Test
     fun `a custom preview shape`() = shoot("custom_shape") {
-        onNodeWithTag(previewShapeTag("CUSTOM")).performClick()
+        pickPreviewShape("CUSTOM")
     }
 
     @Test
-    fun `a lower third`() = shoot("lower_third") { displayMode("Lower Third") }
+    fun `a lower third`() = shoot("lower_third") { displayMode("Lower third") }
 
     @Test
     fun `nothing left to style`() = shoot(
@@ -128,7 +145,108 @@ class ProfilesTabScreenshotTest {
     fun `the Dictionary tab`() = shoot("style_dictionary") { tab(CustomizePane.DICTIONARY) }
 
     @Test
-    fun `a stage monitor`() = shoot("stage_monitor") { displayMode("Stage Monitor") }
+    fun `a stage monitor`() = shoot("stage_monitor") { displayMode("Stage monitor") }
+
+    // ── The pages of the redesign ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the Bible page`() = shoot("page_bible") { tab(CustomizePane.BIBLE) }
+
+    @Test
+    fun `the Bible page in Advanced`() = shoot("page_bible_advanced") {
+        tab(CustomizePane.BIBLE)
+        onNodeWithTag(DETAIL_ADVANCED_TAG).performClick()
+    }
+
+    @Test
+    fun `the Outputs page`() = shoot("page_outputs") { openProfilePage(ProfilePage.Outputs) }
+
+    @Test
+    fun `the Stage layout page`() = shoot("page_stage_layout") {
+        onNodeWithTag(profileRowTag("stage")).performClick()
+        waitForIdle()
+        tab(CustomizePane.STAGE_MONITOR)
+    }
+
+    @Test
+    fun `one translation picked, with a size of its own`() = shoot("only_kjv") {
+        tab(CustomizePane.BIBLE)
+        onNodeWithTag(translationChipTag(0)).performClick()
+        waitForIdle()
+        onAllNodes(hasSetTextAction() and hasTestTag(TEXT_SIZE_FIELD_TAG), useUnmergedTree = true)[0]
+            .performTextReplacement("50")
+    }
+
+    @Test
+    fun `a song language picked`() = shoot("songs_language") {
+        tab(CustomizePane.SONGS)
+        onNodeWithTag(songLanguageTag(SongStyleLanguage.SECONDARY)).performClick()
+    }
+
+    // ── The list ────────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a profile's menu`() = shoot("list_menu", rootIndex = 1) {
+        onNodeWithTag(profileRowTag("stream")).performMouseInput { rightClick(center) }
+    }
+
+    @Test
+    fun `renaming in place`() = shoot("list_rename") {
+        onNodeWithTag(profileRowTag("stream")).performMouseInput { rightClick(center) }
+        waitForIdle()
+        onAllNodes(hasTextExactly("Rename")).let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+    }
+
+    // ── Linked profiles ─────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a follower's Bible page`() = shoot("linked_bible", settings = linkedLibrary()) {
+        onNodeWithTag(profileRowTag("youth")).performClick()
+        waitForIdle()
+        tab(CustomizePane.BIBLE)
+    }
+
+    @Test
+    fun `a follower's own values only`() = shoot("linked_only_changes", settings = linkedLibrary()) {
+        onNodeWithTag(profileRowTag("youth")).performClick()
+        waitForIdle()
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithTag(ONLY_CHANGES_TAG).performClick()
+    }
+
+    @Test
+    fun `a follower's General page`() = shoot("linked_general", settings = linkedLibrary()) {
+        onNodeWithTag(profileRowTag("youth")).performClick()
+    }
+
+    @Test
+    fun `a master's General page`() = shoot("master_general", settings = linkedLibrary())
+
+    // ── Adjust on preview ───────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the handles on a full screen`() = shoot("adjust_full_screen") {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
+    }
+
+    @Test
+    fun `the handles on a lower third`() = shoot("adjust_lower_third") {
+        onNodeWithTag(profileRowTag("stream")).performClick()
+        waitForIdle()
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
+    }
+
+    @Test
+    fun `the large preview`() = shoot("large_preview", rootIndex = 1) {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithTag(PREVIEW_LARGER_TAG).performClick()
+    }
 
     // ── Harness ─────────────────────────────────────────────────────────────────────────────────
 
@@ -204,6 +322,28 @@ class ProfilesTabScreenshotTest {
                 screenAssignments = listOf(ScreenAssignment(activeProfileId = "main")),
             ),
         )
+    }
+
+/**
+     * [library] with Youth night following Sanctuary -- KJV at its own size, Q&A off -- and Easter
+     * following it with nothing of its own.
+     */
+    private fun linkedLibrary(): AppSettings {
+        val base = library()
+        val bible = base.bibleSettings
+        val youth = OutputProfile(
+            id = "youth", name = "Youth night", parentId = "main", showQA = false,
+            bibleSettings = bible.copy(
+                translations = bible.translations.map {
+                    if (it.fileName == "kjv.spb") it.copy(textFontSize = 50) else it
+                },
+            ),
+            overrides = setOf("bibleSettings.translations[kjv.spb].textFontSize", "showQA"),
+        )
+        val easter = OutputProfile(id = "easter", name = "Easter", parentId = "main")
+        val proj = base.projectionSettings
+        val profiles = proj.outputProfiles + youth + easter
+        return base.copy(projectionSettings = proj.copy(outputProfiles = profiles).withLinksResolved())
     }
 
     private fun translation(fileName: String, abbreviation: String, name: String) =

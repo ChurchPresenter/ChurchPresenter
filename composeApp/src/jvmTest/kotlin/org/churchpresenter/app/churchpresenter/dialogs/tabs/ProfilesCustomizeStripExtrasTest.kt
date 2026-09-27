@@ -2,11 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSectionLabel
@@ -40,8 +36,7 @@ class ProfilesCustomizeStripExtrasTest {
     fun `the lyrics carry a section label row`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onNodeWithText("SECTION LABEL").assertExists()
-            onNodeWithText("Show current section (Verse, Chorus…)").assertExists()
+            onNodeWithText("Section label").assertExists()
         }
     }
 
@@ -51,7 +46,7 @@ class ProfilesCustomizeStripExtrasTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             assertFalse(get().song().layoutExtras.sectionLabel.enabled, "it ships off")
 
-            toggleCheckbox("Show current section (Verse, Chorus…)", scroll = false)
+            toggleCheckbox("Section label")
 
             assertTrue(get().song().layoutExtras.sectionLabel.enabled)
             // The size and colour fields come with it; they are asserted by the values they show,
@@ -103,7 +98,7 @@ class ProfilesCustomizeStripExtrasTest {
     fun `a band's Bible strip points at the lower third animation`() {
         profilesTab(doc(band)) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("LOWER THIRD ANIMATION").assertExists()
+            onNodeWithText("Band animation").assertExists()
         }
     }
 
@@ -111,37 +106,11 @@ class ProfilesCustomizeStripExtrasTest {
     fun `a full screen has no band animation to point at`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("LOWER THIRD ANIMATION").assertDoesNotExist()
+            onNodeWithText("Band animation").assertDoesNotExist()
         }
     }
 
-    @Test
-    fun `the signpost opens the Background pane it describes`() {
-        profilesTab(doc(band)) { _ ->
-            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            // "Background" is also the category rail's own label and a content switch, so the
-            // signpost is picked out by being the clickable one inside the strip.
-            onAllNodes(hasText("Background") and hasClickAction()).onLast().performClick()
-            waitForIdle()
 
-            // It navigates rather than editing: the band's backdrop is a Background surface, and
-            // this is the row that says so from the pane an operator is likely to be on.
-            onNodeWithText("Bible · Lower Third").assertExists()
-        }
-    }
-
-    @Test
-    fun `the song strip's own signpost opens the song band's surface`() {
-        // The same row, from the pane beside it, pointing at the *song* band rather than the
-        // Bible's. Two signposts writing the same surface would be the easy mistake here.
-        profilesTab(doc(band)) { _ ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onAllNodes(hasText("Background") and hasClickAction()).onLast().performClick()
-            waitForIdle()
-
-            onNodeWithText("Songs · Lower Third").assertExists()
-        }
-    }
 
     // ── Long verses, and the crossfade ──────────────────────────────────────────────────────────
 
@@ -157,12 +126,12 @@ class ProfilesCustomizeStripExtrasTest {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
             assertFalse(get().bible().splitLongVerses, "it starts off")
-            onNodeWithText("WORDS").assertDoesNotExist()
+            onNodeWithText("words").assertDoesNotExist()
 
             toggleCheckbox("Split long verses across two slides")
 
             assertTrue(get().bible().splitLongVerses)
-            onNodeWithText("WORDS").assertExists()
+            onNodeWithText("words").assertExists()
         }
     }
 
@@ -171,7 +140,7 @@ class ProfilesCustomizeStripExtrasTest {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             val before = get().song().crossfade
-            toggleCheckbox("Crossfade")
+            toggleCheckbox("Crossfade between items")
 
             assertEquals(!before, get().song().crossfade)
         }

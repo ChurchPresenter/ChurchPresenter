@@ -25,9 +25,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.longVerseSliderStop
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 
-/** Dim enough to read as "not typed yet", solid enough to read at all. */
-private const val PLACEHOLDER_ALPHA = 0.6f
-
 /**
  * A control under its own small caption, which is how every cell of the typography grid is built.
  *
@@ -58,23 +55,6 @@ internal fun ControlColumn(
         }
         content()
     }
-}
-
-/**
- * The module's own value, shown in an empty name field as the thing that is still in force.
- *
- * A blank name field means "keep using what the module calls itself", so the placeholder is the
- * live value rather than a hint about one.
- */
-@Composable
-internal fun PanelPlaceholder(value: String) {
-    Text(
-        text = value,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = PLACEHOLDER_ALPHA),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
 }
 
 /**

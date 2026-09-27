@@ -94,7 +94,7 @@ class ProfilesCustomizeBibleStripTest {
     fun `Fade In writes the profile's own flag`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Fade In", scroll = false)
+            toggleCheckbox("Fade in")
 
             assertFalse(get().bible().fadeIn, "it ships on and must have gone off")
         }
@@ -104,7 +104,7 @@ class ProfilesCustomizeBibleStripTest {
     fun `Fade Out writes the profile's own flag`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Fade Out", scroll = false)
+            toggleCheckbox("Fade out")
 
             val stored = get().bible()
             assertFalse(stored.fadeOut)
@@ -116,7 +116,7 @@ class ProfilesCustomizeBibleStripTest {
     fun `Crossfade writes the profile's own flag`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Crossfade", scroll = false)
+            toggleCheckbox("Crossfade between items")
 
             assertTrue(get().bible().crossfade, "it ships off and must have come on")
         }
@@ -126,9 +126,9 @@ class ProfilesCustomizeBibleStripTest {
     fun `a fade goes back on`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Fade Out", scroll = false)
+            toggleCheckbox("Fade out")
             assertFalse(get().bible().fadeOut)
-            toggleCheckbox("Fade Out", scroll = false)
+            toggleCheckbox("Fade out")
             assertTrue(get().bible().fadeOut)
         }
     }
@@ -178,7 +178,7 @@ class ProfilesCustomizeBibleStripTest {
     fun `the strip carries the divider switch`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Show divider between translations", scroll = false)
+            toggleCheckbox("Divider between translations")
 
             assertTrue(get().bible().multiTranslationDivider, "it ships off and must have come on")
         }
@@ -188,8 +188,8 @@ class ProfilesCustomizeBibleStripTest {
     fun `the divider switch goes back off`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Show divider between translations", scroll = false)
-            toggleCheckbox("Show divider between translations", scroll = false)
+            toggleCheckbox("Divider between translations")
+            toggleCheckbox("Divider between translations")
 
             assertFalse(get().bible().multiTranslationDivider)
         }
@@ -220,7 +220,7 @@ class ProfilesCustomizeBibleStripTest {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
             val before = get().bible().splitLongVerses
-            toggleCheckbox("Split long verses across two slides", scroll = false)
+            toggleCheckbox("Split long verses across two slides")
 
             assertEquals(!before, get().bible().splitLongVerses)
         }

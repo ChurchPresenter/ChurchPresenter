@@ -134,7 +134,7 @@ class AppPreviewSettingsScreenshotTest {
 
     @Test
     fun `profiles lower third mode`() = settingsTab("profiles_lower_third", 3) {
-        onAllNodesWithText("Lower Third")[0].performClick()
+        onAllNodesWithText("Lower third")[0].performClick()
     }
 
     @Test

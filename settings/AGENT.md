@@ -101,6 +101,14 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **Moving styling onto the profile needs a migration step** that seeds every profile from the
   document's current value, only where the profile has none of its own (see versions 14 and 15).
   Without it every profile silently takes the class defaults on the next load.
+- **Linked profiles store every value in full** (`LinkedProfiles.kt`); `OutputProfile.overrides`
+  names a follower's own values as paths into its serialized settings, and everything else is
+  rewritten from its master on every edit and on load. **A new `OutputProfile` field is inherited
+  by followers by default** -- if it describes the profile itself rather than how it draws (a name,
+  the preview's shape), add it to `IDENTITY_KEYS` in `LinkedProfilePaths.kt` in the same change.
+- **A Bible translation's look follows the stack's All layer** (`BibleAllLayer.kt`) except at the
+  fields named in its `ownStyleKeys`. Presenters read each translation's own values and never the
+  layer.
 
 ## Gates
 

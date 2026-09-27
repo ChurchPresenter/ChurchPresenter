@@ -49,8 +49,8 @@ class ProfilesCustomizeSlideStripTest {
     fun `word wrap and the repeated chorus are written for this profile`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            toggleCheckbox("Word Wrap", scroll = false)
-            toggleCheckbox("Repeat chorus after each verse", scroll = false)
+            toggleCheckbox("Word wrap")
+            toggleCheckbox("Repeat chorus after each verse")
 
             assertTrue(get().song().wordWrap, "word wrap was off and must have come on")
             assertFalse(get().song().autoRepeatChorus, "the repeated chorus was on and must have gone off")
@@ -79,7 +79,7 @@ class ProfilesCustomizeSlideStripTest {
             retypeNumberField(13, 17)
             assertEquals(17, get().song().endOfSongIndicatorSpacing)
 
-            toggleCheckbox("Show", scroll = false)
+            toggleCheckbox("End-of-song marker")
 
             assertFalse(get().song().showEndOfSongIndicator)
             // A spacing for a marker that is off changes nothing, so the field goes with it.

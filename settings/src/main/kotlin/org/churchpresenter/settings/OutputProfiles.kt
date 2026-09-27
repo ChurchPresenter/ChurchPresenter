@@ -31,13 +31,18 @@ fun ProjectionSettings.renameOutputProfile(id: String, name: String): Projection
  * are using it; this refusal is the defensive backstop, not the primary UI.
  */
 fun ProjectionSettings.deleteOutputProfile(id: String): ProjectionSettings =
-    if (outputProfileUsageCount(id) > 0) this else copy(outputProfiles = outputProfiles.filterNot { it.id == id })
+    // A master with profiles still following it is refused too: they would be left pointing at
+    // nothing. They are unlinked or deleted first.
+    if (outputProfileUsageCount(id) > 0 || linkedTo(id).isNotEmpty()) this
+    else copy(outputProfiles = outputProfiles.filterNot { it.id == id })
 
 /** A copy of the profile at [id] under [newName] and a fresh id, or `this` unchanged if [id] names none. */
 fun ProjectionSettings.duplicateOutputProfile(id: String, newName: String): ProjectionSettings {
     val source = outputProfiles.find { it.id == id } ?: return this
     val fresh = newOutputProfile(outputProfiles, newName)
-    return addOutputProfile(source.copy(id = fresh.id, name = newName))
+    // A standalone copy with the values the source draws with: a duplicate of a linked profile does
+    // not follow its master too.
+    return addOutputProfile(source.copy(id = fresh.id, name = newName, parentId = null, overrides = emptySet()))
 }
 
 /** How many outputs, across all three output lists, currently follow the profile at [id]. */

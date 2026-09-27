@@ -6,11 +6,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.test.ComposeUiTest
+import kotlin.math.roundToInt
 import androidx.compose.ui.test.SkikoComposeUiTest
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -62,7 +65,8 @@ internal fun profilesTab(
             // original for ever. Two edits in a row then both compute from that first snapshot and
             // the second silently discards the first -- which reads as "only the last control
             // works" and is a fault in the harness, not in the editor.
-            val state = remember { mutableStateOf(initial) }
+            // Advanced, so every row a test reaches for is on screen; Basic hides the rarer ones.
+            val state = remember { mutableStateOf(initial.copy(profilesAdvanced = true)) }
             doc = state
             ProfilesSettingsTab(
                 settings = state.value,
@@ -122,23 +126,36 @@ internal fun SkikoComposeUiTest.openCustomizePane(
     pane: CustomizePane,
     element: CustomizeElement? = null,
 ) {
-    onNodeWithTag(railTag(pane.name)).performClick()
+    // A content background is the top group of its own page now; only the default has the
+    // Background page to itself.
+    val page = when (element) {
+        CustomizeElement.BACKGROUND_BIBLE -> CustomizePane.BIBLE
+        CustomizeElement.BACKGROUND_SONG -> CustomizePane.SONGS
+        else -> pane
+    }
+    onNodeWithTag(railTag(page.name)).performClick()
     waitForIdle()
-    if (element != null) openElement(element)
+    if (element != null && element !in BACKGROUND_ELEMENTS) openElement(element)
 }
 
-/** Chips [element] in the pane already open. */
+private val BACKGROUND_ELEMENTS = setOf(
+    CustomizeElement.BACKGROUND_DEFAULT,
+    CustomizeElement.BACKGROUND_BIBLE,
+    CustomizeElement.BACKGROUND_SONG,
+)
+
+/** Picks [element] on the open page's Text strip. */
 internal fun SkikoComposeUiTest.openElement(element: CustomizeElement) {
-    onNodeWithTag(elementChipTag(element.name)).performClick()
+    onNodeWithTag(elementChipTag(element.name)).performScrollTo().performClick()
     waitForIdle()
 }
 
 /**
- * Opens a background surface, taking it over from the Background tab unless [own] is false.
+ * Opens a background surface -- the Background group of the Bible or Songs page, or the Background
+ * page for the default -- and gives the profile its own copy unless [own] is false.
  *
- * A surface that is following is drawn dimmed under a blanket that swallows clicks, so a test that
- * drives any control below has to take it over first, exactly as an operator does. Tests that only
- * assert on what is *rendered* leave [own] alone and see the inherited values.
+ * A surface still following the level above shows no editor, so a test that drives any control
+ * below has to take it over first, exactly as an operator does.
  */
 internal fun SkikoComposeUiTest.openBackgroundSurface(
     element: CustomizeElement = CustomizeElement.BACKGROUND_SONG,
@@ -148,21 +165,62 @@ internal fun SkikoComposeUiTest.openBackgroundSurface(
     if (own) takeOverBackground()
 }
 
-/** Clicks "Custom" on the open surface's follow row. */
+/** Clicks "Own" on the open page's Background row. */
 internal fun SkikoComposeUiTest.takeOverBackground() {
-    // Not the preview column's "Custom" shape, which carries the same word.
-    onNode(hasText(BACKGROUND_OWN) and !hasTestTag(previewShapeTag("CUSTOM"))).performScrollTo().performClick()
+    onNodeWithTag(BG_OWN_TAG).performScrollTo().performClick()
     waitForIdle()
 }
 
-/** Hands the open surface back to the Background tab. */
+/**
+ * Hands the open surface back to the level above: the app's own background for a content surface,
+ * the app default on the Background page.
+ */
 internal fun SkikoComposeUiTest.followBackground() {
-    onNodeWithText(BACKGROUND_FOLLOW).performScrollTo().performClick()
+    val link = onAllNodesWithTag(BG_APP_DEFAULT_TAG).fetchSemanticsNodes()
+    if (link.isNotEmpty()) {
+        onNodeWithTag(BG_APP_DEFAULT_TAG).performScrollTo().performClick()
+    } else {
+        onNodeWithTag(linkTag(BACKGROUND_FOLLOW)).performScrollTo().performClick()
+    }
     waitForIdle()
 }
 
-internal const val BACKGROUND_OWN = "Custom"
-internal const val BACKGROUND_FOLLOW = "Follow Background tab"
+/**
+ * The [nth] clickable segment reading exactly [label] -- "Top", "Center", "Above verse". Earlier
+ * groups come first, so 0 is the Text group's where Position repeats the same words.
+ */
+internal fun ComposeUiTest.segment(label: String, nth: Int = 0): SemanticsNodeInteraction =
+    onAllNodes(hasTextExactly(label) and hasClickAction())[nth]
+
+/** Opens [page] from the section list. */
+internal fun ComposeUiTest.openProfilePage(page: ProfilePage) {
+    onNodeWithTag(page.navTag()).performClick()
+    waitForIdle()
+}
+
+/**
+ * A content switch on the Content & sources page, by its exact caption, opening the page first if
+ * it is not showing.
+ */
+internal fun ComposeUiTest.contentSwitch(label: String): SemanticsNodeInteraction {
+    if (onAllNodesWithTag(contentSwitchTag(label)).fetchSemanticsNodes().isEmpty()) {
+        openProfilePage(ProfilePage.Content)
+    }
+    val node = onNodeWithTag(contentSwitchTag(label))
+    if (onAllNodesWithTag(contentSwitchTag(label)).fetchSemanticsNodes().isNotEmpty()) node.performScrollTo()
+    return node
+}
+
+/** Opens the preview's shape menu and picks [name] -- a [PreviewShapePreset] name, or `CUSTOM`. */
+internal fun ComposeUiTest.pickPreviewShape(name: String) {
+    onNodeWithTag(PREVIEW_SHAPE_TRIGGER_TAG).performClick()
+    waitForIdle()
+    onNodeWithTag(previewShapeTag(name)).performClick()
+    waitForIdle()
+}
+
+internal const val BACKGROUND_OWN = "Own"
+internal const val BACKGROUND_FOLLOW = "Use the app's instead"
 
 /** The background config this profile draws for [scope], after resolution. */
 internal fun AppSettings.backgroundFor(
@@ -189,4 +247,20 @@ internal fun SkikoComposeUiTest.chooseSegment(option: String, scroll: Boolean = 
     if (scroll) node.performScrollTo()
     node.performClick()
     waitForIdle()
+}
+
+/**
+ * Sets the stepper that shows [readout] -- the number field's digits, its unit dropped -- to
+ * [fraction] of [range], the way the slider it replaced was tapped at a fraction of its track.
+ */
+internal fun ComposeUiTest.setProfileStepper(
+    caption: String,
+    readout: String,
+    fraction: Float,
+    range: IntRange = 0..100,
+) {
+    require(caption.isNotBlank()) { "a stepper is named by the row it sits in" }
+    val showing = readout.filter { it.isDigit() || it == '-' }.toInt()
+    val to = (range.first + (range.last - range.first) * fraction).roundToInt()
+    retypeNumberField(showing = showing, to = to)
 }

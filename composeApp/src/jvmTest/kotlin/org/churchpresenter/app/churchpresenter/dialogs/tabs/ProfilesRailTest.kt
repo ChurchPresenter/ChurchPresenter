@@ -4,12 +4,13 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -52,7 +53,8 @@ class ProfilesRailTest {
     private fun SkikoComposeUiTest.deleteProfile(name: String) {
         onAllNodesWithText(name)[0].performClick()
         waitForIdle()
-        onNode(hasContentDescription("Delete")).performClick()
+        openProfilePage(ProfilePage.General)
+        onNodeWithTag(actionKeyTag("Delete")).performScrollTo().performClick()
         waitForIdle()
     }
 
@@ -66,7 +68,7 @@ class ProfilesRailTest {
     @Test
     fun `New Profile adds an unnamed one`() {
         profilesTab(two()) { get ->
-            onNodeWithText("New Profile").performClick()
+            onNodeWithTag(NEW_PROFILE_TAG).performClick()
             waitForIdle()
 
             val profiles = get().projectionSettings.outputProfiles
@@ -83,7 +85,8 @@ class ProfilesRailTest {
             OutputProfile(id = "main", name = "Main", displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
         )
         profilesTab(doc) { get ->
-            onAllNodes(hasContentDescription("Duplicate"))[0].performClick()
+            openProfilePage(ProfilePage.General)
+            onNodeWithTag(actionKeyTag("Duplicate")).performScrollTo().performClick()
             waitForIdle()
 
             val profiles = get().projectionSettings.outputProfiles
@@ -174,25 +177,8 @@ class ProfilesRailTest {
             ),
         )
         profilesTab(doc) { _ ->
-            onAllNodesWithText("Used by Screen 1, Screen 2")[0].assertExists()
+            onAllNodesWithText("Screen 1, Screen 2")[0].assertExists()
         }
     }
 
-    /**
-     * The empty state's own button, which names the profile it makes.
-     *
-     * Distinct from "New Profile", which leaves the name blank for the operator to fill in: this is
-     * the one-click way out of an empty document, so the profile it makes arrives usable.
-     */
-    @Test
-    fun `Create Default Profile makes a named one`() {
-        profilesTab(docWith()) { get ->
-            onNode(hasContentDescription("Create Default Profile")).performClick()
-            waitForIdle()
-
-            val profiles = get().projectionSettings.outputProfiles
-            assertEquals(1, profiles.size)
-            assertEquals("New Profile", profiles[0].name, "it arrives named rather than blank")
-        }
-    }
 }

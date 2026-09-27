@@ -2,12 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.OutputProfile
@@ -39,30 +37,16 @@ class ProfileHeaderTest {
     private fun SkikoComposeUiTest.displayMode(label: String) =
         onNode(hasTextExactly(label) and hasClickAction() and !isToggleable())
 
-    /**
-     * A content switch, by its exact caption -- several of them are prefixes of each other.
-     *
-     * The switches fold away behind "Content on this output", so the section is opened first if it
-     * is shut; it stays open across edits, so this is a no-op after the first call.
-     */
-    private fun SkikoComposeUiTest.contentSwitch(label: String): SemanticsNodeInteraction {
-        if (onAllNodesWithTag(PROFILE_CONTENT_LIST_TAG).fetchSemanticsNodes().isEmpty()) {
-            onNodeWithTag(PROFILE_CONTENT_TOGGLE_TAG).performClick()
-            waitForIdle()
-        }
-        return onNode(isToggleable() and hasTextExactly(label))
-    }
-
     // ── Display mode ────────────────────────────────────────────────────────────────────────────
 
     @Test
     fun `the display mode can be switched to a lower third and back`() {
         profilesTab(doc()) { get ->
-            displayMode("Lower Third").performClick()
+            displayMode("Lower third").performClick()
             waitForIdle()
             assertTrue(get().profile().isLowerThird, "it must now be a band")
 
-            displayMode("Full Screen").performClick()
+            displayMode("Full screen").performClick()
             waitForIdle()
             assertEquals(Constants.DISPLAY_MODE_FULLSCREEN, get().profile().displayMode)
         }
@@ -71,7 +55,7 @@ class ProfileHeaderTest {
     @Test
     fun `a stage monitor is its own display mode`() {
         profilesTab(doc()) { get ->
-            displayMode("Stage Monitor").performClick()
+            displayMode("Stage monitor").performClick()
             waitForIdle()
 
             assertEquals(Constants.DISPLAY_MODE_STAGE_MONITOR, get().profile().displayMode)
@@ -139,12 +123,12 @@ class ProfileHeaderTest {
     @Test
     fun `the look-ahead switch is offered only while songs are on`() {
         profilesTab(doc()) { _ ->
-            contentSwitch("Song LA").assertExists()
+            contentSwitch("Song look-ahead").assertExists()
             contentSwitch("Songs").performClick()
             waitForIdle()
 
             // With songs off there is no look-ahead to show.
-            contentSwitch("Song LA").assertDoesNotExist()
+            contentSwitch("Song look-ahead").assertDoesNotExist()
         }
     }
 
@@ -206,13 +190,13 @@ class ProfileHeaderTest {
             "Web" to { p -> p.showWebsite },
             "Canvas" to { p -> p.showCanvas },
             "Q&A" to { p -> p.showQA },
-            "STT" to { p -> p.showSTT },
+            "Live captions" to { p -> p.showSTT },
             "Dictionary" to { p -> p.showDictionary },
             "Background" to { p -> p.showFullscreenBackground },
             "Lower Third Background" to { p -> p.showLowerThirdBackground },
             "Bible Background" to { p -> p.showBibleBackground },
             "Songs Background" to { p -> p.showSongsBackground },
-            "Song LA" to { p -> p.songLookAhead },
+            "Song look-ahead" to { p -> p.songLookAhead },
         )
         for ((label, read) in switches) {
             profilesTab(doc()) { get ->

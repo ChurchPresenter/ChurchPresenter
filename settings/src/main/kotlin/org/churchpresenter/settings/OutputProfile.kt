@@ -98,6 +98,22 @@ data class OutputProfile(
      * an existing settings file needs no migration. Read through [placementFor].
      */
     val lowerThirdPlacements: Map<PlaceableContent, LowerThirdPlacement> = emptyMap(),
+    /**
+     * The master this profile follows, or null for a profile that follows nothing -- a master in
+     * its own right, or standalone. One level only: a master is never itself linked.
+     *
+     * A linked profile still stores every value in full (see `LinkedProfiles.kt`), so the outputs
+     * and resolution never need to know it is linked; [overrides] says which of those values are
+     * its own rather than its master's.
+     */
+    val parentId: String? = null,
+    /**
+     * The settings a linked profile has changed from its master, as paths into the profile's own
+     * serialized settings -- `bibleSettings.marginTop`, `bibleSettings.translations[kjv.spb].textFontSize`.
+     * Every other value is its master's, rewritten whenever the master changes. Empty on a profile
+     * that follows nothing.
+     */
+    val overrides: Set<String> = emptySet(),
 ) {
     /** Where [content] sits on this profile — always [LowerThirdPlacement.FULL_SCREEN] off a lower third. */
     fun placementFor(content: PlaceableContent): LowerThirdPlacement =

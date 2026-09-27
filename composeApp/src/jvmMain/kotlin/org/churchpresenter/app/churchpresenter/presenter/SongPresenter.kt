@@ -9,76 +9,77 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.geometry.Offset
-import org.churchpresenter.settings.AppSettings
-
-import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
-import org.churchpresenter.settings.songLanguageSelection
-import org.churchpresenter.core.models.songs.SectionTranslation
-import org.churchpresenter.core.models.text.TextOutline
-import org.churchpresenter.core.models.songs.SongBackground
-import org.churchpresenter.core.models.songs.SongBackgroundType
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.utils.bilingualGrid
-import org.churchpresenter.app.churchpresenter.composables.ChordChart
-import org.churchpresenter.songchords.ChordTransposer
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
-import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
+import java.io.File
+import kotlinx.coroutines.channels.Channel
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
-import org.churchpresenter.app.churchpresenter.composables.cameraResolves
-import androidx.compose.ui.text.AnnotatedString
+import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import androidx.compose.ui.unit.em
+import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBlockBackdrop
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
-import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
+import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
+import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
+import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
-import kotlinx.coroutines.channels.Channel
-import java.io.File
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
+import org.churchpresenter.core.models.songs.SectionTranslation
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
+import org.churchpresenter.core.models.text.TextOutline
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.songLanguageSelection
+import org.churchpresenter.settings.translationSettings
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.bilingualGrid
+import org.churchpresenter.songchords.ChordTransposer
 
 private const val SHADOW_OFFSET_PX = 6f
 private const val INDICATOR_REPEAT_COUNT = 3
@@ -1227,9 +1228,28 @@ fun SongPresenter(
                     @Composable
                     fun LanguageLines(block: SongLanguageBlock) {
                         if (block.index != 0 || mainChartRows.isEmpty()) {
-                            block.allLines.forEachIndexed { idx, line ->
-                                LookAheadSpacer(idx, block.lookAheadStart)
-                                LyricLine(idx, line, block.lookAheadStart, block.index)
+                            // A language after the first can be moved on its own (Move X / Y on the
+                            // Profiles tab); left where the layout puts it, nothing is wrapped.
+                            val (shiftX, shiftY) = if (block.index > 0) {
+                                ss.translationSettings(block.index - 1).shiftFor(isLowerThird)
+                            } else {
+                                0 to 0
+                            }
+                            val lines: @Composable () -> Unit = {
+                                block.allLines.forEachIndexed { idx, line ->
+                                    LookAheadSpacer(idx, block.lookAheadStart)
+                                    LyricLine(idx, line, block.lookAheadStart, block.index)
+                                }
+                            }
+                            // Wrapped only when it has to be: to move it, or for a preview to find it.
+                            if (shiftX == 0 && shiftY == 0 && LocalPresentedBlocks.current == null) {
+                                lines()
+                            } else {
+                                Column(
+                                    Modifier.fillMaxWidth()
+                                        .offset((shiftX * scaleFactor).dp, (shiftY * scaleFactor).dp)
+                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.LANGUAGE, block.index.toString())),
+                                ) { lines() }
                             }
                             return
                         }
