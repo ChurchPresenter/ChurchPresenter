@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,6 +46,11 @@ private const val HEX_RGB_DIGITS = 6
 private const val PERCENT = 100
 private const val OPACITY_TEXT_ALPHA = 0.7f
 private val SWATCH_SIZE = 18.dp
+private val SWATCH_LIFT = 2.dp
+private val SWATCH_FOOT = 2.dp
+private const val SWATCH_SHINE_ALPHA = 0.35f
+private const val SWATCH_SHINE_DEPTH = 0.5f
+private const val SWATCH_FOOT_ALPHA = 0.28f
 
 @Composable
 fun ColorPickerField(
@@ -99,6 +106,7 @@ fun ColorPickerField(
             Box(
                 modifier = Modifier
                     .size(SWATCH_SIZE)
+                    .shadow(SWATCH_LIFT, AppShape(4.dp), clip = false)
                     .clip(AppShape(4.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), AppShape(4.dp))
             ) {
@@ -115,6 +123,20 @@ fun ColorPickerField(
                         }
                     }
                     if (!isTransparent) drawRect(currentColor)
+                    // A raised tile in the well: light across its top, a darker edge along its foot.
+                    drawRect(
+                        Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = SWATCH_SHINE_ALPHA), Color.Transparent),
+                            endY = size.height * SWATCH_SHINE_DEPTH,
+                        ),
+                        size = Size(size.width, size.height * SWATCH_SHINE_DEPTH),
+                    )
+                    val foot = SWATCH_FOOT.toPx()
+                    drawRect(
+                        Color.Black.copy(alpha = SWATCH_FOOT_ALPHA),
+                        topLeft = Offset(0f, size.height - foot),
+                        size = Size(size.width, foot),
+                    )
                 }
             }
             val opacity = displayedOpacity(color, currentColor, isTransparent)

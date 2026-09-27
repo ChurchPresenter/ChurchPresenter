@@ -1,5 +1,7 @@
 package org.churchpresenter.theme
 
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.material3.MaterialTheme
@@ -195,14 +197,31 @@ fun Modifier.sunken(
         )
     )
     .drawBehind {
-        val depth = INNER_SHADOW_DEPTH.toPx()
+        // Shade falling from the top edge, and light caught on the bottom lip: the two lines that
+        // make a surface read as cut into the page rather than printed on it.
+        val depth = minOf(WELL_SHADE_DEPTH.toPx(), size.height * WELL_SHADE_MAX_FRACTION)
+        val shade = Color.Black.copy(alpha = if (palette.isDark) WELL_SHADE_DARK else WELL_SHADE_LIGHT)
         drawRect(
-            brush = Brush.verticalGradient(
-                colors = listOf(palette.wellShadow, Color.Transparent),
-                endY = depth,
-            ),
+            brush = Brush.verticalGradient(colors = listOf(shade, Color.Transparent), endY = depth),
             size = Size(size.width, depth),
         )
+        // The lip follows the well's own outline, inside the 1dp rim that is drawn over it, and
+        // fades in toward the bottom -- a straight line squared off the rounded corners.
+        val line = 1.dp.toPx()
+        val lip = Color.White.copy(alpha = if (palette.isDark) WELL_LIP_DARK else WELL_LIP_LIGHT)
+        val inner = Size(size.width - line * 2, size.height - line * 2)
+        translate(left = line, top = line) {
+            drawOutline(
+                shape.createOutline(inner, layoutDirection, this),
+                brush = Brush.verticalGradient(
+                    0f to Color.Transparent,
+                    WELL_LIP_START to Color.Transparent,
+                    1f to lip,
+                    endY = inner.height,
+                ),
+                style = Stroke(line),
+            )
+        }
     }
     .border(1.dp, if (rim.isSpecified) rim else palette.wellBorder, shape)
 
@@ -283,6 +302,13 @@ fun Modifier.flatDisabled(shape: Shape, palette: ElevationPalette): Modifier = t
     .background(Brush.verticalGradient(listOf(palette.key.top, palette.key.bottom)))
 
 private val INNER_SHADOW_DEPTH = 4.dp
+private val WELL_SHADE_DEPTH = 7.dp
+private const val WELL_SHADE_MAX_FRACTION = 0.55f
+private const val WELL_SHADE_LIGHT = 0.16f
+private const val WELL_SHADE_DARK = 0.5f
+private const val WELL_LIP_LIGHT = 0.9f
+private const val WELL_LIP_DARK = 0.24f
+private const val WELL_LIP_START = 0.6f
 internal val RAISED_LIFT = 3.dp
 internal val HOVER_EXTRA_LIFT = 3.dp
 internal const val HOVER_BRIGHTEN = 0.08f

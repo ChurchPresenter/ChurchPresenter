@@ -1,9 +1,5 @@
 package org.churchpresenter.theme.components
 
-import org.churchpresenter.theme.ElevationPalette
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -138,7 +134,6 @@ fun RaisedCheckbox(
                         Modifier.keycap(shape, fill.bottom, palette, hovered = hovered)
                     } else {
                         Modifier.sunken(shape, palette, rim = if (hovered) hoverRim else uncheckedRim)
-                            .wellDepth(palette)
                     }
                 ),
         ) {
@@ -387,24 +382,3 @@ fun SegmentTrackItem(
         }
     }
 }
-
-/** A deeper recess than the well alone draws: shade falling from the top, light on the bottom lip. */
-private fun Modifier.wellDepth(palette: ElevationPalette): Modifier = drawBehind {
-    val shade = Color.Black.copy(alpha = if (palette.isDark) WELL_SHADE_DARK else WELL_SHADE_LIGHT)
-    drawRect(
-        Brush.verticalGradient(listOf(shade, Color.Transparent), endY = size.height * WELL_SHADE_DEPTH),
-        size = Size(size.width, size.height * WELL_SHADE_DEPTH),
-    )
-    val line = 1.dp.toPx()
-    drawRect(
-        Color.White.copy(alpha = if (palette.isDark) WELL_LIP_DARK else WELL_LIP_LIGHT),
-        topLeft = Offset(0f, size.height - line),
-        size = Size(size.width, line),
-    )
-}
-
-private const val WELL_SHADE_LIGHT = 0.22f
-private const val WELL_SHADE_DARK = 0.6f
-private const val WELL_LIP_LIGHT = 0.9f
-private const val WELL_LIP_DARK = 0.2f
-private const val WELL_SHADE_DEPTH = 0.55f
