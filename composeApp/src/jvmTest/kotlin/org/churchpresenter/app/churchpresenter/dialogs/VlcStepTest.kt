@@ -180,9 +180,8 @@ class VlcStepTest {
     fun `Recheck applies the fresh result including it clearing to ok`() =
         vlcStep(initial = missing(), onRecheck = { ok() }) { _ ->
             onNodeWithText(Label.RECHECK).performClick()
-            waitForIdle()
-
-            onNodeWithText(Label.OK).assertIsDisplayed()
+            // The recheck runs on Dispatchers.IO, off the test clock: wait for its result.
+            assertTextEventually(Label.OK)
             onNodeWithText(Label.MISSING).assertDoesNotExist()
         }
 
@@ -190,9 +189,8 @@ class VlcStepTest {
     fun `Recheck can report a different failure than the one it started with`() =
         vlcStep(initial = missing(), onRecheck = { wrongArch() }) { _ ->
             onNodeWithText(Label.RECHECK).performClick()
-            waitForIdle()
-
-            onNodeWithText(Label.WRONG_ARCH).assertIsDisplayed()
+            // The recheck runs on Dispatchers.IO, off the test clock: wait for its result.
+            assertTextEventually(Label.WRONG_ARCH)
         }
 
     @Test
