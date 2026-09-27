@@ -1073,7 +1073,15 @@ fun BiblePresenter(
                                     for (colIndex in 0 until gridCols) {
                                         val cell = rowItems.getOrNull(colIndex)
                                         Box(
-                                            modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds(),
+                                            modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()
+                                                // The cell clips what is moved out of it; a preview
+                                                // keeps a dragged reference inside it.
+                                                .then(
+                                                    cell?.let {
+                                                        val kind = PresentedBlock.Kind.CELL
+                                                        Modifier.reportsBlock(PresentedBlock(kind, it.second.fileName))
+                                                    } ?: Modifier,
+                                                ),
                                             contentAlignment = contentAlignment,
                                         ) {
                                             if (cell != null) {

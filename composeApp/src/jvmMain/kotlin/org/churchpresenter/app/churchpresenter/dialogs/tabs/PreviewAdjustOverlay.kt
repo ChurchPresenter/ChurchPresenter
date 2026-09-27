@@ -92,6 +92,11 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         origin,
         density,
     ) }
+    // What a dragged reference must stay inside: its translation's cell, which clips anything moved
+    // out of it -- or the stage, where the layout has no cells.
+    val referenceBounds = referenceKey
+        ?.let { reported.frameOf(PresentedBlock(PresentedBlock.Kind.CELL, it), origin, density) }
+        ?: AdjustFrame(0.dp, 0.dp, stageWidth, stageHeight)
     Box(
         Modifier
             .size(stageWidth, stageHeight)
@@ -111,7 +116,7 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
         MoveHandle(model, frame, scale)
-        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, scale)
+        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, referenceBounds, scale)
         // The size corner sits on what it sizes -- the reference, or the picked block -- drawn last,
         // since that corner is often where the reference sits too.
         val sized = if (targets?.reference?.picked == true) referenceFrame

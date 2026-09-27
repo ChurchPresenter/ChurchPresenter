@@ -157,6 +157,28 @@ private class BibleEdit(
         onSettingsChange { s -> s.copy(bibleSettings = styled(s.bibleSettings, edited, of)) }
     }
 
+    /** The reference's own move on this output, where the Text rows point at the reference; none otherwise. */
+    val referenceShift: Pair<Int, Int>
+        get() = if (styleElement == BibleStyleElement.REFERENCE) shown.referenceShiftFor(lowerThird) else 0 to 0
+
+    /**
+     * Reset: [defaults] written as [writeStyle] writes them and, on the reference, its own move taken
+     * back too -- in one write, since a reference moved out of sight has no handle left to drag back.
+     */
+    fun reset(defaults: BibleElementStyle) {
+        val clearShift = styleElement == BibleStyleElement.REFERENCE
+        onSettingsChange { s ->
+            val styled = styled(s.bibleSettings, defaults)
+            s.copy(
+                bibleSettings = if (clearShift) {
+                    entryUpdated(styled) { it.withReferenceShift(lowerThird, 0, 0) }
+                } else {
+                    styled
+                },
+            )
+        }
+    }
+
     /** [bible] with [edited] written the way [writeStyle] writes it. */
     fun styled(bible: BibleSettings, edited: BibleElementStyle, of: BibleStyleElement = styleElement): BibleSettings =
         entryUpdated(bible) { it.withElementStyle(of, target, edited) }
@@ -192,8 +214,10 @@ private fun BibleTextGroup(
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
         paths = lookPaths.all,
-        action = ResetAction(style.copy(offset = null) != defaults.copy(offset = null)) {
-            edit.writeStyle(defaults.copy(offset = style.offset))
+        action = ResetAction(
+            style.copy(offset = null) != defaults.copy(offset = null) || edit.referenceShift != (0 to 0),
+        ) {
+            edit.reset(defaults.copy(offset = style.offset))
         },
         header = {
             AppliesToStrip(

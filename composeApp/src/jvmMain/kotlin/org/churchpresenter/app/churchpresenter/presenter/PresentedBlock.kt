@@ -10,9 +10,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 /**
  * One block of presented text a preview can point at: a Bible translation or its reference, keyed
  * by the translation's file name, or one element of a song slide, keyed as its move is stored.
+ * [Kind.CELL] is the clipped cell a translation is drawn in, which nothing moved should leave.
  */
 data class PresentedBlock(val kind: Kind, val key: String) {
-    enum class Kind { TRANSLATION, REFERENCE, ELEMENT }
+    enum class Kind { TRANSLATION, REFERENCE, ELEMENT, CELL }
 }
 
 /**

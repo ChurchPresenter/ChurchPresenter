@@ -78,11 +78,17 @@ internal fun BlockOutlines(targets: BlockTargets, frames: List<AdjustFrame?>) {
  * handle: both are small and must win where they overlap a larger one.
  */
 @Composable
-internal fun BlockGrips(targets: BlockTargets, frames: List<AdjustFrame?>, reference: AdjustFrame?, scale: Float) {
+internal fun BlockGrips(
+    targets: BlockTargets,
+    frames: List<AdjustFrame?>,
+    reference: AdjustFrame?,
+    referenceBounds: AdjustFrame,
+    scale: Float,
+) {
     val shift = targets.shift
     val pickedFrame = targets.selected?.let { frames.getOrNull(it) }
     val ref = targets.reference
-    if (ref != null && reference != null) ReferenceHandle(ref, reference, scale)
+    if (ref != null && reference != null) ReferenceHandle(ref, reference, referenceBounds, scale)
     // The block's dot is left off while the reference is picked: the reference is what moves then.
     if (shift != null && pickedFrame != null && ref?.picked != true) MoveDot(shift, pickedFrame, scale)
 }
@@ -105,11 +111,13 @@ private fun MoveDot(shift: Adjustable<Pair<Int, Int>>, frame: AdjustFrame, scale
 
 /**
  * The reference, outlined in orange -- solid while the Text rows point at it. Clicked, it is picked;
- * dragged, it is picked and moves anywhere on its own, from where its position puts it.
+ * dragged, it is picked and moves anywhere on its own, from where its position puts it -- but never
+ * out of [bounds], its translation's cell, which would clip it out of sight and its handle with it.
  */
 @Composable
-private fun ReferenceHandle(reference: ReferenceTarget, frame: AdjustFrame, scale: Float) {
+private fun ReferenceHandle(reference: ReferenceTarget, frame: AdjustFrame, bounds: AdjustFrame, scale: Float) {
     var from by remember { mutableStateOf(reference.shift.value) }
+    var room by remember { mutableStateOf(DragRoom.NONE) }
     val accent = MaterialTheme.semantic.adjustAccent
     Box(
         Modifier
@@ -125,15 +133,34 @@ private fun ReferenceHandle(reference: ReferenceTarget, frame: AdjustFrame, scal
                 scale,
                 onStart = {
                     from = reference.shift.value
+                    room = DragRoom.within(frame, bounds, scale)
                     if (!reference.picked) reference.onPick()
                 },
                 onDrag = { total ->
-                    val x = (from.first + total.x).roundToInt()
-                    reference.shift.onChange(x to (from.second + total.y).roundToInt())
+                    val x = (from.first + total.x.coerceIn(room.left, room.right)).roundToInt()
+                    reference.shift.onChange(x to (from.second + total.y.coerceIn(room.up, room.down)).roundToInt())
                 },
             )
             .testTag(ADJUST_REFERENCE_TAG),
     )
+}
+
+/**
+ * How far a block may be dragged each way, in output pixels, before it leaves the frame it must stay
+ * in. Each is at least nothing: a block already at or past an edge may still be dragged back.
+ */
+internal data class DragRoom(val left: Float, val right: Float, val up: Float, val down: Float) {
+    companion object {
+        val NONE = DragRoom(0f, 0f, 0f, 0f)
+
+        /** The room [frame] has inside [bounds], at [scale] preview dp per output pixel. */
+        fun within(frame: AdjustFrame, bounds: AdjustFrame, scale: Float): DragRoom = DragRoom(
+            left = minOf(0f, (bounds.left - frame.left).value / scale),
+            right = maxOf(0f, (bounds.right - frame.right).value / scale),
+            up = minOf(0f, (bounds.top - frame.top).value / scale),
+            down = maxOf(0f, (bounds.bottom - frame.bottom).value / scale),
+        )
+    }
 }
 
 /** Test handles for the block handles. */

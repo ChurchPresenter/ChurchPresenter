@@ -143,9 +143,10 @@ class ProfilesAdjustTest {
     fun `the reference is dragged anywhere on its own`() = profilesTab(doc()) { get ->
         bibleAdjusting()
         val position = get().bible().translationList()[0].referencePosition
+        // Across the full width of its cell already, it has no room sideways -- only up.
         dragTag(ADJUST_REFERENCE_TAG, 20f, -30f)
         val moved = get().bible().translationList()[0]
-        assertTrue(moved.referenceShiftX > 0, "x ${moved.referenceShiftX}")
+        assertEquals(0, moved.referenceShiftX, "kept inside its cell")
         assertTrue(moved.referenceShiftY < 0, "y ${moved.referenceShiftY}")
         assertEquals(position, moved.referencePosition, "moving it is not putting it above or after")
     }
