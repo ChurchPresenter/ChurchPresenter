@@ -123,8 +123,6 @@ internal fun ProfileEditor(
                 detail = if (shownPage.hasDetailSwitch) detail else SettingsDetail.ADVANCED,
                 query = query,
                 scope = scope,
-                // The dictionary form is still the tab it was, and scrolls itself.
-                selfScrolling = pane == CustomizePane.DICTIONARY,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
                 // Keyed on the page and the profile: one page's fields must never hand their typing to
@@ -221,7 +219,6 @@ private fun ProfileSettingsColumn(
     detail: SettingsDetail,
     query: String,
     scope: OutputStyleScope,
-    selfScrolling: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -232,10 +229,6 @@ private fun ProfileSettingsColumn(
             LocalSettingsQuery provides query,
             LocalOutputStyleScope provides scope,
         ) {
-            if (selfScrolling) {
-                Column(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp), content = content)
-                return@CompositionLocalProvider
-            }
             val scroll = rememberScrollState()
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 Column(

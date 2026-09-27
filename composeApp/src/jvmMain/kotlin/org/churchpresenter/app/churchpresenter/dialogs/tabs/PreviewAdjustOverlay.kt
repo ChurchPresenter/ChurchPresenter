@@ -109,10 +109,11 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
         if (targets != null) BlockOutlines(targets, blockFrames)
-        // The size corner sits on the block it sizes, when one is picked.
-        SizeCorner(model, targets?.selected?.let { blockFrames.getOrNull(it) } ?: inner, scale)
         MoveHandle(model, frame, scale)
         if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, scale)
+        // The size corner sits on the block it sizes, when one is picked -- drawn last, since that
+        // corner is often where the reference sits too.
+        SizeCorner(model, targets?.selected?.let { blockFrames.getOrNull(it) } ?: inner, scale)
     }
 }
 

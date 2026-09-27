@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -77,13 +78,13 @@ import churchpresenter.composeapp.generated.resources.profile_menu_create_linked
 import churchpresenter.composeapp.generated.resources.profile_menu_move_down
 import churchpresenter.composeapp.generated.resources.profile_menu_move_up
 import churchpresenter.composeapp.generated.resources.profile_menu_rename
+import kotlin.math.roundToInt
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyIconButton
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
 
 /** The profile list is this wide: a name, its badge, and what uses it under them. */
 internal val PROFILE_LIST_WIDTH = 250.dp
@@ -159,71 +160,75 @@ internal fun ProfilesList(
                 verticalArrangement = Arrangement.spacedBy(ROW_GAP),
             ) {
                 profiles.forEach { profile ->
-                    val dragged = profile.id == draggingId
-                    val peers = profiles.filter { it.parentId == profile.parentId }
-                    val index = peers.indexOfFirst { it.id == profile.id }
-                    ProfileListRow(
-                        profile = profile,
-                        selected = profile.id == selectedId,
-                        usedBy = usageOf(profile.id),
-                        renaming = profile.id == renamingId,
-                        onRenameDone = { renamingId = null },
-                        onRename = { actions.onRename(profile.id, it) },
-                        menu = {
-                            profileMenu(
-                                index = index,
-                                count = peers.size,
-                                onRename = { renamingId = profile.id },
-                                onDuplicate = { actions.onDuplicate(profile.id) },
-                                onCreateLinked = if (profile.parentId == null) {
-                                    { actions.onCreateLinked(profile.id) }
-                                } else {
-                                    null
-                                },
-                                onMoveUp = { actions.onMove(profile.id, ProfileMove.By(-1)) },
-                                onMoveDown = { actions.onMove(profile.id, ProfileMove.By(1)) },
-                                onDelete = { actions.onDelete(profile.id) },
-                            )
-                        },
-                        onSelect = { actions.onSelect(profile.id) },
-                        onMoveBy = { delta -> actions.onMove(profile.id, ProfileMove.By(delta)) },
-                        handle = Modifier.pointerInput(profile.id) {
-                            detectDragGestures(
-                                onDragStart = {
-                                    draggingId = profile.id
-                                    dragOffset = 0f
-                                },
-                                onDrag = { change, amount ->
-                                    change.consume()
-                                    dragOffset += amount.y
-                                },
-                                onDragEnd = {
-                                    val to = dropIndexFor(profiles, profile.id, dragOffset, rowTops, rowHeights)
-                                    draggingId = null
-                                    dragOffset = 0f
-                                    if (to != null) actions.onMove(profile.id, ProfileMove.Drop(to))
-                                },
-                                onDragCancel = {
-                                    draggingId = null
-                                    dragOffset = 0f
-                                },
-                            )
-                        },
-                        modifier = Modifier
-                            .onGloballyPositioned {
-                                rowTops[profile.id] = it.positionInParent().y
-                                rowHeights[profile.id] = it.size.height.toFloat()
-                            }
-                            .then(
-                                if (dragged) {
-                                    Modifier
-                                        .offset { IntOffset(0, dragOffset.roundToInt()) }
-                                        .graphicsLayer { alpha = DRAGGED_ALPHA }
-                                } else {
-                                    Modifier
-                                },
-                            ),
-                    )
+                    // Keyed by the profile: after a move the row, and the focus in it, go with the
+                    // profile rather than staying in the slot it left.
+                    key(profile.id) {
+                        val dragged = profile.id == draggingId
+                        val peers = profiles.filter { it.parentId == profile.parentId }
+                        val index = peers.indexOfFirst { it.id == profile.id }
+                        ProfileListRow(
+                            profile = profile,
+                            selected = profile.id == selectedId,
+                            usedBy = usageOf(profile.id),
+                            renaming = profile.id == renamingId,
+                            onRenameDone = { renamingId = null },
+                            onRename = { actions.onRename(profile.id, it) },
+                            menu = {
+                                profileMenu(
+                                    index = index,
+                                    count = peers.size,
+                                    onRename = { renamingId = profile.id },
+                                    onDuplicate = { actions.onDuplicate(profile.id) },
+                                    onCreateLinked = if (profile.parentId == null) {
+                                        { actions.onCreateLinked(profile.id) }
+                                    } else {
+                                        null
+                                    },
+                                    onMoveUp = { actions.onMove(profile.id, ProfileMove.By(-1)) },
+                                    onMoveDown = { actions.onMove(profile.id, ProfileMove.By(1)) },
+                                    onDelete = { actions.onDelete(profile.id) },
+                                )
+                            },
+                            onSelect = { actions.onSelect(profile.id) },
+                            onMoveBy = { delta -> actions.onMove(profile.id, ProfileMove.By(delta)) },
+                            handle = Modifier.pointerInput(profile.id) {
+                                detectDragGestures(
+                                    onDragStart = {
+                                        draggingId = profile.id
+                                        dragOffset = 0f
+                                    },
+                                    onDrag = { change, amount ->
+                                        change.consume()
+                                        dragOffset += amount.y
+                                    },
+                                    onDragEnd = {
+                                        val to = dropIndexFor(profiles, profile.id, dragOffset, rowTops, rowHeights)
+                                        draggingId = null
+                                        dragOffset = 0f
+                                        if (to != null) actions.onMove(profile.id, ProfileMove.Drop(to))
+                                    },
+                                    onDragCancel = {
+                                        draggingId = null
+                                        dragOffset = 0f
+                                    },
+                                )
+                            },
+                            modifier = Modifier
+                                .onGloballyPositioned {
+                                    rowTops[profile.id] = it.positionInParent().y
+                                    rowHeights[profile.id] = it.size.height.toFloat()
+                                }
+                                .then(
+                                    if (dragged) {
+                                        Modifier
+                                            .offset { IntOffset(0, dragOffset.roundToInt()) }
+                                            .graphicsLayer { alpha = DRAGGED_ALPHA }
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                        )
+                    }
                 }
             }
             // The landing line, drawn over the list at the gap the dragged row would drop into.
