@@ -157,7 +157,7 @@ class ProfilesAdjustTest {
             openCustomizePane(CustomizePane.BIBLE)
             tap(PREVIEW_LARGER_TAG)
             assertEquals(1, countTag(LARGE_PREVIEW_TAG))
-            // The large preview.s own switch, the last drawn: the column.s is behind the scrim.
+            // The large preview's own switch, the last drawn: the column's is behind the scrim.
             onAllNodes(hasTestTag(ADJUST_SWITCH_TAG))[countTag(ADJUST_SWITCH_TAG) - 1].performClick()
             waitForIdle()
             val before = get().bible().marginTop

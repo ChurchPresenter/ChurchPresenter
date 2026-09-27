@@ -89,7 +89,7 @@ import org.churchpresenter.theme.sunken
 
 private const val PREVIEW_WIDTH_FRACTION = 0.9f
 
-/** The line height of a zone.s label, as a multiple of its font size. */
+/** The line height of a zone's label, as a multiple of its font size. */
 private const val ZONE_LINE_HEIGHT = 1.2f
 private val STAGE_PREVIEW_MAX_HEIGHT = 360.dp
 private const val ZONE_ALPHA = 0.10f

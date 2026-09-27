@@ -265,7 +265,7 @@ private fun WidthDots(adjustable: Adjustable<ContentRegion>, frame: AdjustFrame,
     }
     ValueChip(
         stringResource(Res.string.profile_adjust_width, region.widthPercent),
-        // Inside the box, under its dot: the right edge of the frame is often the preview.s own.
+        // Inside the box, under its dot: the right edge of the frame is often the preview's own.
         inner.right - WIDTH_LABEL_ROOM,
         y + WIDTH_DOT + 2.dp,
         accent = false,
