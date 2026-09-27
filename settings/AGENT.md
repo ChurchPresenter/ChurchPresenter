@@ -109,6 +109,13 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **A Bible translation's look follows the stack's All layer** (`BibleAllLayer.kt`) except at the
   fields named in its `ownStyleKeys`. Presenters read each translation's own values and never the
   layer.
+- **A song's All layer is stored only where the first language has values of its own**
+  (`SongLayoutExtras.allLanguages`): everywhere else All *is* the first language's look, so settings
+  written before it read unchanged. New song settings go in `SongLayoutExtras`, never on `SongSettings`
+  itself, which is at the JVM's constructor-parameter ceiling.
+- **"Different from defaults" compares with `defaultBaseline()`** (`ProfileDefaults.kt`): the profile a
+  new one would be. A field that is working state rather than a setting -- like the All layers and
+  `ownStyleKeys` -- belongs in its `BOOKKEEPING_PATHS`, or every profile lists it as a change.
 
 ## Gates
 

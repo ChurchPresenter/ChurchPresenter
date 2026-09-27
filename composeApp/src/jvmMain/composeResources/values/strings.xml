@@ -3357,6 +3357,8 @@
     <string name="profile_undo">Undo</string>
     <string name="profile_inherited_tooltip">From %1$s. Change it to set it for %2$s only.</string>
     <string name="profile_master_value">%1$s: %2$s</string>
+    <string name="profile_defaults">defaults</string>
+    <string name="profile_default_value">Default</string>
     <string name="profile_revert">Revert</string>
     <string name="profile_revert_to">Revert to %1$s</string>
     <string name="profile_different_from">Different from %1$s</string>
@@ -3386,6 +3388,8 @@
     <string name="profile_shift">Move X / Y</string>
     <string name="profile_shift_sub">Moves this translation on its own, in output pixels.</string>
     <string name="profile_adjust">Adjust on preview</string>
+    <string name="profile_reset_positions">Reset positions</string>
+    <string name="profile_reset_positions_sub">Puts everything moved on its own back where the layout puts it.</string>
     <string name="profile_adjust_guide">Drag the blue bars to set the margins, and the circle to move the text — release it near an orange line to snap to top, middle or bottom. The white dots set the width, and the orange corner sizes the text the rows are pointed at.</string>
     <string name="profile_adjust_guide_band">Drag the orange bar to set the band height, the blue bars to set the margins, and the orange corner to size the text the rows are pointed at.</string>
     <string name="profile_adjust_band">Band %1$d%</string>
@@ -3399,7 +3403,8 @@
     <string name="profile_stage_arrangement">Arrangement</string>
     <string name="profile_stage_zone_background">Zone background</string>
     <string name="profile_shift_language_sub">Moves this language on its own, in output pixels.</string>
-    <string name="profile_adjust_guide_blocks">Click a block of text to point the rows at it; the blue dot on the picked one moves it on its own. On the Bible page, drag the orange-outlined reference up or down to put it above or after the verse.</string>
+    <string name="profile_shift_element_sub">Moves this element from where the layout puts it, in output pixels.</string>
+    <string name="profile_adjust_guide_blocks">Click a block of text to point the rows at it; the blue dot on the picked one moves it on its own. On the Bible page, click or drag the orange-outlined reference to move it anywhere on its own.</string>
     <string name="profile_group_show">Show</string>
     <string name="profile_group_lines">Lines</string>
     <string name="profile_group_box">Box</string>

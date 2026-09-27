@@ -9,7 +9,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ComposeUiTest
 import kotlin.math.roundToInt
 import androidx.compose.ui.test.SkikoComposeUiTest
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.hasClickAction
@@ -103,6 +106,12 @@ internal fun profileDocument(
 internal const val PROFILE_ID = "main"
 
 /** The profile being edited. */
+/**
+ * Anything but the preview column's "Different from defaults" card, which repeats a changed value
+ * beside its default -- for a check that the page's own control shows it, or no longer does.
+ */
+internal val outsideDefaultsCard: SemanticsMatcher = !hasAnyAncestor(hasTestTag(DEFAULTS_CARD_TAG))
+
 internal fun AppSettings.profile(id: String = PROFILE_ID): OutputProfile =
     projectionSettings.outputProfiles.first { it.id == id }
 

@@ -178,9 +178,14 @@ private fun GlyphFill(modifier: Modifier, icon: ImageVector) {
  * preview a coarser one that still reads as a checkerboard at a few hundred dp.
  */
 @Composable
-internal fun CheckerboardFill(modifier: Modifier, square: Dp = CHECKER_SQUARE) {
-    val light = MaterialTheme.colorScheme.surfaceContainer
-    val dark = MaterialTheme.colorScheme.surfaceContainerHigh
+internal fun CheckerboardFill(
+    modifier: Modifier,
+    square: Dp = CHECKER_SQUARE,
+    /** The two squares' colours; the theme's surfaces when not given. */
+    colors: Pair<Color, Color>? = null,
+) {
+    val light = colors?.first ?: MaterialTheme.colorScheme.surfaceContainer
+    val dark = colors?.second ?: MaterialTheme.colorScheme.surfaceContainerHigh
     val density = LocalDensity.current
     val step = with(density) { square.toPx() }
     Canvas(modifier) {

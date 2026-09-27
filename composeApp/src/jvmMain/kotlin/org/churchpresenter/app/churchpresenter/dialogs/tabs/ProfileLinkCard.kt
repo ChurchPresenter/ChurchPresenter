@@ -24,6 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.content_bible_translations_all
+import churchpresenter.composeapp.generated.resources.profile_default_value
+import churchpresenter.composeapp.generated.resources.profile_defaults
 import churchpresenter.composeapp.generated.resources.profile_different_from
 import churchpresenter.composeapp.generated.resources.profile_linked_profiles
 import churchpresenter.composeapp.generated.resources.profile_no_changes
@@ -36,9 +39,13 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.defaultBaseline
+import org.churchpresenter.settings.defaultChanges
 import org.churchpresenter.settings.pathWithin
 import org.churchpresenter.settings.plainText
 import org.churchpresenter.settings.valueAt
+import org.churchpresenter.settings.withDefaultAt
+import org.churchpresenter.settings.withValueAt
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.jetbrains.compose.resources.stringResource
@@ -58,29 +65,117 @@ internal fun LinkContextCard(
     actions: ProfileLinkActions,
     onOpenPage: (ProfilePage) -> Unit,
     onValueChange: (path: String, value: JsonElement) -> Unit,
+    /** The profile with a setting put back at its default -- see [DefaultsCard]. */
+    onProfileChange: (OutputProfile) -> Unit,
 ) {
     val master = link.master
     when {
         master != null -> DifferencesCard(link, master, actions, onOpenPage, onValueChange)
-        link.followers.isNotEmpty() -> PreviewSideCard(Modifier.testTag(CONTEXT_CARD_TAG)) {
-            CardTitle(stringResource(Res.string.profile_linked_profiles), link.followers.size)
-            link.followers.forEach { follower ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(AppShape(6.dp))
-                        .clickable { actions.onSelectProfile(follower.id) }
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(follower.displayName(), fontSize = 12.sp, modifier = Modifier.weight(1f))
-                    if (follower.overrides.isNotEmpty()) ChangesChip(follower.overrides.size)
+        link.followers.isNotEmpty() -> {
+            PreviewSideCard(Modifier.testTag(CONTEXT_CARD_TAG)) {
+                CardTitle(stringResource(Res.string.profile_linked_profiles), link.followers.size)
+                link.followers.forEach { follower ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(AppShape(6.dp))
+                            .clickable { actions.onSelectProfile(follower.id) }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(follower.displayName(), fontSize = 12.sp, modifier = Modifier.weight(1f))
+                        if (follower.overrides.isNotEmpty()) ChangesChip(follower.overrides.size)
+                    }
                 }
             }
+            DefaultsCard(link.profile, onOpenPage, onValueChange, onProfileChange)
         }
-        else -> StandaloneContextCard(onOpenGeneral = { onOpenPage(ProfilePage.General) })
+        else -> {
+            DefaultsCard(link.profile, onOpenPage, onValueChange, onProfileChange)
+            StandaloneContextCard(onOpenGeneral = { onOpenPage(ProfilePage.General) })
+        }
     }
 }
+
+/**
+ * Every setting a master or standalone profile holds at other than its default -- as a linked
+ * profile's card lists what differs from its master -- each with the default beside it, its own value
+ * to edit in place, and Revert to put the default back.
+ */
+@Composable
+private fun DefaultsCard(
+    profile: OutputProfile,
+    onOpenPage: (ProfilePage) -> Unit,
+    onValueChange: (String, JsonElement) -> Unit,
+    onProfileChange: (OutputProfile) -> Unit,
+) {
+    var expanded by remember(profile.id) { mutableStateOf(false) }
+    val changes = remember(profile) { groupedAcrossTranslations(defaultChanges(profile), profile) }
+    val baseline = remember(profile) { profile.defaultBaseline() }
+    val defaults = stringResource(Res.string.profile_defaults)
+    val source = stringResource(Res.string.profile_default_value)
+    val all = stringResource(Res.string.content_bible_translations_all)
+    PreviewSideCard(Modifier.testTag(DEFAULTS_CARD_TAG)) {
+        CardTitle(stringResource(Res.string.profile_different_from, defaults), changes.size)
+        if (changes.isEmpty()) {
+            Text(
+                stringResource(Res.string.profile_no_changes, defaults),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        val shown = if (expanded) changes else changes.take(SHOWN_CHANGES)
+        shown.forEach { paths ->
+            val path = paths.first()
+            if (paths.size == 1) {
+                ChangeRow(path, profile, source, baseline.valueAt(path), onOpenPage, onValueChange) {
+                    onProfileChange(profile.withDefaultAt(path))
+                }
+            } else {
+                // One row for every translation: an edit or Revert reaches them all, in one write.
+                ChangeRow(
+                    path = path,
+                    profile = profile,
+                    sourceName = source,
+                    sourceValue = baseline.valueAt(path),
+                    onOpenPage = onOpenPage,
+                    onValueChange = { _, value ->
+                        onProfileChange(paths.fold(profile) { p, at -> p.withValueAt(at, value) })
+                    },
+                    label = "${settingPathLabel(path.replace(ENTRY, ""))} · $all",
+                    onRevert = { onProfileChange(paths.fold(profile) { p, at -> p.withDefaultAt(at) }) },
+                )
+            }
+        }
+        if (!expanded && changes.size > SHOWN_CHANGES) {
+            LinkText(stringResource(Res.string.profile_show_more, changes.size - SHOWN_CHANGES), { expanded = true })
+        }
+    }
+}
+
+/**
+ * [changes] as the rows that list them: a setting changed alike on every translation of [profile] is
+ * one row of all its paths, and everything else a row of its own. In the order they first appear.
+ */
+internal fun groupedAcrossTranslations(changes: List<String>, profile: OutputProfile): List<List<String>> {
+    val translations = profile.bibleSettings.translations.size
+    val byShape = changes.groupBy { it.replace(ENTRY, "[*]") }
+    val emitted = mutableSetOf<String>()
+    return changes.mapNotNull { path ->
+        val shape = path.replace(ENTRY, "[*]")
+        val group = byShape.getValue(shape)
+        val alike = shape != path && translations > 1 && group.size == translations &&
+            group.map { profile.valueAt(it) }.distinct().size == 1
+        when {
+            !alike -> listOf(path)
+            emitted.add(shape) -> group
+            else -> null
+        }
+    }
+}
+
+/** Test handle for the card listing what a profile changes from the defaults. */
+internal const val DEFAULTS_CARD_TAG = "profile_defaults_card"
 
 @Composable
 private fun DifferencesCard(
@@ -102,7 +197,11 @@ private fun DifferencesCard(
             )
         }
         val shown = if (expanded) changes else changes.take(SHOWN_CHANGES)
-        shown.forEach { path -> ChangeRow(path, link, master, onOpenPage, onValueChange) }
+        shown.forEach { path ->
+            ChangeRow(path, link.profile, master.displayName(), master.valueAt(path), onOpenPage, onValueChange) {
+                link.onRevert(listOf(path))
+            }
+        }
         if (!expanded && changes.size > SHOWN_CHANGES) {
             LinkText(stringResource(Res.string.profile_show_more, changes.size - SHOWN_CHANGES), { expanded = true })
         }
@@ -118,14 +217,21 @@ private fun CardTitle(text: String, count: Int) {
     }
 }
 
-/** One changed setting: its name, which opens its page, the master's value, then its own to edit and Revert. */
+/**
+ * One changed setting: its name, which opens its page, what it is changed from -- [sourceName]'s
+ * [sourceValue], the master's or the default -- then [profile]'s own value to edit, and Revert.
+ */
 @Composable
 private fun ChangeRow(
     path: String,
-    link: ProfileLink,
-    master: OutputProfile,
+    profile: OutputProfile,
+    sourceName: String,
+    sourceValue: JsonElement?,
     onOpenPage: (ProfilePage) -> Unit,
     onValueChange: (String, JsonElement) -> Unit,
+    /** What the row is called -- the setting's own name, unless it stands for several. */
+    label: String = settingPathLabel(path),
+    onRevert: () -> Unit,
 ) {
     val on = stringResource(Res.string.profile_value_on)
     val off = stringResource(Res.string.profile_value_off)
@@ -133,7 +239,7 @@ private fun ChangeRow(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val page = pageForPath(path)
             Text(
-                text = settingPathLabel(path),
+                text = label,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
@@ -142,13 +248,11 @@ private fun ChangeRow(
                     .weight(1f)
                     .then(if (page != null) Modifier.clickable { onOpenPage(page) } else Modifier),
             )
-            master.valueAt(path)?.plainText(on, off)?.takeIf { it.isNotBlank() }?.let {
-                MasterValueText(master.displayName(), it)
-            }
+            sourceValue?.plainText(on, off)?.takeIf { it.isNotBlank() }?.let { MasterValueText(sourceName, it) }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            InlineValue(link.profile, path, on, off, onValueChange, Modifier.weight(1f))
-            RevertLink({ link.onRevert(listOf(path)) })
+            InlineValue(profile, path, on, off, onValueChange, Modifier.weight(1f))
+            RevertLink(onRevert)
         }
     }
 }

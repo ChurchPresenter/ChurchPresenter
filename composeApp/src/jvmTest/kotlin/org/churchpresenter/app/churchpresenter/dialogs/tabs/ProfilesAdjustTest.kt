@@ -140,15 +140,15 @@ class ProfilesAdjustTest {
     }
 
     @Test
-    fun `the reference is dragged above or after its verse`() = profilesTab(doc()) { get ->
+    fun `the reference is dragged anywhere on its own`() = profilesTab(doc()) { get ->
         bibleAdjusting()
-        dragTag(ADJUST_REFERENCE_TAG, 0f, -30f)
-        assertEquals(Constants.POSITION_ABOVE, get().bible().translationList()[0].referencePosition)
-        dragTag(ADJUST_REFERENCE_TAG, 0f, 30f)
-        assertEquals(Constants.POSITION_BELOW, get().bible().translationList()[0].referencePosition)
-        // A nudge too small to mean either changes nothing.
-        dragTag(ADJUST_REFERENCE_TAG, 0f, 2f)
-        assertEquals(Constants.POSITION_BELOW, get().bible().translationList()[0].referencePosition)
+        val position = get().bible().translationList()[0].referencePosition
+        // Across the full width of its cell already, it has no room sideways -- only up.
+        dragTag(ADJUST_REFERENCE_TAG, 20f, -30f)
+        val moved = get().bible().translationList()[0]
+        assertEquals(0, moved.referenceShiftX, "kept inside its cell")
+        assertTrue(moved.referenceShiftY < 0, "y ${moved.referenceShiftY}")
+        assertEquals(position, moved.referencePosition, "moving it is not putting it above or after")
     }
 
     @Test
@@ -187,9 +187,11 @@ class ProfilesAdjustTest {
         assertFalse(after.lyricsAlignment == before.lyricsAlignment,
                 "${before.lyricsAlignment} → ${after.lyricsAlignment}")
         assertTrue(after.lyricsFontSize > before.lyricsFontSize)
-        tapAt(adjustBlockTag(1), Offset(160f, 4f))
+        // Blocks run number, title, then each language's lyrics: the second language's is the fourth.
+        tapAt(adjustBlockTag(3), Offset(160f, 4f))
         dragTag(ADJUST_BLOCK_MOVE_TAG, 0f, 10f)
-        assertTrue(get().song().translations.first().shiftY > 0)
+        val key = songShiftKey(SongStyleElement.LYRICS, lowerThird = false, language = 1)
+        assertTrue(get().song().shiftAt(key).second > 0)
     }
 
     @Test

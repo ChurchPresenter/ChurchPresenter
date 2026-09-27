@@ -75,8 +75,6 @@ internal fun ProfileEditor(
     // All by default: one look for the whole stack is the usual case, and a single translation is
     // picked out when it needs a look of its own.
     var translationIndex by remember(profile.id) { mutableStateOf(ALL_TRANSLATIONS) }
-    // The Songs page's own: a song's languages are not a Bible's translations.
-    var songLanguage by remember(profile.id) { mutableStateOf(SongStyleLanguage.PRIMARY) }
     var query by remember { mutableStateOf("") }
     var onlyChanges by remember(profile.id) { mutableStateOf(false) }
 
@@ -88,6 +86,7 @@ internal fun ProfileEditor(
     val previewPane = pane ?: stylePanesFor(profile).firstOrNull { it != CustomizePane.STAGE_MONITOR }
     val elements = previewPane?.let { styleElementsFor(it, profile) }.orEmpty()
     val element = pickedElement?.takeIf { it in elements } ?: elements.firstOrNull()
+    val songTargets = rememberSongTargets(profile.id, element) { pickedElement = it }
 
     val resolved = remember(settings, profile) { settings.resolvedFor(profile) }
     val onDraftSettingsChange: ((AppSettings) -> AppSettings) -> Unit = { transform ->
@@ -138,8 +137,7 @@ internal fun ProfileEditor(
                         onElementChange = { pickedElement = it },
                         translationIndex = translationIndex,
                         onTranslationChange = { translationIndex = it },
-                        songLanguage = songLanguage,
-                        onSongLanguageChange = { songLanguage = it },
+                        songTargets = songTargets,
                         onDraftSettingsChange = onDraftSettingsChange,
                         onSettingsChange = onSettingsChange,
                         onProfileChange = onProfileChange,
@@ -165,18 +163,42 @@ internal fun ProfileEditor(
                     onOpenOutputs = { onPageChange(ProfilePage.Outputs) },
                     // The handles act on the page being edited only, never on the picture another shows.
                     adjustModel = adjustModelFor(
-                        pane, resolved, profile, element, onDraftSettingsChange,
+                        pane, resolved, profile, Adjustable(element) { pickedElement = it }, onDraftSettingsChange,
                         Adjustable(translationIndex) { translationIndex = it },
-                        Adjustable(songLanguage) { songLanguage = it },
+                        songTargets,
                     ),
                 ) {
-                    LinkContextCard(link, linkActions, onPageChange) { path, value ->
-                        onProfileChange(profile.withValueAt(path, value))
-                    }
+                    LinkContextCard(
+                        link = link,
+                        actions = linkActions,
+                        onOpenPage = onPageChange,
+                        onValueChange = { path, value -> onProfileChange(profile.withValueAt(path, value)) },
+                        onProfileChange = onProfileChange,
+                    )
                 }
             }
         }
     }
+}
+
+/**
+ * Where the Songs page's Text rows point, held here for the preview to pick as well as the page:
+ * the element, the title slide's own one, and the language -- All by default, since one look for
+ * every language is the usual case. A song's languages are not a Bible's translations.
+ */
+@Composable
+private fun rememberSongTargets(
+    profileId: String,
+    element: CustomizeElement?,
+    onElementChange: (CustomizeElement) -> Unit,
+): SongTargets {
+    var language by remember(profileId) { mutableStateOf<SongStyleLanguage?>(null) }
+    var slideElement by remember(profileId) { mutableStateOf(SongStyleElement.TITLE) }
+    return SongTargets(
+        element = Adjustable(element ?: CustomizeElement.SONG_LYRICS, onElementChange),
+        slideElement = Adjustable(slideElement) { slideElement = it },
+        language = Adjustable(language) { language = it },
+    )
 }
 
 /** The settings column's header, with Basic / Advanced written straight to the document. */
@@ -255,8 +277,7 @@ private fun ColumnScope.PageBody(
     onElementChange: (CustomizeElement) -> Unit,
     translationIndex: Int,
     onTranslationChange: (Int) -> Unit,
-    songLanguage: SongStyleLanguage,
-    onSongLanguageChange: (SongStyleLanguage) -> Unit,
+    songTargets: SongTargets,
     onDraftSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onProfileChange: (OutputProfile) -> Unit,
@@ -308,8 +329,7 @@ private fun ColumnScope.PageBody(
                 onSettingsChange = onDraftSettingsChange,
                 onProfileChange = onProfileChange,
                 onOpenPage = onOpenPage,
-                language = songLanguage,
-                onLanguageChange = onSongLanguageChange,
+                targets = songTargets,
             )
             CustomizePane.BACKGROUND ->
                 ProfileBackgroundPage(draft, profile, onProfileChange, onDraftSettingsChange, onOpenPage)

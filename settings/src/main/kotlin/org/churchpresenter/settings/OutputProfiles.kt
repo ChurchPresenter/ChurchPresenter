@@ -1,12 +1,39 @@
 package org.churchpresenter.settings
 
-/** A profile with a fresh [id] that no profile in [existing] already uses. */
+import org.churchpresenter.settings.utils.Constants
+
+/**
+ * A profile with a fresh [id] that no profile in [existing] already uses.
+ *
+ * Its Bible and song backgrounds are its own and say `Default`, so they follow the profile's own
+ * default background: a new screen is set up from its Background page, rather than quietly taking
+ * whatever the app's Bible and song surfaces happen to be.
+ */
 fun newOutputProfile(existing: List<OutputProfile>, name: String = ""): OutputProfile {
     val taken = existing.map { it.id }.toSet()
     var n = existing.size + 1
     while ("profile$n" in taken) n++
-    return OutputProfile(id = "profile$n", name = name)
+    val followsDefault = BackgroundConfig(backgroundType = Constants.BACKGROUND_DEFAULT)
+    return OutputProfile(
+        id = "profile$n",
+        name = name,
+        backgroundSettings = BackgroundSettings(
+            bibleBackground = followsDefault,
+            bibleLowerThirdBackground = followsDefault,
+            songBackground = followsDefault,
+            songLowerThirdBackground = followsDefault,
+        ),
+        backgroundOverrides = CONTENT_SURFACES.map { it.name }.toSet(),
+    )
 }
+
+/** The surfaces a new profile carries its own of: the content bands, each following the profile's default. */
+private val CONTENT_SURFACES = listOf(
+    BackgroundSurface.BIBLE,
+    BackgroundSurface.BIBLE_LOWER_THIRD,
+    BackgroundSurface.SONG,
+    BackgroundSurface.SONG_LOWER_THIRD,
+)
 
 /** [profile] added at the end. */
 fun ProjectionSettings.addOutputProfile(profile: OutputProfile): ProjectionSettings =

@@ -113,10 +113,11 @@ internal fun LargePreview(
                     profile = profile,
                     onProfileChange = onProfileChange,
                     shapeState = rememberPreviewShapeState(profile),
-                    backgroundMode = backgroundMode.takeIf { drawsText },
+                    backgroundMode = backgroundMode.takeIf { pane.hasPreviewBackground() },
                     onBackgroundModeChange = onBackgroundModeChange,
                     slot = slot.takeIf { drawsText },
                     onSlotChange = onSlotChange,
+                    trailing = { adjustModel?.positions?.let { ResetPositionsKey(it, note = false) } },
                 )
                 if (adjustModel != null) AdjustSwitch(
                     adjust,

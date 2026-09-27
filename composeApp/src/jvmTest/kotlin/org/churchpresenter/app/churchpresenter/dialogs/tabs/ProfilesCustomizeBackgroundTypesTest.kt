@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -48,7 +49,7 @@ class ProfilesCustomizeBackgroundTypesTest {
     fun `a color surface draws a color field`() {
         profilesTab(output(Constants.BACKGROUND_COLOR)) { _ ->
             openBackgroundSurface(own = false)
-            onNodeWithText("#123456").assertExists()
+            onNode(hasText("#123456") and outsideDefaultsCard).assertExists()
         }
     }
 
@@ -92,7 +93,7 @@ class ProfilesCustomizeBackgroundTypesTest {
             openBackgroundSurface(own = false)
             onNodeWithText("Image File").assertDoesNotExist()
             onNodeWithText("Video File").assertDoesNotExist()
-            onNodeWithText("#123456").assertDoesNotExist()
+            onNode(hasText("#123456") and outsideDefaultsCard).assertDoesNotExist()
         }
     }
 
@@ -101,7 +102,7 @@ class ProfilesCustomizeBackgroundTypesTest {
         profilesTab(output(Constants.BACKGROUND_DEFAULT)) { _ ->
             openBackgroundSurface(own = false)
             onNodeWithText("Image File").assertDoesNotExist()
-            onNodeWithText("#123456").assertDoesNotExist()
+            onNode(hasText("#123456") and outsideDefaultsCard).assertDoesNotExist()
         }
     }
 
@@ -115,7 +116,7 @@ class ProfilesCustomizeBackgroundTypesTest {
 
             assertEquals(Constants.BACKGROUND_IMAGE, get().stored().backgroundType)
             onNodeWithText("No image selected").assertExists()
-            onNodeWithText("#123456").assertDoesNotExist()
+            onNode(hasText("#123456") and outsideDefaultsCard).assertDoesNotExist()
         }
     }
 

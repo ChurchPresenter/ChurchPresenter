@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasText
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.utils.Constants
@@ -140,7 +140,7 @@ class ProfilesCustomizeBibleStripTest {
         profilesTab(output()) { _ ->
             openCustomizePane(CustomizePane.BIBLE)
             // A full screen has no band to size.
-            onNodeWithText("29").assertDoesNotExist()
+            onNode(hasText("29") and outsideDefaultsCard).assertDoesNotExist()
         }
     }
 
@@ -148,7 +148,7 @@ class ProfilesCustomizeBibleStripTest {
     fun `a band is offered its own height`() {
         profilesTab(output(band)) { _ ->
             openCustomizePane(CustomizePane.BIBLE)
-            onNodeWithText("29").assertExists()
+            onNode(hasText("29") and outsideDefaultsCard).assertExists()
         }
     }
 

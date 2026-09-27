@@ -92,6 +92,11 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         origin,
         density,
     ) }
+    // What a dragged reference must stay inside: its translation's cell, which clips anything moved
+    // out of it -- or the stage, where the layout has no cells.
+    val referenceBounds = referenceKey
+        ?.let { reported.frameOf(PresentedBlock(PresentedBlock.Kind.CELL, it), origin, density) }
+        ?: AdjustFrame(0.dp, 0.dp, stageWidth, stageHeight)
     Box(
         Modifier
             .size(stageWidth, stageHeight)
@@ -104,16 +109,19 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
                 .size(frame.width, frame.height)
                 .dashedBorder(MaterialTheme.semantic.adjustHandle, 2.dp),
         )
+        // Under every handle: a block is large, and the bars at its edges must still be caught.
+        if (targets != null) BlockOutlines(targets, blockFrames)
         MarginBars(model, frame, scale)
         model.band?.let { BandBar(it, bandTop, stageWidth, stageHeight) }
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
-        if (targets != null) BlockOutlines(targets, blockFrames)
         MoveHandle(model, frame, scale)
-        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, scale)
-        // The size corner sits on the block it sizes, when one is picked -- drawn last, since that
-        // corner is often where the reference sits too.
-        SizeCorner(model, targets?.selected?.let { blockFrames.getOrNull(it) } ?: inner, scale)
+        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, referenceBounds, scale)
+        // The size corner sits on what it sizes -- the reference, or the picked block -- drawn last,
+        // since that corner is often where the reference sits too.
+        val sized = if (targets?.reference?.picked == true) referenceFrame
+            else targets?.selected?.let { blockFrames.getOrNull(it) }
+        SizeCorner(model, sized ?: inner, scale)
     }
 }
 

@@ -11,11 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.composables.CheckerboardFill
 import org.churchpresenter.app.churchpresenter.presenter.ABOVE_BAND_OVERLAP_FRACTION
+import org.churchpresenter.app.churchpresenter.presenter.AboveBand
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
@@ -32,19 +34,39 @@ import churchpresenter.composeapp.generated.resources.profile_preview_note_match
 import churchpresenter.composeapp.generated.resources.profile_preview_note_video
 
 /**
- * What the preview draws behind the text: the real background, nothing, or a checkerboard wherever
- * the output is transparent.
+ * What the preview draws behind the text: the real background, nothing, or a checkerboard in its
+ * place.
  *
- * Preview-only state, never stored. Off is there to judge the type on its own, and Checker to see
- * which parts of a lower third a keyer downstream would cut out.
+ * Preview-only state, never stored. Off is there to judge the type on its own, and Checker to judge
+ * it against a busy ground -- a full screen shows the checkerboard where its background was, and a
+ * lower third keeps its band with the checkerboard above it, which is what a keyer downstream cuts.
  */
 internal enum class PreviewBackgroundMode { ACTUAL, OFF, CHECKER }
+
+/**
+ * Whether the page's preview has a ground to switch -- every page but Stage layout, which draws a
+ * diagram of zones rather than an output.
+ */
+internal fun CustomizePane?.hasPreviewBackground(): Boolean = this != null && this != CustomizePane.STAGE_MONITOR
 
 /** Which content's background the preview stands for. */
 internal enum class PreviewBackgroundSurface { BIBLE, SONGS }
 
 /** How coarse the preview's checkerboard is: fine enough to read as one, coarse enough to see. */
 internal val PREVIEW_CHECKER_SQUARE = 14.dp
+
+/**
+ * The preview checkerboard's two greys: mid-tones, whatever the app's theme, so white text and black
+ * text both read against it -- the theme's own light surfaces all but hid white verse text.
+ */
+private val PREVIEW_CHECKER_LIGHT = Color(0xFF8C8C8C)
+private val PREVIEW_CHECKER_DARK = Color(0xFF6B6B6B)
+
+/** The checkerboard [PreviewBackgroundMode.CHECKER] puts in place of a background. */
+@Composable
+internal fun PreviewCheckerboard(modifier: Modifier) {
+    CheckerboardFill(modifier, square = PREVIEW_CHECKER_SQUARE, colors = PREVIEW_CHECKER_LIGHT to PREVIEW_CHECKER_DARK)
+}
 
 /**
  * The background an output on [profile] draws behind [surface], as a still, filling the preview.
@@ -56,9 +78,9 @@ internal val PREVIEW_CHECKER_SQUARE = 14.dp
  *
  * **A lower third is drawn as the band it is**: the surface fills a band [lowerThirdBandFraction]
  * tall at the bottom, and above it goes the wash the surface is set to ([resolveAboveBand]) over
- * black -- or over the checkerboard in [PreviewBackgroundMode.CHECKER], which is what a Browser
- * Source or NDI alpha output keys out there. A Lottie band is left to the presenter, which draws it
- * with the text because it *is* the text.
+ * black. In [PreviewBackgroundMode.CHECKER] the checkerboard replaces the background -- all of it on
+ * a full screen, the wash above the band on a lower third. A Lottie band is left to the presenter,
+ * which draws it with the text because it *is* the text.
  *
  * [settings] is already resolved for the profile (`resolvedFor`); nothing is resolved twice.
  */
@@ -80,19 +102,21 @@ internal fun BoxScope.PreviewBackgroundLayer(
         (if (surface == PreviewBackgroundSurface.BIBLE) profile.showBibleBackground else profile.showSongsBackground)
     BoxWithConstraints(modifier = Modifier.matchParentSize()) {
         val previewWidth = maxWidth
-        if (mode == PreviewBackgroundMode.CHECKER) {
-            CheckerboardFill(Modifier.fillMaxSize(), square = PREVIEW_CHECKER_SQUARE)
+        val checker = mode == PreviewBackgroundMode.CHECKER
+        if (checker) {
+            PreviewCheckerboard(Modifier.fillMaxSize())
         }
         if (!shown) return@BoxWithConstraints
         val band = backgrounds.resolvedConfigFor(scope)
         if (!lowerThird) {
-            SurfaceStill(band, previewWidth, Modifier.fillMaxSize())
+            if (!checker) SurfaceStill(band, previewWidth, Modifier.fillMaxSize())
             return@BoxWithConstraints
         }
         val fraction = settings.lowerThirdBandFraction(
             if (surface == PreviewBackgroundSurface.BIBLE) Presenting.BIBLE else Presenting.LYRICS,
         )
-        val above = resolveAboveBand(backgrounds, backgrounds.configFor(scope))
+        val above = if (checker) AboveBand(fill = null, fillsBehindBand = false) else
+            resolveAboveBand(backgrounds, backgrounds.configFor(scope))
         val aboveArea = if (above.fillsBehindBand) {
             Modifier.fillMaxSize()
         } else {

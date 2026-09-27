@@ -32,7 +32,10 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_REFERENCE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_SWITCH_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.PreviewBackgroundMode
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewBackgroundTag
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BIBLE_SOURCE_TRIGGER_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DETAIL_ADVANCED_TAG
@@ -246,6 +249,51 @@ class ProfilesTabScreenshotTest {
         tab(CustomizePane.BIBLE)
         waitForIdle()
         onNodeWithTag(PREVIEW_LARGER_TAG).performClick()
+    }
+
+    // ── Follow-ups: languages, moving elements, what changed, Checker ───────────────────────────
+
+    @Test
+    fun `the Songs page names every language beside All`() = shoot("songs_all_languages") {
+        tab(CustomizePane.SONGS)
+        waitForIdle()
+        onNodeWithTag(songLanguageTag(SongStyleLanguage.PRIMARY)).performClick()
+    }
+
+    @Test
+    fun `every song element a block on the preview`() = shoot("songs_adjust_blocks") {
+        tab(CustomizePane.SONGS)
+        waitForIdle()
+        onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
+    }
+
+    @Test
+    fun `the reference picked on the preview`() = shoot("adjust_reference") {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(ADJUST_REFERENCE_TAG).performClick()
+    }
+
+    @Test
+    fun `what the profile changes from the defaults`() = shoot("defaults_card") {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onAllNodes(hasSetTextAction() and hasTestTag(TEXT_SIZE_FIELD_TAG), useUnmergedTree = true)[0]
+            .performTextReplacement("50")
+        waitForIdle()
+        onNodeWithTag(translationChipTag(1)).performClick()
+        waitForIdle()
+        onAllNodes(hasSetTextAction() and hasTestTag(TEXT_SIZE_FIELD_TAG), useUnmergedTree = true)[0]
+            .performTextReplacement("40")
+    }
+
+    @Test
+    fun `Checker in place of a full screen's background`() = shoot("checker_full_screen") {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithTag(previewBackgroundTag(PreviewBackgroundMode.CHECKER)).performClick()
     }
 
     // ── Harness ─────────────────────────────────────────────────────────────────────────────────

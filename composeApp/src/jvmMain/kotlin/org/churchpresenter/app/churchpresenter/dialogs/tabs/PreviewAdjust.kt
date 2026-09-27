@@ -25,16 +25,18 @@ internal class AdjustModel(
     val band: Adjustable<Int>?,
     /** The translations or languages drawn as blocks of their own, to pick and move one; null where there are none. */
     val blocks: BlockTargets? = null,
+    /** Every element moved on its own put back where the layout puts it; null where nothing moves. */
+    val positions: PositionsReset? = null,
 ) {
     /** More than one block to pick from, or a reference to drag. */
-    val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.referenceAbove != null)
+    val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.reference != null)
 }
 
 /**
- * The blocks a page's text is drawn in -- each Bible translation, or each song language -- as the
- * handles address them: which is picked (null for All), how to pick one, and how far the picked one
- * is moved on its own. [reference] is the picked (or first) translation's reference, above or after
- * its verse, on the Bible page.
+ * The blocks a page's text is drawn in -- each Bible translation, or each element of a song slide --
+ * as the handles address them: which is picked (null for All), how to pick one, and how far the
+ * picked one is moved on its own. [reference] is the picked (or first) translation's reference, on
+ * the Bible page.
  */
 internal class BlockTargets(
     val kind: PresentedBlock.Kind,
@@ -44,9 +46,22 @@ internal class BlockTargets(
     val onSelect: (Int) -> Unit,
     /** The picked block's own move, x to y in output pixels; null under All. */
     val shift: Adjustable<Pair<Int, Int>>?,
-    /** Whether the reference sits above its verse; null on a page with no reference. */
-    val referenceAbove: Adjustable<Boolean>? = null,
+    /** The reference as a block of its own; null on a page with none. */
+    val reference: ReferenceTarget? = null,
 )
+
+/**
+ * A Bible reference on the preview: dragged anywhere on its own ([shift], output pixels), and
+ * clicked -- or dragged -- to point the Text rows at it. [picked] while they are.
+ */
+internal class ReferenceTarget(
+    val shift: Adjustable<Pair<Int, Int>>,
+    val picked: Boolean,
+    val onPick: () -> Unit,
+)
+
+/** Reset positions under the preview: [moved] while anything on this output has been moved on its own. */
+internal class PositionsReset(val moved: Boolean, val onReset: () -> Unit)
 
 /** One value a handle changes, and how to write it. */
 internal class Adjustable<T>(val value: T, val onChange: (T) -> Unit)

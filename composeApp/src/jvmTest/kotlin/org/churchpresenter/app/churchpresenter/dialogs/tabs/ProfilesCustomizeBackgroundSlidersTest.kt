@@ -53,9 +53,9 @@ class ProfilesCustomizeBackgroundSlidersTest {
         profilesTab(output()) { _ ->
             // Taken over, which starts from what the app default holds: its editor then shows it.
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            onNode(hasSetTextAction() and hasText("80")).assertExists()
-            onNode(hasSetTextAction() and hasText("45")).assertExists()
-            onNode(hasSetTextAction() and hasText("6")).assertExists()
+            onNode(hasSetTextAction() and hasText("80") and outsideDefaultsCard).assertExists()
+            onNode(hasSetTextAction() and hasText("45") and outsideDefaultsCard).assertExists()
+            onNode(hasSetTextAction() and hasText("6") and outsideDefaultsCard).assertExists()
         }
     }
 
@@ -131,7 +131,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
         profilesTab(output()) { _ ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
             setProfileStepper("Dim", "45%", fraction = 0.5f)
-            onNode(hasSetTextAction() and hasText("50")).assertExists()
+            onNode(hasSetTextAction() and hasText("50") and outsideDefaultsCard).assertExists()
         }
     }
 

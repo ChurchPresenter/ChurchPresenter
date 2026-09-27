@@ -417,7 +417,14 @@ internal fun <A, E> AppliesToStrip(
             RowSegmented(targets, target, onTarget, modifier = Modifier.testTag(CUSTOMIZE_TRANSLATION_ROW_TAG))
         }
         if (elements.size > 1 && element != null) {
-            RowSegmented(elements, element, onElement, modifier = Modifier.testTag(CUSTOMIZE_ELEMENT_ROW_TAG))
+            // Compact: the Songs page's five or six elements belong on one line.
+            RowSegmented(
+                elements,
+                element,
+                onElement,
+                modifier = Modifier.testTag(CUSTOMIZE_ELEMENT_ROW_TAG),
+                compact = true,
+            )
         }
     }
 }
