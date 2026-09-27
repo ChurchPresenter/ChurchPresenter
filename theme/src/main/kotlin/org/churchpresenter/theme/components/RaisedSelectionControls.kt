@@ -1,5 +1,9 @@
 package org.churchpresenter.theme.components
 
+import org.churchpresenter.theme.ElevationPalette
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,6 +54,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
 import androidx.compose.ui.graphics.graphicsLayer
@@ -77,7 +83,7 @@ private const val CHECK_END_Y = 0.32f
 private const val CHECK_STROKE_FRACTION = 0.13f
 
 /**
- * `Checkbox` in the elevated look: a sunken box while clear, a raised accent key with a check mark
+ * `Checkbox` in the elevated look: a sunken box while clear, an accent keycap with a check mark
  * when ticked. [colors]' checked color, when a caller sets one, tints the ticked key.
  */
 @Composable
@@ -129,13 +135,16 @@ fun RaisedCheckbox(
                 .aspectRatio(1f)
                 .then(
                     if (checked) {
-                        Modifier.raised(shape, fill, palette, hovered = hovered, lift = 2.dp, moves = false)
+                        Modifier.keycap(shape, fill.bottom, palette, hovered = hovered)
                     } else {
                         Modifier.sunken(shape, palette, rim = if (hovered) hoverRim else uncheckedRim)
+                            .wellDepth(palette)
                     }
                 ),
         ) {
-            if (checked) CheckMark(fill.ink)
+            if (checked) {
+                Box(Modifier.padding(keycapFacePadding(pressed = false))) { CheckMark(fill.ink) }
+            }
         }
     }
 }
@@ -287,9 +296,9 @@ fun RaisedChip(
             .defaultMinSize(minHeight = CHIP_HEIGHT)
             .then(
                 if (enabled) {
-                    Modifier.raised(shape, fill, palette, pressed, hovered, lift = 2.dp)
+                    Modifier.keycap(shape, fill.bottom, palette, pressed, hovered)
                 } else {
-                    Modifier.clip(shape)
+                    Modifier.keycap(shape, fill.bottom, palette, enabled = false)
                 }
             )
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
@@ -300,7 +309,8 @@ fun RaisedChip(
                 role = Role.Checkbox,
                 onClick = onClick,
             )
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 10.dp)
+            .padding(keycapFacePadding(enabled && pressed)),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -350,7 +360,7 @@ fun SegmentTrackItem(
         modifier = modifier
             .then(
                 when {
-                    selected -> Modifier.raised(shape, palette.selected, palette, hovered = hovered, lift = 2.dp)
+                    selected -> Modifier.keycap(shape, palette.selected.bottom, palette, hovered = hovered)
                     // A faint wash under the pointer, so an unchosen option shows it can be picked.
                     hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
                         .clip(shape).background(ink.copy(alpha = SEGMENT_HOVER_ALPHA))
@@ -367,8 +377,34 @@ fun SegmentTrackItem(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        CompositionLocalProvider(LocalContentColor provides ink) {
-            ProvideTextStyle(MaterialTheme.typography.labelLarge, content)
+        Box(
+            if (selected) Modifier.padding(keycapFacePadding(pressed = false)) else Modifier,
+            contentAlignment = Alignment.Center,
+        ) {
+            CompositionLocalProvider(LocalContentColor provides ink) {
+                ProvideTextStyle(MaterialTheme.typography.labelLarge, content)
+            }
         }
     }
 }
+
+/** A deeper recess than the well alone draws: shade falling from the top, light on the bottom lip. */
+private fun Modifier.wellDepth(palette: ElevationPalette): Modifier = drawBehind {
+    val shade = Color.Black.copy(alpha = if (palette.isDark) WELL_SHADE_DARK else WELL_SHADE_LIGHT)
+    drawRect(
+        Brush.verticalGradient(listOf(shade, Color.Transparent), endY = size.height * WELL_SHADE_DEPTH),
+        size = Size(size.width, size.height * WELL_SHADE_DEPTH),
+    )
+    val line = 1.dp.toPx()
+    drawRect(
+        Color.White.copy(alpha = if (palette.isDark) WELL_LIP_DARK else WELL_LIP_LIGHT),
+        topLeft = Offset(0f, size.height - line),
+        size = Size(size.width, line),
+    )
+}
+
+private const val WELL_SHADE_LIGHT = 0.22f
+private const val WELL_SHADE_DARK = 0.6f
+private const val WELL_LIP_LIGHT = 0.9f
+private const val WELL_LIP_DARK = 0.2f
+private const val WELL_SHADE_DEPTH = 0.55f

@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import org.churchpresenter.theme.AppShape
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Tv
@@ -34,7 +32,8 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 
 private const val DIMMED_ALPHA = 0.5f
 
@@ -91,9 +90,9 @@ fun ActionIconButton(
                 .size(buttonSize)
                 .then(
                     if (enabled) {
-                        Modifier.raised(shape, palette.tinted(containerColor, contentColor), palette, pressed, hovered)
+                        Modifier.keycap(shape, containerColor, palette, pressed, hovered)
                     } else {
-                        Modifier.clip(shape).background(disabledContainerColor)
+                        Modifier.keycap(shape, disabledContainerColor, palette, enabled = false)
                     }
                 )
                 .clickable(
@@ -105,10 +104,13 @@ fun ActionIconButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            val iconModifier = Modifier
+                .padding(keycapFacePadding(enabled && pressed))
+                .size(iconSize)
             if (icon != null) {
-                Icon(icon, contentDescription = tooltipText, tint = ink, modifier = Modifier.size(iconSize))
+                Icon(icon, contentDescription = tooltipText, tint = ink, modifier = iconModifier)
             } else if (painter != null) {
-                Icon(painter, contentDescription = tooltipText, tint = ink, modifier = Modifier.size(iconSize))
+                Icon(painter, contentDescription = tooltipText, tint = ink, modifier = iconModifier)
             }
         }
     }

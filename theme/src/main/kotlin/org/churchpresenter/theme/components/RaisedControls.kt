@@ -1,5 +1,6 @@
 package org.churchpresenter.theme.components
 
+import org.churchpresenter.theme.keycapDisabled
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -35,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.ElevationPalette
 import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.flatDisabled
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.RING_ALPHA
 import androidx.compose.animation.core.animateFloatAsState
@@ -214,12 +214,12 @@ private fun RaisedButtonSurface(
             .minimumInteractiveComponentSize()
             .then(
                 if (enabled) {
-                    Modifier.raised(
-                        shape, fill, palette, pressed, hovered,
+                    Modifier.keycap(
+                        shape, fill.bottom, palette, pressed, hovered,
                         ring = if (focused) focusRing else Color.Unspecified,
                     )
                 } else {
-                    Modifier.flatDisabled(shape, palette)
+                    Modifier.keycapDisabled(shape, palette)
                 }
             )
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
@@ -237,7 +237,8 @@ private fun RaisedButtonSurface(
                 Row(
                     modifier = Modifier
                         .defaultMinSize(ButtonDefaults.MinWidth, ButtonDefaults.MinHeight)
-                        .padding(contentPadding),
+                        .padding(contentPadding)
+                        .padding(keycapFacePadding(enabled && pressed)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                     content = content,
@@ -301,17 +302,7 @@ fun RaisedSwitch(
                 .size(SWITCH_WIDTH, SWITCH_HEIGHT)
                 .then(
                     if (checked) {
-                        Modifier
-                            .clip(trackShape)
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(
-                                        lerp(palette.accent.bottom, Color.White, lit),
-                                        lerp(palette.accent.top, Color.White, lit),
-                                    )
-                                )
-                            )
-                            .border(1.dp, palette.wellBorder, trackShape)
+                        Modifier.sunken(trackShape, palette, fill = lerp(palette.accent.bottom, Color.White, lit))
                     } else {
                         Modifier.sunken(
                             trackShape,
@@ -330,7 +321,13 @@ fun RaisedSwitch(
                         scaleX = knobScale
                         scaleY = knobScale
                     }
-                    .raised(CircleShape, knobFill(palette, checked), palette, lift = 2.dp)
+                    .keycap(
+                        CircleShape,
+                        knobFill(palette, checked).bottom,
+                        palette,
+                        pressed = pressed && enabled,
+                        hovered = hovered && enabled,
+                    )
             )
         }
     }

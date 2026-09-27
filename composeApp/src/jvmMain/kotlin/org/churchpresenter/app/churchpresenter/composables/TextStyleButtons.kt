@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -56,7 +58,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import org.churchpresenter.theme.raised
+import androidx.compose.foundation.layout.padding
 import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -324,12 +326,14 @@ private fun StyleSegment(
                 // The chip draws a letter and the caret draws an arrow; neither is a name, so the
                 // tooltip is also the accessible one.
                 .semantics { contentDescription = tooltip }
-                .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
+                .keycap(shape, fill.bottom, palette, pressed = pressed, hovered = hovered)
                 .hoverable(interaction)
                 .clickable(interactionSource = interaction, indication = null) { onClick() },
             contentAlignment = Alignment.Center,
         ) {
-            content(fill.ink)
+            Box(Modifier.padding(keycapFacePadding(pressed)), contentAlignment = Alignment.Center) {
+                content(fill.ink)
+            }
         }
     }
 }

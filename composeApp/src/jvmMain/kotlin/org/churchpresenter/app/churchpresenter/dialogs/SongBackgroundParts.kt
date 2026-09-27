@@ -4,6 +4,8 @@
  */
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -73,14 +75,22 @@ internal fun SegmentedRow(content: @Composable RowScope.() -> Unit) {
 
 @Composable
 internal fun Segment(label: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
+    val palette = elevationPalette()
+    val shape = AppShape(6.dp)
     Box(
         modifier = Modifier
             .height(24.dp)
             .alpha(if (enabled) 1f else DISABLED_SEGMENT_ALPHA)
-            .clip(AppShape(6.dp))
-            .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .then(
+                if (selected) {
+                    Modifier.keycap(shape, MaterialTheme.colorScheme.primary, palette)
+                } else {
+                    Modifier.clip(shape)
+                }
+            )
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 11.dp),
+            .padding(horizontal = 11.dp)
+            .then(if (selected) Modifier.padding(keycapFacePadding(pressed = false)) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         Text(

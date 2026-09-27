@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
@@ -140,7 +144,6 @@ import androidx.compose.foundation.layout.RowScope
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.raisedHover
 
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
@@ -365,11 +368,20 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             // Hidden rebuild: 3 rapid clicks on the search button force-reloads songs from disk
             var rebuildClickCount by remember { mutableStateOf(0) }
             var rebuildClickTime by remember { mutableStateOf(0L) }
+            val searchInteraction = remember { MutableInteractionSource() }
+            val searchHovered by searchInteraction.collectIsHoveredAsState()
+            val searchPressed by searchInteraction.collectIsPressedAsState()
             Box(
                 modifier = Modifier
                     .size(42.dp)
-                    .raisedHover(AppShape(8.dp), elevationPalette().accent, elevationPalette())
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                    .keycap(
+                        AppShape(8.dp),
+                        elevationPalette().accent.bottom,
+                        elevationPalette(),
+                        pressed = searchPressed,
+                        hovered = searchHovered,
+                    )
+                    .clickable(indication = null, interactionSource = searchInteraction) {
                         val now = System.currentTimeMillis()
                         if (now - rebuildClickTime > REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0
                         rebuildClickCount++
@@ -381,10 +393,20 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     },
                 contentAlignment = Alignment.Center
             ) {
+                val face = Modifier.padding(keycapFacePadding(searchPressed))
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                    CircularProgressIndicator(
+                        modifier = face.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
                 } else {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = stringResource(Res.string.search),
+                        modifier = face.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                    )
                 }
             }
 

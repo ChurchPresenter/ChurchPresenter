@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipArea
@@ -46,7 +48,6 @@ import churchpresenter.composeapp.generated.resources.align_bottom
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
 import androidx.compose.ui.graphics.graphicsLayer
 
@@ -185,12 +186,11 @@ private fun IconChoiceTrack(
                         .size(segmentWidth, segmentHeight)
                         .then(
                             when {
-                                isSelected -> Modifier.raised(
+                                isSelected -> Modifier.keycap(
                                     segmentShape,
-                                    palette.selected,
+                                    palette.selected.bottom,
                                     palette,
                                     hovered = hovered,
-                                    lift = 2.dp,
                                 )
                                 hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
                                     .clip(segmentShape)
@@ -211,7 +211,11 @@ private fun IconChoiceTrack(
                     Image(
                         painter = choice.painter,
                         contentDescription = choice.contentDescription,
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier
+                            .then(
+                                if (isSelected) Modifier.padding(keycapFacePadding(pressed = false)) else Modifier
+                            )
+                            .size(iconSize),
                         colorFilter = ColorFilter.tint(tint),
                     )
                 }

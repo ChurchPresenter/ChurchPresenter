@@ -563,7 +563,7 @@ fun MediaTab(
                 val transportTint = MaterialTheme.colorScheme.onSurface
                     .copy(alpha = if (viewModel.isLoaded) 1f else DISABLED_TRANSPORT_ALPHA)
                 val keyColors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
+                    containerColor = elevationPalette().key.bottom,
                     contentColor = transportTint,
                     disabledContentColor = transportTint,
                 )

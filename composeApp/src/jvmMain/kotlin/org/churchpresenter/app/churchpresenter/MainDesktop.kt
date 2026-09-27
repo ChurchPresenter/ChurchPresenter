@@ -2061,6 +2061,7 @@ private fun PreviewSidebar(
                     text = stringResource(Res.string.tooltip_toggle_displays),
                     onClick = { presenterManager.togglePresenterWindow() },
                     buttonSize = 36.dp,
+                    raised = true,
                     iconTint = if (presenterManager.showPresenterWindow.value)
                         MaterialTheme.colorScheme.primary
                     else
@@ -2075,6 +2076,7 @@ private fun PreviewSidebar(
                         instanceLinkSendClear?.invoke()
                     },
                     buttonSize = 36.dp,
+                    raised = true,
                     iconTint = MaterialTheme.colorScheme.error
                 )
                 PreviewSettingsButton(appSettings.projectionSettings) { updated ->
@@ -2200,9 +2202,9 @@ private fun PreviewSettingsButton(proj: ProjectionSettings, onChange: (Projectio
             painter = painterResource(Res.drawable.ic_settings),
             text = stringResource(Res.string.tooltip_preview_settings),
             onClick = { open = true },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            open = open,
-            buttonSize = 40.dp,
+            style = ToolbarKeyStyle.RAISED,
+            buttonSize = 36.dp,
+            iconSize = 20.dp,
         )
         PreviewGroupsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
     }

@@ -75,7 +75,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
@@ -452,7 +451,7 @@ fun PicturesTab(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 val neutralKeyColors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
+                    containerColor = elevationPalette().key.bottom,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 )
                 val accentKeyColors = IconButtonDefaults.filledIconButtonColors(

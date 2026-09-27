@@ -41,7 +41,8 @@ import churchpresenter.composeapp.generated.resources.position_showing_at
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 import org.churchpresenter.theme.sunken
 import org.jetbrains.compose.resources.stringResource
 
@@ -58,7 +59,7 @@ private val MARKER_WIDTH = 20.dp
 
 /**
  * Where on the output something is shown, picked on a miniature screen: a sunken 16:9 panel holding
- * a 3x3 grid of spots. The chosen spot is a raised accent marker; its name is written beside the
+ * a 3x3 grid of spots. The chosen spot is an accent keycap; its name is written beside the
  * screen rather than on the spot, so a long name never wraps inside a tile.
  *
  * [positions] are value-to-name pairs in reading order, top-left first.
@@ -151,7 +152,7 @@ private fun PositionCell(
                 .fillMaxHeight()
                 .then(
                     when {
-                        isSelected -> Modifier.raised(shape, palette.accent, palette, lift = 2.dp)
+                        isSelected -> Modifier.keycap(shape, palette.accent.bottom, palette, hovered = hovered)
                         hovered -> Modifier.clip(shape).background(palette.key.ink.copy(alpha = HOVER_ALPHA))
                         else -> Modifier.clip(shape)
                     }
@@ -169,6 +170,7 @@ private fun PositionCell(
         ) {
             Box(
                 Modifier
+                    .then(if (isSelected) Modifier.padding(keycapFacePadding(pressed = false)) else Modifier)
                     .size(width = dotWidth, height = DOT_HEIGHT)
                     .clip(CircleShape)
                     .background(if (isSelected) palette.accent.ink else dotColor)

@@ -727,7 +727,11 @@ fun PresentationTab(
                         tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                     ) {
-                        KeyIconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
+                        RaisedIconButton(
+                            onClick = goPrevious,
+                            modifier = Modifier.size(30.dp),
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = elevationPalette().key.bottom)
+                        ) {
                             Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                         }
                     }
@@ -752,7 +756,11 @@ fun PresentationTab(
                         tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                     ) {
-                        KeyIconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
+                        RaisedIconButton(
+                            onClick = goNext,
+                            modifier = Modifier.size(30.dp),
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = elevationPalette().key.bottom)
+                        ) {
                             Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                         }
                     }

@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 
@@ -65,7 +66,7 @@ fun TextStyleToggleButton(
         Box(
             modifier = Modifier
                 .size(buttonSize)
-                .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
+                .keycap(shape, fill.bottom, palette, pressed = pressed, hovered = hovered)
                 .hoverable(interaction)
                 .clickable(interactionSource = interaction, indication = null) { onClick() },
             contentAlignment = Alignment.Center,
@@ -78,6 +79,7 @@ fun TextStyleToggleButton(
                 textDecoration = textDecoration,
                 color = fill.ink,
                 maxLines = 1,
+                modifier = Modifier.padding(keycapFacePadding(pressed)),
             )
         }
     }

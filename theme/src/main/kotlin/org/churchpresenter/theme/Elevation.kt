@@ -283,18 +283,18 @@ fun Modifier.flatDisabled(shape: Shape, palette: ElevationPalette): Modifier = t
     .background(Brush.verticalGradient(listOf(palette.key.top, palette.key.bottom)))
 
 private val INNER_SHADOW_DEPTH = 4.dp
-private val RAISED_LIFT = 3.dp
-private val HOVER_EXTRA_LIFT = 3.dp
-private const val HOVER_BRIGHTEN = 0.08f
-private const val DISABLED_OPACITY = 0.4f
-private val RING_WIDTH = 2.dp
+internal val RAISED_LIFT = 3.dp
+internal val HOVER_EXTRA_LIFT = 3.dp
+internal const val HOVER_BRIGHTEN = 0.08f
+internal const val DISABLED_OPACITY = 0.4f
+internal val RING_WIDTH = 2.dp
 /** How strong a focus or open ring is drawn. */
 const val RING_ALPHA = 0.55f
 private val PRESS_SHIFT = 1.dp
-private val HAIRLINE = 0.5.dp
+internal val HAIRLINE = 0.5.dp
 private const val FILL_WELL_SHADE = 0.08f
 private const val BOTTOM_EDGE_ALPHA = 0.14f
-private const val LIGHT_GLOW_ALPHA = 0.35f
+internal const val LIGHT_GLOW_ALPHA = 0.35f
 private const val TINT_LIFT_DARK = 0.22f
 private const val TINT_LIFT_LIGHT = 0.16f
 private const val HIGHLIGHT_TINT_DARK = 0.4f

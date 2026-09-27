@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.clickable
@@ -46,7 +49,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.semantics.Role
-import org.churchpresenter.theme.raisedHover
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.
@@ -103,21 +105,7 @@ internal fun BibleSearchRow(
                             onModeSelected(modeOptions.indexOf(newValue).coerceAtLeast(0))
                         }
                     )
-                    Box(
-                        modifier = Modifier.size(42.dp)
-                            .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
-                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                                onSubmit()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_search),
-                            contentDescription = stringResource(Res.string.search),
-                            modifier = Modifier.size(16.dp),
-                            tint = elevationPalette().accent.ink
-                        )
-                    }
+                    SearchSubmitKey(onSubmit)
                 }
             }
         } else {
@@ -148,21 +136,7 @@ internal fun BibleSearchRow(
                         onModeSelected(modeOptions.indexOf(newValue).coerceAtLeast(0))
                     }
                 )
-                Box(
-                    modifier = Modifier.size(42.dp)
-                        .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
-                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                            onSubmit()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_search),
-                        contentDescription = stringResource(Res.string.search),
-                        modifier = Modifier.size(16.dp),
-                        tint = elevationPalette().accent.ink
-                    )
-                }
+                SearchSubmitKey(onSubmit)
             }
         }
     }
@@ -205,9 +179,10 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
         val fill = if (searchMode == BibleSearchMode.AUTO) palette.accent else palette.tinted(container, content)
         val interaction = remember { MutableInteractionSource() }
         val pressed by interaction.collectIsPressedAsState()
+        val hovered by interaction.collectIsHoveredAsState()
         Box(
             modifier = modifier
-                .raisedHover(AppShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
+                .keycap(AppShape(8.dp), fill.bottom, palette, pressed = pressed, hovered = hovered)
                 .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onCycle),
             contentAlignment = Alignment.Center
         ) {
@@ -220,8 +195,29 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
                 ),
                 color = fill.ink,
                 maxLines = 1,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                modifier = Modifier.padding(keycapFacePadding(pressed)).padding(horizontal = 10.dp, vertical = 5.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun SearchSubmitKey(onSubmit: () -> Unit) {
+    val palette = elevationPalette()
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    Box(
+        modifier = Modifier.size(42.dp)
+            .keycap(AppShape(10.dp), palette.accent.bottom, palette, pressed = pressed, hovered = hovered)
+            .clickable(indication = null, interactionSource = interaction, onClick = onSubmit),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_search),
+            contentDescription = stringResource(Res.string.search),
+            modifier = Modifier.padding(keycapFacePadding(pressed)).size(16.dp),
+            tint = palette.accent.ink
+        )
     }
 }

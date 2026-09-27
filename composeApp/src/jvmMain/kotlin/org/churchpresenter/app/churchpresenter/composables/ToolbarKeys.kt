@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycapDisabled
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.raisedHover
-import org.churchpresenter.theme.flatDisabled
 
 private const val DISABLED_INK_ALPHA = 0.35f
 private val KEY_INSET = 2.dp
@@ -94,10 +96,9 @@ fun ToolbarKey(
         val pressed by interaction.collectIsPressedAsState()
         val raisedToggle = style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed)
         val surface = when {
-            !enabled && style == ToolbarKeyStyle.RAISED -> Modifier.flatDisabled(shape, palette)
+            !enabled && style == ToolbarKeyStyle.RAISED -> Modifier.keycapDisabled(shape, palette)
             !enabled -> Modifier.clip(shape)
-            style == ToolbarKeyStyle.RAISED ->
-                Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)
+            style == ToolbarKeyStyle.RAISED -> Modifier.keycap(shape, palette.key.bottom, palette, pressed, hovered)
             raisedToggle -> Modifier.raisedHover(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
             // Flat at rest; under the pointer it rises into its own key, so one icon lifts, not the row.
             hovered -> Modifier.raised(shape, palette.key, palette, pressed = pressed, hovered = true, lift = 2.dp)
@@ -123,7 +124,15 @@ fun ToolbarKey(
             Image(
                 painter = painter,
                 contentDescription = text,
-                modifier = Modifier.size(iconSize),
+                modifier = Modifier
+                    .then(
+                        if (style == ToolbarKeyStyle.RAISED) {
+                            Modifier.padding(keycapFacePadding(enabled && pressed))
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .size(iconSize),
                 colorFilter = ColorFilter.tint(if (enabled) tint else tint.copy(alpha = DISABLED_INK_ALPHA)),
             )
             if (style == ToolbarKeyStyle.PANEL_TOGGLE && open) {

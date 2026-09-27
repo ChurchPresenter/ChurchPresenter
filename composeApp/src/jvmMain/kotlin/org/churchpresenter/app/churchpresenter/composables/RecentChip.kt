@@ -31,7 +31,8 @@ import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.recent_pin
 import churchpresenter.composeapp.generated.resources.recent_unpin
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 import org.churchpresenter.theme.semantic
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.painterResource
@@ -62,9 +63,10 @@ fun RecentChip(
     Row(
         modifier = Modifier
             .height(height)
-            .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
+            .keycap(shape, fill.bottom, palette, pressed = pressed, hovered = hovered)
             .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
-            .padding(start = 12.dp, end = 4.dp),
+            .padding(start = 12.dp, end = 4.dp)
+            .padding(keycapFacePadding(pressed)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {

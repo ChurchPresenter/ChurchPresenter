@@ -1,5 +1,6 @@
 package org.churchpresenter.theme.components
 
+import org.churchpresenter.theme.keycapDisabled
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +26,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.flatDisabled
+import org.churchpresenter.theme.keycap
+import org.churchpresenter.theme.keycapFacePadding
 import org.churchpresenter.theme.raised
 
 private val ICON_BUTTON_SIZE = 40.dp
@@ -52,11 +54,9 @@ fun KeyIconButton(
     val pressed by interaction.collectIsPressedAsState()
     val filled = colors.containerColor.alpha > 0f
     val surface = when {
-        !enabled && filled -> Modifier.flatDisabled(shape, palette)
+        !enabled && filled -> Modifier.keycapDisabled(shape, palette)
         !enabled -> Modifier.clip(shape)
-        filled -> Modifier.raised(
-            shape, palette.tinted(colors.containerColor, colors.contentColor), palette, pressed, hovered, lift = 2.dp
-        )
+        filled -> Modifier.keycap(shape, colors.containerColor, palette, pressed, hovered)
         hovered || pressed -> Modifier.raised(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
         else -> Modifier.clip(shape)
     }
@@ -81,7 +81,12 @@ fun KeyIconButton(
             filled -> colors.contentColor
             else -> colors.disabledContentColor
         }
-        CompositionLocalProvider(LocalContentColor provides ink, content = content)
+        Box(
+            if (filled) Modifier.padding(keycapFacePadding(enabled && pressed)) else Modifier,
+            contentAlignment = Alignment.Center,
+        ) {
+            CompositionLocalProvider(LocalContentColor provides ink, content = content)
+        }
     }
 }
 
@@ -122,9 +127,9 @@ fun RaisedIconButton(
             .size(ICON_BUTTON_SIZE)
             .then(
                 if (enabled) {
-                    Modifier.raised(shape, fill, palette, pressed, hovered)
+                    Modifier.keycap(shape, fill.bottom, palette, pressed, hovered)
                 } else {
-                    Modifier.flatDisabled(shape, palette)
+                    Modifier.keycapDisabled(shape, palette)
                 }
             )
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
@@ -138,6 +143,11 @@ fun RaisedIconButton(
         contentAlignment = Alignment.Center,
     ) {
         val ink = if (enabled) colors.contentColor else colors.disabledContentColor
-        CompositionLocalProvider(LocalContentColor provides ink, content = content)
+        Box(
+            Modifier.padding(keycapFacePadding(enabled && pressed)),
+            contentAlignment = Alignment.Center,
+        ) {
+            CompositionLocalProvider(LocalContentColor provides ink, content = content)
+        }
     }
 }

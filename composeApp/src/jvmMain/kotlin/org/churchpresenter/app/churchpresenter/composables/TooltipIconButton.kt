@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycapDisabled
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -37,7 +40,8 @@ private val ICON_KEY_INSET = 2.dp
 /**
  * Reusable IconButton with tooltip that appears on hover, hidden when partially off-screen.
  *
- * Flat until hovered, when it rises into a raised key; it presses in on click.
+ * Flat until hovered, when it rises into a raised key; it presses in on click. [raised] makes it a
+ * keycap at rest too.
  *
  * [iconTint] defaults to [colors]' content colour — so an icon is drawn in the theme's content
  * colour, and dimmed by the *disabled* one when `enabled` is false.
@@ -56,7 +60,8 @@ fun TooltipIconButton(
     iconSize: Dp = 20.dp,
     buttonSize: Dp = 36.dp,
     iconTint: Color? = null,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors()
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    raised: Boolean = false,
 ) {
     ConditionalTooltipArea(
         tooltip = {
@@ -92,7 +97,11 @@ fun TooltipIconButton(
                 )
                 .padding(ICON_KEY_INSET)
                 .then(
-                    if (enabled && (hovered || pressed)) {
+                    if (raised && enabled) {
+                        Modifier.keycap(shape, palette.key.bottom, palette, pressed = pressed, hovered = hovered)
+                    } else if (raised) {
+                        Modifier.keycapDisabled(shape, palette)
+                    } else if (enabled && (hovered || pressed)) {
                         Modifier.raised(shape, palette.key, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
                     } else {
                         Modifier.clip(shape)
@@ -103,7 +112,9 @@ fun TooltipIconButton(
             Image(
                 painter = painter,
                 contentDescription = text,
-                modifier = Modifier.size(iconSize),
+                modifier = Modifier
+                    .then(if (raised) Modifier.padding(keycapFacePadding(enabled && pressed)) else Modifier)
+                    .size(iconSize),
                 colorFilter = ColorFilter.tint(iconTint ?: ink)
             )
         }

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -41,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.ElevationPalette
 import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
 import androidx.compose.ui.graphics.graphicsLayer
 
@@ -209,9 +210,7 @@ private fun <T> Segment(
         modifier = modifier
             .then(
                 when {
-                    isSelected -> Modifier.raised(
-                        segmentShape, selectedFill, palette, hovered = hovered, lift = 2.dp,
-                    )
+                    isSelected -> Modifier.keycap(segmentShape, selectedFill.bottom, palette, hovered = hovered)
                     // A faint wash under the pointer, so an unchosen option shows it can be picked.
                     hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
                         .clip(segmentShape).background(ink.copy(alpha = SEGMENT_HOVER_ALPHA))
@@ -227,7 +226,8 @@ private fun <T> Segment(
                 onClick = onClick
             )
             .then(item.testTag?.let { Modifier.testTag(it) } ?: Modifier)
-            .padding(style.contentPadding),
+            .padding(style.contentPadding)
+            .then(if (isSelected) Modifier.padding(keycapFacePadding(pressed = false)) else Modifier),
         contentAlignment = Alignment.Center
     ) {
         ProvideTextStyle(MaterialTheme.typography.labelLarge) {

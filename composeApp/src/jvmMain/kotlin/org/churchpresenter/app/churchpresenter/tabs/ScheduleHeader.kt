@@ -1,9 +1,11 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import org.churchpresenter.theme.keycapFacePadding
+import org.churchpresenter.theme.keycap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.CircleShape
@@ -46,18 +48,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -107,8 +103,6 @@ import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
 
 private const val MENU_OFFSET_DP = 8
-private const val DASH_ON_PX = 6f
-private const val DASH_OFF_PX = 4f
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -403,32 +397,19 @@ internal fun ScheduleRowActionButton(
 internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val shape = AppShape(8.dp)
-    val borderColor = if (hovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                       else MaterialTheme.colorScheme.outlineVariant
+    val pressed by interactionSource.collectIsPressedAsState()
+    val palette = elevationPalette()
     val contentColor = if (hovered) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
-    // The same fill as the cards around it; the accent wash on hover sits over it.
-    val hoverWash = if (hovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f) else Color.Transparent
-    val strokeWidthPx = with(LocalDensity.current) { 1.dp.toPx() }
-    val cornerRadiusPx = with(LocalDensity.current) { 8.dp.toPx() }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(32.dp)
             .hoverable(interactionSource)
-            .background(bibleListCardFill(), shape)
-            .background(hoverWash, shape)
-            .drawWithContent {
-                drawContent()
-                drawRoundRect(
-                    color = borderColor,
-                    style = Stroke(width = strokeWidthPx, pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH_ON_PX, DASH_OFF_PX))),
-                    cornerRadius = CornerRadius(cornerRadiusPx)
-                )
-            }
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+            .keycap(AppShape(8.dp), bibleListCardFill(), palette, pressed = pressed, hovered = hovered)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(keycapFacePadding(pressed)),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

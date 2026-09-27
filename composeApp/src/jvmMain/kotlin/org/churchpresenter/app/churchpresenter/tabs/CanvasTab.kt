@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
@@ -61,7 +62,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.focusable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
@@ -611,6 +611,9 @@ fun CanvasTab(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     var showAddMenu by remember { mutableStateOf(false) }
+                    val sourceKeyColors = IconButtonDefaults.iconButtonColors(
+                        containerColor = elevationPalette().key.bottom,
+                    )
 
                     Box {
                         TooltipArea(
@@ -623,7 +626,8 @@ fun CanvasTab(
                         ) {
                             KeyIconButton(
                                 onClick = { showAddMenu = true; activeTool = "select" },
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(28.dp),
+                                colors = sourceKeyColors
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.ic_add),
@@ -808,7 +812,8 @@ fun CanvasTab(
                         ) {
                             KeyIconButton(
                                 onClick = { sceneViewModel.removeSource(currentSelectedId) },
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(28.dp),
+                                colors = sourceKeyColors
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.ic_delete),
@@ -828,7 +833,8 @@ fun CanvasTab(
                         ) {
                             KeyIconButton(
                                 onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(28.dp),
+                                colors = sourceKeyColors
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.ic_arrow_up),
@@ -848,7 +854,8 @@ fun CanvasTab(
                         ) {
                             KeyIconButton(
                                 onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(28.dp),
+                                colors = sourceKeyColors
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.ic_arrow_down),
@@ -915,7 +922,7 @@ fun CanvasTab(
                                     modifier = Modifier.size(32.dp),
                                     colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
-                                        else Color.Transparent,
+                                        else elevationPalette().key.bottom,
                                         contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
                                         else MaterialTheme.colorScheme.onSurface
                                     )
