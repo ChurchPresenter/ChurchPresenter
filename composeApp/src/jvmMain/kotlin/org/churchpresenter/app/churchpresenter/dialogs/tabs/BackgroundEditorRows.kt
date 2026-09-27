@@ -8,6 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.app.churchpresenter.presenter.invalidateBibleLottieTemplates
+import churchpresenter.composeapp.generated.resources.song_lottie_unsupported_note
+import churchpresenter.composeapp.generated.resources.bible_lottie_unsupported_note
 import churchpresenter.composeapp.generated.resources.background_above_band_caption
 import churchpresenter.composeapp.generated.resources.background_above_band_fill
 import churchpresenter.composeapp.generated.resources.background_above_band_fills_behind_band
@@ -31,6 +34,7 @@ import churchpresenter.composeapp.generated.resources.lower_third_animation_file
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.position
+import churchpresenter.composeapp.generated.resources.profile_bg_lottie_picker_elsewhere
 import churchpresenter.composeapp.generated.resources.song_background_blur
 import churchpresenter.composeapp.generated.resources.song_background_dim
 import churchpresenter.composeapp.generated.resources.top
@@ -48,8 +52,14 @@ private const val PERCENT = 100f
  * the camera, the gradient's two ends -- then how it is dimmed, faded and blurred, and on a
  * lower-third surface the wash above the band.
  *
- * [includeLottie] is off everywhere but the band group, which is where the animated band is chosen;
- * the type list here leaves it out, so the animation is set in one place.
+ * [includeLottie] is off everywhere but the band's own cards, which is where the animated band is
+ * chosen; the type list here leaves it out elsewhere, so the animation is set in one place.
+ *
+ * [lottiePickerHere] separates *choosing* Lottie as the type, which stays here alongside every
+ * other type, from *editing* it: [ContentBackgroundGroup] passes `false` so the template picker
+ * itself -- the dropdown, Generate, and the note on what it ignores -- renders once, in the "Lower
+ * third band" card next to the height and the ownership shortcut it already shares state with,
+ * rather than spread across two cards.
  */
 @Composable
 internal fun BackgroundSurfaceRows(
@@ -57,6 +67,7 @@ internal fun BackgroundSurfaceRows(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     includeLottie: Boolean = false,
+    lottiePickerHere: Boolean = includeLottie,
 ) {
     val config = settings.backgroundSettings.configFor(scope)
     val onConfig: (BackgroundConfig) -> Unit = { updated ->
@@ -79,7 +90,7 @@ internal fun BackgroundSurfaceRows(
             compact = true,
         )
     }
-    SurfaceSourceRows(scope, settings, config, onConfig, onSettingsChange)
+    SurfaceSourceRows(scope, settings, config, onConfig, onSettingsChange, lottiePickerHere)
     val hasLook = config.backgroundType != Constants.BACKGROUND_TRANSPARENT &&
         config.backgroundType != Constants.BACKGROUND_LOTTIE
     if (hasLook) {
@@ -115,6 +126,7 @@ private fun SurfaceSourceRows(
     config: BackgroundConfig,
     onConfig: (BackgroundConfig) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    lottiePickerHere: Boolean = true,
 ) {
     val onPexelsKey: (String) -> Unit = { key ->
         onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pexelsApiKey = key)) }
@@ -153,7 +165,15 @@ private fun SurfaceSourceRows(
             CameraPickerRow(config, onConfig)
         }
         Constants.BACKGROUND_GRADIENT -> GradientRows(config, onConfig)
-        Constants.BACKGROUND_LOTTIE -> LottieRows(scope, settings, config, onConfig)
+        Constants.BACKGROUND_LOTTIE ->
+            if (lottiePickerHere) {
+                LottieRows(scope, settings, config, onConfig = onConfig)
+            } else {
+                SettingsRow(
+                    stringResource(Res.string.lower_third_animation_file),
+                    sub = stringResource(Res.string.profile_bg_lottie_picker_elsewhere),
+                ) {}
+            }
         else -> Unit
     }
 }
@@ -168,13 +188,25 @@ internal fun LottieRows(
 ) {
     var showGenerator by remember { mutableStateOf(false) }
     val templatesDir = remember { SettingsManager.bibleLowerThirdsDir() }
-    SettingsRow(stringResource(Res.string.lower_third_animation_file)) {
+    // Bumped whenever the generator saves, so a newly generated file appears in the dropdown at
+    // once even when the picked template stays whatever it already was -- `path` alone does not
+    // change then, and used to leave the list stale until the pane was left and reopened.
+    var refreshToken by remember { mutableStateOf(0) }
+    // What a band still takes from the Lower Third style and what it ignores -- the one place that
+    // is said, since the template's own layout overrides most of the text rows beside it.
+    val note = when (scope) {
+        BackgroundScope.BIBLE_LOWER_THIRD -> stringResource(Res.string.bible_lottie_unsupported_note)
+        BackgroundScope.SONG_LOWER_THIRD -> stringResource(Res.string.song_lottie_unsupported_note)
+        else -> null
+    }
+    SettingsRow(stringResource(Res.string.lower_third_animation_file), sub = note) {
         LottieBandPickerRow(
             path = config.backgroundLottie,
             onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
             templatesDir = templatesDir,
             onGenerate = { showGenerator = true },
             modifier = Modifier.width(SOURCE_FIELD_WIDTH),
+            refreshToken = refreshToken,
         )
     }
     if (showGenerator) {
@@ -183,6 +215,10 @@ internal fun LottieRows(
             seed = lottieBandSeed(settings, scope),
             onSaved = { file ->
                 onConfig(config.copy(backgroundLottie = file.absolutePath))
+                // The generator saves over the path it loaded from, so nothing drawing the band
+                // would notice the file changed on its own.
+                invalidateBibleLottieTemplates()
+                refreshToken++
                 showGenerator = false
             },
             onClose = { showGenerator = false },

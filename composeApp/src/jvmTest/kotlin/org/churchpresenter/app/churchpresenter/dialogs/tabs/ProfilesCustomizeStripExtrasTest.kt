@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
@@ -154,21 +155,23 @@ class ProfilesCustomizeStripExtrasTest {
         }
     }
 
-    // ── The lower-third animation signpost ──────────────────────────────────────────────────────
+    // ── The lower-third animation type ──────────────────────────────────────────────────────────
 
     @Test
-    fun `a band's Bible strip points at the lower third animation`() {
+    fun `a band's Bible background offers Lottie as a type`() {
         profilesTab(doc(band)) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("Band animation").assertExists()
+            onNodeWithTag(BG_OWN_TAG, useUnmergedTree = true).performScrollTo().performClick()
+            onNodeWithText("Lottie").assertExists()
         }
     }
 
     @Test
-    fun `a full screen has no band animation to point at`() {
+    fun `a full screen has no Lottie type to offer`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("Band animation").assertDoesNotExist()
+            onNodeWithTag(BG_OWN_TAG, useUnmergedTree = true).performScrollTo().performClick()
+            onNodeWithText("Lottie").assertDoesNotExist()
         }
     }
 

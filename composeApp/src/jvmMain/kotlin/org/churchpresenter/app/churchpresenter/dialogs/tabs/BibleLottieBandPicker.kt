@@ -71,11 +71,16 @@ internal fun LottieBandPickerRow(
     templatesDir: File?,
     onGenerate: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    /**
+     * Bumped by the caller whenever the folder's contents changed without [path] changing along
+     * with it -- generating a new file while a different one stays picked. Listed afresh on
+     * [templatesDir] or [path] changing too, which already covers picking or generating straight
+     * into the selection; this is the one case neither of those two catches.
+     */
+    refreshToken: Int = 0,
 ) {
     val none = stringResource(Res.string.lower_third_animation_none)
-    // Listed afresh whenever the choice changes, which is also when the generator has just
-    // written a new file into the folder.
-    val options = remember(templatesDir, path, none) { templateOptions(templatesDir, path, none) }
+    val options = remember(templatesDir, path, none, refreshToken) { templateOptions(templatesDir, path, none) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -121,6 +126,9 @@ internal fun LottieBandSourceSection(
     bibleLowerThirdsDir: File?,
 ) {
     var showGenerator by remember { mutableStateOf(false) }
+    // Bumped whenever the generator saves -- see `LottieRows`' own copy of this for why `path`
+    // alone is not enough.
+    var refreshToken by remember { mutableStateOf(0) }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         PanelCaption(stringResource(Res.string.lower_third_animation_file))
         LottieBandPickerRow(
@@ -129,6 +137,7 @@ internal fun LottieBandSourceSection(
             templatesDir = bibleLowerThirdsDir,
             onGenerate = if (bibleLowerThirdsDir != null) ({ showGenerator = true }) else null,
             modifier = Modifier.fillMaxWidth(),
+            refreshToken = refreshToken,
         )
     }
     if (showGenerator && bibleLowerThirdsDir != null) {
@@ -140,6 +149,7 @@ internal fun LottieBandSourceSection(
                 // The generator saves over the path it loaded from, so nothing below this
                 // would notice the file changed on its own.
                 invalidateBibleLottieTemplates()
+                refreshToken++
                 showGenerator = false
             },
             onClose = { showGenerator = false },

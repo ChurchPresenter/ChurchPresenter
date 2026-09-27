@@ -32,7 +32,6 @@ import churchpresenter.composeapp.generated.resources.profile_bg_app_default
 import churchpresenter.composeapp.generated.resources.profile_bg_comes_from
 import churchpresenter.composeapp.generated.resources.profile_bg_follow_app
 import churchpresenter.composeapp.generated.resources.profile_bg_level_uses_before
-import churchpresenter.composeapp.generated.resources.profile_bg_lottie_sub
 import churchpresenter.composeapp.generated.resources.profile_bg_open_background
 import churchpresenter.composeapp.generated.resources.profile_bg_own
 import churchpresenter.composeapp.generated.resources.profile_bg_profile_default
@@ -134,15 +133,6 @@ internal fun ContentBackgroundGroup(
             )
         },
     ) {
-        // An animated band is the text and its background at once; it is chosen under Lower third
-        // band, and there is nothing behind it to set here.
-        if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
-            SettingsRow(
-                stringResource(Res.string.profile_bg_row),
-                sub = stringResource(Res.string.profile_bg_lottie_sub),
-            ) {}
-            return@SettingsGroup
-        }
         SettingsRow(stringResource(Res.string.profile_bg_row), sub = sub) {
             RowSegmented(
                 options = listOf(
@@ -169,18 +159,36 @@ internal fun ContentBackgroundGroup(
             )
         }
         if (source == ContentBackgroundSource.OWN) {
-            // A surface still following the app's own is shown but is not this profile's to edit
-            // until it is taken over, which the first edit does.
-            val edit: ((AppSettings) -> AppSettings) -> Unit = { transform ->
-                if (owned) {
-                    onSettingsChange(transform)
-                } else {
-                    val updated = transform(draft).backgroundSettings
-                    onProfileChange(profile.withOwnSurface(scope, updated, updated.configFor(scope)))
-                }
-            }
-            BackgroundSurfaceRows(scope, draft, edit)
+            val edit = ownershipEdit(scope, draft, profile, onProfileChange, onSettingsChange)
+            // A lower-third surface can be a Lottie band as well as an ordinary picture; a full
+            // screen has nowhere to play one. The template picker itself lives in the "Lower third
+            // band" card, next to its height and its own App default/Own shortcut -- not here.
+            BackgroundSurfaceRows(scope, draft, edit, includeLottie = scope.lowerThird, lottiePickerHere = false)
         }
+    }
+}
+
+/**
+ * [transform] applied through [onSettingsChange] once [scope] is this profile's own; while it still
+ * follows the app's own, the *first* edit is what takes the surface over -- see [withOwnSurface] --
+ * so it goes through [onProfileChange] instead, seeded from [draft], which is stale the instant that
+ * write lands.
+ *
+ * Shared by [ContentBackgroundGroup]'s own Own/App default row and `BandGroup`'s Lottie picker, so
+ * an edit made from either place claims ownership the same way.
+ */
+internal fun ownershipEdit(
+    scope: BackgroundScope,
+    draft: AppSettings,
+    profile: OutputProfile,
+    onProfileChange: (OutputProfile) -> Unit,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+): ((AppSettings) -> AppSettings) -> Unit = { transform ->
+    if (scope.name in profile.backgroundOverrides) {
+        onSettingsChange(transform)
+    } else {
+        val updated = transform(draft).backgroundSettings
+        onProfileChange(profile.withOwnSurface(scope, updated, updated.configFor(scope)))
     }
 }
 

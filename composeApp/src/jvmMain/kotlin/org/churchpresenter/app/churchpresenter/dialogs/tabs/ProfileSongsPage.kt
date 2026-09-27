@@ -304,8 +304,8 @@ private fun SongPlacementGroups(
 
     if (lowerThird) {
         BandGroup(
-            prefix = "songSettings",
             scope = BackgroundScope.SONG_LOWER_THIRD,
+            prefix = "songSettings",
             heightPercent = song.lowerThirdHeightPercent,
             onHeight = { v -> updateSong { it.copy(lowerThirdHeightPercent = v) } },
             draft = draft,

@@ -1108,6 +1108,7 @@
     <string name="lower_third_animation">Lower Third Animation</string>
     <string name="lower_third_animation_use_lottie">Animate the band with a Lottie template</string>
     <string name="lower_third_animation_file">Template</string>
+    <string name="profile_bg_lottie_picker_elsewhere">Set in Lower third band, below.</string>
     <string name="lower_third_animation_none">No template selected</string>
     <string name="lower_third_animation_generate">Generate…</string>
     <string name="lower_third_animation_clear">Clear template</string>
@@ -3304,9 +3305,7 @@
     <string name="profile_group_band">Lower third band</string>
     <string name="profile_band_height">Band height</string>
     <string name="profile_band_height_sub">How much of the screen the band covers.</string>
-    <string name="profile_band_animation">Band animation</string>
-    <string name="profile_band_animation_background">Background</string>
-    <string name="profile_band_animation_template">Animation</string>
+    <string name="profile_band_source">Uses</string>
     <string name="profile_layout_side_by_side">Side by side</string>
     <string name="profile_layout_stacked">Stacked</string>
     <string name="profile_applies_to">Applies to</string>

@@ -28,11 +28,11 @@ import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.middle
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.profile_applies_to
-import churchpresenter.composeapp.generated.resources.profile_band_animation
-import churchpresenter.composeapp.generated.resources.profile_band_animation_background
-import churchpresenter.composeapp.generated.resources.profile_band_animation_template
 import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_band_height_sub
+import churchpresenter.composeapp.generated.resources.profile_band_source
+import churchpresenter.composeapp.generated.resources.profile_bg_app_default
+import churchpresenter.composeapp.generated.resources.profile_bg_own
 import churchpresenter.composeapp.generated.resources.profile_content_align
 import churchpresenter.composeapp.generated.resources.profile_content_width
 import churchpresenter.composeapp.generated.resources.profile_crossfade
@@ -55,6 +55,7 @@ import churchpresenter.composeapp.generated.resources.profile_y_offset
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.top
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.OutputProfile
@@ -298,11 +299,19 @@ internal fun TransitionGroup(
 }
 
 /**
- * LOWER THIRD BAND: how tall the band is, and whether it is a background or an animation.
+ * LOWER THIRD BAND: how tall the band is, a shortcut back to whether it follows the app-wide
+ * background for this content or has its own, and -- once that content is a Lottie animation --
+ * the template picker itself.
  *
  * The number that sat beside the fades on the old strip, captioned "Lower Third", was exactly this
- * height. An animation is a Lottie template on the band's own background surface, so choosing one
- * takes that surface over for the profile; going back to Background hands it to the profile default.
+ * height. *Which* type the band uses -- a plain background or a Lottie animation -- is still picked
+ * on the BACKGROUND group above it, alongside every other type -- see [ContentBackgroundGroup] --
+ * but once that choice is Lottie, editing it happens here instead: the template picker, next to the
+ * height and the ownership shortcut it already shares state with, rather than spread across two
+ * cards. [profile_band_source]'s row writes the same ownership flag
+ * ([OutputProfile.backgroundOverrides]) [ContentBackgroundGroup]'s own Own/App default row does, so
+ * the two never diverge; the template picker claims it the same way on its first edit, through the
+ * same [ownershipEdit].
  */
 @Composable
 internal fun BandGroup(
@@ -317,11 +326,15 @@ internal fun BandGroup(
     /** The settings object the band's height lives in -- `bibleSettings`, `songSettings`. */
     prefix: String? = null,
 ) {
-    val backgrounds = draft.backgroundSettings
-    val config = backgrounds.configFor(scope)
-    val animated = config.backgroundType == Constants.BACKGROUND_LOTTIE
     val heightPaths = listOfNotNull(prefix?.let { "$it.lowerThirdHeightPercent" })
-    SettingsGroup(stringResource(Res.string.profile_group_band), action = reset, paths = heightPaths) {
+    val surfacePaths = scope.surfacePaths()
+    val owned = scope.name in profile.backgroundOverrides
+    val config = draft.backgroundSettings.configFor(scope)
+    SettingsGroup(
+        stringResource(Res.string.profile_group_band),
+        action = reset,
+        paths = heightPaths + surfacePaths,
+    ) {
         SettingsRow(
             stringResource(Res.string.profile_band_height),
             sub = stringResource(Res.string.profile_band_height_sub),
@@ -335,36 +348,46 @@ internal fun BandGroup(
                 testTag = BAND_HEIGHT_TAG,
             )
         }
-        SettingsRow(stringResource(Res.string.profile_band_animation)) {
+        SettingsRow(stringResource(Res.string.profile_band_source), paths = surfacePaths) {
             RowSegmented(
                 options = listOf(
-                    RowOption(false, stringResource(Res.string.profile_band_animation_background)),
-                    RowOption(true, stringResource(Res.string.profile_band_animation_template)),
+                    RowOption(false, stringResource(Res.string.profile_bg_app_default), BAND_SOURCE_APP_DEFAULT_TAG),
+                    RowOption(true, stringResource(Res.string.profile_bg_own), BAND_SOURCE_OWN_TAG),
                 ),
-                selected = animated,
-                onSelect = { on ->
-                    if (on == animated) return@RowSegmented
-                    val next = config.copy(
-                        backgroundType = if (on) Constants.BACKGROUND_LOTTIE else scope.inheritType.orEmpty(),
-                        gradientEnabled = false,
+                selected = owned,
+                onSelect = { own ->
+                    if (own == owned) return@RowSegmented
+                    val backgrounds = draft.backgroundSettings
+                    onProfileChange(
+                        if (own) {
+                            profile.withOwnSurface(scope, backgrounds, backgrounds.configFor(scope))
+                        } else {
+                            profile.copy(backgroundOverrides = profile.backgroundOverrides - scope.name)
+                        },
                     )
-                    onProfileChange(profile.withOwnSurface(scope, backgrounds, next))
                 },
             )
         }
-        if (animated) {
-            LottieRows(scope, draft, config) { updated ->
-                onSettingsChange { s -> s.copy(backgroundSettings = s.backgroundSettings.withConfigFor(
-                    scope,
-                    updated,
-                )) }
+        if (config.backgroundType == Constants.BACKGROUND_LOTTIE) {
+            val edit = ownershipEdit(scope, draft, profile, onProfileChange, onSettingsChange)
+            val onConfig: (BackgroundConfig) -> Unit = { updated ->
+                edit { s -> s.copy(backgroundSettings = s.backgroundSettings.withConfigFor(scope, updated)) }
             }
+            LottieRows(scope, draft, config, onConfig = onConfig)
         }
     }
 }
 
 /** Test handle for the band height field. */
 internal const val BAND_HEIGHT_TAG = "profile_band_height"
+
+/**
+ * Test handles for the band's own App default/Own shortcut -- distinct from
+ * [BG_PROFILE_DEFAULT_TAG]/[BG_OWN_TAG], which the BACKGROUND group's row above it also draws on
+ * the same page.
+ */
+internal const val BAND_SOURCE_APP_DEFAULT_TAG = "profile_band_source_app_default"
+internal const val BAND_SOURCE_OWN_TAG = "profile_band_source_own"
 
 /** Test handles for the four margin fields. */
 internal const val MARGIN_TOP_TAG = "profile_margin_top"
