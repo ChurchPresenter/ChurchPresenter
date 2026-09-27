@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * The home for a new song setting, whatever it is about -- layout, as the name says, and by now
@@ -18,7 +19,7 @@ import kotlinx.serialization.Serializable
 data class SongLayoutExtras(
     /** Shrinks/repositions the whole lyrics block -- see [ContentRegion]. */
     val contentRegion: ContentRegion = ContentRegion(),
-    /** The current section's own label, drawn above the lyrics -- see [SongSectionLabel]. */
+    /** The current section's own label, drawn with the lyrics -- see [SongSectionLabel]. */
     val sectionLabel: SongSectionLabel = SongSectionLabel(),
     /** Fine X/Y nudge on top of [SongSettings.songNumberCorner], for the full-screen output. */
     val numberOffset: SongNumberOffset = SongNumberOffset(),
@@ -61,4 +62,70 @@ data class SongLayoutExtras(
     val autoFitEachSlide: Boolean = false,
     /** [autoFitEachSlide] for the lower third. */
     val autoFitEachSlideLowerThird: Boolean = false,
+    /** The All look of a song's languages, where the first language has values of its own -- see [SongAllLanguages]. */
+    val allLanguages: SongAllLanguages = SongAllLanguages(),
+    /**
+     * Each element's own move, in output pixels at 1080 lines, keyed by [songElementShiftKey]:
+     * the number, the title, a language's lyrics, the look-ahead, a credit -- dragged on the
+     * Profiles preview, on top of wherever the layout and the element's own position put it.
+     */
+    val elementShifts: Map<String, SongElementShift> = emptyMap(),
+    /**
+     * Where the next-section lines sit, per output. They have always been drawn under each
+     * language's lyrics, which is the default; [SongSettings] has no slot left for a flat field.
+     */
+    val nextSectionPosition: SongElementPosition = SongElementPosition(),
 )
+
+/** Where one song element sits on each output -- each one of [SONG_ELEMENT_POSITIONS]. */
+@Serializable
+data class SongElementPosition(
+    val fullScreen: String = Constants.BELOW_LYRICS,
+    val lowerThird: String = Constants.BELOW_LYRICS,
+) {
+    fun positionFor(lowerThird: Boolean): String = if (lowerThird) this.lowerThird else fullScreen
+
+    fun withPosition(lowerThird: Boolean, position: String): SongElementPosition =
+        if (lowerThird) copy(lowerThird = position) else copy(fullScreen = position)
+}
+
+/**
+ * The All look of a song's languages, stored only where it has to be.
+ *
+ * The first language stores its look in [SongSettings]' own fields, and every other language follows
+ * it until it has a look of its own -- so while the first language has no values of its own, All
+ * *is* the first language's look and nothing is stored here. Once it does, [style] holds All's value
+ * at each of [firstLanguageOwnKeys], so All can still be read, edited and put back there.
+ *
+ * Keys are `<property>.<field>` -- `lyricsLowerThird.fontSize` -- naming a [SongTranslationSettings]
+ * profile and a [SongTextStyle] field.
+ */
+@Serializable
+data class SongAllLanguages(
+    val style: SongTranslationSettings = SongTranslationSettings(),
+    val firstLanguageOwnKeys: Set<String> = emptySet(),
+)
+
+/** One element's own move, x and y in output pixels at 1080 lines. */
+@Serializable
+data class SongElementShift(val x: Int = 0, val y: Int = 0)
+
+/**
+ * The key an element's move is stored under: its name, the language's slot where the element is
+ * drawn once per language (`0` the first), and the output -- `LYRICS#1@LT`.
+ */
+fun songElementShiftKey(element: String, lowerThird: Boolean, language: Int? = null): String =
+    element + (language?.let { "#$it" } ?: "") + if (lowerThird) "@LT" else ""
+
+/** How far the element stored under [key] is moved; none when it has not been. */
+fun SongSettings.elementShift(key: String): SongElementShift = layoutExtras.elementShifts[key] ?: SongElementShift()
+
+/** [this] with the element under [key] moved by [shift]; no move drops the entry. */
+fun SongSettings.withElementShift(key: String, shift: SongElementShift): SongSettings {
+    val shifts = layoutExtras.elementShifts
+    return copy(
+        layoutExtras = layoutExtras.copy(
+            elementShifts = if (shift == SongElementShift()) shifts - key else shifts + (key to shift),
+        ),
+    )
+}

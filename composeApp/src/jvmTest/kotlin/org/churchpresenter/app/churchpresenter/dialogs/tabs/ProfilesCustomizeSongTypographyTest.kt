@@ -83,10 +83,10 @@ class ProfilesCustomizeSongTypographyTest {
     // ── Above or below the lyrics ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `the title can be moved below the lyrics`() {
+    fun `the title can be moved to the bottom edge`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE)
-            onAllNodesWithContentDescription("Below")[0].performScrollTo().performClick()
+            segment("Bottom").performScrollTo().performClick()
             waitForIdle()
 
             assertEquals(Constants.BELOW_VERSE, get().song().titlePosition)
@@ -101,7 +101,7 @@ class ProfilesCustomizeSongTypographyTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
 
             assertTrue(
-                onAllNodesWithContentDescription("Above").fetchSemanticsNodes().isEmpty(),
+                onAllNodesWithText("Above verse").fetchSemanticsNodes().isEmpty(),
                 "only the number and the title sit above or below",
             )
         }
@@ -121,7 +121,7 @@ class ProfilesCustomizeSongTypographyTest {
     fun `letter spacing and word spacing are stored apart`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            tapSliderTrack("Letter spacing", "3px", fraction = 0.9f)
+            setProfileStepper("Letter spacing", "3px", fraction = 0.9f, range = -10..30)
 
             assertTrue(get().song().lyricsLetterSpacing > 3, "the letter-spacing slider must have moved it")
             assertEquals(7, get().song().lyricsWordSpacing, "the slider beside it must not have moved")
@@ -132,7 +132,7 @@ class ProfilesCustomizeSongTypographyTest {
     fun `word spacing moves on its own too`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            tapSliderTrack("Word spacing", "7px", fraction = 0.9f)
+            setProfileStepper("Word spacing", "7px", fraction = 0.9f, range = 0..40)
 
             assertTrue(get().song().lyricsWordSpacing > 7)
             assertEquals(3, get().song().lyricsLetterSpacing, "the slider beside it must not have moved")

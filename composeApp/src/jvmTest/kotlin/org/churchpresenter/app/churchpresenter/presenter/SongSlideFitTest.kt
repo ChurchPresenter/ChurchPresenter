@@ -4,8 +4,6 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 /**
  * Which part of a song the "each slide" auto-fit measures (#658).
@@ -44,11 +42,9 @@ class SongSlideFitTest {
     fun `verse mode measures only the section on screen`() {
         val first = fit(section = verse)
         assertEquals(listOf(verse), first.sections)
-        assertFalse(first.isLast, "the first of two sections carries no end marker")
 
         val last = fit(section = chorus)
         assertEquals(listOf(chorus), last.sections)
-        assertTrue(last.isLast, "the song's last section leaves room for the end marker")
     }
 
     @Test
@@ -72,7 +68,6 @@ class SongSlideFitTest {
             lookAheadEnabled = true,
         )
         assertEquals(listOf(pairs[3]), result.sections, "the chorus's second line is the song's fourth")
-        assertTrue(result.isLast)
     }
 
     @Test
@@ -81,9 +76,6 @@ class SongSlideFitTest {
         val only = result.sections.single()
         assertEquals(listOf("c a"), only.lines)
         assertEquals(listOf("c a 2"), only.translations.single().lines)
-        assertFalse(result.isLast, "not the last line of the song")
-
-        assertTrue(fit(section = chorus, displayLineIndex = 1, isLineMode = true).isLast)
     }
 
     @Test
@@ -97,6 +89,5 @@ class SongSlideFitTest {
         val loose = LyricSection(header = "[Tag]", type = "tag", lines = listOf("loose"))
         val result = fit(section = loose, displaySectionIndex = -1)
         assertEquals(listOf(loose), result.sections)
-        assertFalse(result.isLast)
     }
 }

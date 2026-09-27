@@ -19,6 +19,9 @@ internal enum class SongStyleElement {
     LYRICS,
     LOOK_AHEAD,
     NEXT_SECTION,
+
+    /** The current section's name -- "Verse 1", "Chorus" -- drawn with the lyrics; see `SongSectionLabel`. */
+    SECTION_LABEL,
     AUTHOR,
     COMPOSER,
     CCLI,
@@ -38,7 +41,11 @@ internal enum class SongStyleTarget { FULL_SCREEN, LOWER_THIRD }
 
 internal val SongStyleTarget.isLowerThird: Boolean get() = this == SongStyleTarget.LOWER_THIRD
 
-/** Only the number and the title sit above or below the lyrics; the rest have nowhere to go. */
+/**
+ * The two elements whose place is stored with their look, in [SongElementStyle.position]. The
+ * section label and the next-section line are placed too, but keep theirs elsewhere -- see
+ * [storedPosition].
+ */
 internal val SongStyleElement.hasPosition: Boolean
     get() = this == SongStyleElement.NUMBER || this == SongStyleElement.TITLE
 
@@ -121,6 +128,11 @@ internal fun SongSettings.elementStyle(
         layoutExtras.titleSlideNumber.styleFor(target.isLowerThird).toElementStyle(
             titleFont = if (target.isLowerThird) titleLowerThirdFontType else titleFontType,
         )
+    // The same credit-shaped record, and a blank face follows the title's, as it always has.
+    SongStyleElement.SECTION_LABEL ->
+        layoutExtras.sectionLabel.styleFor(target.isLowerThird).toElementStyle(
+            titleFont = if (target.isLowerThird) titleLowerThirdFontType else titleFontType,
+        )
 }
 
 /**
@@ -152,6 +164,16 @@ internal fun SongSettings.withElementStyle(
             layoutExtras = layoutExtras.copy(
                 titleSlideNumber = if (target.isLowerThird) number.copy(lowerThird = credit)
                                    else number.copy(fullScreen = credit),
+            ),
+        )
+    }
+    SongStyleElement.SECTION_LABEL -> {
+        val label = layoutExtras.sectionLabel
+        val credit = style.toCreditStyle()
+        copy(
+            layoutExtras = layoutExtras.copy(
+                sectionLabel = if (target.isLowerThird) label.copy(lowerThird = credit)
+                               else label.copy(fullScreen = credit),
             ),
         )
     }

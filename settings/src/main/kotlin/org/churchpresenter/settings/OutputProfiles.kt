@@ -1,12 +1,39 @@
 package org.churchpresenter.settings
 
-/** A profile with a fresh [id] that no profile in [existing] already uses. */
+import org.churchpresenter.settings.utils.Constants
+
+/**
+ * A profile with a fresh [id] that no profile in [existing] already uses.
+ *
+ * Its Bible and song backgrounds are its own and say `Default`, so they follow the profile's own
+ * default background: a new screen is set up from its Background page, rather than quietly taking
+ * whatever the app's Bible and song surfaces happen to be.
+ */
 fun newOutputProfile(existing: List<OutputProfile>, name: String = ""): OutputProfile {
     val taken = existing.map { it.id }.toSet()
     var n = existing.size + 1
     while ("profile$n" in taken) n++
-    return OutputProfile(id = "profile$n", name = name)
+    val followsDefault = BackgroundConfig(backgroundType = Constants.BACKGROUND_DEFAULT)
+    return OutputProfile(
+        id = "profile$n",
+        name = name,
+        backgroundSettings = BackgroundSettings(
+            bibleBackground = followsDefault,
+            bibleLowerThirdBackground = followsDefault,
+            songBackground = followsDefault,
+            songLowerThirdBackground = followsDefault,
+        ),
+        backgroundOverrides = CONTENT_SURFACES.map { it.name }.toSet(),
+    )
 }
+
+/** The surfaces a new profile carries its own of: the content bands, each following the profile's default. */
+private val CONTENT_SURFACES = listOf(
+    BackgroundSurface.BIBLE,
+    BackgroundSurface.BIBLE_LOWER_THIRD,
+    BackgroundSurface.SONG,
+    BackgroundSurface.SONG_LOWER_THIRD,
+)
 
 /** [profile] added at the end. */
 fun ProjectionSettings.addOutputProfile(profile: OutputProfile): ProjectionSettings =
@@ -31,13 +58,18 @@ fun ProjectionSettings.renameOutputProfile(id: String, name: String): Projection
  * are using it; this refusal is the defensive backstop, not the primary UI.
  */
 fun ProjectionSettings.deleteOutputProfile(id: String): ProjectionSettings =
-    if (outputProfileUsageCount(id) > 0) this else copy(outputProfiles = outputProfiles.filterNot { it.id == id })
+    // A master with profiles still following it is refused too: they would be left pointing at
+    // nothing. They are unlinked or deleted first.
+    if (outputProfileUsageCount(id) > 0 || linkedTo(id).isNotEmpty()) this
+    else copy(outputProfiles = outputProfiles.filterNot { it.id == id })
 
 /** A copy of the profile at [id] under [newName] and a fresh id, or `this` unchanged if [id] names none. */
 fun ProjectionSettings.duplicateOutputProfile(id: String, newName: String): ProjectionSettings {
     val source = outputProfiles.find { it.id == id } ?: return this
     val fresh = newOutputProfile(outputProfiles, newName)
-    return addOutputProfile(source.copy(id = fresh.id, name = newName))
+    // A standalone copy with the values the source draws with: a duplicate of a linked profile does
+    // not follow its master too.
+    return addOutputProfile(source.copy(id = fresh.id, name = newName, parentId = null, overrides = emptySet()))
 }
 
 /** How many outputs, across all three output lists, currently follow the profile at [id]. */

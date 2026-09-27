@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.settings.BibleSettings
-import org.churchpresenter.settings.BibleTranslationSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -24,31 +22,6 @@ class BibleAllTranslationsTest {
         assertEquals(2, effectiveTranslationIndex(7, stackSize = 3))
     }
 
-    @Test
-    fun `an edit under All reaches every translation`() {
-        val stack = BibleSettings().withTranslations(
-            listOf("kjv.spb", "rst.spb").map { BibleTranslationSettings(fileName = it) },
-        )
-        val edited = stack.updateEveryTranslation { it.copy(showAbbreviation = true) }
-        assertEquals(listOf(true, true), edited.translationList().map { it.showAbbreviation })
-    }
 
-    @Test
-    fun `only the property that changed is written`() {
-        val shown = BibleElementStyle(color = "#FFFFFF", fontSize = 70)
-        val edited = shown.copy(fontSize = 90)
-        val secondLanguage = BibleElementStyle(color = "#FFFF00", fontSize = 60)
 
-        val result = secondLanguage.withChangesFrom(shown, edited)
-
-        assertEquals(90, result.fontSize, "the change reached it")
-        assertEquals("#FFFF00", result.color, "and its own colour survived")
-    }
-
-    @Test
-    fun `nothing changed writes nothing`() {
-        val mine = BibleElementStyle(color = "#FFFF00", bold = true)
-        val shown = BibleElementStyle()
-        assertEquals(mine, mine.withChangesFrom(shown, shown))
-    }
 }

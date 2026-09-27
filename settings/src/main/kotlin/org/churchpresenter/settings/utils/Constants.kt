@@ -41,6 +41,14 @@ object Constants {
 
     const val ABOVE_VERSE = "AboveVerse"
     const val BELOW_VERSE = "BelowVerse"
+
+    /**
+     * A song element held against the lyrics block itself -- directly above or below it, moving
+     * wherever the lyrics' alignment or offset puts them. [ABOVE_VERSE] and [BELOW_VERSE], despite
+     * their names, have always meant the content area's top and bottom edge, and keep that meaning.
+     */
+    const val ABOVE_LYRICS = "AboveLyrics"
+    const val BELOW_LYRICS = "BelowLyrics"
     const val MIDDLE = "Middle"
     const val BOTTOM = "Bottom"
     const val LEFT = "Left"

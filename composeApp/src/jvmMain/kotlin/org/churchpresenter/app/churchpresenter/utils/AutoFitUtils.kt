@@ -75,6 +75,10 @@ fun calculateAutoFitFontSize(
  * the line *after* the search has settled, and the presenter draws its lyrics with `softWrap` off,
  * so the size that "fitted" then runs off the side of the screen with the end of every line cut.
  * The default measures the raw string, which is right only for a profile that styles nothing.
+ *
+ * [includeEndIndicator] reserves the end-of-song marker's row under **every** section: the presenter
+ * keeps that row on every slide, drawn invisibly until the last, so the lyrics never move when it
+ * appears.
  */
 fun calculateAutoFitForAllSections(
     textMeasurer: TextMeasurer,
@@ -100,11 +104,11 @@ fun calculateAutoFitForAllSections(
     while (high - low > 1) {
         val mid = (low + high) / 2
         val style = baseStyle.copy(fontSize = mid.sp)
-        val fits = sections.withIndex().all { (sectionIdx, section) ->
+        val fits = sections.all { section ->
             sectionFits(
                 textMeasurer, section, style, unconstrainedConstraints, referenceDensity,
                 availableWidth, effectiveHeight,
-                withEndIndicator = includeEndIndicator && sectionIdx == sections.lastIndex,
+                withEndIndicator = includeEndIndicator,
                 styleText = styleText,
             )
         }

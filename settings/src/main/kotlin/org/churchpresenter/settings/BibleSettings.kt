@@ -148,6 +148,28 @@ data class BibleTranslationSettings(
     val referenceOffset: ElementOffset? = null,
     val lowerThirdTextOffset: ElementOffset? = null,
     val lowerThirdReferenceOffset: ElementOffset? = null,
+    /**
+     * How far this translation's block is moved from where the layout puts it, in output pixels at
+     * 1080 lines -- one translation of a parallel stack nudged on its own. One pair per output.
+     */
+    val shiftX: Int = 0,
+    val shiftY: Int = 0,
+    val lowerThirdShiftX: Int = 0,
+    val lowerThirdShiftY: Int = 0,
+    /**
+     * How far this translation's reference is moved on its own, on top of the block's shift and
+     * wherever its position puts it -- output pixels at 1080 lines, one pair per output.
+     */
+    val referenceShiftX: Int = 0,
+    val referenceShiftY: Int = 0,
+    val lowerThirdReferenceShiftX: Int = 0,
+    val lowerThirdReferenceShiftY: Int = 0,
+    /**
+     * The style fields this translation keeps as its own, by name, against the Profiles tab's All
+     * layer ([BibleSettings.allTranslationStyle]): an edit under All reaches every translation except
+     * at the fields it names. Empty -- every field follows All -- until one is set for it alone.
+     */
+    val ownStyleKeys: Set<String> = emptySet(),
 )
 
 // The accessors are one per stored profile field (translation lookup, the two style profiles, the
@@ -170,6 +192,12 @@ data class BibleSettings(
      * [migrateTranslations].
      */
     val translations: List<BibleTranslationSettings> = emptyList(),
+    /**
+     * The Profiles tab's "All" layer: the look every translation takes except where it has its own
+     * ([BibleTranslationSettings.ownStyleKeys]). Each translation still stores its values in full,
+     * so the presenters never read this. Null until [migrateAllLayer] has seeded it.
+     */
+    val allTranslationStyle: BibleTranslationSettings? = null,
     val multiTranslationSpacing: Int = 24,
     val multiTranslationDivider: Boolean = false,
 

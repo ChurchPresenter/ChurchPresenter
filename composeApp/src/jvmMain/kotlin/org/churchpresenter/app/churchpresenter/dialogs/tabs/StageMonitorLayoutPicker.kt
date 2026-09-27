@@ -1,30 +1,20 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible
@@ -61,9 +51,7 @@ import churchpresenter.composeapp.generated.resources.stage_monitor_layout_top_b
 import churchpresenter.composeapp.generated.resources.stage_monitor_layout_top_four_below
 import churchpresenter.composeapp.generated.resources.stage_monitor_layout_top_three_below
 import churchpresenter.composeapp.generated.resources.stage_monitor_layout_top_two_below
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_count
 import churchpresenter.composeapp.generated.resources.stage_monitor_zone_n
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.settings.MetronomePosition
 import org.churchpresenter.settings.StageMonitorContentType
 import org.churchpresenter.settings.StageMonitorLayout
@@ -71,23 +59,8 @@ import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.toStyleZone
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.components.SegmentTrack
-import org.churchpresenter.theme.components.SegmentTrackItem
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Icon
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.Alignment
 
-private const val VARIANT_CARD_WIDTH = 132
 private const val BEZEL_ALPHA = 0.38f
 private const val CELL_ALPHA = 0.40f
 
@@ -115,121 +88,6 @@ internal fun slotLabel(slot: StageMonitorStyleZone): String =
  * above them even when the layout in force has a different number of zones.
  */
 @OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun StageMonitorLayoutPicker(
-    layout: StageMonitorLayout,
-    screenAspect: Float,
-    onPick: (StageMonitorLayout) -> Unit,
-) {
-    val counts = StageMonitorLayout.zoneCounts()
-    val activeCount = layout.slots.size
-    SegmentTrack(modifier = Modifier.fillMaxWidth().height(34.dp)) {
-        counts.forEach { count ->
-            SegmentTrackItem(
-                selected = count == activeCount,
-                onClick = { StageMonitorLayout.withZoneCount(count).firstOrNull()?.let(onPick) },
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-            ) {
-                Text(
-                    stringResource(Res.string.stage_monitor_zone_count, count),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = LocalContentColor.current,
-                    maxLines = 1,
-                )
-            }
-        }
-    }
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        StageMonitorLayout.withZoneCount(activeCount).forEach { variant ->
-            LayoutVariantCard(
-                variant = variant,
-                selected = variant == layout,
-                screenAspect = screenAspect,
-                onPick = { onPick(variant) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun LayoutVariantCard(
-    variant: StageMonitorLayout,
-    selected: Boolean,
-    screenAspect: Float,
-    onPick: () -> Unit,
-) {
-    val palette = elevationPalette()
-    val shape = AppShape(8.dp)
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val pressed by interaction.collectIsPressedAsState()
-    val accent = MaterialTheme.colorScheme.primary
-    // A raised key like every other button. The chosen one lifts higher with an accent ring, its
-    // zones turn to the accent and a tick sits in its corner -- which layout is on reads at a glance.
-    Box(
-        modifier = Modifier
-            .width(VARIANT_CARD_WIDTH.dp)
-            .raised(
-                shape,
-                palette.key,
-                palette,
-                pressed = pressed,
-                hovered = hovered,
-                lift = if (selected) SELECTED_CARD_LIFT else CARD_LIFT,
-                ring = if (selected) accent else Color.Unspecified,
-            )
-            .clickable(interactionSource = interaction, indication = null, onClick = onPick),
-    ) {
-    Column(
-        modifier = Modifier.padding(6.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-        TvScreenBox(
-            modifier = Modifier.fillMaxWidth(),
-            screenAspectRatio = screenAspect,
-            bezelColor = stageMonitorBezelColor(),
-            screenColor = Color.Black,
-        ) {
-            LayoutMiniature(
-                variant = variant,
-                modifier = Modifier.fillMaxSize(),
-                zoneColor = if (selected) accent else Color.White.copy(alpha = CELL_ALPHA),
-            )
-        }
-        Text(
-            text = layoutLabel(variant),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-    if (selected) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(TICK_INSET)
-                .size(TICK_SIZE)
-                .clip(CircleShape)
-                .background(accent),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(TICK_ICON),
-            )
-        }
-    }
-    }
-}
 
 /**
  * The layout's own rows and weights, drawn small — the same grid the monitor will draw.
@@ -266,34 +124,6 @@ internal fun LayoutMiniature(
                 }
             }
         }
-    }
-}
-
-@Composable
-internal fun OffGridZoneChip(
-    label: String,
-    contents: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .clip(AppShape(6.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
-            .padding(horizontal = 8.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = contents.ifBlank { "—" },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-        )
     }
 }
 
@@ -342,8 +172,3 @@ internal fun metronomePositionLabel(position: MetronomePosition): String = when 
 internal fun stageMonitorBezelColor(): Color =
     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = BEZEL_ALPHA)
 
-private val CARD_LIFT = 3.dp
-private val SELECTED_CARD_LIFT = 6.dp
-private val TICK_SIZE = 16.dp
-private val TICK_ICON = 11.dp
-private val TICK_INSET = 4.dp

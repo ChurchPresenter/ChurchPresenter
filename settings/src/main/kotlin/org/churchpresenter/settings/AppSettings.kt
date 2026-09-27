@@ -57,6 +57,11 @@ data class AppSettings(
      */
     val scheduleToolbarIconSize: String = "SMALL",
     /**
+     * Whether Settings → Profiles lists every setting (Advanced) or only the ones most operators
+     * change (Basic). How the operator likes to work, not part of any profile.
+     */
+    val profilesAdvanced: Boolean = false,
+    /**
      * Schedule toolbar buttons the operator has turned off, by `ScheduleToolbarButton` name — the
      * same shape as [hiddenTabs], so an unknown name from a newer build is simply ignored.
      *
@@ -141,6 +146,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 17
+        const val CURRENT_SETTINGS_VERSION = 18
     }
 }

@@ -2,7 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
@@ -50,10 +51,11 @@ class ProfilesCustomizeBackgroundSlidersTest {
     @Test
     fun `all three readouts show what the surface has stored`() {
         profilesTab(output()) { _ ->
-            openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT, own = false)
-            onNodeWithText("80%").assertExists()
-            onNodeWithText("45%").assertExists()
-            onNodeWithText("6px").assertExists()
+            // Taken over, which starts from what the app default holds: its editor then shows it.
+            openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
+            onNode(hasSetTextAction() and hasText("80") and outsideDefaultsCard).assertExists()
+            onNode(hasSetTextAction() and hasText("45") and outsideDefaultsCard).assertExists()
+            onNode(hasSetTextAction() and hasText("6") and outsideDefaultsCard).assertExists()
         }
     }
 
@@ -61,7 +63,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `the opacity slider writes the default surface`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            tapSliderTrack("Opacity", "80%", fraction = 0.5f)
+            setProfileStepper("Opacity", "80%", fraction = 0.5f)
 
             assertEquals(
                 0.5f,
@@ -77,7 +79,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `the dim slider writes the default surface`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            tapSliderTrack("Dim", "45%", fraction = 0.5f)
+            setProfileStepper("Dim", "45%", fraction = 0.5f)
 
             assertEquals(50, get().at(BackgroundScope.DEFAULT).dim)
             assertEquals(
@@ -92,7 +94,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `the blur slider writes the default surface`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            tapSliderTrack("Blur", "6px", fraction = 0.5f)
+            setProfileStepper("Blur", "6px", fraction = 0.5f)
 
             assertEquals(50, get().at(BackgroundScope.DEFAULT).blur)
             assertEquals(45, get().at(BackgroundScope.DEFAULT).dim, "the slider above it must not move")
@@ -103,7 +105,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `a background can be dimmed to all but black`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            tapSliderTrack("Dim", "45%", fraction = 1f)
+            setProfileStepper("Dim", "45%", fraction = 1f)
 
             // 99 rather than 100: the track's right edge cannot be tapped, so the last reachable
             // stop is a pixel short of it. See [tapSliderTrack].
@@ -118,7 +120,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `a background can be taken to no blur at all`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            tapSliderTrack("Blur", "6px", fraction = 0f)
+            setProfileStepper("Blur", "6px", fraction = 0f)
 
             assertEquals(0, get().at(BackgroundScope.DEFAULT).blur)
         }
@@ -128,8 +130,8 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `the readout follows the handle`() {
         profilesTab(output()) { _ ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_DEFAULT)
-            tapSliderTrack("Dim", "45%", fraction = 0.5f)
-            onNodeWithText("50%").assertExists()
+            setProfileStepper("Dim", "45%", fraction = 0.5f)
+            onNode(hasSetTextAction() and hasText("50") and outsideDefaultsCard).assertExists()
         }
     }
 
@@ -139,7 +141,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `the Songs chip on a full screen writes the Songs surface`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_SONG)
-            tapSliderTrack("Dim", "45%", fraction = 0.5f)
+            setProfileStepper("Dim", "45%", fraction = 0.5f)
 
             assertEquals(50, get().at(BackgroundScope.SONG).dim)
             assertEquals(45, get().at(BackgroundScope.DEFAULT).dim, "the Default surface must be untouched")
@@ -150,7 +152,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `the Bible chip on a band writes the band's Bible surface`() {
         profilesTab(output(band)) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
-            tapSliderTrack("Blur", "6px", fraction = 0.5f)
+            setProfileStepper("Blur", "6px", fraction = 0.5f)
 
             assertEquals(50, get().at(BackgroundScope.BIBLE_LOWER_THIRD).blur)
             assertEquals(
@@ -165,7 +167,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `a surface's opacity is stored as the fraction the renderer wants`() {
         profilesTab(output(band)) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_BIBLE)
-            tapSliderTrack("Opacity", "80%", fraction = 0f)
+            setProfileStepper("Opacity", "80%", fraction = 0f)
 
             assertEquals(0f, get().at(BackgroundScope.BIBLE_LOWER_THIRD).backgroundOpacity)
         }
@@ -175,7 +177,7 @@ class ProfilesCustomizeBackgroundSlidersTest {
     fun `taking one surface over leaves the rest of them following`() {
         profilesTab(output()) { get ->
             openBackgroundSurface(CustomizeElement.BACKGROUND_SONG)
-            tapSliderTrack("Dim", "45%", fraction = 0.5f)
+            setProfileStepper("Dim", "45%", fraction = 0.5f)
 
             assertTrue(get().overrides(BackgroundScope.SONG))
             assertTrue(!get().overrides(BackgroundScope.DEFAULT), "one surface at a time")

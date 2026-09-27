@@ -8,28 +8,24 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_no_preview
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.OutputStyleScope
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.OutputStyleScope
+import org.churchpresenter.settings.StageMonitorLayout
 import org.churchpresenter.settings.bibleTranslationPositions
-import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.theme.AppShape
 
 /**
  * The 16:9 stage beside the Customize dialog's controls — what this output will actually draw.
@@ -54,6 +50,8 @@ internal fun CustomizeStagePanel(
     output: PreviewOutputSize,
     slot: PreviewSampleSlot,
     modifier: Modifier = Modifier,
+    /** What goes behind the text -- see [PreviewBackgroundMode]. */
+    backgroundMode: PreviewBackgroundMode = PreviewBackgroundMode.ACTUAL,
 ) {
     val lowerThird = LocalOutputStyleScope.current == OutputStyleScope.LOWER_THIRD
     // Sized by WIDTH alone by its caller, so the `aspectRatio` inside each panel is free to set the
@@ -62,17 +60,16 @@ internal fun CustomizeStagePanel(
     // shaped like the screen it is previewing.
     Box(modifier = modifier.testTag(CUSTOMIZE_STAGE_TAG)) {
         when (pane) {
-            CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot)
-            CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element)
-            CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
+            CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot, backgroundMode)
+            CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element, backgroundMode)
+            CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird, backgroundMode)
             CustomizePane.CAPTIONS,
             CustomizePane.SUBTITLES,
             CustomizePane.QA,
             CustomizePane.DICTIONARY,
-            -> ProfileFormStage(pane, settings, output)
-            // The stage monitor gets no preview column -- its own tab draws its zone layout at full
-            // size -- so this is never reached.
-            CustomizePane.STAGE_MONITOR -> NoStage()
+            -> ProfileFormStage(pane, settings, output, checker = backgroundMode == PreviewBackgroundMode.CHECKER)
+            // The page draws the monitor to scale already; this is the shape of it at a glance.
+            CustomizePane.STAGE_MONITOR -> StageLayoutStage(settings.stageMonitorSettings.layout, output)
         }
     }
 }
@@ -85,6 +82,7 @@ private fun BibleStage(
     output: PreviewOutputSize,
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
+    backgroundMode: PreviewBackgroundMode,
 ) {
     // The profile's own subset, not the whole stack -- see [bibleTranslationPositions]. Narrowing
     // an output to one translation used to leave the preview drawing all of them, so the picture
@@ -112,6 +110,9 @@ private fun BibleStage(
         // This profile's own shape, not whether some other output happens to be portrait.
         vertical = profile.isLowerThirdVertical,
         modifier = Modifier.fillMaxWidth(),
+        background = {
+            PreviewBackgroundLayer(settings, profile, PreviewBackgroundSurface.BIBLE, lowerThird, backgroundMode)
+        },
     )
 }
 
@@ -127,6 +128,7 @@ private fun SongStage(
     lowerThird: Boolean,
     slot: PreviewSampleSlot,
     element: CustomizeElement?,
+    backgroundMode: PreviewBackgroundMode,
 ) {
     val titleSlide = element == CustomizeElement.SONG_TITLE_SLIDE
     val lyricSections = songSampleSections(slot)
@@ -163,6 +165,9 @@ private fun SongStage(
         vertical = profile.isLowerThirdVertical,
         titleSlide = titleSlide,
         modifier = Modifier.fillMaxWidth(),
+        background = {
+            PreviewBackgroundLayer(settings, profile, PreviewBackgroundSurface.SONGS, lowerThird, backgroundMode)
+        },
     )
 }
 
@@ -180,6 +185,9 @@ private fun SongStage(
  * — and left the wash above the band with nowhere to appear at all. The global Background tab's
  * preview has always split it this way; this is the same split, against this output's own band
  * height rather than the taller of the two.
+ *
+ * [mode] Off leaves the bare plate, and Checker puts the checkerboard where the background would be
+ * -- the whole stage, or the part above a lower third's band -- as it does on the text pages.
  */
 @Composable
 private fun BackgroundStage(
@@ -187,12 +195,19 @@ private fun BackgroundStage(
     output: PreviewOutputSize,
     element: CustomizeElement?,
     lowerThird: Boolean,
+    mode: PreviewBackgroundMode,
 ) {
     val scope = (element ?: CustomizeElement.BACKGROUND_DEFAULT).backgroundScope(lowerThird)
     val config = settings.backgroundSettings.configFor(scope)
+    val checker = mode == PreviewBackgroundMode.CHECKER
     StageFrame(output) {
+        if (mode == PreviewBackgroundMode.OFF) return@StageFrame
         if (!scope.lowerThird) {
-            BackgroundConfigFill(config, Modifier.fillMaxSize())
+            if (checker) {
+                PreviewCheckerboard(Modifier.fillMaxSize())
+            } else {
+                BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
+            }
             return@StageFrame
         }
         val band = settings.bandFractionFor(scope)
@@ -202,8 +217,10 @@ private fun BackgroundStage(
                 Modifier
                     .fillMaxWidth()
                     .weight(1f - band)
-                    .then(if (above != null) Modifier.background(above) else Modifier)
-            )
+                    .then(if (above != null && !checker) Modifier.background(above) else Modifier)
+            ) {
+                if (checker) PreviewCheckerboard(Modifier.fillMaxSize())
+            }
             // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
             // and without this it spills up over the band line.
             Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {
@@ -211,7 +228,7 @@ private fun BackgroundStage(
                     // The template at rest, sample text and all: it is the band, not a fill.
                     BibleLottieStillFrame(config.backgroundLottie, Modifier.fillMaxSize())
                 } else {
-                    BackgroundConfigFill(config, Modifier.fillMaxSize())
+                    BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
                 }
             }
         }
@@ -233,29 +250,20 @@ private fun StageFrame(output: PreviewOutputSize, content: @Composable () -> Uni
 }
 
 /** What the stage says where the category has nothing to draw. */
+/** A stage monitor's zones, as they divide a screen of [output]'s shape. */
 @Composable
-private fun NoStage() {
+private fun StageLayoutStage(layout: StageMonitorLayout, output: PreviewOutputSize) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(NO_STAGE_RATIO)
+            .aspectRatio(output.aspectRatio)
             .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
-            .padding(12.dp),
-        contentAlignment = Alignment.Center,
+            .padding(6.dp),
     ) {
-        Text(
-            text = stringResource(Res.string.customize_no_preview),
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = NO_STAGE_ALPHA),
-        )
+        LayoutMiniature(layout, Modifier.fillMaxSize())
     }
 }
-
-private const val NO_STAGE_ALPHA = 0.45f
-
-/** 16:9, so the empty plate is the shape a stage would have been. */
-private const val NO_STAGE_RATIO = 16f / 9f
 
 /** Test handle for the preview stage. */
 internal const val CUSTOMIZE_STAGE_TAG = "customize_stage"

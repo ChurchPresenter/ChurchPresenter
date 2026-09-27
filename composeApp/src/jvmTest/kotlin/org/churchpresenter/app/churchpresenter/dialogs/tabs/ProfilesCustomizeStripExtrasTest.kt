@@ -2,12 +2,14 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.SongSettings
@@ -40,48 +42,33 @@ class ProfilesCustomizeStripExtrasTest {
     fun `the lyrics carry a section label row`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onNodeWithText("SECTION LABEL").assertExists()
-            onNodeWithText("Show current section (Verse, Chorus…)").assertExists()
+            onNodeWithText("Section label").assertExists()
         }
     }
 
     @Test
-    fun `switching the section label on reveals its size and colour`() {
+    fun `switching the section label on writes it for this profile`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             assertFalse(get().song().layoutExtras.sectionLabel.enabled, "it ships off")
 
-            toggleCheckbox("Show current section (Verse, Chorus…)", scroll = false)
+            toggleCheckbox("Section label")
 
             assertTrue(get().song().layoutExtras.sectionLabel.enabled)
-            // The size and colour fields come with it; they are asserted by the values they show,
-            // the captions beside them being shared with the typography panel above.
-            assertNumberFieldShows(
-                SongSectionLabel().fontSize,
-                "the section label's size, now that it has one",
-            )
-        }
-    }
-
-    @Test
-    fun `a section label that is off offers nothing to set`() {
-        profilesTab(doc()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            // A size for a label nobody draws changes nothing, so the fields go with it.
-            onNodeWithText("Font Size").assertDoesNotExist()
         }
     }
 
     @Test
     fun `the section label's size is written for this profile`() {
-        profilesTab(doc(label = SongSectionLabel(enabled = true, fontSize = 27))) { get ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+        val label = SongSectionLabel(enabled = true, fullScreen = SongCreditStyle(fontType = "", fontSize = 27))
+        profilesTab(doc(label = label)) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
             retypeNumberField(27, 33)
 
-            assertEquals(33, get().song().layoutExtras.sectionLabel.fontSize)
+            assertEquals(33, get().song().layoutExtras.sectionLabel.fullScreen.fontSize)
             assertEquals(
                 27,
-                get().songSettings.layoutExtras.sectionLabel.fontSize,
+                get().songSettings.layoutExtras.sectionLabel.fullScreen.fontSize,
                 "the document's own value stays",
             )
         }
@@ -89,59 +76,106 @@ class ProfilesCustomizeStripExtrasTest {
 
     @Test
     fun `the section label's colour is written for this profile`() {
-        profilesTab(doc(label = SongSectionLabel(enabled = true, color = "#123456"))) { get ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+        val label = SongSectionLabel(enabled = true, fullScreen = SongCreditStyle(fontType = "", color = "#123456"))
+        profilesTab(doc(label = label)) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
             recolor("#123456", "#ABCDEF")
 
-            assertEquals("#ABCDEF", get().song().layoutExtras.sectionLabel.color)
+            assertEquals("#ABCDEF", get().song().layoutExtras.sectionLabel.fullScreen.color)
         }
     }
 
-    // ── The lower-third animation signpost ──────────────────────────────────────────────────────
+    @Test
+    fun `the section label has a chip of its own, with its switch`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
+            // Two switches, one each on the chip's rows and in Slides; the chip's comes first.
+            val switches = onAllNodes(isToggleable() and hasText("Section label"))
+            assertEquals(2, switches.fetchSemanticsNodes().size)
+            switches[0].performScrollTo().performClick()
+            waitForIdle()
+
+            assertTrue(get().song().layoutExtras.sectionLabel.enabled)
+        }
+    }
 
     @Test
-    fun `a band's Bible strip points at the lower third animation`() {
+    fun `the section label's position is written for the output being edited`() {
+        profilesTab(doc(label = SongSectionLabel(enabled = true))) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
+            segment("Below lyrics").performScrollTo().performClick()
+            waitForIdle()
+
+            val label = get().song().layoutExtras.sectionLabel
+            assertEquals(Constants.BELOW_LYRICS, label.position)
+            assertEquals(Constants.ABOVE_LYRICS, label.lowerThirdPosition, "the band keeps its own")
+        }
+    }
+
+    @Test
+    fun `a band writes the section label's lower third position`() {
+        profilesTab(doc(band, label = SongSectionLabel(enabled = true))) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
+            segment("Top").performScrollTo().performClick()
+            waitForIdle()
+
+            val label = get().song().layoutExtras.sectionLabel
+            assertEquals(Constants.ABOVE_VERSE, label.lowerThirdPosition)
+            assertEquals(Constants.ABOVE_LYRICS, label.position, "the full screen keeps its own")
+        }
+    }
+
+    @Test
+    fun `the next section can be held above the lyrics`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
+            segment("Above lyrics").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(Constants.ABOVE_LYRICS, get().song().layoutExtras.nextSectionPosition.fullScreen)
+        }
+    }
+
+    @Test
+    fun `the title can be held above the lyrics`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE)
+            segment("Above lyrics").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(Constants.ABOVE_LYRICS, get().song().titlePosition)
+        }
+    }
+
+    @Test
+    fun `the lyrics have no position of their own`() {
+        profilesTab(doc()) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            onNodeWithText("Above lyrics").assertDoesNotExist()
+        }
+    }
+
+    // ── The lower-third animation type ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `a band's Bible background offers Lottie as a type`() {
         profilesTab(doc(band)) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("LOWER THIRD ANIMATION").assertExists()
+            onNodeWithTag(BG_OWN_TAG, useUnmergedTree = true).performScrollTo().performClick()
+            onNodeWithText("Lottie").assertExists()
         }
     }
 
     @Test
-    fun `a full screen has no band animation to point at`() {
+    fun `a full screen has no Lottie type to offer`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            onNodeWithText("LOWER THIRD ANIMATION").assertDoesNotExist()
+            onNodeWithTag(BG_OWN_TAG, useUnmergedTree = true).performScrollTo().performClick()
+            onNodeWithText("Lottie").assertDoesNotExist()
         }
     }
 
-    @Test
-    fun `the signpost opens the Background pane it describes`() {
-        profilesTab(doc(band)) { _ ->
-            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
-            // "Background" is also the category rail's own label and a content switch, so the
-            // signpost is picked out by being the clickable one inside the strip.
-            onAllNodes(hasText("Background") and hasClickAction()).onLast().performClick()
-            waitForIdle()
 
-            // It navigates rather than editing: the band's backdrop is a Background surface, and
-            // this is the row that says so from the pane an operator is likely to be on.
-            onNodeWithText("Bible · Lower Third").assertExists()
-        }
-    }
-
-    @Test
-    fun `the song strip's own signpost opens the song band's surface`() {
-        // The same row, from the pane beside it, pointing at the *song* band rather than the
-        // Bible's. Two signposts writing the same surface would be the easy mistake here.
-        profilesTab(doc(band)) { _ ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            onAllNodes(hasText("Background") and hasClickAction()).onLast().performClick()
-            waitForIdle()
-
-            onNodeWithText("Songs · Lower Third").assertExists()
-        }
-    }
 
     // ── Long verses, and the crossfade ──────────────────────────────────────────────────────────
 
@@ -157,12 +191,12 @@ class ProfilesCustomizeStripExtrasTest {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
             assertFalse(get().bible().splitLongVerses, "it starts off")
-            onNodeWithText("WORDS").assertDoesNotExist()
+            onNodeWithText("words").assertDoesNotExist()
 
             toggleCheckbox("Split long verses across two slides")
 
             assertTrue(get().bible().splitLongVerses)
-            onNodeWithText("WORDS").assertExists()
+            onNodeWithText("words").assertExists()
         }
     }
 
@@ -171,7 +205,7 @@ class ProfilesCustomizeStripExtrasTest {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             val before = get().song().crossfade
-            toggleCheckbox("Crossfade")
+            toggleCheckbox("Crossfade between items")
 
             assertEquals(!before, get().song().crossfade)
         }

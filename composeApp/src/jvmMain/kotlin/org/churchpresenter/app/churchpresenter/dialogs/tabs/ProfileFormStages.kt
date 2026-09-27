@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -41,10 +42,17 @@ import org.jetbrains.compose.resources.stringResource
  * The pictures beside the whole-form style tabs: captions, subtitles, a Q&A question and a
  * dictionary card, each drawn by the renderer the output itself uses, over sample content, at the
  * profile's preview shape -- so a change in the form is seen as the screen would show it.
+ *
+ * [checker] draws them over the checkerboard in place of the plate -- [PreviewBackgroundMode.CHECKER].
  */
 @Composable
-internal fun ProfileFormStage(pane: CustomizePane, settings: AppSettings, output: PreviewOutputSize) {
-    FormStageFrame(output, badge = pane.stageBadge()) {
+internal fun ProfileFormStage(
+    pane: CustomizePane,
+    settings: AppSettings,
+    output: PreviewOutputSize,
+    checker: Boolean = false,
+) {
+    FormStageFrame(output, badge = pane.stageBadge(), checker = checker) {
         when (pane) {
             CustomizePane.CAPTIONS -> CaptionSample(settings)
             CustomizePane.SUBTITLES -> SubtitleOverlay(
@@ -115,7 +123,12 @@ private fun sampleEntry() = StrongsEntry(
 
 /** The plate the form stages draw on: the Bible and Song stages' frame, and their badge. */
 @Composable
-private fun FormStageFrame(output: PreviewOutputSize, badge: String, content: @Composable () -> Unit) {
+private fun FormStageFrame(
+    output: PreviewOutputSize,
+    badge: String,
+    checker: Boolean,
+    content: @Composable () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,6 +137,9 @@ private fun FormStageFrame(output: PreviewOutputSize, badge: String, content: @C
             .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
     ) {
+        if (checker) {
+            PreviewCheckerboard(Modifier.matchParentSize().clip(AppShape(6.dp)))
+        }
         ScaledPresenterBox(output) { content() }
         PreviewBadge(label = badge, modifier = Modifier.align(Alignment.TopStart).padding(6.dp))
     }

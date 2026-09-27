@@ -3,12 +3,14 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -29,6 +31,7 @@ import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.bible.VerseTarget
 import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.stringResource
@@ -130,6 +133,11 @@ internal fun BiblePreviewPanel(
      * portrait, which is a picture of an output that does not exist.
      */
     vertical: Boolean = false,
+    /**
+     * What is drawn behind the text, under the presenter -- the Profiles tab's background still
+     * ([PreviewBackgroundLayer]). Nothing by default: the settings tabs preview the type alone.
+     */
+    background: @Composable BoxScope.() -> Unit = {},
 ) {
     val bible = settings.bibleSettings
 
@@ -140,6 +148,7 @@ internal fun BiblePreviewPanel(
             .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
     ) {
+        background()
         if (selectedVerses.isEmpty()) {
             Text(
                 text = stringResource(Res.string.bible_preview_no_translations),
@@ -149,23 +158,28 @@ internal fun BiblePreviewPanel(
             )
         } else {
             ScaledPresenterBox(output) {
-                BiblePresenter(
-                    // The region the output confines its text to, applied exactly as
-                    // `PresenterModeContent` applies it. Left off, the CONTENT REGION controls
-                    // moved the screen and not the picture of it.
-                    modifier = if (target.isLowerThird) {
-                        Modifier
-                    } else {
-                        Modifier.contentRegion(bible.contentRegion)
-                    },
-                    selectedVerses = selectedVerses,
-                    appSettings = settings,
-                    isLowerThird = target.isLowerThird,
-                    isLowerThirdVertical = target.isLowerThird && vertical,
-                    // A Lottie band is the text, so it has to be drawn; a backdrop is not.
-                    showBackground = target.isLowerThird &&
-                        usesBibleLottieBand(settings.backgroundSettings.bibleLowerThirdBackground),
-                )
+                // The presenter's own "no background" is solid black, which would paint over the
+                // still [background] drew; transparent blanking leaves it showing, and over the
+                // plate's own black the settings tabs' previews look exactly as they did.
+                CompositionLocalProvider(LocalTransparentBlanking provides true) {
+                    BiblePresenter(
+                        // The region the output confines its text to, applied exactly as
+                        // `PresenterModeContent` applies it. Left off, the CONTENT REGION controls
+                        // moved the screen and not the picture of it.
+                        modifier = if (target.isLowerThird) {
+                            Modifier
+                        } else {
+                            Modifier.contentRegion(bible.contentRegion)
+                        },
+                        selectedVerses = selectedVerses,
+                        appSettings = settings,
+                        isLowerThird = target.isLowerThird,
+                        isLowerThirdVertical = target.isLowerThird && vertical,
+                        // A Lottie band is the text, so it has to be drawn; a backdrop is not.
+                        showBackground = target.isLowerThird &&
+                            usesBibleLottieBand(settings.backgroundSettings.bibleLowerThirdBackground),
+                    )
+                }
             }
         }
         MarginGuide(

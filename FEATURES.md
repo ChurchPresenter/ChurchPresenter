@@ -47,7 +47,7 @@
 **Source locations:**
 - `tabs/BibleTab.kt` — main UI
 - `tabs/DictionaryTab.kt` — Strong's dictionary UI
-- `dialogs/tabs/DictionarySettingsTab.kt` — how the dictionary card looks on each output, edited on Profiles → Style → Dictionary
+- `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
@@ -98,7 +98,7 @@
 - `composables/VideoPlayer.kt`
 - `dialogs/tabs/MediaSettingsTab.kt`
 - `dialogs/tabs/ProfileScaleRow.kt`, `utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
-- `composables/SubtitleStyleSettings.kt` — the subtitle look, edited on Profiles → Style → Subtitles
+- `dialogs/tabs/ProfileOverlayPages.kt`, `dialogs/tabs/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles
 
 ## Lower Thirds & Graphics
 - **Animated lower thirds** — display polished Lottie animations for names, titles and welcomes.
@@ -160,7 +160,7 @@
 - `viewmodel/STTManager.kt`
 - `data/settings/STTSettings.kt`
 - `presenter/STTPresenter.kt`
-- `dialogs/STTDisplaySettings.kt` — the caption look, edited on Profiles → Style → STT
+- `dialogs/tabs/ProfileCaptionsPage.kt` — the caption look, edited on Profiles → Live captions
 - `dialogs/STTSettingsDialog.kt` — the install-wide Bible-engine options
 
 ## Audience Q&A
@@ -175,7 +175,7 @@
 - `viewmodel/QAManager.kt`
 - `data/settings/QASettings.kt`
 - `presenter/QAPresenter.kt`
-- `dialogs/QADisplaySettings.kt` — the question and QR look, edited on Profiles → Style → Q&A
+- `dialogs/tabs/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
 - `dialogs/QARemoteDialog.kt` — links, public access, rate limit and the QR message
 - `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)
 
@@ -193,7 +193,11 @@
 
 ## Projection & Output
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.
-- **Output profiles** — each output follows a named, reusable profile that says what it shows and how it looks: its content, its Bible translations in its own order, and its Bible, song, background, caption, subtitle, Q&A and dictionary styling, previewed live at any screen shape. Two screens that share a profile stay identical; change one profile to restyle them both.
+- **Output profiles** — each output follows a named, reusable profile that says what it shows and how it looks: its content, its Bible translations in its own order, and its Bible, song, background, caption, subtitle, Q&A and dictionary styling, previewed live with its real background at any screen shape. Two screens that share a profile stay identical; change one profile to restyle them both.
+- **Linked profiles** — a profile can follow another and keep only what it changes: the overflow room is the sanctuary with a smaller font. Every value shows where it comes from, and one click reverts it, unlinks the profile or links it back.
+- **Style one translation or language** — set a look for all of them, then give one translation or song language a size, colour or position of its own.
+- **Adjust on the preview** — drag margins, position, width, text size and the band height straight on the picture, or open it across the window for finer steps. Click any song element, Bible translation or reference to point the settings at it and drag it on its own; Reset positions puts everything back.
+- **See what you changed** — every setting a profile holds at other than its default is listed beside the preview, with the default and a Revert for each.
 - **Full screen or lower third** — present full-screen or as a lower-third band, per content type.
 - **Beautiful backgrounds** — solid colors, images, looping video, gradients or transparent — set defaults and per-type overrides.
 - **Built-in stock photo & video search** — search and download from Pexels and Pixabay right inside the app with a free API key, plus a set of preloaded backgrounds ready to use offline.
@@ -218,9 +222,17 @@
 - `dialogs/tabs/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
 - `utils/AutoFitUtils.kt`
 - `dialogs/tabs/ProfilesSettingsTab.kt`, `dialogs/tabs/ProfileEditor.kt`, `dialogs/tabs/ProfileHeader.kt` — the Profiles tab: the list, the editor, the header
-- `dialogs/tabs/ProfileContentSection.kt`, `dialogs/tabs/BibleSourcePicker.kt`, `dialogs/tabs/ProfileSources.kt` — what a profile shows, and its Bible and song sources
+- `dialogs/tabs/ProfileContentPage.kt`, `dialogs/tabs/ProfileSourcePickers.kt`, `dialogs/tabs/ProfileSources.kt` — what a profile shows, and its Bible and song sources
 - `dialogs/tabs/PreviewShape.kt`, `dialogs/tabs/PreviewShapeChooser.kt` — the preview's shape: presets, a custom ratio or a custom resolution
-- `dialogs/tabs/CustomizePane.kt`, `dialogs/tabs/ProfileFormPanes.kt`, `dialogs/tabs/ProfileFormStages.kt`, `dialogs/tabs/Customize*.kt` — the Style tabs and the picture beside them
+- `dialogs/tabs/ProfileList.kt`, `dialogs/tabs/ProfileListDrag.kt`, `data/settings/OutputProfileOrder.kt` — the profile list and its order: drag, Alt+↑/↓, the right-click menu
+- `dialogs/tabs/ProfileSectionNav.kt`, `dialogs/tabs/ProfilePage.kt`, `dialogs/tabs/SettingsGroup.kt`, `dialogs/tabs/SettingsRowControls.kt` — the section list, and the cards and rows every page is built from, with Basic / Advanced
+- `dialogs/tabs/ProfileGeneralPage.kt`, `dialogs/tabs/ProfileOutputsPage.kt`, `dialogs/tabs/ProfileBiblePage.kt`, `dialogs/tabs/ProfileSongsPage.kt`, `dialogs/tabs/ProfileBackgroundPage.kt`, `dialogs/tabs/ProfileStagePage.kt` — the pages
+- `data/settings/LinkedProfiles.kt`, `data/settings/LinkedProfilePaths.kt`, `data/settings/LinkedProfileValues.kt`, `dialogs/tabs/ProfileLink*.kt` — linked profiles: a master, and profiles that keep only what they change
+- `data/settings/BibleAllLayer.kt`, `dialogs/tabs/SongAllLanguages.kt`, `dialogs/tabs/ProfileStyleTarget.kt` — "Applies to": All, or one translation or language with values of its own
+- `dialogs/tabs/PreviewAdjust*.kt`, `dialogs/tabs/LargePreview.kt`, `presenter/PresentedBlock.kt` — adjusting a page from its preview, and the preview across the window
+- `dialogs/tabs/SongElementMove.kt`, `presenter/SongElementMove.kt`, `presenter/BibleBlockShift.kt` — moving one song element, one Bible translation or its reference on its own, and Reset positions
+- `data/settings/ProfileDefaults.kt`, `dialogs/tabs/ProfileLinkCard.kt` — what a profile changes from the defaults, listed beside the preview with Revert
+- `dialogs/tabs/CustomizePane.kt`, `dialogs/tabs/ProfileFormStages.kt`, `dialogs/tabs/PreviewBackgroundLayer.kt`, `dialogs/tabs/Customize*.kt` — the picture beside each page, with the output's real background
 - `data/settings/OutputProfile.kt`, `data/settings/OutputProfileResolution.kt` — the profile, and what an output renders with
 
 ## Stage Monitor
@@ -229,7 +241,7 @@
 **Source locations:**
 - `StageMonitorScreen.kt`
 - `data/settings/StageMonitorSettings.kt`
-- `dialogs/tabs/StageMonitorSettingsTab.kt`
+- `dialogs/tabs/ProfileStagePage.kt`, `dialogs/tabs/ProfileStageText.kt`, `dialogs/tabs/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile
 
 ## Mobile & Remote Control
 - **Control from your phone** — a built-in server lets phones and tablets browse songs and scripture, build the schedule and go live — all over your local network.

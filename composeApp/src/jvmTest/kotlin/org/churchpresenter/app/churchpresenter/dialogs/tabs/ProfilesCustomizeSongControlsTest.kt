@@ -4,7 +4,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.OutputProfile
@@ -67,7 +66,7 @@ class ProfilesCustomizeSongControlsTest {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(61, 72)
-            toggleCheckbox("Auto")
+            toggleCheckbox("Auto-fit")
             recolor("#AABBCC", "#112233")
             for (glyph in listOf("B", "I", "U")) {
                 styleButton(group = 0, label = glyph).performScrollTo().performClick()
@@ -108,9 +107,9 @@ class ProfilesCustomizeSongControlsTest {
     fun `the alignments and the case picker write the lyrics`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            horizontalAlignButton(group = 0, which = HAlign.LEFT).performScrollTo().performClick()
+            segment("Left").performScrollTo().performClick()
             waitForIdle()
-            onNodeWithContentDescription("Align Top").performScrollTo().performClick()
+            segment("Top").performScrollTo().performClick()
             waitForIdle()
             chooseSegment("UPPERCASE")
 
@@ -166,11 +165,11 @@ class ProfilesCustomizeSongControlsTest {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LOOK_AHEAD)
             retypeNumberField(51, 46)
-            toggleCheckbox("Auto")
+            toggleCheckbox("Auto-fit")
             recolor("#445566", "#667788")
             styleButton(group = 0, label = "I").performScrollTo().performClick()
             waitForIdle()
-            horizontalAlignButton(group = 0, which = HAlign.RIGHT).performScrollTo().performClick()
+            segment("Right").performScrollTo().performClick()
             waitForIdle()
 
             val stored = get().song()
@@ -227,8 +226,8 @@ class ProfilesCustomizeSongControlsTest {
             retypeNumberField(22, 23)
             retypeNumberField(33, 34)
             retypeNumberField(44, 45)
-            toggleCheckbox("Fade In", scroll = false)
-            toggleCheckbox("Crossfade", scroll = false)
+            toggleCheckbox("Fade in")
+            toggleCheckbox("Crossfade between items")
             retypeNumberField(555, 620)
 
             val stored = get().song()
@@ -261,7 +260,7 @@ class ProfilesCustomizeSongControlsTest {
     fun `a bilingual profile is offered the arrangement in the Lyrics pane`() {
         profilesTab(output(band, Constants.SONG_LANG_BOTH)) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            chooseSegment("Top / Bottom")
+            chooseSegment("Stacked")
 
             assertEquals(Constants.BILINGUAL_TOP_BOTTOM, get().song().bilingualLayout)
         }

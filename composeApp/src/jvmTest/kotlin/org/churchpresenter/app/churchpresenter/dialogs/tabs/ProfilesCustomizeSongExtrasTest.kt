@@ -46,8 +46,7 @@ class ProfilesCustomizeSongExtrasTest {
     fun `the title slide chip draws its own section`() {
         profilesTab(output()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            onNodeWithText("Song Title Slide").assertExists()
-            onNodeWithText("Enabled").assertExists()
+            onNodeWithText("Title slide").assertExists()
         }
     }
 
@@ -55,7 +54,7 @@ class ProfilesCustomizeSongExtrasTest {
     fun `the title slide can be switched off`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
-            toggleCheckbox("Enabled")
+            toggleCheckbox("Title slide")
 
             assertFalse(get().song().titleSlideEnabled, "it started on and must have gone off")
         }

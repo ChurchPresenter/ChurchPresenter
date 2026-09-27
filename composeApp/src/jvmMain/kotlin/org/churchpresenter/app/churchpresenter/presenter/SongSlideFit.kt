@@ -17,11 +17,8 @@ internal data class SlidePosition(
     val displayLineIndex: Int,
 )
 
-/**
- * What one slide's fit measures: the [sections] it has to hold, and whether it [isLast], which is
- * the only slide that also has to leave room for the end-of-song marker.
- */
-internal data class SlideFit(val sections: List<LyricSection>, val isLast: Boolean)
+/** What one slide's fit measures: the [sections] it has to hold. */
+internal data class SlideFit(val sections: List<LyricSection>)
 
 /**
  * The entry of [sectionsForFit] that stands for the slide at [slide], for a fit that sizes each
@@ -58,8 +55,8 @@ internal fun slideFitSections(
     }
     val entry = sectionsForFit.getOrNull(entryIndex)
     return when {
-        entry != null -> SlideFit(listOf(entry), isLast = entryIndex == sectionsForFit.lastIndex)
-        !isLineMode -> SlideFit(listOf(section), isLast = false)
+        entry != null -> SlideFit(listOf(entry))
+        !isLineMode -> SlideFit(listOf(section))
         else -> SlideFit(
             listOf(
                 section.copy(
@@ -69,7 +66,6 @@ internal fun slideFitSections(
                     },
                 ),
             ),
-            isLast = position >= 0 && position == allLyricSections.lastIndex && line == section.lines.lastIndex,
         )
     }
 }

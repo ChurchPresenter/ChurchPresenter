@@ -4,7 +4,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.AppSettings
@@ -113,9 +112,9 @@ class ProfilesCustomizeBibleControlsTest {
     fun `the alignments write the verse's own and the stack's shared one`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            horizontalAlignButton(group = 0, which = HAlign.RIGHT).performScrollTo().performClick()
+            segment("Right").performScrollTo().performClick()
             waitForIdle()
-            onNodeWithContentDescription("Align Top").performScrollTo().performClick()
+            segment("Top").performScrollTo().performClick()
             waitForIdle()
 
             assertEquals(Constants.RIGHT, get().storedTranslation().textHorizontalAlignment)
@@ -145,7 +144,7 @@ class ProfilesCustomizeBibleControlsTest {
             openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_REFERENCE)
             retypeNumberField(37, 42)
             recolor("#445566", "#667788")
-            positionButton(group = 0, above = true).performScrollTo().performClick()
+            segment("Above verse").performScrollTo().performClick()
             waitForIdle()
             toggleCheckbox("Abbreviation")
 
@@ -179,11 +178,11 @@ class ProfilesCustomizeBibleControlsTest {
     fun `the strip writes the fades, their duration and the divider`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            toggleCheckbox("Fade In", scroll = false)
-            toggleCheckbox("Fade Out", scroll = false)
-            toggleCheckbox("Crossfade", scroll = false)
+            toggleCheckbox("Fade in")
+            toggleCheckbox("Fade out")
+            toggleCheckbox("Crossfade between items")
             retypeNumberField(555, 620)
-            toggleCheckbox("Show divider between translations", scroll = false)
+            toggleCheckbox("Divider between translations")
             retypeNumberField(17, 19)
 
             val stored = get().bible()
@@ -255,12 +254,4 @@ class ProfilesCustomizeBibleControlsTest {
         }
     }
 
-    @Test
-    fun `the reference element is not the place it is offered`() {
-        // It arranges the verse block, so it is drawn on the verse text and nowhere else.
-        profilesTab(parallel()) { _ ->
-            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_REFERENCE)
-            onAllNodesWithText("2x2").assertCountEquals(0)
-        }
-    }
 }

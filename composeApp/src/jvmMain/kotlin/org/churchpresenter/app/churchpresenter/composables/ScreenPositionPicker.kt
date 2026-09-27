@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,15 +28,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.position_showing_at
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
@@ -94,7 +95,7 @@ fun ScreenPositionPicker(
                             name = name,
                             isSelected = value == selected,
                             onClick = { onSelect(value) },
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            modifier = Modifier.weight(1f).fillMaxHeight().testTag(screenPositionTag(value)),
                         )
                     }
                 }
@@ -175,3 +176,6 @@ private fun PositionCell(
         }
     }
 }
+
+/** Test handle for the spot of [value] in a [ScreenPositionPicker]. */
+internal fun screenPositionTag(value: String): String = "screen_position_$value"

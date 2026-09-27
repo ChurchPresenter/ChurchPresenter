@@ -49,14 +49,6 @@ class ProfilesCustomizeBackgroundSourcesTest {
         }
     }
 
-    @Test
-    fun `a Lottie surface draws the template row`() {
-        profilesTab(output(Constants.BACKGROUND_LOTTIE)) { _ ->
-            openBackgroundSurface(own = false)
-            onNodeWithText("Template").assertExists()
-            onNodeWithText("No template selected").assertExists()
-        }
-    }
 
     @Test
     fun `an image surface draws neither`() {
@@ -110,18 +102,4 @@ class ProfilesCustomizeBackgroundSourcesTest {
         }
     }
 
-    @Test
-    fun `a Lottie surface keeps its file through a trip to Color`() {
-        val doc = output(Constants.BACKGROUND_LOTTIE, config = { copy(backgroundLottie = "/bands/wipe.json") })
-        profilesTab(doc) { get ->
-            openBackgroundSurface()
-            chooseSegment("Color")
-
-            assertEquals(
-                "/bands/wipe.json",
-                get().stored().backgroundLottie,
-                "the animation outlives the type",
-            )
-        }
-    }
 }

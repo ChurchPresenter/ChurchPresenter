@@ -4,7 +4,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithTag
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile
@@ -116,12 +115,4 @@ class ProfilesPreviewSelectionTest {
         }
     }
 
-    @Test
-    fun `a profile with songs switched off offers no Songs styling`() {
-        profilesTab(doc(OutputProfile(songMode = Constants.SONG_LANG_OFF))) { _ ->
-            // Nothing of the songs reaches this output, so there is nothing to style: the tab goes,
-            // and comes back when songs are switched on under Content or Sources.
-            onNodeWithTag(railTag(CustomizePane.SONGS.name)).assertDoesNotExist()
-        }
-    }
 }

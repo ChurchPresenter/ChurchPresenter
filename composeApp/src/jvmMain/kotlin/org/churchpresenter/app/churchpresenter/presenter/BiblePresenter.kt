@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.HorizontalDivider
@@ -284,6 +285,50 @@ fun BiblePresenter(
         systemFontFamilyOrDefault(if (isLowerThird) t1.lowerThirdReferenceFontType else t1.referenceFontType)
     }
 
+    val bgConfig = if (isLowerThird) appSettings.backgroundSettings.bibleLowerThirdBackground
+    else appSettings.backgroundSettings.bibleBackground
+
+    // A Lottie band draws the whole band itself — text included — so it replaces everything
+    // below rather than sitting under it. A file that is missing or is not a template falls
+    // through to the classic band, the same way a missing picture falls back to the color.
+    if (isLowerThird && usesBibleLottieBand(bgConfig)) {
+        val template by rememberBibleLottieTemplate(bgConfig.backgroundLottie)
+        val loaded = template
+        if (loaded != null) {
+            val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / PERCENT
+            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
+            BoxWithConstraints(modifier.fillMaxSize()) {
+                AboveBandFill(
+                    above = above,
+                    show = showBackground,
+                    bandFraction = effectiveBandFraction(
+                        canvasAspectRatio = maxWidth / maxHeight,
+                        bandFraction = lowerThirdFraction,
+                        templateAspectRatio = loaded.width / loaded.height,
+                    ),
+                )
+                BibleLottieBand(
+                    template = loaded,
+                    verses = effectiveVerses,
+                    // The outgoing verses go through the same per-output translation filter, so a
+                    // screen assigned one translation plays out the verse it was actually showing.
+                    outgoingVerses = versesForOutput(LocalBandOutgoing.current.verses),
+                    translations = listOf(t0, t1, t2, t3),
+                    bandFraction = lowerThirdFraction,
+                    bandClock = LocalLottieBandClock.current,
+                    isKey = isKey,
+                    showBackground = showBackground,
+                )
+            }
+            return
+        }
+    }
+
+
+    // The Lottie band draws its own text and plays from the band clock alone, not from a verse on
+    // screen -- so it has to be reachable even with nothing selected yet, or for the one frame a
+    // switch passes through before `effectiveVerses` catches up. Reached only above; below this the
+    // classic band and the full screen both need a verse to draw at all.
     effectiveVerses.firstOrNull() ?: return
     val secondaryBible = effectiveVerses.getOrNull(1)
 
@@ -497,45 +542,6 @@ fun BiblePresenter(
         Constants.TOP -> Alignment.TopCenter
         Constants.BOTTOM -> Alignment.BottomCenter
         else -> Alignment.Center  // MIDDLE or default
-    }
-
-    val bgConfig = if (isLowerThird) appSettings.backgroundSettings.bibleLowerThirdBackground
-    else appSettings.backgroundSettings.bibleBackground
-
-    // A Lottie band draws the whole band itself — text included — so it replaces everything
-    // below rather than sitting under it. A file that is missing or is not a template falls
-    // through to the classic band, the same way a missing picture falls back to the color.
-    if (isLowerThird && usesBibleLottieBand(bgConfig)) {
-        val template by rememberBibleLottieTemplate(bgConfig.backgroundLottie)
-        val loaded = template
-        if (loaded != null) {
-            val lowerThirdFraction = appSettings.bibleSettings.lowerThirdHeightPercent / PERCENT
-            val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
-            BoxWithConstraints(modifier.fillMaxSize()) {
-                AboveBandFill(
-                    above = above,
-                    show = showBackground,
-                    bandFraction = effectiveBandFraction(
-                        canvasAspectRatio = maxWidth / maxHeight,
-                        bandFraction = lowerThirdFraction,
-                        templateAspectRatio = loaded.width / loaded.height,
-                    ),
-                )
-                BibleLottieBand(
-                    template = loaded,
-                    verses = effectiveVerses,
-                    // The outgoing verses go through the same per-output translation filter, so a
-                    // screen assigned one translation plays out the verse it was actually showing.
-                    outgoingVerses = versesForOutput(LocalBandOutgoing.current.verses),
-                    translations = listOf(t0, t1, t2, t3),
-                    bandFraction = lowerThirdFraction,
-                    bandClock = LocalLottieBandClock.current,
-                    isKey = isKey,
-                    showBackground = showBackground,
-                )
-            }
-            return
-        }
     }
 
     // A verse carries no background of its own, so this is the quick tray's pick, then the Bible
@@ -870,6 +876,8 @@ fun BiblePresenter(
                                 text = itemRefText(item, buildRefText(verse, item)),
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .referenceShift(item, isLowerThird, scaleFactor)
+                                    .reportsBlock(PresentedBlock(PresentedBlock.Kind.REFERENCE, item.fileName))
                                     .backdropRoom(item.referenceBackdropFor(isLowerThird)).then(itemRefPainter.modifier),
                                 outline = item.referenceOutlineFor(isLowerThird),
                                 scaleFactor = scaleFactor,
@@ -1070,11 +1078,24 @@ fun BiblePresenter(
                                     for (colIndex in 0 until gridCols) {
                                         val cell = rowItems.getOrNull(colIndex)
                                         Box(
-                                            modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds(),
+                                            modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()
+                                                // The cell clips what is moved out of it; a preview
+                                                // keeps a dragged reference inside it.
+                                                .then(
+                                                    cell?.let {
+                                                        val kind = PresentedBlock.Kind.CELL
+                                                        Modifier.reportsBlock(PresentedBlock(kind, it.second.fileName))
+                                                    } ?: Modifier,
+                                                ),
                                             contentAlignment = contentAlignment,
                                         ) {
                                             if (cell != null) {
-                                                translationBlock(cell.first, cell.second, fitScale)
+                                                Box(
+                                                    Modifier.translationShift(cell.second, isLowerThird, scaleFactor)
+                                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.TRANSLATION, cell.second.fileName)),
+                                                ) {
+                                                    translationBlock(cell.first, cell.second, fitScale)
+                                                }
                                             }
                                         }
                                         if (colIndex < gridCols - 1) {
@@ -1204,7 +1225,12 @@ fun BiblePresenter(
                                             contentAlignment = Alignment.BottomCenter,
                                         ) {
                                             if (cell != null) {
-                                                translationBlock(cell.first, cell.second, fitScale)
+                                                Box(
+                                                    Modifier.translationShift(cell.second, isLowerThird, scaleFactor)
+                                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.TRANSLATION, cell.second.fileName)),
+                                                ) {
+                                                    translationBlock(cell.first, cell.second, fitScale)
+                                                }
                                             }
                                         }
                                     }

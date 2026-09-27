@@ -44,10 +44,10 @@ class SongElementStyleTest {
     )
 
     @Test
-    fun `there are twenty profiles`() {
-        // Nine elements on two outputs, plus the title slide's own number, which used to share the
+    fun `there are twenty-two profiles`() {
+        // Ten elements on two outputs, plus the title slide's own number, which used to share the
         // lyric slides' profile and now has one of its own -- see #609.
-        assertEquals(20, combinations.size)
+        assertEquals(22, combinations.size)
     }
 
     @Test
@@ -67,13 +67,18 @@ class SongElementStyleTest {
     }
 
     @Test
-    fun `writing one combination leaves the other seventeen alone`() {
+    fun `writing one combination leaves the others alone`() {
         combinations.forEachIndexed { index, (element, target) ->
             val written = SongSettings().withElementStyle(element, target, distinct(index))
 
             combinations.filterNot { it.first == element && it.second == target }.forEach { other ->
+                // A section label with no face of its own draws in the title's, on the same output.
+                val followsTitle = other.first == SongStyleElement.SECTION_LABEL &&
+                    element == SongStyleElement.TITLE && other.second == target
+                val default = defaultSongElementStyle(other.first, other.second)
+                val titleFont = written.elementStyle(element, target).fontType
                 assertEquals(
-                    defaultSongElementStyle(other.first, other.second),
+                    if (followsTitle) default.copy(fontType = titleFont) else default,
                     written.elementStyle(other.first, other.second),
                     "writing $element/$target must not touch ${other.first}/${other.second}",
                 )
