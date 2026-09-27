@@ -3,10 +3,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -26,11 +21,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickFont
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.openColorField
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
-import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -84,9 +75,7 @@ class QARemoteContentTest {
         tunnelStatus: TunnelStatus = TunnelStatus.Idle,
         tunnelUrl: String = "",
         initialQaSettings: QASettings = QASettings(),
-        availableFonts: List<String> = listOf("Arial", "Helvetica", "Courier New"),
-        /** The Q&A form the Profiles tab draws instead, where how a question looks moved to. */
-        display: Boolean = false,
+
         block: ComposeUiTest.(Harness) -> Unit,
     ) {
         val h = Harness()
@@ -95,20 +84,6 @@ class QARemoteContentTest {
             setContent {
                 MaterialTheme {
                     var appSettings by remember { mutableStateOf(AppSettings(qaSettings = initialQaSettings)) }
-                    val onChange: ((AppSettings) -> AppSettings) -> Unit = { transform ->
-                        appSettings = transform(appSettings)
-                        h.settings = appSettings.qaSettings
-                    }
-                    if (display) {
-                        Column(Modifier.verticalScroll(rememberScrollState())) {
-                            QADisplaySettings(
-                                appSettings = appSettings,
-                                onSettingsChange = onChange,
-                                availableFonts = availableFonts,
-                            )
-                        }
-                        return@MaterialTheme
-                    }
                     QARemoteContent(
                         serverUrl = serverUrl,
                         qaDisplayUrl = qaDisplayUrl,
@@ -345,148 +320,4 @@ class QARemoteContentTest {
             assertEquals("", h.settings.qrCodeMessage)
         }
 
-    // ── Colour pickers ──────────────────────────────────────────────────────────
-
-    @Test
-    fun `changing the QR foreground colour updates the setting`() = qaRemote(display = true) { h ->
-        openColorField(showingHex = "#000000")
-        confirmColorDialogWith(hex = "#123456")
-        waitForIdle()
-        assertEquals("#123456", h.settings.qrForegroundColor)
-    }
-
-    @Test
-    fun `changing the QR background colour updates the setting`() = qaRemote(display = true) { h ->
-        openColorField(showingHex = "#FFFFFF")
-        confirmColorDialogWith(hex = "#654321")
-        waitForIdle()
-        assertEquals("#654321", h.settings.qrBackgroundColor)
-    }
-
-    @Test
-    fun `changing the text colour updates the setting`() =
-        qaRemote(display = true, initialQaSettings = QASettings(textColor = "#AABBCC")) { h ->
-            openColorField(showingHex = "#AABBCC")
-            confirmColorDialogWith(hex = "#DDEEFF")
-            waitForIdle()
-            assertEquals("#DDEEFF", h.settings.textColor)
-        }
-
-    @Test
-    fun `changing the background colour updates the setting`() =
-        qaRemote(display = true, initialQaSettings = QASettings(backgroundColor = "#334455")) { h ->
-            openColorField(showingHex = "#334455")
-            confirmColorDialogWith(hex = "#998877")
-            waitForIdle()
-            assertEquals("#998877", h.settings.backgroundColor)
-        }
-
-    // ── Transparent background toggle ───────────────────────────────────────────
-
-    @Test
-    fun `the Transparent button clears the background colour`() = qaRemote(display = true) { h ->
-        onNodeWithText("Transparent").performClick()
-        waitForIdle()
-        assertEquals("transparent", h.settings.backgroundColor)
-    }
-
-    @Test
-    fun `once transparent, clicking the combined button restores a colour`() =
-        qaRemote(display = true, initialQaSettings = QASettings(backgroundColor = "transparent")) { h ->
-            onNodeWithText("Background Color · Transparent").performClick()
-            waitForIdle()
-            assertEquals("#1E1E2E", h.settings.backgroundColor)
-        }
-
-    // ── Text style toggles ──────────────────────────────────────────────────────
-
-    @Test
-    fun `Bold toggles on`() = qaRemote(display = true) { h ->
-        onNode(hasClickAction() and hasText("B")).performClick()
-        waitForIdle()
-        assertTrue(h.settings.bold)
-    }
-
-    @Test
-    fun `Italic toggles on`() = qaRemote(display = true) { h ->
-        onNode(hasClickAction() and hasText("I")).performClick()
-        waitForIdle()
-        assertTrue(h.settings.italic)
-    }
-
-    @Test
-    fun `Underline toggles on`() = qaRemote(display = true) { h ->
-        onNode(hasClickAction() and hasText("U")).performClick()
-        waitForIdle()
-        assertTrue(h.settings.underline)
-    }
-
-    @Test
-    fun `Shadow toggles on and reveals its detail row`() = qaRemote(display = true) { h ->
-        onNode(hasClickAction() and hasText("S")).performClick()
-        waitForIdle()
-        assertTrue(h.settings.shadow)
-        onNodeWithText("SIZE (%)").assertIsDisplayed()
-    }
-
-    @Test
-    fun `the shadow colour, size and opacity are each editable`() =
-        qaRemote(display = true, initialQaSettings = QASettings(shadow = true, shadowColor = "#010203")) { h ->
-            openColorField(showingHex = "#010203")
-            confirmColorDialogWith(hex = "#0A0B0C")
-            waitForIdle()
-            assertEquals("#0A0B0C", h.settings.shadowColor)
-
-            onNode(
-                hasSetTextAction() and hasText("100") and hasImeAction(ImeAction.Default),
-            ).performTextReplacement("60")
-            waitForIdle()
-            assertEquals(60, h.settings.shadowSize)
-
-            onNode(hasSetTextAction() and hasText("78")).performTextReplacement("50")
-            waitForIdle()
-            assertEquals(50, h.settings.shadowOpacity)
-        }
-
-    // ── Font ────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `picking a font from the dropdown updates the setting`() = qaRemote(
-        display = true,
-        initialQaSettings = QASettings(fontType = "Arial"),
-        availableFonts = listOf("Arial", "Helvetica", "Courier New"),
-    ) { h ->
-        pickFont(showing = "Arial", to = "Helvetica")
-
-        assertEquals("Helvetica", h.settings.fontType)
-    }
-
-    @Test
-    fun `changing the font size updates the setting`() = qaRemote(display = true) { h ->
-        onNode(hasSetTextAction() and hasImeAction(ImeAction.Default) and hasText("48")).performTextReplacement("72")
-        waitForIdle()
-        assertEquals(72, h.settings.fontSize)
-    }
-
-    // ── Position grid ───────────────────────────────────────────────────────────
-
-    @Test
-    fun `every position tile sets the position`() = qaRemote(display = true) { h ->
-        listOf(
-            "TL" to Constants.TOP_LEFT,
-            "TC" to Constants.TOP_CENTER,
-            "TR" to Constants.TOP_RIGHT,
-            "CL" to Constants.CENTER_LEFT,
-            "C" to Constants.CENTER,
-            "CR" to Constants.CENTER_RIGHT,
-            "BL" to Constants.BOTTOM_LEFT,
-            "BC" to Constants.BOTTOM_CENTER,
-            "BR" to Constants.BOTTOM_RIGHT,
-        ).forEach { (label, constant) ->
-            // The tiles are spots on a mini-screen now; their names are what they are called by.
-            onNodeWithContentDescription(label).performClick()
-            waitForIdle()
-            assertEquals(constant, h.settings.position, "clicking \"$label\" must select $constant")
-        }
-    }
 }

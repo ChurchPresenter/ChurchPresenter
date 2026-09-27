@@ -43,8 +43,6 @@ import churchpresenter.composeapp.generated.resources.align_right
 import churchpresenter.composeapp.generated.resources.align_top
 import churchpresenter.composeapp.generated.resources.align_middle
 import churchpresenter.composeapp.generated.resources.align_bottom
-import churchpresenter.composeapp.generated.resources.position_above_desc
-import churchpresenter.composeapp.generated.resources.position_below_desc
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
@@ -144,40 +142,6 @@ fun VerticalAlignmentButtons(
         ),
         selected = selectedAlignment,
         onSelect = onAlignmentChange,
-        buttonSize = buttonSize,
-        cornerRadius = cornerRadius,
-    )
-}
-
-/**
- * A group of 2 icon buttons for position (Above/Below)
- */
-@Composable
-fun PositionButtons(
-    selectedPosition: String,
-    onPositionChange: (String) -> Unit,
-    aboveValue: String,
-    belowValue: String,
-    buttonSize: Dp = 28.dp,
-    cornerRadius: Dp = 4.dp
-) {
-    IconChoiceTrack(
-        choices = listOf(
-            IconChoice(
-                aboveValue,
-                painterResource(Res.drawable.ic_align_top),
-                null,
-                stringResource(Res.string.position_above_desc),
-            ),
-            IconChoice(
-                belowValue,
-                painterResource(Res.drawable.ic_align_bottom),
-                null,
-                stringResource(Res.string.position_below_desc),
-            ),
-        ),
-        selected = selectedPosition,
-        onSelect = onPositionChange,
         buttonSize = buttonSize,
         cornerRadius = cornerRadius,
     )
