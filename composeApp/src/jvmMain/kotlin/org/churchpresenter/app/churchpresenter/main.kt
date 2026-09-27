@@ -37,6 +37,7 @@ import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.app.churchpresenter.utils.deleteLeftoverUpdateInstallers
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
@@ -319,6 +320,9 @@ fun main() {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+    // The installer a previous update ran is still in the temp directory: it could not be deleted
+    // while it was running. The single-instance guard above means no download is in flight.
+    deleteLeftoverUpdateInstallers()
     // Which renderer was live is the first thing a GPU driver crash needs and the one thing the
     // report never carried. "default" means the platform's own choice, which is not the same fact
     // as any named API — a report from a machine on Direct3D-by-default and one pinned to it are
