@@ -128,10 +128,7 @@ internal val ProfilePage.hasDetailSwitch: Boolean
     get() = when (this) {
         ProfilePage.General, ProfilePage.Outputs -> false
         ProfilePage.Content -> true
-        // The whole-form pages are one form each until they are broken into rows, with nothing
-        // marked Advanced; a switch there would do nothing.
-        // Stage layout was one of them and is rows now, with an Advanced of its own.
-        is ProfilePage.Appearance -> !pane.isWholeForm || pane == CustomizePane.STAGE_MONITOR
+        is ProfilePage.Appearance -> true
     }
 
 /** Test handle for one entry of the section list. Appearance pages keep their Style-tab tags. */

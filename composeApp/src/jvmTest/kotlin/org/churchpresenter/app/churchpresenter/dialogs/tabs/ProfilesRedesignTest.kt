@@ -286,7 +286,7 @@ class ProfilesRedesignTest {
     fun `a caption setting is written to the profile and not to the document`() {
         profilesTab(profileDocument()) { get ->
             clickTab(CustomizePane.CAPTIONS)
-            toggleCheckbox("Word Highlighting")
+            toggleCheckbox("Highlight the word being spoken")
 
             assertTrue(get().profile().sttSettings.showWordHighlighting)
             assertEquals(STTSettings().showWordHighlighting, get().sttSettings.showWordHighlighting)

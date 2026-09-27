@@ -320,13 +320,11 @@ private fun ColumnScope.PageBody(
             )
             CustomizePane.BACKGROUND ->
                 ProfileBackgroundPage(draft, profile, onProfileChange, onDraftSettingsChange, onOpenPage)
-            // The whole tab it always was, given the column's height; it scrolls itself.
-            CustomizePane.DICTIONARY -> DictionarySettingsTab(
-                settings = draft,
-                onSettingsChange = onDraftSettingsChange,
-            )
+            CustomizePane.DICTIONARY -> ProfileDictionaryPage(draft, onDraftSettingsChange)
             CustomizePane.STAGE_MONITOR -> ProfileStagePage(draft, onDraftSettingsChange)
-            else -> ProfileFormPage(page.pane, draft, onDraftSettingsChange)
+            CustomizePane.CAPTIONS -> ProfileCaptionsPage(draft, onDraftSettingsChange)
+            CustomizePane.SUBTITLES -> ProfileSubtitlesPage(draft, onDraftSettingsChange)
+            CustomizePane.QA -> ProfileQaPage(draft, onDraftSettingsChange)
         }
     }
 }

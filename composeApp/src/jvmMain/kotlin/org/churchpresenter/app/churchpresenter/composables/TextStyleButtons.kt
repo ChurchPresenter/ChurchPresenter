@@ -96,6 +96,8 @@ fun TextStyleButtons(
     strikethrough: Boolean = false,
     onStrikethroughChange: ((Boolean) -> Unit)? = null,
     showShadow: Boolean = true,
+    /** Off for text that has no underline to set -- a button that did nothing read as broken. */
+    showUnderline: Boolean = true,
     backdrop: TextBackdrop? = null,
     onBackdropChange: ((TextBackdrop) -> Unit)? = null,
     outline: TextOutline? = null,
@@ -122,14 +124,16 @@ fun TextStyleButtons(
             buttonSize = buttonSize,
             onClick = { onItalicChange(!italic) }
         )
-        TextStyleToggleButton(
-            label = stringResource(Res.string.text_style_underline),
-            tooltip = stringResource(Res.string.tooltip_underline),
-            isActive = underline,
-            textDecoration = TextDecoration.Underline,
-            buttonSize = buttonSize,
-            onClick = { onUnderlineChange(!underline) }
-        )
+        if (showUnderline) {
+            TextStyleToggleButton(
+                label = stringResource(Res.string.text_style_underline),
+                tooltip = stringResource(Res.string.tooltip_underline),
+                isActive = underline,
+                textDecoration = TextDecoration.Underline,
+                buttonSize = buttonSize,
+                onClick = { onUnderlineChange(!underline) }
+            )
+        }
         if (onStrikethroughChange != null) {
             TextStyleToggleButton(
                 label = stringResource(Res.string.text_style_strikethrough),
