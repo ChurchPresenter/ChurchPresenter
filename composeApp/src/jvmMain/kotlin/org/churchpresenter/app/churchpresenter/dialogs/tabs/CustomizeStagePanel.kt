@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
-import org.churchpresenter.app.churchpresenter.composables.CheckerboardFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
@@ -205,7 +204,7 @@ private fun BackgroundStage(
         if (mode == PreviewBackgroundMode.OFF) return@StageFrame
         if (!scope.lowerThird) {
             if (checker) {
-                CheckerboardFill(Modifier.fillMaxSize(), square = PREVIEW_CHECKER_SQUARE)
+                PreviewCheckerboard(Modifier.fillMaxSize())
             } else {
                 BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
             }
@@ -220,7 +219,7 @@ private fun BackgroundStage(
                     .weight(1f - band)
                     .then(if (above != null && !checker) Modifier.background(above) else Modifier)
             ) {
-                if (checker) CheckerboardFill(Modifier.fillMaxSize(), square = PREVIEW_CHECKER_SQUARE)
+                if (checker) PreviewCheckerboard(Modifier.fillMaxSize())
             }
             // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
             // and without this it spills up over the band line.

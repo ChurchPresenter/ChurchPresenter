@@ -27,7 +27,6 @@ import churchpresenter.composeapp.generated.resources.output_profile_sample_subt
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_qa
 import churchpresenter.composeapp.generated.resources.tab_stt
-import org.churchpresenter.app.churchpresenter.composables.CheckerboardFill
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
@@ -139,7 +138,7 @@ private fun FormStageFrame(
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
     ) {
         if (checker) {
-            CheckerboardFill(Modifier.matchParentSize().clip(AppShape(6.dp)), square = PREVIEW_CHECKER_SQUARE)
+            PreviewCheckerboard(Modifier.matchParentSize().clip(AppShape(6.dp)))
         }
         ScaledPresenterBox(output) { content() }
         PreviewBadge(label = badge, modifier = Modifier.align(Alignment.TopStart).padding(6.dp))

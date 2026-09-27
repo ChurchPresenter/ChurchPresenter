@@ -196,7 +196,8 @@
 - **Output profiles** — each output follows a named, reusable profile that says what it shows and how it looks: its content, its Bible translations in its own order, and its Bible, song, background, caption, subtitle, Q&A and dictionary styling, previewed live with its real background at any screen shape. Two screens that share a profile stay identical; change one profile to restyle them both.
 - **Linked profiles** — a profile can follow another and keep only what it changes: the overflow room is the sanctuary with a smaller font. Every value shows where it comes from, and one click reverts it, unlinks the profile or links it back.
 - **Style one translation or language** — set a look for all of them, then give one translation or song language a size, colour or position of its own.
-- **Adjust on the preview** — drag margins, position, width, text size and the band height straight on the picture, or open it across the window for finer steps.
+- **Adjust on the preview** — drag margins, position, width, text size and the band height straight on the picture, or open it across the window for finer steps. Click any song element, Bible translation or reference to point the settings at it and drag it on its own; Reset positions puts everything back.
+- **See what you changed** — every setting a profile holds at other than its default is listed beside the preview, with the default and a Revert for each.
 - **Full screen or lower third** — present full-screen or as a lower-third band, per content type.
 - **Beautiful backgrounds** — solid colors, images, looping video, gradients or transparent — set defaults and per-type overrides.
 - **Built-in stock photo & video search** — search and download from Pexels and Pixabay right inside the app with a free API key, plus a set of preloaded backgrounds ready to use offline.
@@ -229,6 +230,8 @@
 - `data/settings/LinkedProfiles.kt`, `data/settings/LinkedProfilePaths.kt`, `data/settings/LinkedProfileValues.kt`, `dialogs/tabs/ProfileLink*.kt` — linked profiles: a master, and profiles that keep only what they change
 - `data/settings/BibleAllLayer.kt`, `dialogs/tabs/SongAllLanguages.kt`, `dialogs/tabs/ProfileStyleTarget.kt` — "Applies to": All, or one translation or language with values of its own
 - `dialogs/tabs/PreviewAdjust*.kt`, `dialogs/tabs/LargePreview.kt`, `presenter/PresentedBlock.kt` — adjusting a page from its preview, and the preview across the window
+- `dialogs/tabs/SongElementMove.kt`, `presenter/SongElementMove.kt`, `presenter/BibleBlockShift.kt` — moving one song element, one Bible translation or its reference on its own, and Reset positions
+- `data/settings/ProfileDefaults.kt`, `dialogs/tabs/ProfileLinkCard.kt` — what a profile changes from the defaults, listed beside the preview with Revert
 - `dialogs/tabs/CustomizePane.kt`, `dialogs/tabs/ProfileFormStages.kt`, `dialogs/tabs/PreviewBackgroundLayer.kt`, `dialogs/tabs/Customize*.kt` — the picture beside each page, with the output's real background
 - `data/settings/OutputProfile.kt`, `data/settings/OutputProfileResolution.kt` — the profile, and what an output renders with
 

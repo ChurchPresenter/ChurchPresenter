@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
@@ -55,6 +56,19 @@ internal enum class PreviewBackgroundSurface { BIBLE, SONGS }
 internal val PREVIEW_CHECKER_SQUARE = 14.dp
 
 /**
+ * The preview checkerboard's two greys: mid-tones, whatever the app's theme, so white text and black
+ * text both read against it -- the theme's own light surfaces all but hid white verse text.
+ */
+private val PREVIEW_CHECKER_LIGHT = Color(0xFF8C8C8C)
+private val PREVIEW_CHECKER_DARK = Color(0xFF6B6B6B)
+
+/** The checkerboard [PreviewBackgroundMode.CHECKER] puts in place of a background. */
+@Composable
+internal fun PreviewCheckerboard(modifier: Modifier) {
+    CheckerboardFill(modifier, square = PREVIEW_CHECKER_SQUARE, colors = PREVIEW_CHECKER_LIGHT to PREVIEW_CHECKER_DARK)
+}
+
+/**
  * The background an output on [profile] draws behind [surface], as a still, filling the preview.
  *
  * Drawn from the same chain the presenter walks -- the surface's own config, falling through its
@@ -90,7 +104,7 @@ internal fun BoxScope.PreviewBackgroundLayer(
         val previewWidth = maxWidth
         val checker = mode == PreviewBackgroundMode.CHECKER
         if (checker) {
-            CheckerboardFill(Modifier.fillMaxSize(), square = PREVIEW_CHECKER_SQUARE)
+            PreviewCheckerboard(Modifier.fillMaxSize())
         }
         if (!shown) return@BoxWithConstraints
         val band = backgrounds.resolvedConfigFor(scope)
