@@ -174,20 +174,6 @@ internal fun BibleTranslationSettings.referenceOutlineFor(lowerThird: Boolean): 
  * band and be clipped, and one measured into the sum would shrink the stack for height the half no
  * longer occupies.
  */
-/**
- * [item]'s block moved by its own Shift X / Y -- output pixels at 1080 lines, scaled as its text
- * is -- so one translation of a parallel stack can be nudged without moving the others.
- */
-internal fun Modifier.translationShift(
-    item: BibleTranslationSettings,
-    lowerThird: Boolean,
-    scaleFactor: Float,
-): Modifier {
-    val x = if (lowerThird) item.lowerThirdShiftX else item.shiftX
-    val y = if (lowerThird) item.lowerThirdShiftY else item.shiftY
-    return if (x == 0 && y == 0) this else offset((x * scaleFactor).dp, (y * scaleFactor).dp)
-}
-
 internal fun BibleTranslationSettings.textOffsetFor(lowerThird: Boolean): ElementOffset? =
     if (lowerThird) lowerThirdTextOffset else textOffset
 
@@ -885,6 +871,7 @@ fun BiblePresenter(
                                 text = itemRefText(item, buildRefText(verse, item)),
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
+                                    .referenceShift(item, isLowerThird, scaleFactor)
                                     .reportsBlock(PresentedBlock(PresentedBlock.Kind.REFERENCE, item.fileName))
                                     .backdropRoom(item.referenceBackdropFor(isLowerThird)).then(itemRefPainter.modifier),
                                 outline = item.referenceOutlineFor(isLowerThird),

@@ -51,14 +51,19 @@ internal fun adjustModelFor(
     pane: CustomizePane?,
     draft: AppSettings,
     profile: OutputProfile,
-    element: CustomizeElement?,
+    element: Adjustable<CustomizeElement?>,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     /** The Bible page's translation and where the Songs page's Text rows point, for the preview to pick. */
     translation: Adjustable<Int>,
     songTargets: SongTargets,
 ): AdjustModel? = when (pane) {
-    CustomizePane.BIBLE ->
-        bibleAdjustModel(draft, profile, element ?: CustomizeElement.BIBLE_TEXT, onSettingsChange, translation)
+    CustomizePane.BIBLE -> bibleAdjustModel(
+        draft,
+        profile,
+        Adjustable(element.value ?: CustomizeElement.BIBLE_TEXT, element.onChange),
+        onSettingsChange,
+        translation,
+    )
     CustomizePane.SONGS -> songAdjustModel(draft, profile, songTargets, onSettingsChange)
     else -> null
 }

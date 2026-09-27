@@ -157,6 +157,14 @@ data class BibleTranslationSettings(
     val lowerThirdShiftX: Int = 0,
     val lowerThirdShiftY: Int = 0,
     /**
+     * How far this translation's reference is moved on its own, on top of the block's shift and
+     * wherever its position puts it -- output pixels at 1080 lines, one pair per output.
+     */
+    val referenceShiftX: Int = 0,
+    val referenceShiftY: Int = 0,
+    val lowerThirdReferenceShiftX: Int = 0,
+    val lowerThirdReferenceShiftY: Int = 0,
+    /**
      * The style fields this translation keeps as its own, by name, against the Profiles tab's All
      * layer ([BibleSettings.allTranslationStyle]): an edit under All reaches every translation except
      * at the fields it names. Empty -- every field follows All -- until one is set for it alone.

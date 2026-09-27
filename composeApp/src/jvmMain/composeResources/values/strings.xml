@@ -3400,7 +3400,7 @@
     <string name="profile_stage_zone_background">Zone background</string>
     <string name="profile_shift_language_sub">Moves this language on its own, in output pixels.</string>
     <string name="profile_shift_element_sub">Moves this element from where the layout puts it, in output pixels.</string>
-    <string name="profile_adjust_guide_blocks">Click a block of text to point the rows at it; the blue dot on the picked one moves it on its own. On the Bible page, drag the orange-outlined reference up or down to put it above or after the verse.</string>
+    <string name="profile_adjust_guide_blocks">Click a block of text to point the rows at it; the blue dot on the picked one moves it on its own. On the Bible page, click or drag the orange-outlined reference to move it anywhere on its own.</string>
     <string name="profile_group_show">Show</string>
     <string name="profile_group_lines">Lines</string>
     <string name="profile_group_box">Box</string>

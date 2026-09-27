@@ -28,7 +28,6 @@ import kotlin.math.roundToInt
 
 private val MOVE_DOT = 12.dp
 private const val UNPICKED_ALPHA = 0.55f
-private const val REFERENCE_DRAG_MIN_PX = 8f
 
 /** Where [block] was drawn, in the overlay's own dp, or null while it has not been laid out. */
 internal fun Map<PresentedBlock, Rect>.frameOf(block: PresentedBlock, origin: Offset, density: Float): AdjustFrame? =
@@ -49,10 +48,12 @@ internal fun Map<PresentedBlock, Rect>.frameOf(block: PresentedBlock, origin: Of
 @Composable
 internal fun BlockOutlines(targets: BlockTargets, frames: List<AdjustFrame?>) {
     val semantic = MaterialTheme.semantic
-    // A lone translation or language has nothing to be picked from.
-    if (frames.size > 1) frames.forEachIndexed { index, frame ->
+    // A lone block has nothing to be picked from -- unless the reference is, when the verse is.
+    val referencePicked = targets.reference?.picked == true
+    if (frames.size > 1 || referencePicked) frames.forEachIndexed { index, frame ->
         if (frame == null) return@forEachIndexed
-        val picked = index == targets.selected
+        // With the reference picked, its verse's block is a click away from being picked again.
+        val picked = index == targets.selected && !referencePicked
         Box(
             Modifier
                 .offset(frame.left, frame.top)
@@ -73,16 +74,17 @@ internal fun BlockOutlines(targets: BlockTargets, frames: List<AdjustFrame?>) {
 
 /**
  * The picked block's blue dot at its top left, which moves it on its own, and -- on the Bible page --
- * the reference outlined in orange, dragged up to go above its verse or down to go after it. Drawn
- * over every other handle: both are small and must win where they overlap a larger one.
+ * the reference outlined in orange, which is dragged anywhere on its own. Drawn over every other
+ * handle: both are small and must win where they overlap a larger one.
  */
 @Composable
 internal fun BlockGrips(targets: BlockTargets, frames: List<AdjustFrame?>, reference: AdjustFrame?, scale: Float) {
     val shift = targets.shift
     val pickedFrame = targets.selected?.let { frames.getOrNull(it) }
-    if (shift != null && pickedFrame != null) MoveDot(shift, pickedFrame, scale)
-    val above = targets.referenceAbove
-    if (above != null && reference != null) ReferenceHandle(above, reference, scale)
+    val ref = targets.reference
+    if (ref != null && reference != null) ReferenceHandle(ref, reference, scale)
+    // The block's dot is left off while the reference is picked: the reference is what moves then.
+    if (shift != null && pickedFrame != null && ref?.picked != true) MoveDot(shift, pickedFrame, scale)
 }
 
 /** The picked block's own move, at its top left. */
@@ -101,21 +103,35 @@ private fun MoveDot(shift: Adjustable<Pair<Int, Int>>, frame: AdjustFrame, scale
     )
 }
 
-/** The reference, outlined in orange: dragged up it goes above its verse, dragged down after it. */
+/**
+ * The reference, outlined in orange -- solid while the Text rows point at it. Clicked, it is picked;
+ * dragged, it is picked and moves anywhere on its own, from where its position puts it.
+ */
 @Composable
-private fun ReferenceHandle(above: Adjustable<Boolean>, frame: AdjustFrame, scale: Float) {
+private fun ReferenceHandle(reference: ReferenceTarget, frame: AdjustFrame, scale: Float) {
+    var from by remember { mutableStateOf(reference.shift.value) }
+    val accent = MaterialTheme.semantic.adjustAccent
     Box(
         Modifier
             .offset(frame.left, frame.top)
             .size(frame.width, frame.height)
-            .dashedBorder(MaterialTheme.semantic.adjustAccent, 3.dp)
-            .pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
-            .adjustDrag(scale, onStart = {}, onDrag = {}, onEnd = { total ->
-                when {
-                    total.y < -REFERENCE_DRAG_MIN_PX -> above.onChange(true)
-                    total.y > REFERENCE_DRAG_MIN_PX -> above.onChange(false)
-                }
-            })
+            .then(
+                if (reference.picked) Modifier.border(2.dp, accent, AppShape(4.dp))
+                else Modifier.dashedBorder(accent, 3.dp),
+            )
+            .pointerHoverIcon(PointerIcon(Cursor(Cursor.MOVE_CURSOR)))
+            .clickable { reference.onPick() }
+            .adjustDrag(
+                scale,
+                onStart = {
+                    from = reference.shift.value
+                    if (!reference.picked) reference.onPick()
+                },
+                onDrag = { total ->
+                    val x = (from.first + total.x).roundToInt()
+                    reference.shift.onChange(x to (from.second + total.y).roundToInt())
+                },
+            )
             .testTag(ADJUST_REFERENCE_TAG),
     )
 }

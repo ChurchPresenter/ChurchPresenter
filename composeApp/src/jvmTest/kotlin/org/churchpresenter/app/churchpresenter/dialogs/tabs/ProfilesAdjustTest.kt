@@ -140,15 +140,14 @@ class ProfilesAdjustTest {
     }
 
     @Test
-    fun `the reference is dragged above or after its verse`() = profilesTab(doc()) { get ->
+    fun `the reference is dragged anywhere on its own`() = profilesTab(doc()) { get ->
         bibleAdjusting()
-        dragTag(ADJUST_REFERENCE_TAG, 0f, -30f)
-        assertEquals(Constants.POSITION_ABOVE, get().bible().translationList()[0].referencePosition)
-        dragTag(ADJUST_REFERENCE_TAG, 0f, 30f)
-        assertEquals(Constants.POSITION_BELOW, get().bible().translationList()[0].referencePosition)
-        // A nudge too small to mean either changes nothing.
-        dragTag(ADJUST_REFERENCE_TAG, 0f, 2f)
-        assertEquals(Constants.POSITION_BELOW, get().bible().translationList()[0].referencePosition)
+        val position = get().bible().translationList()[0].referencePosition
+        dragTag(ADJUST_REFERENCE_TAG, 20f, -30f)
+        val moved = get().bible().translationList()[0]
+        assertTrue(moved.referenceShiftX > 0, "x ${moved.referenceShiftX}")
+        assertTrue(moved.referenceShiftY < 0, "y ${moved.referenceShiftY}")
+        assertEquals(position, moved.referencePosition, "moving it is not putting it above or after")
     }
 
     @Test

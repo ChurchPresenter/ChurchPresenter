@@ -163,7 +163,7 @@ internal fun ProfileEditor(
                     onOpenOutputs = { onPageChange(ProfilePage.Outputs) },
                     // The handles act on the page being edited only, never on the picture another shows.
                     adjustModel = adjustModelFor(
-                        pane, resolved, profile, element, onDraftSettingsChange,
+                        pane, resolved, profile, Adjustable(element) { pickedElement = it }, onDraftSettingsChange,
                         Adjustable(translationIndex) { translationIndex = it },
                         songTargets,
                     ),

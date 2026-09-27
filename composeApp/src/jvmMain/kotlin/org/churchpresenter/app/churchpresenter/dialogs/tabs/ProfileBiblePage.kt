@@ -19,6 +19,7 @@ import churchpresenter.composeapp.generated.resources.profile_ref_above
 import churchpresenter.composeapp.generated.resources.profile_ref_after
 import churchpresenter.composeapp.generated.resources.profile_reference
 import churchpresenter.composeapp.generated.resources.profile_shift
+import churchpresenter.composeapp.generated.resources.profile_shift_element_sub
 import churchpresenter.composeapp.generated.resources.profile_shift_sub
 import churchpresenter.composeapp.generated.resources.profile_space_between_translations
 import churchpresenter.composeapp.generated.resources.profile_split_long_verses
@@ -26,6 +27,8 @@ import churchpresenter.composeapp.generated.resources.profile_split_words
 import churchpresenter.composeapp.generated.resources.profile_translation_divider
 import churchpresenter.composeapp.generated.resources.words_suffix
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
+import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MAX
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MIN
@@ -231,7 +234,12 @@ private fun BibleTextGroup(
                         )
                     }
                 },
-                extraAdvanced = { if (edit.picked) ShiftRow(edit) },
+                extraAdvanced = {
+                    when {
+                        edit.styleElement == BibleStyleElement.REFERENCE -> ReferenceShiftRow(edit)
+                        edit.picked -> ShiftRow(edit)
+                    }
+                },
             )
         } }
     }
@@ -264,6 +272,46 @@ private fun ShiftRow(edit: BibleEdit) {
         RowNumberField(
             y,
             { v -> edit.updateEntry { if (lowerThird) it.copy(lowerThirdShiftY = v) else it.copy(shiftY = v) } },
+            SHIFT_RANGE,
+            unit = "Y $px",
+            width = 72.dp,
+            testTag = SHIFT_Y_TAG,
+        )
+    }
+}
+
+/**
+ * MOVE X / Y for the reference: moved on its own, on top of its translation's block -- the picked
+ * translation's, or under All every translation's that has no move of its own.
+ */
+@Composable
+private fun ReferenceShiftRow(edit: BibleEdit) {
+    val lowerThird = edit.lowerThird
+    val (x, y) = edit.shown.referenceShiftFor(lowerThird)
+    val fields = if (lowerThird) {
+        listOf("lowerThirdReferenceShiftX", "lowerThirdReferenceShiftY")
+    } else {
+        listOf("referenceShiftX", "referenceShiftY")
+    }
+    val entryPath = "bibleSettings.translations[${edit.shown.fileName}]"
+    SettingsRow(
+        stringResource(Res.string.profile_shift),
+        sub = stringResource(Res.string.profile_shift_element_sub),
+        advanced = true,
+        paths = if (edit.picked) fields.map { "$entryPath.$it" } else emptyList(),
+    ) {
+        val px = stringResource(Res.string.pixels_short)
+        RowNumberField(
+            x,
+            { v -> edit.updateEntry { it.withReferenceShift(lowerThird, v, y) } },
+            SHIFT_RANGE,
+            unit = "X $px",
+            width = 72.dp,
+            testTag = SHIFT_X_TAG,
+        )
+        RowNumberField(
+            y,
+            { v -> edit.updateEntry { it.withReferenceShift(lowerThird, x, v) } },
             SHIFT_RANGE,
             unit = "Y $px",
             width = 72.dp,
@@ -521,16 +569,18 @@ internal fun bibleOffsetTag(element: BibleStyleElement): String =
 internal fun bibleAdjustModel(
     draft: AppSettings,
     profile: OutputProfile,
-    element: CustomizeElement,
+    /** Which element the Text rows edit, the verse or its reference; the preview can pick the other. */
+    element: Adjustable<CustomizeElement>,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     /** Which translation the Text rows edit, All included; the preview can pick another. */
     translation: Adjustable<Int>,
 ): AdjustModel {
+    val onElementChange = element.onChange
     val edit = BibleEdit(
         draft.bibleSettings,
         profile,
         translation.value,
-        element,
+        element.value,
         profile.isLowerThird,
         onSettingsChange,
     )
@@ -558,19 +608,30 @@ internal fun bibleAdjustModel(
         } else {
             null
         },
-        blocks = bibleBlocks(edit, translation.onChange),
+        blocks = bibleBlocks(edit, translation.onChange, onElementChange),
     )
 }
 
-/** Each translation as a block to pick and move, and the reference to drag above or after its verse. */
-private fun bibleBlocks(edit: BibleEdit, onTranslationChange: (Int) -> Unit): BlockTargets {
-    val reference = edit.shown.elementStyle(BibleStyleElement.REFERENCE, edit.target)
+/**
+ * Each translation this output draws as a block to pick and move, and the picked (or first) one's
+ * reference as a block of its own, moved anywhere -- under All, every translation's reference.
+ */
+private fun bibleBlocks(
+    edit: BibleEdit,
+    onTranslationChange: (Int) -> Unit,
+    onElementChange: (CustomizeElement) -> Unit,
+): BlockTargets {
     val lowerThird = edit.lowerThird
+    val shown = edit.shownPositions.filter { it in edit.stack.indices }
+    val referenceEntry = edit.shown
     return BlockTargets(
         kind = PresentedBlock.Kind.TRANSLATION,
-        keys = edit.stack.map { it.fileName },
-        selected = edit.index.takeIf { edit.picked },
-        onSelect = onTranslationChange,
+        keys = shown.map { edit.stack[it].fileName },
+        selected = shown.indexOf(edit.index).takeIf { edit.picked && it >= 0 },
+        onSelect = { i ->
+            onTranslationChange(shown[i])
+            onElementChange(CustomizeElement.BIBLE_TEXT)
+        },
         shift = if (edit.picked) {
             val entry = edit.shown
             val now = if (lowerThird) entry.lowerThirdShiftX to entry.lowerThirdShiftY else entry.shiftX to entry.shiftY
@@ -585,9 +646,12 @@ private fun bibleBlocks(edit: BibleEdit, onTranslationChange: (Int) -> Unit): Bl
         } else {
             null
         },
-        referenceAbove = Adjustable(reference.position == Constants.POSITION_ABOVE) { above ->
-            val position = if (above) Constants.POSITION_ABOVE else Constants.POSITION_BELOW
-            edit.writeStyle(reference.copy(position = position), BibleStyleElement.REFERENCE)
-        },
+        reference = ReferenceTarget(
+            shift = Adjustable(referenceEntry.referenceShiftFor(lowerThird)) { (x, y) ->
+                edit.updateEntry { it.withReferenceShift(lowerThird, x, y) }
+            },
+            picked = edit.styleElement == BibleStyleElement.REFERENCE,
+            onPick = { onElementChange(CustomizeElement.BIBLE_REFERENCE) },
+        ),
     )
 }
