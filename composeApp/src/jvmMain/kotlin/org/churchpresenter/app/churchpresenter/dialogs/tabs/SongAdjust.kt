@@ -97,7 +97,8 @@ private const val LOWER_THIRD_KEY_SUFFIX = "@LT"
 
 /**
  * Every element the preview may draw, each a block: the title slide's heading and credits under its
- * chip, and otherwise the number, the title and -- per language -- the lyrics and the look-ahead.
+ * chip, and otherwise the number, the title, the section label and -- per language -- the lyrics and
+ * the look-ahead.
  */
 private fun songBlockTargets(
     profile: OutputProfile,
@@ -119,6 +120,7 @@ private fun songBlockTargets(
         listOf(
             SongBlock(SongStyleElement.NUMBER, null, lowerThird, false),
             SongBlock(SongStyleElement.TITLE, languages.first(), lowerThird, false),
+            SongBlock(SongStyleElement.SECTION_LABEL, null, lowerThird, false),
         ) + listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)
             .flatMap { element -> languages.map { SongBlock(element, it, lowerThird, false) } }
     }
@@ -156,6 +158,7 @@ private fun SongStyleElement.customizeElement(): CustomizeElement = when (this) 
     SongStyleElement.TITLE -> CustomizeElement.SONG_TITLE
     SongStyleElement.LOOK_AHEAD -> CustomizeElement.SONG_LOOK_AHEAD
     SongStyleElement.NEXT_SECTION -> CustomizeElement.SONG_NEXT_SECTION
+    SongStyleElement.SECTION_LABEL -> CustomizeElement.SONG_SECTION_LABEL
     SongStyleElement.LYRICS -> CustomizeElement.SONG_LYRICS
     else -> CustomizeElement.SONG_TITLE_SLIDE
 }

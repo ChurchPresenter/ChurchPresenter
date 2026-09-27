@@ -8,6 +8,7 @@ import churchpresenter.composeapp.generated.resources.song_element_look_ahead
 import churchpresenter.composeapp.generated.resources.song_element_lyrics
 import churchpresenter.composeapp.generated.resources.song_element_next_section
 import churchpresenter.composeapp.generated.resources.song_element_number
+import churchpresenter.composeapp.generated.resources.song_element_section_label_short
 import churchpresenter.composeapp.generated.resources.song_element_title
 import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import org.churchpresenter.settings.OutputStyleScope
@@ -32,6 +33,7 @@ internal enum class CustomizeElement {
     SONG_NUMBER,
     SONG_LOOK_AHEAD,
     SONG_NEXT_SECTION,
+    SONG_SECTION_LABEL,
     SONG_TITLE_SLIDE,
     BACKGROUND_DEFAULT,
     BACKGROUND_BIBLE,
@@ -68,6 +70,7 @@ internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = wh
         CustomizeElement.SONG_NUMBER,
         CustomizeElement.SONG_LOOK_AHEAD,
         CustomizeElement.SONG_NEXT_SECTION,
+        CustomizeElement.SONG_SECTION_LABEL,
     )
     CustomizePane.BACKGROUND -> listOf(
         CustomizeElement.BACKGROUND_DEFAULT,
@@ -85,6 +88,8 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.SONG_NUMBER -> stringResource(Res.string.song_element_number)
     CustomizeElement.SONG_LOOK_AHEAD -> stringResource(Res.string.song_element_look_ahead)
     CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.song_element_next_section)
+    // Short, beside Next Section: the Songs strip keeps its six elements on one line.
+    CustomizeElement.SONG_SECTION_LABEL -> stringResource(Res.string.song_element_section_label_short)
     CustomizeElement.SONG_TITLE_SLIDE -> stringResource(Res.string.song_target_title_slide)
     // Named for the surface this output actually writes. Which of the pair that is follows from
     // the output's own shape rather than from anything chosen here -- but the chip still has to

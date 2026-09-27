@@ -15,6 +15,8 @@ internal val SongStyleElement.translationElement: SongTranslationElement?
     get() = when (this) {
         // Neither number changes with the language: the digits are the digits.
         SongStyleElement.NUMBER, SongStyleElement.TITLE_SLIDE_NUMBER -> null
+        // One label over every language's lyrics: the section's name is the song file's header.
+        SongStyleElement.SECTION_LABEL -> null
         SongStyleElement.TITLE -> SongTranslationElement.TITLE
         SongStyleElement.LYRICS -> SongTranslationElement.LYRICS
         SongStyleElement.LOOK_AHEAD -> SongTranslationElement.LOOK_AHEAD

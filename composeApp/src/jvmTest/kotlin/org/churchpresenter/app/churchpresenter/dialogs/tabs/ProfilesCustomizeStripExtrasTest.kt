@@ -2,8 +2,13 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.SongSettings
@@ -41,7 +46,7 @@ class ProfilesCustomizeStripExtrasTest {
     }
 
     @Test
-    fun `switching the section label on reveals its size and colour`() {
+    fun `switching the section label on writes it for this profile`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             assertFalse(get().song().layoutExtras.sectionLabel.enabled, "it ships off")
@@ -49,34 +54,20 @@ class ProfilesCustomizeStripExtrasTest {
             toggleCheckbox("Section label")
 
             assertTrue(get().song().layoutExtras.sectionLabel.enabled)
-            // The size and colour fields come with it; they are asserted by the values they show,
-            // the captions beside them being shared with the typography panel above.
-            assertNumberFieldShows(
-                SongSectionLabel().fontSize,
-                "the section label's size, now that it has one",
-            )
-        }
-    }
-
-    @Test
-    fun `a section label that is off offers nothing to set`() {
-        profilesTab(doc()) { _ ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            // A size for a label nobody draws changes nothing, so the fields go with it.
-            onNodeWithText("Font Size").assertDoesNotExist()
         }
     }
 
     @Test
     fun `the section label's size is written for this profile`() {
-        profilesTab(doc(label = SongSectionLabel(enabled = true, fontSize = 27))) { get ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+        val label = SongSectionLabel(enabled = true, fullScreen = SongCreditStyle(fontType = "", fontSize = 27))
+        profilesTab(doc(label = label)) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
             retypeNumberField(27, 33)
 
-            assertEquals(33, get().song().layoutExtras.sectionLabel.fontSize)
+            assertEquals(33, get().song().layoutExtras.sectionLabel.fullScreen.fontSize)
             assertEquals(
                 27,
-                get().songSettings.layoutExtras.sectionLabel.fontSize,
+                get().songSettings.layoutExtras.sectionLabel.fullScreen.fontSize,
                 "the document's own value stays",
             )
         }
@@ -84,11 +75,82 @@ class ProfilesCustomizeStripExtrasTest {
 
     @Test
     fun `the section label's colour is written for this profile`() {
-        profilesTab(doc(label = SongSectionLabel(enabled = true, color = "#123456"))) { get ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+        val label = SongSectionLabel(enabled = true, fullScreen = SongCreditStyle(fontType = "", color = "#123456"))
+        profilesTab(doc(label = label)) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
             recolor("#123456", "#ABCDEF")
 
-            assertEquals("#ABCDEF", get().song().layoutExtras.sectionLabel.color)
+            assertEquals("#ABCDEF", get().song().layoutExtras.sectionLabel.fullScreen.color)
+        }
+    }
+
+    @Test
+    fun `the section label has a chip of its own, with its switch`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
+            // Two switches, one each on the chip's rows and in Slides; the chip's comes first.
+            val switches = onAllNodes(isToggleable() and hasText("Section label"))
+            assertEquals(2, switches.fetchSemanticsNodes().size)
+            switches[0].performScrollTo().performClick()
+            waitForIdle()
+
+            assertTrue(get().song().layoutExtras.sectionLabel.enabled)
+        }
+    }
+
+    @Test
+    fun `the section label's position is written for the output being edited`() {
+        profilesTab(doc(label = SongSectionLabel(enabled = true))) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
+            segment("Below lyrics").performScrollTo().performClick()
+            waitForIdle()
+
+            val label = get().song().layoutExtras.sectionLabel
+            assertEquals(Constants.BELOW_LYRICS, label.position)
+            assertEquals(Constants.ABOVE_LYRICS, label.lowerThirdPosition, "the band keeps its own")
+        }
+    }
+
+    @Test
+    fun `a band writes the section label's lower third position`() {
+        profilesTab(doc(band, label = SongSectionLabel(enabled = true))) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_SECTION_LABEL)
+            segment("Top").performScrollTo().performClick()
+            waitForIdle()
+
+            val label = get().song().layoutExtras.sectionLabel
+            assertEquals(Constants.ABOVE_VERSE, label.lowerThirdPosition)
+            assertEquals(Constants.ABOVE_LYRICS, label.position, "the full screen keeps its own")
+        }
+    }
+
+    @Test
+    fun `the next section can be held above the lyrics`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
+            segment("Above lyrics").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(Constants.ABOVE_LYRICS, get().song().layoutExtras.nextSectionPosition.fullScreen)
+        }
+    }
+
+    @Test
+    fun `the title can be held above the lyrics`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE)
+            segment("Above lyrics").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(Constants.ABOVE_LYRICS, get().song().titlePosition)
+        }
+    }
+
+    @Test
+    fun `the lyrics have no position of their own`() {
+        profilesTab(doc()) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            onNodeWithText("Above lyrics").assertDoesNotExist()
         }
     }
 

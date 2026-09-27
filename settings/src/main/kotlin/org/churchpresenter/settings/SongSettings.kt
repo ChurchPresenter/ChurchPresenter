@@ -41,7 +41,7 @@ data class SongSettings(
     val titleMinFontSize: Int = 16,
     val titleMaxFontSize: Int = 72,
     /**
-     * Where the title sits relative to the verse: [Constants.ABOVE_VERSE] or [Constants.BELOW_VERSE].
+     * Where the title sits -- one of [SONG_ELEMENT_POSITIONS].
      *
      * This defaulted to [Constants.MIDDLE], which `SongPresenter` draws the title row at neither of
      * -- it renders the row only above or below -- so out of the box the title was configured to
@@ -590,10 +590,10 @@ fun SongSettings.translationStyle(
  * off**: reading it as "above" and leaving it on, as the old dropdown did, put a title on every one
  * of those installs the first time they upgraded.
  *
- * Idempotent: an element already on one of the two rows is left exactly as it is, Show included.
+ * Idempotent: an element already on one of the four places is left exactly as it is, Show included.
  */
 fun SongSettings.migrateElementPositions(): SongSettings {
-    fun drawn(position: String) = position == Constants.ABOVE_VERSE || position == Constants.BELOW_VERSE
+    fun drawn(position: String) = position in SONG_ELEMENT_POSITIONS
     fun position(value: String) = if (drawn(value)) value else Constants.ABOVE_VERSE
     fun display(position: String, value: String) = if (drawn(position)) value else Constants.NONE
     return copy(
@@ -607,3 +607,14 @@ fun SongSettings.migrateElementPositions(): SongSettings {
         showNumberLowerThird = display(songNumberLowerThirdPosition, showNumberLowerThird),
     )
 }
+
+/**
+ * Where a song element can sit, in the order the settings offer them: the content area's top edge,
+ * held against the lyrics above or below, and the bottom edge.
+ */
+val SONG_ELEMENT_POSITIONS: List<String> = listOf(
+    Constants.ABOVE_VERSE,
+    Constants.ABOVE_LYRICS,
+    Constants.BELOW_LYRICS,
+    Constants.BELOW_VERSE,
+)

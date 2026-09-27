@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * The home for a new song setting, whatever it is about -- layout, as the name says, and by now
@@ -18,7 +19,7 @@ import kotlinx.serialization.Serializable
 data class SongLayoutExtras(
     /** Shrinks/repositions the whole lyrics block -- see [ContentRegion]. */
     val contentRegion: ContentRegion = ContentRegion(),
-    /** The current section's own label, drawn above the lyrics -- see [SongSectionLabel]. */
+    /** The current section's own label, drawn with the lyrics -- see [SongSectionLabel]. */
     val sectionLabel: SongSectionLabel = SongSectionLabel(),
     /** Fine X/Y nudge on top of [SongSettings.songNumberCorner], for the full-screen output. */
     val numberOffset: SongNumberOffset = SongNumberOffset(),
@@ -69,7 +70,24 @@ data class SongLayoutExtras(
      * Profiles preview, on top of wherever the layout and the element's own position put it.
      */
     val elementShifts: Map<String, SongElementShift> = emptyMap(),
+    /**
+     * Where the next-section lines sit, per output. They have always been drawn under each
+     * language's lyrics, which is the default; [SongSettings] has no slot left for a flat field.
+     */
+    val nextSectionPosition: SongElementPosition = SongElementPosition(),
 )
+
+/** Where one song element sits on each output -- each one of [SONG_ELEMENT_POSITIONS]. */
+@Serializable
+data class SongElementPosition(
+    val fullScreen: String = Constants.BELOW_LYRICS,
+    val lowerThird: String = Constants.BELOW_LYRICS,
+) {
+    fun positionFor(lowerThird: Boolean): String = if (lowerThird) this.lowerThird else fullScreen
+
+    fun withPosition(lowerThird: Boolean, position: String): SongElementPosition =
+        if (lowerThird) copy(lowerThird = position) else copy(fullScreen = position)
+}
 
 /**
  * The All look of a song's languages, stored only where it has to be.

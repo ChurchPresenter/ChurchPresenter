@@ -135,6 +135,7 @@ class SettingsManager {
         14 to ::migrateStylingIntoProfiles,
         15 to ::migrateScaleModesIntoProfiles,
         16 to ::migrateTitleSlideNumberStyle,
+        18 to ::migrateSectionLabelStyle,
     )
 
     /** The flat song-number field each [SongCreditStyle] property of the title slide's is seeded from. */
@@ -170,15 +171,22 @@ class SettingsManager {
      * their defaults mean "in the flow with the title", which is where the title slide's number has
      * always been.
      */
-    private fun migrateTitleSlideNumberStyle(raw: String): String {
+    private fun migrateTitleSlideNumberStyle(raw: String): String = mapEverySongSettings(raw, ::seedTitleSlideNumber)
+
+    /**
+     * [transform] applied to the document's `songSettings` and to every profile's own copy of it --
+     * a profile carries a whole `SongSettings`, so a song step that rewrites only the document leaves
+     * every customised output behind.
+     */
+    private fun mapEverySongSettings(raw: String, transform: (JsonObject) -> JsonObject): String {
         val root = parseSettingsRoot(raw) ?: return raw
-        val seeded = root["songSettings"]?.jsonObject?.let { seedTitleSlideNumber(it) }
+        val seeded = root["songSettings"]?.jsonObject?.let(transform)
         val projection = root["projectionSettings"]?.jsonObject
         val profiles = projection?.get("outputProfiles")?.jsonArray
         val newProfiles = profiles?.map { element ->
             val profile = element as? JsonObject ?: return@map element
             val song = profile["songSettings"]?.jsonObject ?: return@map element
-            JsonObject(profile + ("songSettings" to seedTitleSlideNumber(song)))
+            JsonObject(profile + ("songSettings" to transform(song)))
         }
         var updated = root
         if (seeded != null) updated = JsonObject(updated + ("songSettings" to seeded))
@@ -188,6 +196,38 @@ class SettingsManager {
         }
         return updated.toString()
     }
+
+    /**
+     * Schema version 18. The section label is a song element with a whole style per output, where it
+     * had a few flat fields shared by both, and an X/Y offset that its drag move replaces.
+     *
+     * The flat fields become the full-screen style and are copied to the lower third, which drew with
+     * the same ones, so no label changes look. The offset is dropped: a label held on the lyrics has
+     * no absolute place for it to mean, and the one the operator set floated the label off them.
+     */
+    private fun migrateSectionLabelStyle(raw: String): String = mapEverySongSettings(raw) { song ->
+        val extras = song["layoutExtras"]?.jsonObject ?: return@mapEverySongSettings song
+        val label = extras["sectionLabel"]?.jsonObject ?: return@mapEverySongSettings song
+        // Written by a build that already has this: keep what it stored.
+        if (label["fullScreen"] != null) return@mapEverySongSettings song
+        // The old record's own defaults, for a document that left them out: the record they now
+        // land in defaults to the credits' face and size, which the label never drew with.
+        val oldDefaults = mapOf(
+            "fontType" to JsonPrimitive(""),
+            "fontSize" to JsonPrimitive(SongSectionLabel.DEFAULT_FONT_SIZE),
+        )
+        val style = JsonObject(oldDefaults + label.filterKeys { it in sectionLabelStyleFields })
+        val migrated = JsonObject(
+            label.filterKeys { it !in sectionLabelStyleFields && it != "offset" } +
+                mapOf("fullScreen" to style, "lowerThird" to style),
+        )
+        JsonObject(song + ("layoutExtras" to JsonObject(extras + ("sectionLabel" to migrated))))
+    }
+
+    /** The flat fields version 18 folds into the label's per-output [SongCreditStyle]; same names there. */
+    private val sectionLabelStyleFields = setOf(
+        "fontSize", "color", "bold", "italic", "underline", "shadow", "outline", "fontType", "horizontalAlignment",
+    )
 
     /** One `songSettings` object with `layoutExtras.titleSlideNumber` filled in from its flat fields. */
     private fun seedTitleSlideNumber(song: JsonObject): JsonObject {

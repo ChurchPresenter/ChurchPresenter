@@ -1015,6 +1015,8 @@
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
     <string name="song_element_next_section">Next Section</string>
+    <string name="song_element_section_label">Section Label</string>
+    <string name="song_element_section_label_short">Label</string>
     <string name="song_element_author">Author</string>
     <string name="song_element_composer">Composer</string>
     <string name="song_element_ccli">CCLI</string>
@@ -3329,9 +3331,13 @@
     <string name="profile_end_marker">End-of-song marker</string>
     <string name="profile_end_marker_spacing">lines</string>
     <string name="profile_section_label">Section label</string>
-    <string name="profile_section_label_sub">Shows Verse 1, Chorus and so on above the lyrics.</string>
+    <string name="profile_section_label_sub">Shows Verse 1, Chorus and so on with the lyrics.</string>
     <string name="profile_slide_element">Element</string>
     <string name="profile_song_position">Position</string>
+    <string name="profile_position_top">Top</string>
+    <string name="profile_position_above_lyrics">Above lyrics</string>
+    <string name="profile_position_below_lyrics">Below lyrics</string>
+    <string name="profile_position_bottom">Bottom</string>
     <string name="profile_group_look">Look</string>
     <string name="profile_live_on">Live on %1$s. Changes show there right away.</string>
     <string name="profile_live_none">Not shown on any output yet.</string>
