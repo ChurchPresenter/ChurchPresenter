@@ -33,6 +33,8 @@ import churchpresenter.composeapp.generated.resources.profile_adjust_guide_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_blocks
 import churchpresenter.composeapp.generated.resources.profile_page_title
 import churchpresenter.composeapp.generated.resources.profile_preview_larger
+import churchpresenter.composeapp.generated.resources.profile_reset_positions
+import churchpresenter.composeapp.generated.resources.profile_reset_positions_sub
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
@@ -117,6 +119,7 @@ internal fun EditorPreview(
                 adjustModel.band != null,
                 adjustModel.hasBlocks,
             )
+            adjustModel?.positions?.let { ResetPositionsKey(it) }
         },
         contextCard = contextCard,
     ) }
@@ -192,6 +195,32 @@ internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: B
     }
 }
 
+/**
+ * Reset positions: everything on the page moved on its own -- a translation, a reference, a song
+ * element -- put back where the layout puts it, on this output. Always under the preview, so an
+ * element dragged out of sight, with its handle, can still be brought back.
+ */
+@Composable
+private fun ResetPositionsKey(positions: PositionsReset) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        KeyButton(
+            onClick = positions.onReset,
+            enabled = positions.moved,
+            modifier = Modifier.height(30.dp).testTag(RESET_POSITIONS_TAG),
+            contentPadding = PaddingValues(horizontal = 10.dp),
+        ) {
+            Text(stringResource(Res.string.profile_reset_positions), fontSize = 12.sp)
+        }
+        Text(
+            stringResource(Res.string.profile_reset_positions_sub),
+            fontSize = 11.sp,
+            lineHeight = 15.sp,
+            color = profilesPalette().faintText,
+        )
+    }
+}
+
 /** Test handles for Larger and the Adjust switch. */
 internal const val PREVIEW_LARGER_TAG = "profile_preview_larger"
 internal const val ADJUST_SWITCH_TAG = "profile_adjust_switch"
+internal const val RESET_POSITIONS_TAG = "profile_reset_positions"

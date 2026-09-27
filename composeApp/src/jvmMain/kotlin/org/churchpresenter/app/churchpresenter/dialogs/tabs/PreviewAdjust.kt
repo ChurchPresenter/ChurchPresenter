@@ -25,6 +25,8 @@ internal class AdjustModel(
     val band: Adjustable<Int>?,
     /** The translations or languages drawn as blocks of their own, to pick and move one; null where there are none. */
     val blocks: BlockTargets? = null,
+    /** Every element moved on its own put back where the layout puts it; null where nothing moves. */
+    val positions: PositionsReset? = null,
 ) {
     /** More than one block to pick from, or a reference to drag. */
     val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.reference != null)
@@ -57,6 +59,9 @@ internal class ReferenceTarget(
     val picked: Boolean,
     val onPick: () -> Unit,
 )
+
+/** Reset positions under the preview: [moved] while anything on this output has been moved on its own. */
+internal class PositionsReset(val moved: Boolean, val onReset: () -> Unit)
 
 /** One value a handle changes, and how to write it. */
 internal class Adjustable<T>(val value: T, val onChange: (T) -> Unit)

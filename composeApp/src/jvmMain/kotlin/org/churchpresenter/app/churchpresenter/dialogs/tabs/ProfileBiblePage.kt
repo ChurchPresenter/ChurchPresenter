@@ -27,7 +27,9 @@ import churchpresenter.composeapp.generated.resources.profile_split_words
 import churchpresenter.composeapp.generated.resources.profile_translation_divider
 import churchpresenter.composeapp.generated.resources.words_suffix
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.app.churchpresenter.presenter.movedOn
 import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
+import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
 import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MAX
@@ -633,6 +635,20 @@ internal fun bibleAdjustModel(
             null
         },
         blocks = bibleBlocks(edit, translation.onChange, onElementChange),
+        positions = PositionsReset(
+            moved = (bs.translations + listOfNotNull(bs.allTranslationStyle)).any { it.movedOn(edit.lowerThird) },
+        ) {
+            val lowerThird = edit.lowerThird
+            onSettingsChange { s ->
+                val bible = s.bibleSettings
+                s.copy(
+                    bibleSettings = bible.copy(
+                        translations = bible.translations.map { it.withMovesCleared(lowerThird) },
+                        allTranslationStyle = bible.allTranslationStyle?.withMovesCleared(lowerThird),
+                    ),
+                )
+            }
+        },
     )
 }
 

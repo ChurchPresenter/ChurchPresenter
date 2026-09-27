@@ -3386,6 +3386,8 @@
     <string name="profile_shift">Move X / Y</string>
     <string name="profile_shift_sub">Moves this translation on its own, in output pixels.</string>
     <string name="profile_adjust">Adjust on preview</string>
+    <string name="profile_reset_positions">Reset positions</string>
+    <string name="profile_reset_positions_sub">Puts everything moved on its own back where the layout puts it.</string>
     <string name="profile_adjust_guide">Drag the blue bars to set the margins, and the circle to move the text — release it near an orange line to snap to top, middle or bottom. The white dots set the width, and the orange corner sizes the text the rows are pointed at.</string>
     <string name="profile_adjust_guide_band">Drag the orange bar to set the band height, the blue bars to set the margins, and the orange corner to size the text the rows are pointed at.</string>
     <string name="profile_adjust_band">Band %1$d%</string>

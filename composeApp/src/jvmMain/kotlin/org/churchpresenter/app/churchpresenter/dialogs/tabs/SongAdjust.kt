@@ -81,8 +81,19 @@ internal fun songAdjustModel(
             null
         },
         blocks = songBlockTargets(profile, targets, edit, update),
+        positions = PositionsReset(moved = song.layoutExtras.elementShifts.keys.any { it.onOutput(lowerThird) }) {
+            update { s ->
+                val shifts = s.layoutExtras.elementShifts.filterKeys { !it.onOutput(lowerThird) }
+                s.copy(layoutExtras = s.layoutExtras.copy(elementShifts = shifts))
+            }
+        },
     )
 }
+
+/** Whether the move stored under this key is on [lowerThird]'s output -- see `songElementShiftKey`. */
+private fun String.onOutput(lowerThird: Boolean): Boolean = endsWith(LOWER_THIRD_KEY_SUFFIX) == lowerThird
+
+private const val LOWER_THIRD_KEY_SUFFIX = "@LT"
 
 /**
  * Every element the preview may draw, each a block: the title slide's heading and credits under its
