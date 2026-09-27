@@ -124,6 +124,7 @@ internal fun LargePreview(
                     adjustModel.band != null,
                     adjustModel.hasBlocks,
                 )
+                adjustModel?.positions?.let { ResetPositionsKey(it) }
             }
             BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 val output = OutputSize(profile.previewWidth, profile.previewHeight)

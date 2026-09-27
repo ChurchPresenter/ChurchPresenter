@@ -201,7 +201,7 @@ internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: B
  * element dragged out of sight, with its handle, can still be brought back.
  */
 @Composable
-private fun ResetPositionsKey(positions: PositionsReset) {
+internal fun ResetPositionsKey(positions: PositionsReset) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         KeyButton(
             onClick = positions.onReset,

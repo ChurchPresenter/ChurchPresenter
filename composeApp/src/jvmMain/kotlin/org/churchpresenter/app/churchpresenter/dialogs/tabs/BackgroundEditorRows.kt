@@ -76,6 +76,7 @@ internal fun BackgroundSurfaceRows(
                 // the presenters gate the gradient on that flag rather than on the type.
                 onConfig(config.copy(backgroundType = v, gradientEnabled = v == Constants.BACKGROUND_GRADIENT))
             },
+            compact = true,
         )
     }
     SurfaceSourceRows(scope, settings, config, onConfig, onSettingsChange)
@@ -206,6 +207,7 @@ private fun AboveBandRows(
             options = scope.aboveBandTypeOptions().map { RowOption(it, stringResource(backgroundTypeWord(it))) },
             selected = config.aboveBandType,
             onSelect = { v -> onConfig(config.copy(aboveBandType = v)) },
+            compact = true,
         )
     }
     if (config.aboveBandType == Constants.BACKGROUND_COLOR) {
