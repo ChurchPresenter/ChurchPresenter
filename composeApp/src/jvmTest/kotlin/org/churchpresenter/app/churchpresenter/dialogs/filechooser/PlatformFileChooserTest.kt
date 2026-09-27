@@ -1021,7 +1021,7 @@ class PlatformFileChooserTest {
         val settings = FileKitFileChooser.dialogSettings("Open Schedule")
 
         assertEquals("Open Schedule", settings.title)
-        assertNull(settings.parentWindow, "headless there is no window to own it")
+        assertNull(settings.parent, "headless there is no window to own it")
     }
 
     @Test
