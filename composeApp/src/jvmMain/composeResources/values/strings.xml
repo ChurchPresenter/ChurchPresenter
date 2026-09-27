@@ -3464,8 +3464,75 @@
     <string name="service_folders_error">Could not create folders. Check the selected location and write permissions. Some folders may already have been created; you can safely try again.</string>
     <string name="service_folders_picker_error">Could not open the folder chooser. Please try again.</string>
     <string name="updater_setup_repository">Connect content repository</string>
+    <string name="updater_help">Help</string>
+    <string name="updater_help_question">What would you like to know?</string>
+    <string name="updater_help_what">What is this?</string>
+    <string name="updater_help_what_text">This is a tool for versioning files and preparing services together. After connecting a repository, ChurchPresenter keeps a copy on your device. When you synchronize changes, copies of Bible and song modules, service plans, presentations, and media files are saved to GitHub and become available to your team on other devices.</string>
+    <string name="updater_help_why">Why use it?</string>
+    <string name="updater_help_why_text">Git helps a team prepare a service in advance across different devices and then synchronize materials through a shared repository. Shared Bible and songbook modules stay in one place, while each service’s materials are kept separately. This avoids copying and setting up the same shared content for every service.</string>
+    <string name="updater_help_how">How do I use it?</string>
+    <string name="updater_help_how_intro">We recommend organizing your repository like this:</string>
+    <string name="updater_help_how_tree">church-content/
+├── Bibles/
+│   ├── Bible Module 1/
+│   └── Bible Module 2/
+├── Songs/
+│   ├── Songbook 1/
+│   │   ├── Song 1
+│   │   ├── Song 2
+│   │   └── …
+│   └── Songbook 2/
+│       ├── Song 1
+│       ├── Song 2
+│       └── …
+└── Services/
+    └── 04.10.2026/
+        ├── Pictures/
+        ├── Media/
+        └── Presentations/</string>
+    <string name="updater_help_how_text">In advance, choose “Plan a service” and enter its date. ChurchPresenter creates the service folders. Place materials in the corresponding folders, create the service plan, and save it as plan.cps. Then choose “Save and synchronize data” and enter a short comment, for example: “Added materials for the 04.10.2026 service.” At church, synchronize the repository, choose “Load a planned service,” and select the service folder. ChurchPresenter connects the materials and loads the plan.</string>
     <string name="updater_choose_location">Choose where to store the clone</string>
     <string name="updater_disconnect_repository">Disconnect repository (keep files)</string>
+    <string name="updater_repository_missing">Repository folder not found</string>
+    <string name="updater_choose_existing_repository">Choose the repository folder</string>
+    <string name="updater_reconnect_repository">Disconnect and connect a repository again</string>
+    <string name="updater_repository_missing_error">The selected folder is not a Git repository.</string>
+    <string name="updater_settings">Repository and account settings</string>
+    <string name="updater_settings_title">Settings</string>
+    <string name="updater_settings_account">GitHub account: %1$s</string>
+    <string name="updater_settings_signout">Sign out of GitHub and disconnect repository</string>
+    <string name="updater_settings_disconnect_confirm">Are you sure you want to disconnect this repository? The cloned files will remain on this device.</string>
+    <string name="updater_settings_signout_confirm">Are you sure you want to remove saved GitHub credentials and disconnect the repository? The clone will remain on this device. This does not sign you out of GitHub in your browser.</string>
+    <string name="updater_progress_signout">Signing out of GitHub…</string>
+    <string name="updater_operation_failed">Operation failed.</string>
+    <string name="updater_no_repositories">GitHub did not return any repositories for this account.</string>
+    <string name="updater_repository_folder_dialog_title">Repository folder</string>
+    <string name="updater_gcm_required">Git Credential Manager is required for GitHub sign-in. Install and configure it for Git, then try again.</string>
+    <string name="updater_signout_credentials_warning">The repository was disconnected, but Git could not confirm removal of saved credentials. Sign out of GitHub in your browser or remove its saved credentials from your system keychain.</string>
+    <string name="updater_progress_choose_location">Choose a folder for the repository…</string>
+    <string name="updater_progress_github">Connecting to GitHub…</string>
+    <string name="updater_progress_repositories">Loading your repositories…</string>
+    <string name="updater_progress_branches">Loading branches…</string>
+    <string name="updater_progress_clone">Cloning repository…</string>
+    <string name="updater_progress_status">Checking repository status…</string>
+    <string name="updater_progress_create">Creating service folders…</string>
+    <string name="updater_progress_save">Saving changes and synchronizing…</string>
+    <string name="updater_progress_sync">Synchronizing repository…</string>
+    <string name="updater_progress_conflict">Applying conflict choice…</string>
+    <string name="updater_progress_load">Connecting folders and loading schedule…</string>
+    <string name="updater_plan_result_title">Service folders are ready</string>
+    <string name="updater_plan_result_directory">Service folder: %1$s</string>
+    <string name="updater_plan_result_plan">Save the ChurchPresenter schedule as: %1$s</string>
+    <string name="updater_plan_result_pictures">Pictures: %1$s</string>
+    <string name="updater_plan_result_presentations">Presentations: %1$s</string>
+    <string name="updater_plan_result_media">Media: %1$s</string>
+    <string name="updater_plan_result_next">Add materials in ChurchPresenter, then save the schedule to the plan path above. The new folders are now local repository changes.</string>
+    <string name="updater_loaded_result_title">Service loaded</string>
+    <string name="updater_loaded_result_directory">Connected service folder: %1$s</string>
+    <string name="updater_loaded_result_plan">Loaded schedule: %1$s</string>
+    <string name="updater_loaded_result_next">The service folders are now connected to ChurchPresenter.</string>
+    <string name="updater_load_failed">ChurchPresenter could not load the selected schedule file.</string>
+    <string name="updater_continue">Continue</string>
     <string name="updater_choose_action">What would you like to do?</string>
     <string name="updater_plan_service">Plan a service</string>
     <string name="updater_load_service">Load a planned service</string>
@@ -3509,6 +3576,7 @@
     <string name="updater_sign_in">Sign in</string>
     <string name="updater_git">GitHub</string>
     <string name="updater_conflict_title">Git conflict</string>
+    <string name="updater_conflict_manual_help">Resolve %1$s in your editor outside ChurchPresenter, save the file, then choose Yes here to mark it resolved.</string>
     <string name="updater_status_line">%1$s: %2$d changed files · local %3$d · remote %4$d</string>
     <string name="updater_status_synced">synchronized</string>
     <string name="updater_status_local">local changes</string>

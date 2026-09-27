@@ -31,7 +31,9 @@ object ServiceFolders {
         require(isValidDate(date))
         val service = root.toAbsolutePath().resolve(date)
         ServiceFolderConstants.MATERIAL_DIRECTORIES.forEach { name ->
-            Files.createDirectories(service.resolve(name))
+            val directory = Files.createDirectories(service.resolve(name))
+            val placeholder = directory.resolve(".gitkeep")
+            if (!Files.exists(placeholder)) Files.createFile(placeholder)
         }
         return service.resolve(ServiceFolderConstants.PLAN_FILE)
     }

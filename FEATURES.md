@@ -183,6 +183,7 @@
 - **Drag-and-drop schedules** — build your whole service from songs, scripture, slides, media, lower thirds, announcements and websites.
 - **Save & reopen services** — store schedules as files and pick up exactly where you left off, with autosave and crash recovery.
 - **Stay organized** — color-coded labels, per-item notes, quick reordering, recents and full undo/redo.
+- **Shared content repository** — connect a GitHub clone, synchronize Bible/song modules and service materials, create dated service folders, and load a saved service plan.
 
 **Source locations:**
 - `tabs/ScheduleTab.kt` — main UI
@@ -190,6 +191,7 @@
 - `core-models/src/main/kotlin/.../models/schedule/ScheduleItem.kt` (the `:core-models` module)
 - `viewmodel/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`
+- `dialogs/ServiceFoldersWindow.kt`, `data/ContentRepositoryManager.kt`, `data/GitHubApi.kt` — repository connection, synchronization and service-folder flow
 
 ## Projection & Output
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.

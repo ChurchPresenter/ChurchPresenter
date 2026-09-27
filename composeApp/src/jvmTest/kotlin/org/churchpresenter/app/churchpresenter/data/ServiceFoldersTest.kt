@@ -25,6 +25,7 @@ class ServiceFoldersTest {
             assertFalse(Files.exists(plan))
             listOf("Pictures", "Presentations", "Media").forEach {
                 assertTrue(Files.isDirectory(plan.parent.resolve(it)))
+                assertTrue(Files.isRegularFile(plan.parent.resolve(it).resolve(".gitkeep")))
             }
             Files.writeString(plan, "existing plan")
             val picture = plan.parent.resolve("Pictures/photo.png")

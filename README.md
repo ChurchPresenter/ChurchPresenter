@@ -86,7 +86,9 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > **[`presentation-engine/`](./presentation-engine)** — PPTX/PPT/Keynote/PDF parsing, timing and
 > animation, entirely in-JVM. `./gradlew :presentation-engine:test`.
 
-Use **Help → Service folder creator** to prepare materials for a service. Choose your services directory and enter a date in `DD.MM.YYYY` format. The utility creates a dated folder containing `Pictures`, `Presentations`, and `Media`, preserving existing files. It shows where to save `plan.cps`; it does not create a plan or change the application's library settings. No PowerShell installation is required.
+Use **Help → Repository management** to connect a GitHub content repository. Git and Git Credential Manager (GCM) must be installed; GCM opens the browser-based GitHub sign-in supported on macOS, Windows and Linux. Choose where to clone the repository, then select its repository and branch. ChurchPresenter points its Bible and song libraries to the clone's `Bibles` and `Songs` folders.
+
+Choose **Plan a service** and enter a date to create `Services/<date>/Pictures`, `Media` and `Presentations`. ChurchPresenter points its corresponding media libraries to these folders and shows where to save the schedule as `plan.cps`—it does not create the schedule file. After adding the service materials and schedule, choose **Save and synchronize data**, enter a commit message, and ChurchPresenter commits and pushes the repository changes. At the church computer, synchronize the repository and choose **Load a planned service** to connect its folders and open `plan.cps`.
 
 
 ---

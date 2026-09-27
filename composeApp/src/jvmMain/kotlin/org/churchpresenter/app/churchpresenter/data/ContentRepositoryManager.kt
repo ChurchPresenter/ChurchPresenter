@@ -6,7 +6,7 @@ import java.nio.file.Path
 import java.util.prefs.Preferences
 
 data class RepositoryStatus(
-    val kind: String,
+    val kind: RepositoryState,
     val branch: String,
     val staged: Int,
     val unstaged: Int,
@@ -14,6 +14,8 @@ data class RepositoryStatus(
     val behind: Int,
     val message: String
 )
+
+enum class RepositoryState { SYNCED, LOCAL, REMOTE, BOTH, CONFLICT }
 
 data class ServiceEntry(val date: String, val directory: Path, val plan: Path?)
 data class ConflictEntry(val path: String)
@@ -56,22 +58,28 @@ class ContentRepositoryManager(private val root: Path) {
     }
 
     fun status(): RepositoryStatus {
+        ensureRepository()
+        git("fetch", "--prune", "origin")
+        return readStatus()
+    }
+
+    private fun readStatus(): RepositoryStatus {
         val branch = git("branch", "--show-current", allowFailure = true).ifBlank { "detached" }
         val porcelain = git("status", "--porcelain", allowFailure = true)
         val staged = porcelain.lineSequence().count { it.length >= 2 && it[0] != ' ' }
         val unstaged = porcelain.lineSequence().count { it.length >= 2 && it[1] != ' ' }
-        val counts = git("rev-list", "--left-right", "--count", "HEAD...@{upstream}", allowFailure = true)
+        val counts = git("rev-list", "--left-right", "--count", "HEAD...@{upstream}")
             .split(Regex("\\s+"))
         val ahead = counts.getOrNull(0)?.toIntOrNull() ?: 0
         val behind = counts.getOrNull(1)?.toIntOrNull() ?: 0
         val conflicts = git("diff", "--name-only", "--diff-filter=U", allowFailure = true).lineSequence().count { it.isNotBlank() }
         val kind = when {
-            conflicts > 0 -> "conflict"
-            staged + unstaged > 0 && behind > 0 -> "both"
-            ahead > 0 && behind > 0 -> "both"
-            staged + unstaged > 0 || ahead > 0 -> "local"
-            behind > 0 -> "remote"
-            else -> "synced"
+            conflicts > 0 -> RepositoryState.CONFLICT
+            staged + unstaged > 0 && behind > 0 -> RepositoryState.BOTH
+            ahead > 0 && behind > 0 -> RepositoryState.BOTH
+            staged + unstaged > 0 || ahead > 0 -> RepositoryState.LOCAL
+            behind > 0 -> RepositoryState.REMOTE
+            else -> RepositoryState.SYNCED
         }
         return RepositoryStatus(kind, branch, staged, unstaged, ahead, behind, git("log", "-1", "--pretty=%s", allowFailure = true))
     }
@@ -83,8 +91,10 @@ class ContentRepositoryManager(private val root: Path) {
     }
 
     fun synchronize(commitMessage: String = "chore: sync ChurchPresenter content") {
-        val current = status()
-        if (current.kind == "conflict") error("Resolve the existing merge conflicts first.")
+        ensureRepository()
+        git("fetch", "--prune", "origin")
+        val current = readStatus()
+        if (current.kind == RepositoryState.CONFLICT) error("Resolve the existing merge conflicts first.")
         if (current.staged + current.unstaged > 0) commit(commitMessage)
         if (current.behind > 0) git("merge", "--no-edit", "origin/${current.branch}")
         if (current.ahead > 0 || current.behind > 0) git("push", "origin", "HEAD:${current.branch}")
@@ -98,11 +108,29 @@ class ContentRepositoryManager(private val root: Path) {
         require(path.isNotBlank() && !path.contains("..") && !path.startsWith('/'))
         git("checkout", if (useRemote) "--theirs" else "--ours", "--", path)
         git("add", "--", path)
+        finishConflictMergeIfResolved()
+    }
+
+    fun markConflictResolved(path: String) {
+        require(path.isNotBlank() && !path.contains("..") && !path.startsWith('/'))
+        git("add", "--", path)
+        finishConflictMergeIfResolved()
     }
 
     fun finishConflictMerge() {
         check(conflicts().isEmpty()) { "There are unresolved conflicts." }
         git("commit", "--no-edit")
+    }
+
+    private fun finishConflictMergeIfResolved() {
+        val mergeHead = git("rev-parse", "-q", "--verify", "MERGE_HEAD", allowFailure = true)
+        if (conflicts().isEmpty() && mergeHead.isNotBlank()) finishConflictMerge()
+    }
+
+    private fun ensureRepository() {
+        check(Files.isDirectory(root.resolve(".git")) || Files.isRegularFile(root.resolve(".git"))) {
+            "Repository folder is missing or is not a Git repository: $root"
+        }
     }
 
     fun services(): List<ServiceEntry> = root.resolve("Services").toFile().let { services ->
@@ -146,6 +174,15 @@ class ContentRepositoryManager(private val root: Path) {
             preferences.remove("remote")
             preferences.remove("branch")
             preferences.flush()
+        }
+
+        fun isAvailable(configuration: RepositoryConfiguration): Boolean =
+            Files.isDirectory(configuration.root) &&
+                (Files.isDirectory(configuration.root.resolve(".git")) || Files.isRegularFile(configuration.root.resolve(".git")))
+
+        fun updateSavedRoot(root: Path) {
+            val configuration = requireNotNull(savedConfiguration()) { "No repository is connected." }
+            saveConfiguration(configuration.copy(root = root.toAbsolutePath()))
         }
 
         private fun saveConfiguration(configuration: RepositoryConfiguration) {

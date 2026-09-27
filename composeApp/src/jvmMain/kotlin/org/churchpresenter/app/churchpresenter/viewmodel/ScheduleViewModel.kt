@@ -44,6 +44,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -446,23 +447,27 @@ class ScheduleViewModel(
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
         if (_isFollowingRemote.value) return
-        val file = FileChooser.platformInstance.chooseSingle(
-            path = null,
-            filters = listOf(FileNameExtensionFilter(fileFilterDescription, Constants.EXTENSION_CPS)),
-            title = dialogTitle,
-            selectDirectory = false
-        )
+        val file = withContext(Dispatchers.IO) {
+            FileChooser.platformInstance.chooseSingle(
+                path = null,
+                filters = listOf(FileNameExtensionFilter(fileFilterDescription, Constants.EXTENSION_CPS)),
+                title = dialogTitle,
+                selectDirectory = false
+            )
+        }
         if (file == null || !file.exists()) return
         loadScheduleFile(file)
     }
 
     /** Loads a known schedule path without showing a second file chooser. */
-    suspend fun loadScheduleFile(file: Path) {
-        if (_isFollowingRemote.value || !file.exists()) return
+    suspend fun loadScheduleFile(file: Path): Boolean {
+        if (_isFollowingRemote.value || !file.exists()) return false
         try {
-            val raw = file.readText()
-            val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
-            val (items, notes, timing) = decodeSchedule(jsonText)
+            val (items, notes, timing) = withContext(Dispatchers.IO) {
+                val raw = file.readText()
+                val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
+                decodeSchedule(jsonText)
+            }
             _scheduleItems.clear()
             _scheduleItems.addAll(items)
             _notes.clear()
@@ -477,11 +482,13 @@ class ScheduleViewModel(
             clearAutoSave()
             notifyChanged()
             CrashReporter.breadcrumb("Schedule opened (${file.fileName}, ${items.size} items)", category = "schedule")
+            return true
         } catch (e: CancellationException) {
             // The file dialog this runs behind is cancellable; abandoning it is not a fault.
             throw e
         } catch (e: Exception) {
             CrashReporter.reportException(e, "Opening schedule file")
+            return false
         }
     }
 
