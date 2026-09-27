@@ -76,7 +76,6 @@ import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.songLanguageSelection
-import org.churchpresenter.settings.translationSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualGrid
 import org.churchpresenter.songchords.ChordTransposer
@@ -1228,28 +1227,27 @@ fun SongPresenter(
                     @Composable
                     fun LanguageLines(block: SongLanguageBlock) {
                         if (block.index != 0 || mainChartRows.isEmpty()) {
-                            // A language after the first can be moved on its own (Move X / Y on the
-                            // Profiles tab); left where the layout puts it, nothing is wrapped.
-                            val (shiftX, shiftY) = if (block.index > 0) {
-                                ss.translationSettings(block.index - 1).shiftFor(isLowerThird)
-                            } else {
-                                0 to 0
-                            }
-                            val lines: @Composable () -> Unit = {
-                                block.allLines.forEachIndexed { idx, line ->
-                                    LookAheadSpacer(idx, block.lookAheadStart)
-                                    LyricLine(idx, line, block.lookAheadStart, block.index)
+                            // The lyric lines and the look-ahead lines are two elements, each moved
+                            // on its own (Move X / Y, or a drag on the Profiles preview) and each in
+                            // this language's own block where it has one.
+                            val laStart = block.lookAheadStart
+                            val lyricCount = if (laStart >= 0) laStart else block.allLines.size
+                            Column(Modifier.fillMaxWidth()) {
+                                SongElementLines(ss, lyricsElement, isLowerThird, block.index, scaleFactor) {
+                                    block.allLines.take(lyricCount).forEachIndexed { idx, line ->
+                                        LyricLine(idx, line, laStart, block.index)
+                                    }
                                 }
-                            }
-                            // Wrapped only when it has to be: to move it, or for a preview to find it.
-                            if (shiftX == 0 && shiftY == 0 && LocalPresentedBlocks.current == null) {
-                                lines()
-                            } else {
-                                Column(
-                                    Modifier.fillMaxWidth()
-                                        .offset((shiftX * scaleFactor).dp, (shiftY * scaleFactor).dp)
-                                        .reportsBlock(PresentedBlock(PresentedBlock.Kind.LANGUAGE, block.index.toString())),
-                                ) { lines() }
+                                if (lyricCount < block.allLines.size) {
+                                    val next = SongStyleElement.NEXT_SECTION
+                                    SongElementLines(ss, next, isLowerThird, block.index, scaleFactor) {
+                                        block.allLines.drop(lyricCount).forEachIndexed { offset, line ->
+                                            val idx = lyricCount + offset
+                                            LookAheadSpacer(idx, laStart)
+                                            LyricLine(idx, line, laStart, block.index)
+                                        }
+                                    }
+                                }
                             }
                             return
                         }
@@ -1293,7 +1291,10 @@ fun SongPresenter(
                     ) {
                         val numberPainter = rememberTextBackdropPainter(numberStyleProfile.backdrop)
                         OutlinedText(
-                            modifier = modifier.alpha(visibilityAlpha).then(numberPainter.modifier),
+                            modifier = modifier
+                                .songElementMove(ss, SongStyleElement.NUMBER, isLowerThird, null, scaleFactor)
+                                .alpha(visibilityAlpha)
+                                .then(numberPainter.modifier),
                             outline = keyedOutline(numberStyleProfile.outline),
                             scaleFactor = scaleFactor,
                             fillWidth = fillWidth,
@@ -1351,7 +1352,10 @@ fun SongPresenter(
                     ) {
                         val titlePainter = rememberTextBackdropPainter(titleProfileHere.backdrop)
                         OutlinedText(
-                            modifier = modifier.alpha(visibilityAlpha).then(titlePainter.modifier),
+                            modifier = modifier
+                                .songElementMove(ss, SongStyleElement.TITLE, isLowerThird, titleLanguage, scaleFactor)
+                                .alpha(visibilityAlpha)
+                                .then(titlePainter.modifier),
                             outline = keyedOutline(titleProfileHere.outline),
                             scaleFactor = scaleFactor,
                             fillWidth = fillWidth,

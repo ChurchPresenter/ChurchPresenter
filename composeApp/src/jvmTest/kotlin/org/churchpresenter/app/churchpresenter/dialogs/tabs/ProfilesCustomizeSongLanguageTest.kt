@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.OutputProfile
@@ -48,14 +48,11 @@ class ProfilesCustomizeSongLanguageTest {
 
 
     /**
-     * The pane's own language switch, by position.
-     *
-     * The profile header carries a song-language picker that lists the same "Language N" captions,
-     * so a bare text match finds two nodes. The pane is composed after the header, so the switch is
-     * the last of them.
+     * The pane's own language switch, by its tag: the profile carries a song-language picker that
+     * lists the same "Language N" captions, so a text match cannot tell the two apart.
      */
-    private fun SkikoComposeUiTest.languageSwitch(label: String) =
-        onAllNodesWithText(label).onLast()
+    private fun SkikoComposeUiTest.languageSwitch(language: SongStyleLanguage) =
+        onNodeWithTag(songLanguageTag(language))
 
     /** How many nodes carry [label] -- the header's picker contributes one of them. */
     private fun SkikoComposeUiTest.countOf(label: String) =
@@ -65,9 +62,9 @@ class ProfilesCustomizeSongLanguageTest {
     fun `a bilingual profile offers the language switch on the lyrics`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            // The header's picker names both; the pane's switch names the second, and stands the
-            // first for All, which every language follows.
-            assertEquals(1, countOf("Language 1"))
+            // The header's picker names both, and so does the pane's switch -- the first beside All,
+            // which every language follows, rather than standing for it.
+            assertEquals(2, countOf("Language 1"))
             assertEquals(2, countOf("Language 2"))
         }
     }
@@ -91,7 +88,7 @@ class ProfilesCustomizeSongLanguageTest {
     fun `the switch moves the controls onto the second language's own profile`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            languageSwitch("Language 2").performScrollTo().performClick()
+            languageSwitch(SongStyleLanguage.SECONDARY).performScrollTo().performClick()
             waitForIdle()
 
             val shown = get().shownSize(SongStyleLanguage.SECONDARY)
@@ -106,9 +103,9 @@ class ProfilesCustomizeSongLanguageTest {
     fun `switching back returns the controls to the first language`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            languageSwitch("Language 2").performScrollTo().performClick()
+            languageSwitch(SongStyleLanguage.SECONDARY).performScrollTo().performClick()
             waitForIdle()
-            languageSwitch("Language 1").performScrollTo().performClick()
+            languageSwitch(SongStyleLanguage.PRIMARY).performScrollTo().performClick()
             waitForIdle()
 
             val second = get().shownSize(SongStyleLanguage.SECONDARY)
@@ -128,7 +125,7 @@ class ProfilesCustomizeSongLanguageTest {
     fun `the controls are rebuilt across a language switch rather than reused`() {
         profilesTab(doc()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            languageSwitch("Language 2").performScrollTo().performClick()
+            languageSwitch(SongStyleLanguage.SECONDARY).performScrollTo().performClick()
             waitForIdle()
 
             // The field shows the second language's own size, not the first's carried over.

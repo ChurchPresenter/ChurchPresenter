@@ -82,19 +82,7 @@ data class SongTranslationSettings(
     val lookAheadLowerThird: SongTextStyle = SongTextStyle(),
     val nextSection: SongTextStyle = SongTextStyle(),
     val nextSectionLowerThird: SongTextStyle = SongTextStyle(),
-    /**
-     * How far this language's lines are moved from where the layout puts them, in output pixels at
-     * 1080 lines -- one language of a bilingual slide nudged on its own. One pair per output.
-     */
-    val shiftX: Int = 0,
-    val shiftY: Int = 0,
-    val lowerThirdShiftX: Int = 0,
-    val lowerThirdShiftY: Int = 0,
 ) {
-    /** How far this language is moved on [lowerThird]'s output or the full screen: x to y. */
-    fun shiftFor(lowerThird: Boolean): Pair<Int, Int> =
-        if (lowerThird) lowerThirdShiftX to lowerThirdShiftY else shiftX to shiftY
-
     /** This language's stored profile for [element] on [target]. */
     fun style(element: SongTranslationElement, lowerThird: Boolean): SongTextStyle = when (element) {
         SongTranslationElement.TITLE -> if (lowerThird) titleLowerThird else title

@@ -86,7 +86,7 @@ class ProfileTargetingTest {
             assertEquals(50, get().song().translations[0].lyrics.fontSize)
             assertTrue(onAllNodes(androidx.compose.ui.test.hasText("Only ",
                     substring = true)).fetchSemanticsNodes().isNotEmpty())
-            tap(songLanguageTag(SongStyleLanguage.PRIMARY))
+            tap(SONG_ALL_LANGUAGES_TAG)
             typeInRow("Size", 80)
             assertEquals(80, get().song().lyricsFontSize)
             assertEquals(50, get().song().translations[0].lyrics.fontSize)
@@ -101,9 +101,8 @@ class ProfileTargetingTest {
         tap(songLanguageTag(SongStyleLanguage.SECONDARY))
         typeInRow("Move X / Y", 30, nth = 0)
         typeInRow("Move X / Y", 10, nth = 1)
-        val second = get().song().translations[0]
-        assertEquals(30, second.shiftX)
-        assertEquals(10, second.shiftY)
+        val key = songShiftKey(SongStyleElement.LYRICS, lowerThird = false, language = 1)
+        assertEquals(30 to 10, get().song().shiftAt(key))
     }
 
     @Test

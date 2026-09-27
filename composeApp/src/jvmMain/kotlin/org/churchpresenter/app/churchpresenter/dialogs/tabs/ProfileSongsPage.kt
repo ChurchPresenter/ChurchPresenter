@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -62,9 +61,11 @@ internal fun ProfileSongsPage(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onProfileChange: (OutputProfile) -> Unit,
     onOpenPage: (ProfilePage) -> Unit,
-    /** Which language the Text rows edit -- the first stands for All. Held by the editor, for the preview to pick. */
-    language: SongStyleLanguage,
-    onLanguageChange: (SongStyleLanguage) -> Unit,
+    /**
+     * Where the Text rows point -- the title slide's element and the language, null for All. Held
+     * by the editor, for the preview to pick.
+     */
+    targets: SongTargets,
 ) {
     val lowerThird = profile.isLowerThird
     val song = draft.songSettings
@@ -91,8 +92,7 @@ internal fun ProfileSongsPage(
         updateSong,
         onSettingsChange,
         onProfileChange,
-        language,
-        onLanguageChange,
+        targets,
     )
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
         SettingsGroup(stringResource(Res.string.profile_group_languages), paths = SONG_LAYOUT_PATHS) {
@@ -129,54 +129,56 @@ private fun SongTextGroup(
     updateSong: ((SongSettings) -> SongSettings) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onProfileChange: (OutputProfile) -> Unit,
-    language: SongStyleLanguage,
-    onLanguageChange: (SongStyleLanguage) -> Unit,
+    targets: SongTargets,
 ) {
     val lowerThird = profile.isLowerThird
     val target = if (lowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
     val song = draft.songSettings
     val titleSlideView = element == CustomizeElement.SONG_TITLE_SLIDE
-    var slideElement by remember(profile.id) { mutableStateOf(SongStyleElement.TITLE) }
+    val slideElement = targets.slideElement.value
     val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
     val offered = songLanguagesOffered(profile, styleElement)
-    val perLanguage = offered.size > 1
-    val editingLanguage = language.takeIf { it in offered } ?: offered.first()
+    val perLanguage = offered.isNotEmpty()
+    val editingLanguage = targets.language.value?.takeIf { it in offered }
     val edit = SongEdit(song, styleElement, target, editingLanguage, perLanguage, updateSong)
     val style = edit.style
     val elements = styleElementsFor(CustomizePane.SONGS, profile)
-    val lookPaths = songLookPaths(song, styleElement, target, editingLanguage) + edit.targetPaths()
+    val lookPaths = songLookPaths(song, styleElement, target, editingLanguage ?: SongStyleLanguage.PRIMARY) +
+        edit.targetPaths()
     val allLabel = stringResource(Res.string.content_bible_translations_all)
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
         paths = lookPaths.all,
-        action = ResetAction(style != defaultSongElementStyle(styleElement, target)) {
-            updateSong { it.withElementReset(styleElement, target, editingLanguage) }
-        },
+        action = ResetAction(edit.resettable) { edit.reset() },
         header = {
             AppliesToStrip(
                 targets = if (perLanguage) {
-                    offered.map { RowOption(
-                        it,
-                        if (it.isTranslation) it.nameLabel(song) else allLabel,
-                        songLanguageTag(it),
-                    ) }
+                    listOf(RowOption<SongStyleLanguage?>(null, allLabel, SONG_ALL_LANGUAGES_TAG)) +
+                        offered.map { RowOption<SongStyleLanguage?>(it, it.nameLabel(song), songLanguageTag(it)) }
                 } else {
                     emptyList()
                 },
                 target = editingLanguage,
-                onTarget = onLanguageChange,
+                onTarget = targets.language.onChange,
                 elements = elements.map { RowOption(it, it.label(), elementChipTag(it.name)) },
                 element = element,
                 onElement = onElementChange,
             )
         },
     ) {
-        if (titleSlideView) SlideElementRow(slideElement) { slideElement = it }
+        if (titleSlideView) SlideElementRow(slideElement, targets.slideElement.onChange)
         key(styleElement, editingLanguage) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
             TextLookRows(
                 look = style.toLook(styleElement),
                 onChange = { look -> edit.write(style.withLook(look)) },
-                extraAdvanced = { if (edit.picked) SongShiftRow(edit) },
+                extraAdvanced = {
+                    SongMoveRow(
+                        song = song,
+                        key = songShiftKey(styleElement, lowerThird, editingLanguage?.translation, titleSlideView),
+                        language = editingLanguage != null,
+                        updateSong = updateSong,
+                    )
+                },
                 fonts = rememberSystemFonts(),
                 paths = lookPaths,
                 autoFitScope = if (!titleSlideView && styleElement.hasAutoFit) {
@@ -484,6 +486,9 @@ internal fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (thi
 
 /** Test handle for one language of the Songs strip. */
 internal fun songLanguageTag(language: SongStyleLanguage): String = "profile_song_language_${language.name}"
+
+/** Test handle for All in the Songs strip. */
+internal const val SONG_ALL_LANGUAGES_TAG = "profile_song_language_all"
 
 /** Test handle for the lyrics block's own positioning switch. */
 internal const val LYRICS_OFFSET_TAG = "song_lyrics_offset"

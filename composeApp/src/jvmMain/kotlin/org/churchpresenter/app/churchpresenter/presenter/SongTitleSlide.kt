@@ -202,6 +202,15 @@ internal fun SongTitleSlideContent(
             fallbackFont = fallbackFont,
             isKey = isKey,
             scaleFactor = scaleFactor,
+            // Each line moved on its own too, from where the stack or its position put it.
+            modifier = Modifier.songElementMove(
+                settings,
+                line.element,
+                target.isLowerThird,
+                line.language,
+                scaleFactor,
+                titleSlide = true,
+            ),
             fillWidth = fillWidth,
         )
     }
@@ -230,10 +239,15 @@ internal fun SongTitleSlideContent(
                 fallbackFont = fallbackTitleFont,
                 isKey = isKey,
                 scaleFactor = scaleFactor,
-                modifier = Modifier.songNumberCornerOffset(
-                    numberCorner,
-                    titleSlideNumber.offsetFor(target.isLowerThird),
-                ),
+                modifier = Modifier
+                    .songNumberCornerOffset(numberCorner, titleSlideNumber.offsetFor(target.isLowerThird))
+                    .songElementMove(
+                        settings,
+                        SongStyleElement.TITLE_SLIDE_NUMBER,
+                        target.isLowerThird,
+                        null,
+                        scaleFactor,
+                    ),
                 fillWidth = false,
             )
         }

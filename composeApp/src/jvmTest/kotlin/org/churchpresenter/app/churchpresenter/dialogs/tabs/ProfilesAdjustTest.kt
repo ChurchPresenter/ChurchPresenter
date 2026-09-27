@@ -187,9 +187,11 @@ class ProfilesAdjustTest {
         assertFalse(after.lyricsAlignment == before.lyricsAlignment,
                 "${before.lyricsAlignment} → ${after.lyricsAlignment}")
         assertTrue(after.lyricsFontSize > before.lyricsFontSize)
-        tapAt(adjustBlockTag(1), Offset(160f, 4f))
+        // Blocks run number, title, then each language's lyrics: the second language's is the fourth.
+        tapAt(adjustBlockTag(3), Offset(160f, 4f))
         dragTag(ADJUST_BLOCK_MOVE_TAG, 0f, 10f)
-        assertTrue(get().song().translations.first().shiftY > 0)
+        val key = songShiftKey(SongStyleElement.LYRICS, lowerThird = false, language = 1)
+        assertTrue(get().song().shiftAt(key).second > 0)
     }
 
     @Test
