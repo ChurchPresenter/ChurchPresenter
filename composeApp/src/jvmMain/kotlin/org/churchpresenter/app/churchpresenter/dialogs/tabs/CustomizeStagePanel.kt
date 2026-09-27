@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
+import org.churchpresenter.app.churchpresenter.composables.CheckerboardFill
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
@@ -62,12 +63,12 @@ internal fun CustomizeStagePanel(
         when (pane) {
             CustomizePane.BIBLE -> BibleStage(settings, profile, output, lowerThird, slot, backgroundMode)
             CustomizePane.SONGS -> SongStage(settings, profile, output, lowerThird, slot, element, backgroundMode)
-            CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird)
+            CustomizePane.BACKGROUND -> BackgroundStage(settings, output, element, lowerThird, backgroundMode)
             CustomizePane.CAPTIONS,
             CustomizePane.SUBTITLES,
             CustomizePane.QA,
             CustomizePane.DICTIONARY,
-            -> ProfileFormStage(pane, settings, output)
+            -> ProfileFormStage(pane, settings, output, checker = backgroundMode == PreviewBackgroundMode.CHECKER)
             // The page draws the monitor to scale already; this is the shape of it at a glance.
             CustomizePane.STAGE_MONITOR -> StageLayoutStage(settings.stageMonitorSettings.layout, output)
         }
@@ -185,6 +186,9 @@ private fun SongStage(
  * — and left the wash above the band with nowhere to appear at all. The global Background tab's
  * preview has always split it this way; this is the same split, against this output's own band
  * height rather than the taller of the two.
+ *
+ * [mode] Off leaves the bare plate, and Checker puts the checkerboard where the background would be
+ * -- the whole stage, or the part above a lower third's band -- as it does on the text pages.
  */
 @Composable
 private fun BackgroundStage(
@@ -192,12 +196,19 @@ private fun BackgroundStage(
     output: PreviewOutputSize,
     element: CustomizeElement?,
     lowerThird: Boolean,
+    mode: PreviewBackgroundMode,
 ) {
     val scope = (element ?: CustomizeElement.BACKGROUND_DEFAULT).backgroundScope(lowerThird)
     val config = settings.backgroundSettings.configFor(scope)
+    val checker = mode == PreviewBackgroundMode.CHECKER
     StageFrame(output) {
+        if (mode == PreviewBackgroundMode.OFF) return@StageFrame
         if (!scope.lowerThird) {
-            BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
+            if (checker) {
+                CheckerboardFill(Modifier.fillMaxSize(), square = PREVIEW_CHECKER_SQUARE)
+            } else {
+                BackgroundConfigFill(config, Modifier.fillMaxSize(), stills = true)
+            }
             return@StageFrame
         }
         val band = settings.bandFractionFor(scope)
@@ -207,8 +218,10 @@ private fun BackgroundStage(
                 Modifier
                     .fillMaxWidth()
                     .weight(1f - band)
-                    .then(if (above != null) Modifier.background(above) else Modifier)
-            )
+                    .then(if (above != null && !checker) Modifier.background(above) else Modifier)
+            ) {
+                if (checker) CheckerboardFill(Modifier.fillMaxSize(), square = PREVIEW_CHECKER_SQUARE)
+            }
             // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
             // and without this it spills up over the band line.
             Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {

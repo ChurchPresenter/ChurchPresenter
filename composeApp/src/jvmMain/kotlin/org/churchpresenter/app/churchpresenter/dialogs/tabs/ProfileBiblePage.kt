@@ -63,7 +63,7 @@ internal fun ProfileBiblePage(
     onOpenPage: (ProfilePage) -> Unit,
 ) {
     val lowerThird = profile.isLowerThird
-    val edit = BibleEdit(draft.bibleSettings, translationIndex, element, lowerThird, onSettingsChange)
+    val edit = BibleEdit(draft.bibleSettings, profile, translationIndex, element, lowerThird, onSettingsChange)
     ContentBackgroundGroup(
         scope = if (lowerThird) BackgroundScope.BIBLE_LOWER_THIRD else BackgroundScope.BIBLE,
         contentLabel = stringResource(Res.string.customize_bible),
@@ -88,13 +88,24 @@ internal fun ProfileBiblePage(
  */
 private class BibleEdit(
     val bs: BibleSettings,
+    profile: OutputProfile,
     translationIndex: Int,
     element: CustomizeElement,
     val lowerThird: Boolean,
     private val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     val stack = bs.translationList()
-    val index = effectiveTranslationIndex(translationIndex, stack.size)
+
+    /**
+     * The stack positions this output draws, in its order -- the only translations worth offering
+     * here. The whole stack when it draws none, so the page still has a translation to style.
+     */
+    val shownPositions = shownBiblePositions(profile, stack.size).ifEmpty { stack.indices.toList() }
+
+    /** The translation picked, or All when the pick is one this output no longer draws. */
+    val index = effectiveTranslationIndex(translationIndex, stack.size).let {
+        if (it != ALL_TRANSLATIONS && stack.size > 1 && it !in shownPositions) ALL_TRANSLATIONS else it
+    }
     val all = index == ALL_TRANSLATIONS
     val shown = if (all) bs.allStyle() else stack.getOrNull(index) ?: BibleTranslationSettings()
     val target = if (lowerThird) BibleStyleTarget.LOWER_THIRD else BibleStyleTarget.FULL_SCREEN
@@ -183,7 +194,7 @@ private fun BibleTextGroup(
         },
         header = {
             AppliesToStrip(
-                targets = bibleTargets(edit.stack),
+                targets = bibleTargets(edit.stack, edit.shownPositions),
                 target = edit.index,
                 onTarget = onTranslationChange,
                 elements = listOf(
@@ -362,16 +373,19 @@ private fun BiblePlacementGroups(
     )
 }
 
-/** All, then each translation of the stack as `1 · KJV`, numbered as the Bible tab numbers them. */
+/**
+ * All, then each translation this output draws, in its order -- the rest of the stack is not on
+ * this screen, so there is nothing of theirs to see here. Each keeps its stack position as its value.
+ */
 @Composable
-private fun bibleTargets(stack: List<BibleTranslationSettings>): List<RowOption<Int>> =
+private fun bibleTargets(stack: List<BibleTranslationSettings>, shown: List<Int>): List<RowOption<Int>> =
     listOf(
         RowOption(
             ALL_TRANSLATIONS,
             stringResource(Res.string.content_bible_translations_all),
             translationChipTag(ALL_TRANSLATIONS),
         ),
-    ) + stack.mapIndexed { index, translation ->
+    ) + shown.mapNotNull { index -> stack.getOrNull(index)?.let { index to it } }.map { (index, translation) ->
         val abbreviation = translation.customAbbreviation.ifBlank {
             defaultTranslationAbbreviation(title = "", fileName = translation.fileName)
         }
@@ -512,7 +526,14 @@ internal fun bibleAdjustModel(
     /** Which translation the Text rows edit, All included; the preview can pick another. */
     translation: Adjustable<Int>,
 ): AdjustModel {
-    val edit = BibleEdit(draft.bibleSettings, translation.value, element, profile.isLowerThird, onSettingsChange)
+    val edit = BibleEdit(
+        draft.bibleSettings,
+        profile,
+        translation.value,
+        element,
+        profile.isLowerThird,
+        onSettingsChange,
+    )
     val bs = edit.bs
     val margins = Margins(bs.marginTop, bs.marginBottom, bs.marginLeft, bs.marginRight)
     return AdjustModel(

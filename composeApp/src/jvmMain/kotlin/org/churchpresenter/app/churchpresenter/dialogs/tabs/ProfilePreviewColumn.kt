@@ -99,8 +99,8 @@ internal fun ProfilePreviewColumn(
                 profile = profile,
                 onProfileChange = onProfileFieldChange,
                 shapeState = rememberPreviewShapeState(profile),
-                // Only where there is a background behind the text, and sample text to lengthen.
-                backgroundMode = backgroundMode.takeIf { drawsText },
+                // Only where there is a ground to switch, and sample text to lengthen.
+                backgroundMode = backgroundMode.takeIf { pane.hasPreviewBackground() },
                 onBackgroundModeChange = onBackgroundModeChange,
                 slot = slot.takeIf { drawsText },
                 onSlotChange = onSlotChange,

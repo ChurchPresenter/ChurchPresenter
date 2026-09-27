@@ -113,7 +113,7 @@ internal fun LargePreview(
                     profile = profile,
                     onProfileChange = onProfileChange,
                     shapeState = rememberPreviewShapeState(profile),
-                    backgroundMode = backgroundMode.takeIf { drawsText },
+                    backgroundMode = backgroundMode.takeIf { pane.hasPreviewBackground() },
                     onBackgroundModeChange = onBackgroundModeChange,
                     slot = slot.takeIf { drawsText },
                     onSlotChange = onSlotChange,
