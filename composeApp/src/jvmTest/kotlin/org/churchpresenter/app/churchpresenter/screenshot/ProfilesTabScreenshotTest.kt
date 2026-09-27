@@ -334,13 +334,16 @@ class ProfilesTabScreenshotTest {
         val youth = OutputProfile(
             id = "youth", name = "Youth night", parentId = "main", showQA = false,
             bibleSettings = bible.copy(
-                translations = bible.translations.map { if (it.fileName == "kjv.spb") it.copy(textFontSize = 50) else it },
+                translations = bible.translations.map {
+                    if (it.fileName == "kjv.spb") it.copy(textFontSize = 50) else it
+                },
             ),
             overrides = setOf("bibleSettings.translations[kjv.spb].textFontSize", "showQA"),
         )
         val easter = OutputProfile(id = "easter", name = "Easter", parentId = "main")
         val proj = base.projectionSettings
-        return base.copy(projectionSettings = proj.copy(outputProfiles = proj.outputProfiles + youth + easter).withLinksResolved())
+        val profiles = proj.outputProfiles + youth + easter
+        return base.copy(projectionSettings = proj.copy(outputProfiles = profiles).withLinksResolved())
     }
 
     private fun translation(fileName: String, abbreviation: String, name: String) =
