@@ -28,7 +28,6 @@ import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.output_profile_delete
 import churchpresenter.composeapp.generated.resources.output_profile_duplicate
 import churchpresenter.composeapp.generated.resources.output_profile_scale
-import churchpresenter.composeapp.generated.resources.profile_band_animation
 import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_bg_row
 import churchpresenter.composeapp.generated.resources.profile_content_align
@@ -95,7 +94,7 @@ private val PLACE_ROWS = listOf(
     Res.string.profile_bg_row, Res.string.profile_vertical_alignment, Res.string.profile_margins,
     Res.string.profile_content_width, Res.string.profile_content_align, Res.string.profile_x_offset,
     Res.string.profile_y_offset, Res.string.profile_place_freely, Res.string.profile_band_height,
-    Res.string.profile_band_animation, Res.string.profile_fade_in, Res.string.profile_fade_out,
+    Res.string.profile_fade_in, Res.string.profile_fade_out,
     Res.string.profile_duration, Res.string.profile_crossfade, Res.string.profile_layout,
 )
 

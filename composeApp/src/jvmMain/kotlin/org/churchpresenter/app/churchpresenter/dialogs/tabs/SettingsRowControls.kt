@@ -155,8 +155,11 @@ internal fun segmentWidth(label: String): Dp =
 /**
  * Room around a compact segment's measured label -- the segment's own 4dp padding each side and a
  * few dp so rounding never leaves it a hair short -- and the least it is given.
+ *
+ * Four spare, not eight: the Songs strip's six elements fit one line on Linux's wider text only
+ * with the difference, and a label measured Bold at its own size needs no more than rounding.
  */
-private val COMPACT_PADDING = 16.dp
+private val COMPACT_PADDING = 12.dp
 private val COMPACT_MIN_WIDTH = 32.dp
 
 /**

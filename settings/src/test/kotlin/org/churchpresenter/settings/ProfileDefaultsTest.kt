@@ -72,20 +72,20 @@ class ProfileDefaultsTest {
         val p = profile(
             song = SongSettings(
                 layoutExtras = SongLayoutExtras(
-                    sectionLabel = SongSectionLabel(offset = ElementOffset(xPercent = 56, yPercent = 31)),
+                    lyricsOffset = ElementOffset(xPercent = 56, yPercent = 31),
                 ),
             ),
         )
         val changes = defaultChanges(p)
         assertEquals(
             listOf(
-                "songSettings.layoutExtras.sectionLabel.offset.xPercent",
-                "songSettings.layoutExtras.sectionLabel.offset.yPercent",
+                "songSettings.layoutExtras.lyricsOffset.xPercent",
+                "songSettings.layoutExtras.lyricsOffset.yPercent",
             ),
             changes,
         )
         val reset = p.withDefaultAt(changes.first())
-        assertNull(reset.songSettings.layoutExtras.sectionLabel.offset)
+        assertNull(reset.songSettings.layoutExtras.lyricsOffset)
         assertEquals(emptyList(), defaultChanges(reset))
     }
 

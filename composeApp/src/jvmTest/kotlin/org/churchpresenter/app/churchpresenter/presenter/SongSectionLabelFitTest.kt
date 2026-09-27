@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -55,19 +54,19 @@ class SongSectionLabelFitTest {
     }
 
     @Test
-    fun `a positioned label costs the lyrics nothing, like a cornered number`() {
-        // Out of the flow and over the slide: reserving would shrink the lyrics for height the label
-        // no longer takes from them.
-        val positioned = SongSectionLabel(enabled = true, offset = ElementOffset(yPercent = 50))
-        assertNull(sectionLabelToReserve(positioned, sections("[Verse 1]"), isLowerThird = false))
+    fun `a label at the bottom edge costs the lyrics nothing, like the title there`() {
+        // Drawn over the lyrics' area rather than beside them: reserving would shrink the lyrics for
+        // height the label does not take from them.
+        val bottom = SongSectionLabel(enabled = true, position = Constants.BELOW_VERSE)
+        assertNull(sectionLabelToReserve(bottom, sections("[Verse 1]"), isLowerThird = false))
     }
 
     @Test
-    fun `the band reserves for a label even when one is positioned`() {
-        // Positioning is full screen only -- the band ignores the offset everywhere else too, so it
-        // must not read one here and quietly stop reserving.
-        val positioned = SongSectionLabel(enabled = true, offset = ElementOffset(yPercent = 50))
-        assertEquals("Verse 1", sectionLabelToReserve(positioned, sections("[Verse 1]"), isLowerThird = true))
+    fun `the band reads its own position`() {
+        // The full screen's bottom edge says nothing about the band's, which still holds the label
+        // on the lyrics.
+        val bottom = SongSectionLabel(enabled = true, position = Constants.BELOW_VERSE)
+        assertEquals("Verse 1", sectionLabelToReserve(bottom, sections("[Verse 1]"), isLowerThird = true))
     }
 
     @Test

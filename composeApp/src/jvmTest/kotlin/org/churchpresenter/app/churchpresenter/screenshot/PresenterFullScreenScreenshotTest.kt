@@ -27,7 +27,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.ElementOffset
+import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
@@ -233,20 +233,23 @@ class PresenterFullScreenScreenshotTest {
 
     @Test
     fun `the section label styled and positioned`() = shoot("song_section_label_styled") {
-        // Bold, stroked, left-aligned and moved off the top -- none of which it could do before
+        // Bold, stroked, left-aligned and held under the lyrics -- none of which it could do before
         // #613, when it drew with a hard-coded plain style and sat centred at the top of the column.
         SongPresenter(
             lyricSection = song(),
             appSettings = withSectionLabel(
                 SongSectionLabel(
                     enabled = true,
-                    fontSize = 44,
-                    color = "#FFD54F",
-                    bold = true,
-                    italic = true,
-                    outline = TextOutline(enabled = true, width = 4, color = "#101820"),
-                    horizontalAlignment = Constants.LEFT,
-                    offset = ElementOffset(xPercent = 0, yPercent = 12),
+                    fullScreen = SongCreditStyle(
+                        fontType = "",
+                        fontSize = 44,
+                        color = "#FFD54F",
+                        bold = true,
+                        italic = true,
+                        outline = TextOutline(enabled = true, width = 4, color = "#101820"),
+                        horizontalAlignment = Constants.LEFT,
+                    ),
+                    position = Constants.BELOW_LYRICS,
                 ),
             ),
         )

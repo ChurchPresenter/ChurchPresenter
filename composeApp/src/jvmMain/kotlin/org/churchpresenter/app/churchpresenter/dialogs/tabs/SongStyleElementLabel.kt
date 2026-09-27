@@ -9,6 +9,7 @@ import churchpresenter.composeapp.generated.resources.song_element_look_ahead
 import churchpresenter.composeapp.generated.resources.song_element_lyrics
 import churchpresenter.composeapp.generated.resources.song_element_next_section
 import churchpresenter.composeapp.generated.resources.song_element_number
+import churchpresenter.composeapp.generated.resources.song_element_section_label
 import churchpresenter.composeapp.generated.resources.song_element_tempo
 import churchpresenter.composeapp.generated.resources.song_element_title
 import org.jetbrains.compose.resources.stringResource
@@ -24,6 +25,7 @@ internal fun SongStyleElement.label(): String = stringResource(
         SongStyleElement.LYRICS -> Res.string.song_element_lyrics
         SongStyleElement.LOOK_AHEAD -> Res.string.song_element_look_ahead
         SongStyleElement.NEXT_SECTION -> Res.string.song_element_next_section
+        SongStyleElement.SECTION_LABEL -> Res.string.song_element_section_label
         SongStyleElement.AUTHOR -> Res.string.song_element_author
         SongStyleElement.COMPOSER -> Res.string.song_element_composer
         SongStyleElement.CCLI -> Res.string.song_element_ccli

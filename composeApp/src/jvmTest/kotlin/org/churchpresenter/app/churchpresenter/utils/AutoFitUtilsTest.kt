@@ -218,7 +218,7 @@ class AutoFitUtilsTest {
     }
 
     @Test
-    fun `the end-of-song indicator reserves room on the last section`() {
+    fun `the end-of-song indicator reserves room`() {
         // A box tight enough that the extra indicator line has to cost something.
         val sections = listOf(section("Amazing grace"), section("How sweet the sound"))
         val without = calculateAutoFitForAllSections(measurer, sections, style, 1600, 120)

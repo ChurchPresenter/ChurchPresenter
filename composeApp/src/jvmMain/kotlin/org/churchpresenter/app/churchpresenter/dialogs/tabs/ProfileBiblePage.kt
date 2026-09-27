@@ -408,8 +408,8 @@ private fun BiblePlacementGroups(
     )
     if (edit.lowerThird) {
         BandGroup(
-            prefix = "bibleSettings",
             scope = BackgroundScope.BIBLE_LOWER_THIRD,
+            prefix = "bibleSettings",
             heightPercent = bs.lowerThirdHeightPercent,
             onHeight = { v -> edit.updateBible { it.copy(lowerThirdHeightPercent = v) } },
             draft = draft,

@@ -43,7 +43,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -200,9 +199,6 @@ fun SongPresenter(
     val titleColor = remember(ss.titleColor, ss.titleLowerThirdColor, isLowerThird, isKey) {
         if (isKey) Color.White
         else parseHexColor(if (isLowerThird) ss.titleLowerThirdColor else ss.titleColor)
-    }
-    val sectionLabelColor = remember(ss.layoutExtras.sectionLabel.color, isKey) {
-        if (isKey) Color.White else parseHexColor(ss.layoutExtras.sectionLabel.color)
     }
     val lyricsColor = remember(ss.lyricsColor, ss.lyricsLowerThirdColor,
         ss.lookAheadColor, ss.lowerThirdLookAheadColor, isLowerThird, lookAheadEnabled, isKey) {
@@ -455,14 +451,6 @@ fun SongPresenter(
                 blurRadius = 12f * scaleFactor * mul
             )
         }
-        // The label borrows the title's shadow the way it borrows the title's face: it carries a
-        // switch of its own, not a colour, a size and an opacity of its own. Three more fields to
-        // configure a drop shadow on a two-word tag is not the trade the issue asked for.
-        val sectionLabelShadow = scaleElementShadow(
-            if (isLowerThird) ss.titleLowerThirdShadowColor else ss.titleShadowColor,
-            if (isLowerThird) ss.titleLowerThirdShadowSize else ss.titleShadowSize,
-            if (isLowerThird) ss.titleLowerThirdShadowOpacity else ss.titleShadowOpacity,
-        )
         val titleTextStyleScaled = if (effectiveTitleShadow)
             titleTextStyle.copy(shadow = scaleElementShadow(
                 if (isLowerThird) ss.titleLowerThirdShadowColor else ss.titleShadowColor,
@@ -637,7 +625,8 @@ fun SongPresenter(
                         } else section
                     }
                 } else allLyricSections
-                // Compute reserved height for title/song number above the verse
+                // Compute reserved height for what takes height from the lyrics: everything but the
+                // bottom edge, which is drawn over them.
                 val referenceDensity = Density(1f)
                 val fitTitleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
                 val fitTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
@@ -648,7 +637,7 @@ fun SongPresenter(
                 val fitNumberFontSize = if (isLowerThird) ss.songNumberLowerThirdFontSize else ss.songNumberFontSize
 
                 var reserved = 0
-                if (fitTitleDisplay != Constants.NONE && fitTitlePosition == Constants.ABOVE_VERSE) {
+                if (fitTitleDisplay != Constants.NONE && fitTitlePosition != Constants.BELOW_VERSE) {
                     val titleStyle = TextStyle(fontSize = fitTitleFontSize.sp, fontFamily = titleFontFamily)
                     val longestTitle = allLyricSections.maxOfOrNull { it.title.length }?.let { len ->
                         allLyricSections.first { it.title.length == len }.title
@@ -660,7 +649,7 @@ fun SongPresenter(
                 // A cornered number is drawn over the slide rather than in the row above it, so it
                 // takes no height from the lyrics and reserves none here.
                 if (fitNumberDisplay != Constants.NONE && fitNumberCorner == Constants.NONE &&
-                    fitNumberPosition == Constants.ABOVE_VERSE
+                    fitNumberPosition != Constants.BELOW_VERSE
                 ) {
                     val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
                     val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
@@ -668,20 +657,14 @@ fun SongPresenter(
                         reserved += autoFitTextMeasurer.measure(maxNum.toString(), numStyle, density = referenceDensity).size.height
                     }
                 }
-                // The section label, which sits above the lyrics and takes height from them exactly
-                // as the title row does -- unless it has been positioned, in which case it floats
-                // over the slide and costs them nothing, the same rule as the cornered number.
-                //
-                // This reserved nothing at all until now, so with the label switched on the fit
-                // believed it had one label's height more room than it did and the lyrics could
-                // overflow. Measured with the label's own face and size, which it has had since the
-                // styling landed beside this.
+                // The section label takes height from the lyrics exactly as the title row does,
+                // wherever it sits but the bottom edge -- measured with its own face and size.
                 val fitLabel = ss.layoutExtras.sectionLabel
                 sectionLabelToReserve(fitLabel, allLyricSections, isLowerThird)?.let { longestLabel ->
+                    val labelProfile = ss.elementStyle(SongStyleElement.SECTION_LABEL, songTarget)
                     val labelStyle = TextStyle(
-                        fontSize = fitLabel.fontSize.sp,
-                        fontFamily = fitLabel.fontType.takeIf { it.isNotBlank() }
-                            ?.let { systemFontFamilyOrDefault(it) } ?: titleFontFamily,
+                        fontSize = labelProfile.fontSize.sp,
+                        fontFamily = systemFontFamilyOrDefault(labelProfile.fontType),
                     )
                     reserved += autoFitTextMeasurer
                         .measure(longestLabel, labelStyle, density = referenceDensity).size.height
@@ -722,7 +705,11 @@ fun SongPresenter(
                     availableWidth = refWidth,
                     availableHeight = refHeight,
                     reservedHeight = reserved,
-                    includeEndIndicator = slideFit?.isLast ?: true,
+                    // Every slide, and only while the marker is on: `EndOfSongIndicator` keeps its
+                    // row on every slide, invisible until the last, so the lyrics do not jump when it
+                    // appears. Counting it on the last slide alone -- and whether or not it was on --
+                    // sized that slide smaller than the rest under Each slide (#671).
+                    includeEndIndicator = ss.showEndOfSongIndicator,
                     // Measure what `LyricLine` draws, not the stored line: an uppercase transform
                     // and the word spacing below are both applied at render, and a fit that did not
                     // include them chose a size whose lines then ran off the side of the output.
@@ -903,6 +890,10 @@ fun SongPresenter(
                 // Which corner the number is pinned to, or NONE for the row it shares with the title.
                 val songNumberCorner = if (isLowerThird) ss.songNumberLowerThirdCorner else ss.songNumberCorner
                 val numberInCorner = numberConfigured && songNumberCorner != Constants.NONE
+                // Where the section label and the next-section lines sit: an edge, or held on the lyrics.
+                val sectionLabelProfile = ss.elementStyle(SongStyleElement.SECTION_LABEL, songTarget)
+                val sectionLabelPosition = ss.layoutExtras.sectionLabel.positionFor(isLowerThird)
+                val nextSectionPosition = ss.layoutExtras.nextSectionPosition.positionFor(isLowerThird)
                 // isLowerThirdVertical forces bilingual content to stack (one below the other)
                 // instead of side-by-side — see the useSideBySide gate further below — same
                 // band/geometry as horizontal otherwise.
@@ -1167,9 +1158,18 @@ fun SongPresenter(
                         }
                     }
 
+                    // Something held directly under the lyrics takes the marker's place there, and the
+                    // marker follows it -- otherwise the marker's row, kept on every slide, would sit
+                    // between the lyrics and what was meant to touch them.
+                    val heldBelowLyrics = (sectionLabelPosition == Constants.BELOW_LYRICS &&
+                        sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) != null) ||
+                        (titleConfigured && effectiveTitlePosition == Constants.BELOW_LYRICS) ||
+                        (numberConfigured && !numberInCorner && effectiveSongNumberPosition == Constants.BELOW_LYRICS)
+
+                    /** The marker, in each language's block -- or, with [afterHeld], once under what is held below. */
                     @Composable
-                    fun EndOfSongIndicator() {
-                        if (!ss.showEndOfSongIndicator) return
+                    fun EndOfSongIndicator(afterHeld: Boolean = false) {
+                        if (!ss.showEndOfSongIndicator || heldBelowLyrics != afterHeld) return
                         // Always reserve space so lyrics don't shift when the indicator appears on the last section
                         val visible = section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
                         val indicatorAlpha = if (visible) 1f else 0f
@@ -1191,11 +1191,12 @@ fun SongPresenter(
                         }
                     }
 
-                    // Invisible placeholder to reserve space for missing lookahead on last section
+                    // Invisible placeholder to reserve space for missing lookahead on last section,
+                    // [gapAfter] when it stands above what it is spaced from rather than below.
                     @Composable
-                    fun LookAheadPlaceholder(block: SongLanguageBlock) {
+                    fun NextSectionPlaceholder(block: SongLanguageBlock, gapAfter: Boolean) {
                         if (lookAheadEnabled && block.lookAheadLines.isEmpty() && block.lines.isNotEmpty()) {
-                            if (!laIsLineMode) {
+                            if (!laIsLineMode && !gapAfter) {
                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
                             }
                             val placeholderStyling = languageLaStyling[block.index]
@@ -1213,56 +1214,36 @@ fun SongPresenter(
                                     )
                                 }
                             }
+                            if (!laIsLineMode && gapAfter) {
+                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                            }
                         }
                     }
 
+                    // The placeholder where the next section is drawn under the lyrics, as it always
+                    // was. Held above them, [LanguageLines] draws its own; at an edge, the edge row does.
+                    @Composable
+                    fun LookAheadPlaceholder(block: SongLanguageBlock) {
+                        if (nextSectionPosition == Constants.BELOW_LYRICS) {
+                            NextSectionPlaceholder(block, gapAfter = false)
+                        }
+                    }
+
+                    /** The gap between lyrics and their next section, in this output's own pixels. */
+                    @Composable
+                    fun NextSectionGap() {
+                        if (!laIsLineMode) Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                    }
+
                     /**
-                     * One language's lines — as a chord chart where this output draws one, and as
-                     * plain lines everywhere else.
-                     *
-                     * The chart is the primary's alone: chords are written against the primary's
-                     * words, and a chart drawn over a translation would put them over syllables
-                     * they do not belong to.
+                     * One language's next-section lines, spaced from the lyrics on the side they
+                     * face: before them when drawn below the lyrics, after them when above.
                      */
                     @Composable
-                    fun LanguageLines(block: SongLanguageBlock) {
-                        if (block.index != 0 || mainChartRows.isEmpty()) {
-                            // The lyric lines and the look-ahead lines are two elements, each moved
-                            // on its own (Move X / Y, or a drag on the Profiles preview) and each in
-                            // this language's own block where it has one.
-                            val laStart = block.lookAheadStart
-                            val lyricCount = if (laStart >= 0) laStart else block.allLines.size
-                            Column(Modifier.fillMaxWidth()) {
-                                SongElementLines(ss, lyricsElement, isLowerThird, block.index, scaleFactor) {
-                                    block.allLines.take(lyricCount).forEachIndexed { idx, line ->
-                                        LyricLine(idx, line, laStart, block.index)
-                                    }
-                                }
-                                if (lyricCount < block.allLines.size) {
-                                    val next = SongStyleElement.NEXT_SECTION
-                                    SongElementLines(ss, next, isLowerThird, block.index, scaleFactor) {
-                                        block.allLines.drop(lyricCount).forEachIndexed { offset, line ->
-                                            val idx = lyricCount + offset
-                                            LookAheadSpacer(idx, laStart)
-                                            LyricLine(idx, line, laStart, block.index)
-                                        }
-                                    }
-                                }
-                            }
-                            return
-                        }
-                        SectionChordChart(
-                            lines = mainChartRows,
-                            color = lyricsColor,
-                            chordColor = chordColor,
-                            horizontalAlignment = chartHorizontalAlignment,
-                            maxFontSize = effectiveLyricsFontSize,
-                            scaleFactor = scaleFactor,
-                            fontFamily = lyricsFontFamily,
-                            textStyle = lyricsTextStyleScaled,
-                        )
-                        if (laChartRows.isNotEmpty()) {
-                            if (!laIsLineMode) Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                    fun NextSectionOf(block: SongLanguageBlock, gapAfter: Boolean) {
+                        if (block.index == 0 && mainChartRows.isNotEmpty()) {
+                            if (laChartRows.isEmpty()) return
+                            if (!gapAfter) NextSectionGap()
                             SectionChordChart(
                                 lines = laChartRows,
                                 color = laColor,
@@ -1273,6 +1254,81 @@ fun SongPresenter(
                                 fontFamily = laFontFamily,
                                 textStyle = lookAheadTextStyle,
                             )
+                            if (gapAfter) NextSectionGap()
+                            return
+                        }
+                        val laStart = block.lookAheadStart
+                        if (laStart < 0) {
+                            NextSectionPlaceholder(block, gapAfter)
+                            return
+                        }
+                        val next = SongStyleElement.NEXT_SECTION
+                        Column(Modifier.fillMaxWidth()) {
+                            SongElementLines(ss, next, isLowerThird, block.index, scaleFactor) {
+                                if (!gapAfter) LookAheadSpacer(laStart, laStart)
+                                block.allLines.drop(laStart).forEachIndexed { offset, line ->
+                                    LyricLine(laStart + offset, line, laStart, block.index)
+                                }
+                                if (gapAfter) LookAheadSpacer(laStart, laStart)
+                            }
+                        }
+                    }
+
+                    /**
+                     * One language's lines — as a chord chart where this output draws one, and as
+                     * plain lines everywhere else -- with its next-section lines above or below them
+                     * where they are held on the lyrics. At an edge the edge row draws those.
+                     *
+                     * The chart is the primary's alone: chords are written against the primary's
+                     * words, and a chart drawn over a translation would put them over syllables
+                     * they do not belong to.
+                     */
+                    @Composable
+                    fun LanguageLines(block: SongLanguageBlock) {
+                        // The lyric lines and the look-ahead lines are two elements, each moved on
+                        // its own (Move X / Y, or a drag on the Profiles preview) and each in this
+                        // language's own block where it has one.
+                        Column(Modifier.fillMaxWidth()) {
+                            if (lookAheadEnabled && nextSectionPosition == Constants.ABOVE_LYRICS) {
+                                NextSectionOf(block, gapAfter = true)
+                            }
+                            if (block.index != 0 || mainChartRows.isEmpty()) {
+                                val laStart = block.lookAheadStart
+                                val lyricCount = if (laStart >= 0) laStart else block.allLines.size
+                                SongElementLines(ss, lyricsElement, isLowerThird, block.index, scaleFactor) {
+                                    block.allLines.take(lyricCount).forEachIndexed { idx, line ->
+                                        LyricLine(idx, line, laStart, block.index)
+                                    }
+                                }
+                            } else {
+                                SectionChordChart(
+                                    lines = mainChartRows,
+                                    color = lyricsColor,
+                                    chordColor = chordColor,
+                                    horizontalAlignment = chartHorizontalAlignment,
+                                    maxFontSize = effectiveLyricsFontSize,
+                                    scaleFactor = scaleFactor,
+                                    fontFamily = lyricsFontFamily,
+                                    textStyle = lyricsTextStyleScaled,
+                                )
+                            }
+                            // A block with no next section of its own leaves its placeholder to
+                            // [LookAheadPlaceholder], after the end-of-song marker.
+                            val hasNext = block.lookAheadStart >= 0 || block.index == 0 && mainChartRows.isNotEmpty()
+                            if (nextSectionPosition == Constants.BELOW_LYRICS && hasNext) {
+                                NextSectionOf(block, gapAfter = false)
+                            }
+                        }
+                    }
+
+                    /** Every language's next-section lines, stacked, where they sit at [position]'s edge. */
+                    @Composable
+                    fun NextSectionEdge(position: String) {
+                        if (!lookAheadEnabled || nextSectionPosition != position) return
+                        Column(Modifier.fillMaxWidth()) {
+                            languageBlocks.forEach { block ->
+                                NextSectionOf(block, gapAfter = position == Constants.ABOVE_VERSE)
+                            }
                         }
                     }
 
@@ -1313,33 +1369,32 @@ fun SongPresenter(
                         )
                     }
 
+                    /** The section label, drawn wherever [position] says it sits; nothing elsewhere. */
                     @Composable
-                    fun SectionLabelPart(modifier: Modifier = Modifier, fillWidth: Boolean = true) {
+                    fun SectionLabelPart(position: String) {
+                        if (sectionLabelPosition != position) return
                         val label = sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) ?: return
-                        val labelSettings = ss.layoutExtras.sectionLabel
+                        val profile = sectionLabelProfile
+                        val labelStyling = songLineStyling(profile, null, scaleFactor, isKey, ::scaleElementShadow)
+                        val labelPainter = rememberTextBackdropPainter(profile.backdrop)
                         OutlinedText(
-                            modifier = modifier,
-                            outline = labelSettings.outline,
+                            modifier = Modifier
+                                .songElementMove(ss, SongStyleElement.SECTION_LABEL, isLowerThird, null, scaleFactor)
+                                .then(labelPainter.modifier),
+                            outline = keyedOutline(profile.outline),
                             scaleFactor = scaleFactor,
-                            // Forwarded, not applied here: `OutlinedText` fills the width unless told
-                            // otherwise, and a positioned label laid out that wide left its offset no
-                            // room to move it sideways, so X did nothing (#656).
-                            fillWidth = fillWidth,
-                            textAlign = getTextAlign(labelSettings.horizontalAlignment),
-                            // A blank face keeps the title's, which is all this had before it
-                            // could name one of its own.
-                            fontFamily = labelSettings.fontType.takeIf { it.isNotBlank() }
-                                ?.let { systemFontFamilyOrDefault(it) } ?: titleFontFamily,
-                            fontSize = (labelSettings.fontSize * scaleFactor).sp,
-                            text = label,
-                            color = sectionLabelColor,
-                            style = TextStyle(
-                                fontWeight = if (labelSettings.bold) FontWeight.Bold else FontWeight.Normal,
-                                fontStyle = if (labelSettings.italic) FontStyle.Italic else FontStyle.Normal,
-                                textDecoration = if (labelSettings.underline) TextDecoration.Underline
-                                                 else TextDecoration.None,
-                                shadow = if (labelSettings.shadow) sectionLabelShadow else null,
+                            onTextLayout = labelPainter::onTextLayout,
+                            textAlign = getTextAlign(profile.horizontalAlignment),
+                            fontFamily = labelStyling.fontFamily,
+                            fontSize = labelStyling.fontSize,
+                            text = styledDisplayText(
+                                label,
+                                profile.transform,
+                                spacingEm(profile.letterSpacing, profile.fontSize),
+                                spacingEm(profile.wordSpacing, profile.fontSize),
                             ),
+                            color = labelStyling.color,
+                            style = labelStyling.textStyle,
                         )
                     }
 
@@ -1420,7 +1475,36 @@ fun SongPresenter(
                     // Determine which positions have content for balancing
                     val hasBottomContent = (titleConfigured && effectiveTitlePosition == Constants.BELOW_VERSE) ||
                             (numberConfigured && !numberInCorner &&
-                                    effectiveSongNumberPosition == Constants.BELOW_VERSE)
+                                    effectiveSongNumberPosition == Constants.BELOW_VERSE) ||
+                            sectionLabelPosition == Constants.BELOW_VERSE ||
+                            (lookAheadEnabled && nextSectionPosition == Constants.BELOW_VERSE)
+
+                    /**
+                     * The lyrics with whatever is held on them drawn directly above and below, so
+                     * the alignment and offset that place the lyrics carry those along. [fillHeight]
+                     * where the lyrics share out the whole height between languages.
+                     */
+                    @Composable
+                    fun HeldOnLyrics(fillHeight: Boolean, lyrics: @Composable () -> Unit) {
+                        Column(
+                            Modifier.fillMaxWidth().then(
+                                if (fillHeight) Modifier.fillMaxHeight() else Modifier.wrapContentHeight(),
+                            ),
+                        ) {
+                            SectionLabelPart(Constants.ABOVE_LYRICS)
+                            TitleAndNumberRow(Constants.ABOVE_LYRICS)
+                            Box(
+                                modifier = Modifier.fillMaxWidth()
+                                    .then(if (fillHeight) Modifier.weight(1f) else Modifier),
+                                contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment,
+                            ) {
+                                lyrics()
+                            }
+                            TitleAndNumberRow(Constants.BELOW_LYRICS)
+                            SectionLabelPart(Constants.BELOW_LYRICS)
+                            EndOfSongIndicator(afterHeld = true)
+                        }
+                    }
 
                     // Outer column fills the content area; title/number at edges, lyrics centered.
                     // Every language's two containers go on it -- each paints only the lines that
@@ -1428,25 +1512,14 @@ fun SongPresenter(
                     // modifier and nothing else.
                     val blockContainers = (lyricsBlocks + laBlocks)
                         .fold(Modifier as Modifier) { acc, block -> acc.then(block.containerModifier) }
-                    // Positioned, the label leaves the column and floats in the frame, costing the
-                    // lyrics no height -- the same trade the cornered song number already makes.
-                    // Null, it stays the column's first child, exactly where it has always been,
-                    // and no wrapper Box is added at all: one would fill the content area and
-                    // defeat the alignment the caller set on it.
-                    // Full screen only, the scope `contentRegion` has: the band's layout is
-                    // band-relative throughout and does not offer either control.
-                    val sectionLabelOffset =
-                        if (isLowerThird) null else ss.layoutExtras.sectionLabel.offset
-                    val labelFloats = sectionLabelOffset != null &&
-                        sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) != null
                     val lyricsOffset = if (isLowerThird) null else ss.layoutExtras.lyricsOffset
-                    SongContentFrame(floating = labelFloats, floatingContent = {
-                        SectionLabelPart(modifier = Modifier.elementOffset(sectionLabelOffset), fillWidth = false)
-                    }) {
+                    // Full screen, several languages each given a band of the height.
+                    val stackedBands = isMultiLanguage && !useGrid2x2 && !useSideBySide && !isLowerThird
                     Column(modifier = Modifier.fillMaxSize().then(blockContainers)) {
-                        if (!labelFloats) SectionLabelPart()
-                        // Top section: items positioned "above verse"
+                        // Top edge: the label, then the title and number, then the next section.
+                        SectionLabelPart(Constants.ABOVE_VERSE)
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
+                        NextSectionEdge(Constants.ABOVE_VERSE)
 
                         // Lyrics area + bottom title/number overlaid (z-stacked).
                         // The bottom title/number floats over the lyrics so it doesn't
@@ -1469,6 +1542,7 @@ fun SongPresenter(
                                 },
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
+                                HeldOnLyrics(fillHeight = stackedBands) {
                                 if (isMultiLanguage) {
                                     if (useGrid2x2) {
                                         // Two rows of up to two languages each. `chunked(2)` on
@@ -1564,16 +1638,19 @@ fun SongPresenter(
                                         }
                                     }
                                 }
+                                }
                             }
 
-                            // Bottom title/number overlaid at the bottom of the lyrics area
+                            // Bottom edge, overlaid at the bottom of the lyrics area: the top
+                            // edge's order mirrored.
                             if (hasBottomContent) {
-                                Box(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
+                                Column(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
+                                    NextSectionEdge(Constants.BELOW_VERSE)
                                     TitleAndNumberRow(Constants.BELOW_VERSE)
+                                    SectionLabelPart(Constants.BELOW_VERSE)
                                 }
                             }
                         }
-                    }
                     }
 
                     // The number pinned to a corner, drawn over the slide rather than in the row it

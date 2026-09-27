@@ -8,38 +8,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
 import churchpresenter.composeapp.generated.resources.customize_songs
-import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.middle
-import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.profile_end_marker
 import churchpresenter.composeapp.generated.resources.profile_end_marker_spacing
 import churchpresenter.composeapp.generated.resources.profile_group_languages
 import churchpresenter.composeapp.generated.resources.profile_group_slides
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_layout
-import churchpresenter.composeapp.generated.resources.profile_ref_above
-import churchpresenter.composeapp.generated.resources.profile_ref_after
 import churchpresenter.composeapp.generated.resources.profile_repeat_chorus
 import churchpresenter.composeapp.generated.resources.profile_section_label
 import churchpresenter.composeapp.generated.resources.profile_section_label_sub
+import churchpresenter.composeapp.generated.resources.profile_position_above_lyrics
+import churchpresenter.composeapp.generated.resources.profile_position_below_lyrics
+import churchpresenter.composeapp.generated.resources.profile_position_bottom
+import churchpresenter.composeapp.generated.resources.profile_position_top
 import churchpresenter.composeapp.generated.resources.profile_slide_element
 import churchpresenter.composeapp.generated.resources.profile_song_position
-import churchpresenter.composeapp.generated.resources.profile_text_style
 import churchpresenter.composeapp.generated.resources.profile_title_slide
 import churchpresenter.composeapp.generated.resources.profile_title_slide_sub
 import churchpresenter.composeapp.generated.resources.profile_title_slide_valign
 import churchpresenter.composeapp.generated.resources.profile_word_wrap
 import churchpresenter.composeapp.generated.resources.top
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
-import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -192,20 +188,25 @@ private fun SongTextGroup(
                     null
                 },
                 extraBasic = {
+                    if (styleElement == SongStyleElement.SECTION_LABEL) {
+                        SectionLabelSwitch(song.layoutExtras.sectionLabel.enabled, updateSong)
+                    }
                     // A cornered number is drawn over the slide and never in the row this places.
                     val cornered = styleElement == SongStyleElement.NUMBER &&
                         song.numberCorner(lowerThird) != Constants.NONE
-                    if (styleElement.hasPosition && !titleSlideView && !cornered) {
-                        SettingsRow(stringResource(Res.string.profile_song_position)) {
-                            RowSegmented(
-                                options = listOf(
-                                    RowOption(Constants.ABOVE_VERSE, stringResource(Res.string.profile_ref_above)),
-                                    RowOption(Constants.BELOW_VERSE, stringResource(Res.string.profile_ref_after)),
-                                ),
-                                selected = style.position,
-                                onSelect = { v -> edit.write(style.copy(position = v)) },
-                            )
-                        }
+                    val stored = song.storedPosition(styleElement, lowerThird)
+                    val placed = styleElement.hasPosition || stored != null
+                    if (placed && !titleSlideView && !cornered) {
+                        SongPositionRow(
+                            selected = stored ?: style.position,
+                            onSelect = { v ->
+                                if (stored != null) {
+                                    updateSong { it.withStoredPosition(styleElement, lowerThird, v) }
+                                } else {
+                                    edit.write(style.copy(position = v))
+                                }
+                            },
+                        )
                     }
                 },
             )
@@ -303,8 +304,8 @@ private fun SongPlacementGroups(
 
     if (lowerThird) {
         BandGroup(
-            prefix = "songSettings",
             scope = BackgroundScope.SONG_LOWER_THIRD,
+            prefix = "songSettings",
             heightPercent = song.lowerThirdHeightPercent,
             onHeight = { v -> updateSong { it.copy(lowerThirdHeightPercent = v) } },
             draft = draft,
@@ -408,69 +409,43 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
                 }
             },
         )
-        SectionLabelRows(song.layoutExtras.sectionLabel, lowerThird) { transform ->
-            updateSong { s ->
-                s.copy(layoutExtras = s.layoutExtras.copy(sectionLabel = transform(s.layoutExtras.sectionLabel)))
-            }
-        }
+        SectionLabelSwitch(song.layoutExtras.sectionLabel.enabled, updateSong)
     }
 }
 
 /**
- * The current section's own label ("Verse 1", "Chorus") above the lyrics: on or off, and -- Advanced
- * -- its size, colour, face and placement.
+ * The section label on or off. On the Slides group, where it has always been, and at the top of the
+ * Section Label element's own rows, where its look is.
  */
 @Composable
-private fun SectionLabelRows(
-    label: SongSectionLabel,
-    lowerThird: Boolean,
-    update: ((SongSectionLabel) -> SongSectionLabel) -> Unit,
-) {
+private fun SectionLabelSwitch(enabled: Boolean, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
     SettingsSwitchRow(
         stringResource(Res.string.profile_section_label),
-        label.enabled,
-        { v -> update { it.copy(enabled = v) } },
+        enabled,
+        { v ->
+            updateSong { s ->
+                s.copy(layoutExtras = s.layoutExtras.copy(sectionLabel = s.layoutExtras.sectionLabel.copy(enabled = v)))
+            }
+        },
         sub = stringResource(Res.string.profile_section_label_sub),
         paths = listOf("$SECTION_LABEL_PATH.enabled"),
     )
-    if (!label.enabled) return
-    SettingsRow(
-        stringResource(Res.string.profile_section_label) + " · " + stringResource(Res.string.lyrics),
-        advanced = true,
-        paths = listOf("$SECTION_LABEL_PATH.fontSize", "$SECTION_LABEL_PATH.color"),
-    ) {
-        RowStepper(
-            label.fontSize,
-            { v -> update { it.copy(fontSize = v) } },
-            SongSectionLabel.FONT_SIZE_RANGE,
-            step = 2,
-            unit = stringResource(Res.string.pixels_short),
-        )
-        RowColor(label.color, { v -> update { it.copy(color = v) } })
-    }
-    SettingsRow(
-        stringResource(Res.string.profile_section_label) + " · " + stringResource(Res.string.profile_text_style),
-        advanced = true,
-        paths = listOf("bold", "italic", "underline", "shadow").map { "$SECTION_LABEL_PATH.$it" },
-    ) {
-        TextStyleButtons(
-            bold = label.bold,
-            italic = label.italic,
-            underline = label.underline,
-            shadow = label.shadow,
-            onBoldChange = { v -> update { it.copy(bold = v) } },
-            onItalicChange = { v -> update { it.copy(italic = v) } },
-            onUnderlineChange = { v -> update { it.copy(underline = v) } },
-            onShadowChange = { v -> update { it.copy(shadow = v) } },
-            buttonSize = 26.dp,
-        )
-    }
-    if (!lowerThird) {
-        ElementPlacementRows(
-            offset = label.offset,
-            onChange = { v -> update { it.copy(offset = v) } },
-            tagPrefix = SECTION_LABEL_OFFSET_TAG,
-            paths = listOf("$SECTION_LABEL_PATH.offset"),
+}
+
+/** POSITION: the content area's top edge, held above or below the lyrics, or the bottom edge. */
+@Composable
+private fun SongPositionRow(selected: String, onSelect: (String) -> Unit) {
+    SettingsRow(stringResource(Res.string.profile_song_position)) {
+        RowSegmented(
+            options = listOf(
+                RowOption(Constants.ABOVE_VERSE, stringResource(Res.string.profile_position_top)),
+                RowOption(Constants.ABOVE_LYRICS, stringResource(Res.string.profile_position_above_lyrics)),
+                RowOption(Constants.BELOW_LYRICS, stringResource(Res.string.profile_position_below_lyrics)),
+                RowOption(Constants.BELOW_VERSE, stringResource(Res.string.profile_position_bottom)),
+            ),
+            selected = selected,
+            onSelect = onSelect,
+            compact = true,
         )
     }
 }
@@ -481,6 +456,7 @@ internal fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (thi
     CustomizeElement.SONG_NUMBER -> SongStyleElement.NUMBER
     CustomizeElement.SONG_LOOK_AHEAD -> SongStyleElement.LOOK_AHEAD
     CustomizeElement.SONG_NEXT_SECTION -> SongStyleElement.NEXT_SECTION
+    CustomizeElement.SONG_SECTION_LABEL -> SongStyleElement.SECTION_LABEL
     else -> SongStyleElement.LYRICS
 }
 
@@ -493,20 +469,17 @@ internal const val SONG_ALL_LANGUAGES_TAG = "profile_song_language_all"
 /** Test handle for the lyrics block's own positioning switch. */
 internal const val LYRICS_OFFSET_TAG = "song_lyrics_offset"
 
-/** Test handle for the section label's positioning switch. */
-internal const val SECTION_LABEL_OFFSET_TAG = "song_section_label_offset"
-
 /** Where the languages' layout is stored. */
 private val SONG_LAYOUT_PATHS = listOf("songSettings.bilingualLayout")
 
-/** Where the section label above the lyrics is stored. */
+/** Where the section label is stored. */
 private const val SECTION_LABEL_PATH = "songSettings.layoutExtras.sectionLabel"
 
 /** Everything the Slides group writes. */
 private val SLIDES_PATHS = listOf(
     "songSettings.titleSlideEnabled", "songSettings.titleSlideVerticalAlignment", "songSettings.wordWrap",
     "songSettings.autoRepeatChorus", "songSettings.showEndOfSongIndicator",
-    "songSettings.endOfSongIndicatorSpacing", SECTION_LABEL_PATH,
+    "songSettings.endOfSongIndicatorSpacing", "$SECTION_LABEL_PATH.enabled",
 )
 
 /** Where the Text group's rows store [element]'s look, on a linked profile; none elsewhere. */

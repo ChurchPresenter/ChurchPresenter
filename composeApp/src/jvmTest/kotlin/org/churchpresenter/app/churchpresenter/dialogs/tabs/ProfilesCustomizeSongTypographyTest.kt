@@ -83,10 +83,10 @@ class ProfilesCustomizeSongTypographyTest {
     // ── Above or below the lyrics ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `the title can be moved below the lyrics`() {
+    fun `the title can be moved to the bottom edge`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE)
-            segment("After verse").performScrollTo().performClick()
+            segment("Bottom").performScrollTo().performClick()
             waitForIdle()
 
             assertEquals(Constants.BELOW_VERSE, get().song().titlePosition)

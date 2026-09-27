@@ -14,6 +14,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.SongLayoutExtras
+import org.churchpresenter.settings.SongSectionLabel
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -187,11 +190,31 @@ class ProfilesAdjustTest {
         assertFalse(after.lyricsAlignment == before.lyricsAlignment,
                 "${before.lyricsAlignment} → ${after.lyricsAlignment}")
         assertTrue(after.lyricsFontSize > before.lyricsFontSize)
-        // Blocks run number, title, then each language's lyrics: the second language's is the fourth.
-        tapAt(adjustBlockTag(3), Offset(160f, 4f))
+        // Blocks run number, title, section label, then each language's lyrics: the second
+        // language's is the fifth.
+        tapAt(adjustBlockTag(4), Offset(160f, 4f))
         dragTag(ADJUST_BLOCK_MOVE_TAG, 0f, 10f)
         val key = songShiftKey(SongStyleElement.LYRICS, lowerThird = false, language = 1)
         assertTrue(get().song().shiftAt(key).second > 0)
+    }
+
+    @Test
+    fun `the section label is a block of its own on the preview`() = profilesTab(
+        profileDocument(
+            song = SongSettings(
+                layoutExtras = SongLayoutExtras(sectionLabel = SongSectionLabel(enabled = true)),
+            ),
+        ),
+    ) { get ->
+        openCustomizePane(CustomizePane.SONGS)
+        tap(ADJUST_SWITCH_TAG)
+        // Blocks run number, title, then the section label. Clicked near its left end: the lyrics'
+        // own Move handle sits over the middle of the verse's top edge, where the label now is.
+        tapAt(adjustBlockTag(2), Offset(20f, 4f))
+        dragTag(ADJUST_BLOCK_MOVE_TAG, 30f, 10f)
+        val key = songShiftKey(SongStyleElement.SECTION_LABEL, lowerThird = false)
+        val (x, y) = get().song().shiftAt(key)
+        assertTrue(x > 0 && y > 0, "the label moved on its own: $x, $y")
     }
 
     @Test

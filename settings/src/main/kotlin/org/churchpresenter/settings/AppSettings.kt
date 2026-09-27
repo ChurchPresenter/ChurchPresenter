@@ -146,6 +146,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 17
+        const val CURRENT_SETTINGS_VERSION = 18
     }
 }
