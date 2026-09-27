@@ -85,10 +85,13 @@ internal fun <T> RowSegmented(
     val type = MaterialTheme.typography
     val fontSize = if (compact) type.labelSmall.fontSize else type.labelMedium.fontSize
     // The compact row measures its labels rather than estimating them from a letter count, since
-    // it is sized to fit and a wide word ("Number") would otherwise be cut short.
+    // it is sized to fit and a wide word ("Number") would otherwise be cut short. Measured in the
+    // style the segment draws them in -- labelLarge, bold -- so a label is never narrower here than
+    // on screen: one that does not fit is ellipsized, and Skia on Linux can hang ellipsizing a label
+    // into a width that almost holds it.
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val labelStyle = TextStyle(fontSize = fontSize, fontWeight = FontWeight.SemiBold)
+    val labelStyle = type.labelLarge.copy(fontSize = fontSize, fontWeight = FontWeight.Bold)
     val width: (String) -> Dp = { label ->
         if (compact) {
             val measured = with(density) { measurer.measure(label, labelStyle).size.width.toDp() }
@@ -98,7 +101,8 @@ internal fun <T> RowSegmented(
         }
     }
     BoxWithConstraints(modifier = modifier) {
-        val lines = segmentLines(options.map { width(it.label) + allowance }, maxWidth)
+        val room = if (compact) maxWidth - COMPACT_TRACK_ENDS else maxWidth
+        val lines = segmentLines(options.map { width(it.label) + allowance }, room)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.End) {
             var start = 0
             lines.forEach { count ->
@@ -148,10 +152,22 @@ internal fun segmentLines(widths: List<Dp>, available: Dp): List<Int> {
 internal fun segmentWidth(label: String): Dp =
     (label.length * SEGMENT_CHAR_WIDTH + SEGMENT_PADDING).coerceAtLeast(SEGMENT_MIN_WIDTH).dp
 
-/** Room either side of a compact segment's measured label, and the least it is given. */
-private val COMPACT_PADDING = 18.dp
+/**
+ * Room around a compact segment's measured label -- the segment's own 4dp padding each side and a
+ * few dp so rounding never leaves it a hair short -- and the least it is given.
+ */
+private val COMPACT_PADDING = 16.dp
 private val COMPACT_MIN_WIDTH = 32.dp
-private val COMPACT_TRACK_ALLOWANCE = 4.dp
+
+/**
+ * What the track adds beside each compact segment: the 9dp gap to the next. Anything less and the
+ * planned line is wider than the track draws it, so the row squeezes its last segment -- and on Linux
+ * Skia can hang ellipsizing a label into what is left.
+ */
+private val COMPACT_TRACK_ALLOWANCE = 9.dp
+
+/** The track's inset at both ends of a line, which a compact line's plan must leave room for. */
+private val COMPACT_TRACK_ENDS = 6.dp
 
 /** An on/off setting: the app's raised switch, slate when on. */
 @Composable
