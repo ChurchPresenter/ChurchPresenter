@@ -141,7 +141,6 @@ internal fun RunOfShowPane(
     measuredSeconds: Map<String, Int>,
     /** The rows that will not go on screen on the day, by row id -- see `preflight`. */
     problems: Map<String, PreflightProblem>,
-    onAddItem: () -> Unit,
     onChangeItem: (ScheduleItem) -> Unit,
     onRemove: (itemId: String) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
@@ -235,7 +234,6 @@ internal fun RunOfShowPane(
                     )
                 }
             }
-            item(key = "add") { AddItemButton(onClick = onAddItem) }
         }
     }
 }
@@ -678,16 +676,15 @@ private fun DurationControl(seconds: Int?, onChange: (Int?) -> Unit) {
     }
 }
 
-/** The full-width sunken well that ends the list — a click or a drop adds an item. */
+/** The full-width sunken well pinned under the run of show — a click or a drop adds an item. */
 @Composable
-private fun AddItemButton(onClick: () -> Unit) {
+internal fun AddItemButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(top = 4.dp)
             .height(32.dp)
             .sunken(CalendarMetrics.rowRadius, elevationPalette())
             .clickable(onClick = onClick),
