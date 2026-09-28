@@ -2,16 +2,19 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -326,31 +329,46 @@ object SharedCameraFrameCache {
      * whether the device opened at all, so an attempt that exits straight back out still carries
      * the reason it exited.
      */
-    private suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
+    internal suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
         coroutineScope {
-            val process = withContext(Dispatchers.IO) {
-                try {
-                    ProcessBuilder(command).redirectErrorStream(false).start()
-                } catch (e: Throwable) {
-                    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
-                    null
+            // The source can be released or switched at any point from the moment the process
+            // starts, and until streamFrames registers it nothing else knows it exists: release()
+            // finds no process to kill, and a cancelled coroutine does not end the child it
+            // started. So this attempt kills its own process whenever it is cancelled -- including
+            // a cancellation that lands while the start call itself is returning, which is why the
+            // process is recorded inside that call rather than taken from its result. Found on
+            // Windows, where an NDI camera with no sender restarts ffmpeg every few seconds and each
+            // switch away left one behind at a full core.
+            var started: Process? = null
+            try {
+                withContext(Dispatchers.IO) {
+                    started = try {
+                        ProcessBuilder(command).redirectErrorStream(false).start()
+                    } catch (e: IOException) {
+                        System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
+                        null
+                    }
                 }
-            } ?: return@coroutineScope null
+                val process = started ?: return@coroutineScope null
+                val drain = startStderrDrain(process)
+                // Interruptible, so a camera released inside the window stops waiting at once.
+                val exitedImmediately = runInterruptible(Dispatchers.IO) {
+                    process.waitFor(IMMEDIATE_EXIT_WINDOW_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+                } && process.exitValue() != 0
 
-            val drain = startStderrDrain(process)
-            val exitedImmediately = withContext(Dispatchers.IO) {
-                process.waitFor(IMMEDIATE_EXIT_WINDOW_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
-            } && process.exitValue() != 0
+                if (!exitedImmediately) return@coroutineScope streamFrames(process, entry, drain)
 
-            if (!exitedImmediately) return@coroutineScope streamFrames(process, entry, drain)
-
-            val exitCode = process.exitValue()
-            System.err.println("[Camera] ffmpeg exited immediately with code $exitCode")
-            val tail = drain.tail()
-            tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
-            drain.job.cancel()
-            withContext(Dispatchers.IO) { killFfmpegProcess(process) }
-            FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail)
+                val exitCode = process.exitValue()
+                System.err.println("[Camera] ffmpeg exited immediately with code $exitCode")
+                val tail = drain.tail()
+                tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+                drain.job.cancel()
+                withContext(Dispatchers.IO) { killFfmpegProcess(process) }
+                FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail)
+            } catch (e: CancellationException) {
+                started?.let { withContext(NonCancellable + Dispatchers.IO) { killFfmpegProcess(it) } }
+                throw e
+            }
         }
 
     private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
@@ -452,12 +470,13 @@ object SharedCameraFrameCache {
         private suspend fun recordFailure(attempt: FfmpegAttempt?) {
             lastStderr = attempt?.stderrTail.orEmpty()
             lastExitCode = attempt?.exitCode ?: -1
-            lastFailure = when {
+            val classified = when {
                 attempt == null -> CameraFailure.UNKNOWN
                 lastStderr.isEmpty() -> CameraFailure.NO_FRAMES
                 else -> classifyCameraFfmpegStderr(lastStderr, deviceScheme(source.devicePath))
                     .takeIf { it != CameraFailure.UNKNOWN } ?: CameraFailure.NO_FRAMES
             }
+            lastFailure = refineForBlindListing(classified, CameraDeviceCatalog.lastEnumeration)
             entry.error.value = lastFailure
 
             // A privacy refusal is the operator's to resolve in System Settings; four more attempts
@@ -513,7 +532,7 @@ object SharedCameraFrameCache {
 }
 
 /** One camera's shared state: the frames on screen, why they stopped, and who is still watching. */
-private class CacheEntry(
+internal class CacheEntry(
     val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
     val error: MutableStateFlow<CameraFailure?> = MutableStateFlow(null),
     var refCount: Int = 0,
@@ -529,7 +548,7 @@ private class CacheEntry(
  * `System.err` and discard. A packaged `.app` has no stderr to print to, which is how 43 Sentry
  * warnings arrived carrying nothing but the fact of the failure.
  */
-private class FfmpegAttempt(
+internal class FfmpegAttempt(
     val framesProduced: Boolean,
     val exitCode: Int,
     val stderrTail: List<String>,
@@ -722,20 +741,21 @@ internal fun bgraBytesToArgbPixels(frameBuf: ByteArray, pixelBuf: IntArray) {
     }
 }
 
-/** Kill an ffmpeg process and ensure device handles are released.
- *  On Windows, Process.destroyForcibly() often fails to release DirectShow
- *  device handles, so we kill the process tree via taskkill. */
+/**
+ * Kills [process] and whatever it started, and nothing else.
+ *
+ * On Windows, `destroyForcibly()` often fails to release DirectShow device handles, so the process
+ * tree is ended with `taskkill /T /PID`. It must never be `taskkill /IM ffmpeg.exe`: that ends every
+ * ffmpeg on the computer, including the other camera sources' own processes and anything the
+ * operator runs outside the app.
+ */
 internal fun killFfmpegProcess(process: Process) {
     try {
+        process.descendants().forEach { it.destroyForcibly() }
         if (System.getProperty("os.name", "").lowercase().contains("win")) {
             try {
                 val pid = process.pid()
                 ProcessBuilder("taskkill", "/F", "/T", "/PID", pid.toString())
-                    .redirectErrorStream(true).start()
-                    .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-            } catch (_: Throwable) {}
-            try {
-                ProcessBuilder("taskkill", "/F", "/IM", "ffmpeg.exe")
                     .redirectErrorStream(true).start()
                     .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
             } catch (_: Throwable) {}
