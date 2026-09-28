@@ -11,7 +11,7 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.app.churchpresenter.composables.CameraHost
 import org.churchpresenter.app.churchpresenter.composables.CenteredGlyphLine
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
@@ -187,8 +187,8 @@ fun CanvasTab(
     /** Save preset, to the left of Add to Schedule: the same scene, kept for the Calendar Manager. */
     onSavePreset: ((sceneId: String, sceneName: String) -> Unit)? = null,
     dialogDismissSignal: Int = 0,
-    /** The cameras the source panel offers, or null to ask this machine — a test pins it. */
-    cameraDevices: List<CameraDevice>? = null,
+    /** The machine the source panel's camera section describes, or null to ask this one — a test pins it. */
+    cameraHost: CameraHost? = null,
 ) {
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -1203,7 +1203,7 @@ fun CanvasTab(
                     source = selectedSource,
                     modifier = Modifier.fillMaxSize(),
                     appSettings = appSettings,
-                    cameraDevices = cameraDevices,
+                    cameraHost = cameraHost,
                     onSourceUpdate = { updatedSource ->
                         sceneViewModel.updateSource(updatedSource.id) { updatedSource }
                     }
