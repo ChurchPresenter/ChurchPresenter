@@ -54,6 +54,13 @@ class FfmpegProcessCleanupTest {
     }
 
     @Test
+    fun `a process that fails straight away is marked as exiting immediately`() = runBlocking {
+        // Tagged `no_frames` on Windows, whose ffmpeg exits with a negative code the loop ignored.
+        val attempt = SharedCameraFrameCache.attemptCapture(listOf("sh", "-c", "exit 5"), CacheEntry())
+        assertTrue(attempt?.exitedImmediately == true, "an immediate failure must say so")
+    }
+
+    @Test
     fun `killing a camera's process ends its children and nothing else`() {
         val bystander = ProcessBuilder("sleep", "30").start()
         val camera = ProcessBuilder("sh", "-c", "sleep 30 & wait").start()

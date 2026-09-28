@@ -376,7 +376,7 @@ object SharedCameraFrameCache {
                 tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
                 drain.job.cancel()
                 withContext(Dispatchers.IO) { killFfmpegProcess(process) }
-                FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail)
+                FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail, exitedImmediately = true)
             } catch (e: CancellationException) {
                 started?.let { withContext(NonCancellable + Dispatchers.IO) { killFfmpegProcess(it) } }
                 throw e
@@ -464,7 +464,7 @@ object SharedCameraFrameCache {
 
                 val attempt = attemptCapture(command, entry)
                 if (attempt != null) everStarted = true
-                if (attempt != null && attempt.exitCode > 0 && !attempt.framesProduced) sawImmediateExit = true
+                if (attempt?.exitedImmediately == true) sawImmediateExit = true
 
                 if (attempt?.framesProduced == true) {
                     entry.error.value = null
@@ -488,7 +488,10 @@ object SharedCameraFrameCache {
                 else -> classifyCameraFfmpegStderr(lastStderr, deviceScheme(source.devicePath))
                     .takeIf { it != CameraFailure.UNKNOWN } ?: CameraFailure.NO_FRAMES
             }
-            lastFailure = refineForBlindListing(classified, CameraDeviceCatalog.lastEnumeration)
+            lastFailure = refineForWindowsPrivacy(
+                refineForBlindListing(classified, CameraDeviceCatalog.lastEnumeration),
+                deviceScheme(source.devicePath),
+            ) { windowsCameraBlocked(::queryRegistryValue) }
             entry.error.value = lastFailure
 
             // A privacy refusal is the operator's to resolve in System Settings; four more attempts
@@ -564,6 +567,8 @@ internal class FfmpegAttempt(
     val framesProduced: Boolean,
     val exitCode: Int,
     val stderrTail: List<String>,
+    /** ffmpeg failed inside the opening window. Its code says nothing: Windows' is negative. */
+    val exitedImmediately: Boolean = false,
 )
 
 /** ffmpeg's stderr as it arrives: the retained tail, and the first frame size announced in it. */
