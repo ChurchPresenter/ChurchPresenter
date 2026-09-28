@@ -293,4 +293,63 @@ class ChordTransposerTest {
     fun `a palette is only offered for a real key`() {
         assertEquals(emptyList(), ChordTransposer.diatonicChords("Verse"))
     }
+
+    // ── The picker's chord types ────────────────────────────────────────────────
+
+    @Test
+    fun `every chord type the picker offers reads as a chord on every root`() {
+        for (root in listOf("C", "F#", "Bb")) {
+            ChordTransposer.CHORD_QUALITIES.forEach { quality ->
+                assertTrue(ChordTransposer.isChord(root + quality), "$root$quality should read as a chord")
+            }
+        }
+    }
+
+    @Test
+    fun `a half-diminished chord reads as one and moves as one`() {
+        assertTrue(ChordTransposer.isChord("Bm7b5"))
+        assertTrue(ChordTransposer.isChord("C7#5"))
+        assertEquals("C#m7b5", ChordTransposer.transposeChord("Cm7b5", 1))
+    }
+
+    @Test
+    fun `widening the chord grammar still leaves every section name alone`() {
+        val headings = listOf(
+            "Verse 1", "Verse 2", "Chorus", "Bridge", "Intro", "Outro", "Tag", "Pre-Chorus",
+            "Ending", "Coda", "Break", "Instrumental", "B5", "Bb5 riff",
+        )
+        headings.filter { it != "B5" }.forEach {
+            assertFalse(ChordTransposer.isChord(it), "$it should not read as a chord")
+        }
+        // A bare power chord is a real chord, as it was before the b5/#5 modifier existed.
+        assertTrue(ChordTransposer.isChord("B5"))
+    }
+
+    // ── Rewriting a whole song ──────────────────────────────────────────────────
+
+    @Test
+    fun `a whole text moves every chord and nothing else`() {
+        val song = "[Verse 1]\n[G]Amazing [C]grace, how [D/F#]sweet\n{Chorus}\n[Em]the sound"
+        assertEquals(
+            "[Verse 1]\n[A]Amazing [D]grace, how [E/G#]sweet\n{Chorus}\n[F#m]the sound",
+            ChordTransposer.transposeText(song, 2),
+        )
+    }
+
+    @Test
+    fun `a whole text is spelled as asked`() {
+        assertEquals("[Bb]one [Eb]two", ChordTransposer.transposeText("[A]one [D]two", 1, flats = true))
+    }
+
+    @Test
+    fun `moving a text by nothing gives it back unchanged`() {
+        val song = "[Bridge]\n[G]one"
+        assertEquals(song, ChordTransposer.transposeText(song, 0))
+    }
+
+    @Test
+    fun `moving a text there and back restores it`() {
+        val song = "[Verse 1]\n[G]one [Em7]two [Cadd9]three"
+        assertEquals(song, ChordTransposer.transposeText(ChordTransposer.transposeText(song, 5), -5))
+    }
 }

@@ -27,8 +27,8 @@ pasted chord sheet becomes markup in the first place. A real Gradle module of th
 - **The chord regex is strict on purpose.** `[Verse 1]` and `[Bridge]` must never parse as chords —
   a heading that does vanishes into the lyric line. Loosening `CHORD` breaks song files that already
   exist, so change it only with a test that pins the headings it must still reject.
-- **`ChordTransposer` carries a `@Suppress("TooManyFunctions")`** at its declaration. Thirteen
-  functions, threshold eleven, and all thirteen have production callers — they are one grammar read
+- **`ChordTransposer` carries a `@Suppress("TooManyFunctions")`** at its declaration. Fourteen
+  functions, threshold eleven, and all fourteen have production callers — they are one grammar read
   three ways, so the object stays whole. Documented at the site rather than in a baseline; this
   module has no baseline and should not acquire one.
 - **`:converter` shares this, and used to fork it.** `converter/song/ChordLines.kt` held a

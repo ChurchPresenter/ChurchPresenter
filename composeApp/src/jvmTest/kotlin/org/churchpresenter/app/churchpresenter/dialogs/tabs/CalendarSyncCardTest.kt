@@ -48,7 +48,8 @@ class CalendarSyncCardTest {
 
     /** A relay that registers, answers a round, and holds one enrolled phone. */
     private inner class Relay : RelayTransport {
-        val calls = mutableListOf<String>()
+        // Written from the service's IO dispatcher while the test thread reads it.
+        val calls: MutableList<String> = java.util.Collections.synchronizedList(mutableListOf())
         var registered = false
 
         override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
@@ -110,10 +111,19 @@ class CalendarSyncCardTest {
             waitForIdle()
             onAllNodesWithText("Revoke")[0].performClick()
             waitForIdle()
+            // Both buttons launch onto the service's IO dispatcher behind its lock, which
+            // waitForIdle() does not wait for: wait for the relay to have heard them, rather than
+            // racing the calls and asserting on whatever had landed so far.
+            waitUntil(timeoutMillis = RELAY_WAIT_MS) {
+                synchronized(relay.calls) {
+                    relay.calls.any { it.startsWith("DELETE") } && relay.calls.count { it.contains("/changes") } >= 2
+                }
+            }
         }
 
-        assertTrue(relay.calls.any { it.startsWith("DELETE") }, "Revoke reaches the relay through the service")
-        assertTrue(relay.calls.count { it.contains("/changes") } >= 2, "Sync now runs another round")
+        val calls = synchronized(relay.calls) { relay.calls.toList() }
+        assertTrue(calls.any { it.startsWith("DELETE") }, "Revoke reaches the relay through the service")
+        assertTrue(calls.count { it.contains("/changes") } >= 2, "Sync now runs another round")
     }
 
     @Test
@@ -223,3 +233,6 @@ class CalendarSyncCardTest {
 }
 
 private const val CLIENT_KEY_URL = "https://keys.example/k3v9q"
+
+/** Only there to fail the test: the wait ends as soon as the relay has heard both calls. */
+private const val RELAY_WAIT_MS = 5_000L

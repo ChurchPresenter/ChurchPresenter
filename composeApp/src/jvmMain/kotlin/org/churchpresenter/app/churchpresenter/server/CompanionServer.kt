@@ -287,6 +287,24 @@ class CompanionServer {
         index, output, _apiKeyEnabled.value, _apiKey.value, bgOverride
     )
 
+    /**
+     * Asks the desktop operator to approve a tablet using a Browser Source page's transpose
+     * buttons, exactly as the presentation remote's handshake does. Called once per page load,
+     * never per press.
+     */
+    internal suspend fun checkMusicianConnect(call: ApplicationCall): Boolean {
+        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        val pending = PendingConnectionRequest(clientId)
+        onMusicianConnect.emit(pending)
+        val approved = pending.decision.await()
+        if (approved) {
+            browserSource.approveMusician(clientId)
+        } else {
+            call.respond(HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
+        }
+        return approved
+    }
+
 
 
 
@@ -464,6 +482,18 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /** Emitted when a tablet asks to use a Browser Source page's transpose buttons. */
+    val onMusicianConnect = MutableSharedFlow<PendingConnectionRequest>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when an approved tablet presses a transpose step or resets it. */
+    val onBrowserSourceTranspose = MutableSharedFlow<BrowserSourceTransposeCommand>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when a remote client requests a QA admin operation (add/edit/delete). */
     data class PendingQAAdminRequest(
         val action: String,
@@ -595,6 +625,16 @@ class CompanionServer {
     /** Registers the frame flow an output's renderer produces. Called from main.kt. */
     fun registerBrowserSourceFrames(index: Int, frames: SharedFlow<BrowserSourceFrame>) =
         browserSource.registerBrowserSourceFrames(index, frames)
+
+    /** Publishes each output's current transpose to the pages that show it. Called from main.kt. */
+    fun updateBrowserSourceTranspose(transposes: Map<Int, Int>) {
+        browserSource.transposes.value = transposes
+    }
+
+    /** Publishes which outputs' pages offer the transpose buttons at all. Called from main.kt. */
+    fun updateTransposeControls(indices: Set<Int>) {
+        browserSource.transposeControls.value = indices
+    }
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -1016,6 +1056,7 @@ class CompanionServer {
                     this@CompanionServer, browserSource._browserSourceFrameFlows,
                     browserSource._browserSourceSessions
                 )
+                browserSourceTransposeRoutes(this@CompanionServer)
                 qaRoutes(this@CompanionServer, json, scope)
             }
     }

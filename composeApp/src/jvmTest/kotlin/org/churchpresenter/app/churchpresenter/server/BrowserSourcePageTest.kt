@@ -73,6 +73,53 @@ class BrowserSourcePageTest {
         assertContains(html, "transparent")
     }
 
+    // ── The transpose buttons (issue #649) ──────────────────────────────────
+
+    @Test
+    fun `every page carries the transpose buttons, hidden until the server offers them`() {
+        val html = browserSourceOverlayPage(2, output, apiKeyEnabled = false, apiKey = "")
+        assertContains(html, """<div id="transpose"""")
+        assertContains(html, "#transpose{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:none;")
+        assertContains(html, "tpBox.classList.toggle('shown',!!state.controls)")
+    }
+
+    @Test
+    fun `the page asks for approval only once the server offers the buttons`() {
+        val html = browserSourceOverlayPage(2, output, apiKeyEnabled = false, apiKey = "")
+        assertContains(html, "if(state.controls&&!tpAsked&&!tpApproved)tpAuth();")
+        // Nothing calls it on load: an OBS page on an ordinary profile never asks the desktop.
+        assertFalse(html.lines().any { it.trim() == "tpAuth();" })
+    }
+
+    @Test
+    fun `the buttons talk to this output's own routes, with the device's id`() {
+        val html = browserSourceOverlayPage(2, output, apiKeyEnabled = false, apiKey = "")
+        assertContains(html, "/api${Constants.ENDPOINT_BROWSER_SOURCE}/2/auth")
+        assertContains(html, "/api${Constants.ENDPOINT_BROWSER_SOURCE}/2/transpose")
+        assertContains(html, "'${Constants.HEADER_DEVICE_ID}':deviceId")
+    }
+
+    @Test
+    fun `a text message is read as transpose state, never drawn as a frame`() {
+        val html = browserSourceOverlayPage(0, output, apiKeyEnabled = false, apiKey = "")
+        assertContains(html, "ws.onmessage=onMessage;")
+        assertContains(html, "if(typeof event.data==='string'){")
+    }
+
+    @Test
+    fun `the api key reaches the buttons' requests too, escaped for the script`() {
+        val html = browserSourceOverlayPage(0, output, apiKeyEnabled = true, apiKey = "it's</script>")
+        assertContains(html, "tpHeaders['${Constants.HEADER_API_KEY}']='it\\'s\\x3c/script>'")
+        assertFalse(html.contains("it's</script>"))
+    }
+
+    @Test
+    fun `no key is put in the script when none is required`() {
+        val html = browserSourceOverlayPage(0, output, apiKeyEnabled = false, apiKey = "unused")
+        assertContains(html, "if(false)tpHeaders")
+        assertFalse(html.contains("'unused'"))
+    }
+
     @Test
     fun `the page is a self-contained html document`() {
         val html = browserSourceOverlayPage(0, output, apiKeyEnabled = false, apiKey = "")

@@ -3,10 +3,13 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
@@ -17,10 +20,18 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.intOrNull
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -128,6 +139,7 @@ internal fun Route.browserSourceRoutes(
                             lastFrame.get()?.let { sendFrame(it) }
                         }
                     }
+                    val transposeJob = launchTransposeState(server.browserSource, index, sendMutex)
                     try {
                         for (frame in incoming) {
                             // One-way server push — inbound frames (pings/pongs aside, handled by
@@ -140,10 +152,90 @@ internal fun Route.browserSourceRoutes(
                         sessions.remove(this)
                         frameJob.cancel()
                         heartbeatJob.cancel()
+                        transposeJob.cancel()
                     }
                 }
 
                 // ── Q&A Endpoints ─────────────────────────────────────────────────
 
                 // Public: submission page
+}
+
+/**
+ * Sends a page of output [index] its transpose state, as text, while that output's profile offers
+ * the buttons -- plus one `controls:false` when it stops, so an open tablet hides them. An output
+ * that never offers them is never sent a text frame at all. Launched in the session's own scope.
+ */
+private fun DefaultWebSocketServerSession.launchTransposeState(hub: BrowserSourceHub, index: Int, sendMutex: Mutex) =
+    launch {
+        var shown = false
+        combine(hub.transposes, hub.transposeControls) { transposes, controls ->
+            (index in controls) to hub.transposeState(transposes, controls, index)
+        }.distinctUntilChanged().collect { (offered, state) ->
+            if (offered || shown) {
+                sendMutex.withLock { send(Frame.Text(state)) }
+            }
+            shown = offered
+        }
+    }
+
+/**
+ * The musicians' transpose buttons on a Browser Source page (issue #649): the handshake and the
+ * press. Only an output whose profile offers the buttons accepts either, so an OBS/vMix output can
+ * never be moved from its own page; and a press is taken only from a device the desktop approved.
+ * Commands never ride the frame socket, which stays one-way.
+ */
+internal fun Route.browserSourceTransposeRoutes(server: CompanionServer) {
+    // The desktop approves the device once, on the page's own handshake -- not on every press.
+    post("/api${Constants.ENDPOINT_BROWSER_SOURCE}/{index}/auth") {
+        val (displayIndex, output) = transposableOutput(server) ?: return@post
+        if (!server.browserSource.checkBrowserSourceApiKey(call, output)) return@post
+        if (!server.checkMusicianConnect(call)) return@post
+        call.respondText("""{"ok":true,"output":$displayIndex}""", ContentType.Application.Json)
+    }
+
+    post("/api${Constants.ENDPOINT_BROWSER_SOURCE}/{index}/transpose") {
+        val (displayIndex, output) = transposableOutput(server) ?: return@post
+        if (!server.browserSource.checkBrowserSourceApiKey(call, output)) return@post
+        if (!server.browserSource.isApprovedMusician(call.request.headers[Constants.HEADER_DEVICE_ID])) {
+            call.respond(HttpStatusCode.Forbidden, """{"error":"device not approved"}""")
+            return@post
+        }
+        val command = parseTransposeCommand(displayIndex - 1, call.receiveText())
+        if (command == null) {
+            call.respond(HttpStatusCode.BadRequest, """{"error":"expected delta or reset"}""")
+            return@post
+        }
+        server.onBrowserSourceTranspose.emit(command)
+        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+    }
+}
+
+/**
+ * The 1-based display index and the output a transpose route names, or null once it has been
+ * refused: 404 for an unknown or disabled output, 403 for one whose profile does not offer the
+ * transpose buttons.
+ */
+private suspend fun RoutingContext.transposableOutput(server: CompanionServer): Pair<Int, ScreenAssignment>? {
+    val displayIndex = call.parameters["index"]?.toIntOrNull()
+    val output = displayIndex?.let { server.browserSourceOutput(it - 1) }
+    if (displayIndex == null || output == null || !output.browserSourceEnabled) {
+        call.respond(HttpStatusCode.NotFound, "Unknown browser source output")
+        return null
+    }
+    if (!server.browserSource.offersTranspose(displayIndex - 1)) {
+        call.respond(HttpStatusCode.Forbidden, """{"error":"this output has no transpose buttons"}""")
+        return null
+    }
+    return displayIndex to output
+}
+
+/** A transpose body — `{"delta":±1}` or `{"reset":true}` — for the output at [index], or null. */
+internal fun parseTransposeCommand(index: Int, body: String): BrowserSourceTransposeCommand? {
+    val obj = runCatching { Json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
+    if ((obj["reset"] as? JsonPrimitive)?.booleanOrNull == true) {
+        return BrowserSourceTransposeCommand(index, reset = true)
+    }
+    val delta = (obj["delta"] as? JsonPrimitive)?.intOrNull ?: return null
+    return if (delta == 1 || delta == -1) BrowserSourceTransposeCommand(index, delta = delta) else null
 }

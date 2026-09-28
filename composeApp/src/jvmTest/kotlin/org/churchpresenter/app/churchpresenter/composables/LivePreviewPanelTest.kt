@@ -172,6 +172,52 @@ class LivePreviewPanelTest {
         onNodeWithText("Browser Source 2").assertExists("the unnamed one keeps its number")
     }
 
+    // ── The musicians' transpose on a Browser Source tile (issue #649) ────────────────────────
+
+    /** Browser Source 1 on an ordinary stage profile (the OBS feed), 2 on the musicians' one. */
+    private fun stageOutputs(): AppSettings {
+        val stage = OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+        return AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(stage, stage.copy(id = "musicians", showTransposeControls = true)),
+                browserSourceOutputs = listOf(
+                    ScreenAssignment(activeProfileId = "stage"),
+                    ScreenAssignment(activeProfileId = "musicians"),
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `only the tile of an output offering the buttons carries a transpose control`() = runComposeUiTest {
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = PresenterManager(), appSettings = stageOutputs()) }
+        }
+        onAllNodesWithText("Transpose 0").assertCountEquals(1)
+        onAllNodesWithContentDescription("Transpose up").assertCountEquals(1)
+    }
+
+    @Test
+    fun `the tile's steps move that output's transpose, and the offset puts it back`() = runComposeUiTest {
+        val manager = PresenterManager()
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = manager, appSettings = stageOutputs()) }
+        }
+        onNodeWithContentDescription("Transpose up").performScrollTo().performClick()
+        onNodeWithContentDescription("Transpose up").performClick()
+        waitForIdle()
+        assertEquals(mapOf(1 to 2), manager.browserSourceTranspose.value)
+        onNodeWithText("Transpose +2").assertExists()
+
+        onNodeWithContentDescription("Transpose down").performClick()
+        waitForIdle()
+        assertEquals(mapOf(1 to 1), manager.browserSourceTranspose.value)
+
+        onNodeWithText("Transpose +1").performClick()
+        waitForIdle()
+        assertEquals(emptyMap(), manager.browserSourceTranspose.value)
+    }
+
     // ── Mode dispatch → Live badge ────────────────────────────────────────────────────────────
 
     @Test

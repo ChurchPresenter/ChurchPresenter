@@ -74,6 +74,7 @@ class StageMonitorScreenshotTest {
          */
         output: OutputSize = OutputSize(1024, 768),
         showChords: Boolean = true,
+        transposeSteps: Int = 0,
         presenting: Presenting = Presenting.LYRICS,
         announcementActive: Boolean = false,
         section: LyricSection = songSection(),
@@ -96,6 +97,7 @@ class StageMonitorScreenshotTest {
                     StageMonitorScreen(
                         sm = settings,
                         showChords = showChords,
+                        transposeSteps = transposeSteps,
                         presentingMode = presenting,
                         announcementActive = announcementActive,
                         currentLyricSection = section,
@@ -172,6 +174,19 @@ class StageMonitorScreenshotTest {
     fun `a song with its chords`() = shoot(
         "song_chords",
         showChords = true,
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
+    /**
+     * The same song on an output a musician has transposed up two: every chord, and the Key line,
+     * moved — the words and the layout exactly as in `song_chords`.
+     */
+    @Test
+    fun `a song transposed for the band`() = shoot(
+        "song_chords_transposed",
+        showChords = true,
+        transposeSteps = 2,
         section = chordSection(),
         sections = listOf(chordSection()),
     )
