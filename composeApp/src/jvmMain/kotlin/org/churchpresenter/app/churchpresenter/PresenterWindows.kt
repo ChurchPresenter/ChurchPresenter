@@ -38,6 +38,7 @@ import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.HideOutputWindowCursor
+import org.churchpresenter.app.churchpresenter.composables.LocalOutputCursorHidden
 import org.churchpresenter.app.churchpresenter.composables.hiddenOutputCursor
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -280,7 +281,10 @@ internal fun PresenterWindows(
                             alwaysOnTop = true,
                         ) {
                             HideOutputWindowCursor(window, hideCursor)
-                            CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                            CompositionLocalProvider(
+                                LocalMediaViewModel provides mediaViewModel,
+                                LocalOutputCursorHidden provides hideCursor,
+                            ) {
                                 PresenterScreen(
                                     modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor),
                                     appSettings = appSettings,
@@ -368,8 +372,10 @@ internal fun PresenterWindows(
                 alwaysOnTop = true,
             ) {
                 HideOutputWindowCursor(window, hideCursor)
-                Box(modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor)) {
-                    presenterOutputContent(screenAssignment, effectiveMode, i + 1)
+                CompositionLocalProvider(LocalOutputCursorHidden provides hideCursor) {
+                    Box(modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor)) {
+                        presenterOutputContent(screenAssignment, effectiveMode, i + 1)
+                    }
                 }
             }
 
@@ -407,7 +413,10 @@ internal fun PresenterWindows(
                         alwaysOnTop = true,
                     ) {
                         HideOutputWindowCursor(window, hideCursor)
-                        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                        CompositionLocalProvider(
+                            LocalMediaViewModel provides mediaViewModel,
+                            LocalOutputCursorHidden provides hideCursor,
+                        ) {
                             PresenterScreen(
                                 modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor),
                                 appSettings = appSettings,
