@@ -171,8 +171,21 @@ Measured on one machine, two cards, same build and same workload:
 Under the Direct3D default both cards capture fine, and on the NVIDIA card the *main* window
 captured normally at the same moment the presenter came back black. So if something on the machine
 screen-captures the presenter monitor, the default is the safe choice and `OPENGL` is worth
-verifying before a service. Tested against GDI/`BitBlt` only — DXGI Desktop Duplication and Windows
-Graphics Capture, which OBS's Display Capture normally uses, were not tested either way.
+verifying before a service.
+
+OBS's Display Capture, measured later on the same NVIDIA GTX 1660 Ti (driver 31.0.15.5186, Windows
+11), with brightness read from OBS's own frames:
+
+| render API | DXGI Desktop Duplication | Windows Graphics Capture | GDI / `BitBlt` |
+|---|---|---|---|
+| default (Direct3D) | captured | captured | captured |
+| `OPENGL`, first session | black | black | black |
+| `OPENGL`, four later sessions | captured | captured | captured |
+
+So on that card the default captures by every method. Under `OPENGL` the black capture came and went:
+one session was black by every method until windows were moved around, and four fresh launches
+afterwards captured normally, so the earlier all-black `BitBlt` result above came back once and then
+not again. Treat `OPENGL` as unverified for captured outputs until checked on the machine itself.
 
 ---
 
