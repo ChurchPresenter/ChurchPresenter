@@ -36,6 +36,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.AppWindowIcons
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
@@ -304,6 +305,9 @@ fun main() {
     // app writes are single slides and thumbnails, small enough to stage in memory, so the temp
     // file buys nothing and costs a dependency on a directory the app does not control.
     javax.imageio.ImageIO.setUseCache(false)
+
+    // Before the first window: every window gets the app icon's pixel frames as it opens.
+    AppWindowIcons.install()
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(
