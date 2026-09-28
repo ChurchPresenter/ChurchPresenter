@@ -204,6 +204,7 @@ class SceneViewModel {
                 is SceneSource.CameraSource -> source.copy(visible = !source.visible)
                 is SceneSource.ScreenCaptureSource -> source.copy(visible = !source.visible)
                 is SceneSource.NdiSource -> source.copy(visible = !source.visible)
+                is SceneSource.OmtSource -> source.copy(visible = !source.visible)
                 is SceneSource.BibleSource -> source.copy(visible = !source.visible)
             }
         }
@@ -223,6 +224,7 @@ class SceneViewModel {
                 is SceneSource.CameraSource -> source.copy(locked = !source.locked)
                 is SceneSource.ScreenCaptureSource -> source.copy(locked = !source.locked)
                 is SceneSource.NdiSource -> source.copy(locked = !source.locked)
+                is SceneSource.OmtSource -> source.copy(locked = !source.locked)
                 is SceneSource.BibleSource -> source.copy(locked = !source.locked)
             }
         }

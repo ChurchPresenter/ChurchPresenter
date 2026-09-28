@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Lan
 import androidx.compose.material.icons.filled.SettingsInputAntenna
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
+import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.profile_outputs_empty
 import churchpresenter.composeapp.generated.resources.profile_outputs_group
 import churchpresenter.composeapp.generated.resources.profile_outputs_hint
@@ -49,7 +51,7 @@ import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.stringResource
 
 /** Which of the three output lists a tile stands for. */
-internal enum class OutputKind { SCREEN, NDI, BROWSER_SOURCE }
+internal enum class OutputKind { SCREEN, NDI, OMT, BROWSER_SOURCE }
 
 /** One output as the Outputs page shows it: where it lives, what it is called, what it follows. */
 internal data class OutputTile(
@@ -62,7 +64,7 @@ internal data class OutputTile(
 
 /**
  * Every output, labelled the way its own card on the Projection tab labels it: the screens, then
- * the NDI outputs, then the Browser Sources.
+ * the NDI outputs, the OMT outputs, then the Browser Sources.
  */
 @Composable
 internal fun outputTiles(proj: ProjectionSettings): List<OutputTile> = buildList {
@@ -84,6 +86,17 @@ internal fun outputTiles(proj: ProjectionSettings): List<OutputTile> = buildList
                 index,
                 a.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, index + 1)),
                 sizeLabel(a.ndiWidth, a.ndiHeight),
+                a.activeProfileId,
+            ),
+        )
+    }
+    proj.omtOutputs.forEachIndexed { index, a ->
+        add(
+            OutputTile(
+                OutputKind.OMT,
+                index,
+                a.omtLabelOr(stringResource(Res.string.omt_output_numbered, index + 1)),
+                sizeLabel(a.omtWidth, a.omtHeight),
                 a.activeProfileId,
             ),
         )
@@ -115,6 +128,7 @@ internal fun ProjectionSettings.withTileProfile(tile: OutputTile, profileId: Str
     return when (tile.kind) {
         OutputKind.SCREEN -> copy(screenAssignments = screenAssignments.set())
         OutputKind.NDI -> copy(ndiOutputs = ndiOutputs.set())
+        OutputKind.OMT -> copy(omtOutputs = omtOutputs.set())
         OutputKind.BROWSER_SOURCE -> copy(browserSourceOutputs = browserSourceOutputs.set())
     }
 }
@@ -263,6 +277,7 @@ private val OutputKind.icon: ImageVector
     get() = when (this) {
         OutputKind.SCREEN -> Icons.Filled.Tv
         OutputKind.NDI -> Icons.Filled.SettingsInputAntenna
+        OutputKind.OMT -> Icons.Filled.Lan
         OutputKind.BROWSER_SOURCE -> Icons.Filled.Language
     }
 

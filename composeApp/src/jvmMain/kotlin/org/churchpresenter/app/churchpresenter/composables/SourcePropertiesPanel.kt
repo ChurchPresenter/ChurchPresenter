@@ -103,6 +103,7 @@ fun SourcePropertiesPanel(
             is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate, cameraDevices)
             is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
             is SceneSource.NdiSource -> NdiProperties(source, onSourceUpdate)
+            is SceneSource.OmtSource -> OmtProperties(source, onSourceUpdate)
             is SceneSource.BibleSource -> BibleProperties(source, onSourceUpdate, appSettings)
         }
     }

@@ -105,6 +105,13 @@ class DeviceInfoReportTest {
     }
 
     @Test
+    fun `the report says how OMT is configured and whether its library loaded`() {
+        val text = report()
+        assertTrue("OMT outputs: " in text)
+        assertTrue("OMT library: " in text)
+    }
+
+    @Test
     fun `every expected section is present`() {
         val text = report()
         for (section in listOf(

@@ -15,7 +15,7 @@ private const val FALLBACK_OUTPUT_HEIGHT = 1080
  * carries all three pairs of fields, and nothing on it distinguishes a Browser Source from an NDI
  * output.
  */
-enum class OutputKind { SCREEN, BROWSER_SOURCE, NDI }
+enum class OutputKind { SCREEN, BROWSER_SOURCE, NDI, OMT }
 
 /**
  * The pixel size of an output, and the shape a preview of it should be.
@@ -84,6 +84,7 @@ val OUTPUT_RESOLUTIONS: List<OutputSize> = listOf(
 fun outputSizeOf(assignment: ScreenAssignment, kind: OutputKind): OutputSize = when (kind) {
     OutputKind.BROWSER_SOURCE -> sizeOrFallback(assignment.browserSourceWidth, assignment.browserSourceHeight)
     OutputKind.NDI -> sizeOrFallback(assignment.ndiWidth, assignment.ndiHeight)
+    OutputKind.OMT -> sizeOrFallback(assignment.omtWidth, assignment.omtHeight)
     OutputKind.SCREEN ->
         if (assignment.targetBoundsW > 0 && assignment.targetBoundsH > 0) {
             OutputSize(assignment.targetBoundsW, assignment.targetBoundsH)

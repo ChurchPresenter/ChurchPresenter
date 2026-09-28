@@ -97,6 +97,7 @@ internal fun OffscreenOutputContent(
                 OffscreenOutputKind.BROWSER_SOURCE ->
                     presenterManager.browserSourceIdentifying.value.contains(outputIndex)
                 OffscreenOutputKind.NDI -> presenterManager.ndiIdentifying.value.contains(outputIndex)
+                OffscreenOutputKind.OMT -> presenterManager.omtIdentifying.value.contains(outputIndex)
             }
             val isLowerThirdVertical = profile.isLowerThirdVertical
             val isLowerThird = profile.isLowerThird
@@ -121,6 +122,8 @@ internal fun OffscreenOutputContent(
                                 rawScreenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}")
                             OffscreenOutputKind.NDI ->
                                 rawScreenAssignment.ndiLabelOr("NDI Output ${outputIndex + 1}")
+                            OffscreenOutputKind.OMT ->
+                                rawScreenAssignment.omtLabelOr("OMT Output ${outputIndex + 1}")
                         },
                         style = TextStyle(
                             color = Color.White,

@@ -31,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
+import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.preview_settings_add_output
 import churchpresenter.composeapp.generated.resources.preview_settings_delete_group
 import churchpresenter.composeapp.generated.resources.preview_settings_empty
@@ -306,6 +307,14 @@ private fun previewOutputChoices(proj: ProjectionSettings): List<OutputChoice> {
                 OutputChoice(
                     Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, i),
                     output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1)),
+                )
+            )
+        }
+        proj.omtOutputs.forEachIndexed { i, output ->
+            add(
+                OutputChoice(
+                    Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, i),
+                    output.omtLabelOr(stringResource(Res.string.omt_output_numbered, i + 1)),
                 )
             )
         }

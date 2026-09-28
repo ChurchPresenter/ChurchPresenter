@@ -53,6 +53,8 @@ import churchpresenter.composeapp.generated.resources.canvas_video_loading
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi_default
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_ndi_waiting
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_omt
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_omt_default
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
@@ -137,6 +139,7 @@ fun SceneSourceRenderer(
         is SceneSource.CameraSource -> CameraSourceContent(source, modifier, showDiagnostics)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
         is SceneSource.NdiSource -> NdiSourceContent(source, modifier)
+        is SceneSource.OmtSource -> OmtSourceContent(source, modifier)
         is SceneSource.BibleSource -> BibleSourceContent(source, modifier, fontScale)
     }
 }
@@ -948,12 +951,12 @@ private fun CameraSourceContent(
 @Composable
 private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) {
     if (source.sourceName.isBlank() && source.sourceAddress.isBlank()) {
-        NdiPlaceholder(stringResource(Res.string.canvas_placeholder_ndi_default), modifier)
+        NetworkSourcePlaceholder(stringResource(Res.string.canvas_placeholder_ndi_default), modifier)
         return
     }
 
     // Acquired in the effect, for the reason spelled out in [CameraSourceContent].
-    var flows by remember { mutableStateOf<NdiFrameCache.NdiFlows?>(null) }
+    var flows by remember { mutableStateOf<ReceivedFrameCache.Flows?>(null) }
     DisposableEffect(source.sourceName, source.sourceAddress, source.lowBandwidth) {
         flows = SharedNdiFrameCache.acquire(source)
         onDispose {
@@ -979,7 +982,7 @@ private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) 
     } else {
         // Connected but with nothing on the wire yet is "waiting"; not connected is a runtime that
         // is not installed or a source that has gone away, and the two read differently on purpose.
-        NdiPlaceholder(
+        NetworkSourcePlaceholder(
             text = if (connected) stringResource(Res.string.canvas_placeholder_ndi_waiting, label)
                    else stringResource(Res.string.canvas_placeholder_ndi, label),
             modifier = modifier,
@@ -987,8 +990,51 @@ private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) 
     }
 }
 
+/**
+ * A live OMT source from the network — [NdiSourceContent]'s twin, fitted rather than cropped for the
+ * reason that one gives, and drawing the same placeholders.
+ */
 @Composable
-private fun NdiPlaceholder(text: String, modifier: Modifier) {
+private fun OmtSourceContent(source: SceneSource.OmtSource, modifier: Modifier) {
+    if (source.sourceAddress.isBlank()) {
+        NetworkSourcePlaceholder(stringResource(Res.string.canvas_placeholder_omt_default), modifier)
+        return
+    }
+
+    // Acquired in the effect, for the reason spelled out in [CameraSourceContent].
+    var flows by remember { mutableStateOf<ReceivedFrameCache.Flows?>(null) }
+    DisposableEffect(source.sourceAddress, source.preview) {
+        flows = SharedOmtFrameCache.acquire(source)
+        onDispose {
+            flows = null
+            SharedOmtFrameCache.release(source)
+        }
+    }
+
+    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
+    val notConnected = remember { MutableStateFlow(false) }
+    val frame by (flows?.frame ?: noFrame).collectAsState()
+    val connected by (flows?.connected ?: notConnected).collectAsState()
+
+    val shown = frame
+    if (shown != null) {
+        Image(
+            bitmap = shown,
+            contentDescription = source.sourceAddress,
+            contentScale = ContentScale.Fit,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        NetworkSourcePlaceholder(
+            text = if (connected) stringResource(Res.string.canvas_placeholder_ndi_waiting, source.sourceAddress)
+                   else stringResource(Res.string.canvas_placeholder_omt, source.sourceAddress),
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun NetworkSourcePlaceholder(text: String, modifier: Modifier) {
     Box(
         modifier = modifier.fillMaxSize().background(Color.DarkGray),
         contentAlignment = Alignment.Center

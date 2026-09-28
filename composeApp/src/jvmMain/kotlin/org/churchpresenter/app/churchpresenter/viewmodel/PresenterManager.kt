@@ -153,6 +153,16 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _ndiLocks.value = updated
     }
 
+    // Per-OMT-output lock: a fourth independent index space, for the reason the NDI one is its own.
+    private val _omtLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+    val omtLocks: State<Map<Int, Presenting>> = _omtLocks
+
+    fun setOmtLock(index: Int, mode: Presenting?) {
+        val updated = _omtLocks.value.toMutableMap()
+        if (mode == null) updated.remove(index) else updated[index] = mode
+        _omtLocks.value = updated
+    }
+
     // Indices of Browser Source outputs currently showing the "Identify" overlay
     // (their output number, briefly flashed) — same idea as identifyingScreen for
     // physical displays, but per-output since there's no window to flash instead.
@@ -178,6 +188,18 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         preRenderScope.launch {
             delay(WATCHDOG_INTERVAL_MS)
             _ndiIdentifying.value = _ndiIdentifying.value - index
+        }
+    }
+
+    // The same, for OMT outputs, in a set of their own for the reason NDI's is.
+    private val _omtIdentifying = mutableStateOf<Set<Int>>(emptySet())
+    val omtIdentifying: State<Set<Int>> = _omtIdentifying
+
+    fun identifyOmtOutput(index: Int) {
+        _omtIdentifying.value = _omtIdentifying.value + index
+        preRenderScope.launch {
+            delay(WATCHDOG_INTERVAL_MS)
+            _omtIdentifying.value = _omtIdentifying.value - index
         }
     }
 

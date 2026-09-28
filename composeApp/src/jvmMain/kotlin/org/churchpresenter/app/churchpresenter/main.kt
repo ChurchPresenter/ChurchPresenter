@@ -50,6 +50,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.remote_action_clear_display
 import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll_code
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
+import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
@@ -107,6 +108,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.app.churchpresenter.presenter.OmtManager
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
 import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
@@ -858,6 +860,75 @@ private fun ApplicationScope.ChurchPresenterApp(
                 onDispose {
                     renderer?.stop()
                     renderer?.let { NdiManager.release(i, it) }
+                }
+            }
+        }
+    }
+    // OMT outputs, beside NDI's and in the same shape. The library ships with the app, so unlike
+    // NDI's runtime it is normally found; the path setting only overrides the bundled copy. Keyed on
+    // the path so a library that failed to load is retried when the operator points elsewhere; once
+    // one is loaded it stays for the run, and so does the discovery server it was started with.
+    LaunchedEffect(appSettings.projectionSettings.omtLibraryPath) {
+        withContext(Dispatchers.IO) {
+            OmtManager.ensureStarted(
+                customPath = appSettings.projectionSettings.omtLibraryPath,
+                discoveryServer = appSettings.projectionSettings.omtDiscoveryServer,
+            )
+        }
+    }
+    val omtStatus by OmtManager.status.collectAsState()
+    appSettings.projectionSettings.omtOutputs.indices.forEach { i ->
+        composeKey(i) {
+            val appSettingsState = rememberUpdatedState(effectiveAppSettings)
+            val screenAssignmentState = rememberUpdatedState(
+                virtualOutputAt(appSettings.projectionSettings.omtOutputs, i)
+            )
+            val effectiveModeState = remember {
+                derivedStateOf {
+                    effectiveOutputMode(
+                        presenterManager.omtLocks.value, i, presenterManager.presentingMode.value,
+                    )
+                }
+            }
+            val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
+            val omtOutput = virtualOutputAt(appSettings.projectionSettings.omtOutputs, i)
+            val defaultName = stringResource(Res.string.omt_output_numbered, i + 1)
+            // Keyed on everything a sender is created with, as the NDI block is: OMT cannot change a
+            // name, size, rate, mode or quality in place either.
+            val renderer = remember(
+                i,
+                omtStatus,
+                omtOutput.omtLabelOr(defaultName),
+                omtOutput.omtWidth,
+                omtOutput.omtHeight,
+                omtOutput.omtFps,
+                omtOutput.omtMode,
+                omtOutput.omtQuality,
+            ) {
+                OmtManager.createRenderer(
+                    index = i,
+                    assignment = omtOutput,
+                    context = OffscreenOutputContext(
+                        presenterManager = presenterManager,
+                        appSettingsState = appSettingsState,
+                        screenAssignmentState = screenAssignmentState,
+                        effectiveModeState = effectiveModeState,
+                        outputIndex = i,
+                        kind = OffscreenOutputKind.OMT,
+                        sttManager = sttManager,
+                        mediaViewModel = mediaViewModel,
+                        qaDisplayUrlState = qaDisplayUrlState,
+                        serverUrlState = browserSourceServerUrlState,
+                    ),
+                    screenAssignmentState = screenAssignmentState,
+                    name = omtOutput.omtLabelOr(defaultName),
+                )
+            }
+            LaunchedEffect(renderer) { renderer?.start(this) }
+            DisposableEffect(renderer) {
+                onDispose {
+                    renderer?.stop()
+                    renderer?.let { OmtManager.release(i, it) }
                 }
             }
         }
@@ -2025,6 +2096,9 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 },
                                 onIdentifyNdi = { index ->
                                     presenterManager.identifyNdiOutput(index)
+                                },
+                                onIdentifyOmt = { index ->
+                                    presenterManager.identifyOmtOutput(index)
                                 },
                                 obsManager = obsManager,
                                 companionSatelliteViewModel = companionSatelliteViewModel

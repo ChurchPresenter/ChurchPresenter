@@ -246,6 +246,20 @@ class PresenterManagerTest {
     }
 
     @Test
+    fun `omt locks are a fourth index space, independent of the ndi one`() {
+        val pm = manager()
+        pm.setNdiLock(0, Presenting.QA)
+        pm.setOmtLock(0, Presenting.LYRICS)
+
+        assertEquals(mapOf(0 to Presenting.QA), pm.ndiLocks.value)
+        assertEquals(mapOf(0 to Presenting.LYRICS), pm.omtLocks.value)
+
+        pm.setOmtLock(0, null)
+        assertTrue(pm.omtLocks.value.isEmpty())
+        assertEquals(mapOf(0 to Presenting.QA), pm.ndiLocks.value, "releasing one must not touch the other")
+    }
+
+    @Test
     fun `ndi locks are a third index space, independent of both the others`() {
         // Three 0-based lists, three unrelated outputs. Sharing a map would have NDI output 0
         // silently steal a browser source's lock, or a screen's.

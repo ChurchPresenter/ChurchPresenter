@@ -331,6 +331,54 @@ class LivePreviewPanelTest {
     }
 
     @Test
+    fun `locking an ndi output and an omt output uses a lock index space each`() = runComposeUiTest {
+        // Four 0-based lists now: screen 0, NDI output 0 and OMT output 0 are different outputs, and
+        // one shared lock helper routes all of them — so each toggle must land in its own map.
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.QA)
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(
+                ndiOutputs = listOf(ScreenAssignment()),
+                omtOutputs = listOf(ScreenAssignment()),
+            )
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = settings)
+            }
+        }
+        // Rendered screen, NDI, OMT in that order, so the OMT toggle is last and NDI's before it.
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+        assertEquals(Presenting.QA, pm.omtLocks.value[0])
+        assertTrue(pm.ndiLocks.value.isEmpty(), "locking the OMT output must not lock the NDI one")
+
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+        assertEquals(Presenting.QA, pm.ndiLocks.value[0])
+        assertTrue(pm.screenLocks.value.isEmpty(), "nor the screen")
+    }
+
+    @Test
+    fun `omt outputs are previewed under their own names, and a disabled one is not`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(omtOutputs = listOf(
+                ScreenAssignment(),
+                ScreenAssignment(omtEnabled = false),
+                ScreenAssignment(omtName = "Overflow"),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("OMT Output 1").assertExists()
+        onNodeWithText("OMT Output 2").assertDoesNotExist()
+        onNodeWithText("Overflow").assertExists()
+    }
+
+    @Test
     fun `ndi outputs render as additional, separately labeled previews`() = runComposeUiTest {
         val settings = AppSettings(
             projectionSettings = ProjectionSettings(ndiOutputs = listOf(

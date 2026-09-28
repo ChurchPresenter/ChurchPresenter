@@ -345,6 +345,10 @@ kotlin {
             // interface. NdiVideoRenderer is the app-side wiring. Ships no NDI binaries — the
             // runtime is installed separately, exactly as VLC is.
             implementation(projects.ndi)
+            // The OMT client, both directions, over the libomt/libvmx the app bundles (both MIT —
+            // unlike NDI they ship inside the installer; see fetchBundledOmt). OmtVideoRenderer and
+            // OmtFrameCache are the app-side wiring.
+            implementation(projects.omt)
             implementation(projects.theme)
             implementation(projects.coreModels)
             implementation(projects.lottieGenerator)
@@ -476,6 +480,7 @@ dependencies {
     // it from there rather than keeping a second copy.
     add("jvmTestImplementation", testFixtures(projects.atem))
     add("jvmTestImplementation", testFixtures(projects.ndi))
+    add("jvmTestImplementation", testFixtures(projects.omt))
 }
 
 compose.desktop {
@@ -1651,12 +1656,133 @@ val signBundledFfmpeg by tasks.registering {
     }
 }
 
+// ── The bundled OMT libraries ─────────────────────────────────────────────────
+// libomt and libvmx are MIT, so unlike the NDI Runtime they ship inside the installer. Fetched, not
+// committed — 8 to 18 MB a platform — from the pinned url + digest in gradle/omt-builds.properties,
+// exactly as ffmpeg is, into appResources/<os>/omt/. Both files land in the one directory because
+// libomt, a .NET NativeAOT library, finds libvmx beside itself at run time.
+val omtBuildProps = Properties().apply {
+    val f = rootProject.file("gradle/omt-builds.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+val fetchBundledOmt by tasks.registering {
+    description = "Downloads the pinned libomt and libvmx for this platform into appResources."
+    group = "build"
+
+    val target = ffmpegTargetKey()
+    val url = omtBuildProps.getProperty("$target.url", "")
+    val sha256 = omtBuildProps.getProperty("$target.sha256", "")
+    val archiveKind = omtBuildProps.getProperty("$target.archive", "zip")
+    val entries = omtBuildProps.getProperty("$target.entries", "").split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    // The MIT notice, which has to travel with every copy of the libraries.
+    val license = omtBuildProps.getProperty("$target.license", "")
+    val osDir = target.substringBefore('-')
+    val outDir = layout.projectDirectory.dir("src/jvmMain/appResources/$osDir/omt").asFile
+    val cacheDir = layout.buildDirectory.dir("omt").get().asFile
+
+    inputs.property("url", url)
+    inputs.property("sha256", sha256)
+    inputs.property("entries", entries.joinToString(","))
+    outputs.files(entries.map { File(outDir, it.substringAfterLast('/')) })
+    inputs.property("license", license)
+    onlyIf { url.isNotBlank() }
+
+    doLast {
+        require(sha256.isNotBlank()) {
+            "gradle/omt-builds.properties: $target.url is set but $target.sha256 is not. " +
+                "An unverified download is not something this build will run."
+        }
+        require(entries.isNotEmpty()) { "gradle/omt-builds.properties: $target.entries names no library files." }
+        cacheDir.mkdirs()
+        val archive = File(cacheDir, "$target-${sha256.take(12)}." + if (archiveKind == "tar") "tar" else "zip")
+        if (!archive.exists() || sha256Of(archive) != sha256) {
+            logger.lifecycle("Downloading OMT libraries for $target from $url")
+            uri(url).toURL().openStream().use { input ->
+                archive.outputStream().use { input.copyTo(it) }
+            }
+        }
+        val actual = sha256Of(archive)
+        check(actual == sha256) {
+            "OMT download for $target does not match its pinned digest.\n" +
+                "  expected $sha256\n  actual   $actual\n" +
+                "Either the pin is stale or the download was tampered with; do not 'fix' this by " +
+                "updating the digest without knowing which."
+        }
+        val extractDir = File(cacheDir, "$target-extracted").apply { deleteRecursively(); mkdirs() }
+        if (archiveKind == "tar") {
+            val tar = ProcessBuilder("tar", "-xf", archive.absolutePath, "-C", extractDir.absolutePath)
+                .redirectErrorStream(true).start()
+            val tarOutput = tar.inputStream.bufferedReader().readText()
+            check(tar.waitFor() == 0) { "tar could not unpack the OMT archive for $target:\n$tarOutput" }
+        } else {
+            copy {
+                from(zipTree(archive))
+                into(extractDir)
+            }
+        }
+        outDir.mkdirs()
+        for (entry in entries) {
+            val found = File(extractDir, entry).takeIf { it.isFile }
+                ?: error("No '$entry' inside the OMT archive for $target ($url)")
+            found.copyTo(File(outDir, found.name), overwrite = true)
+        }
+        if (license.isNotBlank()) {
+            val notice = File(extractDir, license).takeIf { it.isFile }
+                ?: error("No '$license' inside the OMT archive for $target ($url)")
+            notice.copyTo(File(outDir, "LICENSE.txt"), overwrite = true)
+        }
+        logger.lifecycle("Bundled OMT: ${outDir.relativeTo(rootProject.projectDir)} (${entries.joinToString { it.substringAfterLast('/') }})")
+    }
+}
+
+// The same reason signBundledFfmpeg exists: Compose never codesigns anything under appResources,
+// and the publisher's dylibs are only ad-hoc signed, which notarization rejects. Dylibs load into
+// the app's own process, so they take no entitlements of their own — the app's apply.
+val signBundledOmt by tasks.registering {
+    description = "Codesigns the bundled macOS OMT libraries with the Developer ID identity, for notarization."
+    group = "signing"
+    dependsOn(fetchBundledOmt)
+
+    val identity = macSigningProps.getProperty("identityName", "")
+    val keychain = macSigningProps.getProperty("keychain", "")
+    val libraries = listOf("libomt.dylib", "libvmx.dylib").map {
+        layout.projectDirectory.file("src/jvmMain/appResources/macos/omt/$it").asFile
+    }
+
+    onlyIf {
+        org.gradle.internal.os.OperatingSystem.current().isMacOsX && identity.isConfigured() &&
+            libraries.all { it.isFile }
+    }
+    outputs.upToDateWhen { false }
+
+    doLast {
+        for (library in libraries) {
+            val command = buildList {
+                add("codesign")
+                add("--force")
+                add("--sign"); add(identity)
+                add("--options"); add("runtime")
+                add("--timestamp")
+                if (keychain.isNotBlank()) { add("--keychain"); add(keychain) }
+                add(library.absolutePath)
+            }
+            val process = ProcessBuilder(command).redirectErrorStream(true).start()
+            val output = process.inputStream.bufferedReader().readText()
+            check(process.waitFor() == 0) { "codesign failed for the bundled ${library.name}:\n$output" }
+        }
+        logger.lifecycle("Signed bundled OMT libraries with \"$identity\"")
+    }
+}
+
 // prepareAppResources copies the per-OS directory into the bundle, and `run` reads the same one.
 tasks.matching { it.name == "prepareAppResources" || it.name == "run" }.configureEach {
     dependsOn(fetchBundledFfmpeg)
+    dependsOn(fetchBundledOmt)
 }
 tasks.matching { it.name == "prepareAppResources" }.configureEach {
     dependsOn(signBundledFfmpeg)
+    dependsOn(signBundledOmt)
 }
 
 // ── The runtime jpackage will bundle has to be self-contained ─────────────────

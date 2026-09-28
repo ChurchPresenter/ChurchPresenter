@@ -150,7 +150,8 @@ class ProjectionSettingsTabGridTest {
 
     /**
      * How many labelled buttons follow the grid: Add Output, the NDI card's three with no runtime
-     * installed, the audio-device dropdown, the VLC Browse button, and the Camera Capture card's two.
+     * installed, the OMT card's three (Choose Folder, Check again, and the discovery server's
+     * Apply), the audio-device dropdown, the VLC Browse button, and the Camera Capture card's two.
      *
      * The dropdown follows what [projectionTab] **pinned**, not what the machine has. This used to
      * read the global `isVlcAvailable` — which was right while the card read it too, and became a
@@ -159,7 +160,7 @@ class ProjectionSettingsTabGridTest {
      * count was not expecting.
      */
     private fun trailingButtons(vlcInstalled: Boolean = true): Int =
-        1 + 3 + (if (vlcInstalled) 1 else 0) + 1 + 2
+        1 + 3 + 3 + (if (vlcInstalled) 1 else 0) + 1 + 2
 
     @Test
     fun `the grid's ordinals are where Grid says they are`() {

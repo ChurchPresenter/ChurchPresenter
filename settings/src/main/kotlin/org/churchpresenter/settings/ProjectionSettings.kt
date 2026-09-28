@@ -23,6 +23,15 @@ data class ProjectionSettings(
     // Custom NDI Runtime directory (empty = auto-detect), the exact counterpart of vlcPath. The
     // runtime is installed separately — this app ships no NDI binaries and may not.
     val ndiRuntimePath: String = "",
+    // OMT outputs: virtual, and kept out of screenAssignments, for the reasons ndiOutputs gives.
+    val omtOutputs: List<ScreenAssignment> = emptyList(),
+    // A libomt directory to use instead of the copy bundled with the app (empty = the bundled one).
+    // An override, like ffmpegPath, rather than a search like ndiRuntimePath: OMT is MIT and ships
+    // inside the installer.
+    val omtLibraryPath: String = "",
+    // An OMT discovery server, `omt://host:port`, for a network where DNS-SD does not reach — blank
+    // uses DNS-SD. Applies to finding sources on the Canvas and to being found as an output alike.
+    val omtDiscoveryServer: String = "",
     // Custom ffmpeg executable (empty = use the copy bundled with the app). Unlike vlcPath and
     // ndiRuntimePath this is an override rather than a way to find something we do not ship: the
     // app carries its own ffmpeg, and this exists for an operator who wants a different build.

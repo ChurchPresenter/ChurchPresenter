@@ -23,6 +23,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.ndi.NdiRuntimeStatus
+import org.churchpresenter.omt.OmtRuntimeStatus
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
@@ -59,6 +60,11 @@ internal fun projectionTab(
      * differently depending on whether the machine running the suite has an NDI Runtime installed.
      */
     ndiStatus: NdiRuntimeStatus = NdiRuntimeStatus.NotInstalled,
+    /**
+     * Pinned for the same reason. Not-found rather than ready: that is what a checkout that never
+     * ran `fetchBundledOmt` has — CI among them — and it draws the same buttons Ready does.
+     */
+    omtStatus: OmtRuntimeStatus = OmtRuntimeStatus.NotInstalled,
     /** Pinned to the state a packaged app is in, for the same reason. */
     ffmpegStatus: FfmpegStatus = PINNED_FFMPEG,
     /**
@@ -84,6 +90,9 @@ internal fun projectionTab(
                 detectScreens = { screens },
                 ndiStatus = { ndiStatus },
                 ndiReceiverCount = { 0 },
+                omtStatus = { omtStatus },
+                omtReceiverCount = { 0 },
+                omtAddressOf = { "" },
                 ffmpegProbe = { ffmpegStatus },
                 vlcProbe = { vlcInstalled },
                 audioDeviceProbe = { audioDevices },

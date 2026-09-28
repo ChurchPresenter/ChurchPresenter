@@ -1,0 +1,164 @@
+# Builds the OMT libraries for Linux, which their publisher does not ship.
+#
+# Open Media Transport publishes libomt and libvmx for Windows and macOS only; for Linux it says to
+# build from source. So this does, from pinned commits, and then proves the result the same way the
+# macOS binaries were proven: :omt's OmtHardwareTest loads the built libomt, puts a source on the
+# network, discovers it, receives it and checks the red pixel and its alpha came back.
+#
+# On a pull request that touches OMT it stops there. Run by hand with `publish` ticked, it also
+# attaches the pair to a release of this repository — the URL gradle/omt-builds.properties pins as
+# linux-x86_64, with the digest this run prints.
+#
+# Built on ubuntu-22.04 rather than -latest on purpose: a NativeAOT library links against the glibc
+# of the machine that built it, so the oldest supported runner is the widest-compatible binary.
+name: OMT libraries for Linux
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/omt-linux.yml'
+      - 'omt/**'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Attach the built libraries to a release of this repository'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  # The commits the Windows and macOS v1.0.0.19 binaries were built from — except libvmx, which is
+  # taken from after a fix for a Clang compile error (2026-09-23): this build uses Clang, theirs did
+  # not. libvmx's C API is unchanged across the two, so libomt 1.0.0.19 loads it as it loads theirs.
+  LIBOMT_SHA: bb4b67be8e5964f1017592b9fc5406495e704e5d
+  LIBOMTNET_SHA: 5395139d45cf47bf9f90364bf68f9960183e7638
+  LIBVMX_SHA: a1828cb438823ebb777dcad20f9f56b633ae8db4
+  OMT_VERSION: 1.0.0.19
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    outputs:
+      archive: ${{ steps.pack.outputs.archive }}
+      sha256: ${{ steps.pack.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: openmediatransport/libvmx
+          ref: ${{ env.LIBVMX_SHA }}
+          path: omt-src/libvmx
+      - uses: actions/checkout@v4
+        with:
+          repository: openmediatransport/libomtnet
+          ref: ${{ env.LIBOMTNET_SHA }}
+          path: omt-src/libomtnet
+      - uses: actions/checkout@v4
+        with:
+          repository: openmediatransport/libomt
+          ref: ${{ env.LIBOMT_SHA }}
+          path: omt-src/libomt
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # NativeAOT links with clang and needs zlib's headers.
+      - name: Install the native toolchain
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      # Not the upstream buildlinuxx64.sh, which compiles every file with -mavx2 -mbmi -mlzcnt. libvmx
+      # chooses its AVX2 path at run time (__builtin_cpu_supports), so only vmxcodec_avx2.cpp may be
+      # built for AVX2; built the upstream way, the compiler is free to put AVX2 instructions in the
+      # code every CPU runs, and a machine without AVX2 — the SSE4.2 minimum libvmx documents — dies
+      # of SIGILL. Checked: built this way, the shared objects contain no ymm register use at all.
+      - name: Build libvmx
+        working-directory: omt-src/libvmx/src
+        run: |
+          set -euo pipefail
+          BASE="-O3 -std=c++17 -fdeclspec -fPIC"
+          clang++ $BASE -msse4.2 -mssse3 -mpopcnt -c vmxcodec.cpp -o vmxcodec.o
+          clang++ $BASE -msse4.2 -mssse3 -mpopcnt -c vmxcodec_x86.cpp -o vmxcodec_x86.o
+          clang++ $BASE -mavx2 -mbmi -mbmi2 -mlzcnt -c vmxcodec_avx2.cpp -o vmxcodec_avx2.o
+          # The soname is what lets libomt's later dlopen("libvmx.so") find the copy JnaOmtLibrary has
+          # already loaded by full path; glibc matches an already-loaded library by it.
+          clang++ -shared -Wl,-soname,libvmx.so -Wl,-rpath,'$ORIGIN' vmxcodec.o vmxcodec_x86.o vmxcodec_avx2.o -lpthread -o libvmx.so
+          if objdump -d vmxcodec.o vmxcodec_x86.o | grep -q ymm; then
+            echo "::error::AVX2 instructions in libvmx's shared code; it would crash on a CPU without AVX2"
+            exit 1
+          fi
+
+      # libomt's project references libomtnet's built assembly by relative path, which is why the
+      # three are checked out side by side.
+      - name: Build libomt
+        run: |
+          set -euo pipefail
+          dotnet build omt-src/libomtnet/libomtnet.sln -c Release
+          dotnet publish omt-src/libomt/libomt.sln -r linux-x64 -c Release
+          find omt-src/libomt -path '*linux-x64/publish/libomt.so' -print -quit | xargs -I{} cp {} omt-src/libomt.so
+
+      - name: Check the exports
+        run: nm -D --defined-only omt-src/libomt.so | grep -E ' omt_(send_create|send|receive|discovery_getaddresses)$'
+
+      - name: Pack
+        id: pack
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp omt-src/libomt.so omt-src/libvmx/src/libvmx.so dist/
+          cp omt-src/libomtnet/LICENSE.txt dist/LICENSE.txt
+          archive="omt-${OMT_VERSION}-linux-x86_64.tar.gz"
+          # Fixed mtime, owner and order, so rebuilding the same commits gives the same digest.
+          tar --sort=name --mtime='2026-01-01 00:00Z' --owner=0 --group=0 --numeric-owner \
+            -C dist -czf "$archive" libomt.so libvmx.so LICENSE.txt
+          sha=$(sha256sum "$archive" | cut -d' ' -f1)
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+          echo "### OMT for Linux" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$archive\` — sha256 \`$sha\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omt-linux-x86_64
+          path: ${{ steps.pack.outputs.archive }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The whole round trip against the built binaries: load, send, discover, receive, and check
+      # the colour and the alpha survived. The runner is its own LAN of one, which is enough — the
+      # test falls back to the sender's own address if DNS-SD finds nothing.
+      - name: Loopback test against the built libraries
+        run: ./gradlew :omt:test -PomtHardware=true -PomtLibrary="$PWD/dist" --tests '*OmtHardwareTest*' -i
+
+  publish:
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: omt-linux-x86_64
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ needs.build.outputs.archive }}
+          SHA256: ${{ needs.build.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          tag="omt-libs-${OMT_VERSION}"
+          gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$tag" -R "$GITHUB_REPOSITORY" \
+            --title "OMT libraries ${OMT_VERSION} for Linux" --prerelease \
+            --notes "libomt and libvmx built for Linux x86_64 by .github/workflows/omt-linux.yml. Bundled by fetchBundledOmt; not an app release."
+          gh release upload "$tag" "$ARCHIVE" -R "$GITHUB_REPOSITORY" --clobber
+          echo "Pin in gradle/omt-builds.properties:"
+          echo "linux-x86_64.url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/${ARCHIVE}"
+          echo "linux-x86_64.sha256=${SHA256}"

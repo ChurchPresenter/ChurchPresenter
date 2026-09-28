@@ -186,6 +186,10 @@ jobs:
               - *shared
               - 'ndi/**'
               - 'diagnostics/**'          # implementation(projects.diagnostics)
+            omt:
+              - *shared
+              - 'omt/**'
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
             planningcenter:
               - *shared
               - 'planning-center/**'
@@ -237,7 +241,7 @@ jobs:
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
-          :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :planning-center:detekt
+          :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :calendar:detekt :lottieGenerator:detekt
 
@@ -480,6 +484,16 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.ndi == 'true' }}
         run: ./gradlew :ndi:jacocoTestCoverageVerification -x test
 
+      # The OMT client, both directions, driven through a plain Kotlin fake like NDI's: no libomt,
+      # no network. The real-library round trip is omt-linux.yml's, on the binaries it builds.
+      - name: OMT client tests
+        if: ${{ !cancelled() && steps.modules.outputs.omt == 'true' }}
+        run: ./gradlew :omt:test
+
+      - name: OMT client coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.omt == 'true' }}
+        run: ./gradlew :omt:jacocoTestCoverageVerification -x test
+
       - name: Planning Center tests
         if: ${{ !cancelled() && steps.modules.outputs.planningcenter == 'true' }}
         run: ./gradlew :planning-center:test
@@ -550,6 +564,7 @@ jobs:
             diagnostics/build/test-results/**/TEST-*.xml
             atem/build/test-results/**/TEST-*.xml
             ndi/build/test-results/**/TEST-*.xml
+            omt/build/test-results/**/TEST-*.xml
             planning-center/build/test-results/**/TEST-*.xml
             bible-formats/build/test-results/**/TEST-*.xml
             song-chords/build/test-results/**/TEST-*.xml
@@ -742,6 +757,8 @@ jobs:
             atem/build/test-results/
             ndi/build/reports/tests/
             ndi/build/test-results/
+            omt/build/reports/tests/
+            omt/build/test-results/
             planning-center/build/reports/tests/
             planning-center/build/test-results/
             bible-formats/build/reports/tests/

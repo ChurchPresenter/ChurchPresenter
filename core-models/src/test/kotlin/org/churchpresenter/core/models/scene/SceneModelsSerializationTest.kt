@@ -401,6 +401,7 @@ class SceneModelsSerializationTest {
             discriminatorOf(SceneSource.ScreenCaptureSource(id = "1", name = "n")),
         )
         assertEquals(prefix + "NdiSource", discriminatorOf(SceneSource.NdiSource(id = "1", name = "n")))
+        assertEquals(prefix + "OmtSource", discriminatorOf(SceneSource.OmtSource(id = "1", name = "n")))
         assertEquals(prefix + "BibleSource", discriminatorOf(SceneSource.BibleSource(id = "1", name = "n")))
     }
 
@@ -426,6 +427,27 @@ class SceneModelsSerializationTest {
         assertEquals("", fresh.sourceName)
         assertEquals("", fresh.sourceAddress)
         assertEquals(false, fresh.lowBandwidth, "a new source takes the full stream, not the proxy")
+    }
+
+    @Test
+    fun `an OMT source keeps its address and its preview choice`() {
+        val omt = SceneSource.OmtSource(
+            id = "omt1", name = "Overflow", sourceAddress = "omt://10.0.0.5:6400", preview = true,
+        )
+
+        val back = roundTrip(omt)
+
+        assertEquals(omt, back)
+        assertEquals("omt://10.0.0.5:6400", back.sourceAddress)
+        assertTrue(back.preview)
+    }
+
+    @Test
+    fun `an OMT source that was never pointed at anything reads back as unconfigured`() {
+        val fresh = roundTrip(SceneSource.OmtSource(id = "omt2", name = "OMT"))
+
+        assertEquals("", fresh.sourceAddress)
+        assertEquals(false, fresh.preview, "a new source takes the full stream, not the preview")
     }
 
     @Test
@@ -461,6 +483,7 @@ class SceneModelsSerializationTest {
             "CameraSource" to null,
             "ScreenCaptureSource" to null,
             "NdiSource" to null,
+            "OmtSource" to null,
             "BibleSource" to null,
         )
 
@@ -492,6 +515,7 @@ class SceneModelsSerializationTest {
             SceneSource.CameraSource(id = "9", name = "Camera", deviceName = "Cam"),
             SceneSource.ScreenCaptureSource(id = "10", name = "Capture", captureX = 5),
             SceneSource.NdiSource(id = "12", name = "NDI", sourceName = "BOOTH (Camera 1)"),
+            SceneSource.OmtSource(id = "13", name = "OMT", sourceAddress = "BOOTH (Camera 2)"),
             SceneSource.BibleSource(id = "11", name = "Verse", verseText = "…"),
         )
 

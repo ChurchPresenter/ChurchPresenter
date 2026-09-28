@@ -309,6 +309,33 @@ sealed class SceneSource {
         override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
     }
 
+    /**
+     * A live OMT (Open Media Transport) source from the network, received and drawn as a layer.
+     *
+     * [sourceAddress] is what the receiver connects by: the full `HOSTNAME (Source)` name discovery
+     * reports, or an `omt://host:port` URL typed for a source discovery cannot see. One field where
+     * [NdiSource] has two, because OMT takes either form in the same place.
+     *
+     * [preview] asks the sender for its 1/8-size preview stream — OMT's counterpart of NDI's
+     * low-bandwidth proxy, and worth it for the same corner-inset layer.
+     *
+     * The serial name follows its siblings' historical form, pinned as they are.
+     */
+    @Serializable
+    @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.OmtSource")
+    data class OmtSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val sourceAddress: String = "",
+        val preview: Boolean = false
+    ) : SceneSource() {
+        override fun withId(id: String): SceneSource = copy(id = id)
+        override fun withTransform(transform: SourceTransform): SceneSource = copy(transform = transform)
+    }
+
     @Serializable
     @SerialName("org.churchpresenter.app.churchpresenter.models.SceneSource.BibleSource")
     data class BibleSource(

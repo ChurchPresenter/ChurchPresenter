@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.ui.test.onAllNodesWithText
 import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -119,5 +120,18 @@ class CanvasTabAddSourceTest {
             // panel, and guessing one would put a stranger's camera on the canvas.
             assertEquals("", source.sourceName)
             assertEquals(false, source.lowBandwidth)
+        }
+
+    @Test
+    fun `an OMT source is added as an OMT source, pointed at nothing yet, and says so`() =
+        canvasTab(seed = { addScene("Scene") }) { vm, _ ->
+            addSourceOfType(CanvasLabel.OMT)
+
+            val source = soleSource(vm)
+            assertTrue(source is SceneSource.OmtSource, "got $source")
+            assertEquals("", source.sourceAddress)
+            assertEquals(false, source.preview)
+            // The layer draws its own placeholder rather than a black rectangle.
+            onAllNodesWithText("No OMT source selected")[0].assertExists()
         }
 }

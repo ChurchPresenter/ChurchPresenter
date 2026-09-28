@@ -148,6 +148,7 @@ internal object CanvasLabel {
     const val CAMERA = "Camera"
     const val SCREEN_CAPTURE = "Screen Capture"
     const val NDI = "NDI Source"
+    const val OMT = "OMT Source"
     const val BIBLE = "Bible"
     const val GO_LIVE = "Go Live"
     const val ADD_TO_SCHEDULE = "Add to Schedule"
