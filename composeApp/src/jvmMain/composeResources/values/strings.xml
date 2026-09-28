@@ -1859,6 +1859,9 @@
     <string name="canvas_camera_error_no_frames">The camera opened but sent no video.</string>
     <string name="canvas_camera_error_unknown">The camera could not be opened.</string>
     <string name="canvas_camera_error_decklink_in_use">Cannot open input — the device may already be in use for output.</string>
+    <string name="canvas_camera_error_decklink_not_found">This DeckLink device is not connected. Check that the card is installed and its driver is running, then select the input again.</string>
+    <string name="canvas_camera_error_decklink_no_input">This DeckLink device has no video input, so it cannot be used as a camera.</string>
+    <string name="canvas_camera_error_decklink_open_failed">The DeckLink input could not be opened. Check the card in Blackmagic Desktop Video Setup, then select the input again.</string>
     <string name="canvas_camera_open_privacy_settings">Open Camera Privacy Settings</string>
     <string name="canvas_camera_format">Video Format</string>
     <string name="canvas_camera_format_auto">Auto (default)</string>

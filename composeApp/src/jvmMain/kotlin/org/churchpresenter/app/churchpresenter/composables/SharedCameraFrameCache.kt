@@ -167,6 +167,9 @@ object SharedCameraFrameCache {
     /** The same, for a stored AVFoundation index that has drifted — see [avfSourceToOpen]. */
     private val avfIndexDriftReport = ReportOnce()
 
+    /** Bounds the DeckLink open-failure report to one per device per process. */
+    private val deckLinkOpenReports = DeckLinkOpenReports()
+
     // ── DeckLink capture ────────────────────────────────────────────
 
     /** Puts one polled DeckLink frame on screen; false when the poll returned no usable frame. */
@@ -189,19 +192,26 @@ object SharedCameraFrameCache {
         System.err.println("[DeckLink Input] Opening device ${source.deckLinkIndex}, " +
             "format: ${source.videoFormat.ifEmpty { "auto" }}, connection: ${source.videoConnection}")
 
+        val index = source.deckLinkIndex
+        val device = withContext(Dispatchers.IO) { DeckLinkManager.listDevices().find { it.index == index } }
+        val inputModes = if (device != null) withContext(Dispatchers.IO) { DeckLinkManager.listInputModes(index) }
+        else emptyList()
+        deckLinkInputBlocker(present = device != null, hasInput = inputModes.isNotEmpty())?.let { blocker ->
+            System.err.println("[DeckLink Input] Not opening device $index: $blocker")
+            entry.error.value = blocker
+            return
+        }
+
         val opened = withContext(Dispatchers.IO) {
-            DeckLinkManager.openInput(source.deckLinkIndex, source.videoFormat, source.videoConnection)
+            DeckLinkManager.openInput(index, source.videoFormat, source.videoConnection)
         }
         if (!opened) {
-            System.err.println("[DeckLink Input] Failed to open input on device ${source.deckLinkIndex}")
-            CrashReporter.reportWarning(
-                "DeckLink: Failed to open input on device",
-                tags = mapOf(
-                    "subsystem" to "decklink",
-                    "decklink_index" to source.deckLinkIndex.toString()
-                )
-            )
-            entry.error.value = CameraFailure.DECKLINK_INPUT_IN_USE
+            System.err.println("[DeckLink Input] Failed to open input on device $index")
+            val outputActive = DeckLinkManager.isOutputActive(index)
+            if (!outputActive) {
+                reportDeckLinkOpenFailed(index, device?.name.orEmpty(), inputModes.size, deckLinkOpenReports)
+            }
+            entry.error.value = deckLinkOpenFailure(outputActive)
             return
         }
         entry.error.value = null

@@ -57,6 +57,18 @@ internal enum class CameraFailure {
     DECKLINK_INPUT_IN_USE,
 
     /**
+     * The DeckLink device a source names is not there — no card at that index, or none at all on a
+     * machine where the driver is installed. Decided before the card is asked, so it is never reported.
+     */
+    DECKLINK_NOT_FOUND,
+
+    /** A DeckLink device with no video input — an output-only card cannot be a camera. */
+    DECKLINK_NO_INPUT,
+
+    /** The card is present, has an input and is not driving an output, and still would not open. */
+    DECKLINK_OPEN_FAILED,
+
+    /**
      * ffmpeg is not installed, so no camera can be opened at all.
      *
      * Decided before ffmpeg runs rather than classified from its stderr, which is why
