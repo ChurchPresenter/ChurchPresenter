@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -40,6 +41,37 @@ fun HideOutputWindowCursor(window: AwtWindow, hide: Boolean) {
         onDispose { }
     }
 }
+
+/**
+ * Whether the output this content is drawn on hides the mouse pointer.
+ *
+ * Provided by the output windows alongside [HideOutputWindowCursor], for the one child neither layer
+ * reaches: an embedded web page. Chromium's own native window sits inside the output and sets its own
+ * cursor, so the arrow showed over a live Web page with the setting on (found on Windows). The page
+ * is told instead -- see [outputCursorScript]. False everywhere else, so the Web tab's own browser in
+ * the main window keeps its pointer.
+ */
+val LocalOutputCursorHidden = staticCompositionLocalOf { false }
+
+/** The id of the style element [outputCursorScript] adds, so the same script can take it away. */
+private const val HIDE_CURSOR_STYLE_ID = "churchpresenter-hide-cursor"
+
+/**
+ * JavaScript that hides the pointer over a web page, or shows it again.
+ *
+ * A style rule rather than anything done to the window: Chromium then hides the pointer itself, the
+ * same way on every platform, and reapplying it is harmless. Run again after every page load, since
+ * a new page starts without it.
+ */
+internal fun outputCursorScript(hide: Boolean): String =
+    if (hide) {
+        "(function(){var s=document.getElementById('$HIDE_CURSOR_STYLE_ID');" +
+            "if(!s){s=document.createElement('style');s.id='$HIDE_CURSOR_STYLE_ID';" +
+            "(document.head||document.documentElement).appendChild(s);}" +
+            "s.textContent='*,*::before,*::after{cursor:none!important}';})();"
+    } else {
+        "(function(){var s=document.getElementById('$HIDE_CURSOR_STYLE_ID');if(s){s.remove();}})();"
+    }
 
 /** A blank pointer over this content and everything in it, while [hide] is on. */
 fun Modifier.hiddenOutputCursor(hide: Boolean): Modifier =
