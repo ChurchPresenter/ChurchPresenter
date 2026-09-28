@@ -75,9 +75,10 @@ import kotlin.test.assertTrue
  *    unlocks.
  *  * **Camera and window enumeration** shell out to `ffmpeg`, `system_profiler`, `xprop` and
  *    `osascript`. What they return is the machine's hardware, which no fixture can set, and on macOS
- *    the window listing can raise an accessibility prompt. Those two panels are driven under
- *    [withOsName] instead — see `SourcePropertiesCameraTest` and `SourcePropertiesScreenCaptureTest`
- *    for exactly what that reaches and what it leaves uncovered.
+ *    the window listing can raise an accessibility prompt. The camera panel is handed [NO_CAMERAS]
+ *    instead of asking; the window panel is driven under [withOsName] — see
+ *    `SourcePropertiesCameraTest` and `SourcePropertiesScreenCaptureTest` for exactly what each
+ *    reaches and what it leaves uncovered.
  *
  * Colour fields are driven end to end, through the real `ColorPickerDialog`, using the `recolor`
  * helpers already shared by the settings-tab tests.
@@ -95,6 +96,7 @@ internal fun sourcePanel(
     initial: SceneSource,
     appSettings: AppSettings? = null,
     fileChooser: FileChooser = FileChooser.platformInstance,
+    cameraHost: CameraHost? = NO_CAMERAS,
     block: ComposeUiTest.(get: () -> SceneSource) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -105,6 +107,7 @@ internal fun sourcePanel(
                 source = state,
                 appSettings = appSettings,
                 fileChooser = fileChooser,
+                cameraHost = cameraHost,
                 onSourceUpdate = { updated -> state = updated; current = updated },
             )
         }
@@ -126,6 +129,7 @@ internal fun sourcePanel(
 internal fun redrawablePanel(
     initial: SceneSource,
     appSettings: AppSettings? = null,
+    cameraHost: CameraHost? = NO_CAMERAS,
     block: ComposeUiTest.(get: () -> SceneSource, redraw: () -> Unit) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -141,6 +145,7 @@ internal fun redrawablePanel(
                 // little enough not to move anything a test measures.
                 modifier = Modifier.padding(top = (tick % 2).dp),
                 appSettings = appSettings,
+                cameraHost = cameraHost,
                 onSourceUpdate = { updated -> state = updated; current = updated },
             )
         }
@@ -175,6 +180,16 @@ internal fun <T> withOsName(name: String, block: () -> T): T {
 
 /** An OS no branch of the panel claims to enumerate, so every listing returns empty immediately. */
 internal const val OS_WITHOUT_ENUMERATOR = "TestOS"
+
+/**
+ * The machine every panel test describes unless it says otherwise: no cameras, and ffmpeg present.
+ *
+ * Pinned rather than asked. The real answers — the process-wide [CameraDeviceCatalog] and an
+ * `ffmpeg -version` probe — arrive on their own schedule, so a camera panel changed between two
+ * frames of a test that had changed nothing (#703), and a test that waited for the first answer ran
+ * out of time on a slow machine's cold JVM (#701).
+ */
+internal val NO_CAMERAS = CameraHost(devices = emptyList(), ffmpegAvailable = true)
 
 // ── Fixtures ────────────────────────────────────────────────────────────────────────────────────
 

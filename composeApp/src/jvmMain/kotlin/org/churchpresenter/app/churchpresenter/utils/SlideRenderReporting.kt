@@ -12,7 +12,9 @@ import org.churchpresenter.presentationengine.SlideRenderDegradation
  * single issue.
  *
  * The context sentence is constant, per `CrashReporter.reportWarning`'s contract: the slide index
- * and the counts vary per occurrence and belong in tags and extras.
+ * and the counts vary per occurrence and belong in tags and extras. `degraded.origin` and
+ * `degraded.shapes` are tags so occurrences can be grouped by which POI cap refused which kind of
+ * shape — the one field a fix needs, and the one the first report of this issue could not give.
  */
 fun reportDegradedSlide(degradation: SlideRenderDegradation) {
     CrashReporter.reportWarning(
@@ -20,11 +22,14 @@ fun reportDegradedSlide(degradation: SlideRenderDegradation) {
         tags = mapOf(
             "subsystem" to "presentation",
             "degraded.cause" to degradation.cause,
+            "degraded.origin" to degradation.failureOrigin,
+            "degraded.shapes" to degradation.skippedShapes.distinct().sorted().joinToString(","),
         ),
         extras = mapOf(
             "slide.index" to degradation.slideIndex.toString(),
             "shapes.total" to degradation.shapesTotal.toString(),
             "shapes.skipped" to degradation.shapesSkipped.toString(),
+            "record.limit" to degradation.recordLimit,
         ),
     )
 }

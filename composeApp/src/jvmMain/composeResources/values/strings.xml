@@ -1171,7 +1171,6 @@
     <string name="customize_no_preview">No preview for this section</string>
 
     <!-- Output Profiles -->
-    <string name="output_profile_none">None</string>
     <string name="output_profile_new">New Profile</string>
     <string name="output_profile_create_default">Create Default Profile</string>
     <string name="output_profile_create_default_tooltip">Add a fresh profile with the app's factory-default styling, as a backup to fall back to</string>
@@ -1183,6 +1182,9 @@
     <string name="output_profile_usage_count">Used by %1$d output(s)</string>
     <string name="output_profile_name_hint">Profile name</string>
     <string name="output_profile_picker_tooltip">Output profile</string>
+    <string name="output_profile_blank">Blank</string>
+    <!-- No longer shown (Blank replaced None); kept while the locales still carry it. -->
+    <string name="output_profile_none">None</string>
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
     <string name="output_profile_display_mode">Display Mode</string>
@@ -1859,6 +1861,9 @@
     <string name="canvas_camera_error_no_frames">The camera opened but sent no video.</string>
     <string name="canvas_camera_error_unknown">The camera could not be opened.</string>
     <string name="canvas_camera_error_decklink_in_use">Cannot open input — the device may already be in use for output.</string>
+    <string name="canvas_camera_error_decklink_not_found">This DeckLink device is not connected. Check that the card is installed and its driver is running, then select the input again.</string>
+    <string name="canvas_camera_error_decklink_no_input">This DeckLink device has no video input, so it cannot be used as a camera.</string>
+    <string name="canvas_camera_error_decklink_open_failed">The DeckLink input could not be opened. Check the card in Blackmagic Desktop Video Setup, then select the input again.</string>
     <string name="canvas_camera_open_privacy_settings">Open Camera Privacy Settings</string>
     <string name="canvas_camera_format">Video Format</string>
     <string name="canvas_camera_format_auto">Auto (default)</string>

@@ -198,13 +198,14 @@ internal fun CameraProperties(
     source: SceneSource.CameraSource,
     onUpdate: (SceneSource) -> Unit,
     /**
-     * The cameras to offer, or null to ask this machine.
+     * The machine this panel describes, or null to ask the real one.
      *
-     * A test passes a list: enumeration reports whatever hardware the recording machine happens to
+     * A test passes one: enumeration reports whatever hardware the recording machine happens to
      * have, so the committed image of this panel said "MacBook Pro Camera" on one and "Capture
-     * screen 0" on another. Same seam, same reason, as `SongBackgroundLibrary`'s.
+     * screen 0" on another. Same seam, same reason, as `SongBackgroundLibrary`'s. Given a host, the
+     * panel asks the machine nothing — not its cameras, not its ffmpeg, not the last enumeration.
      */
-    devices: List<CameraDevice>? = null,
+    host: CameraHost? = null,
 ) {
     Text(
         stringResource(Res.string.canvas_source_camera),
@@ -219,17 +220,18 @@ internal fun CameraProperties(
     // composition — or from a click handler — blocked the UI thread for as long as those took. A
     // panel that hangs the app for seconds every time a camera source is selected is the reported
     // "Canvas tab is very hanging"; the catalog does the same work on IO and caches it.
-    val known by CameraDeviceCatalog.devices.collectAsState()
-    val supplied = devices
+    val catalog by CameraDeviceCatalog.devices.collectAsState()
+    // Null only while the first enumeration has not answered; a supplied host has always answered.
+    val known = host?.devices ?: catalog
     // Displays are dropped here rather than in the catalog: the catalog is what decides where a
     // *saved* device is now, and it has to keep seeing them. See `selectableCameras`.
-    val offered = (supplied ?: known.orEmpty()).selectableCameras(keeping = source.deviceName)
+    val offered = known.orEmpty().selectableCameras(keeping = source.deviceName)
     val scope = rememberCoroutineScope()
 
-    // Never enumerated when the caller supplied the list, or the real hardware would land a moment
+    // Never enumerated when the caller supplied the host, or the real hardware would land a moment
     // later and replace what the caller pinned.
     LaunchedEffect(deckLinkDeviceFormat) {
-        if (supplied == null) CameraDeviceCatalog.refresh(deckLinkDeviceFormat)
+        if (host == null) CameraDeviceCatalog.refresh(deckLinkDeviceFormat)
     }
 
     RaisedButton(
@@ -362,25 +364,32 @@ internal fun CameraProperties(
     // Probed off the composition thread: `isFfmpegAvailable()` runs `ffmpeg -version` against each
     // candidate install path in turn, with a five-second timeout each. It starts `true` so the
     // "install ffmpeg" sentence never flashes up on a machine that has it.
-    var ffmpegAvailable by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) { ffmpegAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+    var probedFfmpeg by remember { mutableStateOf(true) }
+    LaunchedEffect(host == null) {
+        if (host == null) probedFfmpeg = withContext(Dispatchers.IO) { isFfmpegAvailable() }
+    }
 
-    // `known`, not `devices`: null means the first enumeration has not answered yet, which the hint
+    // `known`, not `offered`: null means the first enumeration has not answered yet, which the hint
     // list treats as "say nothing" and must not be flattened into "no cameras found".
-    CameraToolHints(osName, known, ffmpegAvailable)
+    CameraToolHints(
+        osName = osName,
+        devices = known,
+        ffmpegAvailable = host?.ffmpegAvailable ?: probedFfmpeg,
+        enumerator = if (host == null) CameraDeviceCatalog.lastEnumeration?.enumerator else null,
+    )
 
     CameraPrivacyHint(osName)
 }
 
 /** Whatever [cameraHintStringRes] decides is worth saying about this machine's camera tooling. */
 @Composable
-private fun CameraToolHints(osName: String, devices: List<CameraDevice>?, ffmpegAvailable: Boolean) {
-    cameraHintStringRes(
-        osName,
-        devices,
-        ffmpegAvailable,
-        CameraDeviceCatalog.lastEnumeration?.enumerator,
-    ).forEach { hint ->
+private fun CameraToolHints(
+    osName: String,
+    devices: List<CameraDevice>?,
+    ffmpegAvailable: Boolean,
+    enumerator: CameraEnumerator?,
+) {
+    cameraHintStringRes(osName, devices, ffmpegAvailable, enumerator).forEach { hint ->
         Text(
             stringResource(hint),
             style = MaterialTheme.typography.bodySmall,

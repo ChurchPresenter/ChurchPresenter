@@ -50,9 +50,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.drawShiftedY
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
-import androidx.compose.ui.graphics.graphicsLayer
 
 private const val DISABLED_ALPHA = 0.45f
 private const val SEGMENT_HOVER_ALPHA = 0.08f
@@ -352,7 +352,7 @@ fun SegmentTrackItem(
                 when {
                     selected -> Modifier.raised(shape, palette.selected, palette, hovered = hovered, lift = 2.dp)
                     // A faint wash under the pointer, so an unchosen option shows it can be picked.
-                    hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
+                    hovered -> Modifier.drawShiftedY(-SEGMENT_HOVER_SHIFT)
                         .clip(shape).background(ink.copy(alpha = SEGMENT_HOVER_ALPHA))
                     else -> Modifier.clip(shape)
                 }

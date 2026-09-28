@@ -25,6 +25,9 @@ class ScreenAssignmentReconcileTest {
 
     private fun auto() = ScreenAssignment(targetDisplay = -1)
 
+    private fun reconcile(saved: List<ScreenAssignment>, displays: List<ResolvedDisplay>, deckLinkCount: Int) =
+        reconcileScreenAssignments(saved, displays, deckLinkCount, FALLBACK_PROFILE)
+
     // ── Nothing to do ───────────────────────────────────────────────────────────
 
     @Test
@@ -32,14 +35,14 @@ class ScreenAssignmentReconcileTest {
         val saved = listOf(ScreenAssignment(targetDisplay = 1), ScreenAssignment(targetDisplay = 2))
 
         assertNull(
-            reconcileScreenAssignments(saved, listOf(display(1), display(2)), deckLinkCount = 0),
+            reconcile(saved, listOf(display(1), display(2)), deckLinkCount = 0),
             "a normal launch must not rewrite the settings file",
         )
     }
 
     @Test
     fun `no displays and no devices needs no slots`() {
-        assertNull(reconcileScreenAssignments(emptyList(), emptyList(), deckLinkCount = 0))
+        assertNull(reconcile(emptyList(), emptyList(), deckLinkCount = 0))
     }
 
     // ── Adding missing slots ────────────────────────────────────────────────────
@@ -47,7 +50,7 @@ class ScreenAssignmentReconcileTest {
     @Test
     fun `a slot is created for each non-primary display, carrying its bounds`() {
         val result = assertNotNull(
-            reconcileScreenAssignments(emptyList(), listOf(display(1, x = 1920), display(2, x = 3840)), 0)
+            reconcile(emptyList(), listOf(display(1, x = 1920), display(2, x = 3840)), 0)
         )
 
         assertEquals(2, result.size)
@@ -57,8 +60,19 @@ class ScreenAssignmentReconcileTest {
     }
 
     @Test
+    fun `a new slot follows the fallback profile rather than none`() {
+        val result = assertNotNull(reconcile(listOf(auto()), listOf(display(1), display(2)), deckLinkCount = 1))
+
+        assertEquals(
+            listOf(null, FALLBACK_PROFILE, FALLBACK_PROFILE), result.map { it.activeProfileId },
+            "a slot with no profile draws with factory defaults and shows no selection in its picker; " +
+                "the saved slot's own reference is not this function's to change",
+        )
+    }
+
+    @Test
     fun `a DeckLink-only slot is created as none rather than left on auto`() {
-        val result = assertNotNull(reconcileScreenAssignments(emptyList(), emptyList(), deckLinkCount = 2))
+        val result = assertNotNull(reconcile(emptyList(), emptyList(), deckLinkCount = 2))
 
         assertEquals(2, result.size)
         assertEquals(
@@ -70,7 +84,7 @@ class ScreenAssignmentReconcileTest {
     @Test
     fun `displays fill the first slots and DeckLinks take the rest`() {
         val result = assertNotNull(
-            reconcileScreenAssignments(emptyList(), listOf(display(1)), deckLinkCount = 1)
+            reconcile(emptyList(), listOf(display(1)), deckLinkCount = 1)
         )
 
         assertEquals(listOf(1, Constants.KEY_TARGET_NONE), result.map { it.targetDisplay })
@@ -81,7 +95,7 @@ class ScreenAssignmentReconcileTest {
     @Test
     fun `auto takes the display in its own position`() {
         val result = assertNotNull(
-            reconcileScreenAssignments(listOf(auto(), auto()), listOf(display(1, x = 100), display(3, x = 200)), 0)
+            reconcile(listOf(auto(), auto()), listOf(display(1, x = 100), display(3, x = 200)), 0)
         )
 
         assertEquals(listOf(1, 3), result.map { it.targetDisplay })
@@ -90,7 +104,7 @@ class ScreenAssignmentReconcileTest {
 
     @Test
     fun `auto with no display behind it becomes none`() {
-        val result = assertNotNull(reconcileScreenAssignments(listOf(auto()), emptyList(), deckLinkCount = 0))
+        val result = assertNotNull(reconcile(listOf(auto()), emptyList(), deckLinkCount = 0))
 
         assertEquals(Constants.KEY_TARGET_NONE, result.single().targetDisplay)
     }
@@ -98,7 +112,7 @@ class ScreenAssignmentReconcileTest {
     @Test
     fun `the device index is the one in the full device list, not the non-primary list`() {
         // Primary is device 0, so the two extra screens are devices 1 and 2 — never 0 and 1.
-        val result = assertNotNull(reconcileScreenAssignments(
+        val result = assertNotNull(reconcile(
             listOf(auto(), auto()),
             listOf(display(1), display(2)),
             0,
@@ -117,7 +131,7 @@ class ScreenAssignmentReconcileTest {
         val saved = listOf(ScreenAssignment(targetDisplay = 5, targetBoundsX = 999))
 
         assertNull(
-            reconcileScreenAssignments(saved, emptyList(), deckLinkCount = 1),
+            reconcile(saved, emptyList(), deckLinkCount = 1),
             "a monitor unplugged today is usually plugged back in tomorrow; repointing it silently " +
                 "moves the output somewhere nobody asked for",
         )
@@ -127,7 +141,7 @@ class ScreenAssignmentReconcileTest {
     fun `resolving auto does not disturb a neighbouring explicit assignment`() {
         val saved = listOf(ScreenAssignment(targetDisplay = 4, targetBoundsX = 777), auto())
 
-        val result = assertNotNull(reconcileScreenAssignments(saved, listOf(display(1), display(2, x = 55)), 0))
+        val result = assertNotNull(reconcile(saved, listOf(display(1), display(2, x = 55)), 0))
 
         assertEquals(4, result[0].targetDisplay)
         assertEquals(777, result[0].targetBoundsX)
@@ -139,7 +153,7 @@ class ScreenAssignmentReconcileTest {
     fun `other fields of an assignment survive the resolve`() {
         val saved = listOf(auto().copy(targetType = "decklink", keyTargetDisplay = 3, activeProfileId = "choir"))
 
-        val result = assertNotNull(reconcileScreenAssignments(saved, listOf(display(1)), 0)).single()
+        val result = assertNotNull(reconcile(saved, listOf(display(1)), 0)).single()
 
         assertEquals("decklink", result.targetType)
         assertEquals(3, result.keyTargetDisplay)
@@ -153,8 +167,12 @@ class ScreenAssignmentReconcileTest {
         val saved = listOf(ScreenAssignment(targetDisplay = 1), ScreenAssignment(targetDisplay = 2))
 
         assertNull(
-            reconcileScreenAssignments(saved, listOf(display(1)), deckLinkCount = 0),
+            reconcile(saved, listOf(display(1)), deckLinkCount = 0),
             "unplugging a screen must not delete its saved output configuration",
         )
+    }
+
+    private companion object {
+        const val FALLBACK_PROFILE = "profile1"
     }
 }

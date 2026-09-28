@@ -84,7 +84,7 @@ data class ProjectionSettings(
      * profile -- see [DEFAULT_OUTPUT_PROFILE_ID] -- so every output has something to point at
      * before the operator has made anything of their own.
      */
-    val outputProfiles: List<OutputProfile> = listOf(OutputProfile(id = DEFAULT_OUTPUT_PROFILE_ID, name = "Default")),
+    val outputProfiles: List<OutputProfile> = listOf(factoryOutputProfile()),
 ) {
     /** [key]'s name as the operator typed it, or blank for a monitor never renamed. */
     fun screenName(key: String): String = screenNames[key]?.trim().orEmpty()
@@ -122,8 +122,32 @@ data class ProjectionSettings(
      * after a migrated install (which seeds its own profiles rather than one literally named
      * [DEFAULT_OUTPUT_PROFILE_ID]) still gets a real profile rather than a dangling reference.
      */
-    internal val fallbackProfileId: String
+    val fallbackProfileId: String
         get() = outputProfiles.firstOrNull()?.id ?: DEFAULT_OUTPUT_PROFILE_ID
+
+    /**
+     * Every output pointed at a profile that exists, and at least one profile for them to point at.
+     *
+     * An invariant, not a migration: `SettingsManager` applies it on every load. An output whose
+     * [ScreenAssignment.activeProfileId] is null or names no profile follows nothing -- its picker
+     * shows no selection and it draws with factory defaults -- and such outputs were saved by the
+     * startup reconcile before it learned to assign one, and by a migration of a document with no
+     * outputs, which left no profiles at all. Each is repointed at [fallbackProfileId]. A valid
+     * reference -- [BLANK_OUTPUT_PROFILE_ID] included, a deliberate choice -- is never touched.
+     */
+    fun withProfileReferencesRepaired(): ProjectionSettings {
+        val profiles = outputProfiles.ifEmpty { listOf(factoryOutputProfile()) }
+        val ids = profiles.mapTo(hashSetOf(BLANK_OUTPUT_PROFILE_ID)) { it.id }
+        val fallback = profiles.first().id
+        fun List<ScreenAssignment>.repaired() =
+            map { if (it.activeProfileId in ids) it else it.copy(activeProfileId = fallback) }
+        return copy(
+            outputProfiles = profiles,
+            screenAssignments = screenAssignments.repaired(),
+            browserSourceOutputs = browserSourceOutputs.repaired(),
+            ndiOutputs = ndiOutputs.repaired(),
+        )
+    }
 
     fun getAssignment(index: Int): ScreenAssignment =
         screenAssignments.getOrElse(index) { ScreenAssignment(activeProfileId = fallbackProfileId) }
@@ -135,3 +159,6 @@ data class ProjectionSettings(
         return copy(screenAssignments = mutable)
     }
 }
+
+/** The one profile a fresh install starts with, and what an install left with none is given. */
+fun factoryOutputProfile(): OutputProfile = OutputProfile(id = DEFAULT_OUTPUT_PROFILE_ID, name = "Default")

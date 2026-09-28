@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.app.churchpresenter.composables.CameraHost
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -74,13 +75,14 @@ internal fun canvasTab(
     width: Dp? = null,
     themeMode: ThemeMode? = null,
     /**
-     * The cameras the source panel offers.
+     * The machine the source panel's camera section describes.
      *
      * Pinned by default, never read from the machine: the committed image of the camera picker
      * otherwise named whatever hardware the recording machine had -- "MacBook Pro Camera" on one,
-     * "Capture screen 0" on another. Pass null to let a test exercise the real enumeration.
+     * "Capture screen 0" on another -- and its hints followed whether that machine had ffmpeg.
+     * Pass null to let a test exercise the real enumeration.
      */
-    cameraDevices: List<CameraDevice>? = PINNED_CAMERAS,
+    cameraHost: CameraHost? = CameraHost(PINNED_CAMERAS, ffmpegAvailable = true),
     block: ComposeUiTest.(vm: SceneViewModel, reports: CanvasReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -102,7 +104,7 @@ internal fun canvasTab(
                             presenterManager = presenter,
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },
-                            cameraDevices = cameraDevices,
+                            cameraHost = cameraHost,
                         )
                     }
                 }

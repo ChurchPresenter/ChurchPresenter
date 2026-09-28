@@ -88,6 +88,7 @@ import kotlin.system.exitProcess
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.app.churchpresenter.utils.UPDATE_INSTALLER_PREFIX
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 /**
@@ -269,7 +270,7 @@ fun UpdateAvailableDialog(
                 // NB: do not deleteOnExit() — the installer is launched as the
                 // app exits via exitProcess(0), and the shutdown hook would
                 // delete the file out from under the installer.
-                val tempFile = File.createTempFile("ChurchPresenter-update", suffix)
+                val tempFile = File.createTempFile(UPDATE_INSTALLER_PREFIX, suffix)
 
                 connection.inputStream.use { input ->
                     tempFile.outputStream().use { output ->

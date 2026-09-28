@@ -9,10 +9,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.app.churchpresenter.composables.LocalOutputCursorHidden
+import org.churchpresenter.app.churchpresenter.composables.outputCursorScript
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
 import androidx.compose.ui.graphics.ImageBitmap
@@ -26,6 +29,7 @@ import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
 import org.cef.handler.CefDisplayHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
+import org.cef.handler.CefLoadHandlerAdapter
 import org.cef.handler.CefRequestHandlerAdapter
 import org.cef.handler.CefResourceRequestHandlerAdapter
 import org.cef.handler.CefResourceRequestHandler
@@ -638,6 +642,13 @@ fun EmbeddedWebView(
         onBrowserCreated?.invoke(browser)
     }
 
+    // On an output that hides the pointer, the page hides it too; see LocalOutputCursorHidden.
+    val hideCursor = LocalOutputCursorHidden.current
+    val hideCursorState = rememberUpdatedState(hideCursor)
+    LaunchedEffect(browser, hideCursor) {
+        browser.executeJavaScript(outputCursorScript(hideCursor), "", 0)
+    }
+
     DisposableEffect(Unit) {
         val displayHandler = object : CefDisplayHandlerAdapter() {
             override fun onAddressChange(browser: CefBrowser, frame: CefFrame, url: String) {
@@ -677,6 +688,16 @@ fun EmbeddedWebView(
         }
         client.addRequestHandler(requestHandler)
 
+        // A new page starts without the hidden-pointer style, so it is put back on every load.
+        val loadHandler = object : CefLoadHandlerAdapter() {
+            override fun onLoadEnd(browser: CefBrowser, frame: CefFrame, httpStatusCode: Int) {
+                if (frame.isMain && hideCursorState.value) {
+                    browser.executeJavaScript(outputCursorScript(hide = true), "", 0)
+                }
+            }
+        }
+        client.addLoadHandler(loadHandler)
+
         // Snapshot timer — captures browser via Robot screen capture
         val robot = try { Robot() } catch (_: Exception) { null }
         val timer = if (onSnapshot != null && robot != null) {
@@ -699,6 +720,7 @@ fun EmbeddedWebView(
             client.removeDisplayHandler()
             client.removeLifeSpanHandler()
             client.removeRequestHandler()
+            client.removeLoadHandler()
             // Hide and detach the heavyweight AWT component before closing —
             // on macOS, JCEF's native Canvas stays visible over Compose layers otherwise
             try {

@@ -54,7 +54,9 @@ fun AppSettings.resolvedFor(profile: OutputProfile): AppSettings = copy(
  * was deleted from under it, or a document was hand-edited). Callers resolve this defensively rather
  * than assuming it is always found: every assignment is *meant* to always have a valid one once
  * `migrateOutputProfiles` and the factory default have run, but nothing in the type system enforces
- * that a hand-edited `settings.json` keeps it true.
+ * that a hand-edited `settings.json` keeps it true. [BLANK_OUTPUT_PROFILE_ID] resolves to the
+ * built-in [BLANK_OUTPUT_PROFILE].
  */
 fun ProjectionSettings.profileFor(assignment: ScreenAssignment): OutputProfile? =
-    assignment.activeProfileId?.let { id -> outputProfiles.find { it.id == id } }
+    if (assignment.activeProfileId == BLANK_OUTPUT_PROFILE_ID) BLANK_OUTPUT_PROFILE
+    else assignment.activeProfileId?.let { id -> outputProfiles.find { it.id == id } }

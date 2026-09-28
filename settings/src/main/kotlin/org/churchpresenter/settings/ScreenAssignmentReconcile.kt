@@ -20,6 +20,10 @@ import org.churchpresenter.settings.utils.Constants
  * usually plugged back in tomorrow. Silently repointing it would move the output somewhere the
  * operator never asked for.
  *
+ * A slot added here follows [fallbackProfileId] -- `ProjectionSettings.fallbackProfileId`, the first
+ * profile that exists. Left null it would follow nothing: its profile picker shows no selection, it
+ * draws with factory defaults rather than any profile the operator made, and the null is saved.
+ *
  * Returns **null when nothing needed changing**, so a normal launch does not rewrite the settings
  * file. Callers persist only a non-null result.
  */
@@ -27,6 +31,7 @@ fun reconcileScreenAssignments(
     saved: List<ScreenAssignment>,
     nonPrimaryDisplays: List<ResolvedDisplay>,
     deckLinkCount: Int,
+    fallbackProfileId: String,
 ): List<ScreenAssignment>? {
     val slotCount = (nonPrimaryDisplays.size + deckLinkCount).coerceAtLeast(0)
     var changed = false
@@ -41,6 +46,7 @@ fun reconcileScreenAssignments(
                 targetBoundsY = display?.y ?: Int.MIN_VALUE,
                 targetBoundsW = display?.width ?: 0,
                 targetBoundsH = display?.height ?: 0,
+                activeProfileId = fallbackProfileId,
             )
         )
         changed = true

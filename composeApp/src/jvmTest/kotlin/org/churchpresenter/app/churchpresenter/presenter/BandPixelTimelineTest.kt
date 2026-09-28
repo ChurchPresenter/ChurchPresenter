@@ -24,7 +24,7 @@ import org.churchpresenter.settings.BackgroundSettings
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.fail
 
 /**
  * What the band actually *looks* like over a transition, measured from its pixels.
@@ -52,10 +52,10 @@ class BandPixelTimelineTest {
 
     @Test
     fun `a verse change never blanks the band`() = runComposeUiTest {
-        val ink = inkProfile { manager ->
+        val profile = inkProfile { manager ->
             manager.setSelectedVerses(listOf(john17))
         }
-        assertNeverBlank(ink)
+        assertNeverBlank(profile)
     }
 
     /**
@@ -65,12 +65,12 @@ class BandPixelTimelineTest {
     @Test
     fun `a verse change during a crossfade never blanks the band`() = runComposeUiTest {
         val john18 = john16.copy(verseNumber = 18, verseText = "Whoever believes in him is not condemned")
-        val ink = inkProfile { manager ->
+        val profile = inkProfile { manager ->
             manager.setSelectedVerses(listOf(john17))
             repeat(MID_SWAP_FRAMES) { mainClock.advanceTimeByFrame() }
             manager.setSelectedVerses(listOf(john18))
         }
-        assertNeverBlank(ink)
+        assertNeverBlank(profile)
     }
 
     /**
@@ -81,24 +81,51 @@ class BandPixelTimelineTest {
      * The crossfade itself dips a little as the two texts cross, so the floor is a fraction of the
      * settled amount rather than "never changes" — what is being caught is a blank, not a wobble.
      */
-    private fun assertNeverBlank(ink: List<Int>) {
+    private fun assertNeverBlank(profile: InkProfile) {
+        val ink = profile.ink
         val settled = ink.first()
         val floor = (settled * MIN_INK_FRACTION).toInt()
         val worst = ink.withIndex().minByOrNull { it.value }!!
-        assertTrue(
-            worst.value > floor,
-            "the band lost its text at frame ${worst.index}: ${worst.value} ink, floor $floor\n$ink",
-        )
+        if (worst.value <= floor) fail(profile.describeFailure(worst.index, floor))
+    }
+
+    /**
+     * What one run of the band looked like: the ink on every sampled frame, the band clock on each,
+     * and how the wait for the first drawn verse ended.
+     *
+     * The clock and the first-ink figures are there for #677. The crossfade test has failed on CI
+     * with every sample at zero -- the baseline frames before the change included, one frame after
+     * the wait had seen ink -- and never locally, so a failure has to carry what the band was
+     * doing, or there is nothing to diagnose it from.
+     */
+    private class InkProfile(
+        val ink: List<Int>,
+        val clocks: List<BibleBandClock>,
+        val framesToFirstInk: Int,
+        val inkAtFirstSight: Int,
+    ) {
+        fun describeFailure(worstFrame: Int, floor: Int): String = buildString {
+            appendLine("the band lost its text at frame $worstFrame: ${ink[worstFrame]} ink, floor $floor")
+            appendLine("band clock on that frame: ${clocks[worstFrame]}")
+            appendLine(
+                "the first verse was drawn after $framesToFirstInk frame(s), with $inkAtFirstSight ink; " +
+                    "frames 0 to ${BASELINE - 1} are before the change, the rest after it",
+            )
+            ink.indices.forEach { frame -> appendLine("  frame $frame: ${ink[frame]} ink, ${clocks[frame]}") }
+        }
     }
 
     /** Renders the band through the real driver and counts text pixels per frame while [change] runs. */
-    private fun ComposeUiTest.inkProfile(change: ComposeUiTest.(PresenterManager) -> Unit): List<Int> {
+    private fun ComposeUiTest.inkProfile(change: ComposeUiTest.(PresenterManager) -> Unit): InkProfile {
         TestSingletons.latchSkikoHostOs()
         val manager = PresenterManager()
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(bibleLowerThirdBackground = lottieBackground(template)),
         )
         val ink = mutableListOf<Int>()
+        val clocks = mutableListOf<BibleBandClock>()
+        var framesToFirstInk = 0
+        var inkAtFirstSight = 0
 
         mainClock.autoAdvance = false
         try {
@@ -124,7 +151,10 @@ class BandPixelTimelineTest {
                 }
             }
 
-            fun sample() { ink += onNodeWithTag(SURFACE).captureToImage().toPixelMap().inkCount() }
+            fun sample() {
+                ink += onNodeWithTag(SURFACE).captureToImage().toPixelMap().inkCount()
+                clocks += manager.lottieBandClock.value
+            }
 
             manager.setSelectedVerses(listOf(john16))
             manager.setPresentingMode(Presenting.BIBLE)
@@ -132,7 +162,9 @@ class BandPixelTimelineTest {
             // The Lottie composition loads off the main thread, so settle until there is ink to
             // measure before treating a zero as meaningful.
             advanceUntil("the first verse is drawn") {
-                onNodeWithTag(SURFACE).captureToImage().toPixelMap().inkCount() > 0
+                framesToFirstInk++
+                inkAtFirstSight = onNodeWithTag(SURFACE).captureToImage().toPixelMap().inkCount()
+                inkAtFirstSight > 0
             }
             repeat(BASELINE) {
                 mainClock.advanceTimeByFrame()
@@ -146,7 +178,7 @@ class BandPixelTimelineTest {
         } finally {
             mainClock.autoAdvance = true
         }
-        return ink
+        return InkProfile(ink, clocks, framesToFirstInk, inkAtFirstSight)
     }
 
     private companion object {

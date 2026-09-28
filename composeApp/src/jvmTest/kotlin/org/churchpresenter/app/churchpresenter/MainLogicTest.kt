@@ -253,20 +253,6 @@ class MainLogicTest {
         assertFalse(tunnelJustDropped(previouslyConnected = false, isConnected = true))
     }
 
-    // ── Browser source outputs ──────────────────────────────────────────────────
-
-    @Test
-    fun `a configured browser source output is used`() {
-        val configured = ScreenAssignment(browserSourceName = "custom")
-        assertEquals(configured, virtualOutputAt(listOf(configured), 0))
-    }
-
-    @Test
-    fun `an output that was never configured falls back rather than failing`() {
-        assertEquals(ScreenAssignment(), virtualOutputAt(emptyList(), 0))
-        assertEquals(ScreenAssignment(), virtualOutputAt(listOf(ScreenAssignment()), 3))
-    }
-
     // ── What a follower is told is live ─────────────────────────────────────────
 
     @Test
