@@ -53,6 +53,14 @@ operator has to install.
   if it takes audio, a second one. `OmtSender.receiverCount` reports the connection count, which is
   right for "is anyone watching" and an upper bound otherwise. A video-only receiver — this app's own
   — measured as exactly one.
+- **On Linux, no Avahi daemon means an aborted process** — an upstream `libomtnet` bug
+  (`OMTDiscoveryAvahi.cs`: a failed `avahi_client_new` is logged and its null client passed to
+  `avahi_service_browser_new` anyway, which fails Avahi's assertion and aborts). It fires the moment
+  discovery starts, so any sender, receiver or look would take the app down, and a discovery server
+  does not avoid it. `OmtRuntime.discoveryServiceAvailable` checks the daemon's socket **before the
+  library is loaded**, and `OmtRuntimeHost` reports `DiscoveryServiceMissing` instead of loading it;
+  the card tells the operator to start `avahi-daemon`. Found by `omt-linux.yml`'s loopback test on a
+  runner without Avahi — which is why that workflow now installs and starts it.
 - **The discovery server is read once**, when `libomtnet` creates its discovery singleton
   (`OMTDiscovery`'s constructor reads `DiscoveryServer`), so `OmtRuntimeHost.start` sets it before
   anything discovers and a change takes effect at the next launch. A blank setting is **not**
@@ -74,7 +82,7 @@ operator has to install.
 | File | Owns |
 |---|---|
 | `OmtRuntime.kt` | Where `libomt` is: the override, the bundled directory, the system directories. Pure over its arguments |
-| `OmtRuntimeStatus.kt` | The three outcomes of looking, and `OmtRuntimeHost` — one library per process, handing out senders and receivers |
+| `OmtRuntimeStatus.kt` | The four outcomes of looking — one of them Linux's missing Avahi — and `OmtRuntimeHost`, one library per process, handing out senders and receivers |
 | `OmtLibrary.kt` | The native calls as an interface, plus `OmtVideoFrame`. **The seam** |
 | `JnaOmtLibrary.kt` | The only file that knows JNA exists: the C symbols, the two ABI structs, the native buffers, the `libvmx` preload |
 | `OmtSender.kt` | One source on the network |

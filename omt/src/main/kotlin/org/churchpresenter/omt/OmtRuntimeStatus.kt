@@ -5,8 +5,9 @@ import java.io.File
 /**
  * What the app found when it went looking for `libomt`.
  *
- * Three outcomes where NDI has four: `libomt` has no CPU check to fail. And [NotInstalled] is rarer
- * here than NDI's — the app bundles the library, so it means a platform or a checkout without it.
+ * Four outcomes, like NDI's, though not the same four: `libomt` has no CPU check to fail, and Linux has
+ * a service it needs running instead. [NotInstalled] is rarer here than NDI's — the app bundles the
+ * library, so it means a platform or a checkout without it.
  */
 sealed interface OmtRuntimeStatus {
     /** No `libomt` anywhere this run looked. */
@@ -14,6 +15,13 @@ sealed interface OmtRuntimeStatus {
 
     /** A library was found at [path] but would not load — wrong architecture, or `libvmx` missing. */
     data class LoadFailed(val path: String) : OmtRuntimeStatus
+
+    /**
+     * Linux only: the Avahi daemon `libomt` discovers through is not running, so the library is not
+     * loaded at all — starting it would abort the process. See
+     * [OmtRuntime.discoveryServiceAvailable]. Fixed by installing and starting `avahi-daemon`.
+     */
+    data object DiscoveryServiceMissing : OmtRuntimeStatus
 
     /** Ready, running out of [path]; [bundled] when that is the app's own copy. */
     data class Ready(val path: String, val bundled: Boolean) : OmtRuntimeStatus
@@ -30,12 +38,13 @@ sealed interface OmtRuntimeStatus {
  * globals, so the outputs on the Projection tab and the sources on the Canvas share this rather than
  * each loading their own.
  *
- * [locate] and [loader] are injected so the suite drives the whole lifecycle against a fake and only
- * the real `JnaOmtLibrary.load` call stays uncovered.
+ * [locate], [loader] and [discoveryServiceAvailable] are injected so the suite drives the whole
+ * lifecycle against a fake and only the real `JnaOmtLibrary.load` call stays uncovered.
  */
 class OmtRuntimeHost(
     private val locate: (customPath: String, bundledDir: String) -> String? = OmtRuntime::detect,
     private val loader: (String) -> OmtLibrary? = JnaOmtLibrary::load,
+    private val discoveryServiceAvailable: () -> Boolean = { OmtRuntime.discoveryServiceAvailable() },
 ) {
     private var library: OmtLibrary? = null
 
@@ -65,9 +74,12 @@ class OmtRuntimeHost(
     ): OmtRuntimeStatus {
         if (library != null) return status
         val path = locate(customPath, bundledDir)
-        val lib = path?.let(loader)
+        // Checked before loading, not after: nothing is loaded, so nothing can start discovery.
+        val serviceMissing = path != null && !discoveryServiceAvailable()
+        val lib = if (serviceMissing) null else path?.let(loader)
         status = when {
             path == null -> OmtRuntimeStatus.NotInstalled
+            serviceMissing -> OmtRuntimeStatus.DiscoveryServiceMissing
             lib == null -> OmtRuntimeStatus.LoadFailed(path)
             else -> {
                 lib.setLoggingFilename(logFile.ifBlank { null })

@@ -73,6 +73,35 @@ object OmtRuntime {
             .firstOrNull(exists)
     }
 
+    /**
+     * Where the Avahi daemon listens, on the distributions this app ships to. Newer ones use
+     * `/run`, older ones `/var/run` (usually a link to it).
+     */
+    internal val AVAHI_SOCKETS = listOf("/run/avahi-daemon/socket", "/var/run/avahi-daemon/socket")
+
+    /**
+     * Whether `libomt` can start its discovery on [osName] without taking the process down.
+     *
+     * Only Linux has a precondition. There `libomtnet` discovers through Avahi, and when the Avahi
+     * daemon is not running it logs the failed `avahi_client_new` and then calls
+     * `avahi_service_browser_new` with the null client anyway, which fails Avahi's own assertion and
+     * **aborts the JVM** (`browser.c: avahi_service_browser_new: Assertion 'client' failed`). That
+     * happens the moment the library's discovery starts — the first sender, receiver or look — and a
+     * discovery server does not avoid it. So the daemon's socket is checked before the library is
+     * even loaded. [exists] is the filesystem, injected so this is testable anywhere.
+     */
+    fun discoveryServiceAvailable(osName: String, exists: (String) -> Boolean): Boolean {
+        val os = osName.lowercase()
+        val linux = !(os.contains("mac") || os.contains("darwin") || os.contains("win"))
+        return !linux || AVAHI_SOCKETS.any(exists)
+    }
+
+    /** [discoveryServiceAvailable] on this machine. */
+    fun discoveryServiceAvailable(): Boolean = discoveryServiceAvailable(
+        osName = System.getProperty("os.name").orEmpty(),
+        exists = { File(it).exists() },
+    )
+
     /** [locate] against the real platform and the real filesystem. */
     fun detect(customPath: String = "", bundledDir: String = ""): String? = locate(
         osName = System.getProperty("os.name").orEmpty(),

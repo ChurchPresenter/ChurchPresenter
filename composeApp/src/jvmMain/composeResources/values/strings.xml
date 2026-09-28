@@ -1388,6 +1388,7 @@
     <string name="omt_library_bundled">OMT library included with ChurchPresenter</string>
     <string name="omt_library_custom">OMT library: %1$s</string>
     <string name="omt_library_load_failed">An OMT library was found at %1$s but could not be loaded. It may be for a different processor architecture, or libvmx may be missing beside it.</string>
+    <string name="omt_discovery_service_missing">OMT on Linux needs the Avahi service to find and announce sources, and it is not running. Install and start avahi-daemon (for example: sudo apt install avahi-daemon), then check again.</string>
     <string name="omt_library_missing_title">OMT library not found</string>
     <string name="omt_library_missing_help">This copy of ChurchPresenter does not include the OMT library for this computer. Choose a folder that holds libomt and libvmx, then check again.</string>
     <string name="omt_library_path">OMT library folder</string>

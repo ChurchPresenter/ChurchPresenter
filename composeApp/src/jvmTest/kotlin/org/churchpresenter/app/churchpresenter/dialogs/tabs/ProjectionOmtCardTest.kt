@@ -108,6 +108,17 @@ class ProjectionOmtCardTest {
     }
 
     @Test
+    fun `a Linux machine without Avahi is told to start it, and can check again`() {
+        val rechecks = CopyOnWriteArrayList<Pair<String, String>>()
+        card(status = OmtRuntimeStatus.DiscoveryServiceMissing, rechecks = rechecks) { _ ->
+            onNodeWithText("avahi-daemon", substring = true).assertExists()
+            onNodeWithText("Add Output").assertDoesNotExist()
+            onNodeWithText("Check again").performClick()
+            waitUntil(timeoutMillis = 2_000) { rechecks.isNotEmpty() }
+        }
+    }
+
+    @Test
     fun `no library says what to do about it`() {
         card(status = OmtRuntimeStatus.NotInstalled) { _ ->
             onNodeWithText("OMT library not found").assertExists()

@@ -55,6 +55,7 @@ import churchpresenter.composeapp.generated.resources.omt_address
 import churchpresenter.composeapp.generated.resources.omt_discovery_server
 import churchpresenter.composeapp.generated.resources.omt_discovery_server_help
 import churchpresenter.composeapp.generated.resources.omt_discovery_server_placeholder
+import churchpresenter.composeapp.generated.resources.omt_discovery_service_missing
 import churchpresenter.composeapp.generated.resources.omt_library_bundled
 import churchpresenter.composeapp.generated.resources.omt_library_custom
 import churchpresenter.composeapp.generated.resources.omt_library_load_failed
@@ -293,6 +294,11 @@ private fun OmtLibraryMessage(status: OmtRuntimeStatus) {
         )
         is OmtRuntimeStatus.LoadFailed -> Text(
             text = stringResource(Res.string.omt_library_load_failed, status.path),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+        OmtRuntimeStatus.DiscoveryServiceMissing -> Text(
+            text = stringResource(Res.string.omt_discovery_service_missing),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )

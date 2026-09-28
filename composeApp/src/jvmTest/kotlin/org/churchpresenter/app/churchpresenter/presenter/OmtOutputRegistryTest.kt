@@ -43,7 +43,9 @@ class OmtOutputRegistryTest {
     }
 
     private fun registry(lib: FakeOmtLibrary? = FakeOmtLibrary(), path: String? = LIB_PATH) =
-        OmtOutputRegistry(OmtRuntimeHost(locate = { _, _ -> path }, loader = { lib }))
+        OmtOutputRegistry(
+            OmtRuntimeHost(locate = { _, _ -> path }, loader = { lib }, discoveryServiceAvailable = { true }),
+        )
 
     private fun context() = OffscreenOutputContext(
         presenterManager = PresenterManager(),

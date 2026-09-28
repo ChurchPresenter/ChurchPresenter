@@ -66,9 +66,15 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # NativeAOT links with clang and needs zlib's headers.
-      - name: Install the native toolchain
-        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      # NativeAOT links with clang and needs zlib's headers. Avahi is for the loopback test: libomt
+      # discovers through it on Linux and aborts the process when its daemon is not running — the
+      # upstream bug OmtRuntime.discoveryServiceAvailable guards the app against.
+      - name: Install the native toolchain and Avahi
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev avahi-daemon
+          sudo systemctl start avahi-daemon
+          test -S /run/avahi-daemon/socket
 
       # Not the upstream buildlinuxx64.sh, which compiles every file with -mavx2 -mbmi -mlzcnt. libvmx
       # chooses its AVX2 path at run time (__builtin_cpu_supports), so only vmxcodec_avx2.cpp may be

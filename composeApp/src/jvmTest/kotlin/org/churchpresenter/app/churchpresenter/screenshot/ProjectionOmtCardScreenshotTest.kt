@@ -117,6 +117,13 @@ class ProjectionOmtCardScreenshotTest {
     )
 
     @Test
+    fun `a Linux machine without the Avahi service`() = shoot(
+        "avahi_missing",
+        settings(),
+        status = OmtRuntimeStatus.DiscoveryServiceMissing,
+    )
+
+    @Test
     fun `a library that would not load`() = shoot(
         "load_failed",
         settings(libraryPath = "/opt/omt"),

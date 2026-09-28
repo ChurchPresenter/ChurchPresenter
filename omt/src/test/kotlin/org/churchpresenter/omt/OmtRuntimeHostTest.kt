@@ -18,7 +18,28 @@ class OmtRuntimeHostTest {
     private fun host(
         path: String? = BUNDLED_LIB,
         library: OmtLibrary? = FakeOmtLibrary(),
-    ): OmtRuntimeHost = OmtRuntimeHost(locate = { _, _ -> path }, loader = { library })
+    ): OmtRuntimeHost =
+        OmtRuntimeHost(locate = { _, _ -> path }, loader = { library }, discoveryServiceAvailable = { true })
+
+    @Test
+    fun `without the discovery service the library is never loaded, so it cannot abort the process`() {
+        var loads = 0
+        val host = OmtRuntimeHost(
+            locate = { _, _ -> BUNDLED_LIB },
+            loader = { loads++; FakeOmtLibrary() },
+            discoveryServiceAvailable = { false },
+        )
+        assertEquals(OmtRuntimeStatus.DiscoveryServiceMissing, host.start())
+        assertEquals(0, loads)
+        assertFalse(host.status.isReady)
+        assertNull(host.createSender("x", OmtOutputMode.ALPHA, 30))
+    }
+
+    @Test
+    fun `no library at all is reported as that, whatever the discovery service`() {
+        val host = OmtRuntimeHost(locate = { _, _ -> null }, loader = { null }, discoveryServiceAvailable = { false })
+        assertEquals(OmtRuntimeStatus.NotInstalled, host.start())
+    }
 
     @Test
     fun `nothing found is not installed, and nothing can be created`() {
@@ -69,7 +90,11 @@ class OmtRuntimeHostTest {
     fun `starting again once loaded changes nothing`() {
         var loads = 0
         val lib = FakeOmtLibrary()
-        val host = OmtRuntimeHost(locate = { _, _ -> BUNDLED_LIB }, loader = { loads++; lib })
+        val host = OmtRuntimeHost(
+            locate = { _, _ -> BUNDLED_LIB },
+            loader = { loads++; lib },
+            discoveryServiceAvailable = { true },
+        )
         val first = host.start()
         assertSame(first, host.start(discoveryServer = "omt://late:1"))
         assertEquals(1, loads)

@@ -4,6 +4,7 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -56,6 +57,26 @@ class OmtRuntimeTest {
     @Test
     fun `nowhere holding it is null`() {
         assertNull(OmtRuntime.locate(LINUX, "/a", "/b") { false })
+    }
+
+    @Test
+    fun `Linux needs the Avahi daemon's socket, at either of its paths`() {
+        assertTrue(OmtRuntime.discoveryServiceAvailable(LINUX) { it == "/run/avahi-daemon/socket" })
+        assertTrue(OmtRuntime.discoveryServiceAvailable(LINUX) { it == "/var/run/avahi-daemon/socket" })
+        assertFalse(OmtRuntime.discoveryServiceAvailable(LINUX) { false })
+    }
+
+    @Test
+    fun `macOS and Windows have no discovery precondition`() {
+        assertTrue(OmtRuntime.discoveryServiceAvailable(MAC) { false })
+        assertTrue(OmtRuntime.discoveryServiceAvailable("Darwin") { false })
+        assertTrue(OmtRuntime.discoveryServiceAvailable(WINDOWS) { false })
+    }
+
+    @Test
+    fun `the real check answers without throwing`() {
+        // Whatever this machine has; the point is that it reads the filesystem rather than failing.
+        OmtRuntime.discoveryServiceAvailable()
     }
 
     @Test
