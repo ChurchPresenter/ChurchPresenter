@@ -4,7 +4,11 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.Test
@@ -57,18 +61,26 @@ class CompanionSatelliteSettingsTabFieldsTest {
         }
     }
 
-    /** The port shares its row with the host, so it is the second box on that line. */
-    @Test
-    fun `the port box stores what is typed`() {
-        satelliteTab(initial = satelliteSettings(distinct())) { get ->
-            // The host row holds two boxes; the port is the one showing the current port.
-            boxFor(SatLabel.HOST).performScrollTo()
-            onNode(
-                androidx.compose.ui.test.hasSetTextAction() and
-                    androidx.compose.ui.test.hasText("11111"),
-            ).performTextReplacement("22222")
-            waitForIdle()
+    /** The port shares its row with the host; it is the box showing [text]. */
+    private fun ComposeUiTest.portBox(text: String) =
+        onNode(hasSetTextAction() and hasText(text))
 
+    /** Types [typed] over the port box currently showing [showing] and presses Enter. */
+    private fun ComposeUiTest.enterPort(showing: String, typed: String) {
+        portBox(showing).performTextReplacement(typed)
+        portBox(typed).performImeAction()
+        waitForIdle()
+    }
+
+    @Test
+    fun `the port box stores what is typed, on Enter`() {
+        satelliteTab(initial = satelliteSettings(distinct())) { get ->
+            boxFor(SatLabel.HOST).performScrollTo()
+            portBox("11111").performTextReplacement("2222")
+            waitForIdle()
+            assertEquals(11111, get().onlyConnection().port, "nothing is stored halfway through typing")
+
+            enterPort(showing = "2222", typed = "22222")
             val c = get().onlyConnection()
             assertEquals(22222, c.port, "the typed port must be stored")
             assertEquals("10.0.0.1", c.host, "and the host must be untouched")
@@ -78,18 +90,13 @@ class CompanionSatelliteSettingsTabFieldsTest {
     @Test
     fun `a port that will not parse leaves the stored port alone`() {
         satelliteTab(initial = satelliteSettings(distinct())) { get ->
-            onNode(
-                androidx.compose.ui.test.hasSetTextAction() and
-                    androidx.compose.ui.test.hasText("11111"),
-            ).performTextReplacement("not-a-port")
-            waitForIdle()
+            enterPort(showing = "11111", typed = "not-a-port")
             assertEquals(11111, get().onlyConnection().port, "nonsense must not reach the stored port")
 
-            onNode(
-                androidx.compose.ui.test.hasSetTextAction() and
-                    androidx.compose.ui.test.hasText("not-a-port"),
-            ).performTextReplacement("33333")
-            waitForIdle()
+            enterPort(showing = "11111", typed = "70000")
+            assertEquals(11111, get().onlyConnection().port, "nor a number no socket can use")
+
+            enterPort(showing = "11111", typed = "33333")
             assertEquals(33333, get().onlyConnection().port, "a real port must still land")
         }
     }
