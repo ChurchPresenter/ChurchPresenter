@@ -74,6 +74,18 @@ class CameraDiagnosticsTest {
     }
 
     @Test
+    fun `windows camera privacy is recognised although ffmpeg also says it could not find the device`() {
+        // The tail a GTX 1660 Ti PC printed with "Let desktop apps access your camera" turned off.
+        val blocked = listOf(
+            "[in#0 @ 000001c84fbafa40] Unable to BindToObject for USB3.0 HD VIDEO",
+            "[in#0 @ 000001c84fbafa40] Could not find video device with name [USB3.0 HD VIDEO] " +
+                "among source devices of type video.",
+            "[in#0 @ 000001c84fb4fc00] Error opening input: I/O error",
+        )
+        assertEquals(CameraFailure.PERMISSION_DENIED, classifyCameraFfmpegStderr(blocked, "dshow"))
+    }
+
+    @Test
     fun `permission outranks every other marker in the same output`() {
         // A tail can hold more than one marker. Classification must be a function of the output,
         // not of which line happened to arrive last, or the same failure reports two ways.

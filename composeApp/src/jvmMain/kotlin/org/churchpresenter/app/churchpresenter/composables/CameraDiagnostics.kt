@@ -129,7 +129,11 @@ internal fun classifyCameraFfmpegStderr(
     return when {
         text.containsAny(
             "not authorized to use", "not permitted to use", "-11852", "operation not permitted",
-            "permission denied", "access denied"
+            "permission denied", "access denied",
+            // DirectShow could list the camera but not create it. With Windows' camera privacy off,
+            // ffmpeg lists the devices with type (none) and then prints this ahead of its "could
+            // not find video device" line, which would otherwise blame the camera's name.
+            "unable to bindtoobject"
         ) -> CameraFailure.PERMISSION_DENIED
 
         text.contains("supported pixel formats") ||
