@@ -69,6 +69,8 @@ import org.churchpresenter.settings.withWindowGeometry
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.settings.reconcileScreenAssignments
+import org.churchpresenter.settings.getBrowserSourceOutput
+import org.churchpresenter.settings.getNdiOutput
 import org.churchpresenter.settings.withBundledBible
 import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
@@ -459,7 +461,9 @@ private fun ApplicationScope.ChurchPresenterApp(
         val deckLinkCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
 
         val proj = appSettings.projectionSettings
-        val assignments = reconcileScreenAssignments(proj.screenAssignments, nonPrimaryDisplays, deckLinkCount)
+        val assignments = reconcileScreenAssignments(
+            proj.screenAssignments, nonPrimaryDisplays, deckLinkCount, proj.fallbackProfileId,
+        )
         if (assignments != null) {
             appSettings = appSettings.copy(
                 projectionSettings = proj.copy(screenAssignments = assignments)
@@ -756,7 +760,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+                appSettings.projectionSettings.getBrowserSourceOutput(i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -766,7 +770,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val bsOutput = virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+            val bsOutput = appSettings.projectionSettings.getBrowserSourceOutput(i)
             val renderer = remember(
                 i,
                 bsOutput.browserSourceWidth,
@@ -811,7 +815,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+                appSettings.projectionSettings.getNdiOutput(i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -821,7 +825,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val ndiOutput = virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+            val ndiOutput = appSettings.projectionSettings.getNdiOutput(i)
             val defaultName = stringResource(Res.string.ndi_output_numbered, i + 1)
             // Keyed on everything a sender is created with, because NDI has no way to change any of
             // them in place: a rename, a resize or a mode change is a new source on the network.

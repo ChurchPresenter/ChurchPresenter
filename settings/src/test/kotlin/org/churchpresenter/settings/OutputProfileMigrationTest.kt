@@ -259,4 +259,48 @@ class OutputProfileMigrationTest {
         assertEquals(emptyList(), decode(bibleDoc("{}")).profileAt(0).bibleTranslations)
         assertEquals(emptyList(), decode(bibleDoc(lowerThird, count = 2)).profileAt(0).bibleTranslations)
     }
+
+    // ── Every output follows a profile ──────────────────────────────────────────
+
+    @Test
+    fun `a document with no outputs is given the factory profile rather than none`() {
+        val proj = decode(v11()).projectionSettings
+
+        assertEquals(listOf(DEFAULT_OUTPUT_PROFILE_ID), proj.outputProfiles.map { it.id })
+        assertEquals(DEFAULT_OUTPUT_PROFILE_ID, proj.fallbackProfileId)
+    }
+
+    @Test
+    fun `an output saved with no profile or a missing one is repointed at the first profile on load`() {
+        val raw = """
+            {"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+             "projectionSettings":{
+               "outputProfiles":[{"id":"profile1","name":"A"},{"id":"profile2","name":"B"}],
+               "screenAssignments":[{"activeProfileId":"profile2"},{"activeProfileId":null},{}],
+               "browserSourceOutputs":[{"activeProfileId":"gone"}],
+               "ndiOutputs":[{}]}}
+        """.trimIndent()
+
+        val proj = decode(raw).projectionSettings
+
+        assertEquals(
+            listOf("profile2", "profile1", "profile1"), proj.screenAssignments.map { it.activeProfileId },
+            "a valid reference is left alone; a null one follows the first profile",
+        )
+        assertEquals(listOf("profile1"), proj.browserSourceOutputs.map { it.activeProfileId })
+        assertEquals(listOf("profile1"), proj.ndiOutputs.map { it.activeProfileId })
+    }
+
+    @Test
+    fun `a current document with its profiles emptied is given the factory one and its outputs follow it`() {
+        val raw = """
+            {"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+             "projectionSettings":{"outputProfiles":[],"screenAssignments":[{"activeProfileId":"profile1"}]}}
+        """.trimIndent()
+
+        val proj = decode(raw).projectionSettings
+
+        assertEquals(listOf(DEFAULT_OUTPUT_PROFILE_ID), proj.outputProfiles.map { it.id })
+        assertEquals(DEFAULT_OUTPUT_PROFILE_ID, proj.screenAssignments.single().activeProfileId)
+    }
 }

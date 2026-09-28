@@ -32,7 +32,7 @@ class ReconcileAssignmentsTest {
         windows: Int,
         nonPrimary: List<DetectedScreen> = listOf(projector, balcony),
         all: List<DetectedScreen> = listOf(primary, projector, balcony),
-    ) = reconcileAssignments(stored, windows, nonPrimary, all)
+    ) = reconcileAssignments(stored, windows, nonPrimary, all, FALLBACK_PROFILE)
 
     @Test
     fun `a list that already matches is left alone`() {
@@ -58,6 +58,13 @@ class ReconcileAssignmentsTest {
         assertEquals(1280, reconciled[0].targetBoundsW, "its bounds come with it")
         assertEquals(balcony.index, reconciled[1].targetDisplay)
         assertEquals(3840, reconciled[1].targetBoundsW)
+    }
+
+    @Test
+    fun `a new slot follows the fallback profile`() {
+        val reconciled = reconcile(emptyList(), windows = 2).orEmpty()
+
+        assertEquals(listOf(FALLBACK_PROFILE, FALLBACK_PROFILE), reconciled.map { it.activeProfileId })
     }
 
     @Test
@@ -132,5 +139,9 @@ class ReconcileAssignmentsTest {
         assertEquals(1, reconciled[0].targetDisplay, "the attached one is untouched")
         assertEquals(1280, reconciled[0].targetBoundsW)
         assertEquals(Constants.KEY_TARGET_NONE, reconciled[1].targetDisplay)
+    }
+
+    private companion object {
+        const val FALLBACK_PROFILE = "profile1"
     }
 }

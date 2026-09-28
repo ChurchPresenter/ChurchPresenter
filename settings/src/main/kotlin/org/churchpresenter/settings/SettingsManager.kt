@@ -410,7 +410,7 @@ class SettingsManager {
             songSettings = songSettings.migrateSongNumberStyle().migrateElementPositions(),
             projectionSettings = projectionSettings.copy(
                 outputProfiles = projectionSettings.outputProfiles.map(::repairedProfile),
-            ).withLinksResolved(),
+            ).withLinksResolved().withProfileReferencesRepaired(),
         )
 
     /**
