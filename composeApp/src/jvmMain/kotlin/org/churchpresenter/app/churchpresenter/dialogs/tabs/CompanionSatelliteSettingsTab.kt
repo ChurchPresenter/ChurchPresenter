@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import org.churchpresenter.companionsatellite.CompanionSatelliteClient
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import androidx.compose.material3.MaterialTheme
@@ -273,7 +274,8 @@ private fun CompanionConnectionCard(
                             value = portText,
                             onValueChange = { v ->
                                 portText = v
-                                v.toIntOrNull()?.let { onUpdate { copy(port = it) } }
+                                v.toIntOrNull()?.takeIf { it in CompanionSatelliteClient.VALID_PORTS }
+                                    ?.let { onUpdate { copy(port = it) } }
                             },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
