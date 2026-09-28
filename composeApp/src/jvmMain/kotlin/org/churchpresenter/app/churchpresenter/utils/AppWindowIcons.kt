@@ -13,9 +13,9 @@ import javax.imageio.ImageIO
  *
  * Windows used to be given the vector `ic_app_icon`, which Java rasterises at 16 and 32 px on the
  * fly. That was a third drawing of the icon, different from both the taskbar's `icon.ico` and the
- * macOS icon, and soft at the small sizes Windows draws at 100% scaling. Each window now gets the same
- * pixel frames `icon.ico` is built from (`composeApp/tools/generate_windows_icon.py`), at every size, and the
- * system picks the one it needs rather than scaling one.
+ * macOS icon, and soft at the small sizes Windows draws at 100% scaling. Each window now gets the
+ * same pixel frames `icon.ico` is built from (`composeApp/tools/generate_windows_icon.py`), at
+ * every size, and the system picks the one it needs rather than scaling one.
  *
  * Installed once, for every window as it opens -- including windows that never named an icon.
  */
