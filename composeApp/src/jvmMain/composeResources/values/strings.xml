@@ -1183,6 +1183,8 @@
     <string name="output_profile_name_hint">Profile name</string>
     <string name="output_profile_picker_tooltip">Output profile</string>
     <string name="output_profile_blank">Blank</string>
+    <!-- No longer shown (Blank replaced None); kept while the locales still carry it. -->
+    <string name="output_profile_none">None</string>
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
     <string name="output_profile_display_mode">Display Mode</string>
