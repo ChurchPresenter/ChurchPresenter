@@ -3,6 +3,9 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.performScrollToNode
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.RowEnd
@@ -51,16 +54,17 @@ class RunOfShowRowsTest {
 
     @Test
     fun `every kind of row is drawn with its own second line`() = withCalendar(
-        // Auto-load on, so its "off" note is not drawn: this asks every row at once, and the rows
-        // only just fit the test window without the note's height above them.
-        documentWith(everyKind()).let { it.copy(preferences = it.preferences.copy(autoLoadService = true)) },
+        documentWith(everyKind()),
     ) {
         awaitText("Amazing Grace")
 
         listOf(
             "Welcome loop", "Psalms 100:1-5", "Sermon", "Testimony", "Bible with Background",
             "Fellowship lunch", "Giving page", "Pastor Ruth", "agape",
-        ).forEach { assertTrue(shows(it), "$it is missing from the run of show") }
+        ).forEach {
+            onNode(hasScrollToIndexAction()).performScrollToNode(hasText(it, substring = true, ignoreCase = true))
+            assertTrue(shows(it), "$it is missing from the run of show")
+        }
     }
 
     @Test

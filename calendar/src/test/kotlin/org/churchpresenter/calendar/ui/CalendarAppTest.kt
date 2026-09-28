@@ -3,6 +3,9 @@
 package org.churchpresenter.calendar.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -90,6 +93,19 @@ class CalendarAppTest {
 
         assertTrue(shows("Bible"), "and the other places a row can come from")
         assertTrue(shows("Presets"))
+    }
+
+    @Test
+    fun `the add button stays on screen under a long run of show`() = withCalendar(
+        documentWith(service(items = (1..60).map { song("s$it", "Song $it") }, planned = emptyMap())),
+    ) {
+        awaitText("Song 1")
+
+        onNodeWithText("Add song, verse or section").assertIsDisplayed()
+        assertTrue(onAllNodesWithText("Song 60").fetchSemanticsNodes().isEmpty(), "the end of the list is off screen")
+
+        clickFirst("Add song, verse or section")
+        awaitText("Songs")
     }
 
     @Test
