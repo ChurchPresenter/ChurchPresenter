@@ -45,6 +45,7 @@ internal fun browserSourceOverlayPage(
         else -> "transparent"
     }
     val wsPath = "/api${Constants.ENDPOINT_BROWSER_SOURCE}/$index/ws$keyParam"
+    val apiBase = "/api${Constants.ENDPOINT_BROWSER_SOURCE}/$index"
     return """
 <!DOCTYPE html>
 <html lang="en">
@@ -59,11 +60,13 @@ html,body{width:100%;height:100%;background:$bodyBg;overflow:hidden}
 #diag{position:fixed;bottom:8px;left:8px;max-width:90%;padding:6px 10px;
   background:rgba(200,0,0,0.85);color:#fff;font:12px/1.4 monospace;
   border-radius:4px;display:none;z-index:9999;white-space:pre-wrap}
+$TRANSPOSE_CSS
 </style>
 </head>
 <body>
 <div id="stage"><canvas id="frame"></canvas></div>
 <div id="diag"></div>
+$TRANSPOSE_HTML
 <script>
 const wsUrl=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'$wsPath';
 const canvas=document.getElementById('frame');
@@ -183,7 +186,7 @@ function connect(){
   hasFullFrame=false;
   const ws=new WebSocket(wsUrl);
   ws.binaryType='arraybuffer';
-  ws.onmessage=onSocketMessage;
+  ws.onmessage=onMessage;
   ws.onopen=()=>clearDiag();
   ws.onerror=(e)=>{
 console.error('[BrowserSource] websocket error',e);
@@ -200,9 +203,105 @@ if(event.reason){
 setTimeout(connect,2000);
   };
 }
+${transposeScript(apiBase, if (needsKey) apiKey else "")}
 connect();
 </script>
 </body>
 </html>
 """.trimIndent()
 }
+
+// ── The musicians' transpose buttons ──────────────────────────────────────────
+// Issue #649's pill: -1 / 0 / +1 over the stage monitor on a band member's tablet. Every page
+// carries it, hidden and dormant; it only appears, and only asks the desktop for approval, once
+// the server says this output's profile offers it (`controls:true`). A profile that does not --
+// the one an OBS/vMix output uses -- never sends that, so its page never shows or asks anything.
+// The pill is an HTML overlay: it is never part of the rendered frame, NDI or any other output.
+// Its text is English like every other page this server serves; none of them are localised.
+
+private val TRANSPOSE_CSS = """
+#transpose{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:none;
+  align-items:center;gap:4px;padding:6px 8px;background:rgba(40,42,48,0.92);color:#fff;
+  font:15px/1 -apple-system,system-ui,sans-serif;border-radius:10px;z-index:9998;
+  box-shadow:0 2px 10px rgba(0,0,0,0.4)}
+#transpose.shown{display:flex}
+#transpose .label{padding:0 10px 0 6px;opacity:0.85}
+#transpose button{min-width:48px;height:40px;border:0;border-radius:7px;background:transparent;
+  color:#fff;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer}
+#transpose button:active{background:rgba(255,255,255,0.18)}
+#transpose button:disabled{opacity:0.35;cursor:default}
+#transpose .note{padding:0 8px;opacity:0.75;font-size:13px}
+""".trimIndent()
+
+private val TRANSPOSE_HTML = """
+<div id="transpose" role="group" aria-label="Transpose">
+  <span class="label">Transpose</span>
+  <button id="tp-down" aria-label="Transpose down a semitone">-1</button>
+  <button id="tp-reset" aria-label="Back to the written key">0</button>
+  <button id="tp-up" aria-label="Transpose up a semitone">+1</button>
+  <span class="note" id="tp-note"></span>
+</div>
+""".trimIndent()
+
+/**
+ * The transpose buttons' script, and the socket's message handler. Commands go to their own route
+ * with the device's id, never over the frame socket; the socket only carries the server's
+ * `{"transpose":n,"controls":bool}` state back as text, told apart from the binary frames by type.
+ */
+private fun transposeScript(apiBase: String, apiKey: String): String = """
+let deviceId=null;
+try{deviceId=localStorage.getItem('transpose_device_id');}catch(e){}
+if(!deviceId){
+  deviceId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));
+  try{localStorage.setItem('transpose_device_id',deviceId);}catch(e){}
+}
+const tpHeaders={'Content-Type':'application/json','${Constants.HEADER_DEVICE_ID}':deviceId};
+if(${if (apiKey.isNotEmpty()) "true" else "false"})tpHeaders['${Constants.HEADER_API_KEY}']=${jsString(apiKey)};
+const tpBox=document.getElementById('transpose');
+const tpNote=document.getElementById('tp-note');
+const tpButtons=[document.getElementById('tp-down'),document.getElementById('tp-reset'),document.getElementById('tp-up')];
+let tpApproved=false, tpAsked=false, tpValue=0;
+function tpRender(){
+  tpButtons[1].textContent=tpValue>0?('+'+tpValue):String(tpValue);
+  tpButtons.forEach(b=>b.disabled=!tpApproved);
+  if(tpApproved)tpNote.textContent='';
+}
+function tpSend(body){
+  if(!tpApproved)return;
+  fetch('$apiBase/transpose',{method:'POST',headers:tpHeaders,body:JSON.stringify(body)})
+    .then(r=>{if(r.status===403){tpApproved=false;tpAsked=false;tpNote.textContent='Not allowed';tpRender();}})
+    .catch(()=>{});
+}
+document.getElementById('tp-down').onclick=()=>tpSend({delta:-1});
+document.getElementById('tp-up').onclick=()=>tpSend({delta:1});
+document.getElementById('tp-reset').onclick=()=>tpSend({reset:true});
+function tpAuth(){
+  tpAsked=true;
+  tpNote.textContent='Waiting for approval…';
+  tpRender();
+  fetch('$apiBase/auth',{method:'POST',headers:tpHeaders})
+    .then(r=>{
+      tpApproved=r.ok;
+      if(!r.ok)tpNote.textContent='Not allowed';
+      tpRender();
+    })
+    .catch(()=>{tpNote.textContent='Could not reach ChurchPresenter';tpAsked=false;});
+}
+function onMessage(event){
+  if(typeof event.data==='string'){
+    try{
+      const state=JSON.parse(event.data);
+      tpValue=state.transpose|0;
+      tpBox.classList.toggle('shown',!!state.controls);
+      if(state.controls&&!tpAsked&&!tpApproved)tpAuth();
+      tpRender();
+    }catch(e){}
+    return;
+  }
+  onSocketMessage(event);
+}
+""".trimIndent()
+
+/** [value] as a JavaScript string literal, safe inside a `<script>` block. */
+private fun jsString(value: String): String =
+    "'" + value.replace("\\", "\\\\").replace("'", "\\'").replace("<", "\\x3c") + "'"

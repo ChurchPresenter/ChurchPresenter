@@ -78,6 +78,23 @@ class OmtOutputsTest {
     }
 
     @Test
+    fun `an OMT output pointed at no profile is repaired on load, and a valid one is left alone`() {
+        val settings = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "main", name = "Main"),
+                OutputProfile(id = "foyer", name = "Foyer"),
+            ),
+            omtOutputs = listOf(
+                ScreenAssignment(activeProfileId = null),
+                ScreenAssignment(activeProfileId = "gone"),
+                ScreenAssignment(activeProfileId = "foyer"),
+            ),
+        ).withProfileReferencesRepaired()
+
+        assertEquals(listOf("main", "main", "foyer"), settings.omtOutputs.map { it.activeProfileId })
+    }
+
+    @Test
     fun `a new OMT output is enabled, 1080p30, alpha, at automatic quality`() {
         val output = ScreenAssignment()
         assertTrue(output.omtEnabled)

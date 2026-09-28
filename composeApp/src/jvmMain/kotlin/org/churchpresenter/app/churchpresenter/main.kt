@@ -36,7 +36,9 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.AppWindowIcons
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.app.churchpresenter.utils.deleteLeftoverUpdateInstallers
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
@@ -69,6 +71,9 @@ import org.churchpresenter.settings.withWindowGeometry
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.settings.reconcileScreenAssignments
+import org.churchpresenter.settings.getBrowserSourceOutput
+import org.churchpresenter.settings.getNdiOutput
+import org.churchpresenter.settings.getOmtOutput
 import org.churchpresenter.settings.withBundledBible
 import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
@@ -307,6 +312,9 @@ fun main() {
     // file buys nothing and costs a dependency on a directory the app does not control.
     javax.imageio.ImageIO.setUseCache(false)
 
+    // Before the first window: every window gets the app icon's pixel frames as it opens.
+    AppWindowIcons.install()
+
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(
         startupSettings.analyticsReportingEnabled,
@@ -321,6 +329,9 @@ fun main() {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+    // The installer a previous update ran is still in the temp directory: it could not be deleted
+    // while it was running. The single-instance guard above means no download is in flight.
+    deleteLeftoverUpdateInstallers()
     // Which renderer was live is the first thing a GPU driver crash needs and the one thing the
     // report never carried. "default" means the platform's own choice, which is not the same fact
     // as any named API — a report from a machine on Direct3D-by-default and one pinned to it are
@@ -457,7 +468,9 @@ private fun ApplicationScope.ChurchPresenterApp(
         val deckLinkCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
 
         val proj = appSettings.projectionSettings
-        val assignments = reconcileScreenAssignments(proj.screenAssignments, nonPrimaryDisplays, deckLinkCount)
+        val assignments = reconcileScreenAssignments(
+            proj.screenAssignments, nonPrimaryDisplays, deckLinkCount, proj.fallbackProfileId,
+        )
         if (assignments != null) {
             appSettings = appSettings.copy(
                 projectionSettings = proj.copy(screenAssignments = assignments)
@@ -754,7 +767,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+                appSettings.projectionSettings.getBrowserSourceOutput(i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -764,7 +777,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val bsOutput = virtualOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
+            val bsOutput = appSettings.projectionSettings.getBrowserSourceOutput(i)
             val renderer = remember(
                 i,
                 bsOutput.browserSourceWidth,
@@ -809,7 +822,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+                appSettings.projectionSettings.getNdiOutput(i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -819,7 +832,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val ndiOutput = virtualOutputAt(appSettings.projectionSettings.ndiOutputs, i)
+            val ndiOutput = appSettings.projectionSettings.getNdiOutput(i)
             val defaultName = stringResource(Res.string.ndi_output_numbered, i + 1)
             // Keyed on everything a sender is created with, because NDI has no way to change any of
             // them in place: a rename, a resize or a mode change is a new source on the network.
@@ -881,7 +894,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
             val screenAssignmentState = rememberUpdatedState(
-                virtualOutputAt(appSettings.projectionSettings.omtOutputs, i)
+                appSettings.projectionSettings.getOmtOutput(i)
             )
             val effectiveModeState = remember {
                 derivedStateOf {
@@ -891,7 +904,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                 }
             }
             val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-            val omtOutput = virtualOutputAt(appSettings.projectionSettings.omtOutputs, i)
+            val omtOutput = appSettings.projectionSettings.getOmtOutput(i)
             val defaultName = stringResource(Res.string.omt_output_numbered, i + 1)
             // Keyed on everything a sender is created with, as the NDI block is: OMT cannot change a
             // name, size, rate, mode or quality in place either.
@@ -1656,6 +1669,53 @@ private fun ApplicationScope.ChurchPresenterApp(
                                             { pending.decision.complete(false) },
                                         ))
                                     }
+                                }
+                            }
+
+                            LaunchedEffect(Unit) {
+                                companionServer.onMusicianConnect.collect { pending ->
+                                    val clientId = pending.clientId
+                                    val access = remoteAccessDecision(
+                                        clientId,
+                                        remoteClientManager.allowedClients, remoteClientManager.blockedClients,
+                                        sessionAllowedClients, sessionBlockedClients,
+                                    )
+                                    when (val outcome = remoteApproval(
+                                        access,
+                                        type = RemoteEventType.MUSICIAN_CONNECT,
+                                        title = "",
+                                        clientId = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId),
+                                    )) {
+                                        RemoteApproval.Reject -> pending.decision.complete(false)
+                                        is RemoteApproval.Approve -> {
+                                            pending.decision.complete(true)
+                                            remoteActivityNotifications.add(outcome.notification)
+                                        }
+                                        is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
+                                            outcome.event,
+                                            { pending.decision.complete(true) },
+                                            { pending.decision.complete(false) },
+                                        ))
+                                    }
+                                }
+                            }
+
+                            // A musician view's transpose presses, and the state they produce sent
+                            // back to every musician view: the app is the one owner of the offset,
+                            // so a press on the desktop tile reaches the tablets the same way.
+                            LaunchedEffect(Unit) {
+                                companionServer.onBrowserSourceTranspose.collect { command ->
+                                    if (command.reset) {
+                                        presenterManager.setBrowserSourceTranspose(command.index, 0)
+                                    } else {
+                                        presenterManager.stepBrowserSourceTranspose(command.index, command.delta)
+                                    }
+                                }
+                            }
+                            LaunchedEffect(Unit) {
+                                presenterManager.browserSourceTranspose.collect { transposes ->
+                                    companionServer.updateBrowserSourceTranspose(transposes)
                                 }
                             }
 

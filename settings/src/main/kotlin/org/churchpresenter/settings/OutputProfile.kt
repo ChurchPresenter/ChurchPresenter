@@ -13,6 +13,38 @@ import org.churchpresenter.settings.utils.Constants
 const val DEFAULT_OUTPUT_PROFILE_ID = "default"
 
 /**
+ * The reserved id an output picks to show nothing at all -- see [BLANK_OUTPUT_PROFILE]. No stored
+ * profile can collide with it: new ones are numbered `profileN` (see [newOutputProfile]).
+ */
+const val BLANK_OUTPUT_PROFILE_ID = "blank"
+
+/**
+ * What an output on [BLANK_OUTPUT_PROFILE_ID] renders with: every content type and every background
+ * off, so it stays black -- or transparent over Browser Source and NDI. Built in rather than stored
+ * in [ProjectionSettings.outputProfiles], so it cannot be edited, linked or deleted.
+ */
+val BLANK_OUTPUT_PROFILE = OutputProfile(
+    id = BLANK_OUTPUT_PROFILE_ID,
+    bibleMode = Constants.SONG_LANG_OFF,
+    songMode = Constants.SONG_LANG_OFF,
+    showPictures = false,
+    showMedia = false,
+    showSubtitles = false,
+    showStreaming = false,
+    showAnnouncements = false,
+    showWebsite = false,
+    showChords = false,
+    showQA = false,
+    showSTT = false,
+    showDictionary = false,
+    showCanvas = false,
+    showFullscreenBackground = false,
+    showLowerThirdBackground = false,
+    showBibleBackground = false,
+    showSongsBackground = false,
+)
+
+/**
  * A named, reusable bundle of everything that decides how an output behaves: its display mode,
  * what content it shows, and its full Stage Monitor/Bible/Song/Background/captions/Dictionary/Q&A/
  * subtitle appearance.
@@ -54,6 +86,13 @@ data class OutputProfile(
     val showWebsite: Boolean = true,
     val songLookAhead: Boolean = false,
     val showChords: Boolean = true,
+    /**
+     * Whether a Browser Source page on this profile carries the musicians' −1 / 0 / +1 transpose
+     * buttons. Off by default: the page OBS or vMix loads must never show a control nobody can
+     * press, so a band's tablets use their own output on a profile with this on. Only meaningful
+     * for a Stage Monitor with [showChords]; screens and NDI outputs have no page to put it on.
+     */
+    val showTransposeControls: Boolean = false,
     val showQA: Boolean = true,
     val showSTT: Boolean = true,
     val showDictionary: Boolean = true,

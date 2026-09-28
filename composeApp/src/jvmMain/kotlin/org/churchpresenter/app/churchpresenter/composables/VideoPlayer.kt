@@ -597,17 +597,21 @@ fun VideoPlayer(
     // value on the EDT (VLC may be buffering/transitioning) and guard-skipping the call is what
     // causes the button to get stuck. libvlc play/pause on an already-playing/paused player
     // is a documented no-op, so this is safe.
+    // Behind the gate: the queued call can run after this composable was disposed and the player
+    // released, and pausing a released player is a native invalid memory access.
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
-            if (viewModel.isPlaying) {
-                // Lifts the mute the load effect set for the first-frame grace window — the
-                // audio device itself has been live since load, so this is not the first time
-                // it's asked to exist.
-                if (audioEnabled) mp.audio().setMute(false)
-                mp.controls().play()
-            } else {
-                if (audioEnabled) mp.audio().setMute(true)
-                mp.controls().pause()
+            gate.ifLive {
+                if (viewModel.isPlaying) {
+                    // Lifts the mute the load effect set for the first-frame grace window — the
+                    // audio device itself has been live since load, so this is not the first time
+                    // it's asked to exist.
+                    if (audioEnabled) mp.audio().setMute(false)
+                    mp.controls().play()
+                } else {
+                    if (audioEnabled) mp.audio().setMute(true)
+                    mp.controls().pause()
+                }
             }
         }
     }
@@ -984,17 +988,21 @@ fun SoftwareVideoPlayer(
     // value on the EDT (VLC may be buffering/transitioning) and guard-skipping the call is what
     // causes the button to get stuck. libvlc play/pause on an already-playing/paused player
     // is a documented no-op, so this is safe.
+    // Behind the gate: the queued call can run after this composable was disposed and the player
+    // released, and pausing a released player is a native invalid memory access.
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
-            if (viewModel.isPlaying) {
-                // Lifts the mute the load effect set for the first-frame grace window — the
-                // audio device itself has been live since load, so this is not the first time
-                // it's asked to exist.
-                if (audioEnabled) mp.audio().setMute(false)
-                mp.controls().play()
-            } else {
-                if (audioEnabled) mp.audio().setMute(true)
-                mp.controls().pause()
+            gate.ifLive {
+                if (viewModel.isPlaying) {
+                    // Lifts the mute the load effect set for the first-frame grace window — the
+                    // audio device itself has been live since load, so this is not the first time
+                    // it's asked to exist.
+                    if (audioEnabled) mp.audio().setMute(false)
+                    mp.controls().play()
+                } else {
+                    if (audioEnabled) mp.audio().setMute(true)
+                    mp.controls().pause()
+                }
             }
         }
     }

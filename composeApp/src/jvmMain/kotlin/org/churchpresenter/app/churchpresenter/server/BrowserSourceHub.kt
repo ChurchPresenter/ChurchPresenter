@@ -47,6 +47,35 @@ internal class BrowserSourceHub(
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
 
+    // ── The musicians' transpose buttons ─────────────────────────────────────
+    // Every page carries them hidden; only an output whose profile turns them on ever shows them,
+    // or is sent anything below. An OBS/vMix output on an ordinary profile never learns of them.
+
+    /** Semitones each output's chords are moved by, fed from PresenterManager by main.kt. */
+    internal val transposes = MutableStateFlow<Map<Int, Int>>(emptyMap())
+
+    /** The outputs whose profile offers the transpose buttons (`OutputProfile.offersTranspose`). */
+    internal val transposeControls = MutableStateFlow<Set<Int>>(emptySet())
+
+    internal fun offersTranspose(index: Int): Boolean = index in transposeControls.value
+
+    /**
+     * Devices the desktop approved to transpose since the server started. Approval is asked
+     * once, on the page's own handshake, not on every press.
+     */
+    private val approvedMusicians = ConcurrentHashMap.newKeySet<String>()
+
+    internal fun approveMusician(deviceId: String) {
+        if (deviceId.isNotBlank()) approvedMusicians.add(deviceId)
+    }
+
+    internal fun isApprovedMusician(deviceId: String?): Boolean =
+        !deviceId.isNullOrBlank() && deviceId in approvedMusicians
+
+    /** What a page of [index] is told: the current offset, and whether to offer the buttons. */
+    internal fun transposeState(transposes: Map<Int, Int>, controls: Set<Int>, index: Int): String =
+        """{"transpose":${transposes[index] ?: 0},"controls":${index in controls}}"""
+
 
     /**
      * Registers (or replaces) the frame delta flow a given output's renderer produces.

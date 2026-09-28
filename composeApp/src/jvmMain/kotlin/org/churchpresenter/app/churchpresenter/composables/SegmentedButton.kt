@@ -40,10 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.ElevationPalette
 import org.churchpresenter.theme.RaisedFill
+import org.churchpresenter.theme.drawShiftedY
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
-import androidx.compose.ui.graphics.graphicsLayer
 
 /** Tight enough that a two-line label still fits a segment sized for one and a bit. */
 private const val LINE_HEIGHT_RATIO = 1.15f
@@ -213,7 +213,7 @@ private fun <T> Segment(
                         segmentShape, selectedFill, palette, hovered = hovered, lift = 2.dp,
                     )
                     // A faint wash under the pointer, so an unchosen option shows it can be picked.
-                    hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
+                    hovered -> Modifier.drawShiftedY(-SEGMENT_HOVER_SHIFT)
                         .clip(segmentShape).background(ink.copy(alpha = SEGMENT_HOVER_ALPHA))
                     else -> Modifier.clip(segmentShape)
                 }

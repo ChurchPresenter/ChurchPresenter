@@ -705,7 +705,16 @@ val generateBuildConfig by tasks.registering {
     // A packaged installer build (packageDmg/Msi/Exe/Deb, packageDistributionForCurrentOS,
     // signing/notarization — see .github/workflows/build.yml) is a real release. A plain
     // `run` or IDE launch is a developer build. Used to tag live-map pings dev vs. user.
-    val isRelease = gradle.startParameter.taskNames.any { task ->
+    //
+    // Task names only. `taskNames` also carries task options and their values, and a test filter
+    // is matched like any other string: `--tests '*KeySignalModifierTest*'` contains "sign", so
+    // naming that class compiled the whole run as a release -- and every test that branches on
+    // IS_RELEASE saw production behaviour, depending on which classes the command line happened
+    // to name.
+    val requested = gradle.startParameter.taskNames
+    val isRelease = requested.filterIndexed { i, arg ->
+        !arg.startsWith("-") && requested.getOrNull(i - 1) != "--tests"
+    }.any { task ->
         val t = task.lowercase()
         listOf("package", "distributable", "sign", "notariz").any { t.contains(it) }
     }

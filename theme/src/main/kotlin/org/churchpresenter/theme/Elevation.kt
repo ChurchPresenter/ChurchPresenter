@@ -11,7 +11,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -207,6 +208,17 @@ fun Modifier.sunken(
     .border(1.dp, if (rim.isSpecified) rim else palette.wellBorder, shape)
 
 /**
+ * Draws this element [dy] lower — higher when negative — without moving where it is hit.
+ *
+ * For a lift under the pointer, never a `graphicsLayer` translation: that moves pointer input along
+ * with the picture, so a pointer resting along the lifted edge left the element as it rose, which
+ * dropped it back under the pointer, which lifted it again — every frame, for as long as the pointer
+ * rested there, and a Compose test waiting for idle waited for ever.
+ */
+fun Modifier.drawShiftedY(dy: Dp): Modifier =
+    if (dy == 0.dp) this else drawWithContent { translate(top = dy.toPx()) { this@drawWithContent.drawContent() } }
+
+/**
  * A control raised off the page in [fill]: a top-lit gradient, a dark line along the bottom and a
  * drop shadow tinted with the fill's own color. [pressed] pushes it back in — no shadow, an inner
  * shade along the top instead.
@@ -244,7 +256,7 @@ fun Modifier.raised(
     val top = if (hovered && !pressed) lerp(fill.top, Color.White, fraction = HOVER_BRIGHTEN) else fill.top
     val bottom = if (hovered && !pressed) lerp(fill.bottom, Color.White, fraction = HOVER_BRIGHTEN) else fill.bottom
     return this
-        .graphicsLayer { translationY = shift.toPx() }
+        .drawShiftedY(shift)
         .shadow(elevation, shape, clip = false, ambientColor = shadowTint, spotColor = shadowTint)
         .clip(shape)
         .background(Brush.verticalGradient(listOf(top, bottom)))

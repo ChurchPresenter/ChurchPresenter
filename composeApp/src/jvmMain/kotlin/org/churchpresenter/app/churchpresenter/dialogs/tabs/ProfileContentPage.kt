@@ -43,6 +43,7 @@ import churchpresenter.composeapp.generated.resources.projection_content_lt_back
 import churchpresenter.composeapp.generated.resources.profile_song_look_ahead
 import churchpresenter.composeapp.generated.resources.projection_content_web
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_chords
+import churchpresenter.composeapp.generated.resources.profile_show_transpose_controls
 import churchpresenter.composeapp.generated.resources.tab_canvas
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_qa
@@ -104,6 +105,12 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
             add(ContentSwitch(stringResource(Res.string.stage_monitor_show_chords), profile.showChords) { p, v ->
                 p.copy(showChords = v)
             })
+            // The musicians' transpose buttons, on a Browser Source page — offered only while
+            // there are chords to move.
+            if (profile.showChords) {
+                val label = stringResource(Res.string.profile_show_transpose_controls)
+                add(ContentSwitch(label, profile.showTransposeControls) { p, v -> p.copy(showTransposeControls = v) })
+            }
         }
         add(ContentSwitch(stringResource(Res.string.tab_dictionary), profile.showDictionary) { p, v ->
             p.copy(showDictionary = v)

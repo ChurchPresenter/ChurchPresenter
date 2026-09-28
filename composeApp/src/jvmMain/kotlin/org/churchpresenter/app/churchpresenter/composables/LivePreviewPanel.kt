@@ -44,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +66,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_none
+import churchpresenter.composeapp.generated.resources.output_profile_blank
 import churchpresenter.composeapp.generated.resources.output_profile_swap_menu_tooltip
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -89,7 +90,9 @@ import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.app.churchpresenter.offersTranspose
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.getBrowserSourceOutput
@@ -324,6 +327,13 @@ private class PreviewContext(
                 OutputKind.NDI -> presenterManager.ndiLocks.value
                 OutputKind.OMT -> presenterManager.omtLocks.value
             }
+            // Only a Browser Source carries a per-output transpose. `kind` is fixed for this entry,
+            // so the collect below is either always or never part of its composition.
+            val transposes = if (kind == OutputKind.BROWSER_SOURCE) {
+                presenterManager.browserSourceTranspose.collectAsState().value
+            } else {
+                emptyMap()
+            }
             SingleDisplayPreview(
                 screenIndex = index,
                 screenAssignment = output,
@@ -342,6 +352,18 @@ private class PreviewContext(
                         OutputKind.NDI -> presenterManager.setNdiLock(index, mode)
                         OutputKind.OMT -> presenterManager.setOmtLock(index, mode)
                     }
+                },
+                transposeSteps = transposes[index] ?: 0,
+                onTranspose = if (kind == OutputKind.BROWSER_SOURCE) {
+                    { delta ->
+                        if (delta == null) {
+                            presenterManager.setBrowserSourceTranspose(index, 0)
+                        } else {
+                            presenterManager.stepBrowserSourceTranspose(index, delta)
+                        }
+                    }
+                } else {
+                    null
                 },
                 label = label,
                 showLabel = appSettings.projectionSettings.showOutputLabels,
@@ -369,6 +391,8 @@ private fun SingleDisplayPreview(
     sttManager: STTManager? = null,
     locks: Map<Int, Presenting> = emptyMap(),
     onToggleLock: (Presenting?) -> Unit = {},
+    transposeSteps: Int = 0,
+    onTranspose: ((Int?) -> Unit)? = null,
     label: String,
     showLabel: Boolean = true,
     showMode: Boolean = true,
@@ -524,6 +548,7 @@ private fun SingleDisplayPreview(
                     sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
                     showChords = profile.showChords,
+                    transposeSteps = transposeSteps,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
@@ -790,6 +815,16 @@ private fun SingleDisplayPreview(
             }
         }
 
+        // The musicians' transpose, on an output whose profile offers it. A Stage Monitor has no
+        // lock toggle, so it takes that corner. The same offset the output's page buttons move.
+        if (profile.offersTranspose() && onTranspose != null) {
+            TransposeOverlay(
+                steps = transposeSteps,
+                onStep = onTranspose,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(3.dp),
+            )
+        }
+
         // Screen/output label
         if (showLabel) {
             Text(
@@ -846,7 +881,7 @@ private fun PreviewHeader(
     onToggle: () -> Unit,
     profiles: List<OutputProfile> = emptyList(),
     activeProfileId: String? = null,
-    onPickProfile: (String?) -> Unit = {},
+    onPickProfile: (String) -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -894,7 +929,7 @@ private fun PreviewHeader(
 private fun OutputProfileSwapMenu(
     profiles: List<OutputProfile>,
     activeProfileId: String?,
-    onPick: (String?) -> Unit,
+    onPick: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -913,9 +948,14 @@ private fun OutputProfileSwapMenu(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = {
-                    Text(stringResource(Res.string.output_profile_none), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(Res.string.output_profile_blank),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = if (activeProfileId == BLANK_OUTPUT_PROFILE_ID) FontWeight.Bold
+                        else FontWeight.Normal,
+                    )
                 },
-                onClick = { expanded = false; onPick(null) },
+                onClick = { expanded = false; onPick(BLANK_OUTPUT_PROFILE_ID) },
             )
             profiles.forEach { profile ->
                 DropdownMenuItem(

@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -169,6 +170,52 @@ class LivePreviewPanelTest {
         onNodeWithText("Stage").assertExists("the operator's name, not the number")
         onNodeWithText("Browser Source 1").assertDoesNotExist()
         onNodeWithText("Browser Source 2").assertExists("the unnamed one keeps its number")
+    }
+
+    // ── The musicians' transpose on a Browser Source tile (issue #649) ────────────────────────
+
+    /** Browser Source 1 on an ordinary stage profile (the OBS feed), 2 on the musicians' one. */
+    private fun stageOutputs(): AppSettings {
+        val stage = OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+        return AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(stage, stage.copy(id = "musicians", showTransposeControls = true)),
+                browserSourceOutputs = listOf(
+                    ScreenAssignment(activeProfileId = "stage"),
+                    ScreenAssignment(activeProfileId = "musicians"),
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `only the tile of an output offering the buttons carries a transpose control`() = runComposeUiTest {
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = PresenterManager(), appSettings = stageOutputs()) }
+        }
+        onAllNodesWithText("Transpose 0").assertCountEquals(1)
+        onAllNodesWithContentDescription("Transpose up").assertCountEquals(1)
+    }
+
+    @Test
+    fun `the tile's steps move that output's transpose, and the offset puts it back`() = runComposeUiTest {
+        val manager = PresenterManager()
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = manager, appSettings = stageOutputs()) }
+        }
+        onNodeWithContentDescription("Transpose up").performScrollTo().performClick()
+        onNodeWithContentDescription("Transpose up").performClick()
+        waitForIdle()
+        assertEquals(mapOf(1 to 2), manager.browserSourceTranspose.value)
+        onNodeWithText("Transpose +2").assertExists()
+
+        onNodeWithContentDescription("Transpose down").performClick()
+        waitForIdle()
+        assertEquals(mapOf(1 to 1), manager.browserSourceTranspose.value)
+
+        onNodeWithText("Transpose +1").performClick()
+        waitForIdle()
+        assertEquals(emptyMap(), manager.browserSourceTranspose.value)
     }
 
     // ── Mode dispatch → Live badge ────────────────────────────────────────────────────────────
@@ -862,7 +909,7 @@ class LivePreviewPanelTest {
     }
 
     @Test
-    fun `the menu lists every profile, plus a way back to none`() = runComposeUiTest {
+    fun `the menu lists every profile, plus Blank`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
@@ -874,7 +921,7 @@ class LivePreviewPanelTest {
 
         onNodeWithText("Auditorium").assertExists()
         onNodeWithText("Stream band").assertExists()
-        onNodeWithText("None").assertExists()
+        onNodeWithText("Blank").assertExists()
     }
 
     @Test
@@ -899,7 +946,7 @@ class LivePreviewPanelTest {
     }
 
     @Test
-    fun `picking None clears the output's profile rather than leaving the old one`() = runComposeUiTest {
+    fun `picking Blank points the output at the built-in blank profile`() = runComposeUiTest {
         var doc = twoProfiles()
         setContent {
             MaterialTheme {
@@ -913,10 +960,10 @@ class LivePreviewPanelTest {
 
         onNodeWithContentDescription(SWAP).performClick()
         waitForIdle()
-        onNodeWithText("None").performClick()
+        onNodeWithText("Blank").performClick()
         waitForIdle()
 
-        assertNull(doc.projectionSettings.screenAssignments[0].activeProfileId)
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, doc.projectionSettings.screenAssignments[0].activeProfileId)
     }
 
     @Test

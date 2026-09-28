@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import org.churchpresenter.companionsatellite.CompanionSatelliteClient
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -158,6 +162,14 @@ private fun CompanionConnectionCard(
     var nameText by remember(connection.id, connection.name) { mutableStateOf(connection.name) }
     var hostText by remember(connection.id, connection.host) { mutableStateOf(connection.host) }
     var portText by remember(connection.id, connection.port) { mutableStateOf(connection.port.toString()) }
+    var portFocused by remember { mutableStateOf(false) }
+    // Saved on Enter or on leaving the field, never per keystroke: each save reconnects, and typing
+    // 70000 used to save 7000 on the way -- a port nobody asked for. Anything unusable reverts.
+    fun commitPort() {
+        val port = portText.trim().toIntOrNull()?.takeIf { it in CompanionSatelliteClient.VALID_PORTS }
+        if (port == null) portText = connection.port.toString()
+        else if (port != connection.port) onUpdate { copy(port = port) }
+    }
     var deviceIdText by remember(connection.id, connection.deviceId) { mutableStateOf(connection.deviceId) }
     var leftSidebarDeviceIdText by remember(connection.id, connection.leftSidebarDeviceId) { mutableStateOf(connection.leftSidebarDeviceId) }
     var rightSidebarDeviceIdText by remember(connection.id, connection.rightSidebarDeviceId) { mutableStateOf(connection.rightSidebarDeviceId) }
@@ -271,13 +283,17 @@ private fun CompanionConnectionCard(
                         )
                         SettingsTextField(
                             value = portText,
-                            onValueChange = { v ->
-                                portText = v
-                                v.toIntOrNull()?.let { onUpdate { copy(port = it) } }
-                            },
+                            onValueChange = { portText = it },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(68.dp)
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done,
+                            ),
+                            keyboardActions = KeyboardActions(onDone = { commitPort() }),
+                            modifier = Modifier.width(68.dp).onFocusChanged { state ->
+                                if (portFocused && !state.isFocused) commitPort()
+                                portFocused = state.isFocused
+                            }
                         )
                     }
                 }

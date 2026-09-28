@@ -120,6 +120,23 @@ internal fun shouldReportBlindFfmpeg(facts: CameraEnumerationFacts?): Boolean =
         facts.fallbackListedCount > 0
 
 /**
+ * [failure], read in the light of a listing ffmpeg could not see into.
+ *
+ * With camera access switched off, Windows shows ffmpeg no DirectShow device at all, so opening one
+ * fails as "could not find video device" -- and the operator was told the camera had been unplugged
+ * or renamed, while Windows' own inventory still listed it and the real remedy was a privacy switch.
+ * Found by the Windows acceptance pass. That listing is exactly [shouldReportBlindFfmpeg]'s state, and
+ * in it a device that "cannot be found" is one the platform is hiding, so it is reported as the
+ * permission problem it is. macOS's fallback listing means the same thing there.
+ */
+internal fun refineForBlindListing(failure: CameraFailure, facts: CameraEnumerationFacts?): CameraFailure =
+    if (failure == CameraFailure.DEVICE_NOT_FOUND && shouldReportBlindFfmpeg(facts)) {
+        CameraFailure.PERMISSION_DENIED
+    } else {
+        failure
+    }
+
+/**
  * A gate that lets exactly one report through per process.
  *
  * For facts that are worth saying once and no more, so a second event would carry nothing the first

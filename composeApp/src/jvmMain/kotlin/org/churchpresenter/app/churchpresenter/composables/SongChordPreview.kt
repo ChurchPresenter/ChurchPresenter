@@ -39,10 +39,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.preview
-import churchpresenter.composeapp.generated.resources.song_chords_in_key
 import churchpresenter.composeapp.generated.resources.song_chords_used
 import churchpresenter.composeapp.generated.resources.song_insert_chord
-import churchpresenter.composeapp.generated.resources.song_key
 import churchpresenter.composeapp.generated.resources.song_transpose_down
 import churchpresenter.composeapp.generated.resources.song_transpose_reset
 import churchpresenter.composeapp.generated.resources.song_transpose_up
@@ -53,6 +51,29 @@ import org.churchpresenter.songchords.SongSectionWordGroup
 import org.churchpresenter.songchords.SongSectionWords
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.DrawableResource
+import churchpresenter.composeapp.generated.resources.song_transpose
+import churchpresenter.composeapp.generated.resources.song_key_up
+import churchpresenter.composeapp.generated.resources.song_key_down
+import churchpresenter.composeapp.generated.resources.song_insert_named_chord
+import churchpresenter.composeapp.generated.resources.song_chords_in
+import churchpresenter.composeapp.generated.resources.song_chord_type
+import churchpresenter.composeapp.generated.resources.song_chord_root
+import churchpresenter.composeapp.generated.resources.song_chord_build
+import churchpresenter.composeapp.generated.resources.song_chord_major
+import churchpresenter.composeapp.generated.resources.song_chord_prefer_flats
+import churchpresenter.composeapp.generated.resources.song_chord_prefer_sharps
+import churchpresenter.composeapp.generated.resources.ic_remove
+import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import churchpresenter.composeapp.generated.resources.ic_add
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.foundation.layout.PaddingValues
 
 private const val CHORD_SPACING_RATIO = 0.42f
 
@@ -249,69 +270,40 @@ private fun ZoneLabel(text: String, modifier: Modifier = Modifier, color: Color?
 }
 
 /**
- * The right-hand pane of the song editor: the song as the band will read it, a key readout that
- * transposes, and the chords of that key to insert from.
+ * The right-hand pane of the song editor: the song as the band will read it, the transpose steps
+ * that rewrite its chords, and the chords of a chosen key to insert from.
  *
- * Rendering-only — every edit leaves through [onInsertChord] or the transpose callbacks, so the
- * pane holds no state of its own and can be driven straight from a test.
+ * The preview draws the text exactly as written, so what is inserted is what is shown. [songKey]
+ * only decides which chords the palette and the picker offer; it never shifts the song. Moving the
+ * song is [onTransposeUp]/[onTransposeDown], which rewrite the text itself, and [transposed] is
+ * how far that has gone this session, for the reset chip.
+ *
+ * Rendering-only — every edit leaves through a callback, so the pane holds no state of its own
+ * beyond the picker's selection and can be driven straight from a test.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SongChordPreview(
     text: String,
     showChords: Boolean,
-    steps: Int,
+    songKey: String,
+    transposed: Int,
+    onKeyUp: () -> Unit,
+    onKeyDown: () -> Unit,
     onTransposeUp: () -> Unit,
     onTransposeDown: () -> Unit,
     onTransposeReset: () -> Unit,
     onInsertChord: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val sourceKey = remember(text) { ChordTransposer.detectKey(text) }
-    val keyPitch = ChordTransposer.pitchOf(sourceKey) ?: 0
-    // The key it lands in decides the spelling, so it is worked out before anything is named.
-    val flats = ChordTransposer.prefersFlats(keyPitch + steps)
-    val currentKey = ChordTransposer.nameOf(keyPitch + steps, flats)
-    val sections = remember(text, steps, showChords, flats) {
-        buildPreviewSections(text, steps, flats, showChords)
-    }
-    val used = remember(text, steps, flats) {
-        ChordTransposer.chordsIn(text, steps, flats).toSet()
-    }
-    val palette = remember(currentKey) { ChordTransposer.diatonicChords(currentKey) }
+    val flats = ChordTransposer.prefersFlats(songKey)
+    val sections = remember(text, showChords) { buildPreviewSections(text, 0, flats, showChords) }
+    val used = remember(text) { ChordTransposer.chordsIn(text).toSet() }
+    val palette = remember(songKey) { ChordTransposer.diatonicChords(songKey) }
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)) {
 
-        // Header: the pane's name, and the key it is being read in.
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            ZoneLabel(stringResource(Res.string.preview), modifier = Modifier.weight(1f))
-            if (showChords) {
-                KeyStepper(
-                    keyName = currentKey,
-                    onUp = onTransposeUp,
-                    onDown = onTransposeDown,
-                )
-                if (steps != 0) {
-                    val label = stringResource(
-                        Res.string.song_transpose_reset,
-                        if (steps > 0) "+$steps" else "$steps",
-                    )
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(7.dp))
-                            .clickable(onClick = onTransposeReset)
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
-                    )
-                }
-            }
-        }
+        PreviewHeader(showChords, transposed, onTransposeUp, onTransposeDown, onTransposeReset)
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         // The song itself.
@@ -340,7 +332,7 @@ fun SongChordPreview(
             }
         }
 
-        // The chords of the current key, to insert from.
+        // The chords of the chosen key, and any other chord, to insert from.
         if (showChords && palette.isNotEmpty()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Column(
@@ -351,7 +343,12 @@ fun SongChordPreview(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    ZoneLabel(stringResource(Res.string.song_chords_in_key, currentKey))
+                    Stepper(
+                        label = stringResource(Res.string.song_chords_in),
+                        value = songKey,
+                        down = StepAction(Res.drawable.ic_remove, stringResource(Res.string.song_key_down), onKeyDown),
+                        up = StepAction(Res.drawable.ic_add, stringResource(Res.string.song_key_up), onKeyUp),
+                    )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant,
                         modifier = Modifier.weight(1f),
@@ -362,43 +359,182 @@ fun SongChordPreview(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
                     val insertLabel = stringResource(Res.string.song_insert_chord)
                     palette.forEach { chord ->
-                        val inSong = chord in used
-                        val ink = if (inSong) MaterialTheme.colorScheme.primary
-                                  else MaterialTheme.colorScheme.onSurfaceVariant
                         TooltipWrapper(tooltip = insertLabel) {
-                            Text(
-                                text = chord,
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 12.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = ink,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .widthIn(min = 38.dp)
-                                    .height(27.dp)
-                                    .background(
-                                        if (inSong) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                                        else MaterialTheme.colorScheme.surfaceContainerHigh,
-                                        AppShape(7.dp),
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (inSong) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                        else MaterialTheme.colorScheme.outlineVariant,
-                                        AppShape(7.dp),
-                                    )
-                                    .clickable { onInsertChord(chord) }
-                                    .padding(horizontal = 9.dp, vertical = 5.dp),
-                            )
+                            ChordChip(chord, highlighted = chord in used, onClick = { onInsertChord(chord) })
                         }
                     }
                 }
+                ChordPicker(songKey = songKey, flats = flats, onInsertChord = onInsertChord)
             }
         }
     }
+}
+
+/** The pane's name, and the steps that move the whole song, with a reset once it has moved. */
+@Composable
+private fun PreviewHeader(
+    showChords: Boolean,
+    transposed: Int,
+    onTransposeUp: () -> Unit,
+    onTransposeDown: () -> Unit,
+    onTransposeReset: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ZoneLabel(stringResource(Res.string.preview), modifier = Modifier.weight(1f))
+        if (!showChords) return@Row
+        if (transposed != 0) {
+            Text(
+                text = stringResource(
+                    Res.string.song_transpose_reset,
+                    if (transposed > 0) "+$transposed" else "$transposed",
+                ),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(7.dp))
+                    .clickable(onClick = onTransposeReset)
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+            )
+        }
+        Stepper(
+            label = stringResource(Res.string.song_transpose),
+            value = null,
+            down = StepAction(
+                Res.drawable.ic_arrow_down,
+                stringResource(Res.string.song_transpose_down),
+                onTransposeDown,
+            ),
+            up = StepAction(Res.drawable.ic_arrow_up, stringResource(Res.string.song_transpose_up), onTransposeUp),
+        )
+    }
+}
+
+/**
+ * Any chord at all, built from a root and a type — for the chords a key's seven do not cover.
+ *
+ * Roots start out spelled the way [songKey] is written, so a pick in E flat reads A flat, not
+ * G sharp; the ♯ / ♭ switch beside them spells them the other way, for a player who reads a
+ * black key by the other name (issue #649).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ChordPicker(songKey: String, flats: Boolean, onInsertChord: (String) -> Unit) {
+    var root by remember(songKey) { mutableStateOf(ChordTransposer.pitchOf(songKey) ?: 0) }
+    var quality by remember { mutableStateOf(ChordTransposer.CHORD_QUALITIES.first()) }
+    var useFlats by remember(songKey) { mutableStateOf(flats) }
+    // Folded away until asked for: open, it is five rows of chips, which left the song itself two
+    // lines of room. The key's own seven chords above cover most of what a song needs.
+    var open by remember { mutableStateOf(false) }
+    val chord = ChordTransposer.nameOf(root, useFlats) + quality
+
+    Row(
+        modifier = Modifier.clickable { open = !open }.padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        ZoneLabel(stringResource(Res.string.song_chord_build))
+        Icon(
+            painter = painterResource(if (open) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(12.dp),
+        )
+    }
+    if (!open) return
+
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            ZoneLabel(stringResource(Res.string.song_chord_root), modifier = Modifier.weight(1f))
+            TooltipWrapper(tooltip = stringResource(Res.string.song_chord_prefer_sharps)) {
+                ChordChip(SHARP_SIGN, highlighted = !useFlats, onClick = { useFlats = false })
+            }
+            TooltipWrapper(tooltip = stringResource(Res.string.song_chord_prefer_flats)) {
+                ChordChip(FLAT_SIGN, highlighted = useFlats, onClick = { useFlats = true })
+            }
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            for (pitch in 0 until PITCH_CLASSES) {
+                val name = ChordTransposer.nameOf(pitch, useFlats)
+                ChordChip(name, highlighted = pitch == root, onClick = { root = pitch })
+            }
+        }
+        ZoneLabel(stringResource(Res.string.song_chord_type), modifier = Modifier.padding(top = 3.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            val major = stringResource(Res.string.song_chord_major)
+            ChordTransposer.CHORD_QUALITIES.forEach { q ->
+                ChordChip(qualityLabel(q, major), highlighted = q == quality, onClick = { quality = q })
+            }
+        }
+        FilledTonalButton(
+            onClick = { onInsertChord(chord) },
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+            modifier = Modifier.padding(top = 3.dp).height(30.dp),
+        ) {
+            Text(
+                stringResource(Res.string.song_insert_named_chord, chord),
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+    }
+}
+
+private const val PITCH_CLASSES = 12
+
+// The accidentals as music writes them: the switch's own labels. The chord inserted is still
+// spelled `#`/`b`, which is what the chord grammar reads.
+private const val SHARP_SIGN = "♯"
+private const val FLAT_SIGN = "♭"
+
+/** How a chord type reads on its chip: the bare major triad by name, a flat as a real flat sign. */
+internal fun qualityLabel(quality: String, major: String): String =
+    if (quality.isEmpty()) major else quality.replace("b5", "♭5")
+
+/** One chord on a chip: tinted when it is in the song, or when it is the picker's selection. */
+@Composable
+private fun ChordChip(text: String, highlighted: Boolean, onClick: () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    Text(
+        text = text,
+        fontFamily = FontFamily.Monospace,
+        fontSize = 12.5.sp,
+        fontWeight = FontWeight.Bold,
+        color = if (highlighted) primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .widthIn(min = 38.dp)
+            .height(27.dp)
+            .background(
+                if (highlighted) primary.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceContainerHigh,
+                AppShape(7.dp),
+            )
+            .border(
+                1.dp,
+                if (highlighted) primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant,
+                AppShape(7.dp),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 9.dp, vertical = 5.dp),
+    )
 }
 
 /**
@@ -629,9 +765,12 @@ private fun ChordLine(
     }
 }
 
-/** The key readout, with the two steps that move the whole song. */
+/** One step of a [Stepper]: its icon, its hover label, and what it does. */
+private class StepAction(val icon: DrawableResource, val tooltip: String, val onClick: () -> Unit)
+
+/** A labelled pair of steps, with the [value] they move between when there is one to show. */
 @Composable
-private fun KeyStepper(keyName: String, onUp: () -> Unit, onDown: () -> Unit) {
+private fun Stepper(label: String, value: String?, down: StepAction, up: StepAction) {
     val accent = MaterialTheme.colorScheme.primary
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -641,17 +780,19 @@ private fun KeyStepper(keyName: String, onUp: () -> Unit, onDown: () -> Unit) {
             .border(1.dp, accent.copy(alpha = 0.35f), AppShape(8.dp))
             .padding(start = 10.dp, end = 4.dp, top = 3.dp, bottom = 3.dp),
     ) {
-        ZoneLabel(stringResource(Res.string.song_key), color = accent.copy(alpha = 0.85f))
-        Text(
-            text = keyName,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            color = accent,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(min = 26.dp),
-        )
-        StepButton("−", stringResource(Res.string.song_transpose_down), accent, onDown)
-        StepButton("+", stringResource(Res.string.song_transpose_up), accent, onUp)
+        ZoneLabel(label, color = accent.copy(alpha = 0.85f))
+        if (value != null) {
+            Text(
+                text = value,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = accent,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(min = 26.dp),
+            )
+        }
+        StepButton(down, accent)
+        StepButton(up, accent)
     }
 }
 
@@ -679,16 +820,21 @@ private fun TooltipWrapper(tooltip: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun StepButton(glyph: String, tooltip: String, accent: Color, onClick: () -> Unit) {
-    TooltipWrapper(tooltip = tooltip) {
+private fun StepButton(action: StepAction, accent: Color) {
+    TooltipWrapper(tooltip = action.tooltip) {
         Box(
             modifier = Modifier
                 .size(width = 22.dp, height = 20.dp)
                 .background(accent.copy(alpha = 0.16f), AppShape(5.dp))
-                .clickable(onClick = onClick),
+                .clickable(onClick = action.onClick),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = glyph, fontSize = 13.sp, color = accent, fontWeight = FontWeight.Bold)
+            Icon(
+                painter = painterResource(action.icon),
+                contentDescription = action.tooltip,
+                tint = accent,
+                modifier = Modifier.size(14.dp),
+            )
         }
     }
 }

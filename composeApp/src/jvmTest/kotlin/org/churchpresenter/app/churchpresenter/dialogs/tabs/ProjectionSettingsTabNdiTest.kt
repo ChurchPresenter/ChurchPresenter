@@ -85,8 +85,16 @@ class ProjectionSettingsTabNdiTest {
 
     @Test
     fun `an NDI output takes a profile like any other output`() {
-        projectionTab(initial = withNdi(1), ndiStatus = ready) { get ->
-            onAllNodes(hasText("None")).onLast().performScrollTo().performClick()
+        // Every output follows a real profile, so the picker opens from the one it is on.
+        val onMain = withNdi(1).let {
+            it.copy(
+                projectionSettings = it.projectionSettings.copy(
+                    ndiOutputs = listOf(ScreenAssignment(activeProfileId = "p0")),
+                ),
+            )
+        }
+        projectionTab(initial = onMain, ndiStatus = ready) { get ->
+            onAllNodes(hasText("Main")).onLast().performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Foyer").performClick()
             waitForIdle()

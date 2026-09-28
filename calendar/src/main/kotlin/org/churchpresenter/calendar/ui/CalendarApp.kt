@@ -369,7 +369,6 @@ private fun ColumnScope.OpenServicePane(
         ),
         measuredSeconds = state.measuredSeconds,
         problems = state.preflight,
-        onAddItem = { dialogs.openPicker(null) },
         onChangeItem = { dialogs.openPicker(it) },
         onRemove = { state.removeItem(service.id, it) },
         onMove = { from, to -> state.moveItem(service.id, from, to) },
@@ -390,6 +389,10 @@ private fun ColumnScope.OpenServicePane(
         modifier = Modifier.weight(1f),
     )
     HorizontalDivider()
+    AddItemButton(
+        onClick = { dialogs.openPicker(null) },
+        modifier = Modifier.padding(start = 10.dp, end = 4.dp, top = 8.dp, bottom = 4.dp),
+    )
     Footer(
         status = service.name + " · " + when (val count = service.autoStartCount()) {
             0 -> stringResource(Res.string.calendar_all_manual)

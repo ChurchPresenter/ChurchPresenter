@@ -12,6 +12,7 @@
 - **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.
 - **Powerful search** — find songs by title or number with contains, starts-with, exact-match and phrase filters, plus category and songbook filters.
 - **Built-in song editor** — add and edit songs with simple verse/chorus formatting; no external tools needed.
+- **Chords made easy** — transpose a whole song up or down a semitone at a time (every language moves together, and Save keeps the new key), pick chords from the key you are writing in, or build any chord from a root and a type — major, minor, 7, maj7, m7, 6, m6, 9, add9, sus2, sus4, dim, dim7, m7♭5 and aug.
 - **Song Library Manager** — every song in one editable grid: search, filter by song book, show the columns you care about, type straight into a cell, and change a field on a whole selection at once. Renumbering a book, filling in missing composers or moving a set into a new song book is one screen rather than one song at a time.
 - **Bilingual worship** — show two languages at once, side-by-side or stacked, or switch between primary and secondary on the fly.
 - **Look-ahead for the band** — see the current and next section in advance so transitions stay smooth.
@@ -26,6 +27,7 @@
 - `data/settings/SongSettings.kt`
 - `presenter/SongPresenter.kt`
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
+- `composables/SongChordPreview.kt` — the editor's chord preview: Transpose, the key's palette and the chord picker
 - `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 - `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid
@@ -243,10 +245,12 @@
 
 ## Stage Monitor
 - **Confidence display for the platform** — give worship leaders and speakers their own screen showing the current slide, next slide, a clock, the countdown timer, section labels and presenter notes — in vertical, horizontal or four-quadrant layouts.
+- **Transpose on the band's tablets** — open a Browser Source stage view on a tablet and move its chords up or down a semitone with −1 / 0 / +1 buttons: for a capo, or a singer who needs another key. Only that output changes — the song, the main screen and the OBS feed stay as written. Turned on per profile, and each tablet is approved on the desktop once.
 
 **Source locations:**
 - `StageMonitorScreen.kt`
 - `data/settings/StageMonitorSettings.kt`
+- `server/BrowserSourcePage.kt`, `server/BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
 - `dialogs/tabs/ProfileStagePage.kt`, `dialogs/tabs/ProfileStageText.kt`, `dialogs/tabs/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile
 
 ## Mobile & Remote Control

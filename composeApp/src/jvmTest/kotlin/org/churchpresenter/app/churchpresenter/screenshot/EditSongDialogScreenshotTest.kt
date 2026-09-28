@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -102,6 +103,25 @@ class EditSongDialogScreenshotTest {
 
     @Test
     fun `the chord column turned off`() = shoot("chords_hidden", song = withChords(), chordsVisible = false)
+
+    /** Transposed up two: every chord rewritten in the lyrics box, and the chip that takes it back. */
+    @Test
+    fun `a song transposed`() = shoot("chords_transposed", song = withChords()) {
+        repeat(2) {
+            onNodeWithContentDescription("Transpose up").performClick()
+            waitForIdle()
+        }
+    }
+
+    /** The chord picker open, a root and a type chosen, ready to insert. */
+    @Test
+    fun `the chord picker open`() = shoot("chord_picker", song = withChords()) {
+        onNodeWithText("BUILD A CHORD").performClick()
+        waitForIdle()
+        onNodeWithText("F#").performClick()
+        onNodeWithText("m7").performClick()
+        waitForIdle()
+    }
 
     // ── The second language ─────────────────────────────────────────────────────────────────────
 

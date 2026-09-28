@@ -254,7 +254,12 @@ internal data class TranslationDraft(
      */
     fun toTranslation(): SongTranslation {
         val lines = lyrics.text.split("\n")
-        val blank = lines.all { it.isBlank() || it.trim().startsWith("[") }
+        // Structure alone -- headers, slide breaks, background directives -- is not a translation.
+        // A lyric line that opens on a chord (`[G]Blagodat`) is words, not a header.
+        val blank = lines.all {
+            it.isBlank() || ChordTransposer.isSectionHeader(it) ||
+                ChordTransposer.isSlideBreak(it) || ChordTransposer.isBackgroundDirective(it)
+        }
         return SongTranslation(
             label = label.trim(),
             title = title.trim(),
@@ -312,6 +317,19 @@ internal fun insertSnippet(value: TextFieldValue, snippet: String, ownLine: Bool
         if (!after.startsWith("\n")) append("\n")
     }
     return TextFieldValue(before + piece + after, TextRange(start + piece.length))
+}
+
+/**
+ * [value] with every chord moved by [steps] semitones. The cursor keeps its place in the words:
+ * a chord before it can change length (`C` → `C#`), so the new offset is the length of the text
+ * before it once that part is transposed too.
+ */
+internal fun transposeValue(value: TextFieldValue, steps: Int, flats: Boolean): TextFieldValue {
+    if (steps == 0) return value
+    val text = ChordTransposer.transposeText(value.text, steps, flats)
+    fun moved(offset: Int) =
+        ChordTransposer.transposeText(value.text.take(offset), steps, flats).length.coerceAtMost(text.length)
+    return TextFieldValue(text, TextRange(moved(value.selection.start), moved(value.selection.end)))
 }
 
 /**
@@ -420,10 +438,25 @@ internal fun EditSongContent(
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
-    var steps by remember(isVisible, song) { mutableStateOf(0) }
+    // The key the chord palette offers, read from the song once as it opens. Never guessed again
+    // from later edits: inserting a chord ahead of the first one must not move it.
+    var songKey by remember(isVisible, song) { mutableStateOf(ChordTransposer.detectKey(editedLyrics.text)) }
+    // How far the song's chords have been rewritten this session, so reset can take them back.
+    var transposed by remember(isVisible, song) { mutableStateOf(0) }
     var transposeRecorded by remember(isVisible, song) { mutableStateOf(false) }
+    val stepKey: (Int) -> Unit = { delta ->
+        val pitch = (ChordTransposer.pitchOf(songKey) ?: 0) + delta
+        songKey = ChordTransposer.nameOf(pitch, ChordTransposer.prefersFlats(pitch))
+    }
+    // Rewrites the chords of every language at once — a translation is sung to the same chords —
+    // and moves the palette's key with them.
     val transposeBy: (Int) -> Unit = { delta ->
-        steps += delta
+        val pitch = (ChordTransposer.pitchOf(songKey) ?: 0) + delta
+        val flats = ChordTransposer.prefersFlats(pitch)
+        editedLyrics = transposeValue(editedLyrics, delta, flats)
+        editedTranslations = editedTranslations.map { it.copy(lyrics = transposeValue(it.lyrics, delta, flats)) }
+        songKey = ChordTransposer.nameOf(pitch, flats)
+        transposed += delta
         if (!transposeRecorded) {
             transposeRecorded = true
             UsageEvents.record(UsageEvent.SONG_TRANSPOSED)
@@ -710,10 +743,13 @@ internal fun EditSongContent(
                     SongChordPreview(
                         text = paneValue.text,
                         showChords = showChords,
-                        steps = steps,
+                        songKey = songKey,
+                        transposed = transposed,
+                        onKeyUp = { stepKey(1) },
+                        onKeyDown = { stepKey(-1) },
                         onTransposeUp = { transposeBy(1) },
                         onTransposeDown = { transposeBy(-1) },
-                        onTransposeReset = { steps = 0 },
+                        onTransposeReset = { transposeBy(-transposed) },
                         onInsertChord = { chord ->
                             setPaneValue(insertSnippet(paneValue, "[$chord]", ownLine = false))
                         },

@@ -175,13 +175,25 @@ internal class PresentationStore(
             // report a race that is handled (Sentry CHURCH-PRESENTER-DESKTOP-6J).
             val jpegSlides = CrashReporter.trace("server.render", "Server render presentation") {
                 renderSlidesUnlessSuperseded(deck, writer)
-            } ?: return null
-            writer.commit()
-            committed = true
-            jpegSlides to deck.slides.map { it.notes }
+            }
+            committed = jpegSlides != null && commitUnlessSuperseded(writer)
+            if (committed) jpegSlides?.let { it to deck.slides.map { slide -> slide.notes } } else null
         } finally {
             if (!committed) writer.abort()
         }
+    }
+
+    /**
+     * Commits [writer], or returns false when another writer took the cache entry over after this
+     * one's last slide -- the third form of the race below, one step later (Sentry
+     * CHURCH-PRESENTER-DESKTOP-8T). The other writer finishes the job, as the Presentation tab's
+     * own render already assumes; it is not an error to report.
+     */
+    internal fun commitUnlessSuperseded(writer: SlideDiskCache.Writer): Boolean = try {
+        writer.commit()
+        true
+    } catch (_: SlideCacheSupersededException) {
+        false
     }
 
     /**

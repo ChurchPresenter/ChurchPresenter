@@ -1171,7 +1171,6 @@
     <string name="customize_no_preview">No preview for this section</string>
 
     <!-- Output Profiles -->
-    <string name="output_profile_none">None</string>
     <string name="output_profile_new">New Profile</string>
     <string name="output_profile_create_default">Create Default Profile</string>
     <string name="output_profile_create_default_tooltip">Add a fresh profile with the app's factory-default styling, as a backup to fall back to</string>
@@ -1183,6 +1182,9 @@
     <string name="output_profile_usage_count">Used by %1$d output(s)</string>
     <string name="output_profile_name_hint">Profile name</string>
     <string name="output_profile_picker_tooltip">Output profile</string>
+    <string name="output_profile_blank">Blank</string>
+    <!-- No longer shown (Blank replaced None); kept while the locales still carry it. -->
+    <string name="output_profile_none">None</string>
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
     <string name="output_profile_display_mode">Display Mode</string>
@@ -1318,7 +1320,6 @@
     <string name="browser_source_enabled">Enabled</string>
     <string name="copy_url_transparent">Copy URL for Transparent Background</string>
     <string name="copy_url_black_bg">Copy URL for Black Background</string>
-
     <!-- NDI Outputs (Network Device Interface) -->
     <string name="ndi_outputs">NDI Outputs</string>
     <string name="ndi_outputs_help">Virtual outputs sent over the network as NDI® sources — pick one in OBS, vMix or a switcher. Alpha mode carries real transparency, so a lower third arrives already keyed.</string>
@@ -1885,6 +1886,9 @@
     <string name="canvas_camera_error_no_frames">The camera opened but sent no video.</string>
     <string name="canvas_camera_error_unknown">The camera could not be opened.</string>
     <string name="canvas_camera_error_decklink_in_use">Cannot open input — the device may already be in use for output.</string>
+    <string name="canvas_camera_error_decklink_not_found">This DeckLink device is not connected. Check that the card is installed and its driver is running, then select the input again.</string>
+    <string name="canvas_camera_error_decklink_no_input">This DeckLink device has no video input, so it cannot be used as a camera.</string>
+    <string name="canvas_camera_error_decklink_open_failed">The DeckLink input could not be opened. Check the card in Blackmagic Desktop Video Setup, then select the input again.</string>
     <string name="canvas_camera_open_privacy_settings">Open Camera Privacy Settings</string>
     <string name="canvas_camera_format">Video Format</string>
     <string name="canvas_camera_format_auto">Auto (default)</string>
@@ -2106,6 +2110,8 @@
     <string name="remote_api_qa_clear_display">Q&amp;A: Clear Display</string>
     <string name="remote_api_qa_admin_connect">Connect to Q&amp;A Admin</string>
     <string name="remote_api_qa_admin_connect_detail">A phone or tablet wants to moderate Q&amp;A questions.</string>
+    <string name="remote_api_musician_connect">Connect a Transpose Control</string>
+    <string name="remote_api_musician_connect_detail">A tablet wants to use the transpose buttons on a Browser Source stage view. Everyone watching that output sees the change; the song and other screens stay as they are.</string>
     <string name="remote_api_request_title">Remote API Request</string>
     <string name="remote_api_request_title_queued">Remote API Request (%1$d pending)</string>
     <string name="remote_client_label">Client:</string>
@@ -2121,6 +2127,7 @@
     <string name="remote_activity_presentation_connect_detail">Now connected</string>
     <string name="remote_activity_qa_admin_connect">Connected to Q&amp;A Admin</string>
     <string name="remote_activity_qa_admin_connect_detail">Now connected</string>
+    <string name="remote_activity_musician_connect">Transpose control connected</string>
     <string name="remote_activity_presented">Presenting</string>
     <string name="remote_activity_uploaded">Uploaded</string>
     <string name="remote_activity_cleared">Cleared Display</string>
@@ -2207,6 +2214,19 @@
     <string name="song_chords_in_key">Chords in %1$s</string>
     <string name="song_chords_used">%1$d used</string>
     <string name="song_insert_chord">Insert chord</string>
+    <string name="song_transpose">Transpose</string>
+    <string name="song_chords_in">Chords in</string>
+    <string name="song_key_down">Show the chords of the key below — the song is not changed</string>
+    <string name="song_key_up">Show the chords of the key above — the song is not changed</string>
+    <string name="song_chord_build">Build a chord</string>
+    <string name="song_chord_root">Root</string>
+    <string name="song_chord_prefer_sharps">Spell the roots with sharps (C#, D#, F#…)</string>
+    <string name="song_chord_prefer_flats">Spell the roots with flats (Db, Eb, Gb…)</string>
+    <string name="song_chord_type">Type</string>
+    <string name="song_chord_major">maj</string>
+    <string name="song_insert_named_chord">Insert %1$s</string>
+    <string name="preview_transpose">Transpose %1$s</string>
+    <string name="profile_show_transpose_controls">Transpose buttons on Browser Source page</string>
     <string name="song_stats">%1$d sections · %2$d lines · %3$d words</string>
     <string name="song_typical_live">usually %1$s live</string>
 

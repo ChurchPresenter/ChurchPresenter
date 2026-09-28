@@ -12,6 +12,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.songs.LyricSection
 import org.cef.browser.CefBrowser
@@ -36,6 +40,9 @@ import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
+
+/** One octave either way: past that a transpose is the same key again. */
+private const val MAX_TRANSPOSE_STEPS = 11
 private const val PLAYER_SETTLE_MS = 100L
 private const val FRAME_INTERVAL_MS = 33L
 private const val TICK_INTERVAL_MS = 1000L
@@ -140,6 +147,22 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         if (mode == null) updated.remove(index) else updated[index] = mode
         _browserSourceLocks.value = updated
     }
+
+    // How many semitones each Browser Source output moves the chords it draws, for musicians
+    // reading a Stage Monitor off a tablet. Runtime only: it survives a change of song — a capo
+    // does not come off between songs — but not a restart, and it never touches the song or any
+    // other output. A flow rather than Compose state because the server pushes it to the
+    // musician pages as well as the outputs drawing it.
+    private val _browserSourceTranspose = MutableStateFlow<Map<Int, Int>>(emptyMap())
+    val browserSourceTranspose: StateFlow<Map<Int, Int>> = _browserSourceTranspose.asStateFlow()
+
+    fun setBrowserSourceTranspose(index: Int, steps: Int) {
+        val clamped = steps.coerceIn(-MAX_TRANSPOSE_STEPS, MAX_TRANSPOSE_STEPS)
+        _browserSourceTranspose.update { if (clamped == 0) it - index else it + (index to clamped) }
+    }
+
+    fun stepBrowserSourceTranspose(index: Int, delta: Int) =
+        setBrowserSourceTranspose(index, (_browserSourceTranspose.value[index] ?: 0) + delta)
 
     // Per-NDI-output lock: a third independent index space, for the same reason the Browser Source
     // one is separate from _screenLocks — ProjectionSettings.ndiOutputs has its own 0-based indices,

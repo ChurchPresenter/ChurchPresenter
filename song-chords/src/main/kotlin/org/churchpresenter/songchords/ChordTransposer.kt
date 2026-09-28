@@ -40,6 +40,14 @@ object ChordTransposer {
      */
     private val FLAT_KEYS = setOf(1, 3, 5, 6, 8, 10)
 
+    /**
+     * The chord types offered for picking, as the suffix written after the root: the empty
+     * suffix is a major triad. Kept beside [CHORD] so every suffix offered is one it accepts.
+     */
+    val CHORD_QUALITIES: List<String> = listOf(
+        "", "m", "7", "maj7", "m7", "6", "m6", "9", "add9", "sus2", "sus4", "dim", "dim7", "m7b5", "aug",
+    )
+
     private val PITCH = mapOf(
         "C" to 0, "B#" to 0, "C#" to 1, "DB" to 1, "D" to 2, "D#" to 3, "EB" to 3,
         "E" to 4, "FB" to 4, "F" to 5, "E#" to 5, "F#" to 6, "GB" to 6, "G" to 7,
@@ -57,7 +65,7 @@ object ChordTransposer {
         "^[A-G][#b]?" +                                  // root
             "(maj|min|dim|aug|sus|add|m|M)?" +           // quality
             "[0-9]*" +                                   // extension
-            "(sus[24]|add[0-9]+|dim|aug)?" +             // trailing modifier
+            "(sus[24]|add[0-9]+|dim|aug|[b#]5)?" +       // trailing modifier
             "(/[A-G][#b]?)?$"                            // slash bass
     )
 
@@ -174,6 +182,20 @@ object ChordTransposer {
         return ROOT.replace(chord) { m ->
             val pitch = pitchOf(m.value)
             if (pitch == null) m.value else nameOf(pitch + steps, flats)
+        }
+    }
+
+    /**
+     * Moves every chord in [text] by [steps] semitones, spelled with flats when [flats] is set.
+     *
+     * Rewrites the markup itself, not a rendering of it: headings, directives and the words are
+     * left exactly as written, so the result can be saved back as the song.
+     */
+    fun transposeText(text: String, steps: Int, flats: Boolean = false): String {
+        if (steps == 0) return text
+        return BRACKETED.replace(text) { m ->
+            val inner = m.value.substring(1, m.value.length - 1)
+            if (isChord(inner)) "[${transposeChord(inner, steps, flats)}]" else m.value
         }
     }
 

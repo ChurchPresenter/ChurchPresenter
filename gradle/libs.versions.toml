@@ -28,7 +28,7 @@ apache-poi = "5.3.0"
 pdfbox = "2.0.33"
 aircompressor = "2.0.2"
 junitJupiter = "5.10.2"
-filekit = "0.14.1"
+filekit = "0.15.0"
 twelvemonkeys-imageio = "3.10.1"
 
 [libraries]
