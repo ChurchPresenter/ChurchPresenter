@@ -6,10 +6,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.songchords.ChordTransposer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -120,16 +122,19 @@ class SongChordChartUiTest {
     private fun preview(
         text: String,
         showChords: Boolean = true,
-        steps: Int = 0,
+        transposed: Int = 0,
         block: ComposeUiTest.(PreviewReports) -> Unit,
     ) = runComposeUiTest {
-        val reports = PreviewReports().also { it.steps = steps }
+        val reports = PreviewReports().also { it.steps = transposed }
         setContent {
             MaterialTheme {
                 SongChordPreview(
                     text = text,
                     showChords = showChords,
-                    steps = steps,
+                    songKey = ChordTransposer.detectKey(text),
+                    transposed = transposed,
+                    onKeyUp = {},
+                    onKeyDown = {},
                     onTransposeUp = { reports.steps++ },
                     onTransposeDown = { reports.steps-- },
                     onTransposeReset = { reports.steps = 0 },
@@ -141,10 +146,10 @@ class SongChordChartUiTest {
     }
 
     @Test
-    fun `the pane names itself and the key the song is in`() =
+    fun `the pane names itself and the key its chords are offered in`() =
         preview("[Verse 1]\n[G]one two") { _ ->
             assertTrue(shows("PREVIEW"))
-            assertTrue(shows("KEY"))
+            assertTrue(shows("CHORDS IN"))
             assertTrue(shows("G"))
         }
 
@@ -181,41 +186,41 @@ class SongChordChartUiTest {
 
     @Test
     fun `the two steps move the song`() = preview("[G]one") { reports ->
-        onNodeWithText("+").performClick()
+        onNodeWithContentDescription("Transpose up").performClick()
         waitForIdle()
         assertEquals(1, reports.steps)
 
-        onNodeWithText("−").performClick()
+        onNodeWithContentDescription("Transpose down").performClick()
         waitForIdle()
         assertEquals(0, reports.steps)
     }
 
     @Test
-    fun `a song left at its own key offers nothing to reset`() = preview("[G]one", steps = 0) { _ ->
+    fun `a song left at its own key offers nothing to reset`() = preview("[G]one", transposed = 0) { _ ->
         assertTrue(!shows("+0 — reset"))
     }
 
     @Test
-    fun `a transposed song offers to go back`() = preview("[G]one", steps = 2) { reports ->
+    fun `a transposed song offers to go back`() = preview("[G]one", transposed = 2) { reports ->
         onNodeWithText("+2 — reset").performClick()
         waitForIdle()
         assertEquals(0, reports.steps)
     }
 
     @Test
-    fun `transposing down is shown with its sign`() = preview("[G]one", steps = -2) { _ ->
+    fun `transposing down is shown with its sign`() = preview("[G]one", transposed = -2) { _ ->
         assertTrue(shows("-2 — reset"))
     }
 
     @Test
     fun `with chords off the words are shown alone`() = preview("[G]one two", showChords = false) { _ ->
         assertTrue(shows("one two"))
-        assertTrue(!shows("KEY"), "there is no key to report when chords are not shown")
+        assertTrue(!shows("TRANSPOSE"), "there is nothing to transpose when chords are not shown")
     }
 
     @Test
     fun `a song naming no chords offers no palette`() = preview("[Verse 1]\njust words") { _ ->
         assertTrue(shows("just words"))
-        assertTrue(!shows("0 used") || shows("CHORDS IN C"))
+        assertTrue(!shows("0 used") || shows("CHORDS IN"))
     }
 }

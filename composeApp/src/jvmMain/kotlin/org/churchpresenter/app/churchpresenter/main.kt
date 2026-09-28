@@ -1589,6 +1589,53 @@ private fun ApplicationScope.ChurchPresenterApp(
                             }
 
                             LaunchedEffect(Unit) {
+                                companionServer.onMusicianConnect.collect { pending ->
+                                    val clientId = pending.clientId
+                                    val access = remoteAccessDecision(
+                                        clientId,
+                                        remoteClientManager.allowedClients, remoteClientManager.blockedClients,
+                                        sessionAllowedClients, sessionBlockedClients,
+                                    )
+                                    when (val outcome = remoteApproval(
+                                        access,
+                                        type = RemoteEventType.MUSICIAN_CONNECT,
+                                        title = "",
+                                        clientId = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId),
+                                    )) {
+                                        RemoteApproval.Reject -> pending.decision.complete(false)
+                                        is RemoteApproval.Approve -> {
+                                            pending.decision.complete(true)
+                                            remoteActivityNotifications.add(outcome.notification)
+                                        }
+                                        is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
+                                            outcome.event,
+                                            { pending.decision.complete(true) },
+                                            { pending.decision.complete(false) },
+                                        ))
+                                    }
+                                }
+                            }
+
+                            // A musician view's transpose presses, and the state they produce sent
+                            // back to every musician view: the app is the one owner of the offset,
+                            // so a press on the desktop tile reaches the tablets the same way.
+                            LaunchedEffect(Unit) {
+                                companionServer.onBrowserSourceTranspose.collect { command ->
+                                    if (command.reset) {
+                                        presenterManager.setBrowserSourceTranspose(command.index, 0)
+                                    } else {
+                                        presenterManager.stepBrowserSourceTranspose(command.index, command.delta)
+                                    }
+                                }
+                            }
+                            LaunchedEffect(Unit) {
+                                presenterManager.browserSourceTranspose.collect { transposes ->
+                                    companionServer.updateBrowserSourceTranspose(transposes)
+                                }
+                            }
+
+                            LaunchedEffect(Unit) {
                                 companionServer.onBibleHold.collect { hold ->
                                     presenterManager.setBibleHold(hold)
                                 }

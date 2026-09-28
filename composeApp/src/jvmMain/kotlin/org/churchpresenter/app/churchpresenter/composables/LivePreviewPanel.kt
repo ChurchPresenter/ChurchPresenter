@@ -44,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,6 +89,7 @@ import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.app.churchpresenter.offersTranspose
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
@@ -289,6 +291,7 @@ private fun previewEntries(
             val label = output.browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1))
             add(
                 PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i)) { m, grouped ->
+                    val transposes by presenterManager.browserSourceTranspose.collectAsState()
                     SingleDisplayPreview(
                         screenIndex = i,
                         screenAssignment = output,
@@ -301,6 +304,14 @@ private fun previewEntries(
                         sttManager = sttManager,
                         locks = presenterManager.browserSourceLocks.value,
                         onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
+                        transposeSteps = transposes[i] ?: 0,
+                        onTranspose = { delta ->
+                            if (delta == null) {
+                                presenterManager.setBrowserSourceTranspose(i, 0)
+                            } else {
+                                presenterManager.stepBrowserSourceTranspose(i, delta)
+                            }
+                        },
                         label = label,
                         showLabel = showLabels,
                         showMode = proj.showOutputModes,
@@ -361,6 +372,8 @@ private fun SingleDisplayPreview(
     sttManager: STTManager? = null,
     locks: Map<Int, Presenting> = emptyMap(),
     onToggleLock: (Presenting?) -> Unit = {},
+    transposeSteps: Int = 0,
+    onTranspose: ((Int?) -> Unit)? = null,
     label: String,
     showLabel: Boolean = true,
     showMode: Boolean = true,
@@ -513,6 +526,7 @@ private fun SingleDisplayPreview(
                     sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
                     showChords = profile.showChords,
+                    transposeSteps = transposeSteps,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
@@ -777,6 +791,16 @@ private fun SingleDisplayPreview(
                     modifier = Modifier.size(13.dp)
                 )
             }
+        }
+
+        // The musicians' transpose, on an output whose profile offers it. A Stage Monitor has no
+        // lock toggle, so it takes that corner. The same offset the output's page buttons move.
+        if (profile.offersTranspose() && onTranspose != null) {
+            TransposeOverlay(
+                steps = transposeSteps,
+                onStep = onTranspose,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(3.dp),
+            )
         }
 
         // Screen/output label

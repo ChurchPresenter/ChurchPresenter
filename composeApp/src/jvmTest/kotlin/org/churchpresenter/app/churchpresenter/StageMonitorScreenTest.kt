@@ -26,6 +26,7 @@ import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
@@ -112,6 +113,7 @@ class StageMonitorScreenTest {
         displayedDictionaryEntry: StrongsEntry? = null,
         dictionarySettings: DictionarySettings = DictionarySettings(),
         mediaViewModel: MediaViewModel? = null,
+        transposeSteps: Int = 0,
         block: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
@@ -121,6 +123,7 @@ class StageMonitorScreenTest {
                         StageMonitorScreen(
                             sm = sm,
                             presentingMode = presentingMode,
+                            transposeSteps = transposeSteps,
                             announcementActive = announcementActive,
                             currentLyricSection = currentLyricSection,
                             allLyricSections = allLyricSections,
@@ -205,6 +208,49 @@ class StageMonitorScreenTest {
         ) {
             assertEquals(emptySet(), renderedText())
         }
+    }
+
+    // ── A musician's transpose (issue #649) ─────────────────────────────────────────────────────
+
+    private fun chordSection(vararg chordLines: String) = LyricSection(
+        title = "Verse 1",
+        lines = chordLines.map { ChordTransposer.stripChords(it) },
+        chordLines = chordLines.toList(),
+    )
+
+    @Test
+    fun `a transposed output draws the chords moved, and says the key it moved them to`() {
+        screen(
+            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
+            presentingMode = Presenting.LYRICS,
+            currentLyricSection = chordSection("[Gsus4]Amazing [Cmaj7]grace"),
+            transposeSteps = 2,
+        ) {
+            assertTrue(rendersContaining("Asus4"), renderedText().toString())
+            assertTrue(rendersContaining("Dmaj7"), renderedText().toString())
+            assertTrue(rendersContaining("Key A"), renderedText().toString())
+            assertFalse(rendersContaining("Gsus4"), "the written chord must not be drawn as well")
+        }
+    }
+
+    @Test
+    fun `an output left at nothing draws the chords as written`() {
+        screen(
+            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
+            presentingMode = Presenting.LYRICS,
+            currentLyricSection = chordSection("[Gsus4]Amazing grace"),
+        ) {
+            assertTrue(rendersContaining("Gsus4"), renderedText().toString())
+            assertTrue(rendersContaining("Key G"), renderedText().toString())
+        }
+    }
+
+    @Test
+    fun `chord lines move spelled the way the key they land in is written`() {
+        assertEquals(listOf("[Bb]one [Eb]two"), transposeChordLines(listOf("[A]one [D]two"), 1))
+        assertEquals(listOf("[B]one [E]two"), transposeChordLines(listOf("[Bb]one [Eb]two"), 1))
+        val written = listOf("[G]one")
+        assertTrue(transposeChordLines(written, 0) === written, "nothing to move is no work at all")
     }
 
     // ── Songs ───────────────────────────────────────────────────────────────────────────────────

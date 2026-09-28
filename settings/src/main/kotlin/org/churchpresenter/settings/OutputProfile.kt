@@ -54,6 +54,13 @@ data class OutputProfile(
     val showWebsite: Boolean = true,
     val songLookAhead: Boolean = false,
     val showChords: Boolean = true,
+    /**
+     * Whether a Browser Source page on this profile carries the musicians' −1 / 0 / +1 transpose
+     * buttons. Off by default: the page OBS or vMix loads must never show a control nobody can
+     * press, so a band's tablets use their own output on a profile with this on. Only meaningful
+     * for a Stage Monitor with [showChords]; screens and NDI outputs have no page to put it on.
+     */
+    val showTransposeControls: Boolean = false,
     val showQA: Boolean = true,
     val showSTT: Boolean = true,
     val showDictionary: Boolean = true,

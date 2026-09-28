@@ -3,8 +3,26 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.profileFor
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+
+/**
+ * Whether an output on this profile offers the musicians' transpose: a Stage Monitor drawing
+ * chords, with the profile's own switch on. The one rule behind the page's buttons, the routes
+ * that accept a press, and the desktop tile's control.
+ */
+internal fun OutputProfile.offersTranspose(): Boolean =
+    displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR && showChords && showTransposeControls
+
+/** The Browser Source outputs whose profile [offersTranspose]. */
+internal fun transposeControlOutputs(projection: ProjectionSettings): Set<Int> =
+    projection.browserSourceOutputs.indices.filterTo(mutableSetOf()) { i ->
+        projection.profileFor(projection.browserSourceOutputs[i])?.offersTranspose() == true
+    }
 
 /**
  * Tells connected companions what is live and keeps the Browser Source outputs and background
@@ -31,6 +49,9 @@ internal fun LiveStatusWiring(
     // frame flow crosses into CompanionServer.
     LaunchedEffect(appSettings.projectionSettings.browserSourceOutputs) {
         companionServer.updateBrowserSourceOutputs(appSettings.projectionSettings.browserSourceOutputs)
+    }
+    LaunchedEffect(appSettings.projectionSettings) {
+        companionServer.updateTransposeControls(transposeControlOutputs(appSettings.projectionSettings))
     }
     LaunchedEffect(appSettings.backgroundSettings) {
         companionServer.updateBackgroundSettings(appSettings.backgroundSettings)

@@ -79,6 +79,7 @@ internal fun ProfilePage.pathPrefixes(): List<String> = when (this) {
 /** Everything the Content & sources page decides: what is shown, from where, and how it fits. */
 private val CONTENT_PATHS = listOf(
     "bibleMode", "bibleTranslations", "songMode", "songTranslations", "songLookAhead", "showChords",
+    "showTransposeControls",
     "showPictures", "showMedia", "showSubtitles", "showStreaming", "showAnnouncements", "showWebsite",
     "showQA", "showSTT", "showDictionary", "showCanvas", "showFullscreenBackground",
     "showLowerThirdBackground", "showBibleBackground", "showSongsBackground", "pictureScaleMode",

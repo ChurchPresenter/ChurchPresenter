@@ -34,6 +34,12 @@ data class PendingRemoveRequest(
 )
 
 /**
+ * A musician view's transpose press, for the Browser Source output at 0-based [index]: a step of
+ * [delta] semitones, or back to the key the song is written in when [reset] is set.
+ */
+data class BrowserSourceTransposeCommand(val index: Int, val delta: Int = 0, val reset: Boolean = false)
+
+/**
  * Emitted when a device authenticates against the presentation remote for the first time
  * this session, so the desktop operator can approve/deny it like any other remote action.
  */

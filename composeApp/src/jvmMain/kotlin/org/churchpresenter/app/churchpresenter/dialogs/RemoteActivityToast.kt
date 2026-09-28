@@ -56,6 +56,7 @@ import churchpresenter.composeapp.generated.resources.remote_activity_qa_clear_d
 import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect
 import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect
+import churchpresenter.composeapp.generated.resources.remote_activity_musician_connect
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect_detail
 import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
 import kotlinx.coroutines.delay
@@ -136,6 +137,7 @@ private fun RemoteActivityToast(
         RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect)
         RemoteEventType.CALENDAR_ENROLL -> stringResource(Res.string.remote_activity_calendar_enroll)
         RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect)
+        RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_musician_connect)
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
@@ -144,6 +146,7 @@ private fun RemoteActivityToast(
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.CALENDAR_ENROLL -> "📱"
         RemoteEventType.QA_ADMIN_CONNECT -> "📱"
+        RemoteEventType.MUSICIAN_CONNECT -> "📱"
         RemoteEventType.PRESENT         -> "▶️"
         RemoteEventType.UPLOAD          -> "📤"
         RemoteEventType.CLEAR           -> "🔲"
@@ -167,6 +170,7 @@ private fun RemoteActivityToast(
         when (notification.type) {
             RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect_detail)
             RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
+            RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
             else -> ""
         }
     }

@@ -78,6 +78,7 @@ import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import churchpresenter.composeapp.generated.resources.song_key
 import churchpresenter.composeapp.generated.resources.song_capo
@@ -177,6 +178,9 @@ fun StageMonitorScreen(
     sm: StageMonitorSettings,
     presentingMode: Presenting,
     showChords: Boolean = true,
+    // Semitones this output moves the chords it draws: a musician's transpose, on this output
+    // alone. The song and every other output keep the key it is written in.
+    transposeSteps: Int = 0,
     // True when an announcement has been routed to this stage monitor — either because it's what's
     // actually live everywhere (presentingMode == ANNOUNCEMENTS), or because Announcements was sent
     // here specifically via its own "Send to Stage Monitor" toggle. Kept independent of
@@ -236,12 +240,16 @@ fun StageMonitorScreen(
 
     val mediaViewModel = LocalMediaViewModel.current
 
+    val currentChordLines = remember(currentLyricSection, transposeSteps) {
+        transposeChordLines(currentLyricSection.chordLines, transposeSteps)
+    }
     val renderData = ZoneRenderData(
         currentText = currentText,
-        chordLines = if (showChords) currentLyricSection.chordLines else emptyList(),
+        chordLines = if (showChords) currentChordLines else emptyList(),
         songInfo = if (presentingMode == Presenting.LYRICS) {
             songInfoOf(
-                section = currentLyricSection,
+                // The key it reports is the key the chords are drawn in, so it moves with them.
+                section = currentLyricSection.copy(chordLines = currentChordLines),
                 keyLabel = stringResource(Res.string.song_key),
                 capoLabel = stringResource(Res.string.song_capo),
                 playLabel = stringResource(Res.string.song_play),
@@ -251,7 +259,10 @@ fun StageMonitorScreen(
             null
         },
         nextChordLines = if (showChords && presentingMode == Presenting.LYRICS) {
-            allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.chordLines.orEmpty()
+            transposeChordLines(
+                allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.chordLines.orEmpty(),
+                transposeSteps,
+            )
         } else {
             emptyList()
         },
@@ -368,6 +379,17 @@ private data class ZoneRenderData(
     val displayedDictionaryEntry: StrongsEntry?,
     val dictionarySettings: DictionarySettings
 )
+
+/**
+ * [lines] with every chord moved by [steps] semitones, spelled the way the key they land in is
+ * written. The key is the one [ChordTransposer.detectKey] reads from the lines themselves.
+ */
+internal fun transposeChordLines(lines: List<String>, steps: Int): List<String> {
+    if (steps == 0 || lines.isEmpty()) return lines
+    val keyPitch = ChordTransposer.pitchOf(ChordTransposer.detectKey(lines.joinToString("\n"))) ?: 0
+    val flats = ChordTransposer.prefersFlats(keyPitch + steps)
+    return lines.map { ChordTransposer.transposeText(it, steps, flats) }
+}
 
 /**
  * A chord chart drawn in a zone's own styling, so it reads as that zone's text with the chords

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -98,6 +99,14 @@ internal fun OffscreenOutputContent(
                     presenterManager.browserSourceIdentifying.value.contains(outputIndex)
                 OffscreenOutputKind.NDI -> presenterManager.ndiIdentifying.value.contains(outputIndex)
             }
+            // A musician's transpose is a Browser Source feature: its musician page is where it is
+            // set. NDI outputs draw the song in the key it is written in.
+            val transposes by presenterManager.browserSourceTranspose.collectAsState()
+            val transposeSteps = if (context.kind == OffscreenOutputKind.BROWSER_SOURCE) {
+                transposes[outputIndex] ?: 0
+            } else {
+                0
+            }
             val isLowerThirdVertical = profile.isLowerThirdVertical
             val isLowerThird = profile.isLowerThird
             val isStageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
@@ -135,6 +144,7 @@ internal fun OffscreenOutputContent(
                     sm = appSettings.stageMonitorSettings,
                     presentingMode = effectiveMode,
                     showChords = profile.showChords,
+                    transposeSteps = transposeSteps,
                     currentLyricSection = presenterManager.displayedLyricSection.value,
                     allLyricSections = presenterManager.allLyricSections.value,
                     songDisplaySectionIndex = presenterManager.songDisplaySectionIndex.value,
