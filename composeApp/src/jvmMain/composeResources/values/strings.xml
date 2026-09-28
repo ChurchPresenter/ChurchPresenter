@@ -2180,6 +2180,8 @@
     <string name="song_key_up">Show the chords of the key above — the song is not changed</string>
     <string name="song_chord_build">Build a chord</string>
     <string name="song_chord_root">Root</string>
+    <string name="song_chord_prefer_sharps">Spell the roots with sharps (C#, D#, F#…)</string>
+    <string name="song_chord_prefer_flats">Spell the roots with flats (Db, Eb, Gb…)</string>
     <string name="song_chord_type">Type</string>
     <string name="song_chord_major">maj</string>
     <string name="song_insert_named_chord">Insert %1$s</string>

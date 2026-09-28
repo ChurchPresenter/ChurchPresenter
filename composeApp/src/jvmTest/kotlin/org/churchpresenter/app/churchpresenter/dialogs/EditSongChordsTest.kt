@@ -180,6 +180,26 @@ class EditSongChordsTest {
         }
 
     @Test
+    fun `the sharps and flats switch spells the roots the other way, and inserts that spelling`() =
+        editor(song(listOf("[G]one"))) { saved ->
+            tap(Label.BUILD_A_CHORD)
+            assertTrue(showsExactly("C#"), "a sharp key starts with sharps")
+
+            tap("♭")
+            assertTrue(showsExactly("Db") && !showsExactly("C#"), "flats should replace the sharps")
+            tap("Db")
+            tap("m7")
+            tap("Insert Dbm7")
+
+            tap("♯")
+            assertTrue(showsExactly("C#") && !showsExactly("Db"), "and sharps come back")
+            assertTrue(showsExactly("Insert C#m7"), "the chosen root is kept, only its name changes")
+
+            tap(Label.SAVE)
+            assertTrue(saved()!!.lyrics.joinToString("\n").contains("[Dbm7]"), "stored ${saved()!!.lyrics}")
+        }
+
+    @Test
     fun `the picker starts on the song's key and a major chord`() =
         editor(song(listOf("[Bb]one"))) { _ ->
             tap(Label.BUILD_A_CHORD)

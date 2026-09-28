@@ -62,6 +62,8 @@ import churchpresenter.composeapp.generated.resources.song_chord_type
 import churchpresenter.composeapp.generated.resources.song_chord_root
 import churchpresenter.composeapp.generated.resources.song_chord_build
 import churchpresenter.composeapp.generated.resources.song_chord_major
+import churchpresenter.composeapp.generated.resources.song_chord_prefer_flats
+import churchpresenter.composeapp.generated.resources.song_chord_prefer_sharps
 import churchpresenter.composeapp.generated.resources.ic_remove
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
@@ -419,17 +421,21 @@ private fun PreviewHeader(
 
 /**
  * Any chord at all, built from a root and a type — for the chords a key's seven do not cover.
- * Roots are spelled the way [songKey] is written, so a pick in E flat reads A flat, not G sharp.
+ *
+ * Roots start out spelled the way [songKey] is written, so a pick in E flat reads A flat, not
+ * G sharp; the ♯ / ♭ switch beside them spells them the other way, for a player who reads a
+ * black key by the other name (issue #649).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChordPicker(songKey: String, flats: Boolean, onInsertChord: (String) -> Unit) {
     var root by remember(songKey) { mutableStateOf(ChordTransposer.pitchOf(songKey) ?: 0) }
     var quality by remember { mutableStateOf(ChordTransposer.CHORD_QUALITIES.first()) }
+    var useFlats by remember(songKey) { mutableStateOf(flats) }
     // Folded away until asked for: open, it is five rows of chips, which left the song itself two
     // lines of room. The key's own seven chords above cover most of what a song needs.
     var open by remember { mutableStateOf(false) }
-    val chord = ChordTransposer.nameOf(root, flats) + quality
+    val chord = ChordTransposer.nameOf(root, useFlats) + quality
 
     Row(
         modifier = Modifier.clickable { open = !open }.padding(vertical = 2.dp),
@@ -447,13 +453,26 @@ private fun ChordPicker(songKey: String, flats: Boolean, onInsertChord: (String)
     if (!open) return
 
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        ZoneLabel(stringResource(Res.string.song_chord_root), modifier = Modifier.padding(top = 3.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            ZoneLabel(stringResource(Res.string.song_chord_root), modifier = Modifier.weight(1f))
+            TooltipWrapper(tooltip = stringResource(Res.string.song_chord_prefer_sharps)) {
+                ChordChip(SHARP_SIGN, highlighted = !useFlats, onClick = { useFlats = false })
+            }
+            TooltipWrapper(tooltip = stringResource(Res.string.song_chord_prefer_flats)) {
+                ChordChip(FLAT_SIGN, highlighted = useFlats, onClick = { useFlats = true })
+            }
+        }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             for (pitch in 0 until PITCH_CLASSES) {
-                ChordChip(ChordTransposer.nameOf(pitch, flats), highlighted = pitch == root, onClick = { root = pitch })
+                val name = ChordTransposer.nameOf(pitch, useFlats)
+                ChordChip(name, highlighted = pitch == root, onClick = { root = pitch })
             }
         }
         ZoneLabel(stringResource(Res.string.song_chord_type), modifier = Modifier.padding(top = 3.dp))
@@ -480,6 +499,11 @@ private fun ChordPicker(songKey: String, flats: Boolean, onInsertChord: (String)
 }
 
 private const val PITCH_CLASSES = 12
+
+// The accidentals as music writes them: the switch's own labels. The chord inserted is still
+// spelled `#`/`b`, which is what the chord grammar reads.
+private const val SHARP_SIGN = "♯"
+private const val FLAT_SIGN = "♭"
 
 /** How a chord type reads on its chip: the bare major triad by name, a flat as a real flat sign. */
 internal fun qualityLabel(quality: String, major: String): String =
