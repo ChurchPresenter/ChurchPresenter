@@ -103,10 +103,35 @@ jobs:
           set -euo pipefail
           dotnet build omt-src/libomtnet/libomtnet.sln -c Release
           dotnet publish omt-src/libomt/libomt.sln -r linux-x64 -c Release
-          find omt-src/libomt -path '*linux-x64/publish/libomt.so' -print -quit | xargs -I{} cp {} omt-src/libomt.so
+          built=$(find omt-src/libomt -path '*linux-x64/publish/libomt.so' -print -quit)
+          if [ -z "$built" ]; then
+            echo "::error::dotnet publish produced no libomt.so"
+            find omt-src/libomt -path '*linux-x64/publish/*' -maxdepth 8 -print
+            exit 1
+          fi
+          cp "$built" omt-src/libomt.so
+          file omt-src/libomt.so
 
+      # NativeAOT links a shared library with a version script, so an export is listed as
+      # `omt_send@@V1.0` rather than bare — hence the optional suffix. Every symbol OmtLibC binds is
+      # checked, and the step names any that are missing rather than failing silently.
       - name: Check the exports
-        run: nm -D --defined-only omt-src/libomt.so | grep -E ' omt_(send_create|send|receive|discovery_getaddresses)$'
+        run: |
+          set -euo pipefail
+          exports=$(nm -D --defined-only omt-src/libomt.so | awk '{print $NF}' | sed 's/@.*//')
+          missing=""
+          for symbol in omt_setloggingfilename omt_settings_set_string omt_send_create \
+              omt_send_setsenderinformation omt_send_getaddress omt_send omt_send_connections \
+              omt_send_destroy omt_discovery_getaddresses omt_receive_create omt_receive \
+              omt_receive_setflags omt_receive_destroy omt_shutdown; do
+            grep -qx "$symbol" <<< "$exports" || missing="$missing $symbol"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::libomt.so does not export:$missing"
+            nm -D --defined-only omt-src/libomt.so | grep -i omt | head -40
+            exit 1
+          fi
+          echo "All 14 symbols JnaOmtLibrary binds are exported."
 
       - name: Pack
         id: pack
