@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performImeAction
@@ -19,7 +20,7 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalTestApi::class)
 class PropertyIntFieldTest {
 
-    private fun field(start: Int, block: androidx.compose.ui.test.ComposeUiTest.(get: () -> Int) -> Unit) =
+    private fun field(start: Int, block: ComposeUiTest.(get: () -> Int) -> Unit) =
         runComposeUiTest {
             var size by mutableIntStateOf(start)
             setContent { PropertyIntField("Font size", size, 8..500) { size = it } }
