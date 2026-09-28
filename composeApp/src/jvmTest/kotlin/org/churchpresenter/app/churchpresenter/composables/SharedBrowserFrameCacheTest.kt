@@ -345,7 +345,7 @@ class SharedBrowserFrameCacheTest {
 
     @Test
     fun `killProcess terminates an already-exited process without throwing`() {
-        val process = ProcessBuilder("true").start()
+        val process = ProcessBuilder(shellCommand("exit 0")).start()
         process.waitFor()
         SharedBrowserFrameCache.killProcess(process)
     }

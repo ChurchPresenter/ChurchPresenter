@@ -233,8 +233,16 @@ private fun FontPickerTrigger(
  * Hanging the panel *below* the field is what will not fit: it is as tall as a dialog and the
  * pickers it serves sit low in settings panels. Covering the field costs nothing — the family it
  * shows is the one already ticked in the list.
+ *
+ * While open, the panel may move up but never back down. Its height follows the highlighted face —
+ * the preview wraps or gains a missing-script warning — so a panel clamped to the window's bottom
+ * edge moved with every highlight, which put a different row under a pointer that had not moved,
+ * whose hover highlighted it, which moved the panel back: it jittered between two faces for as long
+ * as the pointer rested there. Moving only upwards is bounded, so it settles.
  */
 private class FontPanelPosition(private val margin: Int) : PopupPositionProvider {
+    private var top = Int.MAX_VALUE
+
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
@@ -243,7 +251,8 @@ private class FontPanelPosition(private val margin: Int) : PopupPositionProvider
     ): IntOffset {
         val x = anchorBounds.left.coerceIn(0, (windowSize.width - popupContentSize.width).coerceAtLeast(0))
         val lowest = (windowSize.height - popupContentSize.height - margin).coerceAtLeast(0)
-        return IntOffset(x, anchorBounds.top.coerceIn(0, lowest))
+        top = minOf(top, anchorBounds.top.coerceIn(0, lowest))
+        return IntOffset(x, top)
     }
 }
 

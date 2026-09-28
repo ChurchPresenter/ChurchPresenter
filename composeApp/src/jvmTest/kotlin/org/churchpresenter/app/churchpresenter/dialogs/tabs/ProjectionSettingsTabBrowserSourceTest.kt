@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,6 +42,15 @@ class ProjectionSettingsTabBrowserSourceTest {
         it.copy(
             projectionSettings = it.projectionSettings.copy(
                 browserSourceOutputs = List(count) { ScreenAssignment() },
+            ),
+        )
+    }
+
+    /** One output on the first profile: every output follows a real one, so its picker opens from there. */
+    private fun oneOutputOnMain(): AppSettings = withOutputs(1).let {
+        it.copy(
+            projectionSettings = it.projectionSettings.copy(
+                browserSourceOutputs = listOf(ScreenAssignment(activeProfileId = "p0")),
             ),
         )
     }
@@ -243,13 +253,26 @@ class ProjectionSettingsTabBrowserSourceTest {
 
     @Test
     fun `a browser source takes a profile like any other output`() {
-        projectionTab(initial = withOutputs(1)) { get ->
-            onAllNodesWithText("None").onLast().performScrollTo().performClick()
+        projectionTab(initial = oneOutputOnMain()) { get ->
+            onAllNodesWithText("Main").onLast().performScrollTo().performClick()
             waitForIdle()
             onNodeWithText("Foyer").performClick()
             waitForIdle()
 
             assertEquals("p1", output(get).activeProfileId)
+        }
+    }
+
+    @Test
+    fun `a browser source can be set to Blank, and its picker then says so`() {
+        projectionTab(initial = oneOutputOnMain()) { get ->
+            onAllNodesWithText("Main").onLast().performScrollTo().performClick()
+            waitForIdle()
+            onNodeWithText("Blank").performClick()
+            waitForIdle()
+
+            assertEquals(BLANK_OUTPUT_PROFILE_ID, output(get).activeProfileId)
+            onAllNodesWithText("Blank").onLast().assertExists()
         }
     }
 }

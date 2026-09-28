@@ -89,8 +89,9 @@ private const val MAX_TEXT_CURVE = 200f
 /** Tracking, as a percentage of the font size. */
 private const val MIN_LETTER_SPACING = -20f
 private const val MAX_LETTER_SPACING = 100f
-private const val MIN_FONT_SIZE = 8
-private const val MAX_FONT_SIZE = 500
+/** The font sizes a canvas layer's size field accepts; see `drawnFontSize` for why 0 cannot be one. */
+internal const val MIN_FONT_SIZE = 8
+internal const val MAX_FONT_SIZE = 500
 private const val MAX_TARGET_HOUR = 99
 private const val MAX_MINUTE_OR_SECOND = 59
 private const val MAX_HOUR_OF_DAY = 23
@@ -252,13 +253,12 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
     ) { v -> onUpdate(source.copy(curve = v)) }
     // Half a row: a font size is three digits, and the panel is a narrow column.
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        PropertyTextField(
+        PropertyIntField(
             stringResource(Res.string.canvas_clock_font_size),
-            source.fontSize.toString(),
+            source.fontSize,
+            MIN_FONT_SIZE..MAX_FONT_SIZE,
             Modifier.weight(1f)
-        ) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))) }
-        }
+        ) { onUpdate(source.copy(fontSize = it)) }
         Spacer(Modifier.weight(1f))
     }
     Row(

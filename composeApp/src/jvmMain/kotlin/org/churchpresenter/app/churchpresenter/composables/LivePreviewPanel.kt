@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_none
+import churchpresenter.composeapp.generated.resources.output_profile_blank
 import churchpresenter.composeapp.generated.resources.output_profile_swap_menu_tooltip
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -91,6 +91,7 @@ import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.offersTranspose
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.getBrowserSourceOutput
@@ -859,7 +860,7 @@ private fun PreviewHeader(
     onToggle: () -> Unit,
     profiles: List<OutputProfile> = emptyList(),
     activeProfileId: String? = null,
-    onPickProfile: (String?) -> Unit = {},
+    onPickProfile: (String) -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -907,7 +908,7 @@ private fun PreviewHeader(
 private fun OutputProfileSwapMenu(
     profiles: List<OutputProfile>,
     activeProfileId: String?,
-    onPick: (String?) -> Unit,
+    onPick: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -926,9 +927,14 @@ private fun OutputProfileSwapMenu(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = {
-                    Text(stringResource(Res.string.output_profile_none), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(Res.string.output_profile_blank),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = if (activeProfileId == BLANK_OUTPUT_PROFILE_ID) FontWeight.Bold
+                        else FontWeight.Normal,
+                    )
                 },
-                onClick = { expanded = false; onPick(null) },
+                onClick = { expanded = false; onPick(BLANK_OUTPUT_PROFILE_ID) },
             )
             profiles.forEach { profile ->
                 DropdownMenuItem(

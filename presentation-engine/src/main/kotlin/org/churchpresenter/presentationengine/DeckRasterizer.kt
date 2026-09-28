@@ -5,6 +5,7 @@ import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.apache.poi.sl.draw.DrawFactory
 import org.apache.poi.sl.draw.Drawable
+import org.apache.poi.sl.usermodel.Shape
 import org.apache.poi.sl.usermodel.Slide
 import org.apache.poi.sl.usermodel.SlideShow
 import org.apache.poi.xslf.usermodel.XMLSlideShow
@@ -285,8 +286,8 @@ class DeckRasterizer(
         canvas: SlideCanvas,
         cause: Throwable,
     ): BufferedImage {
-        val shapes = slide.shapes.toList()
-        var skipped = 0
+        val shapes: List<Shape<*, *>> = slide.shapes.toList()
+        var skipped = emptyList<SkippedDraw<Shape<*, *>>>()
         val image = slideImage(canvas) { graphics ->
             val factory = DrawFactory.getInstance(graphics)
             runCatching { slide.background?.let { factory.getDrawable(it).draw(graphics) } }
@@ -297,12 +298,18 @@ class DeckRasterizer(
         }
         if (!degradationReported) {
             degradationReported = true
+            // The first skipped shape's own error is the real refusal; the whole-slide [cause] is
+            // the same one seen from outside POI's DrawSlide, or the only one when nothing skipped.
+            val refusal = skipped.firstOrNull()?.error ?: cause
             onDegraded(
                 SlideRenderDegradation(
                     slideIndex = slideIndex,
                     shapesTotal = shapes.size,
-                    shapesSkipped = skipped,
+                    shapesSkipped = skipped.size,
                     cause = cause.javaClass.simpleName,
+                    skippedShapes = skipped.map { it.item.javaClass.simpleName },
+                    failureOrigin = failureOrigin(refusal),
+                    recordLimit = recordLimit(refusal.message),
                 )
             )
         }

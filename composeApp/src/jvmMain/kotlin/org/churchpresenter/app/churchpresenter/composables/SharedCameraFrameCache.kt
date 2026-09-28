@@ -2,16 +2,19 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +31,9 @@ private const val RESTART_DELAY_MS = 1000L
 private const val DIMENSION_POLL_ATTEMPTS = 50
 private const val DIMENSION_POLL_INTERVAL_MS = 100L
 private const val PROCESS_KILL_TIMEOUT_S = 3L
+
+/** The most one read of ffmpeg's pipe asks for; see [SharedCameraFrameCache.readFullFrame]. */
+internal const val READ_CHUNK_BYTES = 256 * 1024
 private const val IMMEDIATE_EXIT_WINDOW_MS = 2000L
 private const val ALPHA_SHIFT = 24
 private const val RED_SHIFT = 16
@@ -167,6 +173,9 @@ object SharedCameraFrameCache {
     /** The same, for a stored AVFoundation index that has drifted — see [avfSourceToOpen]. */
     private val avfIndexDriftReport = ReportOnce()
 
+    /** Bounds the DeckLink open-failure report to one per device per process. */
+    private val deckLinkOpenReports = DeckLinkOpenReports()
+
     // ── DeckLink capture ────────────────────────────────────────────
 
     /** Puts one polled DeckLink frame on screen; false when the poll returned no usable frame. */
@@ -189,19 +198,26 @@ object SharedCameraFrameCache {
         System.err.println("[DeckLink Input] Opening device ${source.deckLinkIndex}, " +
             "format: ${source.videoFormat.ifEmpty { "auto" }}, connection: ${source.videoConnection}")
 
+        val index = source.deckLinkIndex
+        val device = withContext(Dispatchers.IO) { DeckLinkManager.listDevices().find { it.index == index } }
+        val inputModes = if (device != null) withContext(Dispatchers.IO) { DeckLinkManager.listInputModes(index) }
+        else emptyList()
+        deckLinkInputBlocker(present = device != null, hasInput = inputModes.isNotEmpty())?.let { blocker ->
+            System.err.println("[DeckLink Input] Not opening device $index: $blocker")
+            entry.error.value = blocker
+            return
+        }
+
         val opened = withContext(Dispatchers.IO) {
-            DeckLinkManager.openInput(source.deckLinkIndex, source.videoFormat, source.videoConnection)
+            DeckLinkManager.openInput(index, source.videoFormat, source.videoConnection)
         }
         if (!opened) {
-            System.err.println("[DeckLink Input] Failed to open input on device ${source.deckLinkIndex}")
-            CrashReporter.reportWarning(
-                "DeckLink: Failed to open input on device",
-                tags = mapOf(
-                    "subsystem" to "decklink",
-                    "decklink_index" to source.deckLinkIndex.toString()
-                )
-            )
-            entry.error.value = CameraFailure.DECKLINK_INPUT_IN_USE
+            System.err.println("[DeckLink Input] Failed to open input on device $index")
+            val outputActive = DeckLinkManager.isOutputActive(index)
+            if (!outputActive) {
+                reportDeckLinkOpenFailed(index, device?.name.orEmpty(), inputModes.size, deckLinkOpenReports)
+            }
+            entry.error.value = deckLinkOpenFailure(outputActive)
             return
         }
         entry.error.value = null
@@ -274,7 +290,7 @@ object SharedCameraFrameCache {
         val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
         System.err.println("[Camera] Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
 
-        val inputStream = java.io.BufferedInputStream(process.inputStream, frameBytes * 2)
+        val inputStream = process.inputStream
         val frameBuf = ByteArray(frameBytes)
         val pixelBuf = IntArray(videoW * videoH)
         var frameCount = 0
@@ -296,12 +312,21 @@ object SharedCameraFrameCache {
         return frameCount
     }
 
-    private fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
+    /**
+     * Fills [frameBuf] with one frame, asking the pipe for at most [READ_CHUNK_BYTES] at a time.
+     *
+     * The size of each request is what decides the frame rate on Windows. Measured on a GTX 1660 Ti
+     * PC with 1080p BGRA from ffmpeg: reads of 8 MB and more ran at about 45 MB/s -- 5 frames a
+     * second, a camera falling eleven times behind -- while 64 KB and 256 KB reads of the same pipe
+     * ran at about 1,750 MB/s. A whole frame used to be requested at once, through a
+     * BufferedInputStream that passes a request larger than its own buffer straight to the pipe.
+     */
+    internal fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
         try {
             var read = 0
             var endOfStream = false
             while (read < frameBytes && !endOfStream) {
-                val r = inputStream.read(frameBuf, read, frameBytes - read)
+                val r = inputStream.read(frameBuf, read, minOf(frameBytes - read, READ_CHUNK_BYTES))
                 if (r == -1) endOfStream = true else read += r
             }
             !endOfStream
@@ -316,31 +341,46 @@ object SharedCameraFrameCache {
      * whether the device opened at all, so an attempt that exits straight back out still carries
      * the reason it exited.
      */
-    private suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
+    internal suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
         coroutineScope {
-            val process = withContext(Dispatchers.IO) {
-                try {
-                    ProcessBuilder(command).redirectErrorStream(false).start()
-                } catch (e: Throwable) {
-                    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
-                    null
+            // The source can be released or switched at any point from the moment the process
+            // starts, and until streamFrames registers it nothing else knows it exists: release()
+            // finds no process to kill, and a cancelled coroutine does not end the child it
+            // started. So this attempt kills its own process whenever it is cancelled -- including
+            // a cancellation that lands while the start call itself is returning, which is why the
+            // process is recorded inside that call rather than taken from its result. Found on
+            // Windows, where an NDI camera with no sender restarts ffmpeg every few seconds and each
+            // switch away left one behind at a full core.
+            var started: Process? = null
+            try {
+                withContext(Dispatchers.IO) {
+                    started = try {
+                        ProcessBuilder(command).redirectErrorStream(false).start()
+                    } catch (e: IOException) {
+                        System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
+                        null
+                    }
                 }
-            } ?: return@coroutineScope null
+                val process = started ?: return@coroutineScope null
+                val drain = startStderrDrain(process)
+                // Interruptible, so a camera released inside the window stops waiting at once.
+                val exitedImmediately = runInterruptible(Dispatchers.IO) {
+                    process.waitFor(IMMEDIATE_EXIT_WINDOW_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+                } && process.exitValue() != 0
 
-            val drain = startStderrDrain(process)
-            val exitedImmediately = withContext(Dispatchers.IO) {
-                process.waitFor(IMMEDIATE_EXIT_WINDOW_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
-            } && process.exitValue() != 0
+                if (!exitedImmediately) return@coroutineScope streamFrames(process, entry, drain)
 
-            if (!exitedImmediately) return@coroutineScope streamFrames(process, entry, drain)
-
-            val exitCode = process.exitValue()
-            System.err.println("[Camera] ffmpeg exited immediately with code $exitCode")
-            val tail = drain.tail()
-            tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
-            drain.job.cancel()
-            withContext(Dispatchers.IO) { killFfmpegProcess(process) }
-            FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail)
+                val exitCode = process.exitValue()
+                System.err.println("[Camera] ffmpeg exited immediately with code $exitCode")
+                val tail = drain.tail()
+                tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+                drain.job.cancel()
+                withContext(Dispatchers.IO) { killFfmpegProcess(process) }
+                FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail, exitedImmediately = true)
+            } catch (e: CancellationException) {
+                started?.let { withContext(NonCancellable + Dispatchers.IO) { killFfmpegProcess(it) } }
+                throw e
+            }
         }
 
     private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
@@ -424,7 +464,7 @@ object SharedCameraFrameCache {
 
                 val attempt = attemptCapture(command, entry)
                 if (attempt != null) everStarted = true
-                if (attempt != null && attempt.exitCode > 0 && !attempt.framesProduced) sawImmediateExit = true
+                if (attempt?.exitedImmediately == true) sawImmediateExit = true
 
                 if (attempt?.framesProduced == true) {
                     entry.error.value = null
@@ -442,12 +482,16 @@ object SharedCameraFrameCache {
         private suspend fun recordFailure(attempt: FfmpegAttempt?) {
             lastStderr = attempt?.stderrTail.orEmpty()
             lastExitCode = attempt?.exitCode ?: -1
-            lastFailure = when {
+            val classified = when {
                 attempt == null -> CameraFailure.UNKNOWN
                 lastStderr.isEmpty() -> CameraFailure.NO_FRAMES
                 else -> classifyCameraFfmpegStderr(lastStderr, deviceScheme(source.devicePath))
                     .takeIf { it != CameraFailure.UNKNOWN } ?: CameraFailure.NO_FRAMES
             }
+            lastFailure = refineForWindowsPrivacy(
+                refineForBlindListing(classified, CameraDeviceCatalog.lastEnumeration),
+                deviceScheme(source.devicePath),
+            ) { windowsCameraBlocked(::queryRegistryValue) }
             entry.error.value = lastFailure
 
             // A privacy refusal is the operator's to resolve in System Settings; four more attempts
@@ -503,7 +547,7 @@ object SharedCameraFrameCache {
 }
 
 /** One camera's shared state: the frames on screen, why they stopped, and who is still watching. */
-private class CacheEntry(
+internal class CacheEntry(
     val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
     val error: MutableStateFlow<CameraFailure?> = MutableStateFlow(null),
     var refCount: Int = 0,
@@ -519,10 +563,12 @@ private class CacheEntry(
  * `System.err` and discard. A packaged `.app` has no stderr to print to, which is how 43 Sentry
  * warnings arrived carrying nothing but the fact of the failure.
  */
-private class FfmpegAttempt(
+internal class FfmpegAttempt(
     val framesProduced: Boolean,
     val exitCode: Int,
     val stderrTail: List<String>,
+    /** ffmpeg failed inside the opening window. Its code says nothing: Windows' is negative. */
+    val exitedImmediately: Boolean = false,
 )
 
 /** ffmpeg's stderr as it arrives: the retained tail, and the first frame size announced in it. */
@@ -712,20 +758,21 @@ internal fun bgraBytesToArgbPixels(frameBuf: ByteArray, pixelBuf: IntArray) {
     }
 }
 
-/** Kill an ffmpeg process and ensure device handles are released.
- *  On Windows, Process.destroyForcibly() often fails to release DirectShow
- *  device handles, so we kill the process tree via taskkill. */
+/**
+ * Kills [process] and whatever it started, and nothing else.
+ *
+ * On Windows, `destroyForcibly()` often fails to release DirectShow device handles, so the process
+ * tree is ended with `taskkill /T /PID`. It must never be `taskkill /IM ffmpeg.exe`: that ends every
+ * ffmpeg on the computer, including the other camera sources' own processes and anything the
+ * operator runs outside the app.
+ */
 internal fun killFfmpegProcess(process: Process) {
     try {
+        process.descendants().forEach { it.destroyForcibly() }
         if (System.getProperty("os.name", "").lowercase().contains("win")) {
             try {
                 val pid = process.pid()
                 ProcessBuilder("taskkill", "/F", "/T", "/PID", pid.toString())
-                    .redirectErrorStream(true).start()
-                    .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-            } catch (_: Throwable) {}
-            try {
-                ProcessBuilder("taskkill", "/F", "/IM", "ffmpeg.exe")
                     .redirectErrorStream(true).start()
                     .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
             } catch (_: Throwable) {}

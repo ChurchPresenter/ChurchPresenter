@@ -232,7 +232,10 @@ fun ProjectionSettingsTab(
         screenDevicesAll.filter { !it.isPrimary }
     }
     LaunchedEffect(presenterWindowCount, nonPrimaryDevices) {
-        reconcileAssignments(proj.screenAssignments, presenterWindowCount, nonPrimaryDevices, screenDevicesAll)
+        reconcileAssignments(
+            proj.screenAssignments, presenterWindowCount, nonPrimaryDevices, screenDevicesAll,
+            proj.fallbackProfileId,
+        )
             ?.let { reconciled ->
                 onSettingsChange { s ->
                     s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = reconciled))
@@ -693,12 +696,15 @@ private fun rememberDisplayOptions(
  * Bounds are cleared alongside the target in both reset paths, and that is load-bearing: a slot that
  * later stands in as a dev fallback window would otherwise go on reporting the resolution of the
  * monitor it used to drive, because `outputSizeOf` prefers real bounds whenever they are non-zero.
+ *
+ * A slot added here follows [fallbackProfileId]; left null it would follow no profile at all.
  */
 internal fun reconcileAssignments(
     stored: List<ScreenAssignment>,
     presenterWindowCount: Int,
     nonPrimaryDevices: List<DetectedScreen>,
     allDevices: List<DetectedScreen>,
+    fallbackProfileId: String,
 ): List<ScreenAssignment>? {
     var changed = false
     val assignments = stored.toMutableList()
@@ -710,7 +716,8 @@ internal fun reconcileAssignments(
             targetBoundsX = device?.boundsX ?: Int.MIN_VALUE,
             targetBoundsY = device?.boundsY ?: Int.MIN_VALUE,
             targetBoundsW = device?.boundsW ?: 0,
-            targetBoundsH = device?.boundsH ?: 0
+            targetBoundsH = device?.boundsH ?: 0,
+            activeProfileId = fallbackProfileId,
         ))
         changed = true
     }

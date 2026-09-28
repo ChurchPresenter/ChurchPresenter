@@ -77,7 +77,8 @@ internal fun listCameraDevicesWithDeckLinkListing(
     val devices = mutableListOf<CameraDevice>()
 
     if (DeckLinkManager.isAvailable()) {
-        val deckLinkDevices = DeckLinkManager.listDevices()
+        // An output-only card has no input to open, so it is never offered as a camera.
+        val deckLinkDevices = DeckLinkManager.listDevices().filter { DeckLinkManager.hasInput(it.index) }
         for (device in deckLinkDevices) {
             devices.add(CameraDevice(
                 name = device.name,

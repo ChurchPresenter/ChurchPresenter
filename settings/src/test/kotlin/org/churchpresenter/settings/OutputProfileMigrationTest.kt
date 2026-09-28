@@ -6,6 +6,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -20,6 +22,9 @@ import org.churchpresenter.settings.utils.Constants
  * before -- the repaired document with that output's sparse override written over it, which is what
  * the old per-output resolution did.
  */
+/** How many profiles to create while checking none of them is given Blank's reserved id. */
+private const val BLANK_ID_PROBE = 12
+
 class OutputProfileMigrationTest {
 
     private lateinit var home: File
@@ -258,5 +263,89 @@ class OutputProfileMigrationTest {
     fun `full screens and two-translation stacks are not narrowed`() {
         assertEquals(emptyList(), decode(bibleDoc("{}")).profileAt(0).bibleTranslations)
         assertEquals(emptyList(), decode(bibleDoc(lowerThird, count = 2)).profileAt(0).bibleTranslations)
+    }
+
+    // ── Every output follows a profile ──────────────────────────────────────────
+
+    @Test
+    fun `a document with no outputs is given the factory profile rather than none`() {
+        val proj = decode(v11()).projectionSettings
+
+        assertEquals(listOf(DEFAULT_OUTPUT_PROFILE_ID), proj.outputProfiles.map { it.id })
+        assertEquals(DEFAULT_OUTPUT_PROFILE_ID, proj.fallbackProfileId)
+    }
+
+    @Test
+    fun `an output saved with no profile or a missing one is repointed at the first profile on load`() {
+        val raw = """
+            {"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+             "projectionSettings":{
+               "outputProfiles":[{"id":"profile1","name":"A"},{"id":"profile2","name":"B"}],
+               "screenAssignments":[{"activeProfileId":"profile2"},{"activeProfileId":null},{}],
+               "browserSourceOutputs":[{"activeProfileId":"gone"}],
+               "ndiOutputs":[{}]}}
+        """.trimIndent()
+
+        val proj = decode(raw).projectionSettings
+
+        assertEquals(
+            listOf("profile2", "profile1", "profile1"), proj.screenAssignments.map { it.activeProfileId },
+            "a valid reference is left alone; a null one follows the first profile",
+        )
+        assertEquals(listOf("profile1"), proj.browserSourceOutputs.map { it.activeProfileId })
+        assertEquals(listOf("profile1"), proj.ndiOutputs.map { it.activeProfileId })
+    }
+
+    @Test
+    fun `a current document with its profiles emptied is given the factory one and its outputs follow it`() {
+        val raw = """
+            {"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+             "projectionSettings":{"outputProfiles":[],"screenAssignments":[{"activeProfileId":"profile1"}]}}
+        """.trimIndent()
+
+        val proj = decode(raw).projectionSettings
+
+        assertEquals(listOf(DEFAULT_OUTPUT_PROFILE_ID), proj.outputProfiles.map { it.id })
+        assertEquals(DEFAULT_OUTPUT_PROFILE_ID, proj.screenAssignments.single().activeProfileId)
+    }
+
+    @Test
+    fun `an output deliberately on Blank keeps it through the load repair`() {
+        val raw = """
+            {"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+             "projectionSettings":{
+               "outputProfiles":[{"id":"profile1","name":"A"}],
+               "screenAssignments":[{"activeProfileId":"$BLANK_OUTPUT_PROFILE_ID"}],
+               "browserSourceOutputs":[{"activeProfileId":"$BLANK_OUTPUT_PROFILE_ID"}],
+               "ndiOutputs":[{"activeProfileId":"$BLANK_OUTPUT_PROFILE_ID"}]}}
+        """.trimIndent()
+
+        val proj = decode(raw).projectionSettings
+
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, proj.screenAssignments.single().activeProfileId)
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, proj.browserSourceOutputs.single().activeProfileId)
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, proj.ndiOutputs.single().activeProfileId)
+        assertEquals(listOf("profile1"), proj.outputProfiles.map { it.id }, "Blank is never stored as a profile")
+    }
+
+    @Test
+    fun `Blank resolves to the built-in profile that shows nothing, backgrounds included`() {
+        val proj = ProjectionSettings()
+        val profile = requireNotNull(proj.profileFor(ScreenAssignment(activeProfileId = BLANK_OUTPUT_PROFILE_ID)))
+
+        assertSame(BLANK_OUTPUT_PROFILE, profile)
+        assertFalse(profile.showBible)
+        assertFalse(profile.showSongs)
+        assertFalse(profile.showSubtitles)
+        assertFalse(profile.showFullscreenBackground)
+        assertFalse(profile.showLowerThirdBackground)
+        assertFalse(profile.showBibleBackground)
+        assertFalse(profile.showSongsBackground)
+    }
+
+    @Test
+    fun `a new profile never takes the id Blank has reserved`() {
+        val profiles = (1..BLANK_ID_PROBE).fold(listOf<OutputProfile>()) { acc, _ -> acc + newOutputProfile(acc) }
+        assertTrue(profiles.none { it.id == BLANK_OUTPUT_PROFILE_ID })
     }
 }

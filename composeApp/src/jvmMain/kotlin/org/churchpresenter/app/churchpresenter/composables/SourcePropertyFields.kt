@@ -39,6 +39,46 @@ internal fun PropertyTextField(label: String, value: String, modifier: Modifier 
     )
 }
 
+/**
+ * A whole-number field that keeps what is typed and applies it on Enter or when focus leaves.
+ *
+ * Checking on every keystroke fought the operator: with a range of 8–500, clearing the field and
+ * typing 36 was cut to 8 at the "3" and became 86 or 368, and deleting down to 5 jumped to 8. Here
+ * the text is free while it is being edited, and only the finished number is checked -- clamped
+ * into [range], or put back to [value] when it is not a number at all.
+ */
+@Composable
+internal fun PropertyIntField(
+    label: String,
+    value: Int,
+    range: IntRange,
+    modifier: Modifier = Modifier,
+    onValueChange: (Int) -> Unit,
+) {
+    var text by remember(value) { mutableStateOf(value.toString()) }
+    var hasFocus by remember { mutableStateOf(false) }
+    fun commit() {
+        val committed = text.trim().toIntOrNull()?.coerceIn(range)
+        if (committed == null) {
+            text = value.toString()
+        } else {
+            text = committed.toString()
+            if (committed != value) onValueChange(committed)
+        }
+    }
+    StyledTextField(
+        value = text,
+        onValueChange = { text = it },
+        label = label,
+        modifier = modifier.fillMaxWidth().onFocusChanged { state ->
+            if (hasFocus && !state.isFocused) commit()
+            hasFocus = state.isFocused
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { commit() }),
+    )
+}
+
 @Composable
 internal fun PropertyFloatField(label: String, value: Float, modifier: Modifier = Modifier, onValueChange: (Float) -> Unit) {
     var text by remember(value) { mutableStateOf("%.3f".format(value)) }

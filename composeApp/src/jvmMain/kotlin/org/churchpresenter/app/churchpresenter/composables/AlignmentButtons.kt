@@ -45,10 +45,10 @@ import churchpresenter.composeapp.generated.resources.align_middle
 import churchpresenter.composeapp.generated.resources.align_bottom
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.drawShiftedY
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
-import androidx.compose.ui.graphics.graphicsLayer
 
 private val TRACK_INSET = 2.dp
 private const val ICON_FRACTION = 0.7f
@@ -192,7 +192,7 @@ private fun IconChoiceTrack(
                                     hovered = hovered,
                                     lift = 2.dp,
                                 )
-                                hovered -> Modifier.graphicsLayer { translationY = -SEGMENT_HOVER_SHIFT.toPx() }
+                                hovered -> Modifier.drawShiftedY(-SEGMENT_HOVER_SHIFT)
                                     .clip(segmentShape)
                                     .background(tint.copy(alpha = SEGMENT_HOVER_ALPHA))
                                 else -> Modifier.clip(segmentShape)
