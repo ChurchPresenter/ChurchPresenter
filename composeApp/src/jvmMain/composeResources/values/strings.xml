@@ -1171,7 +1171,6 @@
     <string name="customize_no_preview">No preview for this section</string>
 
     <!-- Output Profiles -->
-    <string name="output_profile_none">None</string>
     <string name="output_profile_new">New Profile</string>
     <string name="output_profile_create_default">Create Default Profile</string>
     <string name="output_profile_create_default_tooltip">Add a fresh profile with the app's factory-default styling, as a backup to fall back to</string>
@@ -1183,6 +1182,7 @@
     <string name="output_profile_usage_count">Used by %1$d output(s)</string>
     <string name="output_profile_name_hint">Profile name</string>
     <string name="output_profile_picker_tooltip">Output profile</string>
+    <string name="output_profile_blank">Blank</string>
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
     <string name="output_profile_display_mode">Display Mode</string>

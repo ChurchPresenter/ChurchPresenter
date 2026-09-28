@@ -133,11 +133,11 @@ data class ProjectionSettings(
      * shows no selection and it draws with factory defaults -- and such outputs were saved by the
      * startup reconcile before it learned to assign one, and by a migration of a document with no
      * outputs, which left no profiles at all. Each is repointed at [fallbackProfileId]. A valid
-     * reference is never touched.
+     * reference -- [BLANK_OUTPUT_PROFILE_ID] included, a deliberate choice -- is never touched.
      */
     fun withProfileReferencesRepaired(): ProjectionSettings {
         val profiles = outputProfiles.ifEmpty { listOf(factoryOutputProfile()) }
-        val ids = profiles.mapTo(HashSet()) { it.id }
+        val ids = profiles.mapTo(hashSetOf(BLANK_OUTPUT_PROFILE_ID)) { it.id }
         val fallback = profiles.first().id
         fun List<ScreenAssignment>.repaired() =
             map { if (it.activeProfileId in ids) it else it.copy(activeProfileId = fallback) }

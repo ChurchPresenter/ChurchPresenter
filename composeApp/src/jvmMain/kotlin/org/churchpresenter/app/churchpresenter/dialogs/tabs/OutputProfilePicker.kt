@@ -18,7 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_none
+import churchpresenter.composeapp.generated.resources.output_profile_blank
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
 
@@ -34,7 +35,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun OutputProfilePicker(
     profiles: List<OutputProfile>,
     activeProfileId: String?,
-    onPick: (String?) -> Unit,
+    onPick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val active = profiles.find { it.id == activeProfileId }
@@ -47,7 +48,8 @@ internal fun OutputProfilePicker(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = active?.name?.ifBlank { active.id } ?: stringResource(Res.string.output_profile_none),
+                text = if (activeProfileId == BLANK_OUTPUT_PROFILE_ID) stringResource(Res.string.output_profile_blank)
+                else active?.let { it.name.ifBlank { it.id } }.orEmpty(),
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -56,9 +58,9 @@ internal fun OutputProfilePicker(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = {
-                    Text(stringResource(Res.string.output_profile_none), style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(Res.string.output_profile_blank), style = MaterialTheme.typography.bodySmall)
                 },
-                onClick = { expanded = false; onPick(null) },
+                onClick = { expanded = false; onPick(BLANK_OUTPUT_PROFILE_ID) },
             )
             profiles.forEach { profile ->
                 DropdownMenuItem(
