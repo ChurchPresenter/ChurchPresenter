@@ -31,6 +31,9 @@ private const val RESTART_DELAY_MS = 1000L
 private const val DIMENSION_POLL_ATTEMPTS = 50
 private const val DIMENSION_POLL_INTERVAL_MS = 100L
 private const val PROCESS_KILL_TIMEOUT_S = 3L
+
+/** The most one read of ffmpeg's pipe asks for; see [SharedCameraFrameCache.readFullFrame]. */
+internal const val READ_CHUNK_BYTES = 256 * 1024
 private const val IMMEDIATE_EXIT_WINDOW_MS = 2000L
 private const val ALPHA_SHIFT = 24
 private const val RED_SHIFT = 16
@@ -287,7 +290,7 @@ object SharedCameraFrameCache {
         val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
         System.err.println("[Camera] Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
 
-        val inputStream = java.io.BufferedInputStream(process.inputStream, frameBytes * 2)
+        val inputStream = process.inputStream
         val frameBuf = ByteArray(frameBytes)
         val pixelBuf = IntArray(videoW * videoH)
         var frameCount = 0
@@ -309,12 +312,21 @@ object SharedCameraFrameCache {
         return frameCount
     }
 
-    private fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
+    /**
+     * Fills [frameBuf] with one frame, asking the pipe for at most [READ_CHUNK_BYTES] at a time.
+     *
+     * The size of each request is what decides the frame rate on Windows. Measured on a GTX 1660 Ti
+     * PC with 1080p BGRA from ffmpeg: reads of 8 MB and more ran at about 45 MB/s -- 5 frames a
+     * second, a camera falling eleven times behind -- while 64 KB and 256 KB reads of the same pipe
+     * ran at about 1,750 MB/s. A whole frame used to be requested at once, through a
+     * BufferedInputStream that passes a request larger than its own buffer straight to the pipe.
+     */
+    internal fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
         try {
             var read = 0
             var endOfStream = false
             while (read < frameBytes && !endOfStream) {
-                val r = inputStream.read(frameBuf, read, frameBytes - read)
+                val r = inputStream.read(frameBuf, read, minOf(frameBytes - read, READ_CHUNK_BYTES))
                 if (r == -1) endOfStream = true else read += r
             }
             !endOfStream
