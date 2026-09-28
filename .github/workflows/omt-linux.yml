@@ -73,15 +73,20 @@ jobs:
       # Not the upstream buildlinuxx64.sh, which compiles every file with -mavx2 -mbmi -mlzcnt. libvmx
       # chooses its AVX2 path at run time (__builtin_cpu_supports), so only vmxcodec_avx2.cpp may be
       # built for AVX2; built the upstream way, the compiler is free to put AVX2 instructions in the
-      # code every CPU runs, and a machine without AVX2 — the SSE4.2 minimum libvmx documents — dies
-      # of SIGILL. Checked: built this way, the shared objects contain no ymm register use at all.
+      # code every CPU runs, and a machine without AVX2 dies of SIGILL. Checked: built this way, the
+      # shared objects contain no ymm register use at all.
+      #
+      # LZCNT, though, the shared code does need: its bit reader (GETZEROS in vmxcodec_common.h) calls
+      # __lzcnt64 with no CPU check, so -mlzcnt is required everywhere — as it is, in effect, in the
+      # publisher's own Windows and macOS builds. That makes LZCNT (Intel Haswell 2013, AMD 2007) the
+      # real floor, above the SSE4.2 libvmx's README states.
       - name: Build libvmx
         working-directory: omt-src/libvmx/src
         run: |
           set -euo pipefail
           BASE="-O3 -std=c++17 -fdeclspec -fPIC"
-          clang++ $BASE -msse4.2 -mssse3 -mpopcnt -c vmxcodec.cpp -o vmxcodec.o
-          clang++ $BASE -msse4.2 -mssse3 -mpopcnt -c vmxcodec_x86.cpp -o vmxcodec_x86.o
+          clang++ $BASE -msse4.2 -mssse3 -mpopcnt -mlzcnt -c vmxcodec.cpp -o vmxcodec.o
+          clang++ $BASE -msse4.2 -mssse3 -mpopcnt -mlzcnt -c vmxcodec_x86.cpp -o vmxcodec_x86.o
           clang++ $BASE -mavx2 -mbmi -mbmi2 -mlzcnt -c vmxcodec_avx2.cpp -o vmxcodec_avx2.o
           # The soname is what lets libomt's later dlopen("libvmx.so") find the copy JnaOmtLibrary has
           # already loaded by full path; glibc matches an already-loaded library by it.
