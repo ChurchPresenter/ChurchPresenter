@@ -135,6 +135,16 @@ class CompanionSatelliteClientTest {
         }
     }
 
+    @Test
+    fun `a port no socket can use is reported as an error, not thrown`() {
+        val events = Events()
+        val c = newClient(events)
+        c.connect("127.0.0.1", 7_313_444, SurfaceSpec(DEVICE, rows = 2, columns = 2, bitmapSize = 72))
+        assertEquals(CompanionConnectionStatus.ERROR, events.status)
+        assertEquals("Port out of range: 7313444", events.statuses.last().second)
+        c.dispose()
+    }
+
     // ── LAYOUT_MANIFEST ───────────────────────────────────────────────────────
 
     private fun manifestOf(addDeviceLine: String): String {

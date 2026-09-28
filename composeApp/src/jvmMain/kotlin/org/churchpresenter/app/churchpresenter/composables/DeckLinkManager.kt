@@ -257,6 +257,9 @@ object DeckLinkManager {
         } catch (_: Throwable) { emptyList() }
     }
 
+    /** Whether [deviceIndex] can capture at all: an output-only card lists no input modes. */
+    fun hasInput(deviceIndex: Int): Boolean = listInputModes(deviceIndex).isNotEmpty()
+
     fun listVideoConnections(deviceIndex: Int): List<VideoConnection> {
         if (!isAvailable()) return emptyList()
         return try {

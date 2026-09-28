@@ -284,7 +284,7 @@ class SourcePropertiesClockTest {
 
     @Test
     fun `typing a font size stores it`() = sourcePanel(Fixture.clock("clk-size")) { get ->
-        typeField(Field.FONT_SIZE, "150")
+        commitField(Field.FONT_SIZE, "150")
 
         assertEquals(150, (get() as SceneSource.ClockSource).fontSize)
         assertFieldShows("150", "the font size field")
@@ -292,21 +292,21 @@ class SourcePropertiesClockTest {
 
     @Test
     fun `a font size below the minimum is raised to it`() = sourcePanel(Fixture.clock("clk-small")) { get ->
-        typeField(Field.FONT_SIZE, "2")
+        commitField(Field.FONT_SIZE, "2")
 
         assertEquals(8, (get() as SceneSource.ClockSource).fontSize, "the smallest clock is 8pt")
     }
 
     @Test
     fun `a font size above the maximum is lowered to it`() = sourcePanel(Fixture.clock("clk-big")) { get ->
-        typeField(Field.FONT_SIZE, "9000")
+        commitField(Field.FONT_SIZE, "9000")
 
         assertEquals(500, (get() as SceneSource.ClockSource).fontSize, "the largest clock is 500pt")
     }
 
     @Test
     fun `text that is not a number leaves the font size alone`() = sourcePanel(Fixture.clock("clk-nan")) { get ->
-        typeField(Field.FONT_SIZE, "large")
+        commitField(Field.FONT_SIZE, "large")
 
         assertEquals(64, (get() as SceneSource.ClockSource).fontSize)
     }

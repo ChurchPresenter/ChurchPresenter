@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitDialogParent
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -63,9 +64,18 @@ object FileKitFileChooser : FileChooser() {
         return baseName to extension
     }
 
-    /** Settings shared by every native dialog: the title, owned by whatever window is active. */
+    /**
+     * Settings shared by every native dialog: the title, owned by whatever window is active.
+     *
+     * A null [parentWindow] stays null rather than becoming a parent wrapping nothing: FileKit
+     * reads no parent as "centre it on the screen", which is what a dialog opened before any
+     * window is showing wants.
+     */
     internal fun dialogSettings(title: String): FileKitDialogSettings =
-        FileKitDialogSettings(title = title, parentWindow = parentWindow())
+        FileKitDialogSettings(
+            title = title,
+            parent = parentWindow()?.let { FileKitDialogParent.awt(it) }
+        )
 
     /**
      * The extensions the native saver restricts to, or null for no restriction.

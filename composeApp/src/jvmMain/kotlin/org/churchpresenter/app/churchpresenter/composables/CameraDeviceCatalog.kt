@@ -87,6 +87,17 @@ internal object CameraDeviceCatalog {
 }
 
 /**
+ * Everything the camera panel would otherwise ask this machine: which cameras it has, and whether
+ * ffmpeg runs on it.
+ *
+ * Supplied whole or not at all. A test that pinned only the device list still had the panel probe
+ * the host's ffmpeg and read [CameraDeviceCatalog]'s last enumeration for its hints, and either
+ * answer could land between two frames the test compared — so the panel changed under a test that
+ * had changed nothing.
+ */
+data class CameraHost(val devices: List<CameraDevice>, val ffmpegAvailable: Boolean)
+
+/**
  * Whether [camera] names a device this machine actually has, and so may be opened.
  *
  * **A stored device path is not enough.** A `.song` file travels, and settings are exported and

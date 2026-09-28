@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
@@ -374,6 +375,13 @@ class BrowserSourceVideoRendererTest {
         assertFalse(showsContentFor(Presenting.QA, allOff))
         assertFalse(showsContentFor(Presenting.STT, allOff))
         assertFalse(showsContentFor(Presenting.DICTIONARY, allOff))
+    }
+
+    @Test
+    fun `the Blank profile shows no content type at all`() {
+        Presenting.entries.forEach { mode ->
+            assertFalse(showsContentFor(mode, BLANK_OUTPUT_PROFILE), "Blank must not show $mode")
+        }
     }
 
     @Test

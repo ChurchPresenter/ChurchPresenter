@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -860,7 +861,7 @@ class LivePreviewPanelTest {
     }
 
     @Test
-    fun `the menu lists every profile, plus a way back to none`() = runComposeUiTest {
+    fun `the menu lists every profile, plus Blank`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
@@ -872,7 +873,7 @@ class LivePreviewPanelTest {
 
         onNodeWithText("Auditorium").assertExists()
         onNodeWithText("Stream band").assertExists()
-        onNodeWithText("None").assertExists()
+        onNodeWithText("Blank").assertExists()
     }
 
     @Test
@@ -897,7 +898,7 @@ class LivePreviewPanelTest {
     }
 
     @Test
-    fun `picking None clears the output's profile rather than leaving the old one`() = runComposeUiTest {
+    fun `picking Blank points the output at the built-in blank profile`() = runComposeUiTest {
         var doc = twoProfiles()
         setContent {
             MaterialTheme {
@@ -911,10 +912,10 @@ class LivePreviewPanelTest {
 
         onNodeWithContentDescription(SWAP).performClick()
         waitForIdle()
-        onNodeWithText("None").performClick()
+        onNodeWithText("Blank").performClick()
         waitForIdle()
 
-        assertNull(doc.projectionSettings.screenAssignments[0].activeProfileId)
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, doc.projectionSettings.screenAssignments[0].activeProfileId)
     }
 
     @Test

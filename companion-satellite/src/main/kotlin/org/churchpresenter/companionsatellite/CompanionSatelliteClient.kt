@@ -68,6 +68,10 @@ class CompanionSatelliteClient(
         /** Gap between successive CHANGE-PAGE messages, so Companion finishes one step before the
          * next arrives. */
         private const val PAGE_STEP_INTERVAL_MS = 150L
+
+        /** The ports a TCP socket can be opened on. Anything else makes [Socket]'s constructor
+         * throw [IllegalArgumentException] rather than an [IOException]. */
+        val VALID_PORTS = 1..65_535
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -93,6 +97,11 @@ class CompanionSatelliteClient(
         reconnectDelayMs: Long = 2000L
     ) {
         disconnect()
+        // A port no socket can use is a setting to fix, not a connection to retry.
+        if (port !in VALID_PORTS) {
+            setStatus(CompanionConnectionStatus.ERROR, "Port out of range: $port")
+            return
+        }
         val myGeneration = ++generation
         activeDeviceId = surface.deviceId
         onButtonsReset(surface.buttonCount)

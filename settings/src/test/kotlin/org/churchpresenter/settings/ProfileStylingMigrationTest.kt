@@ -119,8 +119,12 @@ class ProfileStylingMigrationTest {
 
     @Test
     fun `a document with no profiles or no looks is left alone`() {
-        assertEquals(emptyList(), decode("""{"settingsVersion":13,"projectionSettings":{"outputProfiles":[]}}""")
-            .projectionSettings.outputProfiles)
+        // Nothing to seed; the load's own repair then gives the install its factory profile.
+        assertEquals(
+            listOf(DEFAULT_OUTPUT_PROFILE_ID),
+            decode("""{"settingsVersion":13,"projectionSettings":{"outputProfiles":[]}}""")
+                .projectionSettings.outputProfiles.map { it.id },
+        )
         val bare = decode("""{"settingsVersion":13,"projectionSettings":{"outputProfiles":[{"id":"a"}]}}""")
             .projectionSettings.outputProfiles.single()
         assertEquals(STTSettings(), bare.sttSettings)

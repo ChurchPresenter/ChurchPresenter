@@ -74,6 +74,19 @@ class CameraDiagnosticsTest {
     }
 
     @Test
+    fun `directshow failing to bind a device is not by itself read as a privacy block`() {
+        // Printed both with "Let desktop apps access your camera" off and for a DeckLink capture
+        // driver with no card behind it, so only Windows' own setting can tell the two apart.
+        val bindFailed = listOf(
+            "[in#0 @ 000001c84fbafa40] Unable to BindToObject for Decklink Video Capture",
+            "[in#0 @ 000001c84fbafa40] Could not find video device with name [Decklink Video Capture] " +
+                "among source devices of type video.",
+            "[in#0 @ 000001c84fb4fc00] Error opening input: I/O error",
+        )
+        assertEquals(CameraFailure.DEVICE_NOT_FOUND, classifyCameraFfmpegStderr(bindFailed, "dshow"))
+    }
+
+    @Test
     fun `permission outranks every other marker in the same output`() {
         // A tail can hold more than one marker. Classification must be a function of the output,
         // not of which line happened to arrive last, or the same failure reports two ways.

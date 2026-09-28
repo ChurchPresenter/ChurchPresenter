@@ -256,7 +256,7 @@ always prescribed.
 |---|---|---|
 | ~~`StageMonitorScreenshotTest`~~ | ~~22~~ | **Fixed.** Drew a live wall clock, *and* read the host's 12/24-hour locale. `StageMonitorScreen` now takes `now` and `use24Hour`; the test pins both. |
 | ~~`AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*`~~ | ~~1~~ | **Never the clock.** This is the Stage Monitor *settings tab*, which draws no clock and never calls `StageMonitorScreen`. Its diff was the text backdrop button — see below. |
-| ~~`CanvasTabScreenshotTest` → `source_camera`~~ | ~~1~~ | **Fixed.** Enumerated the host's real capture devices. `CameraProperties`/`SourcePropertiesPanel`/`CanvasTab` now take `cameraDevices`, and `canvasTab()` pins a fixed pair by default. |
+| ~~`CanvasTabScreenshotTest` → `source_camera`~~ | ~~1~~ | **Fixed.** Enumerated the host's real capture devices. `CameraProperties`/`SourcePropertiesPanel`/`CanvasTab` now take a `CameraHost` — the devices *and* whether ffmpeg runs, so the hints are pinned too — and `canvasTab()` pins a fixed pair by default. |
 | `SettingsFieldsScreenshotTest` → `font_picker`, `font_picker_open` | 2 | The **font list is pinned but the glyphs are not**. The picker renders each name in its own typeface, so a machine missing one of `FONTS` draws that row in a fallback face. The test's own comment says the list is fixed "not the machine's", which is true and not enough. |
 | `AppPreviewSettingsScreenshotTest` → `settings_bible_light` | 1 | The same dropdown, inside the Bible settings preview. |
 

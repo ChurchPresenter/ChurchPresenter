@@ -3,6 +3,9 @@ package org.churchpresenter.app.churchpresenter.composables
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_config_refused
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_decklink_in_use
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_decklink_no_input
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_decklink_not_found
+import churchpresenter.composeapp.generated.resources.canvas_camera_error_decklink_open_failed
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_device_busy
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_device_not_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_error_device_not_found_windows
@@ -54,6 +57,9 @@ internal fun cameraFailureStringRes(
             else Res.string.canvas_camera_error_device_not_found
         CameraFailure.NO_FRAMES -> Res.string.canvas_camera_error_no_frames
         CameraFailure.DECKLINK_INPUT_IN_USE -> Res.string.canvas_camera_error_decklink_in_use
+        CameraFailure.DECKLINK_NOT_FOUND -> Res.string.canvas_camera_error_decklink_not_found
+        CameraFailure.DECKLINK_NO_INPUT -> Res.string.canvas_camera_error_decklink_no_input
+        CameraFailure.DECKLINK_OPEN_FAILED -> Res.string.canvas_camera_error_decklink_open_failed
         CameraFailure.FFMPEG_MISSING -> Res.string.canvas_camera_error_ffmpeg_missing
         CameraFailure.UNKNOWN -> Res.string.canvas_camera_error_unknown
     }
