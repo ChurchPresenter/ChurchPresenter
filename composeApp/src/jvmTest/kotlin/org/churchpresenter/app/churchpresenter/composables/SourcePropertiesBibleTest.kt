@@ -216,7 +216,7 @@ class SourcePropertiesBibleTest {
 
     @Test
     fun `typing a verse font size stores it`() = sourcePanel(Fixture.bible()) { get ->
-        typeField(Field.VERSE_FONT_SIZE, "80")
+        commitField(Field.VERSE_FONT_SIZE, "80")
 
         val source = get() as SceneSource.BibleSource
         assertEquals(80, source.fontSize)
@@ -225,7 +225,7 @@ class SourcePropertiesBibleTest {
 
     @Test
     fun `typing a reference font size stores it`() = sourcePanel(Fixture.bible()) { get ->
-        typeField(Field.REFERENCE_FONT_SIZE, "24")
+        commitField(Field.REFERENCE_FONT_SIZE, "24")
 
         val source = get() as SceneSource.BibleSource
         assertEquals(24, source.referenceFontSize)
@@ -234,7 +234,7 @@ class SourcePropertiesBibleTest {
 
     @Test
     fun `text that is not a number leaves a font size alone`() = sourcePanel(Fixture.bible()) { get ->
-        typeField(Field.VERSE_FONT_SIZE, "big")
+        commitField(Field.VERSE_FONT_SIZE, "big")
 
         assertEquals(48, (get() as SceneSource.BibleSource).fontSize)
     }

@@ -259,13 +259,12 @@ internal fun BibleProperties(
             onValueChange = { onUpdate(source.copy(fontFamily = it)) },
             modifier = Modifier.weight(FONT_NAME_WEIGHT)
         )
-        PropertyTextField(
+        PropertyIntField(
             stringResource(Res.string.canvas_clock_font_size),
-            source.fontSize.toString(),
+            source.fontSize,
+            MIN_FONT_SIZE..MAX_FONT_SIZE,
             Modifier.weight(1f)
-        ) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))) }
-        }
+        ) { onUpdate(source.copy(fontSize = it)) }
     }
     PropertySliderWithInput(
         stringResource(Res.string.canvas_letter_spacing),
@@ -319,15 +318,12 @@ internal fun BibleProperties(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PropertyTextField(
+        PropertyIntField(
             stringResource(Res.string.canvas_bible_ref_font_size),
-            source.referenceFontSize.toString(),
+            source.referenceFontSize,
+            MIN_FONT_SIZE..MAX_FONT_SIZE,
             Modifier.weight(1f)
-        ) { v ->
-            v.toIntOrNull()?.let {
-                onUpdate(source.copy(referenceFontSize = it.coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE)))
-            }
-        }
+        ) { onUpdate(source.copy(referenceFontSize = it)) }
         ColorPickerField(
             color = source.referenceFontColor,
             onColorChange = { onUpdate(source.copy(referenceFontColor = it)) },

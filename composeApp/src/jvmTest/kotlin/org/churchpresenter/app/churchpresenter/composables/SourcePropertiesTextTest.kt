@@ -158,7 +158,7 @@ class SourcePropertiesTextTest {
 
     @Test
     fun `committing a font size stores it`() = sourcePanel(Fixture.text()) { get ->
-        typeField(Field.FONT_SIZE, "96")
+        commitField(Field.FONT_SIZE, "96")
 
         assertEquals(96, (get() as SceneSource.TextSource).fontSize)
         assertFieldShows("96", "the font size field")
@@ -166,7 +166,7 @@ class SourcePropertiesTextTest {
 
     @Test
     fun `text that is not a number leaves the font size alone`() = sourcePanel(Fixture.text()) { get ->
-        typeField(Field.FONT_SIZE, "huge")
+        commitField(Field.FONT_SIZE, "huge")
 
         assertEquals(48, (get() as SceneSource.TextSource).fontSize, "the stored size is untouched")
     }
