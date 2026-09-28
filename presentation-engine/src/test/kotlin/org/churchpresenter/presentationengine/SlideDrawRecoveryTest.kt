@@ -19,7 +19,7 @@ class SlideDrawRecoveryTest {
     fun `draws every item and skips none when nothing throws`() {
         val drawn = mutableListOf<String>()
         val skipped = drawEachSkippingFailures(listOf("a", "b", "c")) { drawn += it }
-        assertEquals(0, skipped)
+        assertEquals(0, skipped.size)
         assertEquals(listOf("a", "b", "c"), drawn)
     }
 
@@ -30,7 +30,7 @@ class SlideDrawRecoveryTest {
             if (it == "bad") error("this shape cannot be drawn")
             drawn += it
         }
-        assertEquals(1, skipped)
+        assertEquals(listOf("bad"), skipped.map { it.item })
         assertEquals(listOf("a", "c"), drawn, "the items after the failure must still be drawn")
     }
 
@@ -41,7 +41,7 @@ class SlideDrawRecoveryTest {
             if (it == "bad") error("no")
             drawn += it
         }
-        assertEquals(3, skipped)
+        assertEquals(3, skipped.size)
         assertEquals(listOf("good"), drawn)
     }
 
@@ -54,13 +54,14 @@ class SlideDrawRecoveryTest {
             if (it == "boom") throw OutOfMemoryError("declared length")
             drawn += it
         }
-        assertEquals(1, skipped)
+        assertEquals(1, skipped.size)
+        assertTrue(skipped.single().error is OutOfMemoryError)
         assertEquals(listOf("a", "b"), drawn)
     }
 
     @Test
     fun `an empty list skips nothing`() {
-        assertEquals(0, drawEachSkippingFailures(emptyList<String>()) { error("must not be called") })
+        assertEquals(0, drawEachSkippingFailures(emptyList<String>()) { error("must not be called") }.size)
     }
 
     @Test
@@ -104,5 +105,32 @@ class SlideDrawRecoveryTest {
             dir.deleteRecursively()
         }
         assertTrue(PoiLimits.hasApplied, "loading a PowerPoint deck must have applied the limits")
+    }
+
+    @Test
+    fun `the origin is the part of POI that refused, not the allocator that threw`() {
+        val refusal = RuntimeException("refused").apply {
+            stackTrace = arrayOf(
+                StackTraceElement("org.apache.poi.util.IOUtils", "throwRFE", null, 0),
+                StackTraceElement("org.apache.poi.util.IOUtils", "safelyAllocate", null, 0),
+                StackTraceElement("org.apache.poi.hemf.record.emf.HemfFill", "readBitmap", null, 0),
+                StackTraceElement("org.apache.poi.sl.draw.DrawPictureShape", "draw", null, 0),
+            )
+        }
+        assertEquals("HemfFill.readBitmap", failureOrigin(refusal))
+    }
+
+    @Test
+    fun `an error with no stack has a blank origin`() {
+        assertEquals("", failureOrigin(RuntimeException().apply { stackTrace = emptyArray() }))
+    }
+
+    @Test
+    fun `only the quoted limit is kept from a POI size refusal`() {
+        val message = "Tried to allocate an array of length 123456789, but the maximum length for this " +
+            "record type is 100000000. If the file is not corrupt and not large, please open an issue."
+        assertEquals("100000000", recordLimit(message))
+        assertEquals("", recordLimit("C:\\Users\\someone\\sermon.pptx is corrupt"))
+        assertEquals("", recordLimit(null))
     }
 }
