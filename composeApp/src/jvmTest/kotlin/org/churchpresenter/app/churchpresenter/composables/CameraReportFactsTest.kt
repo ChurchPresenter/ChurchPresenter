@@ -221,4 +221,37 @@ class CameraReportFactsTest {
         assertFalse(gate.claim(), "and no one else does")
         assertFalse(gate.claim())
     }
+
+    // ── A device the platform is hiding ───────────────────────────────────────────────────────
+
+    @Test
+    fun `not found while ffmpeg sees nothing and Windows sees cameras is a privacy block`() {
+        val blind = facts(CameraEnumerator.PNP_FALLBACK, ffmpegListed = 0, fallbackListed = 2)
+        assertEquals(
+            CameraFailure.PERMISSION_DENIED,
+            refineForBlindListing(CameraFailure.DEVICE_NOT_FOUND, blind),
+        )
+    }
+
+    @Test
+    fun `not found after an ordinary listing stays not found`() {
+        val seen = facts(CameraEnumerator.DSHOW, ffmpegListed = 2)
+        assertEquals(CameraFailure.DEVICE_NOT_FOUND, refineForBlindListing(CameraFailure.DEVICE_NOT_FOUND, seen))
+        assertEquals(CameraFailure.DEVICE_NOT_FOUND, refineForBlindListing(CameraFailure.DEVICE_NOT_FOUND, null))
+    }
+
+    @Test
+    fun `other failures are left as they are, even after a blind listing`() {
+        val blind = facts(CameraEnumerator.PNP_FALLBACK, ffmpegListed = 0, fallbackListed = 2)
+        assertEquals(CameraFailure.DEVICE_BUSY, refineForBlindListing(CameraFailure.DEVICE_BUSY, blind))
+    }
+
+    @Test
+    fun `without ffmpeg an empty listing is not read as a privacy block`() {
+        val noFfmpeg = facts(CameraEnumerator.PNP_FALLBACK, fallbackListed = 2, ffmpegAvailable = false)
+        assertEquals(
+            CameraFailure.DEVICE_NOT_FOUND,
+            refineForBlindListing(CameraFailure.DEVICE_NOT_FOUND, noFfmpeg),
+        )
+    }
 }
