@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -58,7 +59,9 @@ class AnnouncementsTabAppearanceTest {
 
     @Test
     fun `the transparent button moves under the colour when the panel is too narrow for both`() =
-        announcementsTab(settings = leftPanel(220)) { _, _ ->
+        // The colour sits beside the position grid under the preview, so it is the whole tab that
+        // has to be narrow to squeeze it.
+        announcementsTab(width = NARROW_TAB) { _, _ ->
             assertFalse(transparentButtonBesideField())
             val field = onNodeWithText("BACKGROUND COLOR", substring = true).fetchSemanticsNode().boundsInRoot
             val button = onNodeWithText(AnnouncementLabel.TRANSPARENT).fetchSemanticsNode().boundsInRoot
@@ -213,3 +216,6 @@ class AnnouncementsTabAppearanceTest {
 
 /** A Fade a few frames long: the fade branch still runs, without rendering seconds of it per click. */
 private const val SHORT_FADE_MS = 50
+
+/** Narrow enough that the background colour, beside the position grid, has no room for its button. */
+private val NARROW_TAB = 640.dp

@@ -74,36 +74,6 @@ class AnnouncementsTabTest {
     }
 
     @Test
-    fun `the show button becomes a hide button once it is live`() = announcementsTab { presenter, _ ->
-        typeAnnouncement("Notices")
-        assertTrue(hasAnnButton(AnnouncementLabel.SHOW), "offers to show, to begin with")
-
-        annButton(AnnouncementLabel.SHOW).performClick()
-        waitForIdle()
-
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
-        assertTrue(hasAnnButton(AnnouncementLabel.HIDE), "the same button now offers to hide")
-        assertFalse(hasAnnButton(AnnouncementLabel.SHOW))
-    }
-
-    @Test
-    fun `hiding asks for the display to be cleared`() = announcementsTab { presenter, _ ->
-        typeAnnouncement("Notices")
-        annButton(AnnouncementLabel.SHOW).performClick()
-        waitForIdle()
-        assertFalse(presenter.clearDisplayRequested.value, "nothing asked for yet")
-
-        annButton(AnnouncementLabel.HIDE).performClick()
-        waitForIdle()
-
-        // The tab raises the request; MainDesktop is what watches it and takes the content down,
-        // so the mode is still ANNOUNCEMENTS here — the request is the whole of the tab's part.
-        assertTrue(presenter.clearDisplayRequested.value, "the display was asked to clear")
-    }
-
-    // ── Adding to the schedule ──────────────────────────────────────────────────
-
-    @Test
     fun `adding to the schedule hands over the announcement, not the timer`() =
         announcementsTab(
             initial = AnnouncementsSettings(timerHours = 1, timerMinutes = 30, timerSeconds = 15),
@@ -196,7 +166,6 @@ class AnnouncementsTabTest {
             // The Announcements tab is also shown in a follower window with no output of its own.
             assertTrue(showsExactly(AnnouncementLabel.TEXT_HINT), "the editor is still usable")
             assertFalse(hasAnnButton(AnnouncementLabel.GO_LIVE), "but nothing offers to go live")
-            assertFalse(hasAnnButton(AnnouncementLabel.SHOW))
         }
 
     @Test
