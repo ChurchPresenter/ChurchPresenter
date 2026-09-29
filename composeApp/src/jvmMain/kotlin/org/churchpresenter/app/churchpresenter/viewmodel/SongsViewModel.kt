@@ -34,8 +34,10 @@ import org.churchpresenter.app.churchpresenter.utils.isSlideBreak
 import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
 import org.churchpresenter.app.churchpresenter.utils.isVerseHeader
 import java.io.File
+import java.util.IdentityHashMap
 
 private const val SONG_NUMBER_DIGITS = 4
+private val WHITESPACE_RUN = Regex("\\s+")
 
 class SongsViewModel(
     private var appSettings: AppSettings,
@@ -858,7 +860,8 @@ class SongsViewModel(
         if (query.isNotEmpty()) {
             filtered = when (_filterType.value) {
                 Constants.CONTAINS -> filtered.filter { song ->
-                    song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) }
+                    song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) } ||
+                        song.searchLyrics().contains(query, ignoreCase = true)
                 }
                 Constants.STARTS_WITH -> filtered.filter { song ->
                     song.number.startsWith(query, ignoreCase = true) ||
@@ -909,6 +912,24 @@ class SongsViewModel(
      */
     private fun SongItem.searchTitles(): List<String> =
         (listOf(title) + extraTranslations().map { it.title }).filter { it.isNotBlank() }
+
+    private val lyricSearchText = IdentityHashMap<SongItem, String>()
+    private var lyricSearchTextFor: List<SongItem>? = null
+
+    private fun SongItem.searchLyrics(): String {
+        if (lyricSearchTextFor !== _allSongItems.value) {
+            lyricSearchText.clear()
+            lyricSearchTextFor = _allSongItems.value
+        }
+        return lyricSearchText.getOrPut(this) {
+            translationList().asSequence()
+                .flatMap { it.lyrics.asSequence() }
+                .filterNot { isHeaderLine(it) || isSlideBreak(it) || songBackgroundDirectiveOf(it) != null }
+                .map { ChordTransposer.stripChords(it) }
+                .joinToString(" ")
+                .replace(WHITESPACE_RUN, " ")
+        }
+    }
 
     /** [items] in the order [column] asks for; the sort itself, without the selection bookkeeping. */
     private fun sortedBy(column: String, items: List<SongItem>): List<SongItem> = when (column) {

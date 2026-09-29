@@ -51,6 +51,17 @@ class SongsTabScreenshotTest {
         ),
     )
 
+    private val withLyrics = listOf(
+        SongFixture(
+            number = "1",
+            title = "Amazing Grace",
+            author = "John Newton",
+            lyrics = listOf("[Verse 1]", "Amazing grace how sweet the sound", "That saved a wretch like me"),
+        ),
+        SongFixture(number = "2", title = "Be Thou My Vision", author = "Dallan Forgaill"),
+        SongFixture(number = "12", title = "Amazing Love", author = "Charles Wesley"),
+    )
+
     private val splitChorus = listOf(
         SongFixture(
             number = "1",
@@ -127,6 +138,14 @@ class SongsTabScreenshotTest {
 
     @Test
     fun `searching by title`() = shoot("search_by_title") { search("Amazing") }
+
+    @Test
+    fun `searching by lyrics`() = stackedThemes(SECTION, "search_by_lyrics") { mode, file ->
+        songsTab(songs = withLyrics, themeMode = mode) { _, _ ->
+            search("wretch like me")
+            captureTo(file)
+        }
+    }
 
     @Test
     fun `searching by number`() = shoot("search_by_number") { search("12") }
