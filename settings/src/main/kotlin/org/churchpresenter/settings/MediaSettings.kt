@@ -39,4 +39,11 @@ data class MediaSettings(
     val outline: TextOutline = TextOutline(),
     val position: String = Constants.BOTTOM_CENTER,
     val maxLines: Int = 2,
+    /**
+     * Each item's own text box, keyed by [textBoxKey] with [SUBTITLE_BOX].
+     * An item with none, or with one turned off, is drawn where it always was.
+     */
+    val textBoxes: Map<String, TextBox> = emptyMap(),
+    /** How this page's boxes behave -- see [TextBoxOptions]. */
+    val textBoxOptions: TextBoxOptions = TextBoxOptions(),
 )

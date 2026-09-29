@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.percent_suffix
+import churchpresenter.composeapp.generated.resources.profile_box_item_transcript
+import churchpresenter.composeapp.generated.resources.profile_box_item_translation
 import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
@@ -29,7 +31,10 @@ import churchpresenter.composeapp.generated.resources.profile_line_spacing
 import churchpresenter.composeapp.generated.resources.profile_ms
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
+import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.settings.TextBox
 import org.jetbrains.compose.resources.stringResource
 
 private const val STT = "sttSettings"
@@ -124,6 +129,25 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
         ScreenPlacementRow(stt.position, { v -> update { it.copy(position = v) } }, STT)
         DisplayAlignmentRow(stt.horizontalAlignment, { v -> update { it.copy(horizontalAlignment = v) } }, STT)
     }
+    ItemBoxGroup(
+        items = listOf(
+            BoxItem(
+                CAPTION_TRANSCRIPT_BOX,
+                stringResource(Res.string.profile_box_item_transcript),
+                TextBox(xPercent = 5f, yPercent = 55f, widthPercent = 90f, heightPercent = 20f),
+            ),
+            BoxItem(
+                CAPTION_TRANSLATION_BOX,
+                stringResource(Res.string.profile_box_item_translation),
+                TextBox(xPercent = 5f, yPercent = 77f, widthPercent = 90f, heightPercent = 20f),
+            ),
+        ),
+        boxes = stt.textBoxes,
+        options = stt.textBoxOptions,
+        onBoxes = { boxes -> update { it.copy(textBoxes = boxes) } },
+        onOptions = { options -> update { it.copy(textBoxOptions = options) } },
+        paths = listOf("$STT.textBoxes", "$STT.textBoxOptions"),
+    )
 }
 
 /** SHOW: transcription, translation or both, and how the words arrive. */

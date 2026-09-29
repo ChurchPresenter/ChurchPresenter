@@ -68,6 +68,8 @@ internal fun TextBoxRows(
     lowerThird: Boolean,
     boxPaths: List<String> = emptyList(),
     optionPaths: List<String> = emptyList(),
+    /** Whether the page has margins for its boxes to be measured inside -- the single-form pages do not. */
+    offerArea: Boolean = true,
 ) {
     SettingsSwitchRow(
         stringResource(Res.string.profile_box),
@@ -114,8 +116,11 @@ internal fun TextBoxRows(
             )
         }
     }
-    TextBoxOptionRows(options, onOptions, perLanguage, lowerThird, optionPaths)
+    TextBoxOptionRows(options, onOptions, BoxOptionOffers(perLanguage, lowerThird, offerArea), optionPaths)
 }
+
+/** Which of the page-wide box options a page offers. */
+private data class BoxOptionOffers(val perLanguage: Boolean, val lowerThird: Boolean, val area: Boolean)
 
 /** X, Y, width and height, four small fields in percent -- the box's exact rectangle. */
 @Composable
@@ -162,11 +167,10 @@ private fun BoxRectFields(box: TextBox, onBox: (TextBox) -> Unit) {
 private fun TextBoxOptionRows(
     options: TextBoxOptions,
     onOptions: (TextBoxOptions) -> Unit,
-    perLanguage: Boolean,
-    lowerThird: Boolean,
+    offers: BoxOptionOffers,
     paths: List<String>,
 ) {
-    if (lowerThird) {
+    if (offers.lowerThird) {
         SettingsRow(stringResource(Res.string.profile_box_band), advanced = true, paths = paths) {
             RowSegmented(
                 options = listOf(
@@ -178,7 +182,7 @@ private fun TextBoxOptionRows(
             )
         }
     }
-    SettingsRow(stringResource(Res.string.profile_box_area), advanced = true, paths = paths) {
+    if (offers.area) SettingsRow(stringResource(Res.string.profile_box_area), advanced = true, paths = paths) {
         RowSegmented(
             options = listOf(
                 RowOption(false, stringResource(Res.string.profile_box_area_screen)),
@@ -188,7 +192,7 @@ private fun TextBoxOptionRows(
             onSelect = { onOptions(options.copy(insideMargins = it)) },
         )
     }
-    if (perLanguage) {
+    if (offers.perLanguage) {
         SettingsRow(stringResource(Res.string.profile_box_languages), advanced = true, paths = paths) {
             RowSegmented(
                 options = listOf(

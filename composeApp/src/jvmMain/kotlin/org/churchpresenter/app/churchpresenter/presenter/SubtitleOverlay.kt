@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
@@ -28,6 +29,9 @@ import org.churchpresenter.app.churchpresenter.subtitles.SubtitleCue
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.MediaSettings
+import org.churchpresenter.settings.SUBTITLE_BOX
+import org.churchpresenter.settings.boxAt
+import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -109,10 +113,27 @@ fun SubtitleOverlay(
             lineHeight = lineHeightSp
         )
 
-        Box(
-            modifier = Modifier.fillMaxSize().padding((OUTER_MARGIN_DP * scaleFactor).dp),
-            contentAlignment = boxAlignment
-        ) {
+        // A box places the stack where the operator drew it instead of at the configured position.
+        // Subtitles are timed text, so the box is their room rather than a size to fit: the line
+        // limit still decides how much of a cue is kept.
+        val box = mediaSettings.textBoxes.boxAt(textBoxKey(SUBTITLE_BOX, lowerThird = false))
+        val placement: @Composable (@Composable () -> Unit) -> Unit = { content ->
+            if (box.enabled) {
+                val alignment = when {
+                    mediaSettings.position.contains("Left") -> Constants.LEFT
+                    mediaSettings.position.contains("Right") -> Constants.RIGHT
+                    else -> Constants.CENTER
+                }
+                val rect = box.rectIn(Rect(0f, 0f, maxWidth.value, maxHeight.value))
+                BoxedItem(rect, box, alignment, textBoxKey(SUBTITLE_BOX, false)) { content() }
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding((OUTER_MARGIN_DP * scaleFactor).dp),
+                    contentAlignment = boxAlignment,
+                ) { content() }
+            }
+        }
+        placement {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy((CARD_GAP_DP * scaleFactor).dp),

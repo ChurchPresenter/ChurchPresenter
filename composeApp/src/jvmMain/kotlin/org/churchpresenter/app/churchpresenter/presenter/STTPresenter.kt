@@ -20,13 +20,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.text.AnnotatedString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -38,7 +39,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.composables.BottomAlignedText
+import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
+import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.boxAt
+import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -131,6 +137,24 @@ fun STTPresenter(
     val isInverse = sttSettings.layout == "stacked_inverse" || sttSettings.layout == "side_by_side_inverse"
     val maxLines = sttSettings.maxLines
 
+    val transcriptBox = sttSettings.textBoxes.boxAt(textBoxKey(CAPTION_TRANSCRIPT_BOX, lowerThird = false))
+    val translationBox = sttSettings.textBoxes.boxAt(textBoxKey(CAPTION_TRANSLATION_BOX, lowerThird = false))
+    if (transcriptBox.enabled || translationBox.enabled) {
+        // Each part the output shows, in its own box where it has one and in the usual card where
+        // it does not. Captions are live, so a box is their room rather than a size to fit: the
+        // line limit still decides how much of the running text is kept.
+        val parts = buildList {
+            if (showTranscription) {
+                add(CaptionPart(CAPTION_TRANSCRIPT_BOX, transcriptionText, textColor, transcriptBox))
+            }
+            if (showTranslation) {
+                add(CaptionPart(CAPTION_TRANSLATION_BOX, translationText, translationColor, translationBox))
+            }
+        }
+        BoxedCaptions(parts, baseTextStyle, cardBg, sttSettings, boxAlignment, modifier)
+        return
+    }
+
     BoxWithConstraints(
         modifier = modifier.fillMaxSize().padding(32.dp),
         contentAlignment = boxAlignment
@@ -218,6 +242,56 @@ fun STTPresenter(
                         outline = sttSettings.outline,
                     )
                 }
+            }
+        }
+    }
+}
+
+/** One part of the captions -- the transcript or the translation -- with its text, colour and box. */
+private class CaptionPart(val key: String, val text: AnnotatedString, val color: Color, val box: TextBox)
+
+/** [parts] each in a card of its own: boxed parts in their box, the rest where the page puts captions. */
+@Composable
+private fun BoxedCaptions(
+    parts: List<CaptionPart>,
+    style: TextStyle,
+    cardBg: Color,
+    sttSettings: STTSettings,
+    alignment: Alignment,
+    modifier: Modifier,
+) {
+    val horizontal = when {
+        sttSettings.position.contains("Left") -> Constants.LEFT
+        sttSettings.position.contains("Right") -> Constants.RIGHT
+        else -> Constants.CENTER
+    }
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        val area = Rect(0f, 0f, maxWidth.value, maxHeight.value)
+        val card: @Composable (CaptionPart) -> Unit = { part ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(cardBg)
+                    .padding(24.dp),
+            ) {
+                BottomAlignedText(
+                    text = part.text,
+                    style = style.copy(color = part.color),
+                    maxLines = sttSettings.maxLines,
+                    modifier = Modifier.fillMaxWidth(),
+                    backdrop = sttSettings.backdrop,
+                    outline = sttSettings.outline,
+                )
+            }
+        }
+        parts.filter { it.box.enabled && it.text.isNotEmpty() }.forEach { part ->
+            BoxedItem(part.box.rectIn(area), part.box, horizontal, textBoxKey(part.key, false)) { card(part) }
+        }
+        val rest = parts.filter { !it.box.enabled && it.text.isNotEmpty() }
+        if (rest.isNotEmpty()) {
+            Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = alignment) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) { rest.forEach { card(it) } }
             }
         }
     }

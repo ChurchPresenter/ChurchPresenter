@@ -31,6 +31,11 @@ internal class AdjustModel(
     val positions: PositionsReset? = null,
     /** The page's text boxes on this output, to pick, move and resize; null on a page without any. */
     val boxes: BoxTargets? = null,
+    /**
+     * A page with nothing to adjust but its boxes -- captions, subtitles, Q&A, the dictionary --
+     * which has no margins, block or text size of its own to offer handles for.
+     */
+    val boxesOnly: Boolean = false,
 ) {
     /** More than one block to pick from, or a reference to drag. */
     val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.reference != null)
@@ -81,6 +86,20 @@ internal class BoxHandle(
     val box: TextBox,
     val onChange: (TextBox) -> Unit,
     val onPick: () -> Unit,
+)
+
+/**
+ * The Adjust model of a page with only [boxes] to offer: every other handle stands aside, and its
+ * values are inert placeholders nothing draws.
+ */
+internal fun boxesOnlyAdjustModel(boxes: BoxTargets?): AdjustModel = AdjustModel(
+    margins = Adjustable(Margins(0, 0, 0, 0)) {},
+    alignment = Adjustable(Constants.MIDDLE) {},
+    region = null,
+    textSize = Adjustable(0) {},
+    band = null,
+    boxes = boxes,
+    boxesOnly = true,
 )
 
 /** Reset positions under the preview: [moved] while anything on this output has been moved on its own. */

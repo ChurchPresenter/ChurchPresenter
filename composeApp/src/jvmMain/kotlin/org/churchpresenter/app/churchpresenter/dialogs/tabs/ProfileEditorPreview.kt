@@ -40,6 +40,8 @@ import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.jetbrains.compose.resources.stringResource
@@ -67,7 +69,42 @@ internal fun adjustModelFor(
         translation,
     )
     CustomizePane.SONGS -> songAdjustModel(draft, profile, songTargets, onSettingsChange)
+    CustomizePane.CAPTIONS -> draft.sttSettings.let { stt ->
+        pageBoxTargets(stt.textBoxes, stt.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textBoxes = boxes)) }
+        }?.let(::boxesOnlyAdjustModel)
+    }
+    CustomizePane.SUBTITLES -> draft.mediaSettings.let { media ->
+        pageBoxTargets(media.textBoxes, media.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) }
+        }?.let(::boxesOnlyAdjustModel)
+    }
+    CustomizePane.QA -> draft.qaSettings.let { qa ->
+        pageBoxTargets(qa.textBoxes, qa.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textBoxes = boxes)) }
+        }?.let(::boxesOnlyAdjustModel)
+    }
+    CustomizePane.DICTIONARY -> draft.dictionarySettings.let { ds ->
+        pageBoxTargets(ds.textBoxes, ds.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(textBoxes = boxes)) }
+        }?.let(::boxesOnlyAdjustModel)
+    }
     else -> null
+}
+
+/**
+ * The boxes of a single-form page, each turned on one a handle -- written back through [write] as
+ * the page's whole map -- or null while none is on.
+ */
+private fun pageBoxTargets(
+    boxes: Map<String, TextBox>,
+    options: TextBoxOptions,
+    write: (Map<String, TextBox>) -> Unit,
+): BoxTargets? {
+    val handles = boxes.filterValues { it.enabled }.map { (key, box) ->
+        BoxHandle(key = key, box = box, onChange = { changed -> write(boxes + (key to changed)) }, onPick = {})
+    }
+    return if (handles.isEmpty()) null else BoxTargets(handles, selected = null, options = options)
 }
 
 /**

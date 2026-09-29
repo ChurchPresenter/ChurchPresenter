@@ -105,6 +105,10 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
             .onGloballyPositioned { origin = it.boundsInWindow().topLeft }
             .testTag(ADJUST_OVERLAY_TAG),
     ) {
+        if (model.boxesOnly) {
+            model.boxes?.let { BoxHandles(it, Rect(0f, 0f, stageWidth.value, stageHeight.value), scale) }
+            return@Box
+        }
         Box(
             Modifier
                 .offset(frame.left, frame.top)

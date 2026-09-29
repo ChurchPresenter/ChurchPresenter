@@ -110,10 +110,13 @@ internal fun BoxHandles(targets: BoxTargets, area: Rect, scale: Float) {
     val colors = MaterialTheme.semantic
     val error = MaterialTheme.colorScheme.error
     val rects = targets.handles.map { it.box.rectIn(area) }
+    // A page whose rows do not say which box they point at leaves the pick to the preview itself.
+    var pickedHere by remember { mutableStateOf<String?>(null) }
+    val selected = targets.selected ?: pickedHere
     targets.handles.forEachIndexed { index, handle ->
         val rect = rects[index]
         val overlaps = rect.overlapsOf(rects.filterIndexed { j, _ -> j != index }).isNotEmpty()
-        val picked = handle.key == targets.selected
+        val picked = handle.key == selected
         val color = if (overlaps) error else colors.adjustAccent
         Box(
             Modifier
@@ -126,11 +129,20 @@ internal fun BoxHandles(targets: BoxTargets, area: Rect, scale: Float) {
                         Modifier.dashedBorder(color, 2.dp)
                     },
                 )
-                .then(if (picked) Modifier else Modifier.clickable { handle.onPick() })
+                .then(
+                    if (picked) {
+                        Modifier
+                    } else {
+                        Modifier.clickable {
+                            pickedHere = handle.key
+                            handle.onPick()
+                        }
+                    },
+                )
                 .testTag(adjustBoxTag(handle.key)),
         )
     }
-    val picked = targets.handles.firstOrNull { it.key == targets.selected } ?: return
+    val picked = targets.handles.firstOrNull { it.key == selected } ?: return
     val others = targets.handles.filter { it !== picked }.map { it.box }
     MovableBox(picked, area, scale, others, targets.options.snap)
 }

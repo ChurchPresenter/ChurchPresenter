@@ -38,4 +38,11 @@ data class STTSettings(
     val outline: TextOutline = TextOutline(),
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.BOTTOM,
+    /**
+     * Each item's own text box, keyed by [textBoxKey] with [CAPTION_TRANSCRIPT_BOX] or [CAPTION_TRANSLATION_BOX].
+     * An item with none, or with one turned off, is drawn where it always was.
+     */
+    val textBoxes: Map<String, TextBox> = emptyMap(),
+    /** How this page's boxes behave -- see [TextBoxOptions]. */
+    val textBoxOptions: TextBoxOptions = TextBoxOptions(),
 )

@@ -95,3 +95,15 @@ fun Map<String, TextBox>.boxAt(key: String): TextBox = this[key] ?: TextBox()
 /** [this] with [box] stored under [key]; an untouched box is dropped rather than stored. */
 fun Map<String, TextBox>.withBox(key: String, box: TextBox): Map<String, TextBox> =
     if (box == TextBox()) this - key else this + (key to box)
+
+/** The item names the single-form pages' boxes are stored under. */
+const val CAPTION_TRANSCRIPT_BOX = "TRANSCRIPT"
+const val CAPTION_TRANSLATION_BOX = "TRANSLATION"
+const val SUBTITLE_BOX = "SUBTITLE"
+const val QA_QUESTION_BOX = "QUESTION"
+const val QA_QR_CODE_BOX = "QR_CODE"
+const val QA_QR_MESSAGE_BOX = "QR_MESSAGE"
+const val DICTIONARY_WORD_BOX = "WORD"
+const val DICTIONARY_REFERENCE_BOX = "REFERENCE"
+const val DICTIONARY_DEFINITION_BOX = "DEFINITION"
+const val DICTIONARY_KJV_BOX = "KJV_USAGE"
