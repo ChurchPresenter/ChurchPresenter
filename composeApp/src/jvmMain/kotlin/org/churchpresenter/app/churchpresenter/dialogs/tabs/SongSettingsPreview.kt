@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import org.churchpresenter.app.churchpresenter.presenter.textOnly
+import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -21,7 +23,6 @@ import churchpresenter.composeapp.generated.resources.song_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import churchpresenter.composeapp.generated.resources.song_preview_title_slide
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.core.models.songs.LyricSection
@@ -113,8 +114,9 @@ internal fun SongPreviewPanel(
                     modifier = if (target.isLowerThird) {
                         Modifier
                     } else {
-                        Modifier.contentRegion(song.layoutExtras.contentRegion)
+                        Modifier.wholeOutputRegion(song.layoutExtras.contentRegion)
                     },
+                    textRegion = if (target.isLowerThird) null else song.layoutExtras.contentRegion.textOnly(),
                     lyricSection = sections.first(),
                     appSettings = settings,
                     isLowerThird = target.isLowerThird,

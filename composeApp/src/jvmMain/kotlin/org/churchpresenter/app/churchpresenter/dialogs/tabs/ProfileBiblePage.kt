@@ -380,6 +380,7 @@ private fun BiblePlacementGroups(
         // Full screen only: a lower third's own width already is the band.
         region = bs.contentRegion.takeIf { !edit.lowerThird },
         onRegion = { r -> edit.updateBible { it.copy(contentRegion = r) } },
+        room = MarginRoom.reference(bs.lowerThirdHeightPercent.takeIf { edit.lowerThird }),
         reset = ResetAction(
             bs.verticalAlignment != d.verticalAlignment || bs.marginTop != d.marginTop ||
                 bs.marginBottom != d.marginBottom || bs.marginLeft != d.marginLeft ||

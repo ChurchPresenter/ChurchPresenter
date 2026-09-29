@@ -75,7 +75,36 @@ data class SongLayoutExtras(
      * language's lyrics, which is the default; [SongSettings] has no slot left for a flat field.
      */
     val nextSectionPosition: SongElementPosition = SongElementPosition(),
+    /**
+     * The space between languages drawn together, in output pixels at 1080 lines -- above and below
+     * when they are stacked, beside when they sit side by side.
+     *
+     * Null, the default, is the spacing songs have always had: [DEFAULT_STACKED_LANGUAGE_GAP] between
+     * stacked languages and none between side-by-side columns. A value applies in both directions.
+     */
+    val languageGap: Int? = null,
+    /**
+     * Whether auto-fit sizes each language on its own rather than all of them together.
+     *
+     * False, the default, is the fit songs have always had: one size -- the one the longest language
+     * needs -- for every language, with the one Auto-fit switch deciding for all of them. True fits
+     * every language to its own room with its own font, and each language's own Auto-fit switch then
+     * decides for that language alone.
+     */
+    val fitLanguagesSeparately: Boolean = false,
 )
+
+/** The space between stacked languages while [SongLayoutExtras.languageGap] is not set. */
+const val DEFAULT_STACKED_LANGUAGE_GAP = 12
+
+/** The range [SongLayoutExtras.languageGap] may be set to. */
+val LANGUAGE_GAP_RANGE = 0..400
+
+/** The space between stacked languages, in output pixels at 1080 lines. */
+fun SongLayoutExtras.stackedLanguageGap(): Int = languageGap ?: DEFAULT_STACKED_LANGUAGE_GAP
+
+/** The space between side-by-side languages, in output pixels at 1080 lines. */
+fun SongLayoutExtras.sideBySideLanguageGap(): Int = languageGap ?: 0
 
 /** Where one song element sits on each output -- each one of [SONG_ELEMENT_POSITIONS]. */
 @Serializable

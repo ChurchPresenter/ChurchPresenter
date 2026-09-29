@@ -60,6 +60,7 @@ import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropP
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
@@ -209,6 +210,8 @@ fun BiblePresenter(
     crossfadeEnabled: Boolean = false,
     /** Positions in the translation stack this output shows; empty means all of them. */
     bibleTranslations: List<Int> = emptyList(),
+    /** Full screen: the region the text alone is placed in, the background filling the screen -- see [textOnly]. */
+    textRegion: ContentRegion? = null,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val bs = appSettings.bibleSettings
@@ -576,7 +579,6 @@ fun BiblePresenter(
             .then(if (!isLowerThird && !resolvedBg.isBlurred) bgModifier else Modifier)
     ) {
         val density = LocalDensity.current
-        val scaleFactor = presenterScale(maxWidth, maxHeight)
         val blurRadius = backgroundBlurRadius(resolvedBg.blurReferencePx, maxWidth)
         PresenterBackgroundLayers(
             background = resolvedBg,
@@ -584,6 +586,9 @@ fun BiblePresenter(
             isLowerThird = isLowerThird,
             blurRadius = blurRadius,
         )
+        // Everything but the background, in the region when the background stays full screen.
+        TextRegionBox(textRegion) {
+        val scaleFactor = presenterScale(maxWidth, maxHeight)
 
         // Scale shadow to be visible at projection resolution
         fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
@@ -1714,6 +1719,7 @@ fun BiblePresenter(
                     TextContent(effectiveVerses)
                 }
             }
+        }
         }
     }
 }

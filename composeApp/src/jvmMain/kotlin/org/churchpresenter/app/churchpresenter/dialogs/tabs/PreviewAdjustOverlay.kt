@@ -51,7 +51,6 @@ private val SIZE_CORNER = 12.dp
 private val BAND_BAR = 4.dp
 private const val WIDTH_DOT_HEIGHT = 0.72f
 private const val SIZE_PER_OUTPUT_PX = 0.2f
-private const val MAX_MARGIN_PX = 500
 private val TEXT_SIZE_RANGE = 8..200
 internal const val FULL_PERCENT = 100f
 
@@ -111,7 +110,7 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         )
         // Under every handle: a block is large, and the bars at its edges must still be caught.
         if (targets != null) BlockOutlines(targets, blockFrames)
-        MarginBars(model, frame, scale)
+        MarginBars(model, frame, scale, MarginRoom.of(output.width, output.height, model.band?.value))
         model.band?.let { BandBar(it, bandTop, stageWidth, stageHeight) }
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
@@ -158,8 +157,11 @@ internal fun Modifier.adjustDrag(
 }
 
 /** One margin, the way its bar moves it: which edge, and which way along the drag it grows. */
-private enum class MarginEdge(val horizontal: Boolean, val sign: Int) {
-    TOP(true, 1), BOTTOM(true, -1), LEFT(false, 1), RIGHT(false, -1);
+private enum class MarginEdge(val horizontal: Boolean, val sign: Int, val side: MarginSide) {
+    TOP(true, 1, MarginSide.TOP),
+    BOTTOM(true, -1, MarginSide.BOTTOM),
+    LEFT(false, 1, MarginSide.LEFT),
+    RIGHT(false, -1, MarginSide.RIGHT);
 
     fun of(m: Margins): Int = when (this) {
         TOP -> m.top
@@ -178,7 +180,7 @@ private enum class MarginEdge(val horizontal: Boolean, val sign: Int) {
 
 /** The four blue bars, one centred on each edge, with the margin each one sets. */
 @Composable
-private fun MarginBars(model: AdjustModel, frame: AdjustFrame, scale: Float) {
+private fun MarginBars(model: AdjustModel, frame: AdjustFrame, scale: Float, room: MarginRoom) {
     var from by remember { mutableStateOf(model.margins.value) }
     val midX = frame.left + frame.width / 2
     val midY = frame.top + frame.height / 2
@@ -195,7 +197,7 @@ private fun MarginBars(model: AdjustModel, frame: AdjustFrame, scale: Float) {
         }
         MarginBar(x, y, edge, edge.of(model.margins.value), scale, { from = model.margins.value }) { total ->
             val along = if (edge.horizontal) total.y else total.x
-            val value = (edge.of(from) + along * edge.sign).roundToInt().coerceIn(0, MAX_MARGIN_PX)
+            val value = (edge.of(from) + along * edge.sign).roundToInt().coerceIn(0, room.maxFor(edge.side, from))
             model.margins.onChange(edge.set(from, value))
         }
     }

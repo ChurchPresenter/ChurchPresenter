@@ -3333,6 +3333,14 @@
     <string name="profile_group_translations">Translations</string>
     <string name="profile_group_languages">Languages</string>
     <string name="profile_layout">Layout</string>
+    <string name="profile_region_moves_background">Background follows Content Region</string>
+    <string name="profile_region_moves_background_sub">On: the background shrinks and moves with the text. Off: the background fills the screen and only the text moves.</string>
+    <string name="profile_fit_languages">Fit languages</string>
+    <string name="profile_fit_languages_sub">Same size: every language at the size the longest one needs. Each on its own: every language fitted to its own room, with its own Auto-fit switch.</string>
+    <string name="profile_fit_languages_same">Same size</string>
+    <string name="profile_fit_languages_each">Each on its own</string>
+    <string name="profile_language_gap">Gap between languages</string>
+    <string name="profile_language_gap_sub">The space between the languages, whether stacked or side by side.</string>
     <string name="profile_reference">Reference</string>
     <string name="profile_ref_after">After verse</string>
     <string name="profile_ref_above">Above verse</string>

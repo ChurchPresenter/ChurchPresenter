@@ -74,7 +74,10 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.sideBySideLanguageGap
 import org.churchpresenter.settings.songLanguageSelection
+import org.churchpresenter.settings.stackedLanguageGap
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualGrid
 import org.churchpresenter.songchords.ChordTransposer
@@ -82,9 +85,8 @@ import org.churchpresenter.songchords.ChordTransposer
 private const val SHADOW_OFFSET_PX = 6f
 private const val INDICATOR_REPEAT_COUNT = 3
 
-/** The look-ahead spacer and the stacked-language block gap, both `12` at every render call site. */
+/** The look-ahead spacer, `12` at every render call site. */
 private const val LOOK_AHEAD_SPACER_REFERENCE_GAP = 12
-private const val LANGUAGE_BLOCK_REFERENCE_GAP = 12
 
 /** The app's own background-type name for one of [SongBackgroundType]'s. */
 internal fun songBackgroundTypeConstant(type: String): String = when (type) {
@@ -153,6 +155,8 @@ fun SongPresenter(
      */
     languageSelection: List<Int> = emptyList(),
     showChords: Boolean = false,
+    /** Full screen: the region the text alone is placed in, the background filling the screen -- see [textOnly]. */
+    textRegion: ContentRegion? = null,
 ) {
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -430,7 +434,6 @@ fun SongPresenter(
             .graphicsLayer { alpha = transitionAlpha * enterAlpha }
             .then(if (!isLowerThird && !blurred) bgModifier else Modifier)
     ) {
-        val scaleFactor = presenterScale(maxWidth, maxHeight)
         // The stored radius is in the 1920x1080 reference space the rest of the presenter measures in.
         val blurRadius = backgroundBlurRadius(bgBlurReferencePx, maxWidth)
         PresenterBackgroundLayers(
@@ -439,6 +442,9 @@ fun SongPresenter(
             isLowerThird = isLowerThird,
             blurRadius = blurRadius,
         )
+        // Everything but the background, in the region when the background stays full screen.
+        TextRegionBox(textRegion) {
+        val scaleFactor = presenterScale(maxWidth, maxHeight)
 
         // Scale shadow to be visible at projection resolution
         fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
@@ -491,7 +497,7 @@ fun SongPresenter(
         } else {
             ss.layoutExtras.autoFitEachSlide
         }
-        val autoFitFontSize = remember(
+        val songFit = remember(
             allLyricSections,
             isLowerThird,
             lookAheadEnabled,
@@ -541,9 +547,10 @@ fun SongPresenter(
                 // Side by side, each language gets a column; the fit has to hold in the narrowest
                 // of them, which with equal weights is every one of them. A 2x2 grid's columns are
                 // narrower still, but only ever two of them regardless of how many languages fill it.
+                val fitSideGap = ss.layoutExtras.sideBySideLanguageGap()
                 val refWidth = when {
-                    sideBySide -> fullWidth / drawnLanguages
-                    grid2x2 -> fullWidth / gridCols
+                    sideBySide -> (fullWidth - (drawnLanguages - 1) * fitSideGap) / drawnLanguages
+                    grid2x2 -> (fullWidth - (gridCols - 1) * fitSideGap) / gridCols
                     else -> fullWidth
                 }
                 val fullHeight = if (isLowerThird) {
@@ -674,15 +681,15 @@ fun SongPresenter(
                 // per language block) and the gaps between stacked-language blocks (`grid2x2`'s row
                 // gap and `topBottom`'s band gap). At low font sizes these are negligible against the
                 // text; near the real ceiling they are not, and a search that never reserved them
-                // chose a size the real layout then clipped by exactly this much. Both are `12` in
-                // this same reference space at every one of their call sites below -- see
-                // `LookAheadSpacer`, `LookAheadPlaceholder` and the two per-language `Spacer`s in the
-                // grid2x2/topBottom render branches.
+                // chose a size the real layout then clipped by exactly this much. The look-ahead
+                // spacer is `12` in this same reference space at every call site below
+                // (`LookAheadSpacer`, `LookAheadPlaceholder`); the language gap is the profile's own
+                // `stackedLanguageGap`, as the grid2x2/topBottom render branches draw it.
                 if (lookAheadEnabled && !fitIsLineMode) {
                     reserved += LOOK_AHEAD_SPACER_REFERENCE_GAP
                 }
                 if (drawnLanguages > 1 && (topBottom || grid2x2)) {
-                    reserved += (drawnLanguages - 1) * LANGUAGE_BLOCK_REFERENCE_GAP
+                    reserved += (drawnLanguages - 1) * ss.layoutExtras.stackedLanguageGap()
                 }
 
                 // Slide by slide, only the slide on screen is measured, so a short verse can grow up
@@ -698,9 +705,10 @@ fun SongPresenter(
                 } else {
                     null
                 }
-                calculateAutoFitForAllSections(
+                val fitSections = slideFit?.sections ?: sectionsForFit
+                val shared = calculateAutoFitForAllSections(
                     textMeasurer = autoFitTextMeasurer,
-                    sections = slideFit?.sections ?: sectionsForFit,
+                    sections = fitSections,
                     baseStyle = baseStyle,
                     availableWidth = refWidth,
                     availableHeight = refHeight,
@@ -715,8 +723,38 @@ fun SongPresenter(
                     // include them chose a size whose lines then ran off the side of the output.
                     styleText = { styledDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm) },
                 )
+                // Each language on its own: its own lines, in its own font, in the same room.
+                val perLanguage = if (ss.layoutExtras.fitLanguagesSeparately && drawnLanguages > 1) {
+                    val fitElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+                    activeLanguages.associateWith { language ->
+                        val look = ss.elementStyle(fitElement, songTarget, language)
+                        val letterEm = spacingEm(look.letterSpacing, look.fontSize)
+                        val wordEm = spacingEm(look.wordSpacing, look.fontSize)
+                        calculateAutoFitForAllSections(
+                            textMeasurer = autoFitTextMeasurer,
+                            sections = fitSections.map { it.onlyLanguage(language) },
+                            baseStyle = TextStyle(
+                                fontWeight = if (look.bold) FontWeight.Bold else FontWeight.Normal,
+                                fontStyle = if (look.italic) FontStyle.Italic else FontStyle.Normal,
+                                letterSpacing = letterEm.em,
+                                fontFamily = systemFontFamilyOrDefault(look.fontType),
+                            ),
+                            availableWidth = refWidth,
+                            availableHeight = refHeight,
+                            reservedHeight = reserved,
+                            includeEndIndicator = ss.showEndOfSongIndicator,
+                            styleText = { styledDisplayText(it, look.transform, letterEm, wordEm) },
+                        )
+                    }
+                } else {
+                    emptyMap()
+                }
+                SongFit(shared, perLanguage)
             }
         }
+        val autoFitFontSize = songFit?.shared
+        // Empty unless each language is fitted on its own -- see `fitLanguagesSeparately`.
+        val languageFitSizes = songFit?.perLanguage.orEmpty()
         val autoFitEnabled = if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadFontSizeAutoFit else ss.lookAheadFontSizeAutoFit
         } else {
@@ -1072,7 +1110,18 @@ fun SongPresenter(
                     )
                     val lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
                     val languageLyricStyling = List(MAX_SONG_TRANSLATIONS) { language ->
-                        if (!ss.languageOverridesStyle(language)) primaryLyricStyling
+                        if (languageFitSizes.isNotEmpty()) {
+                            // Fitted one by one: every language at its own size, its own Auto-fit
+                            // switch deciding whether it takes it.
+                            val look = ss.elementStyle(lyricsElement, songTarget, language)
+                            songLineStyling(
+                                profile = look,
+                                autoFitFontSize = languageFitSizes[language]?.takeIf { look.autoFit },
+                                scaleFactor = scaleFactor,
+                                isKey = isKey,
+                                shadowOf = ::scaleElementShadow,
+                            )
+                        } else if (!ss.languageOverridesStyle(language)) primaryLyricStyling
                         else songLineStyling(
                             profile = ss.elementStyle(lyricsElement, songTarget, language),
                             autoFitFontSize = if (autoFitEnabled) autoFitFontSize else null,
@@ -1082,7 +1131,15 @@ fun SongPresenter(
                         )
                     }
                     val languageLaStyling = List(MAX_SONG_TRANSLATIONS) { language ->
-                        if (!ss.languageOverridesStyle(language)) primaryLaStyling
+                        if (languageFitSizes.isNotEmpty()) {
+                            songLineStyling(
+                                profile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget, language),
+                                autoFitFontSize = languageFitSizes[language]?.takeIf { laAutoFitEnabled },
+                                scaleFactor = scaleFactor,
+                                isKey = isKey,
+                                shadowOf = ::scaleElementShadow,
+                            )
+                        } else if (!ss.languageOverridesStyle(language)) primaryLaStyling
                         else songLineStyling(
                             profile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget, language),
                             autoFitFontSize = if (laAutoFitEnabled) autoFitFontSize else null,
@@ -1543,6 +1600,12 @@ fun SongPresenter(
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
                                 HeldOnLyrics(fillHeight = stackedBands) {
+                                val stackedGap = ss.layoutExtras.stackedLanguageGap()
+                                val sideGap = ss.layoutExtras.sideBySideLanguageGap()
+                                // No gap is the columns' old `SpaceEvenly`, which equal weights leave with
+                                // nothing to spread; a gap is spaced between them.
+                                val sideBySideArrangement =
+                                    if (sideGap == 0) Arrangement.SpaceEvenly else Arrangement.spacedBy((sideGap * scaleFactor).dp)
                                 if (isMultiLanguage) {
                                     if (useGrid2x2) {
                                         // Two rows of up to two languages each. `chunked(2)` on
@@ -1552,11 +1615,11 @@ fun SongPresenter(
                                         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                             languageBlocks.chunked(2).forEachIndexed { rowIndex, row ->
                                                 if (rowIndex > 0) {
-                                                    Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                    Spacer(modifier = Modifier.padding(top = (stackedGap * scaleFactor).dp))
                                                 }
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceEvenly,
+                                                    horizontalArrangement = sideBySideArrangement,
                                                 ) {
                                                     row.forEach { block ->
                                                         Column(
@@ -1577,7 +1640,7 @@ fun SongPresenter(
                                         // divide the width the way two always did.
                                         Row(
                                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                                            horizontalArrangement = Arrangement.SpaceEvenly
+                                            horizontalArrangement = sideBySideArrangement,
                                         ) {
                                             languageBlocks.forEach { block ->
                                                 Column(
@@ -1596,7 +1659,7 @@ fun SongPresenter(
                                         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                             languageBlocks.forEachIndexed { position, block ->
                                                 if (position > 0) {
-                                                    Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                    Spacer(modifier = Modifier.padding(top = (stackedGap * scaleFactor).dp))
                                                 }
                                                 LanguageLines(block)
                                                 EndOfSongIndicator()
@@ -1609,7 +1672,7 @@ fun SongPresenter(
                                         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                                             languageBlocks.forEachIndexed { position, block ->
                                                 if (position > 0) {
-                                                    Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                    Spacer(modifier = Modifier.padding(top = (stackedGap * scaleFactor).dp))
                                                 }
                                                 Box(
                                                     modifier = Modifier.fillMaxWidth().weight(1f),
@@ -1732,6 +1795,7 @@ fun SongPresenter(
                     TextContent(lyricSection, displayLineIndex)
                 }
             }
+        }
         }
     }
 }

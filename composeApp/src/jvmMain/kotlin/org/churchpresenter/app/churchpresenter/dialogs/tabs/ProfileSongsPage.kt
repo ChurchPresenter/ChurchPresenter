@@ -15,10 +15,17 @@ import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.middle
 import churchpresenter.composeapp.generated.resources.profile_end_marker
 import churchpresenter.composeapp.generated.resources.profile_end_marker_spacing
+import churchpresenter.composeapp.generated.resources.profile_fit_languages
+import churchpresenter.composeapp.generated.resources.profile_fit_languages_each
+import churchpresenter.composeapp.generated.resources.profile_fit_languages_same
+import churchpresenter.composeapp.generated.resources.profile_fit_languages_sub
 import churchpresenter.composeapp.generated.resources.profile_group_languages
 import churchpresenter.composeapp.generated.resources.profile_group_slides
 import churchpresenter.composeapp.generated.resources.profile_group_text
+import churchpresenter.composeapp.generated.resources.profile_language_gap
+import churchpresenter.composeapp.generated.resources.profile_language_gap_sub
 import churchpresenter.composeapp.generated.resources.profile_layout
+import churchpresenter.composeapp.generated.resources.unit_px
 import churchpresenter.composeapp.generated.resources.profile_repeat_chorus
 import churchpresenter.composeapp.generated.resources.profile_section_label
 import churchpresenter.composeapp.generated.resources.profile_section_label_sub
@@ -36,6 +43,8 @@ import churchpresenter.composeapp.generated.resources.top
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.DEFAULT_STACKED_LANGUAGE_GAP
+import org.churchpresenter.settings.LANGUAGE_GAP_RANGE
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -97,6 +106,37 @@ internal fun ProfileSongsPage(
                     options = bilingualLayoutRowOptions(),
                     selected = song.bilingualLayout,
                     onSelect = { v -> updateSong { it.copy(bilingualLayout = v) } },
+                )
+            }
+            SettingsRow(
+                stringResource(Res.string.profile_language_gap),
+                sub = stringResource(Res.string.profile_language_gap_sub),
+                paths = SONG_GAP_PATHS,
+            ) {
+                RowStepper(
+                    value = song.layoutExtras.languageGap ?: DEFAULT_STACKED_LANGUAGE_GAP,
+                    onValueChange = { v -> updateSong { it.copy(layoutExtras = it.layoutExtras.copy(languageGap = v)) } },
+                    range = LANGUAGE_GAP_RANGE,
+                    step = LANGUAGE_GAP_STEP,
+                    unit = stringResource(Res.string.unit_px),
+                    testTag = SONG_LANGUAGE_GAP_TAG,
+                )
+            }
+            SettingsRow(
+                stringResource(Res.string.profile_fit_languages),
+                sub = stringResource(Res.string.profile_fit_languages_sub),
+                advanced = true,
+                paths = SONG_FIT_LANGUAGES_PATHS,
+            ) {
+                RowSegmented(
+                    options = listOf(
+                        RowOption(false, stringResource(Res.string.profile_fit_languages_same)),
+                        RowOption(true, stringResource(Res.string.profile_fit_languages_each)),
+                    ),
+                    selected = song.layoutExtras.fitLanguagesSeparately,
+                    onSelect = { v ->
+                        updateSong { it.copy(layoutExtras = it.layoutExtras.copy(fitLanguagesSeparately = v)) }
+                    },
                 )
             }
         }
@@ -164,8 +204,11 @@ private fun SongTextGroup(
     ) {
         if (titleSlideView) SlideElementRow(slideElement, targets.slideElement.onChange)
         key(styleElement, editingLanguage) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
+            // One language picked: its own Auto-fit only means something while languages are
+            // fitted one by one; fitted together, All's switch decides for every one of them.
+            val ownFit = edit.picked && !song.layoutExtras.fitLanguagesSeparately
             TextLookRows(
-                look = style.toLook(styleElement),
+                look = style.toLook(styleElement).let { if (ownFit) it.copy(autoFit = null) else it },
                 onChange = { look -> edit.write(style.withLook(look)) },
                 extraAdvanced = {
                     SongMoveRow(
@@ -272,6 +315,7 @@ private fun SongPlacementGroups(
         },
         region = song.layoutExtras.contentRegion.takeIf { !lowerThird },
         onRegion = { r -> updateSong { it.copy(layoutExtras = it.layoutExtras.copy(contentRegion = r)) } },
+        room = MarginRoom.reference(song.lowerThirdHeightPercent.takeIf { lowerThird }),
         reset = ResetAction(
             song.lyricsAlignment != d.lyricsAlignment || song.marginTop != d.marginTop ||
                 song.marginBottom != d.marginBottom || song.marginLeft != d.marginLeft ||
@@ -469,8 +513,16 @@ internal const val SONG_ALL_LANGUAGES_TAG = "profile_song_language_all"
 /** Test handle for the lyrics block's own positioning switch. */
 internal const val LYRICS_OFFSET_TAG = "song_lyrics_offset"
 
+private val SONG_FIT_LANGUAGES_PATHS = listOf("songSettings.layoutExtras.fitLanguagesSeparately")
+
 /** Where the languages' layout is stored. */
-private val SONG_LAYOUT_PATHS = listOf("songSettings.bilingualLayout")
+private val SONG_LAYOUT_PATHS =
+    listOf("songSettings.bilingualLayout", "songSettings.layoutExtras.languageGap") + SONG_FIT_LANGUAGES_PATHS
+private val SONG_GAP_PATHS = listOf("songSettings.layoutExtras.languageGap")
+private const val LANGUAGE_GAP_STEP = 4
+
+/** Test handle for the Gap between languages field. */
+internal const val SONG_LANGUAGE_GAP_TAG = "profile_song_language_gap"
 
 /** Where the section label is stored. */
 private const val SECTION_LABEL_PATH = "songSettings.layoutExtras.sectionLabel"

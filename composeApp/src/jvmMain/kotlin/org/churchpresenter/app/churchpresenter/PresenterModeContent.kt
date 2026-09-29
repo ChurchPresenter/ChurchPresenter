@@ -6,12 +6,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.compottie.LottieComposition
+import org.churchpresenter.app.churchpresenter.presenter.textOnly
+import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
@@ -111,8 +112,9 @@ internal fun PresenterModeContent(
                     modifier = if (profile.isLowerThird) {
                         Modifier
                     } else {
-                        Modifier.contentRegion(appSettings.bibleSettings.contentRegion)
+                        Modifier.wholeOutputRegion(appSettings.bibleSettings.contentRegion)
                     },
+                    textRegion = if (profile.isLowerThird) null else appSettings.bibleSettings.contentRegion.textOnly(),
                     selectedVerses = displayedVerses,
                     appSettings = appSettings,
                     isLowerThird = profile.isLowerThird,
@@ -131,8 +133,9 @@ internal fun PresenterModeContent(
                     modifier = if (profile.isLowerThird) {
                         Modifier
                     } else {
-                        Modifier.contentRegion(appSettings.songSettings.layoutExtras.contentRegion)
+                        Modifier.wholeOutputRegion(appSettings.songSettings.layoutExtras.contentRegion)
                     },
+                    textRegion = if (profile.isLowerThird) null else appSettings.songSettings.layoutExtras.contentRegion.textOnly(),
                     lyricSection = displayedLyricSection,
                     appSettings = appSettings,
                     isLowerThird = profile.isLowerThird,

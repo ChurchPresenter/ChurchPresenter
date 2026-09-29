@@ -50,6 +50,7 @@ private val BOOKKEEPING_PATHS = listOf(
     "backgroundOverrides",
 )
 private const val OWN_KEYS_FIELD = ".ownStyleKeys"
+private const val OWN_BACKGROUND_FIELD = ".ownBackgroundType"
 
 /**
  * Every setting [profile] holds at other than its default, by path, sorted. A value set where the
@@ -58,7 +59,8 @@ private const val OWN_KEYS_FIELD = ".ownStyleKeys"
  */
 fun defaultChanges(profile: OutputProfile): List<String> {
     val changed = changedPaths(profile.defaultBaseline(), profile)
-        .filterNot { path -> BOOKKEEPING_PATHS.any { pathWithin(path, it) } || path.endsWith(OWN_KEYS_FIELD) }
+        .filterNot { path -> BOOKKEEPING_PATHS.any { pathWithin(path, it) } ||
+            path.endsWith(OWN_KEYS_FIELD) || path.endsWith(OWN_BACKGROUND_FIELD) }
     return changed.filterNot { path -> changed.any { it != path && it.startsWith("$path.") } }.sorted()
 }
 

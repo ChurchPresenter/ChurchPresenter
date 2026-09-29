@@ -69,3 +69,10 @@ internal fun slideFitSections(
         )
     }
 }
+
+/** The fitted size shared by every language, and -- when they are fitted one by one -- each language's own. */
+internal data class SongFit(val shared: Int, val perLanguage: Map<Int, Int>)
+
+/** [this] with only language [language]'s lines, as the primary's, and no others. */
+internal fun LyricSection.onlyLanguage(language: Int): LyricSection =
+    copy(lines = allLanguageLines().getOrElse(language) { emptyList() }, translations = emptyList())
