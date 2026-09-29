@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -32,6 +33,7 @@ import churchpresenter.composeapp.generated.resources.profile_adjust_guide
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_blocks
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_boxes
+import churchpresenter.composeapp.generated.resources.profile_adjust_no_boxes
 import churchpresenter.composeapp.generated.resources.profile_page_title
 import churchpresenter.composeapp.generated.resources.profile_preview_larger
 import churchpresenter.composeapp.generated.resources.profile_reset_positions
@@ -45,6 +47,7 @@ import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedSwitch
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -162,6 +165,7 @@ internal fun EditorPreview(
                 adjustModel.band != null,
                 adjustModel.hasBlocks,
                 boxesOnly = adjustModel.boxesOnly,
+                noBoxes = adjustModel.boxesOnly && adjustModel.boxes == null,
             )
             adjustModel?.positions?.let { ResetPositionsKey(it) }
         },
@@ -211,6 +215,8 @@ internal fun AdjustSwitch(
     blocks: Boolean = false,
     /** A page with only text boxes to adjust, whose guide says so. */
     boxesOnly: Boolean = false,
+    /** On such a page, whether none of its boxes is on yet -- the note says where to turn one on. */
+    noBoxes: Boolean = false,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
@@ -227,7 +233,17 @@ internal fun AdjustSwitch(
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        if (checked && boxesOnly) {
+        if (checked && boxesOnly && noBoxes) {
+            // Nothing on the preview to pick until a box is on, so say so plainly, not as a hint.
+            Text(
+                stringResource(Res.string.profile_adjust_no_boxes),
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.semantic.warning,
+                modifier = Modifier.testTag(ADJUST_NO_BOXES_TAG),
+            )
+        } else if (checked && boxesOnly) {
             Text(
                 stringResource(Res.string.profile_adjust_guide_boxes),
                 fontSize = 11.sp,
@@ -288,3 +304,6 @@ internal fun ResetPositionsKey(
 internal const val PREVIEW_LARGER_TAG = "profile_preview_larger"
 internal const val ADJUST_SWITCH_TAG = "profile_adjust_switch"
 internal const val RESET_POSITIONS_TAG = "profile_reset_positions"
+
+/** Test handle for the note shown while Adjust is on and none of the page's boxes is. */
+internal const val ADJUST_NO_BOXES_TAG = "profile_adjust_no_boxes"
