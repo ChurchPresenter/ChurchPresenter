@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.scene.SceneSource
 import java.io.File
+import org.churchpresenter.diagnostics.Log
 
 internal fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource.CameraSource): String =
     if (source.isDeckLink) {
@@ -97,7 +98,7 @@ internal fun listCameraDevicesWithDeckLinkListing(
         hasDeckLink && cam.name.lowercase().contains("decklink")
     }.let { devices.addAll(it) }
 
-    System.err.println("[Camera] Found ${devices.size} total device(s) ($deckLinkCount DeckLink)")
+    Log.info("Camera", "Found ${devices.size} total device(s) ($deckLinkCount DeckLink)")
     return CameraListing(devices, listing.facts.copy(deckLinkCount = deckLinkCount))
 }
 
@@ -123,8 +124,8 @@ internal fun listCameraFormats(devicePath: String, deviceName: String): List<Cam
     val formats = cameraFormatsFor(
         System.getProperty("os.name", "").lowercase(), devicePath, deviceName, ::readCommandOutput
     )
-    System.err.println("[Camera] Found ${formats.size} format(s) for $deviceName")
-    formats.forEach { System.err.println("[Camera]   ${it.displayName}") }
+    Log.info("Camera", "Found ${formats.size} format(s) for $deviceName")
+    formats.forEach { Log.info("Camera", "  ${it.displayName}") }
     if (formats.isNotEmpty()) cameraFormatCache[devicePath] = formats
     return formats
 }
@@ -297,8 +298,8 @@ internal fun recheckFfmpegAvailability(): Boolean = FfmpegBinary.recheck()
 private fun listCameraDevices(): CameraListing {
     val listing = enumerateCameras(System.getProperty("os.name", "").lowercase(), ::readCommandOutput)
     val devices = listing.devices
-    System.err.println("[Camera] Found ${devices.size} camera device(s):")
-    devices.forEach { System.err.println("[Camera]   ${it.displayName} -> ${it.path}") }
+    Log.info("Camera", "Found ${devices.size} camera device(s):")
+    devices.forEach { Log.info("Camera", "  ${it.displayName} -> ${it.path}") }
     return listing.copy(
         facts = listing.facts.copy(
             ffmpegAvailable = isFfmpegAvailable(),
@@ -750,8 +751,9 @@ internal suspend fun avfSourceToOpen(
     return when (val resolution = resolveAvfoundationDevice(source, known)) {
         is AvfResolution.At -> {
             if (resolution.devicePath != source.devicePath) {
-                System.err.println(
-                    "[Camera] '${source.deviceName}' has moved to ${resolution.devicePath} " +
+                Log.info(
+                    "Camera",
+                    "'${source.deviceName}' has moved to ${resolution.devicePath} " +
                         "(saved as ${source.devicePath}) — opening it where it is now"
                 )
             }
@@ -762,8 +764,9 @@ internal suspend fun avfSourceToOpen(
 
         AvfResolution.Gone -> {
             val refused = avfDeviceNameAt(source, known)
-            System.err.println(
-                "[Camera] Refusing ${source.devicePath}: it holds " +
+            Log.warn(
+                "Camera",
+                "Refusing ${source.devicePath}: it holds " +
                     "'${refused.ifBlank { "nothing" }}' now, not '${source.deviceName}'"
             )
             onRefused(CameraFailure.DEVICE_NOT_FOUND)

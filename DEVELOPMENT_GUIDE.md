@@ -19,7 +19,7 @@ The following are **NOT** acceptable in any commit (each is explained in CODING_
 ❌ Material 2 components (`androidx.compose.material.*`, other than `material.icons`)
 ❌ Text or emoji used as an icon (`Text("✕")`)
 ❌ Unused imports
-❌ Debug print statements (`println()`, `print()`)
+❌ Print statements (`println()`, `print()`, `System.err.println()`) — diagnostics use `Log`
 ❌ Commented-out code blocks
 ❌ Fully qualified type names where an import would do (`androidx.compose.ui.unit.Dp`)
 
@@ -102,7 +102,7 @@ comm -23 \
 | Wildcard imports | 0 | whole repo ✅ |
 | Material 2 imports | 0 | whole repo ✅ |
 | `println` in `composeApp` | 0 | ✅ |
-| `System.err.println` in `composeApp` | 84 | error diagnostics (VLC, JCEF, cameras, NDI/OMT, server); see the decision log |
+| `System.err.println` in `composeApp` | 0 | diagnostics go through `Log` (`:diagnostics`) ✅ |
 | Fully qualified `androidx.compose.*` in code | 0 | whole repo, excluding imports, `@OptIn` and KDoc ✅ |
 | Fully qualified names where the import already exists | 0 | ✅ |
 | `!!` in `composeApp` | 0 | ✅ |
@@ -118,8 +118,6 @@ comm -23 \
   `java.awt.image.BufferedImage`); `java.awt.Toolkit.getDefaultToolkit().systemClipboard` is the
   settled clipboard one-liner. The rule is about the long form where an import already binds the
   name.
-- `System.err.println` for error diagnostics in media/web/capture/server code — they are the only
-  trace of a native library failing on an operator's machine.
 - `println` in the CLI tools (`presentation-engine` `DumpKeynote`/`DumpTiming`/`MakeSampleDeck`,
   `bible-engine` `tools/`, `lottieGenerator` `DumpStyleReview`) — printing is their purpose.
 - `println` in `bible-engine`'s standalone launch (`Main.kt`, `AppConfig.kt`) and behind its

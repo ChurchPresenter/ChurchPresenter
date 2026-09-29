@@ -16,6 +16,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.image.BufferedImage
+import org.churchpresenter.diagnostics.Log
 
 /**
  * How long without a frame it takes to decide a source has stopped sending rather than paused.
@@ -80,7 +81,7 @@ internal fun argbImage(pixels: IntArray, width: Int, height: Int): BufferedImage
  */
 abstract class ReceivedFrameCache<S>(
     private val openReceiver: (S) -> NetworkPictureReceiver?,
-    /** The prefix on a failed capture's log line — `[NDI Input]`, `[OMT Input]`. */
+    /** The tag on a failed capture's log line — `NDI Input`, `OMT Input`. */
     private val logTag: String,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -176,7 +177,7 @@ abstract class ReceivedFrameCache<S>(
         } catch (_: CancellationException) {
             // Ordinary teardown — the last layer let go.
         } catch (e: Exception) {
-            System.err.println("$logTag ${labelOf(source)}: ${e.message}")
+            Log.warn(logTag, "${labelOf(source)}: ${e.message}")
         } finally {
             entry.connected.value = false
             // NonCancellable, and it matters: the ordinary way out of here is the last layer being

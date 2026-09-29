@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.diagnostics.Log
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.decklink_output_title
 import churchpresenter.composeapp.generated.resources.ic_app_icon
@@ -80,7 +81,7 @@ fun DeckLinkComposeOutput(
         val info = DeckLinkManager.getOutputInfo(deviceIndex)
         val w = info?.width ?: 1920
         val h = info?.height ?: 1080
-        System.err.println("[DeckLink] Device $deviceIndex: ${w}x${h} @ ${info?.fps} fps, role=$outputRole")
+        Log.info("DeckLink", "Device $deviceIndex: ${w}x${h} @ ${info?.fps} fps, role=$outputRole")
 
         val jframe = offscreenFrame(frameTitle, w, h, appIconImage)
 
@@ -115,14 +116,14 @@ fun DeckLinkComposeOutput(
         val captureJob = scope.launch {
             val layer = awaitSkiaLayer(composePanel)
             if (layer == null) {
-                System.err.println("[DeckLink] Device $deviceIndex: Could not find SkiaLayer")
+                Log.warn("DeckLink", "Device $deviceIndex: Could not find SkiaLayer")
                 CrashReporter.reportWarning(
                     "DeckLink: Could not find SkiaLayer for device $deviceIndex output",
                     tags = mapOf("subsystem" to "decklink")
                 )
                 return@launch
             }
-            System.err.println("[DeckLink] Device $deviceIndex: SkiaLayer found, starting capture, role=$outputRole")
+            Log.info("DeckLink", "Device $deviceIndex: SkiaLayer found, starting capture, role=$outputRole")
 
             val pixels = IntArray(w * h)
             val byteBuf = ByteArray(w * h * 4)

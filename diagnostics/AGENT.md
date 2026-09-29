@@ -23,6 +23,7 @@ owns — [CrashReporter] and [BuildIdentity].
 | Path | Owns |
 |---|---|
 | `CrashReporter.kt` | `object CrashReporter` — the local crash log, the Sentry bridge, PII scrubbing, the crash-escalation counter, and `BuildIdentity` |
+| `Log.kt` | `object Log` (`info`/`warn`/`error`) — the app's diagnostic lines: `[tag] message` on stderr, and a breadcrumb for warnings and errors. `Logger` takes its sink and trail as parameters for tests |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of
 `:settings`: everything that can fail wants to report, and nothing should have to depend on the

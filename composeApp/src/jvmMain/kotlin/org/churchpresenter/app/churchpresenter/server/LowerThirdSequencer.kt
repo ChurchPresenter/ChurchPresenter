@@ -14,6 +14,7 @@ import kotlinx.coroutines.sync.withLock
 import org.churchpresenter.atem.AtemConnectionManager
 import org.churchpresenter.atem.AtemKey
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.AtemSettings
 
 /**
@@ -102,7 +103,7 @@ object LowerThirdSequencer {
                 activeUseDsk = useDownstreamKey
             } catch (e: Exception) {
                 keyError = e.message ?: "ATEM unreachable"
-                System.err.println("[LowerThirdSequencer] key on failed: $keyError")
+                Log.warn("LowerThirdSequencer", "key on failed: $keyError")
                 CrashReporter.reportWarning(
                     "LowerThirdSequencer: ATEM key on failed",
                     throwable = e,
@@ -171,7 +172,7 @@ object LowerThirdSequencer {
         runCatching {
             AtemConnectionManager.use(host, port) { it.setKeyOnAir(AtemKey(useDsk, mixEffect, keyer), false) }
         }.onFailure {
-            System.err.println("[LowerThirdSequencer] key off failed: ${it.message}")
+            Log.warn("LowerThirdSequencer", "key off failed: ${it.message}")
             CrashReporter.reportWarning(
                 "LowerThirdSequencer: ATEM key off failed",
                 throwable = it,

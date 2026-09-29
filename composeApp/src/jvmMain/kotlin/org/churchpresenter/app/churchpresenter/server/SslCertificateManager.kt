@@ -17,6 +17,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.io.StringWriter
@@ -133,7 +134,7 @@ object SslCertificateManager {
                 cert.notAfter.after(Date.from(Instant.now().plus(CERT_RENEWAL_MARGIN_DAYS, ChronoUnit.DAYS)))
             return if (stillUsable) key to cert else null
         } catch (e: Exception) {
-            System.err.println("[SslCertificateManager] Existing CA keystore unreadable, regenerating: ${e.message}")
+            Log.warn("SslCertificateManager", "Existing CA keystore unreadable, regenerating: ${e.message}")
             CrashReporter.reportWarning(
                 "SSL: Existing CA keystore unreadable, regenerating",
                 throwable = e,
