@@ -130,14 +130,14 @@ appear in the picker:
 
 ## Verification
 
-There are no automated tests in this module (no `src/test` directory) — the live preview
-panel is the actual acceptance gate:
+`CompiledStyleMatrixTest` renders every `AnimationStyle` entry — a new one included, with no
+edit to the test — across alignment, Detail, logo, background and hidden Name, and checks the
+output is finite and that each option changes it. It catches a crash or a dead toggle; it cannot
+judge the motion, so the live preview is still the acceptance gate for how it looks:
 
-1. Compile: `./gradlew compileKotlinJvm` (from the main ChurchPresenter repo root, since this
-   module's Kotlin is mounted into the main build) or `./gradlew build` from this module's
-   own root if run standalone.
-2. Run the app (`./gradlew run` from this module, or the Lower Third settings screen inside
-   the main ChurchPresenter app), select the new style in the dropdown, and check the live preview
+1. Test: `./gradlew :lottieGenerator:test` from the repo root (this is a module of the one build).
+2. Run it (`./gradlew :lottieGenerator:run`, or the Lower Third settings screen inside the app),
+   select the new style in the dropdown, and check the live preview
    across:
    - All three alignments (left/center/right)
    - Logo on and off
