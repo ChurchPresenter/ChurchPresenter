@@ -68,10 +68,17 @@ class AppPreviewDictionaryScreenshotTest {
      * Re-selecting re-queries, so the complete count is the load's own positive signal. It is a
      * fixed number because the data is fixed; the wait ends on it and the check below fails loudly
      * if it never arrives rather than capturing something half-scanned.
+     *
+     * Every lookup is a history step (see `DictionaryTabHistoryTest`), so how many clicks the wait
+     * took decides whether Back is enabled in the picture — one on a machine where the index was
+     * already loaded, several where it was not. The entry is therefore selected once before the
+     * loop, so the loop's click is always at least the second and Back is always enabled.
      */
     private fun ComposeUiTest.selectUntilFullyScanned() {
         val deadline = System.currentTimeMillis() + RENDER_TIMEOUT_MS
         var seen: String? = null
+        onAllNodes(hasText("chêçêd", substring = true))[0].performClick()
+        waitForIdle()
         while (System.currentTimeMillis() < deadline) {
             onAllNodes(hasText("chêçêd", substring = true))[0].performClick()
             waitForIdle()
