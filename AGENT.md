@@ -197,10 +197,11 @@ not flagged.
 - `verifyRoborazziJvm` fails past `ScreenshotSupport.CHANGE_THRESHOLD` (0.1% of pixels) and writes a
   reference|diff|new image to `composeApp/build/outputs/roborazzi/<name>_compare.png`. **Open it
   before calling anything churn** — a whole suite failing is usually a re-record nobody did.
-- Known churn on a clean `main`: `SettingsFieldsScreenshotTest → font_picker, font_picker_open` and
-  `AppPreviewSettingsScreenshotTest → settings_bible_light` (font rows render in installed faces).
-  Anything else failing is a real difference. The remedy for churn is always the same: take the
-  outside value as a parameter and let the test pin it — never widen the threshold.
+- There is **no known churn**: a clean `main` verifies with zero failures on macOS, so any failure is
+  a real difference. When a value from outside the composition leaks into a picture (a clock, the
+  host's devices, installed fonts — see `PinnedFaces`/`LocalFontPreviewFace`), the remedy is always
+  the same: take it as a parameter or a composition local and let the test pin it — never widen the
+  threshold.
 - Every state is shot in **both themes stacked into one image** — go through `stackedThemes` or
   `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
   compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
