@@ -291,6 +291,33 @@ class ProjectionOmtCardTest {
     }
 
     @Test
+    fun `the network name follows a rename rather than keeping the old one`() {
+        // A rename replaces the sender, which registers after the card has recomposed — read once,
+        // the caption kept the old name until the dialog was reopened.
+        var advertised = "HOST (Old)"
+
+        runComposeUiTest {
+            setContent {
+                Surface {
+                    OmtOutputsCard(
+                        settings = withOutputs(),
+                        onSettingsChange = {},
+                        status = BUNDLED,
+                        receiverCount = { 0 },
+                        addressOf = { advertised },
+                        recheck = { _, _ -> },
+                    )
+                }
+            }
+            onNodeWithText("Receivers list this output as HOST (Old)").assertExists()
+            advertised = "HOST (New)"
+            mainClock.advanceTimeBy(1_500)
+            waitForIdle()
+            onNodeWithText("Receivers list this output as HOST (New)").assertExists()
+        }
+    }
+
+    @Test
     fun `receivers and the network name are shown, and nobody watching says so`() {
         card(withOutputs(), receivers = 2, address = "HOST (Lyrics)") { _ ->
             onNodeWithText("2 receiving").assertExists()

@@ -128,9 +128,12 @@ class OmtVideoRendererTest {
         r.start(scope)
         // The pump's idle ticks keep deciding; the sender is open, so the answer is the switch.
         waitFor("the sender to open") { lib.created.isNotEmpty() }
+        // Read before stop(), which asks once on purpose to decide whether to clear the receivers.
+        val sentWhileOff = lib.sent.size
+        val askedWhileOff = lib.connectionQueries
         r.stop()
-        assertTrue(lib.sent.isEmpty())
-        assertEquals(0, lib.connectionQueries)
+        assertEquals(0, sentWhileOff)
+        assertEquals(0, askedWhileOff)
     }
 
     @Test
@@ -150,6 +153,32 @@ class OmtVideoRendererTest {
         r.start(scope)
         waitFor("a frame") { lib.sent.isNotEmpty() }
         r.stop()
+        assertEquals(1, lib.destroyed.size)
+    }
+
+    @Test
+    fun `stopping a watched output leaves its receivers on a blank frame, then closes`() {
+        // OBS keeps drawing the last frame it received after a source goes away, so the last one
+        // sent has to be empty — otherwise quitting leaves a verse frozen on the stream.
+        val lib = FakeOmtLibrary()
+        val r = renderer(lib, OmtOutputMode.ALPHA, receivers = 1)
+        r.start(scope)
+        waitFor("a frame") { lib.sent.isNotEmpty() }
+        r.stop()
+
+        val last = lib.sent.last()
+        assertEquals(W, last.width)
+        assertEquals(H, last.height)
+        assertTrue(last.bytes.all { it == 0.toByte() }, "the last frame sent is fully transparent")
+        assertEquals(1, lib.destroyed.size)
+    }
+
+    @Test
+    fun `stopping an output nobody is watching sends nothing more`() {
+        val lib = FakeOmtLibrary()
+        val r = renderer(lib, receivers = 0, openSender = true)
+        r.stop()
+        assertTrue(lib.sent.isEmpty())
         assertEquals(1, lib.destroyed.size)
     }
 

@@ -74,6 +74,19 @@ class OmtSender(
     }
 
     /**
+     * Sends one empty frame: fully transparent in [OmtOutputMode.ALPHA], black in
+     * [OmtOutputMode.FILL].
+     *
+     * What a receiver should be left showing once this source goes away. Taking a source off the
+     * network is not enough on its own: OBS's OMT plugin keeps drawing the last frame it received,
+     * so an app that simply closed left a verse frozen on the stream (found testing on Windows).
+     */
+    fun sendBlank(width: Int, height: Int) {
+        if (width <= 0 || height <= 0) return
+        send(IntArray(width * height), width, height)
+    }
+
+    /**
      * How many receivers are watching. 0 when not open.
      *
      * The library counts connections, and a receiver that also takes audio holds two — so this is

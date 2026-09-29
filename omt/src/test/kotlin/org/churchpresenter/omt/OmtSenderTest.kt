@@ -65,6 +65,24 @@ class OmtSenderTest {
     }
 
     @Test
+    fun `a blank frame is fully transparent in alpha mode and black in fill mode`() {
+        val alphaLib = FakeOmtLibrary()
+        OmtSender(alphaLib, "a", OmtOutputMode.ALPHA, 30).apply { open() }.sendBlank(2, 1)
+        assertTrue(alphaLib.sent.single().bytes.all { it == 0.toByte() }, "every byte zero, alpha included")
+
+        val fillLib = FakeOmtLibrary()
+        OmtSender(fillLib, "f", OmtOutputMode.FILL, 30).apply { open() }.sendBlank(1, 1)
+        assertContentEquals(byteArrayOf(0, 0, 0, 0xFF.toByte()), fillLib.sent.single().bytes)
+    }
+
+    @Test
+    fun `a blank frame of no size is not sent`() {
+        val lib = FakeOmtLibrary()
+        OmtSender(lib, "x", OmtOutputMode.ALPHA, 30).apply { open() }.sendBlank(0, 10)
+        assertTrue(lib.sent.isEmpty())
+    }
+
+    @Test
     fun `a zero-sized frame is not sent`() {
         val lib = FakeOmtLibrary()
         OmtSender(lib, "x", OmtOutputMode.ALPHA, 30).apply { open() }.send(IntArray(0), 0, 0)

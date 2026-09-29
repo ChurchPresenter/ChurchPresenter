@@ -57,6 +57,14 @@ class OmtHardwareTest {
         return OmtRuntime.detect(customPath = dir).also { println("libomt: $it (looked in $dir)") }
     }
 
+    /**
+     * The library at [path], with its own log switched off. Left alone it writes one file per test
+     * process into `~/.OMT/logs` — `C:\ProgramData\OMT\logs` on Windows — which a test has no
+     * business leaving behind.
+     */
+    private fun load(path: String): JnaOmtLibrary =
+        assertNotNull(JnaOmtLibrary.load(path), "libomt at $path did not bind").apply { setLoggingFilename(null) }
+
     /** `composeApp/src/jvmMain/appResources/<os>/omt`, relative to this module's directory. */
     private fun bundledDir(): String {
         val os = System.getProperty("os.name").orEmpty().lowercase()
@@ -71,7 +79,7 @@ class OmtHardwareTest {
     @Test
     fun `a real sender takes a frame in every mode`() {
         val path = libraryPathOrSkip() ?: return
-        val lib = assertNotNull(JnaOmtLibrary.load(path), "libomt at $path did not bind")
+        val lib = load(path)
         for (mode in OmtOutputMode.entries) {
             val sender = OmtSender(lib, "ChurchPresenter Self Test ${mode.name}", mode, fps = 30,
                 product = "ChurchPresenter", version = "test")
@@ -96,7 +104,7 @@ class OmtHardwareTest {
     @Test
     fun `a real receiver reads back what a real sender put on the network`() {
         val path = libraryPathOrSkip() ?: return
-        val lib = assertNotNull(JnaOmtLibrary.load(path))
+        val lib = load(path)
         val name = "ChurchPresenter Loopback Test"
         val sender = OmtSender(lib, name, OmtOutputMode.ALPHA, fps = 30)
         val discovery = OmtDiscovery(lib)
@@ -132,6 +140,44 @@ class OmtHardwareTest {
                 receiver.close()
             }
         } finally {
+            sender.close()
+        }
+    }
+
+    /**
+     * The last thing a receiver gets from a source that is going away is the blank frame, not the
+     * picture before it.
+     *
+     * The receiver-side half of what `OmtVideoRenderer.stop` relies on: OBS keeps drawing the last
+     * frame it received, so the blank has to actually arrive before `omt_send_destroy` takes the
+     * source down — sent and then lost in the teardown would leave the verse frozen exactly as
+     * before. So this sends red until red arrives, then the blank, closes at once, and drains.
+     */
+    @Test
+    fun `the blank frame sent before closing is the last thing a receiver gets`() {
+        val path = libraryPathOrSkip() ?: return
+        val lib = load(path)
+        val name = "ChurchPresenter Blank On Close Test"
+        val sender = OmtSender(lib, name, OmtOutputMode.ALPHA, fps = 30)
+        assertTrue(sender.open())
+        val receiver = OmtReceiver(lib, sender.address())
+        try {
+            assertTrue(receiver.open())
+            val red = IntArray(SIZE * SIZE) { HALF_RED }
+            assertNotNull(pollFor(FRAME_ATTEMPTS) { sender.send(red, SIZE, SIZE); receiver.receive() }, "no red frame")
+
+            sender.sendBlank(SIZE, SIZE)
+            sender.close()
+
+            var last: Int? = null
+            while (true) {
+                val frame = receiver.receive() ?: break
+                last = frame.pixels[0]
+            }
+            println("last pixel after close: ${last?.toUInt()?.toString(16)}")
+            assertEquals(0, assertNotNull(last, "nothing arrived after the red frame"), "the blank frame never arrived")
+        } finally {
+            receiver.close()
             sender.close()
         }
     }

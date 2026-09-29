@@ -28,8 +28,8 @@ class OmtVideoRenderer(
     private val sender: OmtSender,
     context: OffscreenOutputContext,
     private val screenAssignmentState: State<ScreenAssignment>,
-    width: Int = DEFAULT_WIDTH,
-    height: Int = DEFAULT_HEIGHT,
+    private val width: Int = DEFAULT_WIDTH,
+    private val height: Int = DEFAULT_HEIGHT,
     fps: Int = DEFAULT_FPS,
     /**
      * Called the first time a receiver is found watching this output. A defaulted constructor
@@ -128,9 +128,17 @@ class OmtVideoRenderer(
         pump.start(scope) { argb, w, h, _ -> sender.send(argb, w, h) }
     }
 
-    /** Stops rendering and takes the source off the network, so no receiver is left on a frozen frame. */
+    /**
+     * Stops rendering, clears what receivers are showing, and takes the source off the network.
+     *
+     * The blank frame is the part that stops a receiver freezing: OBS's OMT plugin keeps drawing the
+     * last frame it got after the source disappears, so without it quitting the app left a verse on
+     * the stream. Sent only to someone watching — with nobody connected there is nothing to clear,
+     * and a shutdown hook should not spend a frame's encode on it.
+     */
     fun stop() {
         pump.stop()
+        if (sender.isOpen && sender.receiverCount() > 0) sender.sendBlank(width, height)
         sender.close()
     }
 }

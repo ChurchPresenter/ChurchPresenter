@@ -1718,6 +1718,8 @@ val fetchBundledOmt by tasks.registering {
                 "Either the pin is stale or the download was tampered with; do not 'fix' this by " +
                 "updating the digest without knowing which."
         }
+        // Said out loud rather than implied: a reviewer checking the bundle wants to see it happened.
+        logger.lifecycle("OMT archive for $target matches its pinned SHA-256 (${sha256.take(12)}...)")
         val extractDir = File(cacheDir, "$target-extracted").apply { deleteRecursively(); mkdirs() }
         if (archiveKind == "tar") {
             val tar = ProcessBuilder("tar", "-xf", archive.absolutePath, "-C", extractDir.absolutePath)

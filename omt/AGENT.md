@@ -66,7 +66,14 @@ operator has to install.
   anything discovers and a change takes effect at the next launch. A blank setting is **not**
   written: that would override a server configured in OMT's own `settings.xml`, which every OMT app
   on the machine shares.
-- **The library writes a log** into `~/.OMT/logs`, one file per process, unless told otherwise.
+- **A receiver keeps its last frame after the source goes away** — OBS's OMT plugin does (found
+  testing on Windows). So `OmtVideoRenderer.stop` sends one blank frame (transparent in Alpha,
+  black in Fill) before closing, when anyone is watching; `OmtHardwareTest` checks against the real
+  library that this blank is the last thing a receiver gets.
+- **OBS opens a second connection** for a while after it connects (audio, then dropped about a
+  minute later), so an OBS receiver can read as "2 receiving" until it settles.
+- **The library writes a log** into `~/.OMT/logs` — `C:\ProgramData\OMT\logs` on Windows — one
+  file per process, unless told otherwise.
   `OmtManager` points it at `~/.churchpresenter/omt.log`; `setLoggingFilename` must be the first call.
 - **`omt_shutdown` is never called.** The header allows it only after every sender *and receiver*
   is gone, and a Canvas capture loop can still be inside `omt_receive` when the shutdown hook runs.

@@ -491,7 +491,16 @@ private fun OmtOutputRow(
         // The name receivers actually list this output under. Worth showing because it is not the
         // name typed above: the library prefixes the machine's, and that prefix is what an operator
         // looks for in OBS.
-        val address = addressOf(index)
+        //
+        // Polled like the receiver count, not read once: a rename replaces the sender, and the new
+        // one registers after this card has already recomposed with the old name — read once, the
+        // caption stayed on the old name until the dialog was reopened (found testing on Windows).
+        val address by produceState(addressOf(index), index) {
+            while (true) {
+                value = addressOf(index)
+                delay(RECEIVER_POLL_MS)
+            }
+        }
         if (address.isNotBlank()) {
             Text(
                 text = stringResource(Res.string.omt_address, address),
