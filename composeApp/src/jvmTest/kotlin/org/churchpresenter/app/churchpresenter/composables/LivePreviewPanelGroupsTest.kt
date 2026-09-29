@@ -2,35 +2,28 @@
 
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.width
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PreviewGroup
 import org.churchpresenter.settings.PreviewGroupShape
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.layoutFromGroups
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+
 
 /**
- * The sidebar panel once it has groups: which outputs it draws, in what arrangement, and what it
- * leaves off. The display counting and badges are covered by [LivePreviewPanelTest].
+ * The sidebar panel once it has a layout made from preview groups -- as settings version 20 makes
+ * one: which outputs it draws and what it leaves off. The display counting and badges are covered by
+ * [LivePreviewPanelTest].
  *
  * Headless there is no real monitor, so `Screen 1` is always the dev-fallback preview and the
  * Browser Source and NDI outputs below are the ones a group can hold or leave out.
@@ -52,7 +45,9 @@ class LivePreviewPanelGroupsTest {
         projectionSettings = ProjectionSettings(
             browserSourceOutputs = listOf(ScreenAssignment(), ScreenAssignment()),
             ndiOutputs = listOf(ScreenAssignment(ndiEnabled = true)),
-            previewGroups = groups.toList(),
+            previewLayouts = listOfNotNull(layoutFromGroups(groups.toList(), name = "")),
+            // As the upgrade leaves it: outputs no group held stay out of the panel.
+            listUnplacedOutputs = groups.isEmpty(),
             showOutputLabels = showLabels,
             showOutputModes = showModes,
         ),
@@ -122,12 +117,6 @@ class LivePreviewPanelGroupsTest {
     }
 
     @Test
-    fun `an output in two groups is drawn once`() = runComposeUiTest {
-        panel(settings(PreviewGroup("a", members = listOf(bs0)), PreviewGroup("b", members = listOf(bs0))))
-        onNodeWithText("Browser Source 1").assertExists()
-    }
-
-    @Test
     fun `several groups are all drawn`() = runComposeUiTest {
         panel(
             settings(
@@ -176,72 +165,5 @@ class LivePreviewPanelGroupsTest {
         panel(settings())
         // One per output, so there are several: the point is that the text is there at all.
         onAllNodesWithText("Full Screen").assertCountEquals(4)
-    }
-
-    // ── The grid itself ─────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a grid gives each column an equal share of the width`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                Box(Modifier.size(width = 300.dp, height = 300.dp)) {
-                    PreviewGroupGrid(
-                        columns = 3,
-                        cells = listOf("a", "b", "c").map { name ->
-                            { m: Modifier -> Text(name, modifier = m) }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-        }
-        val a = onNodeWithText("a").getUnclippedBoundsInRoot()
-        val b = onNodeWithText("b").getUnclippedBoundsInRoot()
-        val c = onNodeWithText("c").getUnclippedBoundsInRoot()
-        assertTrue(a.top == b.top && b.top == c.top, "three columns share one row")
-        assertTrue(a.left < b.left && b.left < c.left)
-    }
-
-    @Test
-    fun `a grid wraps to the next row after its columns`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                Box(Modifier.size(width = 300.dp, height = 300.dp)) {
-                    PreviewGroupGrid(
-                        columns = 2,
-                        cells = listOf("a", "b", "c").map { name ->
-                            { m: Modifier -> Text(name, modifier = m) }
-                        },
-                    )
-                }
-            }
-        }
-        val a = onNodeWithText("a").getUnclippedBoundsInRoot()
-        val b = onNodeWithText("b").getUnclippedBoundsInRoot()
-        val c = onNodeWithText("c").getUnclippedBoundsInRoot()
-        assertEquals(a.top, b.top)
-        assertTrue(c.top > a.top)
-        assertEquals(a.left, c.left)
-    }
-
-    @Test
-    fun `a short last row leaves its cells empty instead of stretching`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                Box(Modifier.size(width = 300.dp, height = 300.dp)) {
-                    PreviewGroupGrid(
-                        columns = 2,
-                        cells = listOf("a", "b", "c").map { name ->
-                            { m: Modifier -> Text(name, modifier = m) }
-                        },
-                    )
-                }
-            }
-        }
-        // "c" is alone on its row but keeps a column's width instead of taking the whole row.
-        assertEquals(
-            onNodeWithText("a").getUnclippedBoundsInRoot().width,
-            onNodeWithText("c").getUnclippedBoundsInRoot().width,
-        )
     }
 }

@@ -48,11 +48,26 @@ data class ProjectionSettings(
      */
     val previewOutputSelections: Map<String, String> = emptyMap(),
     /**
-     * How the preview panel arranges its outputs: each group is a grid of previews (see
-     * [PreviewGroup]). Outputs in no group are listed below them, one per row, so an empty list is
-     * the panel as it always was.
+     * How the preview panel was arranged before [previewLayouts]: each group a grid of previews
+     * (see [PreviewGroup]). Settings version 20 turns them into a layout; they are kept only so a
+     * file taken back to an older build still reads as it did there.
      */
     val previewGroups: List<PreviewGroup> = emptyList(),
+    /**
+     * The preview panel's named layouts, one of them drawn -- see [activeLayout]. Empty is the
+     * panel as it always was: every output listed one per row.
+     */
+    val previewLayouts: List<PreviewLayout> = emptyList(),
+    /** The [PreviewLayout.id] of the layout the panel draws; the first where this names none. */
+    val activePreviewLayout: String = "",
+    /**
+     * True: a layout is stretched to the panel's height as well as its width, and nothing scrolls.
+     * False, the default and what groups always did: it keeps the shape its previews give it, scaling
+     * with the panel's width and scrolling when taller than the panel.
+     */
+    val previewLayoutFillsPanel: Boolean = false,
+    /** Whether outputs no area of the layout shows are listed under it, one per row, or left out. */
+    val listUnplacedOutputs: Boolean = true,
     /** Whether each preview in the panel carries its output's name. */
     val showOutputLabels: Boolean = true,
     /** Whether each preview names its display type -- Full Screen, Lower Third or Stage Monitor. */

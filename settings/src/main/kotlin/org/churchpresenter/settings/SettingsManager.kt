@@ -53,6 +53,9 @@ private const val VERSION_CALENDAR_BUTTON = 11
 /** A quick-tray tile's lower-third half may inherit the output's band — see [SettingsManager]. */
 private const val VERSION_QUICK_BACKGROUND_INHERITS = 17
 
+/** Version 20: the preview panel's groups became a layout. */
+private const val VERSION_PREVIEW_LAYOUTS = 20
+
 /** What the tray's old constructor seeded both halves of a tile with: opaque black, nothing else. */
 private val SEEDED_BLACK = SongBackground(type = SongBackgroundType.COLOR, color = "#000000")
 
@@ -470,6 +473,7 @@ class SettingsManager {
         if (fromVersion < VERSION_QUICK_BACKGROUND_INHERITS) {
             settings = migrateQuickBackgroundLowerThird(settings)
         }
+        if (fromVersion < VERSION_PREVIEW_LAYOUTS) settings = migratePreviewGroupsToLayout(settings)
         // The primary/secondary-bible output shorthand ("primary"/"secondary" bibleMode, converted
         // to a position in the stack) used to be migrated here as a typed, per-[ScreenAssignment]
         // step gated on `fromVersion < 6`. An output no longer carries `bibleMode` at all -- that
@@ -661,6 +665,24 @@ class SettingsManager {
      * band is a picture, a gradient, a dimmed black or any other colour comes through untouched.
      * A black band that *was* wanted is two clicks to set again, now that the switch exists.
      */
+    /**
+     * Version 20. The preview panel's groups become one layout that draws them the same -- see
+     * [layoutFromGroups] -- and outputs no group held stay out of the panel, as they did. A panel with
+     * no groups keeps no layout, which is still every output listed one per row.
+     */
+    private fun migratePreviewGroupsToLayout(settings: AppSettings): AppSettings {
+        val projection = settings.projectionSettings
+        if (projection.previewLayouts.isNotEmpty()) return settings
+        val layout = layoutFromGroups(projection.previewGroups, name = "") ?: return settings
+        return settings.copy(
+            projectionSettings = projection.copy(
+                previewLayouts = listOf(layout),
+                activePreviewLayout = layout.id,
+                listUnplacedOutputs = false,
+            ),
+        )
+    }
+
     private fun migrateQuickBackgroundLowerThird(settings: AppSettings): AppSettings {
         if (settings.quickBackgrounds.none { it.lowerThirdBackground == SEEDED_BLACK }) return settings
         return settings.copy(

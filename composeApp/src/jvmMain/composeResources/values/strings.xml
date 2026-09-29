@@ -3337,6 +3337,17 @@
     <string name="profile_region_moves_background_sub">On: the background shrinks and moves with the text. Off: the background fills the screen and only the text moves.</string>
     <string name="profile_box">Text box</string>
     <string name="preview_layout_empty_area">Empty</string>
+    <string name="preview_layout_none">No layout yet: every output is listed one per row. Start one from a template below.</string>
+    <string name="preview_layout_new">New layout</string>
+    <string name="preview_layout_edit">Edit layout</string>
+    <string name="preview_layout_done">Done</string>
+    <string name="preview_layout_delete">Delete layout</string>
+    <string name="preview_layout_default_name">Layout %1$d</string>
+    <string name="preview_layout_fills_panel">Fill the panel</string>
+    <string name="preview_layout_list_unplaced">List outputs not in the layout</string>
+    <string name="preview_layout_template_one">One</string>
+    <string name="preview_layout_template_tall_first">Tall + %1$d</string>
+    <string name="preview_layout_template_tall_last">%1$d + Tall</string>
     <string name="preview_layout_split_across">Split across</string>
     <string name="preview_layout_split_down">Split down</string>
     <string name="preview_layout_remove">Remove</string>

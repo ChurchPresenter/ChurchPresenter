@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
+import org.churchpresenter.settings.activeLayout
 import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -2042,6 +2043,8 @@ private fun PreviewSidebar(
     sttManager: STTManager?,
     companionSatelliteViewModel: CompanionSatelliteViewModel,
 ) {
+    // Whether the panel's layout is being edited, from the gear's Edit layout to the panel's Done.
+    var editingPreviewLayout by remember { mutableStateOf(false) }
     if (isPanelRendered(collapsed, visibleFraction)) {
         Column(
             modifier = Modifier
@@ -2077,18 +2080,22 @@ private fun PreviewSidebar(
                     buttonSize = 36.dp,
                     iconTint = MaterialTheme.colorScheme.error
                 )
-                PreviewSettingsButton(appSettings.projectionSettings) { updated ->
+                PreviewSettingsButton(appSettings.projectionSettings, { editingPreviewLayout = true }) { updated ->
                     onSettingsChange { s -> s.copy(projectionSettings = updated) }
                 }
             }
+            // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
+            val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
             LivePreviewPanel(
                 presenterManager = presenterManager,
                 appSettings = livePreviewAppSettings,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth(),
                 serverUrl = serverUrl,
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
                 onSettingsChange = onSettingsChange,
+                editingLayout = editingPreviewLayout,
+                onDoneEditing = { editingPreviewLayout = false },
             )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,
@@ -2107,8 +2114,8 @@ private fun PreviewSidebar(
             if (rightSidebarConnections.isNotEmpty()) {
                 // Pushes everything below (divider + panel) down to the bottom of this
                 // fillMaxHeight column instead of sitting right under the live preview
-                // with empty space left below it.
-                Spacer(modifier = Modifier.weight(1f))
+                // with empty space left below it -- unless the preview is filling that space.
+                if (!previewFills) Spacer(modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
                 var selectedRightSidebarId by remember(rightSidebarConnections.map { it.id }) {
@@ -2193,7 +2200,11 @@ private fun ScheduleSidebarCompanionPanel(
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
 @Composable
-private fun PreviewSettingsButton(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
+private fun PreviewSettingsButton(
+    proj: ProjectionSettings,
+    onEditLayout: () -> Unit,
+    onChange: (ProjectionSettings) -> Unit,
+) {
     Box {
         var open by remember { mutableStateOf(false) }
         ToolbarKey(
@@ -2204,6 +2215,12 @@ private fun PreviewSettingsButton(proj: ProjectionSettings, onChange: (Projectio
             open = open,
             buttonSize = 40.dp,
         )
-        PreviewGroupsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
+        PreviewGroupsPopover(
+            expanded = open,
+            onDismiss = { open = false },
+            proj = proj,
+            onChange = onChange,
+            onEditLayout = onEditLayout,
+        )
     }
 }
