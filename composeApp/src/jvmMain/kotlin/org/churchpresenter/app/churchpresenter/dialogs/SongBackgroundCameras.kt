@@ -17,7 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
@@ -48,7 +48,7 @@ internal fun LazyGridScope.cameraTiles(
             swatchAspect = swatchAspect,
             onClick = { onChange(cameraBackground(background, device)) },
         ) {
-            Box(Modifier.fillMaxSize().background(Color.Black))
+            Box(Modifier.fillMaxSize().background(FixedColors.screenBlack))
         }
     }
 }

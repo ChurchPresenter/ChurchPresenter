@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_check
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
@@ -234,14 +235,14 @@ internal enum class SwatchBadge { NONE, PLAY, PLUS }
 @Composable
 private fun GlyphBadge(glyph: ImageVector) {
     Box(
-        modifier = Modifier.size(19.dp).clip(CircleShape).background(Color.Black.copy(alpha = BADGE_ALPHA)),
+        modifier = Modifier.size(19.dp).clip(CircleShape).background(FixedColors.inkDark.copy(alpha = BADGE_ALPHA)),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = glyph,
             contentDescription = null,
             modifier = Modifier.size(12.dp),
-            tint = Color.White,
+            tint = FixedColors.inkLight,
         )
     }
 }

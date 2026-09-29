@@ -95,7 +95,7 @@ private const val INSET_SHADE_LIGHT = 0.04f
 internal fun bibleInsetFill(): Color =
     lerp(
         bibleListCardFill(),
-        Color.Black,
+        MaterialTheme.colorScheme.scrim,
         if (isDarkScheme(MaterialTheme.colorScheme)) INSET_SHADE_DARK else INSET_SHADE_LIGHT,
     )
 

@@ -48,7 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -441,7 +441,7 @@ private fun StockMediaThumbnail(
             Icon(
                 imageVector = Icons.Default.PlayArrow,
                 contentDescription = null,
-                tint = Color.White,
+                tint = FixedColors.inkLight,
                 modifier = Modifier.align(Alignment.Center).size(32.dp)
             )
         }

@@ -30,7 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -160,13 +160,13 @@ private fun SongBackgroundStage(background: SongBackground, sampleLine: String, 
     ) {
         SongBackgroundFill(background, Modifier.fillMaxSize())
         if (background.dim > 0) {
-            Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = background.dim / 100f)))
+            Box(Modifier.fillMaxSize().background(FixedColors.screenBlack.copy(alpha = background.dim / 100f)))
         }
         Text(
             text = sampleLine.ifBlank { stringResource(Res.string.song_background_sample_line) },
             fontSize = 10.5.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color.White,
+            color = FixedColors.inkLight,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.align(Alignment.Center).padding(9.dp),
@@ -177,7 +177,7 @@ private fun SongBackgroundStage(background: SongBackground, sampleLine: String, 
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.6.sp,
             maxLines = 1,
-            color = Color.White.copy(alpha = BADGE_INK_ALPHA),
+            color = FixedColors.inkLight.copy(alpha = BADGE_INK_ALPHA),
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 4.dp),
         )
     }

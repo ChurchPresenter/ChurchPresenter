@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -184,10 +185,10 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
         )
     } else {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(Res.string.canvas_image_not_found), color = Color.White, fontSize = 12.sp)
+            Text(stringResource(Res.string.canvas_image_not_found), color = FixedColors.inkLight, fontSize = 12.sp)
         }
     }
 }
@@ -370,7 +371,7 @@ private fun VideoSourceContent(
     val file = remember(source.filePath) { if (source.filePath.isNotBlank()) File(source.filePath) else null }
     if (file == null || !file.exists() || !isVlcAvailable) {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -378,7 +379,7 @@ private fun VideoSourceContent(
                        else if (!isVlcAvailable) stringResource(Res.string.canvas_video_vlc_not_found)
                        else if (file == null) stringResource(Res.string.canvas_video_no_selection)
                        else stringResource(Res.string.canvas_video_file_not_found, source.filePath),
-                color = Color.White,
+                color = FixedColors.inkLight,
                 fontSize = 14.sp
             )
         }
@@ -414,10 +415,10 @@ private fun VideoSourceContent(
         )
     } else {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(Res.string.canvas_video_loading), color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.canvas_video_loading), color = FixedColors.inkLight, fontSize = 14.sp)
         }
     }
 }
@@ -429,10 +430,10 @@ private fun BrowserSourceContent(
 ) {
     if (source.url.isBlank()) {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = stringResource(Res.string.canvas_browser_no_url), color = Color.White, fontSize = 14.sp)
+            Text(text = stringResource(Res.string.canvas_browser_no_url), color = FixedColors.inkLight, fontSize = 14.sp)
         }
         return
     }
@@ -486,12 +487,12 @@ private fun BrowserSourceContent(
         )
     } else {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = error ?: "Loading: ${source.url}",
-                color = if (error != null) Color(ERROR_TEXT_COLOR) else Color.White,
+                color = if (error != null) Color(ERROR_TEXT_COLOR) else FixedColors.inkLight,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -769,7 +770,7 @@ private fun CurvedBibleText(
             text = source.verseText.ifEmpty { stringResource(Res.string.canvas_bible_select_verse) },
             curve = source.curve,
             style = TextStyle(
-                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
+                color = if (source.verseText.isEmpty()) FixedColors.placeholderMuted else textColor,
                 fontSize = drawnFontSize(source.fontSize, fontScale),
                 fontFamily = fontFamily,
                 fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
@@ -882,7 +883,7 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
                 contentScale = ContentScale.Fit
             )
         } else {
-            Text(stringResource(Res.string.canvas_placeholder_qr), color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.canvas_placeholder_qr), color = FixedColors.inkLight, fontSize = 14.sp)
         }
     }
 }
@@ -896,13 +897,13 @@ private fun CameraSourceContent(
 ) {
     if (source.devicePath.isBlank()) {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
                        else stringResource(Res.string.canvas_placeholder_camera_default),
-                color = Color.White,
+                color = FixedColors.inkLight,
                 fontSize = 14.sp
             )
         }
@@ -941,7 +942,7 @@ private fun CameraSourceContent(
         )
     } else {
         Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
             contentAlignment = Alignment.Center
         ) {
             val shownError = error?.takeIf { showDiagnostics }
@@ -949,7 +950,7 @@ private fun CameraSourceContent(
                 text = shownError?.let { stringResource(cameraFailureStringRes(it)) }
                     ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
                        else stringResource(Res.string.canvas_placeholder_camera_default),
-                color = if (shownError != null) Color(ERROR_TEXT_COLOR) else Color.White,
+                color = if (shownError != null) Color(ERROR_TEXT_COLOR) else FixedColors.inkLight,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -1052,10 +1053,10 @@ private fun OmtSourceContent(source: SceneSource.OmtSource, modifier: Modifier) 
 @Composable
 private fun NetworkSourcePlaceholder(text: String, modifier: Modifier) {
     Box(
-        modifier = modifier.fillMaxSize().background(Color.DarkGray),
+        modifier = modifier.fillMaxSize().background(FixedColors.placeholderSurface),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = text, color = Color.White, fontSize = 14.sp, textAlign = TextAlign.Center)
+        Text(text = text, color = FixedColors.inkLight, fontSize = 14.sp, textAlign = TextAlign.Center)
     }
 }
 
@@ -1076,7 +1077,7 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
     val frame by (frames ?: noFrame).collectAsState()
 
     Box(
-        modifier = modifier.fillMaxSize().background(Color.Black),
+        modifier = modifier.fillMaxSize().background(FixedColors.screenBlack),
         contentAlignment = Alignment.Center
     ) {
         val currentFrame = frame
@@ -1088,7 +1089,7 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
                 contentScale = ContentScale.Fit
             )
         } else {
-            Text(stringResource(Res.string.canvas_placeholder_screen_capture), color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.canvas_placeholder_screen_capture), color = FixedColors.inkLight, fontSize = 14.sp)
         }
     }
 }
@@ -1245,7 +1246,7 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 text = source.verseText.ifEmpty { stringResource(Res.string.canvas_bible_select_verse) },
                 outline = source.outline,
                 scaleFactor = fontScale,
-                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
+                color = if (source.verseText.isEmpty()) FixedColors.placeholderMuted else textColor,
                 fontSize = drawnFontSize(source.fontSize, fontScale),
                 fontFamily = fontFamily,
                 style = TextStyle(

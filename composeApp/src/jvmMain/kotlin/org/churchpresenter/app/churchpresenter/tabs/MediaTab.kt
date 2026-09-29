@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -896,24 +897,24 @@ fun MediaTab(
                 Box(
                     modifier = Modifier
                         .aspectRatio(previewOutput.size.aspectRatio)
-                        .background(Color.Black, AppShape(8.dp))
+                        .background(FixedColors.screenBlack, AppShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     when {
                         isPresenting -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.6f))
-                            Text(stringResource(Res.string.media_now_presenting), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.8f))
-                            Text(viewModel.mediaTitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Icon(Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(56.dp), tint = FixedColors.inkLight.copy(alpha = 0.6f))
+                            Text(stringResource(Res.string.media_now_presenting), style = MaterialTheme.typography.bodyLarge, color = FixedColors.inkLight.copy(alpha = 0.8f))
+                            Text(viewModel.mediaTitle, style = MaterialTheme.typography.bodySmall, color = FixedColors.inkLight.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         viewModel.isLoaded -> SharedVideoOutputDisplay(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = appSettings.mediaScaleMode.contentScale,
                         )
                         else -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.4f))
-                            Text(stringResource(Res.string.media_no_source), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.6f))
-                            Text(stringResource(Res.string.media_select_to_begin), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.4f))
+                            Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(56.dp), tint = FixedColors.inkLight.copy(alpha = 0.4f))
+                            Text(stringResource(Res.string.media_no_source), style = MaterialTheme.typography.bodyLarge, color = FixedColors.inkLight.copy(alpha = 0.6f))
+                            Text(stringResource(Res.string.media_select_to_begin), style = MaterialTheme.typography.bodySmall, color = FixedColors.inkLight.copy(alpha = 0.4f))
                         }
                     }
                 }

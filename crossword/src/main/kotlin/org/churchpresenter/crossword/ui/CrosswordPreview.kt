@@ -16,7 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,15 +66,15 @@ private fun PreviewCell(letter: Char?, clueNumber: Int?) {
     Box(
         modifier = Modifier
             .size(cellSize)
-            .background(if (letter != null) Color.White else Color.Black)
-            .border(0.5.dp, Color.Gray)
+            .background(if (letter != null) FixedColors.paperCell else FixedColors.paperBlocked)
+            .border(0.5.dp, FixedColors.paperBorder)
     ) {
         if (letter != null) {
             if (clueNumber != null) {
                 Text(
                     text = clueNumber.toString(),
                     fontSize = 7.sp,
-                    color = Color.DarkGray,
+                    color = FixedColors.paperInk,
                     modifier = Modifier.align(Alignment.TopStart).padding(1.dp)
                 )
             }

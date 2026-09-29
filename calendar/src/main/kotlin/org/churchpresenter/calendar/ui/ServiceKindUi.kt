@@ -2,6 +2,7 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_items_count
 import org.churchpresenter.calendar.generated.resources.calendar_items_count_one
@@ -40,7 +41,7 @@ fun kindLabel(kind: ServiceKind): String = stringResource(
  *  hand-editable and a bad value must not stop the window opening. */
 internal fun parseHex(hex: String): Color {
     val digits = hex.removePrefix("#")
-    val value = digits.toLongOrNull(HEX_RADIX) ?: return Color.Gray
+    val value = digits.toLongOrNull(HEX_RADIX) ?: return FixedColors.placeholderMuted
     return Color(value or OPAQUE)
 }
 

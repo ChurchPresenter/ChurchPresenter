@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -307,14 +308,14 @@ private fun SlotBadge(slot: Int, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(AppShape(3.dp))
-            .background(Color.Black.copy(alpha = SLOT_SCRIM_ALPHA))
+            .background(FixedColors.inkDark.copy(alpha = SLOT_SCRIM_ALPHA))
             .padding(horizontal = 3.dp, vertical = 1.dp),
     ) {
         Text(
             text = slot.toString(),
             fontSize = 8.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White.copy(alpha = SLOT_INK_ALPHA),
+            color = FixedColors.inkLight.copy(alpha = SLOT_INK_ALPHA),
         )
     }
 }

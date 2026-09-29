@@ -37,7 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -229,7 +229,7 @@ private fun ColorTileFill(entry: ColorSwatchDef, background: SongBackground) {
 @Composable
 private fun MediaTileFill(entry: LibraryEntry, isVideo: Boolean) {
     if (isVideo) {
-        Box(Modifier.fillMaxSize().background(Color.Black))
+        Box(Modifier.fillMaxSize().background(FixedColors.screenBlack))
         return
     }
     var bitmap by remember(entry.key) { mutableStateOf<ImageBitmap?>(null) }

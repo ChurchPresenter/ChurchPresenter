@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -123,7 +124,7 @@ fun TvScreenBox(
                         else Modifier.aspectRatio(screenAspectRatio)
                     )
                     .background(screenColor, AppShape(SCREEN_RADIUS))
-                    .border(1.dp, Color.Black.copy(alpha = 0.4f), AppShape(SCREEN_RADIUS)),
+                    .border(1.dp, FixedColors.screenBlack.copy(alpha = 0.4f), AppShape(SCREEN_RADIUS)),
                 contentAlignment = Alignment.Center,
                 content = content
             )

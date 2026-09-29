@@ -95,33 +95,22 @@ private data class StoryPanelPalette(
     val standBottom: Color,
 )
 
-private val DarkStoryPanel = StoryPanelPalette(
-    top = Color(0xFF101820),
-    bottom = Color(0xFF0B0D10),
-    glow = Color(0x2E4ADE80),
-    accent = Color(0xFF4ADE80),
-    quote = Color(0xFFF1F3F5),
-    bezel = Color(0xFF1B2028),
-    bezelBorder = Color(0x1FFFFFFF),
-    standTop = Color(0xFF2A3038),
-    standBottom = Color(0xFF151920),
-)
-
-private val LightStoryPanel = StoryPanelPalette(
-    top = Color(0xFFF4F7FA),
-    bottom = Color(0xFFE2E7ED),
-    glow = Color(0x332E7D32),
-    accent = Color(0xFF2E7D32),
-    quote = Color(0xFF1B1F24),
-    bezel = Color(0xFFCFD6DE),
-    bezelBorder = Color(0x1F000000),
-    standTop = Color(0xFFC3CBD5),
-    standBottom = Color(0xFFA9B3BF),
-)
-
 @Composable
-private fun storyPanelPalette(): StoryPanelPalette =
-    if (isDarkScheme(MaterialTheme.colorScheme)) DarkStoryPanel else LightStoryPanel
+private fun storyPanelPalette(): StoryPanelPalette {
+    val scheme = MaterialTheme.colorScheme
+    val success = MaterialTheme.semantic.success
+    return StoryPanelPalette(
+        top = scheme.surfaceContainerHigh,
+        bottom = scheme.surfaceContainerLowest,
+        glow = success.copy(alpha = 0.2f),
+        accent = success,
+        quote = scheme.onSurface,
+        bezel = scheme.surfaceVariant,
+        bezelBorder = scheme.outlineVariant,
+        standTop = scheme.surfaceContainerHighest,
+        standBottom = scheme.outline,
+    )
+}
 
 @Composable
 fun ShareYourStoryDialog(

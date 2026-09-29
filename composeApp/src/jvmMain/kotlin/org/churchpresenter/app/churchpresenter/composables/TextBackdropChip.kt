@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -68,9 +69,9 @@ internal fun TextBackdropChip(
     // swatch still has to show the plate.
     val ink = when {
         fill.alpha > CHIP_INK_FILL_ALPHA ->
-            if (fill.luminance() > CHIP_INK_LUMINANCE) Color.Black else Color.White
+            if (fill.luminance() > CHIP_INK_LUMINANCE) FixedColors.inkDark else FixedColors.inkLight
         mode == TextBackdropMode.OFF -> emptyInk
-        else -> Color.White
+        else -> FixedColors.inkLight
     }
     val shape = AppShape(3.dp)
     Box(
@@ -79,7 +80,7 @@ internal fun TextBackdropChip(
             // swatch stands the look on a neutral ground rather than on the theme's own surface.
             // Without it half of what people set is invisible in the preview: a white outline on
             // the light theme, a black bar on the dark one.
-            .background(if (mode == TextBackdropMode.OFF) Color.Transparent else CHIP_STAGE, shape)
+            .background(if (mode == TextBackdropMode.OFF) Color.Transparent else FixedColors.lookStage, shape)
             .background(fill, shape)
             .border(
                 width = if (mode.drawsBorder) 1.5.dp else 1.dp,
@@ -125,13 +126,6 @@ private fun ChipLabel(label: String, ink: Color, fontSize: TextUnit) {
 /** Below this the fill is see-through enough that the button behind it decides the contrast. */
 private const val CHIP_INK_FILL_ALPHA = 0.35f
 
-/**
- * The neutral ground a look is previewed against, standing in for the picture behind the text.
- *
- * A mid grey rather than a dark one: the two colours people actually set are black and white, and
- * against a dark stage a black plate is indistinguishable from an empty one.
- */
-private val CHIP_STAGE = Color(0xFF7C848F)
 private const val CHIP_INK_LUMINANCE = 0.5f
 private val CHIP_BAR_WIDTH = 14.dp
 private val CHIP_BAR_HEIGHT = 2.5.dp

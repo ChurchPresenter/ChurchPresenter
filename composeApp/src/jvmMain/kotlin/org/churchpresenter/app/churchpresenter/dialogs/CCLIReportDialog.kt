@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -755,6 +756,7 @@ private fun SongTable(songs: List<SongSummary>, onClear: (SongSummary) -> Unit, 
     val dateFmt = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
     val maxCount = remember(songs) { songs.maxOfOrNull { it.count } ?: 1 }
     val accent = MaterialTheme.colorScheme.primary
+    val onAccent = MaterialTheme.colorScheme.onPrimary
     Column(modifier = modifier) {
         // Header
         Row(
@@ -795,7 +797,7 @@ private fun SongTable(songs: List<SongSummary>, onClear: (SongSummary) -> Unit, 
                         TableCell(song.author.ifBlank { "—" }, weight = 1.5f, muted = song.author.isBlank())
                         TableCell(song.songbook.ifBlank { "—" }, weight = 1f, muted = song.songbook.isBlank())
                         TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())
-                        UsageBadgeCell(song.count, maxCount, accent, fixedWidth = 52.dp.value)
+                        UsageBadgeCell(song.count, maxCount, accent, onAccent, fixedWidth = 52.dp.value)
                         TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
                         TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)
                         RowClearButton(label = song.title, alpha = clearAlpha) { onClear(song) }
@@ -816,6 +818,7 @@ private fun VerseTable(verses: List<VerseSummary>, onClear: (VerseSummary) -> Un
     val dateFmt = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
     val maxCount = remember(verses) { verses.maxOfOrNull { it.count } ?: 1 }
     val accent = MaterialTheme.colorScheme.tertiary
+    val onAccent = MaterialTheme.colorScheme.onTertiary
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -851,7 +854,7 @@ private fun VerseTable(verses: List<VerseSummary>, onClear: (VerseSummary) -> Un
                         TableCell("${index + 1}", fixedWidth = 28.dp.value, align = TextAlign.End)
                         TableCell("${verse.bookName} ${verse.chapter}:${verse.verseNumber}", weight = 2f)
                         TableCell(verse.bibleName.ifBlank { "—" }, weight = 1f, muted = verse.bibleName.isBlank())
-                        UsageBadgeCell(verse.count, maxCount, accent, fixedWidth = 52.dp.value)
+                        UsageBadgeCell(verse.count, maxCount, accent, onAccent, fixedWidth = 52.dp.value)
                         TableCell(dateFmt.format(Date(verse.firstUsed)), fixedWidth = 90.dp.value)
                         TableCell(dateFmt.format(Date(verse.lastUsed)), fixedWidth = 90.dp.value)
                         RowClearButton(
@@ -963,7 +966,7 @@ private fun TopItemsChart(
 ) {
     val maxValue = data.maxOfOrNull { it.second }?.coerceAtLeast(1) ?: 1
     val trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val brightEnd = lerp(accent, Color.White, 0.35f)
+    val brightEnd = lerp(accent, FixedColors.inkLight, 0.35f)
     val barBrush = Brush.horizontalGradient(listOf(accent, brightEnd))
     val scrollState = rememberScrollState()
 
@@ -1030,8 +1033,8 @@ private fun ActivityBarChart(
     val versesLabel = stringResource(Res.string.ccli_legend_bible)
     val barCorner = AppShape(topStart = 4.dp, topEnd = 4.dp)
     // Lighter at the top, fading down to the series color.
-    val songBrush = Brush.verticalGradient(listOf(lerp(songColor, Color.White, 0.3f), songColor))
-    val verseBrush = Brush.verticalGradient(listOf(lerp(verseColor, Color.White, 0.3f), verseColor))
+    val songBrush = Brush.verticalGradient(listOf(lerp(songColor, FixedColors.inkLight, 0.3f), songColor))
+    val verseBrush = Brush.verticalGradient(listOf(lerp(verseColor, FixedColors.inkLight, 0.3f), verseColor))
     val barWidth = when {
         data.size <= 14 -> 18.dp
         data.size <= 26 -> 9.dp
@@ -1347,11 +1350,12 @@ private fun RowScope.UsageBadgeCell(
     count: Int,
     maxCount: Int,
     accent: Color,
+    onAccent: Color,
     fixedWidth: Float
 ) {
     val ratio = if (maxCount > 0) count.toFloat() / maxCount else 0f
     val bg = accent.copy(alpha = (0.18f + 0.72f * ratio).coerceIn(0.18f, 0.9f))
-    val fg = if (ratio > 0.5f) Color.White else accent
+    val fg = if (ratio > 0.5f) onAccent else accent
     Box(modifier = Modifier.width(fixedWidth.dp)) {
         Box(
             modifier = Modifier

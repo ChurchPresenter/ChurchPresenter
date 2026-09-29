@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -330,7 +331,7 @@ private fun BackgroundScopeRow(
                 .clip(AppShape(5.dp))
                 // Black under the fill, so the part of the screen this surface does not paint
                 // reads as unpainted output rather than as the rail showing through.
-                .background(Color.Black)
+                .background(FixedColors.screenBlack)
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(5.dp))
         ) {
             BackgroundCoverageFill(
@@ -503,7 +504,7 @@ private fun BackgroundStagePreview(
             modifier = Modifier.width(width),
             screenAspectRatio = stageAspect,
             bezelColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            screenColor = Color.Black
+            screenColor = FixedColors.screenBlack
         ) {
             BackgroundCoverageFill(
                 config = config,
@@ -526,7 +527,7 @@ private fun BackgroundStagePreview(
                     else SAMPLE_LOWER_THIRD_SIZE
                     ) * stageScale,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White,
+                color = FixedColors.inkLight,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -547,12 +548,12 @@ private fun BackgroundStagePreview(
                 fontSize = 8.5.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.7.sp,
-                color = Color.White.copy(alpha = STAGE_BADGE_ALPHA),
+                color = FixedColors.inkLight.copy(alpha = STAGE_BADGE_ALPHA),
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(7.dp)
                     .clip(AppShape(5.dp))
-                    .background(Color.Black.copy(alpha = STAGE_BADGE_SCRIM_ALPHA))
+                    .background(FixedColors.inkDark.copy(alpha = STAGE_BADGE_SCRIM_ALPHA))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
@@ -609,7 +610,7 @@ private fun BackgroundCoverageFill(
             } else {
                 BackgroundConfigFill(config, Modifier.fillMaxSize(), blurRadius)
                 if (config.dim > 0) {
-                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.dim / PERCENT)))
+                    Box(Modifier.fillMaxSize().background(FixedColors.screenBlack.copy(alpha = config.dim / PERCENT)))
                 }
             }
             // Drawn over the fill rather than between the two boxes: a divider in the layout would
@@ -1189,7 +1190,7 @@ private fun QuickBackgroundStripTile(
                         .padding(3.dp)
                         .size(15.dp)
                         .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = QUICK_SCRIM_ALPHA))
+                        .background(FixedColors.inkDark.copy(alpha = QUICK_SCRIM_ALPHA))
                         .clickable(onClick = onRemove),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1197,7 +1198,7 @@ private fun QuickBackgroundStripTile(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(Res.string.remove),
                         modifier = Modifier.size(9.dp),
-                        tint = Color.White
+                        tint = FixedColors.inkLight
                     )
                 }
             }
@@ -1310,10 +1311,10 @@ private fun SlotChip(slot: Int, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(AppShape(3.dp))
-            .background(Color.Black.copy(alpha = QUICK_SCRIM_ALPHA))
+            .background(FixedColors.inkDark.copy(alpha = QUICK_SCRIM_ALPHA))
             .padding(horizontal = 4.dp, vertical = 1.dp)
     ) {
-        Text(text = slot.toString(), fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(text = slot.toString(), fontSize = 9.sp, fontWeight = FontWeight.Bold, color = FixedColors.inkLight)
     }
 }
 

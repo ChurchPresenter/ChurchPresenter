@@ -39,7 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.semantic
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -55,10 +55,6 @@ import kotlinx.coroutines.delay
 
 /** How long a status line stays on screen before it clears itself. */
 private const val STATUS_MESSAGE_MS = 3_000L
-
-/** Clue-list marker: green when the engine placed the clue on the grid, amber when it could not. */
-private val PLACED_CLUE_COLOR = Color(0xFF4CAF50)
-private val UNPLACED_CLUE_COLOR = Color(0xFFFFA500)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -222,7 +218,7 @@ private fun BoxScope.ClueGutter(state: AdminState, editorStyle: TextStyle) {
                     Text(
                         text = if (placed) "●" else "⚠",
                         fontSize = 9.sp,
-                        color = if (placed) PLACED_CLUE_COLOR else UNPLACED_CLUE_COLOR,
+                        color = if (placed) MaterialTheme.semantic.success else MaterialTheme.semantic.warning,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }

@@ -19,7 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -111,7 +111,7 @@ internal fun SongBackgroundFill(background: SongBackground, modifier: Modifier) 
             if (background.opacity < SONG_BACKGROUND_FULL_OPACITY) blurred.alpha(background.opacity / PERCENT)
             else blurred
         when {
-            !background.isCustom -> Box(shaped.background(Color.Black))
+            !background.isCustom -> Box(shaped.background(FixedColors.screenBlack))
             background.type == SongBackgroundType.GRADIENT -> Box(
                 shaped.background(
                     Brush.verticalGradient(
@@ -124,12 +124,12 @@ internal fun SongBackgroundFill(background: SongBackground, modifier: Modifier) 
             // every quick-tray button and every settings strip at once, so a live preview would
             // hold the device open for as long as any of them is on screen.
             background.type == SongBackgroundType.VIDEO ||
-                background.type == SongBackgroundType.CAMERA -> Box(shaped.background(Color.Black))
+                background.type == SongBackgroundType.CAMERA -> Box(shaped.background(FixedColors.screenBlack))
             else -> Box(shaped.background(parseHexColor(background.color)))
         }
         // The wash the comment above promises, which was never actually drawn.
         if (background.dim > 0) {
-            Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = background.dim / PERCENT)))
+            Box(Modifier.fillMaxSize().background(FixedColors.screenBlack.copy(alpha = background.dim / PERCENT)))
         }
     }
 }
@@ -145,7 +145,7 @@ private fun ImageFill(path: String, modifier: Modifier) {
     }
     val shot = bitmap
     if (shot == null) {
-        Box(modifier.background(Color.Black))
+        Box(modifier.background(FixedColors.screenBlack))
     } else {
         Image(bitmap = shot, contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier)
     }

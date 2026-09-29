@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -87,7 +88,7 @@ fun ColorPickerDialog(
     onDismiss: () -> Unit,
     onColorSelected: (String) -> Unit,
 ) {
-    val initialColor = cpTryParseHex(initialHex) ?: Color.White
+    val initialColor = cpTryParseHex(initialHex) ?: FixedColors.inkLight
     val (initH, initS, initV) = cpColorToHsv(initialColor)
 
     var hue by remember { mutableStateOf(initH) }
@@ -216,7 +217,7 @@ fun ColorPickerDialog(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         RecentColors.colors.forEach { recentHex ->
-                            val recentColor = cpTryParseHex(recentHex) ?: Color.White
+                            val recentColor = cpTryParseHex(recentHex) ?: FixedColors.inkLight
                             Box(
                                 modifier = Modifier
                                     .size(24.dp)
@@ -296,15 +297,15 @@ internal fun SvPanel(
     ) {
         // Background gradient layers
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(brush = Brush.horizontalGradient(listOf(Color.White, hueColor)))
-            drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, Color.Black)))
+            drawRect(brush = Brush.horizontalGradient(listOf(FixedColors.inkLight, hueColor)))
+            drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, FixedColors.inkDark)))
         }
         // Circular selector indicator
         Canvas(modifier = Modifier.fillMaxSize()) {
             val cx = saturation * size.width
             val cy = (1f - brightness) * size.height
-            drawCircle(Color.White, radius = 8.dp.toPx(), center = Offset(cx, cy), style = Stroke(2.dp.toPx()))
-            drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
+            drawCircle(FixedColors.inkLight, radius = 8.dp.toPx(), center = Offset(cx, cy), style = Stroke(2.dp.toPx()))
+            drawCircle(FixedColors.inkDark.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
         }
     }
 }
@@ -319,12 +320,7 @@ internal fun HueBar(
 
     // Rainbow stops: R → Y → G → C → B → M → R
     val rainbowBrush = remember {
-        Brush.horizontalGradient(
-            listOf(
-                Color(0xFFFF0000), Color(0xFFFFFF00), Color(0xFF00FF00),
-                Color(0xFF00FFFF), Color(0xFF0000FF), Color(0xFFFF00FF), Color(0xFFFF0000),
-            )
-        )
+        Brush.horizontalGradient(FixedColors.hueSpectrum)
     }
 
     Box(
@@ -346,8 +342,8 @@ internal fun HueBar(
             drawRect(brush = rainbowBrush)
             // Thumb line
             val x = hue / 360f * size.width
-            drawLine(Color.White, Offset(x, 0f), Offset(x, size.height), strokeWidth = 3.dp.toPx())
-            drawLine(Color.Black.copy(alpha = 0.35f), Offset(x - 1.dp.toPx(), 0f), Offset(x - 1.dp.toPx(), size.height), strokeWidth = 1.dp.toPx())
+            drawLine(FixedColors.inkLight, Offset(x, 0f), Offset(x, size.height), strokeWidth = 3.dp.toPx())
+            drawLine(FixedColors.inkDark.copy(alpha = 0.35f), Offset(x - 1.dp.toPx(), 0f), Offset(x - 1.dp.toPx(), size.height), strokeWidth = 1.dp.toPx())
         }
     }
 }

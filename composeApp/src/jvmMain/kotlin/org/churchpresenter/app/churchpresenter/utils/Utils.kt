@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
 
@@ -61,9 +62,9 @@ object Utils {
      */
     fun ensureContrast(foreground: Color, background: Color, minRatio: Double = 4.5): Color {
         if (contrastRatio(foreground, background) >= minRatio) return foreground
-        val whiteContrast = contrastRatio(Color.White, background)
-        val blackContrast = contrastRatio(Color.Black, background)
-        return if (whiteContrast >= blackContrast) Color.White else Color.Black
+        val whiteContrast = contrastRatio(FixedColors.inkLight, background)
+        val blackContrast = contrastRatio(FixedColors.inkDark, background)
+        return if (whiteContrast >= blackContrast) FixedColors.inkLight else FixedColors.inkDark
     }
 
     fun parseHexColor(hexColor: String): Color {
@@ -84,10 +85,10 @@ object Utils {
                     val blue = cleanHex.substring(4, 6).toInt(16)
                     Color(red, green, blue)
                 }
-                else -> Color.White
+                else -> FixedColors.inkLight
             }
         } catch (_: Exception) {
-            Color.White
+            FixedColors.inkLight
         }
     }
 }

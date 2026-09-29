@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,7 @@ fun MetronomeDot(
     active: Boolean,
     modifier: Modifier = Modifier,
     size: Dp = 18.dp,
-    color: Color = Color.White
+    color: Color = FixedColors.inkLight
 ) {
     var flashOn by remember { mutableStateOf(false) }
     LaunchedEffect(bpm, active) {

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,12 +58,6 @@ private data class ConfettiParticle(
     val rotation: Float,
     val rotationSpeed: Float,
     val wobble: Float
-)
-
-private val confettiColors = listOf(
-    Color(0xFFE53935), Color(0xFF8E24AA), Color(0xFF1E88E5),
-    Color(0xFF00ACC1), Color(0xFF43A047), Color(0xFFFDD835),
-    Color(0xFFFB8C00), Color(0xFFFFB300)
 )
 
 @Composable
@@ -142,7 +137,7 @@ private fun ConfettiOverlay() {
                     y = -rng.nextFloat() * 1.2f,
                     vx = (rng.nextFloat() - 0.5f) * 0.004f,
                     vy = 0.003f + rng.nextFloat() * 0.004f,
-                    color = confettiColors[rng.nextInt(confettiColors.size)],
+                    color = FixedColors.confetti[rng.nextInt(FixedColors.confetti.size)],
                     size = 6f + rng.nextFloat() * 6f,
                     rotation = rng.nextFloat() * 360f,
                     rotationSpeed = (rng.nextFloat() - 0.5f) * 4f,

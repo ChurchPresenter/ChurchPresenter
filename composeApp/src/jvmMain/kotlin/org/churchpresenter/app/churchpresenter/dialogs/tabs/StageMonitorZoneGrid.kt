@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -126,7 +126,7 @@ internal fun ZoneGrid(
             .widthIn(max = tvScreenBoxWidthFor(STAGE_PREVIEW_MAX_HEIGHT, screenAspect)),
         screenAspectRatio = screenAspect,
         bezelColor = stageMonitorBezelColor(),
-        screenColor = Color.Black,
+        screenColor = FixedColors.screenBlack,
     ) {
         // Inset, so the screen itself shows around the zones instead of being papered over.
         BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(4.dp)) {
@@ -348,7 +348,7 @@ private fun ResizeDivider(
                     width = if (horizontal) SIZE_GRIP_THICKNESS else SIZE_GRIP_LENGTH,
                     height = if (horizontal) SIZE_GRIP_LENGTH else SIZE_GRIP_THICKNESS
                 )
-                .background(Color.White.copy(alpha = SIZE_GRIP_ALPHA), AppShape(2.dp))
+                .background(FixedColors.screenWhite.copy(alpha = SIZE_GRIP_ALPHA), AppShape(2.dp))
         )
     }
 }
@@ -416,14 +416,14 @@ private fun ZoneLabelCell(
             .fillMaxSize()
             .padding(2.dp)
             .background(
-                if (selected) accent.copy(alpha = SELECTED_ZONE_ALPHA) else Color.White.copy(alpha = ZONE_ALPHA),
+                if (selected) accent.copy(alpha = SELECTED_ZONE_ALPHA) else FixedColors.screenWhite.copy(alpha = ZONE_ALPHA),
                 shape
             )
             // Two pixels when selected: these cells sit on black whatever the theme, so a light
             // theme's primary is a dark blue there and the fill alone barely separates from grey.
             .border(
                 if (selected) 2.dp else 1.dp,
-                if (selected) accent else Color.White.copy(alpha = ZONE_BORDER_ALPHA),
+                if (selected) accent else FixedColors.screenWhite.copy(alpha = ZONE_BORDER_ALPHA),
                 shape
             )
             .clickable(onClick = onClick)
@@ -453,14 +453,14 @@ private fun ZoneLabelCell(
                     fontSize = fitted.sp,
                     lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = ZONE_CAPTION_ALPHA),
+                    color = FixedColors.screenWhite.copy(alpha = ZONE_CAPTION_ALPHA),
                 )
                 Text(
                     text = body,
                     style = base,
                     fontSize = fitted.sp,
                     lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
-                    color = Color.White.copy(alpha = if (text.isBlank()) ZONE_BORDER_ALPHA else 1f),
+                    color = FixedColors.screenWhite.copy(alpha = if (text.isBlank()) ZONE_BORDER_ALPHA else 1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
@@ -470,7 +470,7 @@ private fun ZoneLabelCell(
                     lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
                     // White on the selected cell: its fill is already the accent, and the accent
                     // on top of itself is a light theme's dark blue on dark blue.
-                    color = if (selected) Color.White else Color.White.copy(alpha = ZONE_CAPTION_ALPHA),
+                    color = if (selected) FixedColors.screenWhite else FixedColors.screenWhite.copy(alpha = ZONE_CAPTION_ALPHA),
                 )
             }
         }

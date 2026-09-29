@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import org.churchpresenter.app.churchpresenter.presenter.textOnly
 import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -154,7 +155,7 @@ internal fun BiblePreviewPanel(
             Text(
                 text = stringResource(Res.string.bible_preview_no_translations),
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = EMPTY_NOTE_ALPHA),
+                color = FixedColors.inkLight.copy(alpha = EMPTY_NOTE_ALPHA),
                 modifier = Modifier.align(Alignment.Center),
             )
         } else {

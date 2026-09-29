@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -289,11 +290,11 @@ internal fun ScheduleItemRow(
                 .raised(
                     CARD_SHAPE,
                     RaisedFill(
-                        top = lerp(cardBg, Color.White, CARD_TOP_LIFT),
+                        top = lerp(cardBg, FixedColors.inkLight, CARD_TOP_LIFT),
                         bottom = cardBg,
                         ink = MaterialTheme.colorScheme.onSurface,
                         highlight = Color.Transparent,
-                        glow = Color.Black,
+                        glow = MaterialTheme.colorScheme.scrim,
                     ),
                     elevationPalette(),
                     hovered = hovered,

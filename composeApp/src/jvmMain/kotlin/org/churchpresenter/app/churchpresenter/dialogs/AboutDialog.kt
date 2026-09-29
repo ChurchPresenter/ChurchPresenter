@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.theme.components.RaisedButton
@@ -204,7 +204,7 @@ internal fun AboutDialogContent(
                         .background(
                             Brush.linearGradient(
                                 listOf(
-                                    lerp(MaterialTheme.colorScheme.primary, Color.Black, GRADIENT_DARKEN),
+                                    lerp(MaterialTheme.colorScheme.primary, FixedColors.inkDark, GRADIENT_DARKEN),
                                     MaterialTheme.colorScheme.primary
                                 )
                             )

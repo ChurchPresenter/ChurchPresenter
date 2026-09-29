@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -35,10 +35,10 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 internal fun TransposeOverlay(steps: Int, onStep: (Int?) -> Unit, modifier: Modifier = Modifier) {
-    val ink = Color.White
+    val ink = FixedColors.inkLight
     Row(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.6f), AppShape(4.dp))
+            .background(FixedColors.inkDark.copy(alpha = 0.6f), AppShape(4.dp))
             .padding(horizontal = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp),

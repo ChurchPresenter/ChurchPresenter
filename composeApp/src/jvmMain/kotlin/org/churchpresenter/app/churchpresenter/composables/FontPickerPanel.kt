@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -303,7 +304,7 @@ internal fun FontPreviewPane(face: FontFace, measured: Boolean, lines: List<Stri
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black, AppShape(6.dp))
+                .background(FixedColors.screenBlack, AppShape(6.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp))
                 .padding(horizontal = 11.dp, vertical = 9.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -317,7 +318,7 @@ internal fun FontPreviewPane(face: FontFace, measured: Boolean, lines: List<Stri
                     fontSize = 15.sp,
                     lineHeight = 19.sp,
                     fontFamily = if (drawable || !measured) family else null,
-                    color = if (drawable || !measured) Color.White else Color.White.copy(alpha = 0.45f),
+                    color = if (drawable || !measured) FixedColors.screenWhite else FixedColors.screenWhite.copy(alpha = 0.45f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )

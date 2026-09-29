@@ -38,6 +38,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -1015,7 +1016,7 @@ fun AnnouncementsTab(
                                 .aspectRatio(previewOutput.size.aspectRatio, matchHeightConstraintsFirst = true)
                                 .testTag(ANNOUNCEMENTS_PREVIEW_TAG)
                                 .clip(AppShape(4.dp))
-                                .background(Color.Black)
+                                .background(FixedColors.screenBlack)
                                 .border(
                                     BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                                     AppShape(4.dp)

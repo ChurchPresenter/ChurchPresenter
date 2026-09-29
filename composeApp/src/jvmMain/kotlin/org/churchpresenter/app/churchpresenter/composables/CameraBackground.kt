@@ -18,7 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.theme.FixedColors
 import androidx.compose.ui.layout.ContentScale
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.camera.asCameraSource
@@ -60,6 +60,6 @@ fun CameraBackground(camera: CameraDeviceRef, modifier: Modifier = Modifier) {
             modifier = modifier.fillMaxSize(),
         )
     } else {
-        Box(modifier.fillMaxSize().background(Color.Black))
+        Box(modifier.fillMaxSize().background(FixedColors.screenBlack))
     }
 }
