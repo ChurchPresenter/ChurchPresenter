@@ -31,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.profile_adjust
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_blocks
+import churchpresenter.composeapp.generated.resources.profile_adjust_guide_boxes
 import churchpresenter.composeapp.generated.resources.profile_page_title
 import churchpresenter.composeapp.generated.resources.profile_preview_larger
 import churchpresenter.composeapp.generated.resources.profile_reset_positions
@@ -70,24 +71,29 @@ internal fun adjustModelFor(
     )
     CustomizePane.SONGS -> songAdjustModel(draft, profile, songTargets, onSettingsChange)
     CustomizePane.CAPTIONS -> draft.sttSettings.let { stt ->
-        pageBoxTargets(stt.textBoxes, stt.textBoxOptions) { boxes ->
+        boxesOnlyAdjustModel(pageBoxTargets(stt.textBoxes, stt.textBoxOptions) { boxes ->
             onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textBoxes = boxes)) }
-        }?.let(::boxesOnlyAdjustModel)
+        })
     }
     CustomizePane.SUBTITLES -> draft.mediaSettings.let { media ->
-        pageBoxTargets(media.textBoxes, media.textBoxOptions) { boxes ->
+        boxesOnlyAdjustModel(pageBoxTargets(media.textBoxes, media.textBoxOptions) { boxes ->
             onSettingsChange { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) }
-        }?.let(::boxesOnlyAdjustModel)
+        })
     }
     CustomizePane.QA -> draft.qaSettings.let { qa ->
-        pageBoxTargets(qa.textBoxes, qa.textBoxOptions) { boxes ->
+        boxesOnlyAdjustModel(pageBoxTargets(qa.textBoxes, qa.textBoxOptions) { boxes ->
             onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textBoxes = boxes)) }
-        }?.let(::boxesOnlyAdjustModel)
+        })
     }
     CustomizePane.DICTIONARY -> draft.dictionarySettings.let { ds ->
-        pageBoxTargets(ds.textBoxes, ds.textBoxOptions) { boxes ->
+        boxesOnlyAdjustModel(pageBoxTargets(ds.textBoxes, ds.textBoxOptions) { boxes ->
             onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(textBoxes = boxes)) }
-        }?.let(::boxesOnlyAdjustModel)
+        })
+    }
+    CustomizePane.STAGE_MONITOR -> draft.stageMonitorSettings.let { sm ->
+        boxesOnlyAdjustModel(pageBoxTargets(sm.textBoxes, sm.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(stageMonitorSettings = s.stageMonitorSettings.copy(textBoxes = boxes)) }
+        })
     }
     else -> null
 }
@@ -155,6 +161,7 @@ internal fun EditorPreview(
                 { adjust = it },
                 adjustModel.band != null,
                 adjustModel.hasBlocks,
+                boxesOnly = adjustModel.boxesOnly,
             )
             adjustModel?.positions?.let { ResetPositionsKey(it) }
         },
@@ -197,7 +204,14 @@ internal fun LargerKey(onClick: () -> Unit) {
 
 /** Adjust on preview, and -- while it is on -- what the handles do. */
 @Composable
-internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: Boolean, blocks: Boolean = false) {
+internal fun AdjustSwitch(
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+    band: Boolean,
+    blocks: Boolean = false,
+    /** A page with only text boxes to adjust, whose guide says so. */
+    boxesOnly: Boolean = false,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier
@@ -213,7 +227,14 @@ internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: B
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        if (checked) {
+        if (checked && boxesOnly) {
+            Text(
+                stringResource(Res.string.profile_adjust_guide_boxes),
+                fontSize = 11.sp,
+                lineHeight = 15.sp,
+                color = profilesPalette().faintText,
+            )
+        } else if (checked) {
             Text(
                 stringResource(if (band) Res.string.profile_adjust_guide_band else Res.string.profile_adjust_guide),
                 fontSize = 11.sp,

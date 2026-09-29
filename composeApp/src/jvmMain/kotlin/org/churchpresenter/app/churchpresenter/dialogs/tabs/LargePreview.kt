@@ -124,6 +124,7 @@ internal fun LargePreview(
                     onAdjustChange,
                     adjustModel.band != null,
                     adjustModel.hasBlocks,
+                    boxesOnly = adjustModel.boxesOnly,
                 )
             }
             BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {

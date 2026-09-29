@@ -3336,6 +3336,7 @@
     <string name="profile_region_moves_background">Background follows Content Region</string>
     <string name="profile_region_moves_background_sub">On: the background shrinks and moves with the text. Off: the background fills the screen and only the text moves.</string>
     <string name="profile_box">Text box</string>
+    <string name="profile_adjust_guide_boxes">Click a text box to pick it, drag it to move it and drag its corners and edges to resize it. Turn on a text box in the Text boxes group below to place an item here.</string>
     <string name="preview_layout_empty_area">Empty</string>
     <string name="preview_layout_none">No layout yet: every output is listed one per row. Start one from a template below.</string>
     <string name="preview_layout_new">New layout</string>

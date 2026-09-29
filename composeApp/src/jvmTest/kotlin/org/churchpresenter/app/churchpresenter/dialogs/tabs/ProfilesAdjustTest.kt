@@ -217,10 +217,10 @@ class ProfilesAdjustTest {
     }
 
     @Test
-    fun `the stage layout has no handles and no Larger`() =
+    fun `the stage layout has Adjust for its zone boxes, and no Larger`() =
         profilesTab(doc(Constants.DISPLAY_MODE_STAGE_MONITOR)) { _ ->
             openCustomizePane(CustomizePane.STAGE_MONITOR)
             assertEquals(0, countTag(PREVIEW_LARGER_TAG))
-            assertEquals(0, countTag(ADJUST_SWITCH_TAG))
+            assertEquals(1, countTag(ADJUST_SWITCH_TAG))
         }
 }
