@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar.ui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.pressKey
@@ -251,7 +252,7 @@ class PreflightAndMeasuredTest {
     fun `every problem has words, with and without a fix`() = runComposeUiTest {
         setContent {
             AppThemeWrapper(theme = ThemeMode.LIGHT) {
-                androidx.compose.foundation.layout.Column {
+                Column {
                     PreflightProblem.entries.forEach { ProblemMark(it, onFix = {}) }
                     ProblemMark(PreflightProblem.MISSING_FILE, onFix = null)
                 }

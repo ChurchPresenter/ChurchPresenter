@@ -63,7 +63,9 @@ bash cleanup_check.sh          # wildcard, Material 2, prints, FQN, unused-code 
 ./gradlew :composeApp:detekt   # CI's first gate — run it last
 ```
 
-`cleanup_check.sh` scans `composeApp/src/` only. For a module, run its own `detekt` task.
+`cleanup_check.sh` checks `composeApp/src/` in full and every module of the build for wildcard
+imports, Material 2, prints and fully qualified names (listing only the modules with a finding),
+then compiles everything for the unused-code counts. Run each touched module's `detekt` as well.
 
 ### Detailed checks
 
@@ -120,6 +122,9 @@ comm -23 \
   trace of a native library failing on an operator's machine.
 - `println` in the CLI tools (`presentation-engine` `DumpKeynote`/`DumpTiming`/`MakeSampleDeck`,
   `bible-engine` `tools/`, `lottieGenerator` `DumpStyleReview`) — printing is their purpose.
+- `println` in `bible-engine`'s standalone launch (`Main.kt`, `AppConfig.kt`) and behind its
+  `verboseLog` flag — the engine's own console output; the app runs it in-process with the flag
+  off. `cleanup_check.sh` skips exactly these and the `tools/` packages.
 - Hardcoded `"%"` suffixes on dynamic values — the percent sign is identical in every supported
   locale.
 

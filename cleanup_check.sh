@@ -63,12 +63,48 @@ else
     echo "   ✅ PASS"
 fi
 
+# ── The modules ──────────────────────────────────────────────────────────────────────────────
+# Every other module of the build (settings.gradle.kts), main and test sources. The print check
+# covers main sources only and skips what prints on purpose: CLI tools under a `tools/` package,
+# bible-engine's standalone-launch files (Main.kt, AppConfig.kt), and lines behind its
+# `verboseLog` flag. DEVELOPMENT_GUIDE.md's decision log lists the same exceptions.
+echo ""
+echo "Modules:"
+MODULES=$(grep -oE 'include\(":[A-Za-z-]+"\)' settings.gradle.kts | sed -E 's/include\(":(.*)"\)/\1/' | grep -v '^composeApp$')
+MOD_CRITICAL=0
+MOD_WARNINGS=0
+MOD_DIRTY=0
+for MOD in $MODULES; do
+    [ -d "$MOD/src" ] || continue
+    M_WILD=$(grep -rE '^import .*\.\*$' --include='*.kt' "$MOD/src" 2>/dev/null | wc -l | tr -d ' ')
+    M_M2=$(grep -r 'import androidx\.compose\.material\.' --include='*.kt' "$MOD/src" 2>/dev/null \
+        | grep -v 'import androidx\.compose\.material\.icons' | wc -l | tr -d ' ')
+    M_PRINT=$(grep -rE '\b(println|print)\(' --include='*.kt' "$MOD/src/main" 2>/dev/null \
+        | grep -v 'System\.err\.println' \
+        | grep -vE '/tools/|bible-engine/.*/(Main|AppConfig)\.kt:|verboseLog' | wc -l | tr -d ' ')
+    M_FQN=$(grep -rE 'androidx\.compose\.[a-z]*\.[a-zA-Z]*\.[A-Z]' --include='*.kt' "$MOD/src" 2>/dev/null \
+        | grep -vE '^\S*:\s*import\b' \
+        | grep -vE '@file:OptIn|@OptIn' \
+        | grep -vE '^\S*:\s*(\*|//|/\*)' \
+        | wc -l | tr -d ' ')
+    MOD_CRITICAL=$((MOD_CRITICAL + M_WILD + M_M2))
+    MOD_WARNINGS=$((MOD_WARNINGS + M_PRINT + M_FQN))
+    if [ $((M_WILD + M_M2 + M_PRINT + M_FQN)) -gt 0 ]; then
+        MOD_DIRTY=$((MOD_DIRTY + 1))
+        printf "   ❌ %-22s wildcard %s · Material 2 %s · prints %s · FQN %s\n" "$MOD" "$M_WILD" "$M_M2" "$M_PRINT" "$M_FQN"
+    fi
+done
+if [ "$MOD_DIRTY" -eq 0 ]; then
+    echo "   ✅ PASS — $(echo "$MODULES" | wc -l | tr -d ' ') modules clean"
+fi
+
 echo ""
 echo "Building project to check for warnings..."
 echo ""
 
-# Build and check for unused code
-./gradlew compileKotlinJvm --no-daemon 2>&1 > /tmp/build_output.txt
+# Build and check for unused code. `compileKotlin` with no project path compiles every JVM module;
+# stderr is captured too, which is where the compiler's warnings go.
+./gradlew compileKotlinJvm compileKotlin --no-daemon > /tmp/build_output.txt 2>&1
 
 UNUSED_IMPORTS=$(grep 'Unused import' /tmp/build_output.txt | wc -l | tr -d ' ')
 echo "📥 Unused imports: $UNUSED_IMPORTS"
@@ -96,6 +132,8 @@ if [ "$MATERIAL2" -gt 0 ]; then CRITICAL=$((CRITICAL+1)); fi
 if [ "$PRINTS" -gt 0 ]; then WARNINGS=$((WARNINGS+1)); fi
 if [ "$QUALIFIED" -gt 0 ]; then WARNINGS=$((WARNINGS+1)); fi
 if [ "$UNUSED_IMPORTS" -gt 0 ]; then WARNINGS=$((WARNINGS+1)); fi
+if [ "$MOD_CRITICAL" -gt 0 ]; then CRITICAL=$((CRITICAL+1)); fi
+if [ "$MOD_WARNINGS" -gt 0 ]; then WARNINGS=$((WARNINGS+1)); fi
 
 if [ "$CRITICAL" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
     echo "✅ All checks passed! Code is ready to commit."
