@@ -1600,12 +1600,15 @@ fun SongPresenter(
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
                                 HeldOnLyrics(fillHeight = stackedBands) {
-                                val stackedGap = ss.layoutExtras.stackedLanguageGap()
+                                val stackedGapDp = (ss.layoutExtras.stackedLanguageGap() * scaleFactor).dp
                                 val sideGap = ss.layoutExtras.sideBySideLanguageGap()
                                 // No gap is the columns' old `SpaceEvenly`, which equal weights leave with
                                 // nothing to spread; a gap is spaced between them.
-                                val sideBySideArrangement =
-                                    if (sideGap == 0) Arrangement.SpaceEvenly else Arrangement.spacedBy((sideGap * scaleFactor).dp)
+                                val sideBySideArrangement = if (sideGap == 0) {
+                                    Arrangement.SpaceEvenly
+                                } else {
+                                    Arrangement.spacedBy((sideGap * scaleFactor).dp)
+                                }
                                 if (isMultiLanguage) {
                                     if (useGrid2x2) {
                                         // Two rows of up to two languages each. `chunked(2)` on
@@ -1615,7 +1618,7 @@ fun SongPresenter(
                                         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                             languageBlocks.chunked(2).forEachIndexed { rowIndex, row ->
                                                 if (rowIndex > 0) {
-                                                    Spacer(modifier = Modifier.padding(top = (stackedGap * scaleFactor).dp))
+                                                    Spacer(modifier = Modifier.padding(top = stackedGapDp))
                                                 }
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -1659,7 +1662,7 @@ fun SongPresenter(
                                         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                             languageBlocks.forEachIndexed { position, block ->
                                                 if (position > 0) {
-                                                    Spacer(modifier = Modifier.padding(top = (stackedGap * scaleFactor).dp))
+                                                    Spacer(modifier = Modifier.padding(top = stackedGapDp))
                                                 }
                                                 LanguageLines(block)
                                                 EndOfSongIndicator()
@@ -1672,7 +1675,7 @@ fun SongPresenter(
                                         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                                             languageBlocks.forEachIndexed { position, block ->
                                                 if (position > 0) {
-                                                    Spacer(modifier = Modifier.padding(top = (stackedGap * scaleFactor).dp))
+                                                    Spacer(modifier = Modifier.padding(top = stackedGapDp))
                                                 }
                                                 Box(
                                                     modifier = Modifier.fillMaxWidth().weight(1f),

@@ -116,7 +116,7 @@ internal fun SongPreviewPanel(
                     } else {
                         Modifier.wholeOutputRegion(song.layoutExtras.contentRegion)
                     },
-                    textRegion = if (target.isLowerThird) null else song.layoutExtras.contentRegion.textOnly(),
+                    textRegion = song.layoutExtras.contentRegion.textOnly(target.isLowerThird),
                     lyricSection = sections.first(),
                     appSettings = settings,
                     isLowerThird = target.isLowerThird,

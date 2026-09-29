@@ -115,7 +115,9 @@ internal fun ProfileSongsPage(
             ) {
                 RowStepper(
                     value = song.layoutExtras.languageGap ?: DEFAULT_STACKED_LANGUAGE_GAP,
-                    onValueChange = { v -> updateSong { it.copy(layoutExtras = it.layoutExtras.copy(languageGap = v)) } },
+                    onValueChange = { v ->
+                        updateSong { it.copy(layoutExtras = it.layoutExtras.copy(languageGap = v)) }
+                    },
                     range = LANGUAGE_GAP_RANGE,
                     step = LANGUAGE_GAP_STEP,
                     unit = stringResource(Res.string.unit_px),

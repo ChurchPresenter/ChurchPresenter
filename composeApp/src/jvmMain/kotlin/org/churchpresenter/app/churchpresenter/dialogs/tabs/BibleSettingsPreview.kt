@@ -172,7 +172,7 @@ internal fun BiblePreviewPanel(
                         } else {
                             Modifier.wholeOutputRegion(bible.contentRegion)
                         },
-                        textRegion = if (target.isLowerThird) null else bible.contentRegion.textOnly(),
+                        textRegion = bible.contentRegion.textOnly(target.isLowerThird),
                         selectedVerses = selectedVerses,
                         appSettings = settings,
                         isLowerThird = target.isLowerThird,

@@ -114,7 +114,7 @@ internal fun PresenterModeContent(
                     } else {
                         Modifier.wholeOutputRegion(appSettings.bibleSettings.contentRegion)
                     },
-                    textRegion = if (profile.isLowerThird) null else appSettings.bibleSettings.contentRegion.textOnly(),
+                    textRegion = appSettings.bibleSettings.contentRegion.textOnly(profile.isLowerThird),
                     selectedVerses = displayedVerses,
                     appSettings = appSettings,
                     isLowerThird = profile.isLowerThird,
@@ -135,7 +135,7 @@ internal fun PresenterModeContent(
                     } else {
                         Modifier.wholeOutputRegion(appSettings.songSettings.layoutExtras.contentRegion)
                     },
-                    textRegion = if (profile.isLowerThird) null else appSettings.songSettings.layoutExtras.contentRegion.textOnly(),
+                    textRegion = appSettings.songSettings.layoutExtras.contentRegion.textOnly(profile.isLowerThird),
                     lyricSection = displayedLyricSection,
                     appSettings = appSettings,
                     isLowerThird = profile.isLowerThird,

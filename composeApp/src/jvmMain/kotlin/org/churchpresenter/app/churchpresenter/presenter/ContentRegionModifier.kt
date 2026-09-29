@@ -94,8 +94,12 @@ internal fun Modifier.elementOffset(offset: ElementOffset?): Modifier {
 internal fun Modifier.wholeOutputRegion(region: ContentRegion): Modifier =
     if (region.movesBackground) contentRegion(region) else this
 
-/** The region the presenter places its text in by itself: [this] when it keeps the background full screen. */
-internal fun ContentRegion.textOnly(): ContentRegion? = takeUnless { movesBackground }
+/**
+ * The region the presenter places its text in by itself: [this] when it keeps the background full
+ * screen. None on a [lowerThird], whose band already is its region.
+ */
+internal fun ContentRegion.textOnly(lowerThird: Boolean): ContentRegion? =
+    takeUnless { movesBackground || lowerThird }
 
 /**
  * The box a presenter lays its text out in, over a background that has already filled the screen:
@@ -103,7 +107,8 @@ internal fun ContentRegion.textOnly(): ContentRegion? = takeUnless { movesBackgr
  */
 @Composable
 internal fun TextRegionBox(region: ContentRegion?, content: @Composable BoxWithConstraintsScope.() -> Unit) {
-    BoxWithConstraints(Modifier.fillMaxSize().then(region?.let { Modifier.contentRegion(it) } ?: Modifier), content = content)
+    val regionModifier = region?.let { Modifier.contentRegion(it) } ?: Modifier
+    BoxWithConstraints(Modifier.fillMaxSize().then(regionModifier), content = content)
 }
 
 /**
