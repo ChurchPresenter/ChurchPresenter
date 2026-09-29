@@ -127,10 +127,9 @@ class ProfilesAdjustTest {
     @Test
     fun `a block picked on the preview is what the rows edit, and moves on its own`() = profilesTab(doc()) { get ->
         bibleAdjusting()
-        assertEquals(0, countTag(ADJUST_BLOCK_MOVE_TAG), "nothing is picked under All")
         tapAt(adjustBlockTag(1), Offset(160f, 4f))
-        assertEquals(1, countTag(ADJUST_BLOCK_MOVE_TAG))
-        dragTag(ADJUST_BLOCK_MOVE_TAG, 10f, 10f)
+        // The block itself is the handle that moves it.
+        dragTagFrom(adjustBlockTag(1), Offset(160f, 4f), 10f, 10f)
         val (kjv, rst) = get().bible().translationList()
         assertTrue(rst.shiftX > 0 && rst.shiftY > 0,
                 "rst ${rst.shiftX},${rst.shiftY} kjv ${kjv.shiftX},${kjv.shiftY}")
@@ -193,7 +192,7 @@ class ProfilesAdjustTest {
         // Blocks run number, title, section label, then each language's lyrics: the second
         // language's is the fifth.
         tapAt(adjustBlockTag(4), Offset(160f, 4f))
-        dragTag(ADJUST_BLOCK_MOVE_TAG, 0f, 10f)
+        dragTagFrom(adjustBlockTag(4), Offset(160f, 4f), 0f, 10f)
         val key = songShiftKey(SongStyleElement.LYRICS, lowerThird = false, language = 1)
         assertTrue(get().song().shiftAt(key).second > 0)
     }
@@ -211,7 +210,7 @@ class ProfilesAdjustTest {
         // Blocks run number, title, then the section label. Clicked near its left end: the lyrics'
         // own Move handle sits over the middle of the verse's top edge, where the label now is.
         tapAt(adjustBlockTag(2), Offset(20f, 4f))
-        dragTag(ADJUST_BLOCK_MOVE_TAG, 30f, 10f)
+        dragTagFrom(adjustBlockTag(2), Offset(20f, 4f), 30f, 10f)
         val key = songShiftKey(SongStyleElement.SECTION_LABEL, lowerThird = false)
         val (x, y) = get().song().shiftAt(key)
         assertTrue(x > 0 && y > 0, "the label moved on its own: $x, $y")

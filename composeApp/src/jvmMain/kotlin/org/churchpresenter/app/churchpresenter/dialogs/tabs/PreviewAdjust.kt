@@ -4,6 +4,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -27,6 +29,8 @@ internal class AdjustModel(
     val blocks: BlockTargets? = null,
     /** Every element moved on its own put back where the layout puts it; null where nothing moves. */
     val positions: PositionsReset? = null,
+    /** The page's text boxes on this output, to pick, move and resize; null on a page without any. */
+    val boxes: BoxTargets? = null,
 ) {
     /** More than one block to pick from, or a reference to drag. */
     val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.reference != null)
@@ -57,6 +61,25 @@ internal class BlockTargets(
 internal class ReferenceTarget(
     val shift: Adjustable<Pair<Int, Int>>,
     val picked: Boolean,
+    val onPick: () -> Unit,
+)
+
+/**
+ * A page's text boxes on this output: each one turned on, as [handles], and the key of the one the
+ * Text rows point at -- [selected], which gets the move and resize handles. [options] say what the
+ * boxes are measured against and whether a dragged box snaps.
+ */
+internal class BoxTargets(
+    val handles: List<BoxHandle>,
+    val selected: String?,
+    val options: TextBoxOptions,
+)
+
+/** One text box on the preview: its key, the box as stored, how to write it, and how to point the rows at it. */
+internal class BoxHandle(
+    val key: String,
+    val box: TextBox,
+    val onChange: (TextBox) -> Unit,
     val onPick: () -> Unit,
 )
 

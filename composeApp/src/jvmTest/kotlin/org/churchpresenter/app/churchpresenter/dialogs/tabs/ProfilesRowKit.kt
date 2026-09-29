@@ -101,6 +101,18 @@ internal fun ComposeUiTest.dragTag(tag: String, dx: Float, dy: Float, nth: Int =
     waitForIdle()
 }
 
+/** Drags the node tagged [tag] by [dx] × [dy], from [at] inside it rather than from its centre. */
+internal fun ComposeUiTest.dragTagFrom(tag: String, at: Offset, dx: Float, dy: Float) {
+    onAllNodes(hasTestTag(tag), useUnmergedTree = true)[0].performMouseInput {
+        moveTo(at)
+        press()
+        moveBy(Offset(dx / 2, dy / 2))
+        moveBy(Offset(dx / 2, dy / 2))
+        release()
+    }
+    waitForIdle()
+}
+
 /** How many nodes are tagged [tag]. */
 internal fun ComposeUiTest.countTag(tag: String): Int =
     onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().size

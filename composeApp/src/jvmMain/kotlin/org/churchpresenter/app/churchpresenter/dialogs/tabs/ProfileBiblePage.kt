@@ -27,6 +27,7 @@ import churchpresenter.composeapp.generated.resources.profile_split_words
 import churchpresenter.composeapp.generated.resources.profile_translation_divider
 import churchpresenter.composeapp.generated.resources.words_suffix
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.app.churchpresenter.presenter.bibleBoxKey
 import org.churchpresenter.app.churchpresenter.presenter.movedOn
 import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
 import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
@@ -41,10 +42,12 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.allStyle
+import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.clearOwnStyle
 import org.churchpresenter.settings.updateAllLayer
 import org.churchpresenter.settings.updateOwnStyle
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.withBox
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -625,7 +628,10 @@ internal fun bibleAdjustModel(
         },
         blocks = bibleBlocks(edit, translation.onChange, onElementChange),
         positions = PositionsReset(
-            moved = (bs.translations + listOfNotNull(bs.allTranslationStyle)).any { it.movedOn(edit.lowerThird) },
+            moved = (bs.translations + listOfNotNull(bs.allTranslationStyle)).any { it.movedOn(edit.lowerThird) } ||
+                bs.textBoxes.any { (key, box) ->
+                    box.enabled && key.endsWith(LOWER_THIRD_BOX_SUFFIX) == edit.lowerThird
+                },
         ) {
             val lowerThird = edit.lowerThird
             onSettingsChange { s ->
@@ -634,11 +640,57 @@ internal fun bibleAdjustModel(
                     bibleSettings = bible.copy(
                         translations = bible.translations.map { it.withMovesCleared(lowerThird) },
                         allTranslationStyle = bible.allTranslationStyle?.withMovesCleared(lowerThird),
+                        // Boxes are turned off, not forgotten: turning one back on puts it where it was.
+                        textBoxes = bible.textBoxes.mapValues { (key, box) ->
+                            if (key.endsWith(LOWER_THIRD_BOX_SUFFIX) == lowerThird) box.copy(enabled = false) else box
+                        },
                     ),
                 )
             }
         },
+        boxes = bibleBoxTargets(edit, translation.onChange, onElementChange),
     )
+}
+
+/** The suffix a lower third's box keys carry -- see `textBoxKey`. */
+private const val LOWER_THIRD_BOX_SUFFIX = "@LT"
+
+/**
+ * Each shown translation's verse and reference boxes on this output, one handle each -- one in all
+ * where the translations share a box -- and the one the Text rows point at; null while none is on.
+ */
+private fun bibleBoxTargets(
+    edit: BibleEdit,
+    onTranslationChange: (Int) -> Unit,
+    onElementChange: (CustomizeElement) -> Unit,
+): BoxTargets? {
+    val bs = edit.bs
+    val shown = edit.shownPositions.filter { it in edit.stack.indices }
+    val handles = shown.flatMap { position ->
+        val fileName = edit.stack[position].fileName
+        BibleStyleElement.entries.mapNotNull { element ->
+            val key = bs.bibleBoxKey(element, edit.lowerThird, fileName)
+            val box = bs.textBoxes.boxAt(key)
+            if (!box.enabled) return@mapNotNull null
+            BoxHandle(
+                key = key,
+                box = box,
+                onChange = { changed -> edit.updateBible { it.copy(textBoxes = it.textBoxes.withBox(key, changed)) } },
+                onPick = {
+                    onTranslationChange(position)
+                    onElementChange(
+                        if (element == BibleStyleElement.REFERENCE) {
+                            CustomizeElement.BIBLE_REFERENCE
+                        } else {
+                            CustomizeElement.BIBLE_TEXT
+                        },
+                    )
+                },
+            )
+        }
+    }.distinctBy { it.key }
+    if (handles.isEmpty()) return null
+    return BoxTargets(handles, edit.boxTarget()?.key, bs.textBoxOptions)
 }
 
 /**

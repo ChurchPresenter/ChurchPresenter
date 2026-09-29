@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -35,8 +36,10 @@ import churchpresenter.composeapp.generated.resources.profile_adjust_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_size
 import churchpresenter.composeapp.generated.resources.profile_adjust_width
 import kotlin.math.roundToInt
+import org.churchpresenter.app.churchpresenter.presenter.BoxMargins
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.app.churchpresenter.presenter.textBoxArea
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.theme.AppShape
@@ -109,13 +112,24 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
                 .dashedBorder(MaterialTheme.semantic.adjustHandle, 2.dp),
         )
         // Under every handle: a block is large, and the bars at its edges must still be caught.
-        if (targets != null) BlockOutlines(targets, blockFrames)
+        if (targets != null) BlockOutlines(targets, blockFrames, scale)
+        model.boxes?.let { boxes ->
+            val bandRect = model.band?.let { Rect(0f, bandTop.value, stageWidth.value, stageHeight.value) }
+            val area = textBoxArea(
+                outputWidth = stageWidth.value,
+                outputHeight = stageHeight.value,
+                options = boxes.options,
+                margins = BoxMargins(m.left * scale, m.top * scale, m.right * scale, m.bottom * scale),
+                band = bandRect,
+            )
+            BoxHandles(boxes, area, scale)
+        }
         MarginBars(model, frame, scale, MarginRoom.of(output.width, output.height, model.band?.value))
         model.band?.let { BandBar(it, bandTop, stageWidth, stageHeight) }
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
         MoveHandle(model, frame, scale)
-        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, referenceBounds, scale)
+        if (targets != null) BlockGrips(targets, referenceFrame, referenceBounds, scale)
         // The size corner sits on what it sizes -- the reference, or the picked block -- drawn last,
         // since that corner is often where the reference sits too.
         val sized = if (targets?.reference?.picked == true) referenceFrame
