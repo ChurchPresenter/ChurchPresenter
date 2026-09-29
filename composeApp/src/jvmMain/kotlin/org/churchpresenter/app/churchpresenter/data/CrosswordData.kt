@@ -309,8 +309,9 @@ object CrosswordLayoutEngine {
             .mapIndexed { idx, pos -> pos to (idx + 1) }
             .toMap()
 
+        // Every placed entry's start cell is a key of cellNumber, which was built from them.
         val oldToNew = placed.associate { pe ->
-            pe.number to cellNumber[(pe.row - minRow) to (pe.col - minCol)]!!
+            pe.number to cellNumber.getValue((pe.row - minRow) to (pe.col - minCol))
         }
 
         val clueMap = originalClues.associateBy { it.number }
@@ -327,12 +328,12 @@ object CrosswordLayoutEngine {
         val acrossClues = placed
             .filter { it.direction == CrosswordDirection.ACROSS }
             .sortedBy { oldToNew[it.number] }
-            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew[pe.number]!! to it.clue } }
+            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew.getValue(pe.number) to it.clue } }
 
         val downClues = placed
             .filter { it.direction == CrosswordDirection.DOWN }
             .sortedBy { oldToNew[it.number] }
-            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew[pe.number]!! to it.clue } }
+            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew.getValue(pe.number) to it.clue } }
 
         return RenderedCrossword(level, title, rows, acrossClues, downClues)
     }
