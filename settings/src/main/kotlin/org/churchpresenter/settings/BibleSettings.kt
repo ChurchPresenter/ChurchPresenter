@@ -132,22 +132,6 @@ data class BibleTranslationSettings(
     val referenceOutline: TextOutline = TextOutline(),
     val lowerThirdReferenceOutline: TextOutline = TextOutline(),
 
-    // Where the verse text and the reference sit, once the operator positions them rather than
-    // leaving them stacked in the order `referencePosition` gives -- see [ElementOffset]. Null, the
-    // default, is the stack, which is what every one of these has always drawn; a positioned
-    // element leaves it, so `referencePosition` stops applying to a reference that has an offset.
-    //
-    // **One pair per output**, unlike [BibleSettings.contentRegion], which stays full-screen only.
-    // The band was originally excluded on the argument that a strip a third of a screen high has
-    // little room to position anything in -- but that is an argument about how far the numbers move
-    // an element, not about whether the control works, and the request behind it asked for exactly
-    // this: the same styling available separately for full screen and the lower third. A vertical
-    // band is a tall strip with a great deal of room, and moving the reference off the verse's line
-    // is the common case in either shape.
-    val textOffset: ElementOffset? = null,
-    val referenceOffset: ElementOffset? = null,
-    val lowerThirdTextOffset: ElementOffset? = null,
-    val lowerThirdReferenceOffset: ElementOffset? = null,
     /**
      * How far this translation's block is moved from where the layout puts it, in output pixels at
      * 1080 lines -- one translation of a parallel stack nudged on its own. One pair per output.
@@ -400,6 +384,18 @@ data class BibleSettings(
      * decided on length instead, which this does not do.
      */
     val longVerseWordCount: Int = 45,
+    /**
+     * Each translation's verse text and reference boxes, keyed by [textBoxKey] with
+     * [BIBLE_TEXT_BOX] or [BIBLE_REFERENCE_BOX], the translation's file name and the output. A
+     * translation with none, or with one turned off, is laid out as it always was.
+     *
+     * On [BibleSettings] rather than on each [BibleTranslationSettings], so the stack's All layer,
+     * which copies a translation's look from one to the next, never moves one translation's box
+     * onto another.
+     */
+    val textBoxes: Map<String, TextBox> = emptyMap(),
+    /** How the Bible page's boxes behave -- see [TextBoxOptions]. */
+    val textBoxOptions: TextBoxOptions = TextBoxOptions(),
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.
@@ -598,3 +594,9 @@ data class BibleSettings(
      */
     fun swapped() = moveTranslation(0, 1)
 }
+
+/** The item name a translation's verse text box is stored under -- see [BibleSettings.textBoxes]. */
+const val BIBLE_TEXT_BOX = "TEXT"
+
+/** The item name a translation's reference box is stored under -- see [BibleSettings.textBoxes]. */
+const val BIBLE_REFERENCE_BOX = "REFERENCE"

@@ -91,7 +91,7 @@ internal fun ProfileBiblePage(
  * child composable is remembered across compositions, and would keep writing through the document
  * as it was when the page was first drawn. A new instance each composition cannot.
  */
-private class BibleEdit(
+internal class BibleEdit(
     val bs: BibleSettings,
     profile: OutputProfile,
     translationIndex: Int,
@@ -216,11 +216,7 @@ private fun BibleTextGroup(
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
         paths = lookPaths.all,
-        action = ResetAction(
-            style.copy(offset = null) != defaults.copy(offset = null) || edit.referenceShift != (0 to 0),
-        ) {
-            edit.reset(defaults.copy(offset = style.offset))
-        },
+        action = ResetAction(style != defaults || edit.referenceShift != (0 to 0)) { edit.reset(defaults) },
         header = {
             AppliesToStrip(
                 targets = bibleTargets(edit.stack, edit.shownPositions),
@@ -246,6 +242,9 @@ private fun BibleTextGroup(
         // Keyed on what the rows point at: one set of controls stands for many stored styles, and
         // without this a field keeps the text it was typing into the translation it left.
         key(edit.index, edit.styleElement) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
+            val boxes = edit.boxTarget()
+            // A boxed element is placed by its box; its shift stands aside until the box is off.
+            val boxed = boxes?.box?.enabled == true
             TextLookRows(
                 look = style.toLook(),
                 onChange = { look -> edit.writeStyle(style.withLook(look)) },
@@ -259,9 +258,11 @@ private fun BibleTextGroup(
                             { v -> edit.updateEntry { it.copy(showAbbreviation = v) } },
                         )
                     }
+                    BibleBoxRows(boxes, edit)
                 },
                 extraAdvanced = {
                     when {
+                        boxed -> Unit
                         edit.styleElement == BibleStyleElement.REFERENCE -> ReferenceShiftRow(edit)
                         edit.picked -> ShiftRow(edit)
                     }
@@ -394,15 +395,6 @@ private fun BiblePlacementGroups(
                     marginLeft = d.marginLeft,
                     marginRight = d.marginRight,
                     contentRegion = d.contentRegion,
-                )
-            }
-        },
-        extraAdvanced = {
-            key(edit.index, edit.styleElement) {
-                ElementPlacementRows(
-                    offset = edit.style.offset,
-                    onChange = { v -> edit.writeStyle(edit.style.copy(offset = v)) },
-                    tagPrefix = bibleOffsetTag(edit.styleElement),
                 )
             }
         },
@@ -587,10 +579,6 @@ private fun TranslationsGroup(
         )
     }
 }
-
-/** Test handle for one Bible element's positioning switch. */
-internal fun bibleOffsetTag(element: BibleStyleElement): String =
-    if (element == BibleStyleElement.REFERENCE) "bible_reference_offset" else "bible_text_offset"
 
 /** The Adjust handles on the Bible page: its margins and block, and the text its Text rows are pointed at. */
 internal fun bibleAdjustModel(

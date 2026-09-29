@@ -3338,6 +3338,7 @@
     <string name="profile_box">Text box</string>
     <string name="profile_box_sub">Place this item in a box of its own, drawn and resized on the preview. Its text fits inside the box.</string>
     <string name="profile_box_vertical">Vertical</string>
+    <string name="profile_box_pick_translation">Each translation has its own box. Pick a translation above to place it, or set Languages to Share one box under Advanced.</string>
     <string name="profile_box_pick_language">Each language has its own box. Pick a language above to place it, or set Languages to Share one box under Advanced.</string>
     <string name="profile_box_overflow">If text is too big</string>
     <string name="profile_box_overflow_shrink">Shrink to fit</string>
