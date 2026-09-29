@@ -398,7 +398,7 @@ fun LowerThirdTab(
         f.readText()
     }
 
-    val composition by rememberLottieComposition(key = jsonContent) {
+    val composition by rememberLottieComposition(jsonContent) {
         LottieCompositionSpec.JsonString(jsonContent.ifBlank { "{}" })
     }
 

@@ -280,8 +280,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.sqlite.jdbc)
             implementation(libs.kotlinx.serialization.json)
-            implementation("io.github.alexzhirkevich:compottie:2.0.0-rc01")
-            implementation("io.github.alexzhirkevich:compottie-dot:2.0.0-rc01")
+            implementation(libs.compottie)
+            implementation(libs.compottie.dot)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
