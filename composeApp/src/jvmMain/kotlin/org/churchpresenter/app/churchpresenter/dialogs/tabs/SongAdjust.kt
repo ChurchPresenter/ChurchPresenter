@@ -38,7 +38,7 @@ private class SongBlock(val element: SongStyleElement, val language: Int?, lower
 /**
  * The Adjust handles on the Songs page: its margins and block, the size of what the Text rows point
  * at, and every element on the slide as a block of its own -- clicked to point the rows at it, and
- * moved on its own by its blue dot.
+ * dragged by its body to move it on its own.
  */
 internal fun songAdjustModel(
     draft: AppSettings,
