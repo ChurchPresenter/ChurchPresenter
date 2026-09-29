@@ -15,6 +15,25 @@ import java.io.File
 private const val BUNDLED_OMT_DIR = "omt"
 
 /**
+ * Moves last run's [log] aside to `<name>.1`, replacing any older one, so this run starts empty.
+ *
+ * `libomt` never trims its log, and it is not quiet: a Canvas layer whose source has gone away is
+ * retried by the library every couple of seconds, two lines each time — about 3 KB a minute for the
+ * rest of the service (measured on Windows). Two runs is what a support conversation needs, and it
+ * bounds the file by what one run can write rather than letting it grow for as long as the app is
+ * installed. A failed move is not an error worth stopping for: the library then appends, as before.
+ */
+internal fun rotateOmtLog(log: File) {
+    log.parentFile?.mkdirs()
+    if (!log.isFile) return
+    val previous = File(log.parentFile, log.name + ".1")
+    runCatching {
+        previous.delete()
+        log.renameTo(previous)
+    }
+}
+
+/**
  * The app's single `libomt`: the senders opened over it and the receivers the Canvas takes sources
  * back off the network with.
  *
@@ -38,7 +57,7 @@ object OmtManager {
         val result = registry.ensureStarted(
             customPath = customPath,
             bundledDir = bundledDir()?.absolutePath.orEmpty(),
-            logFile = logFile().absolutePath,
+            logFile = logFile.absolutePath,
             discoveryServer = discoveryServer,
         )
         if (result.isReady) registerShutdownHook()
@@ -76,11 +95,15 @@ object OmtManager {
 
     /**
      * The library's own log, in the app's own folder. Left alone, `libomt` writes a new file per
-     * process into a `~/.OMT/logs` the operator never asked for; this keeps it to one file, where a
-     * support conversation would look for it.
+     * process into a `~/.OMT/logs` the operator never asked for; this keeps it where a support
+     * conversation would look for it.
+     *
+     * Started fresh each run, the last run kept beside it — see [rotateOmtLog]. Resolved once, so
+     * the rotation happens once per process however often [ensureStarted] is called.
      */
-    private fun logFile(): File =
-        File(System.getProperty("user.home"), ".churchpresenter/omt.log").also { it.parentFile.mkdirs() }
+    private val logFile: File by lazy {
+        File(System.getProperty("user.home"), ".churchpresenter/omt.log").also(::rotateOmtLog)
+    }
 
     private fun registerShutdownHook() {
         if (shutdownHookRegistered) return

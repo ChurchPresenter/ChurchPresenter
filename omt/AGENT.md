@@ -70,8 +70,12 @@ operator has to install.
   testing on Windows). So `OmtVideoRenderer.stop` sends one blank frame (transparent in Alpha,
   black in Fill) before closing, when anyone is watching; `OmtHardwareTest` checks against the real
   library that this blank is the last thing a receiver gets.
-- **OBS opens a second connection** for a while after it connects (audio, then dropped about a
-  minute later), so an OBS receiver can read as "2 receiving" until it settles.
+- **OBS opens a second connection** beside its video one. One Windows run saw it drop after about a
+  minute; another saw it still open after several — so an OBS receiver often reads as "2 receiving",
+  and OBS plus a Canvas layer as 3.
+- **A vanished source is retried by the library itself**, every couple of seconds, logging each
+  attempt — about 3 KB a minute. Retrying is right (the source may come back), so `OmtManager`
+  bounds the log instead: each run starts `omt.log` fresh and keeps the last run as `omt.log.1`.
 - **The library writes a log** into `~/.OMT/logs` — `C:\ProgramData\OMT\logs` on Windows — one
   file per process, unless told otherwise.
   `OmtManager` points it at `~/.churchpresenter/omt.log`; `setLoggingFilename` must be the first call.
