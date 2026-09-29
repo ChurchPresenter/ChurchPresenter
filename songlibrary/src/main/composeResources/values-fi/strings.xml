@@ -34,7 +34,6 @@
     <string name="revert">Kumoa</string>
     <string name="save_changes">Tallenna muutokset</string>
     <string name="done">Valmis</string>
-    <string name="saved">%1$s tallennettu</string>
     <string name="save_failed">Kohdetta %1$s ei voitu tallentaa</string>
     <string name="new_song_book">Uusi laulukirja</string>
     <string name="new_song_book_subhead">Kokoelma, johon laulut voi sijoittaa</string>

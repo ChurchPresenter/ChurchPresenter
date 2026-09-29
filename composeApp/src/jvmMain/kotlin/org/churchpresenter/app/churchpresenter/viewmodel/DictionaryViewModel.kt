@@ -213,13 +213,14 @@ class DictionaryViewModel {
      * having it still read as its old self here is the kind of half-applied setting that reads as a
      * bug.
      */
-    fun loadAvailableBibles(directory: String, customNames: Map<String, String> = emptyMap()) {
+    /** Scans [directory] for translations; returns the scan's job, or null when there is none to run. */
+    fun loadAvailableBibles(directory: String, customNames: Map<String, String> = emptyMap()): Job? {
         // One scan at a time. Each runs on the IO pool and finishes in its own time, so two folders
         // named in quick succession could answer out of order and the stale scan's list would win
         // -- an empty folder's `emptyList()` landing after the next folder's translations.
         availableBiblesJob?.cancel()
-        if (directory.isEmpty()) { availableDictBibles = emptyList(); return }
-        availableBiblesJob = viewModelScope.launch {
+        if (directory.isEmpty()) { availableDictBibles = emptyList(); return null }
+        return viewModelScope.launch {
             val dir = File(directory)
             if (!dir.exists() || !dir.isDirectory) { availableDictBibles = emptyList(); return@launch }
             availableDictBibles = withContext(Dispatchers.IO) {
@@ -235,7 +236,7 @@ class DictionaryViewModel {
                     }
                     .toList()
             }
-        }
+        }.also { availableBiblesJob = it }
     }
 
     fun setDictBible(filePath: String) {

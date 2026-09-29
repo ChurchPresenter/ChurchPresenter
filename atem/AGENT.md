@@ -26,10 +26,10 @@ inside `ConstantsKt` is exactly how a sibling rename silently rewrote a `mockkSt
 
 | Path | Owns |
 |---|---|
-| `server/AtemClient.kt` | `class AtemClient` — the socket, the packet layer, every command builder and parser; `AtemState`, `AtemMediaSlot`, `AtemProtocolException`, and the `Companion` one-shots (`cutKey`, `cutUpstreamKeyer`, `isReachable`) |
-| `server/AtemConnectionManager.kt` | `object AtemConnectionManager` — one shared client, serialised by a `Mutex`, reconnected lazily when the ATEM expires an idle session |
-| `server/AtemFrameEncoder.kt` | The media-pool frame encoding (10-bit YUV + RLE) |
-| `server/AtemUploadStatus.kt` | `object AtemUploadStatus` — the upload progress `StateFlow` the UI observes |
+| `AtemClient.kt` | `class AtemClient` — the socket, the packet layer, every command builder and parser; `AtemState`, `AtemMediaSlot`, `AtemProtocolException`, and the `Companion` one-shots (`cutKey`, `cutUpstreamKeyer`, `isReachable`) |
+| `AtemConnectionManager.kt` | `object AtemConnectionManager` — one shared client, serialised by a `Mutex`, reconnected lazily when the ATEM expires an idle session |
+| `AtemFrameEncoder.kt` | The media-pool frame encoding (10-bit YUV + RLE) |
+| `AtemUploadStatus.kt` | `object AtemUploadStatus` — the upload progress `StateFlow` the UI observes |
 | `src/testFixtures/…/FakeAtemSwitcher.kt` | The loopback switcher every suite here drives, and the app's ATEM suites borrow |
 
 ## What deliberately stayed in `:composeApp`

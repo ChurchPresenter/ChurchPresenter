@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
@@ -35,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -152,7 +154,7 @@ internal fun SongBackgroundLibrary(
 private val SCROLLBAR_GUTTER = 8.dp
 
 /** The tiles for Images and Videos: Browse… first, then the stock library. */
-private fun androidx.compose.foundation.lazy.grid.LazyGridScope.mediaTiles(
+private fun LazyGridScope.mediaTiles(
     category: String,
     entries: List<LibraryEntry>,
     background: SongBackground,
@@ -215,7 +217,7 @@ private fun ColorTileFill(entry: ColorSwatchDef, background: SongBackground) {
         entry.own -> Box(modifier.background(parseHexColor(background.color)))
         entry.gradient -> Box(
             modifier.background(
-                androidx.compose.ui.graphics.Brush.verticalGradient(
+                Brush.verticalGradient(
                     listOf(parseHexColor(entry.color), parseHexColor(entry.colorEnd.orEmpty()))
                 )
             )

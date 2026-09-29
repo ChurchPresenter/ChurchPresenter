@@ -34,7 +34,6 @@
     <string name="revert">Ibalik</string>
     <string name="save_changes">I-save ang mga Pagbabago</string>
     <string name="done">Tapos</string>
-    <string name="saved">Na-save ang %1$s</string>
     <string name="save_failed">Hindi ma-save ang %1$s</string>
     <string name="new_song_book">Bagong Aklat ng Awit</string>
     <string name="new_song_book_subhead">Isang koleksyon kung saan maaaring ilagay ang mga awit</string>

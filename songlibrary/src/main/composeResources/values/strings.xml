@@ -38,7 +38,6 @@
     <string name="revert">Revert</string>
     <string name="save_changes">Save Changes</string>
     <string name="done">Done</string>
-    <string name="saved">Saved %1$s</string>
     <string name="save_failed">%1$s could not be saved</string>
     <string name="new_song_book">New Song Book</string>
     <string name="new_song_book_subhead">A collection songs can be filed under</string>

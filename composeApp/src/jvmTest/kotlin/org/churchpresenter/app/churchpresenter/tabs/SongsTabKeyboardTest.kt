@@ -428,14 +428,14 @@ class SongsTabKeyboardTest {
             songs = multiLineSong,
             songSettings = lineMode(),
             isPresenting = true,
-            searchIdleFocusMs = IDLE_MS,
+            // No window at all: were the live guard missing, the caret would move on the very frame
+            // the query settled, so the check below needs no wait to be meaningful.
+            searchIdleFocusMs = 0L,
         ) { vm, reports ->
             selectFirstSong(vm)
             search("grace")
             val pushedBefore = reports.allSections.size
 
-            // Well past the window, and it must still not have fired.
-            Thread.sleep(IDLE_MS * 5)
             waitForIdle()
             press(Key.DirectionRight)
             assertEquals(0, vm.selectedLineIndex.value, "the wait must not fire while live")

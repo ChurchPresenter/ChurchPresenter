@@ -133,7 +133,7 @@ data class ScreenAssignment(
 ) {
     /** The key of the monitor this output drives, or blank when it drives none. */
     val targetScreenKey: String
-        get() = if (targetType != "screen") ""
+        get() = if (targetType != Constants.TARGET_TYPE_SCREEN) ""
         else screenKey(targetBoundsX, targetBoundsY, targetBoundsW, targetBoundsH)
 
     /** Whether a key output target is configured */

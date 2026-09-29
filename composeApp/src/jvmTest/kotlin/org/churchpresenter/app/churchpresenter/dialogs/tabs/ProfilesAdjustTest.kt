@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -39,7 +40,7 @@ class ProfilesAdjustTest {
     private fun doc(mode: String = Constants.DISPLAY_MODE_FULLSCREEN) = profileDocument(mode = mode,
             bible = twoTranslations)
 
-    private fun androidx.compose.ui.test.SkikoComposeUiTest.bibleAdjusting() {
+    private fun SkikoComposeUiTest.bibleAdjusting() {
         openCustomizePane(CustomizePane.BIBLE)
         tap(ADJUST_SWITCH_TAG)
     }

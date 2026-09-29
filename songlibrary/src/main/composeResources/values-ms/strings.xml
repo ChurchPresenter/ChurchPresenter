@@ -34,7 +34,6 @@
     <string name="revert">Kembalikan</string>
     <string name="save_changes">Simpan Perubahan</string>
     <string name="done">Selesai</string>
-    <string name="saved">%1$s disimpan</string>
     <string name="save_failed">%1$s tidak dapat disimpan</string>
     <string name="new_song_book">Buku Lagu Baharu</string>
     <string name="new_song_book_subhead">Koleksi tempat lagu boleh dikumpulkan</string>

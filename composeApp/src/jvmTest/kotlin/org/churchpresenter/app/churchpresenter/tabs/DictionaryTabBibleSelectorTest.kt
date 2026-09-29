@@ -60,9 +60,6 @@ class DictionaryTabBibleSelectorTest {
          * is reported.
          */
         const val SCAN_TIMEOUT_MS = 5_000L
-
-        /** A beat for a cancelled scan to have landed, had it not been cancelled. */
-        const val SETTLE_MS = 200L
     }
 
     private val tempDirs = mutableListOf<File>()
@@ -140,14 +137,14 @@ class DictionaryTabBibleSelectorTest {
     @Test
     fun `a newer folder scan supersedes an older one still in flight`() = dictionaryTab { vm, _ ->
         awaitInterlinear(vm)
-        vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal"))
+        val older = vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal"))
         vm.loadAvailableBibles(bibleFolder("web.spb" to "World English"))
         waitUntil("the newer folder's translation to be listed", SCAN_TIMEOUT_MS) {
             vm.availableDictBibles.map { it.second } == listOf("World English")
         }
-        // Long enough for the older scan to have finished, had it been allowed to write.
+        // The older scan has run to its end -- the point at which it would have written its list.
+        waitUntil("the older scan to finish", SCAN_TIMEOUT_MS) { older?.isCompleted != false }
         waitForIdle()
-        Thread.sleep(SETTLE_MS)
         assertEquals(listOf("World English"), vm.availableDictBibles.map { it.second })
     }
 

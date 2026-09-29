@@ -661,7 +661,13 @@ private fun rememberDisplayOptions(
     val screenNames = proj.screenNames
     return remember(screenDevicesAll, noneLabel, screenNames) {
         val options = mutableListOf<DisplayOption>()
-        options.add(DisplayOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
+        options.add(
+            DisplayOption(
+                label = noneLabel,
+                targetDisplay = Constants.KEY_TARGET_NONE,
+                targetType = Constants.TARGET_TYPE_SCREEN,
+            )
+        )
         // Add physical displays, skipping the primary monitor
         var displayNum = 1
         for (screen in screenDevicesAll) {
@@ -674,7 +680,7 @@ private fun rememberDisplayOptions(
                     label = displayLabel(named, displayNum, screen),
                     shortLabel = displayShortLabel(named, displayNum, screen),
                     targetDisplay = screen.index,
-                    targetType = "screen",
+                    targetType = Constants.TARGET_TYPE_SCREEN,
                     boundsX = screen.boundsX,
                     boundsY = screen.boundsY,
                     boundsW = screen.boundsW,
@@ -691,7 +697,7 @@ private fun rememberDisplayOptions(
                         label = "DeckLink ${i + 1}: ${device.name}",
                         shortLabel = "DK${i + 1}: ${device.name}",
                         targetDisplay = device.index,
-                        targetType = "decklink"
+                        targetType = Constants.TARGET_TYPE_DECKLINK
                     )
                 )
             }
@@ -766,7 +772,7 @@ internal fun reconcileAssignments(
             }
             changed = true
         } else if (
-            current.targetType == "screen" &&
+            current.targetType == Constants.TARGET_TYPE_SCREEN &&
             current.targetDisplay >= 0 &&
             allDevices.none { it.index == current.targetDisplay }
         ) {

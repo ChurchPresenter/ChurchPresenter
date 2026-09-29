@@ -34,7 +34,6 @@
     <string name="revert">Скасувати зміни</string>
     <string name="save_changes">Зберегти зміни</string>
     <string name="done">Готово</string>
-    <string name="saved">Збережено: %1$s</string>
     <string name="save_failed">Не вдалося зберегти: %1$s</string>
     <string name="new_song_book">Новий збірник</string>
     <string name="new_song_book_subhead">Збірка, до якої можна віднести пісні</string>

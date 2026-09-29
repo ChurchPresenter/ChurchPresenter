@@ -34,7 +34,6 @@
     <string name="revert">उल्टाउनुहोस्</string>
     <string name="save_changes">परिवर्तन सुरक्षित गर्नुहोस्</string>
     <string name="done">सकियो</string>
-    <string name="saved">%1$s सुरक्षित गरियो</string>
     <string name="save_failed">%1$s सुरक्षित गर्न सकिएन</string>
     <string name="new_song_book">नयाँ गीत पुस्तक</string>
     <string name="new_song_book_subhead">गीतहरू राख्न सकिने सङ्ग्रह</string>

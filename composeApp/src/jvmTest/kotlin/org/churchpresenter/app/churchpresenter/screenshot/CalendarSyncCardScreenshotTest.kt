@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
@@ -71,7 +72,7 @@ class CalendarSyncCardScreenshotTest {
         settings: AppSettings = paired,
         status: CalendarSyncStatus,
         devices: List<PairedDevice> = emptyList(),
-        drive: androidx.compose.ui.test.ComposeUiTest.() -> Unit = {},
+        drive: ComposeUiTest.() -> Unit = {},
     ) = captureComponent(SECTION, name, drive = drive) {
         Box(Modifier.width(720.dp)) {
             CalendarSyncCardContent(

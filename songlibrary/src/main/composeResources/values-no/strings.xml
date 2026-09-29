@@ -34,7 +34,6 @@
     <string name="revert">Tilbakestill</string>
     <string name="save_changes">Lagre endringer</string>
     <string name="done">Ferdig</string>
-    <string name="saved">%1$s lagret</string>
     <string name="save_failed">%1$s kunne ikke lagres</string>
     <string name="new_song_book">Ny sangbok</string>
     <string name="new_song_book_subhead">En samling sanger kan legges i</string>

@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import churchpresenter.composeapp.generated.resources.canvas_bible_select_verse
+import churchpresenter.composeapp.generated.resources.canvas_browser_no_url
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -430,7 +432,7 @@ private fun BrowserSourceContent(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "Browser: no URL", color = Color.White, fontSize = 14.sp)
+            Text(text = stringResource(Res.string.canvas_browser_no_url), color = Color.White, fontSize = 14.sp)
         }
         return
     }
@@ -764,7 +766,7 @@ private fun CurvedBibleText(
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
         CurvedText(
-            text = source.verseText.ifEmpty { "Select a verse..." },
+            text = source.verseText.ifEmpty { stringResource(Res.string.canvas_bible_select_verse) },
             curve = source.curve,
             style = TextStyle(
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,
@@ -1240,7 +1242,7 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
             val versePainter = rememberTextBackdropPainter(source.backdrop, fontScale)
             val refPainter = rememberTextBackdropPainter(source.referenceBackdrop, fontScale)
             OutlinedText(
-                text = source.verseText.ifEmpty { "Select a verse..." },
+                text = source.verseText.ifEmpty { stringResource(Res.string.canvas_bible_select_verse) },
                 outline = source.outline,
                 scaleFactor = fontScale,
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,

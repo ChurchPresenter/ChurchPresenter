@@ -34,7 +34,6 @@
     <string name="revert">ย้อนกลับ</string>
     <string name="save_changes">บันทึกการเปลี่ยนแปลง</string>
     <string name="done">เสร็จสิ้น</string>
-    <string name="saved">บันทึกแล้ว %1$s</string>
     <string name="save_failed">บันทึก %1$s ไม่สำเร็จ</string>
     <string name="new_song_book">หนังสือเพลงใหม่</string>
     <string name="new_song_book_subhead">ชุดที่ใช้จัดเก็บเพลง</string>

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.planning_center_error_session_expired
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -147,7 +149,7 @@ class PlanningCenterImportViewModelTest {
         val vm = viewModel()
         vm.loadServiceTypes()
         awaitUntil("the error") { vm.errorMessage != null }
-        assertTrue(vm.errorMessage!!.contains("reconnect", ignoreCase = true))
+        assertEquals(Res.string.planning_center_error_session_expired, vm.errorMessage)
     }
 
     @Test
@@ -215,7 +217,7 @@ class PlanningCenterImportViewModelTest {
         vm.selectServiceType("st-2")
         awaitUntil("the error") { vm.errorMessage != null }
 
-        assertTrue(vm.errorMessage!!.contains("reconnect", ignoreCase = true))
+        assertEquals(Res.string.planning_center_error_session_expired, vm.errorMessage)
         assertTrue(vm.plans.isEmpty())
     }
 
@@ -228,7 +230,7 @@ class PlanningCenterImportViewModelTest {
         vm.selectPlan("plan-1")
         awaitUntil("the error") { vm.errorMessage != null }
 
-        assertTrue(vm.errorMessage!!.contains("reconnect", ignoreCase = true))
+        assertEquals(Res.string.planning_center_error_session_expired, vm.errorMessage)
         assertTrue(vm.planItems.isEmpty())
     }
 

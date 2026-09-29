@@ -34,7 +34,6 @@
     <string name="revert">Қайтару</string>
     <string name="save_changes">Өзгерістерді сақтау</string>
     <string name="done">Дайын</string>
-    <string name="saved">Сақталды: %1$s</string>
     <string name="save_failed">%1$s сақталмады</string>
     <string name="new_song_book">Жаңа жинақ</string>
     <string name="new_song_book_subhead">Әндерді жатқызуға болатын жинақ</string>

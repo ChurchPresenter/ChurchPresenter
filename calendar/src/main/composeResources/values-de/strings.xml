@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kalenderverwaltung</string>
     <string name="calendar_title">Kalender</string>
     <string name="calendar_today">Heute</string>
     <string name="calendar_close">Schließen</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Besondere Veranstaltung</string>
 
     <string name="calendar_add_service">Gottesdienst hinzufügen</string>
-    <string name="calendar_new_service">Neuer Gottesdienst</string>
     <string name="calendar_edit_service">Gottesdienst bearbeiten</string>
     <string name="calendar_service_name">Name</string>
     <string name="calendar_service_start">Beginn</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Abbrechen</string>
     <string name="calendar_delete">Löschen</string>
 
-    <string name="calendar_run_of_show">Ablauf</string>
-    <string name="calendar_nothing_planned">Für diesen Tag ist nichts geplant</string>
-    <string name="calendar_no_service_hint">Füge einen Gottesdienst hinzu, um mit der Planung zu beginnen.</string>
-    <string name="calendar_run_empty">Dieser Gottesdienst hat noch keine Elemente.</string>
     <string name="calendar_items_count_one">%1$d Element</string>
     <string name="calendar_items_count">%1$d Elemente</string>
-    <string name="calendar_planned_total">%1$s geplant</string>
     <string name="calendar_duration">Dauer</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Wie lange das laufen soll — zum Eintippen klicken, etwa 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Lieder</string>
     <string name="calendar_pick_bible">Bibel</string>
     <string name="calendar_pick_section">Abschnitt</string>
-    <string name="calendar_pick_schedule">Ablaufplan-Tab</string>
     <string name="calendar_pick_presets">Vorlagen</string>
     <string name="calendar_presets_empty">Noch keine Vorlagen</string>
     <string name="calendar_presets_empty_sub">Speichere eine mit „Vorlage speichern“ neben „Zum Ablaufplan hinzufügen“ in den Tabs Bilder, Präsentation, Medien, Ankündigungen und Leinwand.</string>
     <string name="calendar_presets_note">Vorlagen erscheinen unter „Vorlagen“, wenn du ein Element hinzufügst, und unter „Element“, wenn ein Marker etwas anzeigt.</string>
     <string name="calendar_settings_presets">Vorlagen</string>
     <string name="calendar_preset_remove">Vorlage löschen</string>
-    <string name="calendar_cue_from_run">Aus diesem Ablauf</string>
     <string name="calendar_cue_loops">Schleife</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Gespeicherte Vorlagen</string>
-    <string name="calendar_search_songs_hint">Lieder nach Titel oder Nummer suchen</string>
-    <string name="calendar_bible_hint">Gib eine Stelle ein, etwa Johannes 3:16-17</string>
     <string name="calendar_section_hint">Abschnittsname, etwa Lobpreis</string>
-    <string name="calendar_add">Hinzufügen</string>
     <string name="calendar_no_results">Nichts passt dazu</string>
     <string name="calendar_songs_loading">Liedbibliothek wird gelesen…</string>
-    <string name="calendar_schedule_empty">Der Ablaufplan-Tab ist leer.</string>
-    <string name="calendar_capture_schedule">Alle Elemente aus dem Ablaufplan-Tab hinzufügen</string>
 
     <string name="calendar_load_into_schedule">In den Ablaufplan laden</string>
     <string name="calendar_load_title">Ablaufplan ersetzen?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Abschnitt entfernen</string>
     <string name="calendar_default_start">Standard-Beginn</string>
     <string name="calendar_default_start_sub">Die Uhrzeit, mit der ein neuer Gottesdienst angelegt wird</string>
-    <string name="calendar_automation_empty">Noch keine Marker</string>
-    <string name="calendar_automation_title">Automatisierung</string>
     <string name="calendar_armed">Aktiv</string>
     <string name="calendar_armed_off">Aus</string>
     <string name="calendar_arm_tip">Alle Marker aktivieren oder deaktivieren</string>
     <string name="calendar_cue_skip_tip">Diesen Marker überspringen</string>
-    <string name="calendar_automation_note">kennzeichnet Elemente, die von selbst laufen. Ein abgewählter Haken überspringt den Marker für diesen Gottesdienst.</string>
-    <string name="calendar_edit_cues">Marker bearbeiten</string>
     <string name="calendar_cue_action_countdown">Countdown starten</string>
     <string name="calendar_cue_action_go_live">Live schalten</string>
     <string name="calendar_cue_action_project">Ankündigungsschleife</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Ausgänge leeren</string>
     <string name="calendar_cue_badge_timer">Timer</string>
     <string name="calendar_cue_badge_go_live">Live</string>
-    <string name="calendar_cue_item">Element</string>
     <string name="calendar_cue_item_missing">Element ist nicht mehr in diesem Ablauf</string>
     <string name="calendar_copy_include_cues">Automatisierungsmarker</string>
     <string name="calendar_copy_include_cues_sub">%1$d Marker, Zeitversätze bleiben erhalten</string>
     <string name="calendar_template_include_cues">Automatisierungsmarker</string>
     <string name="calendar_template_include_cues_sub">Relative Zeitversätze</string>
-    <string name="calendar_templates_empty">Keine gespeicherten Vorlagen</string>
     <string name="calendar_templates_empty_sub">Speichere eine aus einem beliebigen Gottesdienst mit „Vorlage“ in der Ablauf-Kopfzeile. Bis dahin kann ein neuer Gottesdienst mit einer Kopie eines früheren beginnen.</string>
     <string name="calendar_templates_note">Vorlagen werden unter „Beginnen mit“ angeboten, wenn du einen Gottesdienst hinzufügst. Eine neue speicherst du aus einem beliebigen Gottesdienst mit „Vorlage“ in der Ablauf-Kopfzeile.</string>
     <string name="calendar_template_remove">Vorlage löschen</string>
     <string name="calendar_template_saved_sub">Vorlage · %1$s · %2$d Elemente</string>
-    <string name="calendar_copy_service">Kopieren</string>
     <string name="calendar_copy_service_tip">Diesen Gottesdienst auf ein anderes Datum kopieren oder wiederholen</string>
-    <string name="calendar_save_template">Vorlage</string>
     <string name="calendar_save_template_tip">Diesen Ablauf als Vorlage speichern</string>
     <string name="calendar_copy_title">%1$s kopieren</string>
     <string name="calendar_copy_sub">%1$s · %2$d Elemente</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Wiederholt sich %1$s · %2$d Gottesdienste in dieser Serie</string>
     <string name="calendar_export_pdf">PDF exportieren</string>
     <string name="calendar_settings_open">Kalendereinstellungen</string>
-    <string name="calendar_export_failed">Der Ablauf konnte nicht exportiert werden.</string>
     <string name="calendar_section_new">Neuer Abschnitt</string>
     <string name="calendar_section_insert">Einfügen</string>
     <string name="calendar_auto_load">Gottesdienst automatisch laden</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Wird vorgeschlagen, wenn ein Lied noch keine gemessene Dauer hat</string>
     <string name="calendar_pick_search">Lieder suchen oder eine Stelle eingeben</string>
     <string name="calendar_pick_adds_to">Wird zu %1$s hinzugefügt</string>
-    <string name="calendar_pick_duration">Dauer</string>
     <string name="calendar_pick_all_books">Alle Liederbücher</string>
     <string name="calendar_pick_reference">Bibelstelle</string>
     <string name="calendar_pick_all_bible_books">Alle Bücher</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Zum Ablauf hinzufügen</string>
     <string name="calendar_pick_add_range">%1$s hinzufügen</string>
     <string name="calendar_pick_verse_hint">Tippe einen Vers an, dann einen weiteren für einen Bereich</string>
-    <string name="calendar_pick_clear">Leeren</string>
     <string name="calendar_edit_song">Dieses Lied bearbeiten</string>
-    <string name="calendar_replace_row">Ersetzt %1$s</string>
-    <string name="calendar_change_row">Dieses Element ändern</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · läuft von selbst um %2$s — zum sofortigen Auslösen klicken</string>
     <string name="calendar_cue_fire_now">Diesen Marker jetzt auslösen</string>
     <string name="calendar_cue_fired_at">Ausgelöst %1$s</string>
     <string name="calendar_cue_next_in">Nächster · in %1$d Min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Uhr vorgestellt · klicken für weitere 5 Min, × zurück zur echten Zeit</string>
     <string name="calendar_run_clock_reset">Zurück zur echten Zeit</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d Min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d von %3$d Markern lösen automatisch aus</string>
     <string name="calendar_cue_fired_title">Marker ausgelöst</string>
     <string name="calendar_cue_toast_close">Ausblenden</string>
     <string name="calendar_preset_kind_all">Alle</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Weiter</string>
     <string name="calendar_chip_blank">Leeren</string>
-    <string name="calendar_chip_manual">Manuell</string>
     <string name="calendar_auto_starts">%1$d automatische Starts</string>
     <string name="calendar_auto_start_one">1 automatischer Start</string>
     <string name="calendar_all_manual">Alles manuell</string>

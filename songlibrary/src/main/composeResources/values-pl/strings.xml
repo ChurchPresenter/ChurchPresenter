@@ -34,7 +34,6 @@
     <string name="revert">Przywróć</string>
     <string name="save_changes">Zapisz zmiany</string>
     <string name="done">Gotowe</string>
-    <string name="saved">Zapisano: %1$s</string>
     <string name="save_failed">Nie udało się zapisać: %1$s</string>
     <string name="new_song_book">Nowy śpiewnik</string>
     <string name="new_song_book_subhead">Zbiór, do którego można przypisać pieśni</string>

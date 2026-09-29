@@ -4,33 +4,38 @@
 
 > Source paths below are relative to `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/`
 >
-> Except `data/settings/…` and `data/SettingsManager.kt`, which live in the `:settings` module
-> under `settings/src/main/kotlin/org/churchpresenter/settings/` — the paths below keep the old
-> shape for readability; the package there is `org.churchpresenter.settings`.
+> Except `data/settings/…` and `data/SettingsManager.kt`, which are shorthand for the `:settings`
+> module: every one of those files sits flat in `settings/src/main/kotlin/org/churchpresenter/settings/`
+> (package `org.churchpresenter.settings`). Only `data/settings/ObsSceneSelection.kt` is really under
+> the app's `data/settings/`.
 
 ## Songs & Lyrics
 - **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.
-- **Powerful search** — find songs by title or number with contains, starts-with, exact-match and phrase filters, plus category and songbook filters.
+- **Powerful search** — find songs by title or number with contains, starts-with, exact-match and phrase filters, plus category and songbook filters. A text search looks through every language's titles and lyrics, and each hit says where it matched — the title, the section by its own name (Verse 1, Chorus) or the lyrics, and which language — with the match highlighted. Digits alone search song numbers.
 - **Built-in song editor** — add and edit songs with simple verse/chorus formatting; no external tools needed.
 - **Chords made easy** — transpose a whole song up or down a semitone at a time (every language moves together, and Save keeps the new key), pick chords from the key you are writing in, or build any chord from a root and a type — major, minor, 7, maj7, m7, 6, m6, 9, add9, sus2, sus4, dim, dim7, m7♭5 and aug.
-- **Song Library Manager** — every song in one editable grid: search, filter by song book, show the columns you care about, type straight into a cell, and change a field on a whole selection at once. Renumbering a book, filling in missing composers or moving a set into a new song book is one screen rather than one song at a time.
+- **Song Library Manager** — every song in one editable grid: search, filter by song book, show the columns you care about, type straight into a cell, and change a field on a whole selection at once. Renumbering a book, filling in missing composers or moving a set into a new song book is one screen rather than one song at a time. **Compare translations** puts a song's languages side by side, section by section, and flags sections out of step and languages missing a title or lyrics.
 - **Bilingual worship** — show two languages at once, side-by-side or stacked, or switch between primary and secondary on the fly.
 - **Look-ahead for the band** — see the current and next section in advance so transitions stay smooth.
 - **Favorites & play counts** — star the songs you use most and see how often each has been sung.
 - **Bring your existing library** — the bundled converter reads SongBeamer, OpenLP (the `songs.sqlite` database itself or an OpenLyrics export), OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm and SoftProjector libraries, plus lyrics pulled out of PDF, Word, PowerPoint and Keynote files — several files or a whole folder at a time — and ready-to-use sample songs ship with the app.
 - **Flexible display** — one verse or one line at a time, optional title slides, and full control over how numbers and titles appear.
+- **A background per song** — give a song, or one of its sections, its own colour, gradient, picture, video or camera, separately for full screen and lower third, with a look (dim, blur, opacity) on top — or let it follow the profile's background.
 
 **Source locations:**
 - `tabs/SongsTab.kt` — main UI
 - `viewmodel/SongsViewModel.kt`, `viewmodel/SongSettingsViewModel.kt`, `viewmodel/SongFolderWatcher.kt`
-- `data/Songs.kt`, `data/SongItem.kt`, `data/SongFileParser.kt`, `data/SpsConverter.kt`
+- `data/Songs.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
+- `viewmodel/SongSearchMatch.kt`, `tabs/SongListPane.kt` — where each search hit matched, and the list that draws it
+- `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
 - `presenter/SongPresenter.kt`
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
 - `composables/SongChordPreview.kt` — the editor's chord preview: Transpose, the key's palette and the chord picker
 - `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
-- `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid
+- `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid; `TranslationComparison.kt` and `ui/CompareTranslations*.kt` — Compare translations
+- `song-chords/` (the `:song-chords` Gradle module) — chord parsing, transposition and chord-sheet import
 - `core-models/` (the `:core-models` Gradle module) — `models.songs`: the song, the `.song` file format and the library folder, shared by the app and the library window
 
 ## Bible & Scripture
@@ -42,6 +47,7 @@
 - **Multi-verse ranges** — select and present several verses at once with Ctrl/Shift click.
 - **Search the whole Bible** — search across the entire text or just the current book.
 - **History** — jump back to recently shown passages instantly.
+- **Cross references** — see the passages that cross-reference the verse you are on, and jump to one in a click.
 - **Strong's dictionary** — explore original Hebrew and Greek words with transliteration, pronunciation, definitions and KJV usage.
 - **Download translations in-app** — browse over 1,500 translations in more than 1,000 languages from eBible.org and the Zefania XML archive, filter by language, and install one in a click: it downloads and converts on your machine, straight into your Bible folder, with its copyright shown up front.
 - **Follow along automatically** — connect a live speech-to-text feed and the app listens for spoken Bible references — stated outright or simply the next verse in a passage being read — and stages or goes live with the matching verse on its own, tiered by confidence so only clear matches jump straight to the screen.
@@ -50,7 +56,8 @@
 - `tabs/BibleTab.kt` — main UI
 - `tabs/DictionaryTab.kt` — Strong's dictionary UI
 - `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
-- `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
+- `viewmodel/BibleViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
+- `tabs/BibleCrossReferences.kt`, `tabs/BibleCrossReferenceState.kt`, `tabs/BibleHistoryPanel.kt`, `tabs/BibleDetectionPanel.kt`, `tabs/BibleTranslationOrder.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
@@ -111,16 +118,14 @@
 
 **Source locations:**
 - `tabs/LowerThird.kt` — main UI
-- `viewmodel/LowerThirdSettingsViewModel.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
 - `server/LowerThirdSequencer.kt`
-- `dialogs/tabs/LowerThirdSettingsTab.kt`
 - `presenter/BibleLottieBand.kt`, `presenter/BibleLottieTemplate.kt`, `presenter/BibleLottieTextFit.kt`, `presenter/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
 - `dialogs/tabs/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
 - `lottieGenerator/src/main/kotlin/.../band/` (the `:lottieGenerator` module) — the Bible band generator
 
 ## Announcements & Timers
-- **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping.
+- **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping. The tab is laid out around a full-height preview in the output's own shape, with the text and the timer side by side and their position, background and animation under the preview.
 - **Countdown timers** — count down to a duration or to a specific clock time, with custom colors and an end-of-countdown message — perfect for "service starts in…".
 
 **Source locations:**
@@ -186,7 +191,7 @@
 ## Service Planning
 - **Drag-and-drop schedules** — build your whole service from songs, scripture, slides, media, lower thirds, announcements and websites.
 - **Save & reopen services** — store schedules as files and pick up exactly where you left off, with autosave and crash recovery.
-- **Stay organized** — color-coded labels, per-item notes, quick reordering, recents and full undo/redo.
+- **Stay organized** — color-coded labels, per-item notes, quick reordering, recents and full undo/redo; Add Item stays pinned below the run of show however long it grows.
 
 **Source locations:**
 - `tabs/ScheduleTab.kt` — main UI
@@ -194,6 +199,19 @@
 - `core-models/src/main/kotlin/.../models/schedule/ScheduleItem.kt` (the `:core-models` module)
 - `viewmodel/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`
+
+## Calendar & Planning
+- **Calendar Manager** — every planned service on a month grid, each with its own run of show, opened from the Help menu. Build a service from songs, scripture, media and cues, time each row, save services as templates, and load one into the Schedule when it is time.
+- **Automated runs** — a row can start on its own, run for a set time and repeat; cues blank the outputs or go live at a time relative to the service start.
+- **Services on the band's phones** — pair a phone with a QR code and it sees the planned services, their runs of show and the songbooks, synced end-to-end encrypted through a relay.
+- **Print it** — export a service's run of show as a PDF.
+- **Planning Center import** — bring a Planning Center Services plan's songs, media and order of service straight into the Schedule, with its songs matched against your library. Each church uses its own free PCO developer credentials; nothing is written back.
+
+**Source locations:**
+- `calendar/` (the `:calendar` Gradle module) — the Calendar Manager window, its model and the PDF export
+- `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `server/CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
+- `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client
+- `dialogs/PlanningCenterImportDialog.kt`, `viewmodel/PlanningCenterImportViewModel.kt` — the import window
 
 ## Projection & Output
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.
@@ -227,7 +245,7 @@
 - `presenter/OmtVideoRenderer.kt`, `presenter/OmtOutputRegistry.kt`, `presenter/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `data/StockMediaClient.kt`, `dialogs/StockMediaBrowserDialog.kt`, `viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
-- `composables/DeckLinkIO.kt`, `composables/LivePreviewPanel.kt`, `composables/LoopingVideoBackground.kt`
+- `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `composables/LivePreviewPanel.kt`, `composables/LoopingVideoBackground.kt`
 - `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
 - `dialogs/tabs/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
@@ -316,7 +334,8 @@
 - **9 themes** — light, dark, system and six accent themes to match your booth.
 - **Make it yours** — View → Customize Theme… builds a whole palette from one accent color on a light or dark base, lets you set the background, text, secondary, selection, success, warning and error colors too — or leave any on Auto — and sets the font, text size and list Margin — Normal, Thin or Thinner, for more rows on screen — the app's own windows use. Text is kept readable whatever you pick, and output screens are never affected.
 - **Guided setup** — a friendly first-run wizard gets your Bibles, songs and media ready in minutes.
-- **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service.
+- **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service, every one of them rebindable from Help → Keyboard Shortcuts.
+- **Tabs your way** — show the main tabs as icons, labels or both, with the margin between them set to taste.
 - **Portable settings** — export and import your entire configuration to set up another machine instantly.
 - **Stays running** — automatic update checks, crash recovery and launch-at-login keep things reliable.
 
@@ -326,10 +345,13 @@
 - `dialogs/CustomizeThemeDialog.kt`, `dialogs/CustomizeThemePreview.kt`, `dialogs/ThemeCustomizationChoice.kt`, `ui/theme/ThemeCustomizationSettings.kt` — the Customize Theme window, its preview, what it hands back, and the settings it is read from
 - `data/settings/CustomThemeColors.kt` (the `:settings` module) — the optional per-role colours
 - `dialogs/SetupWizardDialog.kt`
-- `dialogs/KeyboardShortcutsDialog.kt`
+- `dialogs/KeyboardShortcutsDialog.kt`, `dialogs/ShortcutBindingRow.kt`, `dialogs/ShortcutCapture.kt`, `dialogs/ShortcutCategoryRail.kt` — the shortcut list and rebinding
+- `composables/LabeledTab.kt`, `dialogs/tabs/TabLabelsRow.kt` — tab label styles
+- `tabs/CrosswordTab.kt`, `data/CrosswordData.kt` — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
-- `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`, `utils/CrashReporter.kt`
+- `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`
+- `diagnostics/` (the `:diagnostics` Gradle module) — `CrashReporter`: crash logs and the Sentry bridge
 
 ## Free & Open
 - **Free and open-source** — released under the GNU GPL v3. No subscriptions, no per-seat fees.

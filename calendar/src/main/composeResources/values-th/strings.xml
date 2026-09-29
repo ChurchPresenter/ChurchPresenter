@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">ตัวจัดการปฏิทิน</string>
     <string name="calendar_title">ปฏิทิน</string>
     <string name="calendar_today">วันนี้</string>
     <string name="calendar_close">ปิด</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">งานพิเศษ</string>
 
     <string name="calendar_add_service">เพิ่มการนมัสการ</string>
-    <string name="calendar_new_service">การนมัสการใหม่</string>
     <string name="calendar_edit_service">แก้ไขการนมัสการ</string>
     <string name="calendar_service_name">ชื่อ</string>
     <string name="calendar_service_start">เวลาเริ่ม</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">ยกเลิก</string>
     <string name="calendar_delete">ลบ</string>
 
-    <string name="calendar_run_of_show">ลำดับรายการ</string>
-    <string name="calendar_nothing_planned">ยังไม่มีแผนสำหรับวันนี้</string>
-    <string name="calendar_no_service_hint">เพิ่มการนมัสการเพื่อเริ่มวางแผน</string>
-    <string name="calendar_run_empty">การนมัสการนี้ยังไม่มีรายการ</string>
     <string name="calendar_items_count_one">%1$d รายการ</string>
     <string name="calendar_items_count">%1$d รายการ</string>
-    <string name="calendar_planned_total">วางแผนไว้ %1$s</string>
     <string name="calendar_duration">ความยาว</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">วางแผนให้ใช้เวลานานเท่าใด — คลิกเพื่อพิมพ์ เช่น 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">เพลง</string>
     <string name="calendar_pick_bible">พระคัมภีร์</string>
     <string name="calendar_pick_section">หัวข้อ</string>
-    <string name="calendar_pick_schedule">แท็บกำหนดการ</string>
     <string name="calendar_pick_presets">ค่าที่บันทึกไว้</string>
     <string name="calendar_presets_empty">ยังไม่มีค่าที่บันทึกไว้</string>
     <string name="calendar_presets_empty_sub">บันทึกได้ด้วย „บันทึกค่า” ข้างปุ่ม „เพิ่มลงกำหนดการ” ในแท็บรูปภาพ งานนำเสนอ สื่อ ประกาศ และผืนผ้าใบ</string>
     <string name="calendar_presets_note">ค่าที่บันทึกไว้จะปรากฏใต้ „ค่าที่บันทึกไว้” เมื่อคุณเพิ่มรายการ และใต้ „รายการ” เมื่อเครื่องหมายแสดงบางอย่าง</string>
     <string name="calendar_settings_presets">ค่าที่บันทึกไว้</string>
     <string name="calendar_preset_remove">ลบค่าที่บันทึกไว้</string>
-    <string name="calendar_cue_from_run">จากลำดับรายการนี้</string>
     <string name="calendar_cue_loops">วนซ้ำ</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">ค่าที่บันทึกไว้</string>
-    <string name="calendar_search_songs_hint">ค้นหาเพลงจากชื่อหรือหมายเลข</string>
-    <string name="calendar_bible_hint">พิมพ์ข้ออ้างอิง เช่น ยอห์น 3:16-17</string>
     <string name="calendar_section_hint">ชื่อหัวข้อ เช่น นมัสการ</string>
-    <string name="calendar_add">เพิ่ม</string>
     <string name="calendar_no_results">ไม่พบสิ่งที่ตรงกัน</string>
     <string name="calendar_songs_loading">กำลังอ่านคลังเพลง…</string>
-    <string name="calendar_schedule_empty">แท็บกำหนดการว่างเปล่า</string>
-    <string name="calendar_capture_schedule">เพิ่มทุกรายการจากแท็บกำหนดการ</string>
 
     <string name="calendar_load_into_schedule">โหลดเข้ากำหนดการ</string>
     <string name="calendar_load_title">แทนที่กำหนดการหรือไม่</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">นำหัวข้อออก</string>
     <string name="calendar_default_start">เวลาเริ่มเริ่มต้น</string>
     <string name="calendar_default_start_sub">เวลาที่ใช้เมื่อสร้างการนมัสการใหม่</string>
-    <string name="calendar_automation_empty">ยังไม่มีเครื่องหมาย</string>
-    <string name="calendar_automation_title">ระบบอัตโนมัติ</string>
     <string name="calendar_armed">เปิด</string>
     <string name="calendar_armed_off">ปิด</string>
     <string name="calendar_arm_tip">เปิดหรือปิดเครื่องหมายทั้งหมด</string>
     <string name="calendar_cue_skip_tip">ข้ามเครื่องหมายนี้</string>
-    <string name="calendar_automation_note">ระบุรายการที่ทำงานเอง การเอาเครื่องหมายถูกออกจะข้ามเครื่องหมายนั้นสำหรับการนมัสการนี้</string>
-    <string name="calendar_edit_cues">แก้ไขเครื่องหมาย</string>
     <string name="calendar_cue_action_countdown">เริ่มนับถอยหลัง</string>
     <string name="calendar_cue_action_go_live">ออกอากาศ</string>
     <string name="calendar_cue_action_project">วนประกาศ</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">ล้างสัญญาณออก</string>
     <string name="calendar_cue_badge_timer">ตัวจับเวลา</string>
     <string name="calendar_cue_badge_go_live">ออกอากาศ</string>
-    <string name="calendar_cue_item">รายการ</string>
     <string name="calendar_cue_item_missing">รายการนี้ไม่อยู่ในลำดับรายการนี้แล้ว</string>
     <string name="calendar_copy_include_cues">เครื่องหมายอัตโนมัติ</string>
     <string name="calendar_copy_include_cues_sub">%1$d เครื่องหมาย คงระยะเวลาเดิมไว้</string>
     <string name="calendar_template_include_cues">เครื่องหมายอัตโนมัติ</string>
     <string name="calendar_template_include_cues_sub">ระยะเวลาสัมพัทธ์</string>
-    <string name="calendar_templates_empty">ไม่มีเทมเพลตที่บันทึกไว้</string>
     <string name="calendar_templates_empty_sub">บันทึกได้จากการนมัสการใดก็ได้ด้วยปุ่ม „เทมเพลต” ที่หัวลำดับรายการ ระหว่างนี้การนมัสการใหม่เริ่มจากสำเนาของครั้งก่อน ๆ ได้</string>
     <string name="calendar_templates_note">เทมเพลตจะปรากฏใต้ „เริ่มจาก” เมื่อเพิ่มการนมัสการ บันทึกอันใหม่จากการนมัสการใดก็ได้ด้วยปุ่ม „เทมเพลต” ที่หัวลำดับรายการ</string>
     <string name="calendar_template_remove">ลบเทมเพลต</string>
     <string name="calendar_template_saved_sub">เทมเพลต · %1$s · %2$d รายการ</string>
-    <string name="calendar_copy_service">คัดลอก</string>
     <string name="calendar_copy_service_tip">คัดลอกการนมัสการนี้ไปวันอื่น หรือทำซ้ำ</string>
-    <string name="calendar_save_template">เทมเพลต</string>
     <string name="calendar_save_template_tip">บันทึกลำดับรายการนี้เป็นเทมเพลต</string>
     <string name="calendar_copy_title">คัดลอก %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d รายการ</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">ทำซ้ำ %1$s · %2$d การนมัสการในชุดนี้</string>
     <string name="calendar_export_pdf">ส่งออก PDF</string>
     <string name="calendar_settings_open">การตั้งค่าปฏิทิน</string>
-    <string name="calendar_export_failed">ส่งออกลำดับรายการไม่สำเร็จ</string>
     <string name="calendar_section_new">หัวข้อใหม่</string>
     <string name="calendar_section_insert">แทรก</string>
     <string name="calendar_auto_load">โหลดการนมัสการอัตโนมัติ</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">ใช้เมื่อเพลงยังไม่มีความยาวที่วัดไว้</string>
     <string name="calendar_pick_search">ค้นหาเพลง หรือพิมพ์ข้ออ้างอิง</string>
     <string name="calendar_pick_adds_to">จะเพิ่มลงใน %1$s</string>
-    <string name="calendar_pick_duration">ความยาว</string>
     <string name="calendar_pick_all_books">หนังสือเพลงทั้งหมด</string>
     <string name="calendar_pick_reference">ข้ออ้างอิง</string>
     <string name="calendar_pick_all_bible_books">หนังสือทั้งหมด</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">เพิ่มลงลำดับรายการ</string>
     <string name="calendar_pick_add_range">เพิ่ม %1$s</string>
     <string name="calendar_pick_verse_hint">แตะข้อหนึ่ง แล้วแตะอีกข้อเพื่อเลือกช่วง</string>
-    <string name="calendar_pick_clear">ล้าง</string>
     <string name="calendar_edit_song">แก้ไขเพลงนี้</string>
-    <string name="calendar_replace_row">กำลังแทนที่ %1$s</string>
-    <string name="calendar_change_row">เปลี่ยนรายการนี้</string>
-    <string name="calendar_cue_auto">อัตโนมัติ</string>
-    <string name="calendar_cue_auto_tip">%1$s · ทำงานเองเวลา %2$s — คลิกเพื่อสั่งทำงานตอนนี้</string>
     <string name="calendar_cue_fire_now">สั่งเครื่องหมายนี้ทำงานตอนนี้</string>
     <string name="calendar_cue_fired_at">ทำงานเมื่อ %1$s</string>
     <string name="calendar_cue_next_in">ถัดไป · ในอีก %1$d นาที</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">นาฬิกาถูกเลื่อน · คลิกเพื่อเลื่อนอีก 5 นาที × เพื่อกลับสู่เวลาจริง</string>
     <string name="calendar_run_clock_reset">กลับสู่เวลาจริง</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d นาที</string>
-    <string name="calendar_footer_cues">%1$s · %2$d จาก %3$d เครื่องหมายจะทำงานอัตโนมัติ</string>
     <string name="calendar_cue_fired_title">เครื่องหมายทำงานแล้ว</string>
     <string name="calendar_cue_toast_close">ซ่อน</string>
     <string name="calendar_preset_kind_all">ทั้งหมด</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ ถัดไป</string>
     <string name="calendar_chip_blank">ล้าง</string>
-    <string name="calendar_chip_manual">ด้วยมือ</string>
     <string name="calendar_auto_starts">เริ่มอัตโนมัติ %1$d รายการ</string>
     <string name="calendar_auto_start_one">เริ่มอัตโนมัติ 1 รายการ</string>
     <string name="calendar_all_manual">ด้วยมือทั้งหมด</string>

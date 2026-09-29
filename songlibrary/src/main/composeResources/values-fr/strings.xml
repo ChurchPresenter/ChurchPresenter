@@ -34,7 +34,6 @@
     <string name="revert">Annuler les modifications</string>
     <string name="save_changes">Enregistrer les modifications</string>
     <string name="done">Terminé</string>
-    <string name="saved">%1$s enregistrés</string>
     <string name="save_failed">Impossible d’enregistrer %1$s</string>
     <string name="new_song_book">Nouveau recueil</string>
     <string name="new_song_book_subhead">Un ensemble dans lequel classer les cantiques</string>

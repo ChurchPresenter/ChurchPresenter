@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kidhibiti cha Kalenda</string>
     <string name="calendar_title">Kalenda</string>
     <string name="calendar_today">Leo</string>
     <string name="calendar_close">Funga</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Tukio maalum</string>
 
     <string name="calendar_add_service">Ongeza ibada</string>
-    <string name="calendar_new_service">Ibada mpya</string>
     <string name="calendar_edit_service">Hariri ibada</string>
     <string name="calendar_service_name">Jina</string>
     <string name="calendar_service_start">Saa ya kuanza</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Ghairi</string>
     <string name="calendar_delete">Futa</string>
 
-    <string name="calendar_run_of_show">Mtiririko wa ibada</string>
-    <string name="calendar_nothing_planned">Hakuna kilichopangwa kwa siku hii</string>
-    <string name="calendar_no_service_hint">Ongeza ibada ili uanze kupanga.</string>
-    <string name="calendar_run_empty">Ibada hii bado haina vipengee.</string>
     <string name="calendar_items_count_one">Kipengee %1$d</string>
     <string name="calendar_items_count">Vipengee %1$d</string>
-    <string name="calendar_planned_total">%1$s zimepangwa</string>
     <string name="calendar_duration">Muda</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Muda unaopangwa kuchukua — bofya ili kuandika, kama 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Nyimbo</string>
     <string name="calendar_pick_bible">Biblia</string>
     <string name="calendar_pick_section">Sehemu</string>
-    <string name="calendar_pick_schedule">Kichupo cha Ratiba</string>
     <string name="calendar_pick_presets">Mipangilio tayari</string>
     <string name="calendar_presets_empty">Bado hakuna mipangilio tayari</string>
     <string name="calendar_presets_empty_sub">Hifadhi moja kwa „Hifadhi mpangilio tayari”, kando ya „Ongeza kwenye ratiba” kwenye vichupo vya Picha, Wasilisho, Media, Matangazo na Turubai.</string>
     <string name="calendar_presets_note">Mipangilio tayari huonekana chini ya „Mipangilio tayari” unapoongeza kipengee, na chini ya „Kipengee” alama inapoonyesha kitu.</string>
     <string name="calendar_settings_presets">Mipangilio tayari</string>
     <string name="calendar_preset_remove">Futa mpangilio tayari</string>
-    <string name="calendar_cue_from_run">Kutoka mtiririko huu wa ibada</string>
     <string name="calendar_cue_loops">hurudia</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Mipangilio tayari iliyohifadhiwa</string>
-    <string name="calendar_search_songs_hint">Tafuta nyimbo kwa kichwa au nambari</string>
-    <string name="calendar_bible_hint">Andika rejeleo, kama Yohana 3:16-17</string>
     <string name="calendar_section_hint">Jina la sehemu, kama Kuabudu</string>
-    <string name="calendar_add">Ongeza</string>
     <string name="calendar_no_results">Hakuna kinachofanana</string>
     <string name="calendar_songs_loading">Inasoma maktaba ya nyimbo…</string>
-    <string name="calendar_schedule_empty">Kichupo cha Ratiba ni tupu.</string>
-    <string name="calendar_capture_schedule">Ongeza vipengee vyote kutoka kichupo cha Ratiba</string>
 
     <string name="calendar_load_into_schedule">Pakia kwenye Ratiba</string>
     <string name="calendar_load_title">Badilisha ratiba?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Ondoa sehemu</string>
     <string name="calendar_default_start">Saa ya kuanza ya chaguo-msingi</string>
     <string name="calendar_default_start_sub">Saa inayotumika wakati ibada mpya inaundwa</string>
-    <string name="calendar_automation_empty">Bado hakuna alama</string>
-    <string name="calendar_automation_title">Uendeshaji otomatiki</string>
     <string name="calendar_armed">Imewashwa</string>
     <string name="calendar_armed_off">Imezimwa</string>
     <string name="calendar_arm_tip">Washa au zima alama zote</string>
     <string name="calendar_cue_skip_tip">Ruka alama hii</string>
-    <string name="calendar_automation_note">huonyesha vipengee vinavyojiendesha vyenyewe. Kuondoa alama huruka alama kwa ibada hii.</string>
-    <string name="calendar_edit_cues">Hariri alama</string>
     <string name="calendar_cue_action_countdown">Anzisha kuhesabu kinyume</string>
     <string name="calendar_cue_action_go_live">Rusha moja kwa moja</string>
     <string name="calendar_cue_action_project">Mzunguko wa matangazo</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Futa matokeo yote</string>
     <string name="calendar_cue_badge_timer">Kipima muda</string>
     <string name="calendar_cue_badge_go_live">Moja kwa moja</string>
-    <string name="calendar_cue_item">Kipengee</string>
     <string name="calendar_cue_item_missing">Kipengee hakipo tena katika mtiririko huu wa ibada</string>
     <string name="calendar_copy_include_cues">Alama za uendeshaji otomatiki</string>
     <string name="calendar_copy_include_cues_sub">Alama %1$d, nyakati zimehifadhiwa</string>
     <string name="calendar_template_include_cues">Alama za uendeshaji otomatiki</string>
     <string name="calendar_template_include_cues_sub">Nyakati linganishi</string>
-    <string name="calendar_templates_empty">Hakuna violezo vilivyohifadhiwa</string>
     <string name="calendar_templates_empty_sub">Hifadhi kimoja kutoka ibada yoyote kwa „Kiolezo”, kwenye kichwa cha mtiririko. Hadi hapo, ibada mpya inaweza kuanza kutoka nakala ya ibada yoyote ya awali.</string>
     <string name="calendar_templates_note">Violezo hutolewa chini ya „Anza na” unapoongeza ibada. Hifadhi kipya kutoka ibada yoyote kwa „Kiolezo”, kwenye kichwa cha mtiririko.</string>
     <string name="calendar_template_remove">Futa kiolezo</string>
     <string name="calendar_template_saved_sub">Kiolezo · %1$s · vipengee %2$d</string>
-    <string name="calendar_copy_service">Nakili</string>
     <string name="calendar_copy_service_tip">Nakili ibada hii kwenda tarehe nyingine, au irudie</string>
-    <string name="calendar_save_template">Kiolezo</string>
     <string name="calendar_save_template_tip">Hifadhi mtiririko huu wa ibada kama kiolezo</string>
     <string name="calendar_copy_title">Nakili %1$s</string>
     <string name="calendar_copy_sub">%1$s · vipengee %2$d</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Hurudia %1$s · ibada %2$d katika msururu huu</string>
     <string name="calendar_export_pdf">Hamisha PDF</string>
     <string name="calendar_settings_open">Mipangilio ya kalenda</string>
-    <string name="calendar_export_failed">Mtiririko wa ibada haukuweza kuhamishwa.</string>
     <string name="calendar_section_new">Sehemu mpya</string>
     <string name="calendar_section_insert">Ingiza</string>
     <string name="calendar_auto_load">Pakia ibada kiotomatiki</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Hutolewa wakati wimbo bado hauna muda uliopimwa</string>
     <string name="calendar_pick_search">Tafuta nyimbo, au andika rejeleo</string>
     <string name="calendar_pick_adds_to">Huongezwa kwenye %1$s</string>
-    <string name="calendar_pick_duration">Muda</string>
     <string name="calendar_pick_all_books">Vitabu vyote vya nyimbo</string>
     <string name="calendar_pick_reference">Rejeleo</string>
     <string name="calendar_pick_all_bible_books">Vitabu vyote</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Ongeza kwenye mtiririko wa ibada</string>
     <string name="calendar_pick_add_range">Ongeza %1$s</string>
     <string name="calendar_pick_verse_hint">Gusa mstari, kisha gusa mwingine kupata mfululizo</string>
-    <string name="calendar_pick_clear">Futa</string>
     <string name="calendar_edit_song">Hariri wimbo huu</string>
-    <string name="calendar_replace_row">Inabadilisha %1$s</string>
-    <string name="calendar_change_row">Badilisha kipengee hiki</string>
-    <string name="calendar_cue_auto">Otomatiki</string>
-    <string name="calendar_cue_auto_tip">%1$s · hujiendesha saa %2$s — bofya ili kuianzisha sasa</string>
     <string name="calendar_cue_fire_now">Anzisha alama hii sasa</string>
     <string name="calendar_cue_fired_at">Ilianzishwa %1$s</string>
     <string name="calendar_cue_next_in">Inayofuata · baada ya dakika %1$d</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Saa imesogezwa · bofya kwa dakika 5 zaidi, × kurudi kwenye saa halisi</string>
     <string name="calendar_run_clock_reset">Rudi kwenye saa halisi</string>
     <string name="calendar_run_meta">%1$s – %2$s · dakika %3$d</string>
-    <string name="calendar_footer_cues">%1$s · alama %2$d kati ya %3$d zitaanzishwa kiotomatiki</string>
     <string name="calendar_cue_fired_title">Alama imeanzishwa</string>
     <string name="calendar_cue_toast_close">Ficha</string>
     <string name="calendar_preset_kind_all">Zote</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Kinachofuata</string>
     <string name="calendar_chip_blank">Futa</string>
-    <string name="calendar_chip_manual">Kwa mkono</string>
     <string name="calendar_auto_starts">Mianzo otomatiki %1$d</string>
     <string name="calendar_auto_start_one">Mwanzo otomatiki 1</string>
     <string name="calendar_all_manual">Yote kwa mkono</string>

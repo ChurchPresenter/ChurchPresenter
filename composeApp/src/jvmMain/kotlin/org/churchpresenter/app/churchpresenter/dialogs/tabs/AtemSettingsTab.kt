@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import churchpresenter.composeapp.generated.resources.atem_downstream_keyer
+import churchpresenter.composeapp.generated.resources.atem_downstream_keyer_hint
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -490,8 +492,8 @@ fun AtemSettingsTab(
                 LabeledSwitch(
                     checked = atem.useDownstreamKey,
                     onCheckedChange = { update { copy(useDownstreamKey = it) } },
-                    label = "Downstream keyer (DSK)",
-                    supporting = "Drive the key as a downstream keyer instead of an upstream keyer (USK)",
+                    label = stringResource(Res.string.atem_downstream_keyer),
+                    supporting = stringResource(Res.string.atem_downstream_keyer_hint),
                     modifier = Modifier.fillMaxWidth(),
                     spacing = 12.dp,
                 )

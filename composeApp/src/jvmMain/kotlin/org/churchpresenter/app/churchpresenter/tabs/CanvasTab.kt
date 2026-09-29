@@ -1004,7 +1004,7 @@ fun CanvasTab(
                                 presenterManager.setShowPresenterWindow(true)
                                 wentLive(
                                     ScheduleItem.SceneItem(
-                                        id = java.util.UUID.randomUUID().toString(),
+                                        id = UUID.randomUUID().toString(),
                                         sceneId = currentScene.id,
                                         sceneName = currentScene.name,
                                     )

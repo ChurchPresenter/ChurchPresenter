@@ -28,10 +28,11 @@ fun parseStoredDate(text: String): LocalDate? = runCatching { LocalDate.parse(te
 
 /** A stored `HH:mm` back to a [LocalTime], or null. Accepts `9:05` as well as `09:05`. */
 fun parseStoredTime(text: String): LocalTime? {
-    val parts = text.trim().split(':').map { it.toIntOrNull() }
-    if (parts.size != HH_MM_PARTS || parts.any { it == null }) return null
+    val fields = text.trim().split(':')
+    val parts = fields.mapNotNull { it.toIntOrNull() }
+    if (fields.size != HH_MM_PARTS || parts.size != HH_MM_PARTS) return null
     // LocalTime.of rejects 25:00 and 10:61 by throwing, which is the validation this wants.
-    return runCatching { LocalTime.of(parts[0]!!, parts[1]!!) }.getOrNull()
+    return runCatching { LocalTime.of(parts[0], parts[1]) }.getOrNull()
 }
 
 /** [time] as it is stored, always zero-padded. */

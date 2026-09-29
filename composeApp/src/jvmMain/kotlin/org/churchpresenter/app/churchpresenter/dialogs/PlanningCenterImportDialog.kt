@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.planningcenter.PcoItemType
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.Image
@@ -412,7 +413,11 @@ internal fun PlanningCenterImportDialogContent(
             Spacer(Modifier.height(12.dp))
 
             viewModel.errorMessage?.let { err ->
-                Text(err, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    stringResource(err),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 Spacer(Modifier.height(8.dp))
             }
 
@@ -485,7 +490,7 @@ internal fun PlanningCenterImportDialogContent(
                             // attachments list below can also check it — a real accordion.
                             var expanded by remember(pco.id) { mutableStateOf(false) }
                             val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
-                            val isExpandable = pco.itemType == "item" && !hasScripture &&
+                            val isExpandable = pco.itemType == PcoItemType.ITEM && !hasScripture &&
                                 viewModel.attachmentsByItemId.containsKey(pco.id) &&
                                 (viewModel.attachmentsByItemId[pco.id]?.size ?: 0) > 0
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
@@ -496,7 +501,7 @@ internal fun PlanningCenterImportDialogContent(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     when (pco.itemType) {
-                                        "song" -> {
+                                        PcoItemType.SONG -> {
                                             RaisedCheckbox(
                                                 checked = entry.selected && entry.matchedSongId != null,
                                                 enabled = entry.matchedSongId != null,
@@ -537,7 +542,7 @@ internal fun PlanningCenterImportDialogContent(
                                                 }
                                             }
                                         }
-                                        "header" -> {
+                                        PcoItemType.HEADER -> {
                                             RaisedCheckbox(
                                                 checked = entry.selected,
                                                 onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
@@ -550,7 +555,7 @@ internal fun PlanningCenterImportDialogContent(
                                                 modifier = Modifier.weight(1f)
                                             )
                                         }
-                                        "media" -> {
+                                        PcoItemType.MEDIA -> {
                                             // PCO "media" items reference video/audio that lives
                                             // in the Media Library, not the Attachments API — the
                                             // "attachments" this endpoint would return are incidental
@@ -633,7 +638,7 @@ internal fun PlanningCenterImportDialogContent(
                                     }
                                 }
 
-                                if (expanded && pco.itemType == "item") {
+                                if (expanded && pco.itemType == PcoItemType.ITEM) {
                                     val attachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
                                     val selectedIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
                                     attachments.forEach { att ->
@@ -698,9 +703,9 @@ internal fun PlanningCenterImportDialogContent(
                         val pco = entry.pco
                         val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
                         when (pco.itemType) {
-                            "header" -> entry.selected
-                            "song" -> entry.matchedSongId != null
-                            "item" -> if (hasScripture) {
+                            PcoItemType.HEADER -> entry.selected
+                            PcoItemType.SONG -> entry.matchedSongId != null
+                            PcoItemType.ITEM -> if (hasScripture) {
                                 viewModel.selectedScriptureIndices[pco.id]?.isNotEmpty() == true
                             } else {
                                 val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
@@ -718,7 +723,7 @@ internal fun PlanningCenterImportDialogContent(
                             for (entry in viewModel.planItems) {
                                 val pco = entry.pco
                                 when (pco.itemType) {
-                                    "song" -> {
+                                    PcoItemType.SONG -> {
                                         val songId = entry.matchedSongId.takeIf { entry.selected }
                                         if (songId != null) {
                                             val parts = songId.split("::", limit = 2)
@@ -727,12 +732,12 @@ internal fun PlanningCenterImportDialogContent(
                                             onAddSong(songNumber, pco.songTitle ?: pco.title, songbook, songId)
                                         }
                                     }
-                                    "header" -> {
+                                    PcoItemType.HEADER -> {
                                         if (entry.selected) {
                                             onAddLabel(pco.title, defaultHeaderTextColor, defaultHeaderBackgroundColor)
                                         }
                                     }
-                                    "item" -> {
+                                    PcoItemType.ITEM -> {
                                         // Scripture and attachment checkboxes are independent of
                                         // the row's own checkbox (matching the button's enabled
                                         // check above) — unchecking the row while leaving one of
@@ -766,7 +771,7 @@ internal fun PlanningCenterImportDialogContent(
                                 }
                                 // Attachments are their own per-file checkboxes, independent of
                                 // the row's main checkbox.
-                                if (pco.itemType == "item") {
+                                if (pco.itemType == PcoItemType.ITEM) {
                                     val attachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
                                     val selectedIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
                                     // All selected images for this item share one cache folder

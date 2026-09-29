@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">日历管理器</string>
     <string name="calendar_title">日历</string>
     <string name="calendar_today">今天</string>
     <string name="calendar_close">关闭</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">特别活动</string>
 
     <string name="calendar_add_service">添加聚会</string>
-    <string name="calendar_new_service">新建聚会</string>
     <string name="calendar_edit_service">编辑聚会</string>
     <string name="calendar_service_name">名称</string>
     <string name="calendar_service_start">开始时间</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">取消</string>
     <string name="calendar_delete">删除</string>
 
-    <string name="calendar_run_of_show">聚会流程</string>
-    <string name="calendar_nothing_planned">这一天没有任何安排</string>
-    <string name="calendar_no_service_hint">添加一场聚会即可开始安排。</string>
-    <string name="calendar_run_empty">这场聚会还没有项目。</string>
     <string name="calendar_items_count_one">%1$d 个项目</string>
     <string name="calendar_items_count">%1$d 个项目</string>
-    <string name="calendar_planned_total">已安排 %1$s</string>
     <string name="calendar_duration">时长</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">预计持续多久 — 点击输入，例如 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">诗歌</string>
     <string name="calendar_pick_bible">圣经</string>
     <string name="calendar_pick_section">分段</string>
-    <string name="calendar_pick_schedule">节目单标签页</string>
     <string name="calendar_pick_presets">预设</string>
     <string name="calendar_presets_empty">还没有预设</string>
     <string name="calendar_presets_empty_sub">在图片、演示、媒体、公告和画布标签页中，用「添加到节目单」旁边的「保存预设」保存一个。</string>
     <string name="calendar_presets_note">添加项目时预设出现在「预设」下；当某个标记显示内容时，出现在「项目」下。</string>
     <string name="calendar_settings_presets">预设</string>
     <string name="calendar_preset_remove">删除预设</string>
-    <string name="calendar_cue_from_run">来自本聚会流程</string>
     <string name="calendar_cue_loops">循环</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">已保存的预设</string>
-    <string name="calendar_search_songs_hint">按标题或编号搜索诗歌</string>
-    <string name="calendar_bible_hint">输入经文出处，例如 约翰福音 3:16-17</string>
     <string name="calendar_section_hint">分段名称，例如 敬拜</string>
-    <string name="calendar_add">添加</string>
     <string name="calendar_no_results">没有匹配的内容</string>
     <string name="calendar_songs_loading">正在读取诗歌库…</string>
-    <string name="calendar_schedule_empty">节目单标签页是空的。</string>
-    <string name="calendar_capture_schedule">添加节目单标签页中的全部项目</string>
 
     <string name="calendar_load_into_schedule">载入节目单</string>
     <string name="calendar_load_title">替换节目单？</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">移除分段</string>
     <string name="calendar_default_start">默认开始时间</string>
     <string name="calendar_default_start_sub">新建聚会时使用的时间</string>
-    <string name="calendar_automation_empty">还没有标记</string>
-    <string name="calendar_automation_title">自动化</string>
     <string name="calendar_armed">已启用</string>
     <string name="calendar_armed_off">关闭</string>
     <string name="calendar_arm_tip">启用或关闭所有标记</string>
     <string name="calendar_cue_skip_tip">跳过此标记</string>
-    <string name="calendar_automation_note">标示会自行运行的项目。取消勾选会在本场聚会中跳过该标记。</string>
-    <string name="calendar_edit_cues">编辑标记</string>
     <string name="calendar_cue_action_countdown">开始倒计时</string>
     <string name="calendar_cue_action_go_live">上画面</string>
     <string name="calendar_cue_action_project">公告循环</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">清空输出</string>
     <string name="calendar_cue_badge_timer">计时器</string>
     <string name="calendar_cue_badge_go_live">上画面</string>
-    <string name="calendar_cue_item">项目</string>
     <string name="calendar_cue_item_missing">该项目已不在此聚会流程中</string>
     <string name="calendar_copy_include_cues">自动化标记</string>
     <string name="calendar_copy_include_cues_sub">%1$d 个标记，保留时间偏移</string>
     <string name="calendar_template_include_cues">自动化标记</string>
     <string name="calendar_template_include_cues_sub">相对偏移</string>
-    <string name="calendar_templates_empty">没有已保存的模板</string>
     <string name="calendar_templates_empty_sub">在聚会流程标题栏的「模板」按钮，可从任意一场聚会保存一个。在此之前，新聚会可以从任意一场以往聚会的副本开始。</string>
     <string name="calendar_templates_note">添加聚会时，模板会出现在「从此开始」下。用聚会流程标题栏的「模板」从任意一场聚会保存新的模板。</string>
     <string name="calendar_template_remove">删除模板</string>
     <string name="calendar_template_saved_sub">模板 · %1$s · %2$d 个项目</string>
-    <string name="calendar_copy_service">复制</string>
     <string name="calendar_copy_service_tip">把这场聚会复制到另一个日期，或让它重复</string>
-    <string name="calendar_save_template">模板</string>
     <string name="calendar_save_template_tip">把这个聚会流程保存为模板</string>
     <string name="calendar_copy_title">复制 %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d 个项目</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">重复 %1$s · 此系列中有 %2$d 场聚会</string>
     <string name="calendar_export_pdf">导出 PDF</string>
     <string name="calendar_settings_open">日历设置</string>
-    <string name="calendar_export_failed">无法导出聚会流程。</string>
     <string name="calendar_section_new">新建分段</string>
     <string name="calendar_section_insert">插入</string>
     <string name="calendar_auto_load">自动载入聚会</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">当诗歌尚无实测时长时使用</string>
     <string name="calendar_pick_search">搜索诗歌，或输入经文出处</string>
     <string name="calendar_pick_adds_to">将添加到 %1$s</string>
-    <string name="calendar_pick_duration">时长</string>
     <string name="calendar_pick_all_books">所有诗歌本</string>
     <string name="calendar_pick_reference">经文出处</string>
     <string name="calendar_pick_all_bible_books">所有书卷</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">添加到聚会流程</string>
     <string name="calendar_pick_add_range">添加 %1$s</string>
     <string name="calendar_pick_verse_hint">点一节经文，再点另一节可选取范围</string>
-    <string name="calendar_pick_clear">清除</string>
     <string name="calendar_edit_song">编辑这首诗歌</string>
-    <string name="calendar_replace_row">正在替换 %1$s</string>
-    <string name="calendar_change_row">更换此项目</string>
-    <string name="calendar_cue_auto">自动</string>
-    <string name="calendar_cue_auto_tip">%1$s · 将于 %2$s 自行运行 — 点击可立即触发</string>
     <string name="calendar_cue_fire_now">立即触发此标记</string>
     <string name="calendar_cue_fired_at">已于 %1$s 触发</string>
     <string name="calendar_cue_next_in">下一个 · %1$d 分钟后</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">时钟已拨快 · 点击再加 5 分钟，× 返回真实时间</string>
     <string name="calendar_run_clock_reset">返回真实时间</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d 分钟</string>
-    <string name="calendar_footer_cues">%1$s · %3$d 个标记中有 %2$d 个将自动触发</string>
     <string name="calendar_cue_fired_title">标记已触发</string>
     <string name="calendar_cue_toast_close">隐藏</string>
     <string name="calendar_preset_kind_all">全部</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ 下一项</string>
     <string name="calendar_chip_blank">清空</string>
-    <string name="calendar_chip_manual">手动</string>
     <string name="calendar_auto_starts">%1$d 个自动开始</string>
     <string name="calendar_auto_start_one">1 个自动开始</string>
     <string name="calendar_all_manual">全部手动</string>

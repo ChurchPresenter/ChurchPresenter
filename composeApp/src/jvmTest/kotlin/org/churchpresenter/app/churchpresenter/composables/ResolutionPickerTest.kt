@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,7 +27,7 @@ class ResolutionPickerTest {
     private fun picker(
         width: Int = 1920,
         height: Int = 1080,
-        block: androidx.compose.ui.test.ComposeUiTest.(read: () -> Pair<Int, Int>?) -> Unit,
+        block: ComposeUiTest.(read: () -> Pair<Int, Int>?) -> Unit,
     ) = runComposeUiTest {
         var picked: Pair<Int, Int>? = null
         setContent {

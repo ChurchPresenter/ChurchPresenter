@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">カレンダー管理</string>
     <string name="calendar_title">カレンダー</string>
     <string name="calendar_today">今日</string>
     <string name="calendar_close">閉じる</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">特別な集会</string>
 
     <string name="calendar_add_service">礼拝を追加</string>
-    <string name="calendar_new_service">新しい礼拝</string>
     <string name="calendar_edit_service">礼拝を編集</string>
     <string name="calendar_service_name">名前</string>
     <string name="calendar_service_start">開始時刻</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">キャンセル</string>
     <string name="calendar_delete">削除</string>
 
-    <string name="calendar_run_of_show">進行表</string>
-    <string name="calendar_nothing_planned">この日の予定はありません</string>
-    <string name="calendar_no_service_hint">礼拝を追加すると計画を始められます。</string>
-    <string name="calendar_run_empty">この礼拝にはまだ項目がありません。</string>
     <string name="calendar_items_count_one">%1$d 項目</string>
     <string name="calendar_items_count">%1$d 項目</string>
-    <string name="calendar_planned_total">予定 %1$s</string>
     <string name="calendar_duration">長さ</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">想定している長さ — クリックして入力します。例: 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">賛美歌</string>
     <string name="calendar_pick_bible">聖書</string>
     <string name="calendar_pick_section">区切り</string>
-    <string name="calendar_pick_schedule">スケジュールタブ</string>
     <string name="calendar_pick_presets">プリセット</string>
     <string name="calendar_presets_empty">プリセットはまだありません</string>
     <string name="calendar_presets_empty_sub">画像・プレゼン・メディア・お知らせ・キャンバスの各タブで「スケジュールに追加」の隣にある「プリセットを保存」から保存できます。</string>
     <string name="calendar_presets_note">プリセットは項目を追加するときに「プリセット」の下に、キューが何かを表示するときは「項目」の下に表示されます。</string>
     <string name="calendar_settings_presets">プリセット</string>
     <string name="calendar_preset_remove">プリセットを削除</string>
-    <string name="calendar_cue_from_run">この進行表から</string>
     <string name="calendar_cue_loops">繰り返し</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">保存済みプリセット</string>
-    <string name="calendar_search_songs_hint">題名または番号で賛美歌を検索</string>
-    <string name="calendar_bible_hint">聖句を入力（例: ヨハネ 3:16-17）</string>
     <string name="calendar_section_hint">区切りの名前（例: 賛美）</string>
-    <string name="calendar_add">追加</string>
     <string name="calendar_no_results">該当するものがありません</string>
     <string name="calendar_songs_loading">賛美歌ライブラリを読み込み中…</string>
-    <string name="calendar_schedule_empty">スケジュールタブは空です。</string>
-    <string name="calendar_capture_schedule">スケジュールタブの項目をすべて追加</string>
 
     <string name="calendar_load_into_schedule">スケジュールに読み込む</string>
     <string name="calendar_load_title">スケジュールを置き換えますか？</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">区切りを削除</string>
     <string name="calendar_default_start">既定の開始時刻</string>
     <string name="calendar_default_start_sub">新しい礼拝を作成するときの時刻</string>
-    <string name="calendar_automation_empty">キューはまだありません</string>
-    <string name="calendar_automation_title">自動化</string>
     <string name="calendar_armed">オン</string>
     <string name="calendar_armed_off">オフ</string>
     <string name="calendar_arm_tip">すべてのキューをオン／オフ</string>
     <string name="calendar_cue_skip_tip">このキューをスキップ</string>
-    <string name="calendar_automation_note">は自動で実行される項目を示します。チェックを外すと、この礼拝ではそのキューを飛ばします。</string>
-    <string name="calendar_edit_cues">キューを編集</string>
     <string name="calendar_cue_action_countdown">カウントダウン開始</string>
     <string name="calendar_cue_action_go_live">本番に出す</string>
     <string name="calendar_cue_action_project">お知らせのループ</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">出力をクリア</string>
     <string name="calendar_cue_badge_timer">タイマー</string>
     <string name="calendar_cue_badge_go_live">本番</string>
-    <string name="calendar_cue_item">項目</string>
     <string name="calendar_cue_item_missing">この項目はもうこの進行表にありません</string>
     <string name="calendar_copy_include_cues">自動化キュー</string>
     <string name="calendar_copy_include_cues_sub">%1$d 件のキュー、時間差はそのまま</string>
     <string name="calendar_template_include_cues">自動化キュー</string>
     <string name="calendar_template_include_cues_sub">相対的な時間差</string>
-    <string name="calendar_templates_empty">保存済みテンプレートはありません</string>
     <string name="calendar_templates_empty_sub">進行表の見出しにある「テンプレート」から、どの礼拝でも保存できます。それまでは、新しい礼拝は過去の礼拝の複製から始められます。</string>
     <string name="calendar_templates_note">テンプレートは礼拝を追加するときに「元にするもの」の下に表示されます。進行表の見出しの「テンプレート」から新しく保存できます。</string>
     <string name="calendar_template_remove">テンプレートを削除</string>
     <string name="calendar_template_saved_sub">テンプレート · %1$s · %2$d 項目</string>
-    <string name="calendar_copy_service">複製</string>
     <string name="calendar_copy_service_tip">この礼拝を別の日付に複製、または繰り返します</string>
-    <string name="calendar_save_template">テンプレート</string>
     <string name="calendar_save_template_tip">この進行表をテンプレートとして保存</string>
     <string name="calendar_copy_title">%1$s を複製</string>
     <string name="calendar_copy_sub">%1$s · %2$d 項目</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">%1$s に繰り返し · このシリーズに %2$d 件の礼拝</string>
     <string name="calendar_export_pdf">PDF を書き出す</string>
     <string name="calendar_settings_open">カレンダー設定</string>
-    <string name="calendar_export_failed">進行表を書き出せませんでした。</string>
     <string name="calendar_section_new">新しい区切り</string>
     <string name="calendar_section_insert">挿入</string>
     <string name="calendar_auto_load">礼拝を自動で読み込む</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">賛美歌の実測の長さがまだないときに提案されます</string>
     <string name="calendar_pick_search">賛美歌を検索、または聖句を入力</string>
     <string name="calendar_pick_adds_to">%1$s に追加されます</string>
-    <string name="calendar_pick_duration">長さ</string>
     <string name="calendar_pick_all_books">すべての賛美歌集</string>
     <string name="calendar_pick_reference">聖句</string>
     <string name="calendar_pick_all_bible_books">すべての書</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">進行表に追加</string>
     <string name="calendar_pick_add_range">%1$s を追加</string>
     <string name="calendar_pick_verse_hint">節をタップし、もう一つタップすると範囲になります</string>
-    <string name="calendar_pick_clear">クリア</string>
     <string name="calendar_edit_song">この賛美歌を編集</string>
-    <string name="calendar_replace_row">%1$s を置き換え中</string>
-    <string name="calendar_change_row">この項目を変更</string>
-    <string name="calendar_cue_auto">自動</string>
-    <string name="calendar_cue_auto_tip">%1$s · %2$s に自動で実行 — クリックすると今すぐ実行します</string>
     <string name="calendar_cue_fire_now">このキューを今すぐ実行</string>
     <string name="calendar_cue_fired_at">%1$s に実行</string>
     <string name="calendar_cue_next_in">次 · %1$d 分後</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">時計を進めています · クリックでさらに 5 分、× で実時間に戻ります</string>
     <string name="calendar_run_clock_reset">実時間に戻す</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d 分</string>
-    <string name="calendar_footer_cues">%1$s · %3$d 件中 %2$d 件のキューが自動で実行されます</string>
     <string name="calendar_cue_fired_title">キューを実行しました</string>
     <string name="calendar_cue_toast_close">閉じる</string>
     <string name="calendar_preset_kind_all">すべて</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ 次へ</string>
     <string name="calendar_chip_blank">クリア</string>
-    <string name="calendar_chip_manual">手動</string>
     <string name="calendar_auto_starts">自動開始 %1$d 件</string>
     <string name="calendar_auto_start_one">自動開始 1 件</string>
     <string name="calendar_all_manual">すべて手動</string>

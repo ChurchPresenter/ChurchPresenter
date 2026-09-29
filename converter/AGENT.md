@@ -20,11 +20,11 @@ Only these symbols — keep them public, and treat a signature change here as an
 
 | Symbol | Used by |
 |---|---|
-| `ui.App` (as `ConverterApp`), `ui.Strings` | `dialogs/AboutDialog.kt` — the Help-menu window |
-| `converter.bible.XmlToSpbConverter` | `data/ZefaniaSource.kt`, `data/BebliaSource.kt` |
-| `converter.bible.UsfxToSpbConverter` | `data/EBibleSource.kt` |
-| `converter.bible.BibleCatalogNaming` | `data/ZefaniaRepositoryIndex.kt`, `data/BebliaCatalogIndex.kt` |
-| `converter.bible.BookNames` | `data/BebliaSource.kt` |
+| `ui.App` (as `ConverterApp`), `ui.Strings`, `ui.ConverterTab` | `dialogs/AboutDialog.kt`, `main.kt` — the Help-menu window |
+| `ui.SongSources`, `ui.BIBLE_CONVERSION` | `utils/UsageEventMappings.kt` — naming a conversion in usage events |
+
+The Bible converters (`XmlToSpbConverter`, `UsfxToSpbConverter`, `SpbVersePatcher`, the catalogue
+naming) live in `:bible-formats`, which this module and the app both depend on.
 
 The app's own `data/SpsConverter.kt` is a different thing with a similar name — it is app code and
 does not live here.
@@ -36,7 +36,6 @@ does not live here.
 | Package | Owns |
 |---|---|
 | `converter/song/` | One converter per source format, plus the shared lyric/section machinery (`LyricBlocks`, `SectionLabel`, `SongOutput`, the `SongFormatConverter` registry) and format helpers (`ParadoxTable`, `ProtoMessage`, `LooseJson`, `XmlRepair`, `XmlSupport`, `ChordLines`, `DocumentTextExtractor`) |
-| `converter/bible/` | `XmlToSpbConverter` (Zefania/Beblia XML), `UsfxToSpbConverter` (eBible USFX), `BebliaParser`, `BookNames`, `BibleCatalogNaming`, `SpbVersePatcher` + `VersePatches` |
 | `converter/library/` | Library-wide passes: `DuplicateFinder`, `RtfText`, `TextUtils` |
 | `ui/` | The Compose Desktop GUI (`App`, theme, widgets, `Strings`) |
 | `Main.kt` | `mainClass = "MainKt"` — the standalone app's entry point |

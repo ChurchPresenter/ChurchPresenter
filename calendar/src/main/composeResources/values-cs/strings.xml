@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Správce kalendáře</string>
     <string name="calendar_title">Kalendář</string>
     <string name="calendar_today">Dnes</string>
     <string name="calendar_close">Zavřít</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Zvláštní událost</string>
 
     <string name="calendar_add_service">Přidat bohoslužbu</string>
-    <string name="calendar_new_service">Nová bohoslužba</string>
     <string name="calendar_edit_service">Upravit bohoslužbu</string>
     <string name="calendar_service_name">Název</string>
     <string name="calendar_service_start">Čas začátku</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Zrušit</string>
     <string name="calendar_delete">Smazat</string>
 
-    <string name="calendar_run_of_show">Průběh bohoslužby</string>
-    <string name="calendar_nothing_planned">Na tento den není nic naplánováno</string>
-    <string name="calendar_no_service_hint">Přidejte bohoslužbu a začněte plánovat.</string>
-    <string name="calendar_run_empty">Tato bohoslužba zatím nemá žádné položky.</string>
     <string name="calendar_items_count_one">%1$d položka</string>
     <string name="calendar_items_count">%1$d položek</string>
-    <string name="calendar_planned_total">%1$s naplánováno</string>
     <string name="calendar_duration">Délka</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Jak dlouho to má trvat — klikněte a zadejte, například 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Písně</string>
     <string name="calendar_pick_bible">Bible</string>
     <string name="calendar_pick_section">Sekce</string>
-    <string name="calendar_pick_schedule">Karta programu</string>
     <string name="calendar_pick_presets">Předvolby</string>
     <string name="calendar_presets_empty">Zatím žádné předvolby</string>
     <string name="calendar_presets_empty_sub">Uložte ji tlačítkem „Uložit předvolbu“ vedle „Přidat do programu“ na kartách Obrázky, Prezentace, Média, Oznámení a Plátno.</string>
     <string name="calendar_presets_note">Předvolby se objeví v sekci „Předvolby“ při přidávání položky a v sekci „Položka“, když značka něco ukazuje.</string>
     <string name="calendar_settings_presets">Předvolby</string>
     <string name="calendar_preset_remove">Smazat předvolbu</string>
-    <string name="calendar_cue_from_run">Z tohoto průběhu bohoslužby</string>
     <string name="calendar_cue_loops">ve smyčce</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Uložené předvolby</string>
-    <string name="calendar_search_songs_hint">Hledat písně podle názvu nebo čísla</string>
-    <string name="calendar_bible_hint">Zadejte odkaz, například Jan 3:16-17</string>
     <string name="calendar_section_hint">Název sekce, například Chvály</string>
-    <string name="calendar_add">Přidat</string>
     <string name="calendar_no_results">Nic neodpovídá</string>
     <string name="calendar_songs_loading">Načítání knihovny písní…</string>
-    <string name="calendar_schedule_empty">Karta programu je prázdná.</string>
-    <string name="calendar_capture_schedule">Přidat všechny položky z karty programu</string>
 
     <string name="calendar_load_into_schedule">Načíst do programu</string>
     <string name="calendar_load_title">Nahradit program?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Odebrat sekci</string>
     <string name="calendar_default_start">Výchozí čas začátku</string>
     <string name="calendar_default_start_sub">Čas, se kterým se vytvoří nová bohoslužba</string>
-    <string name="calendar_automation_empty">Zatím žádné značky</string>
-    <string name="calendar_automation_title">Automatizace</string>
     <string name="calendar_armed">Zapnuto</string>
     <string name="calendar_armed_off">Vyp.</string>
     <string name="calendar_arm_tip">Zapnout nebo vypnout všechny značky</string>
     <string name="calendar_cue_skip_tip">Přeskočit tuto značku</string>
-    <string name="calendar_automation_note">označuje položky, které se spouští samy. Odškrtnutí přeskočí značku pro tuto bohoslužbu.</string>
-    <string name="calendar_edit_cues">Upravit značky</string>
     <string name="calendar_cue_action_countdown">Spustit odpočet</string>
     <string name="calendar_cue_action_go_live">Naživo</string>
     <string name="calendar_cue_action_project">Smyčka oznámení</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Vyčistit výstupy</string>
     <string name="calendar_cue_badge_timer">Časovač</string>
     <string name="calendar_cue_badge_go_live">Naživo</string>
-    <string name="calendar_cue_item">Položka</string>
     <string name="calendar_cue_item_missing">Položka už v tomto průběhu bohoslužby není</string>
     <string name="calendar_copy_include_cues">Značky automatizace</string>
     <string name="calendar_copy_include_cues_sub">%1$d značek, posuny zachovány</string>
     <string name="calendar_template_include_cues">Značky automatizace</string>
     <string name="calendar_template_include_cues_sub">Relativní posuny</string>
-    <string name="calendar_templates_empty">Žádné uložené šablony</string>
     <string name="calendar_templates_empty_sub">Uložte šablonu z libovolné bohoslužby tlačítkem „Šablona“ v záhlaví průběhu. Do té doby může nová bohoslužba začít kopií kterékoli dřívější.</string>
     <string name="calendar_templates_note">Šablony se nabízejí v sekci „Začít z“ při přidávání bohoslužby. Novou uložíte z libovolné bohoslužby tlačítkem „Šablona“ v záhlaví průběhu.</string>
     <string name="calendar_template_remove">Smazat šablonu</string>
     <string name="calendar_template_saved_sub">Šablona · %1$s · %2$d položek</string>
-    <string name="calendar_copy_service">Kopírovat</string>
     <string name="calendar_copy_service_tip">Zkopírovat tuto bohoslužbu na jiné datum nebo ji opakovat</string>
-    <string name="calendar_save_template">Šablona</string>
     <string name="calendar_save_template_tip">Uložit tento průběh bohoslužby jako šablonu</string>
     <string name="calendar_copy_title">Kopírovat %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d položek</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Opakuje se %1$s · %2$d bohoslužeb v této sérii</string>
     <string name="calendar_export_pdf">Export PDF</string>
     <string name="calendar_settings_open">Nastavení kalendáře</string>
-    <string name="calendar_export_failed">Průběh bohoslužby se nepodařilo exportovat.</string>
     <string name="calendar_section_new">Nová sekce</string>
     <string name="calendar_section_insert">Vložit</string>
     <string name="calendar_auto_load">Načítat bohoslužbu automaticky</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Nabídne se, když píseň ještě nemá změřenou délku</string>
     <string name="calendar_pick_search">Hledejte písně nebo zadejte odkaz</string>
     <string name="calendar_pick_adds_to">Přidá do %1$s</string>
-    <string name="calendar_pick_duration">Délka</string>
     <string name="calendar_pick_all_books">Všechny zpěvníky</string>
     <string name="calendar_pick_reference">Odkaz</string>
     <string name="calendar_pick_all_bible_books">Všechny knihy</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Přidat do průběhu bohoslužby</string>
     <string name="calendar_pick_add_range">Přidat %1$s</string>
     <string name="calendar_pick_verse_hint">Klepněte na verš, pak na další pro rozsah</string>
-    <string name="calendar_pick_clear">Vymazat</string>
     <string name="calendar_edit_song">Upravit tuto píseň</string>
-    <string name="calendar_replace_row">Nahrazuje se: %1$s</string>
-    <string name="calendar_change_row">Změnit tuto položku</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · spustí se sama v %2$s — klikněte pro spuštění teď</string>
     <string name="calendar_cue_fire_now">Spustit tuto značku teď</string>
     <string name="calendar_cue_fired_at">Spuštěno %1$s</string>
     <string name="calendar_cue_next_in">Další · za %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Hodiny posunuty · klikněte pro dalších 5 min, × pro návrat na skutečný čas</string>
     <string name="calendar_run_clock_reset">Zpět na skutečný čas</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d z %3$d značek se spustí automaticky</string>
     <string name="calendar_cue_fired_title">Značka spuštěna</string>
     <string name="calendar_cue_toast_close">Skrýt</string>
     <string name="calendar_preset_kind_all">Vše</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Další</string>
     <string name="calendar_chip_blank">Vyčistit</string>
-    <string name="calendar_chip_manual">Ručně</string>
     <string name="calendar_auto_starts">%1$d automatických startů</string>
     <string name="calendar_auto_start_one">1 automatický start</string>
     <string name="calendar_all_manual">Vše ručně</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kalendar menejeri</string>
     <string name="calendar_title">Kalendar</string>
     <string name="calendar_today">Bugun</string>
     <string name="calendar_close">Yopish</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Maxsus tadbir</string>
 
     <string name="calendar_add_service">Xizmat qo‘shish</string>
-    <string name="calendar_new_service">Yangi xizmat</string>
     <string name="calendar_edit_service">Xizmatni tahrirlash</string>
     <string name="calendar_service_name">Nomi</string>
     <string name="calendar_service_start">Boshlanish vaqti</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Bekor qilish</string>
     <string name="calendar_delete">O‘chirish</string>
 
-    <string name="calendar_run_of_show">Xizmat tartibi</string>
-    <string name="calendar_nothing_planned">Bu kunga hech narsa rejalashtirilmagan</string>
-    <string name="calendar_no_service_hint">Rejalashtirishni boshlash uchun xizmat qo‘shing.</string>
-    <string name="calendar_run_empty">Bu xizmatda hali elementlar yo‘q.</string>
     <string name="calendar_items_count_one">%1$d element</string>
     <string name="calendar_items_count">%1$d ta element</string>
-    <string name="calendar_planned_total">%1$s rejalashtirilgan</string>
     <string name="calendar_duration">Davomiyligi</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Bu qancha davom etishi rejalashtirilgan — kiritish uchun bosing, masalan 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Qo‘shiqlar</string>
     <string name="calendar_pick_bible">Muqaddas Kitob</string>
     <string name="calendar_pick_section">Bo‘lim</string>
-    <string name="calendar_pick_schedule">Jadval yorlig‘i</string>
     <string name="calendar_pick_presets">Tayyorlanmalar</string>
     <string name="calendar_presets_empty">Hali tayyorlanmalar yo‘q</string>
     <string name="calendar_presets_empty_sub">«Rasmlar», «Taqdimot», «Media», «E’lonlar» va «Kanvas» yorliqlarida «Jadvalga qo‘shish» yonidagi «Tayyorlanmani saqlash» bilan saqlang.</string>
     <string name="calendar_presets_note">Tayyorlanmalar element qo‘shganda «Tayyorlanmalar» bo‘limida, belgi biror narsa ko‘rsatganda esa «Element» bo‘limida chiqadi.</string>
     <string name="calendar_settings_presets">Tayyorlanmalar</string>
     <string name="calendar_preset_remove">Tayyorlanmani o‘chirish</string>
-    <string name="calendar_cue_from_run">Ushbu xizmat tartibidan</string>
     <string name="calendar_cue_loops">takrorlanadi</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Saqlangan tayyorlanmalar</string>
-    <string name="calendar_search_songs_hint">Qo‘shiqlarni nomi yoki raqami bo‘yicha qidirish</string>
-    <string name="calendar_bible_hint">Havola kiriting, masalan Yuhanno 3:16-17</string>
     <string name="calendar_section_hint">Bo‘lim nomi, masalan «Hamd»</string>
-    <string name="calendar_add">Qo‘shish</string>
     <string name="calendar_no_results">Hech narsa topilmadi</string>
     <string name="calendar_songs_loading">Qo‘shiqlar kutubxonasi o‘qilmoqda…</string>
-    <string name="calendar_schedule_empty">Jadval yorlig‘i bo‘sh.</string>
-    <string name="calendar_capture_schedule">Jadval yorlig‘idagi barcha elementni qo‘shish</string>
 
     <string name="calendar_load_into_schedule">Jadvalga yuklash</string>
     <string name="calendar_load_title">Jadval almashtirilsinmi?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Bo‘limni o‘chirish</string>
     <string name="calendar_default_start">Standart boshlanish vaqti</string>
     <string name="calendar_default_start_sub">Yangi xizmat yaratiladigan vaqt</string>
-    <string name="calendar_automation_empty">Hali belgilar yo‘q</string>
-    <string name="calendar_automation_title">Avtomatlashtirish</string>
     <string name="calendar_armed">Yoqilgan</string>
     <string name="calendar_armed_off">O‘chiq</string>
     <string name="calendar_arm_tip">Barcha belgini yoqish yoki o‘chirish</string>
     <string name="calendar_cue_skip_tip">Bu belgini o‘tkazib yuborish</string>
-    <string name="calendar_automation_note">o‘zi ishga tushadigan elementlarni belgilaydi. Belgini olib tashlash bu xizmat uchun belgini o‘tkazib yuboradi.</string>
-    <string name="calendar_edit_cues">Belgilarni tahrirlash</string>
     <string name="calendar_cue_action_countdown">Teskari sanoqni boshlash</string>
     <string name="calendar_cue_action_go_live">Efirga</string>
     <string name="calendar_cue_action_project">E’lonlar tsikli</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Chiqishlarni tozalash</string>
     <string name="calendar_cue_badge_timer">Taymer</string>
     <string name="calendar_cue_badge_go_live">Efirga</string>
-    <string name="calendar_cue_item">Element</string>
     <string name="calendar_cue_item_missing">Element bu xizmat tartibida endi yo‘q</string>
     <string name="calendar_copy_include_cues">Avtomatlashtirish belgilari</string>
     <string name="calendar_copy_include_cues_sub">%1$d ta belgi, siljishlar saqlandi</string>
     <string name="calendar_template_include_cues">Avtomatlashtirish belgilari</string>
     <string name="calendar_template_include_cues_sub">Nisbiy siljishlar</string>
-    <string name="calendar_templates_empty">Saqlangan shablonlar yo‘q</string>
     <string name="calendar_templates_empty_sub">Istalgan xizmatdan xizmat tartibi sarlavhasidagi «Shablon» bilan saqlang. Unga qadar yangi xizmat istalgan oldingisining nusxasidan boshlanishi mumkin.</string>
     <string name="calendar_templates_note">Shablonlar xizmat qo‘shganda «Nimadan boshlash» bo‘limida taklif etiladi. Yangisini istalgan xizmatdan xizmat tartibi sarlavhasidagi «Shablon» bilan saqlang.</string>
     <string name="calendar_template_remove">Shablonni o‘chirish</string>
     <string name="calendar_template_saved_sub">Shablon · %1$s · %2$d ta element</string>
-    <string name="calendar_copy_service">Nusxalash</string>
     <string name="calendar_copy_service_tip">Bu xizmatni boshqa sanaga nusxalash yoki takrorlash</string>
-    <string name="calendar_save_template">Shablon</string>
     <string name="calendar_save_template_tip">Ushbu xizmat tartibini shablon sifatida saqlash</string>
     <string name="calendar_copy_title">%1$s nusxalash</string>
     <string name="calendar_copy_sub">%1$s · %2$d ta element</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">%1$s takrorlanadi · bu turkumda %2$d ta xizmat</string>
     <string name="calendar_export_pdf">PDF eksport</string>
     <string name="calendar_settings_open">Kalendar sozlamalari</string>
-    <string name="calendar_export_failed">Xizmat tartibini eksport qilib bo‘lmadi.</string>
     <string name="calendar_section_new">Yangi bo‘lim</string>
     <string name="calendar_section_insert">Kiritish</string>
     <string name="calendar_auto_load">Xizmatni avtomatik yuklash</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Qo‘shiqning o‘lchangan davomiyligi hali bo‘lmaganda taklif etiladi</string>
     <string name="calendar_pick_search">Qo‘shiq qidiring yoki havola kiriting</string>
     <string name="calendar_pick_adds_to">%1$s ga qo‘shiladi</string>
-    <string name="calendar_pick_duration">Davomiyligi</string>
     <string name="calendar_pick_all_books">Barcha qo‘shiq to‘plami</string>
     <string name="calendar_pick_reference">Havola</string>
     <string name="calendar_pick_all_bible_books">Barcha kitob</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Xizmat tartibiga qo‘shish</string>
     <string name="calendar_pick_add_range">%1$s qo‘shish</string>
     <string name="calendar_pick_verse_hint">Oyatni bosing, keyin diapazon uchun boshqasini bosing</string>
-    <string name="calendar_pick_clear">Tozalash</string>
     <string name="calendar_edit_song">Bu qo‘shiqni tahrirlash</string>
-    <string name="calendar_replace_row">Almashtirilmoqda: %1$s</string>
-    <string name="calendar_change_row">Bu elementni almashtirish</string>
-    <string name="calendar_cue_auto">Avto</string>
-    <string name="calendar_cue_auto_tip">%1$s · %2$s da o‘zi ishga tushadi — hozir ishga tushirish uchun bosing</string>
     <string name="calendar_cue_fire_now">Bu belgini hozir ishga tushirish</string>
     <string name="calendar_cue_fired_at">%1$s da ishga tushdi</string>
     <string name="calendar_cue_next_in">Keyingisi · %1$d daqiqadan keyin</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Soat surildi · 5 daqiqa qo‘shish uchun bosing, × — haqiqiy vaqtga qaytish</string>
     <string name="calendar_run_clock_reset">Haqiqiy vaqtga qaytish</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d daq</string>
-    <string name="calendar_footer_cues">%1$s · %3$d belgidan %2$d tasi avtomatik ishga tushadi</string>
     <string name="calendar_cue_fired_title">Belgi ishga tushdi</string>
     <string name="calendar_cue_toast_close">Yashirish</string>
     <string name="calendar_preset_kind_all">Hammasi</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Keyingi</string>
     <string name="calendar_chip_blank">Tozalash</string>
-    <string name="calendar_chip_manual">Qo‘lda</string>
     <string name="calendar_auto_starts">%1$d ta avtomatik boshlanish</string>
     <string name="calendar_auto_start_one">1 ta avtomatik boshlanish</string>
     <string name="calendar_all_manual">Hammasi qo‘lda</string>

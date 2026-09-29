@@ -8,6 +8,7 @@ import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import org.churchpresenter.settings.SongColumnId
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -265,17 +266,17 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
     Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
         // Pre-compute column labels (stringResource is @Composable, can't be called in forEach)
         val colHeaderLabels = mapOf(
-            "number"     to stringResource(Res.string.number),
-            "title"      to stringResource(Res.string.title),
-            "songbook"   to stringResource(Res.string.song_book),
-            "tune"       to stringResource(Res.string.tune),
-            "play_count" to stringResource(Res.string.song_play_count),
-            "author"     to stringResource(Res.string.author),
-            "composer"   to stringResource(Res.string.composer)
+            SongColumnId.NUMBER     to stringResource(Res.string.number),
+            SongColumnId.TITLE      to stringResource(Res.string.title),
+            SongColumnId.SONGBOOK   to stringResource(Res.string.song_book),
+            SongColumnId.TUNE       to stringResource(Res.string.tune),
+            SongColumnId.PLAY_COUNT to stringResource(Res.string.song_play_count),
+            SongColumnId.AUTHOR     to stringResource(Res.string.author),
+            SongColumnId.COMPOSER   to stringResource(Res.string.composer)
         )
         val allColLabels = colHeaderLabels + mapOf(
-            "favorites"       to stringResource(Res.string.song_favorites),
-            "add_to_schedule" to stringResource(Res.string.add_to_schedule)
+            SongColumnId.FAVORITES       to stringResource(Res.string.song_favorites),
+            SongColumnId.ADD_TO_SCHEDULE to stringResource(Res.string.add_to_schedule)
         )
 
         // Search controls — wraps to new line if not enough space
@@ -452,7 +453,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             visibleCols.forEach { colId ->
                 val isBeingDragged = colId == columns.draggingId
                 val sk = sortKey(colId)
-                val isSortable = sk.isNotEmpty() && colId != "add_to_schedule"
+                val isSortable = sk.isNotEmpty() && colId != SongColumnId.ADD_TO_SCHEDULE
                 val isSorted = isSortable && currentSortColumn == sk
                 val reorderDragMod = Modifier.pointerInput(colId) {
                     detectHorizontalDragGestures(
@@ -505,7 +506,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             // name is a semantics question for the whole table, not this icon.
                             Icon(
                                 painter = painterResource(
-                                    if (colId == "favorites") Res.drawable.ic_star else Res.drawable.ic_playlist_add
+                                    if (colId == SongColumnId.FAVORITES) Res.drawable.ic_star
+                                    else Res.drawable.ic_playlist_add
                                 ),
                                 contentDescription = null,
                                 modifier = Modifier.size(13.dp),
@@ -582,7 +584,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
             ) {
                 availableCols.forEach { colId ->
                     val isVisible = colId !in columns.hidden
-                    val isProtected = colId == "title"
+                    val isProtected = colId == SongColumnId.TITLE
                     DropdownMenuItem(
                         text = { Text(allColLabels[colId] ?: colId) },
                         leadingIcon = {
@@ -612,7 +614,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
         ) {
             availableCols.forEach { colId ->
                 val isVisible = colId !in columns.hidden
-                val isProtected = colId == "title"
+                val isProtected = colId == SongColumnId.TITLE
                 DropdownMenuItem(
                     text = { Text(allColLabels[colId] ?: colId) },
                     leadingIcon = {
@@ -734,16 +736,16 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                         visibleCols.forEach { colId ->
                             if (colId !in actionCols) {
                                 val cellText = when (colId) {
-                                    "number"     -> song.number
-                                    "title"      -> song.title
-                                    "songbook"   -> song.songbook
-                                    "tune"       -> song.tune
-                                    "play_count" -> {
+                                    SongColumnId.NUMBER     -> song.number
+                                    SongColumnId.TITLE      -> song.title
+                                    SongColumnId.SONGBOOK   -> song.songbook
+                                    SongColumnId.TUNE       -> song.tune
+                                    SongColumnId.PLAY_COUNT -> {
                                         val count = playCountFor(song.songId) ?: 0
                                         if (count > 0) count.toString() else ""
                                     }
-                                    "author"     -> song.author
-                                    "composer"   -> song.composer
+                                    SongColumnId.AUTHOR     -> song.author
+                                    SongColumnId.COMPOSER   -> song.composer
                                     else         -> ""
                                 }
                                 TooltipArea(
@@ -769,13 +771,14 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     )
                                 ) {
                                     Text(
-                                        if (colId == "title" && match.isOwnTitle()) {
+                                        if (colId == SongColumnId.TITLE && match.isOwnTitle()) {
                                             highlightedText(cellText, searchQuery)
                                         } else {
                                             AnnotatedString(cellText)
                                         },
                                         style = MaterialTheme.typography.bodySmall,
-                                        textAlign = if (colId == "play_count") TextAlign.End else TextAlign.Start,
+                                        textAlign = if (colId == SongColumnId.PLAY_COUNT) TextAlign.End
+                                                    else TextAlign.Start,
                                         modifier = Modifier
                                             .width(with(density) { colWidth(colId).toDp() })
                                             .initialPassCombinedClickable(
@@ -798,7 +801,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                                 },
                                             )
                                             .padding(horizontal = 8.dp),
-                                        maxLines = if (colId == "number") Int.MAX_VALUE else 1,
+                                        maxLines = if (colId == SongColumnId.NUMBER) Int.MAX_VALUE else 1,
                                         overflow = TextOverflow.Ellipsis,
                                         color = textColor
                                     )
@@ -807,7 +810,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             } else {
                                 Box(modifier = Modifier.width(6.dp))
                                 when (colId) {
-                                    "add_to_schedule" -> KeyIconButton(
+                                    SongColumnId.ADD_TO_SCHEDULE -> KeyIconButton(
                                         onClick = { onAddToSchedule?.invoke(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
@@ -818,7 +821,7 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                             tint = MaterialTheme.colorScheme.secondary
                                         )
                                     }
-                                    "favorites" -> {
+                                    SongColumnId.FAVORITES -> {
                                         val isFav = song.songId in favorites
                                         KeyIconButton(
                                             onClick = {
@@ -1103,7 +1106,7 @@ private fun SongSearchMatch?.isOwnTitle(): Boolean = this?.kind == SongMatchKind
 private fun titleOffset(visibleCols: List<String>, actionCols: Set<String>, widthOf: (String) -> Dp): Dp {
     var offset = 0.dp
     for (col in visibleCols) {
-        if (col == "title") break
+        if (col == SongColumnId.TITLE) break
         offset += if (col in actionCols) CELL_GAP + ACTION_CELL else widthOf(col) + CELL_GAP
     }
     return offset

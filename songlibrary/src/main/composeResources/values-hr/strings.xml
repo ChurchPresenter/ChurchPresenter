@@ -34,7 +34,6 @@
     <string name="revert">Vrati</string>
     <string name="save_changes">Spremi promjene</string>
     <string name="done">Gotovo</string>
-    <string name="saved">Spremljeno: %1$s</string>
     <string name="save_failed">%1$s nije moguće spremiti</string>
     <string name="new_song_book">Nova pjesmarica</string>
     <string name="new_song_book_subhead">Zbirka u koju se pjesme mogu razvrstati</string>

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.mergeColumnOrder
+import org.churchpresenter.settings.SongColumnId
 
 internal class SongTableColumns(
     private val density: Density,
@@ -50,8 +51,8 @@ internal class SongTableColumns(
 
     private companion object {
         val MIN_WIDTHS = mapOf(
-            "number" to 30, "title" to 60, "songbook" to 40, "tune" to 40,
-            "play_count" to 30, "author" to 40, "composer" to 40,
+            SongColumnId.NUMBER to 30, SongColumnId.TITLE to 60, SongColumnId.SONGBOOK to 40, SongColumnId.TUNE to 40,
+            SongColumnId.PLAY_COUNT to 30, SongColumnId.AUTHOR to 40, SongColumnId.COMPOSER to 40,
         )
     }
 }
@@ -79,13 +80,13 @@ internal fun rememberSongTableColumns(
         density = density,
         initialWidths = with(density) {
             mapOf(
-                "number" to settings.songSettings.colWidthNumber.dp.toPx(),
-                "title" to settings.songSettings.colWidthTitle.dp.toPx(),
-                "songbook" to settings.songSettings.colWidthSongbook.dp.toPx(),
-                "tune" to settings.songSettings.colWidthTune.dp.toPx(),
-                "play_count" to settings.songSettings.colWidthPlayCount.dp.toPx(),
-                "author" to settings.songSettings.colWidthAuthor.dp.toPx(),
-                "composer" to settings.songSettings.colWidthComposer.dp.toPx(),
+                SongColumnId.NUMBER to settings.songSettings.colWidthNumber.dp.toPx(),
+                SongColumnId.TITLE to settings.songSettings.colWidthTitle.dp.toPx(),
+                SongColumnId.SONGBOOK to settings.songSettings.colWidthSongbook.dp.toPx(),
+                SongColumnId.TUNE to settings.songSettings.colWidthTune.dp.toPx(),
+                SongColumnId.PLAY_COUNT to settings.songSettings.colWidthPlayCount.dp.toPx(),
+                SongColumnId.AUTHOR to settings.songSettings.colWidthAuthor.dp.toPx(),
+                SongColumnId.COMPOSER to settings.songSettings.colWidthComposer.dp.toPx(),
             )
         },
         initialOrder = mergeColumnOrder(settings.songColOrder, availableColumns),

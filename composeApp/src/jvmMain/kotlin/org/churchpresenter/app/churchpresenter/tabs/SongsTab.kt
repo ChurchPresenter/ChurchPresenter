@@ -4,6 +4,7 @@ import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import org.churchpresenter.settings.SongColumnId
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
@@ -425,7 +426,7 @@ fun SongsTab(
         mutableStateOf(with(density) { appSettings.songFavoritesPanelHeightDp.dp.toPx() })
     }
 
-    val actionCols = setOf("favorites", "add_to_schedule")
+    val actionCols = setOf(SongColumnId.FAVORITES, SongColumnId.ADD_TO_SCHEDULE)
     val availableCols = availableSongColumns(songbooks.size, hasAddToSchedule = onAddToSchedule != null)
     val visibleCols = columns.visible
 
@@ -446,13 +447,13 @@ fun SongsTab(
         onSettingsChangeState.value { s ->
             s.copy(
                 songSettings = s.songSettings.copy(
-                    colWidthNumber      = dp["number"] ?: s.songSettings.colWidthNumber,
-                    colWidthTitle       = dp["title"] ?: s.songSettings.colWidthTitle,
-                    colWidthSongbook    = dp["songbook"] ?: s.songSettings.colWidthSongbook,
-                    colWidthTune        = dp["tune"] ?: s.songSettings.colWidthTune,
-                    colWidthPlayCount   = dp["play_count"] ?: s.songSettings.colWidthPlayCount,
-                    colWidthAuthor      = dp["author"] ?: s.songSettings.colWidthAuthor,
-                    colWidthComposer    = dp["composer"] ?: s.songSettings.colWidthComposer,
+                    colWidthNumber      = dp[SongColumnId.NUMBER] ?: s.songSettings.colWidthNumber,
+                    colWidthTitle       = dp[SongColumnId.TITLE] ?: s.songSettings.colWidthTitle,
+                    colWidthSongbook    = dp[SongColumnId.SONGBOOK] ?: s.songSettings.colWidthSongbook,
+                    colWidthTune        = dp[SongColumnId.TUNE] ?: s.songSettings.colWidthTune,
+                    colWidthPlayCount   = dp[SongColumnId.PLAY_COUNT] ?: s.songSettings.colWidthPlayCount,
+                    colWidthAuthor      = dp[SongColumnId.AUTHOR] ?: s.songSettings.colWidthAuthor,
+                    colWidthComposer    = dp[SongColumnId.COMPOSER] ?: s.songSettings.colWidthComposer,
                 ),
                 songColOrder = columns.order,
                 songHiddenCols = columns.hidden,

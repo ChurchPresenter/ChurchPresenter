@@ -34,7 +34,6 @@
     <string name="revert">Reverter</string>
     <string name="save_changes">Salvar alterações</string>
     <string name="done">Concluído</string>
-    <string name="saved">%1$s salvas</string>
     <string name="save_failed">Não foi possível salvar %1$s</string>
     <string name="new_song_book">Novo hinário</string>
     <string name="new_song_book_subhead">Uma coleção na qual arquivar músicas</string>

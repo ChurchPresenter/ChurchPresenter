@@ -34,7 +34,6 @@
     <string name="revert">Descartar</string>
     <string name="save_changes">Guardar cambios</string>
     <string name="done">Listo</string>
-    <string name="saved">%1$s guardados</string>
     <string name="save_failed">No se pudo guardar %1$s</string>
     <string name="new_song_book">Nuevo cancionero</string>
     <string name="new_song_book_subhead">Una colección en la que archivar cantos</string>

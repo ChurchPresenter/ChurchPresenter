@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kalenterinhallinta</string>
     <string name="calendar_title">Kalenteri</string>
     <string name="calendar_today">Tänään</string>
     <string name="calendar_close">Sulje</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Erityistilaisuus</string>
 
     <string name="calendar_add_service">Lisää tilaisuus</string>
-    <string name="calendar_new_service">Uusi tilaisuus</string>
     <string name="calendar_edit_service">Muokkaa tilaisuutta</string>
     <string name="calendar_service_name">Nimi</string>
     <string name="calendar_service_start">Alkamisaika</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Peruuta</string>
     <string name="calendar_delete">Poista</string>
 
-    <string name="calendar_run_of_show">Kulkusuunnitelma</string>
-    <string name="calendar_nothing_planned">Tälle päivälle ei ole suunniteltu mitään</string>
-    <string name="calendar_no_service_hint">Lisää tilaisuus, niin pääset suunnittelemaan.</string>
-    <string name="calendar_run_empty">Tässä tilaisuudessa ei ole vielä kohtia.</string>
     <string name="calendar_items_count_one">%1$d kohta</string>
     <string name="calendar_items_count">%1$d kohtaa</string>
-    <string name="calendar_planned_total">%1$s suunniteltu</string>
     <string name="calendar_duration">Kesto</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Kuinka kauan tämän on tarkoitus kestää — napsauta ja kirjoita, esimerkiksi 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Laulut</string>
     <string name="calendar_pick_bible">Raamattu</string>
     <string name="calendar_pick_section">Osio</string>
-    <string name="calendar_pick_schedule">Ohjelma-välilehti</string>
     <string name="calendar_pick_presets">Esiasetukset</string>
     <string name="calendar_presets_empty">Ei vielä esiasetuksia</string>
     <string name="calendar_presets_empty_sub">Tallenna sellainen painikkeella ”Tallenna esiasetus”, joka on ”Lisää ohjelmaan” -painikkeen vieressä välilehdillä Kuvat, Esitys, Media, Tiedotteet ja Kanvas.</string>
     <string name="calendar_presets_note">Esiasetukset näkyvät kohdassa ”Esiasetukset”, kun lisäät kohdan, ja kohdassa ”Kohta”, kun merkki näyttää jotakin.</string>
     <string name="calendar_settings_presets">Esiasetukset</string>
     <string name="calendar_preset_remove">Poista esiasetus</string>
-    <string name="calendar_cue_from_run">Tästä kulkusuunnitelmasta</string>
     <string name="calendar_cue_loops">toistuu</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Tallennetut esiasetukset</string>
-    <string name="calendar_search_songs_hint">Hae lauluja nimellä tai numerolla</string>
-    <string name="calendar_bible_hint">Kirjoita viite, esimerkiksi Joh. 3:16-17</string>
     <string name="calendar_section_hint">Osion nimi, esimerkiksi Ylistys</string>
-    <string name="calendar_add">Lisää</string>
     <string name="calendar_no_results">Mikään ei vastaa hakua</string>
     <string name="calendar_songs_loading">Luetaan laulukirjastoa…</string>
-    <string name="calendar_schedule_empty">Ohjelma-välilehti on tyhjä.</string>
-    <string name="calendar_capture_schedule">Lisää kaikki kohdat Ohjelma-välilehdeltä</string>
 
     <string name="calendar_load_into_schedule">Lataa ohjelmaan</string>
     <string name="calendar_load_title">Korvataanko ohjelma?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Poista osio</string>
     <string name="calendar_default_start">Oletusalkamisaika</string>
     <string name="calendar_default_start_sub">Kellonaika, jolla uusi tilaisuus luodaan</string>
-    <string name="calendar_automation_empty">Ei vielä merkkejä</string>
-    <string name="calendar_automation_title">Automaatio</string>
     <string name="calendar_armed">Päällä</string>
     <string name="calendar_armed_off">Pois</string>
     <string name="calendar_arm_tip">Kytke kaikki merkit päälle tai pois</string>
     <string name="calendar_cue_skip_tip">Ohita tämä merkki</string>
-    <string name="calendar_automation_note">merkitsee kohdat, jotka käynnistyvät itsestään. Valinnan poistaminen ohittaa merkin tässä tilaisuudessa.</string>
-    <string name="calendar_edit_cues">Muokkaa merkkejä</string>
     <string name="calendar_cue_action_countdown">Käynnistä ajastus</string>
     <string name="calendar_cue_action_go_live">Mene liveen</string>
     <string name="calendar_cue_action_project">Tiedotesilmukka</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Tyhjennä ulostulot</string>
     <string name="calendar_cue_badge_timer">Ajastin</string>
     <string name="calendar_cue_badge_go_live">Live</string>
-    <string name="calendar_cue_item">Kohta</string>
     <string name="calendar_cue_item_missing">Kohta ei ole enää tässä kulkusuunnitelmassa</string>
     <string name="calendar_copy_include_cues">Automaatiomerkit</string>
     <string name="calendar_copy_include_cues_sub">%1$d merkkiä, siirtymät säilytetään</string>
     <string name="calendar_template_include_cues">Automaatiomerkit</string>
     <string name="calendar_template_include_cues_sub">Suhteelliset siirtymät</string>
-    <string name="calendar_templates_empty">Ei tallennettuja malleja</string>
     <string name="calendar_templates_empty_sub">Tallenna sellainen mistä tahansa tilaisuudesta painikkeella ”Malli” kulkusuunnitelman otsikkorivillä. Siihen asti uusi tilaisuus voi alkaa minkä tahansa aiemman kopiosta.</string>
     <string name="calendar_templates_note">Malleja tarjotaan kohdassa ”Aloita pohjasta”, kun lisäät tilaisuuden. Tallenna uusi mistä tahansa tilaisuudesta painikkeella ”Malli” kulkusuunnitelman otsikkorivillä.</string>
     <string name="calendar_template_remove">Poista malli</string>
     <string name="calendar_template_saved_sub">Malli · %1$s · %2$d kohtaa</string>
-    <string name="calendar_copy_service">Kopioi</string>
     <string name="calendar_copy_service_tip">Kopioi tämä tilaisuus toiselle päivälle tai toista se</string>
-    <string name="calendar_save_template">Malli</string>
     <string name="calendar_save_template_tip">Tallenna tämä kulkusuunnitelma malliksi</string>
     <string name="calendar_copy_title">Kopioi %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d kohtaa</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Toistuu %1$s · %2$d tilaisuutta tässä sarjassa</string>
     <string name="calendar_export_pdf">Vie PDF:ksi</string>
     <string name="calendar_settings_open">Kalenterin asetukset</string>
-    <string name="calendar_export_failed">Kulkusuunnitelmaa ei voitu viedä.</string>
     <string name="calendar_section_new">Uusi osio</string>
     <string name="calendar_section_insert">Lisää</string>
     <string name="calendar_auto_load">Lataa tilaisuus automaattisesti</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Tarjotaan, kun laululla ei ole vielä mitattua kestoa</string>
     <string name="calendar_pick_search">Hae lauluja tai kirjoita viite</string>
     <string name="calendar_pick_adds_to">Lisätään kohteeseen %1$s</string>
-    <string name="calendar_pick_duration">Kesto</string>
     <string name="calendar_pick_all_books">Kaikki laulukirjat</string>
     <string name="calendar_pick_reference">Viite</string>
     <string name="calendar_pick_all_bible_books">Kaikki kirjat</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Lisää kulkusuunnitelmaan</string>
     <string name="calendar_pick_add_range">Lisää %1$s</string>
     <string name="calendar_pick_verse_hint">Napauta jaetta ja sitten toista, niin saat välin</string>
-    <string name="calendar_pick_clear">Tyhjennä</string>
     <string name="calendar_edit_song">Muokkaa tätä laulua</string>
-    <string name="calendar_replace_row">Korvataan %1$s</string>
-    <string name="calendar_change_row">Vaihda tämä kohta</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · käynnistyy itsestään klo %2$s — napsauta laukaistaksesi nyt</string>
     <string name="calendar_cue_fire_now">Laukaise tämä merkki nyt</string>
     <string name="calendar_cue_fired_at">Laukesi %1$s</string>
     <string name="calendar_cue_next_in">Seuraava · %1$d min päästä</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Kelloa siirretty · napsauta lisätäksesi 5 min, × palataksesi oikeaan aikaan</string>
     <string name="calendar_run_clock_reset">Takaisin oikeaan aikaan</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d/%3$d merkistä laukeaa automaattisesti</string>
     <string name="calendar_cue_fired_title">Merkki laukesi</string>
     <string name="calendar_cue_toast_close">Piilota</string>
     <string name="calendar_preset_kind_all">Kaikki</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Seuraava</string>
     <string name="calendar_chip_blank">Tyhjennä</string>
-    <string name="calendar_chip_manual">Käsin</string>
     <string name="calendar_auto_starts">%1$d automaattista aloitusta</string>
     <string name="calendar_auto_start_one">1 automaattinen aloitus</string>
     <string name="calendar_all_manual">Kaikki käsin</string>

@@ -34,7 +34,6 @@
     <string name="revert">Atsaukt</string>
     <string name="save_changes">Saglabāt izmaiņas</string>
     <string name="done">Gatavs</string>
-    <string name="saved">Saglabātas: %1$s</string>
     <string name="save_failed">Neizdevās saglabāt: %1$s</string>
     <string name="new_song_book">Jauna dziesmu grāmata</string>
     <string name="new_song_book_subhead">Krājums, kurā ievietot dziesmas</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">पात्रो व्यवस्थापक</string>
     <string name="calendar_title">पात्रो</string>
     <string name="calendar_today">आज</string>
     <string name="calendar_close">बन्द गर्नुहोस्</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">विशेष कार्यक्रम</string>
 
     <string name="calendar_add_service">सभा थप्नुहोस्</string>
-    <string name="calendar_new_service">नयाँ सभा</string>
     <string name="calendar_edit_service">सभा सम्पादन गर्नुहोस्</string>
     <string name="calendar_service_name">नाम</string>
     <string name="calendar_service_start">सुरु हुने समय</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">रद्द गर्नुहोस्</string>
     <string name="calendar_delete">मेट्नुहोस्</string>
 
-    <string name="calendar_run_of_show">सभाको क्रम</string>
-    <string name="calendar_nothing_planned">यो दिनका लागि केही योजना छैन</string>
-    <string name="calendar_no_service_hint">योजना सुरु गर्न एउटा सभा थप्नुहोस्।</string>
-    <string name="calendar_run_empty">यो सभामा अझै कुनै वस्तु छैन।</string>
     <string name="calendar_items_count_one">%1$d वस्तु</string>
     <string name="calendar_items_count">%1$d वस्तु</string>
-    <string name="calendar_planned_total">%1$s योजना गरिएको</string>
     <string name="calendar_duration">अवधि</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">यो कति बेर चल्ने योजना छ — टाइप गर्न क्लिक गर्नुहोस्, जस्तै 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">भजनहरू</string>
     <string name="calendar_pick_bible">बाइबल</string>
     <string name="calendar_pick_section">खण्ड</string>
-    <string name="calendar_pick_schedule">कार्यक्रम ट्याब</string>
     <string name="calendar_pick_presets">प्रिसेटहरू</string>
     <string name="calendar_presets_empty">अझै कुनै प्रिसेट छैन</string>
     <string name="calendar_presets_empty_sub">तस्बिर, प्रस्तुति, मिडिया, घोषणा र क्यानभास ट्याबहरूमा „कार्यक्रममा थप्नुहोस्” को छेउमा रहेको „प्रिसेट सुरक्षित गर्नुहोस्” बाट एउटा सुरक्षित गर्नुहोस्।</string>
     <string name="calendar_presets_note">वस्तु थप्दा प्रिसेटहरू „प्रिसेटहरू” मुनि देखिन्छन्, र कुनै चिन्हले केही देखाउँदा „वस्तु” मुनि।</string>
     <string name="calendar_settings_presets">प्रिसेटहरू</string>
     <string name="calendar_preset_remove">प्रिसेट मेट्नुहोस्</string>
-    <string name="calendar_cue_from_run">यो सभाको क्रमबाट</string>
     <string name="calendar_cue_loops">दोहोरिन्छ</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">सुरक्षित प्रिसेटहरू</string>
-    <string name="calendar_search_songs_hint">शीर्षक वा नम्बरबाट भजन खोज्नुहोस्</string>
-    <string name="calendar_bible_hint">सन्दर्भ लेख्नुहोस्, जस्तै यूहन्ना 3:16-17</string>
     <string name="calendar_section_hint">खण्डको नाम, जस्तै आराधना</string>
-    <string name="calendar_add">थप्नुहोस्</string>
     <string name="calendar_no_results">केही मेल खाएन</string>
     <string name="calendar_songs_loading">भजन पुस्तकालय पढ्दै…</string>
-    <string name="calendar_schedule_empty">कार्यक्रम ट्याब खाली छ।</string>
-    <string name="calendar_capture_schedule">कार्यक्रम ट्याबका सबै वस्तु थप्नुहोस्</string>
 
     <string name="calendar_load_into_schedule">कार्यक्रममा लोड गर्नुहोस्</string>
     <string name="calendar_load_title">कार्यक्रम बदल्ने?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">खण्ड हटाउनुहोस्</string>
     <string name="calendar_default_start">पूर्वनिर्धारित सुरु समय</string>
     <string name="calendar_default_start_sub">नयाँ सभा बनाउँदा प्रयोग हुने समय</string>
-    <string name="calendar_automation_empty">अझै कुनै चिन्ह छैन</string>
-    <string name="calendar_automation_title">स्वचालन</string>
     <string name="calendar_armed">चालु</string>
     <string name="calendar_armed_off">बन्द</string>
     <string name="calendar_arm_tip">सबै चिन्ह चालु वा बन्द गर्नुहोस्</string>
     <string name="calendar_cue_skip_tip">यो चिन्ह छोड्नुहोस्</string>
-    <string name="calendar_automation_note">आफैँ चल्ने वस्तुहरू देखाउँछ। चिन्ह हटाउँदा यो सभाका लागि त्यो छुट्छ।</string>
-    <string name="calendar_edit_cues">चिन्हहरू सम्पादन गर्नुहोस्</string>
     <string name="calendar_cue_action_countdown">उल्टो गन्ती सुरु गर्नुहोस्</string>
     <string name="calendar_cue_action_go_live">प्रत्यक्ष जानुहोस्</string>
     <string name="calendar_cue_action_project">घोषणा चक्र</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">आउटपुट खाली गर्नुहोस्</string>
     <string name="calendar_cue_badge_timer">टाइमर</string>
     <string name="calendar_cue_badge_go_live">प्रत्यक्ष</string>
-    <string name="calendar_cue_item">वस्तु</string>
     <string name="calendar_cue_item_missing">यो वस्तु अब यो सभाको क्रममा छैन</string>
     <string name="calendar_copy_include_cues">स्वचालन चिन्हहरू</string>
     <string name="calendar_copy_include_cues_sub">%1$d चिन्ह, समय अन्तर कायम</string>
     <string name="calendar_template_include_cues">स्वचालन चिन्हहरू</string>
     <string name="calendar_template_include_cues_sub">सापेक्ष समय अन्तर</string>
-    <string name="calendar_templates_empty">कुनै सुरक्षित टेम्प्लेट छैन</string>
     <string name="calendar_templates_empty_sub">सभाको क्रमको शीर्षकमा रहेको „टेम्प्लेट” बाट कुनै पनि सभाबाट एउटा सुरक्षित गर्नुहोस्। त्यतिन्जेल नयाँ सभा कुनै पनि पुरानो सभाको प्रतिलिपिबाट सुरु हुन सक्छ।</string>
     <string name="calendar_templates_note">सभा थप्दा टेम्प्लेटहरू „यसबाट सुरु गर्नुहोस्” मुनि देखाइन्छन्। सभाको क्रमको शीर्षकमा रहेको „टेम्प्लेट” बाट नयाँ सुरक्षित गर्नुहोस्।</string>
     <string name="calendar_template_remove">टेम्प्लेट मेट्नुहोस्</string>
     <string name="calendar_template_saved_sub">टेम्प्लेट · %1$s · %2$d वस्तु</string>
-    <string name="calendar_copy_service">प्रतिलिपि</string>
     <string name="calendar_copy_service_tip">यो सभालाई अर्को मितिमा प्रतिलिपि गर्नुहोस्, वा दोहोर्‍याउनुहोस्</string>
-    <string name="calendar_save_template">टेम्प्लेट</string>
     <string name="calendar_save_template_tip">यो सभाको क्रमलाई टेम्प्लेटको रूपमा सुरक्षित गर्नुहोस्</string>
     <string name="calendar_copy_title">%1$s प्रतिलिपि गर्नुहोस्</string>
     <string name="calendar_copy_sub">%1$s · %2$d वस्तु</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">%1$s दोहोरिन्छ · यो शृंखलामा %2$d सभा</string>
     <string name="calendar_export_pdf">PDF निर्यात</string>
     <string name="calendar_settings_open">पात्रो सेटिङ</string>
-    <string name="calendar_export_failed">सभाको क्रम निर्यात गर्न सकिएन।</string>
     <string name="calendar_section_new">नयाँ खण्ड</string>
     <string name="calendar_section_insert">घुसाउनुहोस्</string>
     <string name="calendar_auto_load">सभा स्वतः लोड गर्नुहोस्</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">भजनको नापिएको अवधि नहुँदा सुझाइन्छ</string>
     <string name="calendar_pick_search">भजन खोज्नुहोस्, वा सन्दर्भ लेख्नुहोस्</string>
     <string name="calendar_pick_adds_to">%1$s मा थपिन्छ</string>
-    <string name="calendar_pick_duration">अवधि</string>
     <string name="calendar_pick_all_books">सबै भजन पुस्तक</string>
     <string name="calendar_pick_reference">सन्दर्भ</string>
     <string name="calendar_pick_all_bible_books">सबै पुस्तक</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">सभाको क्रममा थप्नुहोस्</string>
     <string name="calendar_pick_add_range">%1$s थप्नुहोस्</string>
     <string name="calendar_pick_verse_hint">एउटा पदमा थिच्नुहोस्, त्यसपछि दायराका लागि अर्कोमा</string>
-    <string name="calendar_pick_clear">खाली गर्नुहोस्</string>
     <string name="calendar_edit_song">यो भजन सम्पादन गर्नुहोस्</string>
-    <string name="calendar_replace_row">%1$s बदल्दै</string>
-    <string name="calendar_change_row">यो वस्तु बदल्नुहोस्</string>
-    <string name="calendar_cue_auto">स्वतः</string>
-    <string name="calendar_cue_auto_tip">%1$s · %2$s मा आफैँ चल्छ — अहिले चलाउन क्लिक गर्नुहोस्</string>
     <string name="calendar_cue_fire_now">यो चिन्ह अहिले चलाउनुहोस्</string>
     <string name="calendar_cue_fired_at">%1$s चल्यो</string>
     <string name="calendar_cue_next_in">अर्को · %1$d मिनेटमा</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">घडी अगाडि बढाइयो · थप ५ मिनेटका लागि क्लिक गर्नुहोस्, वास्तविक समयमा फर्कन ×</string>
     <string name="calendar_run_clock_reset">वास्तविक समयमा फर्कनुहोस्</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d मिनेट</string>
-    <string name="calendar_footer_cues">%1$s · %3$d मध्ये %2$d चिन्ह स्वतः चल्नेछन्</string>
     <string name="calendar_cue_fired_title">चिन्ह चल्यो</string>
     <string name="calendar_cue_toast_close">लुकाउनुहोस्</string>
     <string name="calendar_preset_kind_all">सबै</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ अर्को</string>
     <string name="calendar_chip_blank">खाली</string>
-    <string name="calendar_chip_manual">हातले</string>
     <string name="calendar_auto_starts">%1$d स्वतः सुरुवात</string>
     <string name="calendar_auto_start_one">१ स्वतः सुरुवात</string>
     <string name="calendar_all_manual">सबै हातले</string>

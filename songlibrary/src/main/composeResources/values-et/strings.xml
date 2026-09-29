@@ -34,7 +34,6 @@
     <string name="revert">Ennista</string>
     <string name="save_changes">Salvesta muudatused</string>
     <string name="done">Valmis</string>
-    <string name="saved">Salvestatud: %1$s</string>
     <string name="save_failed">%1$s salvestamine ebaõnnestus</string>
     <string name="new_song_book">Uus laulik</string>
     <string name="new_song_book_subhead">Kogumik, kuhu laule paigutada</string>

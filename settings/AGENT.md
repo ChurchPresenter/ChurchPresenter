@@ -48,8 +48,8 @@ old document is still migrated on load and on Settings → Import.
 
 | Path | Owns |
 |---|---|
-| `data/settings/*.kt` | The 34 settings data classes — one file per area (`AppSettings`, `BibleSettings`, `ScreenAssignment`, …) |
-| `data/SettingsManager.kt` | Load, migrate, save, import, export; the versioned migration steps |
+| `*.kt` (package root) | The settings data classes and their helpers — one file per area (`AppSettings`, `BibleSettings`, `ScreenAssignment`, `TextBox`, …) |
+| `SettingsManager.kt` | Load, migrate, save, import, export; the versioned migration steps |
 | `utils/Constants.kt` | `object Constants` — the string values settings defaults are written with, plus the fixed ports and wire header names |
 | `utils/AppDataDir.kt` | Where the app persists: `~/.churchpresenter`, with the platform app-data folder behind it |
 | `utils/UpdateCheckInterval.kt` | The startup-check interval enum, stored in `AppSettings` |

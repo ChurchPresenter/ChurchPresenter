@@ -92,7 +92,7 @@ class CompanionServer {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 
-    private var _qaEventJob: kotlinx.coroutines.Job? = null
+    private var _qaEventJob: Job? = null
     var qaManager: QAManager? = null
         set(value) {
             _qaEventJob?.cancel()
@@ -500,7 +500,7 @@ class CompanionServer {
         val questionId: String = "",
         val text: String = "",
         val clientId: String = "",
-        val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+        val decision: CompletableDeferred<Boolean> = CompletableDeferred()
     )
 
     val onQAAdminRequest = MutableSharedFlow<PendingQAAdminRequest>(
@@ -1075,7 +1075,7 @@ class CompanionServer {
         tunnelManager.stop()
         server?.stop(SHUTDOWN_GRACE_MS, SHUTDOWN_TIMEOUT_MS)
         server = null
-        scope.coroutineContext[kotlinx.coroutines.Job]?.cancelChildren()
+        scope.coroutineContext[Job]?.cancelChildren()
         _isRunning.value = false
         _serverUrl.value = ""
         CrashReporter.breadcrumb("Server stopped", category = "server")

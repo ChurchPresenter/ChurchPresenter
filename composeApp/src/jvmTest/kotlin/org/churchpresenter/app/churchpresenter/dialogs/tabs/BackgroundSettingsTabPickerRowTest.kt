@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -137,7 +138,7 @@ class BackgroundSettingsTabPickerRowTest {
         }
     }
 
-    private fun androidx.compose.ui.test.ComposeUiTest.uploadButtonCount(): Int =
+    private fun ComposeUiTest.uploadButtonCount(): Int =
         onAllNodesWithContentDescription(slot1).fetchSemanticsNodes(atLeastOneRootRequired = false).size +
             onAllNodesWithContentDescription(slot2).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 }

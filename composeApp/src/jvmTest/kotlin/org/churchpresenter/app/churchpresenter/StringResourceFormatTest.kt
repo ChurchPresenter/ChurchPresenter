@@ -66,7 +66,7 @@ class StringResourceFormatTest {
         // Pointer gestures — no keyboard binding behind them.
         "shortcut_key_double_click", "shortcut_key_right_click", "shortcut_key_shift_drag",
         "shortcut_description_go_live", "shortcut_description_context_menu",
-        "shortcut_description_reorder_item", "shortcut_description_reorder_image",
+        "shortcut_description_reorder_item",
         "bible_verse_selection_hint", "hold_live_modifier_hint", "pictures_reorder_hint",
         // The registry's own vocabulary.
         "key_mod_ctrl", "key_mod_shift", "key_mod_alt", "key_mod_meta",
@@ -74,7 +74,7 @@ class StringResourceFormatTest {
         "key_name_backspace", "key_name_delete", "key_name_insert", "key_name_home",
         "key_name_end", "key_name_page_up", "key_name_page_down",
         // The capture dialog, which is literally asking for a key press.
-        "shortcut_capture_title", "shortcut_capture_prompt",
+        "shortcut_capture_title",
         // Names an on-screen arrow *button*, not a key.
         "bible_translation_order_hint",
         // Escape dismisses a focusable Compose Popup. That is the toolkit's own behaviour, not an

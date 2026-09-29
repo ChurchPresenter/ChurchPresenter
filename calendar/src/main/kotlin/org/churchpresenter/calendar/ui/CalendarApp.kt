@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.graphics.vector.ImageVector
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.Icons
@@ -595,7 +596,7 @@ private fun Header(
 private fun HeaderButton(
     label: String,
     onClick: () -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    icon: ImageVector? = null,
 ) {
     val key = elevationPalette().key
     Row(

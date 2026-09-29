@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_check
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
+import org.jetbrains.compose.resources.painterResource
 
 /** The design's section caption: 9px, bold, wide-tracked, upper case. */
 @Composable
@@ -200,7 +203,12 @@ internal fun SwatchTile(
                         .size(15.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("✓", fontSize = 9.sp, color = MaterialTheme.colorScheme.onPrimary)
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_check),
+                        contentDescription = null,
+                        modifier = Modifier.size(9.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                    )
                 }
             }
         }

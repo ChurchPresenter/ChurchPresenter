@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kalendāra pārvaldnieks</string>
     <string name="calendar_title">Kalendārs</string>
     <string name="calendar_today">Šodien</string>
     <string name="calendar_close">Aizvērt</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Īpašs pasākums</string>
 
     <string name="calendar_add_service">Pievienot dievkalpojumu</string>
-    <string name="calendar_new_service">Jauns dievkalpojums</string>
     <string name="calendar_edit_service">Rediģēt dievkalpojumu</string>
     <string name="calendar_service_name">Nosaukums</string>
     <string name="calendar_service_start">Sākuma laiks</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Atcelt</string>
     <string name="calendar_delete">Dzēst</string>
 
-    <string name="calendar_run_of_show">Norises kārtība</string>
-    <string name="calendar_nothing_planned">Šai dienai nekas nav ieplānots</string>
-    <string name="calendar_no_service_hint">Pievienojiet dievkalpojumu, lai sāktu plānot.</string>
-    <string name="calendar_run_empty">Šim dievkalpojumam vēl nav punktu.</string>
     <string name="calendar_items_count_one">%1$d punkts</string>
     <string name="calendar_items_count">%1$d punkti</string>
-    <string name="calendar_planned_total">%1$s ieplānots</string>
     <string name="calendar_duration">Ilgums</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Cik ilgi tam paredzēts ilgt — noklikšķiniet, lai ierakstītu, piemēram, 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Dziesmas</string>
     <string name="calendar_pick_bible">Bībele</string>
     <string name="calendar_pick_section">Sadaļa</string>
-    <string name="calendar_pick_schedule">Programmas cilne</string>
     <string name="calendar_pick_presets">Sagataves</string>
     <string name="calendar_presets_empty">Sagatavju vēl nav</string>
     <string name="calendar_presets_empty_sub">Saglabājiet to ar „Saglabāt sagatavi” blakus „Pievienot programmai” cilnēs Attēli, Prezentācija, Mediji, Paziņojumi un Audekls.</string>
     <string name="calendar_presets_note">Sagataves parādās sadaļā „Sagataves”, kad pievienojat punktu, un sadaļā „Punkts”, kad atzīme kaut ko rāda.</string>
     <string name="calendar_settings_presets">Sagataves</string>
     <string name="calendar_preset_remove">Dzēst sagatavi</string>
-    <string name="calendar_cue_from_run">No šīs norises kārtības</string>
     <string name="calendar_cue_loops">atkārtojas</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Saglabātās sagataves</string>
-    <string name="calendar_search_songs_hint">Meklēt dziesmas pēc nosaukuma vai numura</string>
-    <string name="calendar_bible_hint">Ierakstiet atsauci, piemēram, Jāņa 3:16-17</string>
     <string name="calendar_section_hint">Sadaļas nosaukums, piemēram, Slavēšana</string>
-    <string name="calendar_add">Pievienot</string>
     <string name="calendar_no_results">Nekas neatbilst</string>
     <string name="calendar_songs_loading">Notiek dziesmu bibliotēkas lasīšana…</string>
-    <string name="calendar_schedule_empty">Programmas cilne ir tukša.</string>
-    <string name="calendar_capture_schedule">Pievienot visus punktus no Programmas cilnes</string>
 
     <string name="calendar_load_into_schedule">Ielādēt programmā</string>
     <string name="calendar_load_title">Aizstāt programmu?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Noņemt sadaļu</string>
     <string name="calendar_default_start">Noklusējuma sākuma laiks</string>
     <string name="calendar_default_start_sub">Laiks, ar kādu tiek izveidots jauns dievkalpojums</string>
-    <string name="calendar_automation_empty">Atzīmju vēl nav</string>
-    <string name="calendar_automation_title">Automatizācija</string>
     <string name="calendar_armed">Ieslēgts</string>
     <string name="calendar_armed_off">Izslēgts</string>
     <string name="calendar_arm_tip">Ieslēgt vai izslēgt visas atzīmes</string>
     <string name="calendar_cue_skip_tip">Izlaist šo atzīmi</string>
-    <string name="calendar_automation_note">apzīmē punktus, kas sākas paši. Atzīmes noņemšana izlaiž to šajā dievkalpojumā.</string>
-    <string name="calendar_edit_cues">Rediģēt atzīmes</string>
     <string name="calendar_cue_action_countdown">Sākt atpakaļskaitīšanu</string>
     <string name="calendar_cue_action_go_live">Pārraidīt</string>
     <string name="calendar_cue_action_project">Paziņojumu cikls</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Notīrīt izejas</string>
     <string name="calendar_cue_badge_timer">Taimeris</string>
     <string name="calendar_cue_badge_go_live">Pārraide</string>
-    <string name="calendar_cue_item">Punkts</string>
     <string name="calendar_cue_item_missing">Punkta vairs nav šajā norises kārtībā</string>
     <string name="calendar_copy_include_cues">Automatizācijas atzīmes</string>
     <string name="calendar_copy_include_cues_sub">%1$d atzīmes, nobīdes saglabātas</string>
     <string name="calendar_template_include_cues">Automatizācijas atzīmes</string>
     <string name="calendar_template_include_cues_sub">Relatīvās nobīdes</string>
-    <string name="calendar_templates_empty">Nav saglabātu veidņu</string>
     <string name="calendar_templates_empty_sub">Saglabājiet to no jebkura dievkalpojuma ar „Veidne” norises kārtības galvenē. Līdz tam jauns dievkalpojums var sākties ar jebkura iepriekšējā kopiju.</string>
     <string name="calendar_templates_note">Veidnes tiek piedāvātas sadaļā „Sākt no”, kad pievienojat dievkalpojumu. Jaunu saglabājiet no jebkura dievkalpojuma ar „Veidne” norises kārtības galvenē.</string>
     <string name="calendar_template_remove">Dzēst veidni</string>
     <string name="calendar_template_saved_sub">Veidne · %1$s · %2$d punkti</string>
-    <string name="calendar_copy_service">Kopēt</string>
     <string name="calendar_copy_service_tip">Kopēt šo dievkalpojumu uz citu datumu vai to atkārtot</string>
-    <string name="calendar_save_template">Veidne</string>
     <string name="calendar_save_template_tip">Saglabāt šo norises kārtību kā veidni</string>
     <string name="calendar_copy_title">Kopēt %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d punkti</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Atkārtojas %1$s · %2$d dievkalpojumi šajā sērijā</string>
     <string name="calendar_export_pdf">Eksportēt PDF</string>
     <string name="calendar_settings_open">Kalendāra iestatījumi</string>
-    <string name="calendar_export_failed">Norises kārtību neizdevās eksportēt.</string>
     <string name="calendar_section_new">Jauna sadaļa</string>
     <string name="calendar_section_insert">Ievietot</string>
     <string name="calendar_auto_load">Ielādēt dievkalpojumu automātiski</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Tiek piedāvāts, kad dziesmai vēl nav izmērīta ilguma</string>
     <string name="calendar_pick_search">Meklējiet dziesmas vai ierakstiet atsauci</string>
     <string name="calendar_pick_adds_to">Pievieno: %1$s</string>
-    <string name="calendar_pick_duration">Ilgums</string>
     <string name="calendar_pick_all_books">Visas dziesmu grāmatas</string>
     <string name="calendar_pick_reference">Atsauce</string>
     <string name="calendar_pick_all_bible_books">Visas grāmatas</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Pievienot norises kārtībai</string>
     <string name="calendar_pick_add_range">Pievienot %1$s</string>
     <string name="calendar_pick_verse_hint">Pieskarieties pantam, tad citam, lai iegūtu diapazonu</string>
-    <string name="calendar_pick_clear">Notīrīt</string>
     <string name="calendar_edit_song">Rediģēt šo dziesmu</string>
-    <string name="calendar_replace_row">Aizstāj %1$s</string>
-    <string name="calendar_change_row">Nomainīt šo punktu</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · sākas pati plkst. %2$s — noklikšķiniet, lai palaistu tagad</string>
     <string name="calendar_cue_fire_now">Palaist šo atzīmi tagad</string>
     <string name="calendar_cue_fired_at">Nostrādāja %1$s</string>
     <string name="calendar_cue_next_in">Nākamā · pēc %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Pulkstenis pagriezts · noklikšķiniet vēl 5 min, × lai atgrieztos pie īstā laika</string>
     <string name="calendar_run_clock_reset">Atpakaļ uz īsto laiku</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d no %3$d atzīmēm nostrādās automātiski</string>
     <string name="calendar_cue_fired_title">Atzīme nostrādāja</string>
     <string name="calendar_cue_toast_close">Paslēpt</string>
     <string name="calendar_preset_kind_all">Visas</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Nākamais</string>
     <string name="calendar_chip_blank">Notīrīt</string>
-    <string name="calendar_chip_manual">Manuāli</string>
     <string name="calendar_auto_starts">%1$d automātiski sākumi</string>
     <string name="calendar_auto_start_one">1 automātisks sākums</string>
     <string name="calendar_all_manual">Viss manuāli</string>

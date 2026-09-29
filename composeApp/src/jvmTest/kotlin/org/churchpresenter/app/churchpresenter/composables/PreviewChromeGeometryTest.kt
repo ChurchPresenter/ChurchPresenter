@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,7 +15,7 @@ import kotlin.test.assertTrue
  */
 class PreviewChromeGeometryTest {
 
-    private fun screenWidthOf(totalHeight: androidx.compose.ui.unit.Dp, ratio: Float) =
+    private fun screenWidthOf(totalHeight: Dp, ratio: Float) =
         tvScreenBoxWidthFor(totalHeight, ratio) - TvScreenBoxHorizontalChrome
 
     @Test
