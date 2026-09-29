@@ -3128,6 +3128,8 @@
     <string name="song_background_color_slate">Slate</string>
     <string name="song_background_video_loop">video loop</string>
     <string name="song_background_camera_live">live camera</string>
+    <string name="song_search_match_lyrics">Lyrics</string>
+    <string name="song_search_match_translation">Translation %1$d</string>
     <string name="unit_px">px</string>
     <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
     <string name="quick_background_title">Quick backgrounds</string>

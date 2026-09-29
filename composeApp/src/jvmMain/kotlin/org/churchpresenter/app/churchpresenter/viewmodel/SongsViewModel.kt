@@ -857,7 +857,16 @@ class SongsViewModel(
         // mid-service. Only the ends are trimmed; whitespace inside a title is still significant, so
         // "Be Thou  My Vision" and "Be Thou My Vision" remain different queries.
         val query = _searchQuery.value.trim()
-        if (query.isNotEmpty()) {
+        if (isNumberQuery(query)) {
+            // Digits alone are a song number: matching them against titles and lyrics as well
+            // would bury song 48 under every hymn with "48" somewhere in its words.
+            filtered = when (_filterType.value) {
+                Constants.CONTAINS -> filtered.filter { it.number.contains(query) }
+                Constants.STARTS_WITH -> filtered.filter { it.number.startsWith(query) }
+                Constants.EXACT_MATCH -> filtered.filter { it.number.trim() == query }
+                else -> filtered
+            }
+        } else if (query.isNotEmpty()) {
             filtered = when (_filterType.value) {
                 Constants.CONTAINS -> filtered.filter { song ->
                     song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) } ||
@@ -930,6 +939,29 @@ class SongsViewModel(
                 .replace(WHITESPACE_RUN, " ")
         }
     }
+
+    private val lyricSections = IdentityHashMap<SongItem, MutableMap<Int, List<SearchableSection>>>()
+    private var lyricSectionsFor: List<SongItem>? = null
+
+    /**
+     * Where the current search found [song] -- a title, a named section, which language -- for the
+     * results list to show under the row; null when the box is empty, holds only digits (a song
+     * number, which the number column already shows), or [song] is not a match.
+     *
+     * Reads [searchQuery], so a composable calling it follows the query as it is typed.
+     */
+    fun searchMatchFor(song: SongItem): SongSearchMatch? {
+        val query = _searchQuery.value.trim()
+        if (query.isEmpty() || isNumberQuery(query)) return null
+        if (lyricSectionsFor !== _allSongItems.value) {
+            lyricSections.clear()
+            lyricSectionsFor = _allSongItems.value
+        }
+        val cached = lyricSections.getOrPut(song) { mutableMapOf() }
+        return findSongMatch(song, query) { index, lyrics -> cached.getOrPut(index) { searchableSections(lyrics) } }
+    }
+
+    private fun isNumberQuery(query: String): Boolean = query.isNotEmpty() && query.all(Char::isDigit)
 
     /** [items] in the order [column] asks for; the sort itself, without the selection bookkeeping. */
     private fun sortedBy(column: String, items: List<SongItem>): List<SongItem> = when (column) {
