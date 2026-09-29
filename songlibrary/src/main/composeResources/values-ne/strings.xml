@@ -29,7 +29,6 @@
     <string name="empty_title">तपाईंका फिल्टरसँग कुनै गीत मिलेन</string>
     <string name="reset_filters">फिल्टर रिसेट गर्नुहोस्</string>
     <string name="library_empty">यस पुस्तकालयमा अझै कुनै गीत छैन</string>
-    <string name="footer_songs">%1$s गीत</string>
     <string name="unsaved_changes">%1$s सुरक्षित गरिएको छैन</string>
     <string name="revert">उल्टाउनुहोस्</string>
     <string name="save_changes">परिवर्तन सुरक्षित गर्नुहोस्</string>

@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Beginnen mit</string>
     <string name="calendar_template_blank">Leerer Gottesdienst</string>
     <string name="calendar_template_blank_sub">Leerer Ablauf</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d Elemente</string>
     <string name="calendar_add_service_save">Gottesdienst hinzufügen</string>
     <string name="calendar_new_service_on">Neuer Gottesdienst · %1$s</string>
     <string name="calendar_kind_sunday_short">Sonntag</string>
     <string name="calendar_kind_midweek_short">Wochenmitte</string>
     <string name="calendar_kind_special_short">Besonders</string>
-    <string name="calendar_close_sheet">Schließen</string>
     <string name="calendar_settings">Kalendereinstellungen</string>
     <string name="calendar_settings_sub">Gilt für jeden Gottesdienst, nicht nur für den heutigen</string>
     <string name="calendar_settings_sections">Abschnitte</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Element ist nicht mehr in diesem Ablauf</string>
     <string name="calendar_copy_include_cues">Automatisierungsmarker</string>
     <string name="calendar_copy_include_cues_sub">%1$d Marker, Zeitversätze bleiben erhalten</string>
-    <string name="calendar_template_include_cues">Automatisierungsmarker</string>
     <string name="calendar_template_include_cues_sub">Relative Zeitversätze</string>
     <string name="calendar_templates_empty_sub">Speichere eine aus einem beliebigen Gottesdienst mit „Vorlage“ in der Ablauf-Kopfzeile. Bis dahin kann ein neuer Gottesdienst mit einer Kopie eines früheren beginnen.</string>
     <string name="calendar_templates_note">Vorlagen werden unter „Beginnen mit“ angeboten, wenn du einen Gottesdienst hinzufügst. Eine neue speicherst du aus einem beliebigen Gottesdienst mit „Vorlage“ in der Ablauf-Kopfzeile.</string>

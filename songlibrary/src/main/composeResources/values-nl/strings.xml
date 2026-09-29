@@ -29,7 +29,6 @@
     <string name="empty_title">Geen liederen voldoen aan je filters</string>
     <string name="reset_filters">Filters wissen</string>
     <string name="library_empty">Deze bibliotheek bevat nog geen liederen</string>
-    <string name="footer_songs">%1$s liederen</string>
     <string name="unsaved_changes">%1$s niet opgeslagen</string>
     <string name="revert">Ongedaan maken</string>
     <string name="save_changes">Wijzigingen opslaan</string>

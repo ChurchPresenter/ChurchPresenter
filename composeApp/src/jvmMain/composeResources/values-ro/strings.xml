@@ -421,7 +421,6 @@
     <string name="tooltip_move_up">Mută Sus</string>
     <string name="tooltip_move_down">Mută Jos</string>
     <string name="tooltip_add_to_schedule">Adaugă la Program</string>
-    <string name="tooltip_clear_schedule">Golește Programul</string>
     <string name="tooltip_clear_display">Golește Ecranul</string>
     <string name="remote_action_clear_display">Golește Ecranul</string>
     <string name="schedule_add_files_title">Adaugă fișiere la program</string>
@@ -432,13 +431,11 @@
     <string name="tooltip_theme_system">Tema Sistemului</string>
     <string name="tooltip_remove">Elimină</string>
     <string name="tooltip_edit">Editează</string>
-    <string name="tooltip_edit_label">Editează Etichetă</string>
     <string name="tooltip_go_live">Proiectează</string>
     <string name="tooltip_presentation_remote">Deschide telecomanda</string>
     <string name="tooltip_qa_remote">Partajare și Acces la Distanță</string>
     <string name="tooltip_send_to_stage_monitor">Trimite la Monitorul de Scenă</string>
     <string name="tooltip_hide_from_stage_monitor">Ascunde Anunțul</string>
-    <string name="tooltip_add_label">Adaugă Etichetă</string>
     <string name="tooltip_collapse_schedule">Restrânge Programul</string>
     <string name="tooltip_expand_schedule">Extinde Programul</string>
     <string name="schedule_drop_hint">Glisați fișiere aici pentru a le adăuga la program</string>
@@ -618,7 +615,6 @@
     <string name="media_vlc_load_failed">VLC a fost găsit, dar nu a putut fi încărcat. Încercați să reinstalați VLC de pe videolan.org (pe Windows, instalați și Microsoft Visual C++ Redistributable), apoi reporniți aplicația.</string>
     <string name="vlc_custom_path">Cale VLC personalizată</string>
     <string name="vlc_browse">Răsfoire</string>
-    <string name="vlc_path_hint">Selectați directorul de instalare VLC</string>
     <string name="vlc_directory_chooser_title">Selectați directorul de instalare VLC</string>
     <string name="vlc_path_invalid">Directorul nu conține bibliotecile VLC</string>
     <string name="media_audio_continues">Audio va continua să fie redat în fundal la schimbarea filelor sau afișarea altor conținuturi</string>
@@ -740,7 +736,6 @@
     <string name="web_zoom_out">Micșorare</string>
     <string name="website_dialog_title">Adaugă Website</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Titlu (opțional)</string>
     <string name="website_title_hint">Introduceți un nume de afișare…</string>
     <string name="website_disclaimer">Nu suntem responsabili pentru reclamele sau conținutul care pot apărea pe site-ul web afișat.</string>
@@ -1502,8 +1497,6 @@
     <string name="setup_step2_tip2">Aveți o Biblie în alt format? Convertorul de cântări și Biblii (Ajutor → Convertor de cântări și Biblii) o poate converti.</string>
     <string name="setup_step3_title">Adăugați cărți de cântece</string>
     <string name="setup_step3_subtitle">Indicați aplicației dosarul cu biblioteca dvs. de cântece</string>
-    <string name="setup_step3_step1">1. Deschideți Setări folosind butonul ⚙ din bara de instrumente</string>
-    <string name="setup_step3_step2">2. Mergeți la fila Sistem</string>
     <string name="setup_step3_step3">3. Faceți clic pe „Răsfoire…" lângă Directorul de cântece</string>
     <string name="setup_step3_step4">4. Selectați un dosar cu fișierele dvs. de cântece</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2058,7 +2051,6 @@
     <string name="background_above_band_caption">Deasupra benzii</string>
     <string name="background_above_band_fill">Culoare de umplere</string>
     <string name="background_above_band_opacity">Opacitate umplere</string>
-    <string name="quick_background_title">Fundaluri rapide</string>
     <string name="quick_background_reset">Înapoi la normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · se administrează în Setări</string>

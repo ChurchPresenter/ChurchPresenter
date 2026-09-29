@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.CircleShape
+import churchpresenter.composeapp.generated.resources.add_label
+import churchpresenter.composeapp.generated.resources.menu_clear_schedule
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -86,8 +88,6 @@ import churchpresenter.composeapp.generated.resources.tooltip_schedule_options
 import churchpresenter.composeapp.generated.resources.tooltip_redo_unbound
 import churchpresenter.composeapp.generated.resources.tooltip_undo_unbound
 import churchpresenter.composeapp.generated.resources.schedule_add_files
-import churchpresenter.composeapp.generated.resources.tooltip_add_label
-import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
@@ -320,10 +320,10 @@ private fun scheduleToolbarButtonLabel(button: ScheduleToolbarButton): String = 
     ScheduleToolbarButton.NEW -> stringResource(Res.string.tooltip_new_schedule)
     ScheduleToolbarButton.OPEN -> stringResource(Res.string.tooltip_open_schedule)
     ScheduleToolbarButton.SAVE -> stringResource(Res.string.tooltip_save_schedule)
-    ScheduleToolbarButton.CLEAR -> stringResource(Res.string.tooltip_clear_schedule)
+    ScheduleToolbarButton.CLEAR -> stringResource(Res.string.menu_clear_schedule)
     ScheduleToolbarButton.UNDO -> stringResource(Res.string.tooltip_undo_unbound)
     ScheduleToolbarButton.REDO -> stringResource(Res.string.tooltip_redo_unbound)
-    ScheduleToolbarButton.ADD_LABEL -> stringResource(Res.string.tooltip_add_label)
+    ScheduleToolbarButton.ADD_LABEL -> stringResource(Res.string.add_label)
     ScheduleToolbarButton.PLANNING_CENTER -> stringResource(Res.string.planning_center_import_title)
     ScheduleToolbarButton.CALENDAR -> stringResource(Res.string.open_calendar_manager)
 }

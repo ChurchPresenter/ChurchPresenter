@@ -666,7 +666,6 @@
     <string name="tooltip_schedule_zoom_in">Zoom In</string>
     <string name="tooltip_schedule_zoom_out">Zoom Out</string>
     <string name="tooltip_add_to_schedule">Add to Schedule</string>
-    <string name="tooltip_clear_schedule">Clear Schedule</string>
     <string name="tooltip_clear_display">Clear Display</string>
     <string name="remote_action_clear_display">Clear Display</string>
     <string name="schedule_add_files_title">Add Files to Schedule</string>
@@ -680,14 +679,12 @@
     <string name="tooltip_theme_system">System Theme</string>
     <string name="tooltip_remove">Remove</string>
     <string name="tooltip_edit">Edit</string>
-    <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_presentation_remote">Open Remote Control</string>
     <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
     <string name="tooltip_stt_settings">STT Display Settings</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
-    <string name="tooltip_add_label">Add Label</string>
     <string name="tooltip_collapse_schedule">Collapse Schedule</string>
     <string name="tooltip_expand_schedule">Expand Schedule</string>
     <string name="schedule_drop_hint">Drag files here to add to schedule</string>
@@ -1191,7 +1188,6 @@
     <string name="media_vlc_load_failed">VLC was found but could not be loaded. Try reinstalling VLC from videolan.org (on Windows, also install the Microsoft Visual C++ Redistributable), then restart the application.</string>
     <string name="vlc_custom_path">Custom VLC path</string>
     <string name="vlc_browse">Browse</string>
-    <string name="vlc_path_hint">Select VLC installation directory</string>
     <string name="vlc_directory_chooser_title">Select VLC installation directory</string>
     <string name="vlc_path_invalid">Directory does not contain VLC libraries</string>
     <string name="media_audio_continues">Audio will continue playing in the background when switching tabs or displaying other content</string>
@@ -1329,7 +1325,6 @@
     <string name="web_snapshot_screen_recording_hint">If this persists, grant Screen Recording permission\nin System Settings > Privacy &amp; Security > Screen Recording</string>
     <string name="website_dialog_title">Add Website</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Title (optional)</string>
     <string name="website_title_hint">Enter a display name…</string>
     <string name="website_disclaimer">We are not responsible for any advertisements or content that may appear on the displayed website.</string>
@@ -2226,8 +2221,6 @@
     <string name="setup_step2_tip2">Have a Bible in another format? The Song and Bible Converter (Help → Song and Bible Converter) can convert it.</string>
     <string name="setup_step3_title">Add Song Books</string>
     <string name="setup_step3_subtitle">Point the app to your song library folder</string>
-    <string name="setup_step3_step1">1. Open Settings using the ⚙ button in the toolbar</string>
-    <string name="setup_step3_step2">2. Go to the System tab</string>
     <string name="setup_step3_step3">3. Click "Browse…" next to Songs Storage Directory</string>
     <string name="setup_step3_step4">4. Select a folder containing your song files</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2564,7 +2557,6 @@
     <string name="song_search_match_translation">Translation %1$d</string>
     <string name="unit_px">px</string>
     <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
-    <string name="quick_background_title">Quick backgrounds</string>
     <string name="quick_background_reset">Back to normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · manage in Settings</string>

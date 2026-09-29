@@ -57,7 +57,6 @@ import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
-import churchpresenter.composeapp.generated.resources.vlc_path_hint
 import churchpresenter.composeapp.generated.resources.vlc_path_invalid
 import churchpresenter.composeapp.generated.resources.window_position
 import kotlinx.coroutines.Dispatchers
@@ -609,7 +608,12 @@ private fun VlcPathRow(
             value = vlcPathText,
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text(stringResource(Res.string.vlc_path_hint), style = MaterialTheme.typography.bodySmall) },
+            placeholder = {
+                Text(
+                    stringResource(Res.string.vlc_directory_chooser_title),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            },
             isError = vlcPathError,
             supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
             singleLine = true,

@@ -29,7 +29,6 @@
     <string name="empty_title">ไม่มีเพลงที่ตรงกับตัวกรอง</string>
     <string name="reset_filters">ล้างตัวกรอง</string>
     <string name="library_empty">คลังนี้ยังไม่มีเพลง</string>
-    <string name="footer_songs">%1$s เพลง</string>
     <string name="unsaved_changes">ยังไม่ได้บันทึก %1$s</string>
     <string name="revert">ย้อนกลับ</string>
     <string name="save_changes">บันทึกการเปลี่ยนแปลง</string>

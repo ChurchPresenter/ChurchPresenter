@@ -89,13 +89,11 @@
     <string name="calendar_start_from">Start from</string>
     <string name="calendar_template_blank">Blank service</string>
     <string name="calendar_template_blank_sub">Empty run of show</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d items</string>
     <string name="calendar_add_service_save">Add service</string>
     <string name="calendar_new_service_on">New service · %1$s</string>
     <string name="calendar_kind_sunday_short">Sunday</string>
     <string name="calendar_kind_midweek_short">Midweek</string>
     <string name="calendar_kind_special_short">Special</string>
-    <string name="calendar_close_sheet">Close</string>
     <string name="calendar_settings">Calendar settings</string>
     <string name="calendar_settings_sub">Applies to every service, not just today</string>
     <string name="calendar_settings_sections">Sections</string>
@@ -122,7 +120,6 @@
     <string name="calendar_cue_item_missing">Item no longer in this run of show</string>
     <string name="calendar_copy_include_cues">Automation cues</string>
     <string name="calendar_copy_include_cues_sub">%1$d cues, offsets preserved</string>
-    <string name="calendar_template_include_cues">Automation cues</string>
     <string name="calendar_template_include_cues_sub">Relative offsets</string>
     <string name="calendar_templates_empty_sub">Save one from any service with Template, in the Run of show header. Until then a new service can start from a copy of any earlier one.</string>
     <string name="calendar_templates_note">Templates are offered under Start from when you add a service. Save a new one from any service with Template, in the Run of show header.</string>

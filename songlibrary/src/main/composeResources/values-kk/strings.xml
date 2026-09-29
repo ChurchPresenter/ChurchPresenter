@@ -29,7 +29,6 @@
     <string name="empty_title">Сүзгілерге сәйкес ән жоқ</string>
     <string name="reset_filters">Сүзгілерді тазалау</string>
     <string name="library_empty">Бұл кітапханада әзірге ән жоқ</string>
-    <string name="footer_songs">%1$s ән</string>
     <string name="unsaved_changes">%1$s сақталмады</string>
     <string name="revert">Қайтару</string>
     <string name="save_changes">Өзгерістерді сақтау</string>

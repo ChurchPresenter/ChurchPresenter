@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Aloita pohjasta</string>
     <string name="calendar_template_blank">Tyhjä tilaisuus</string>
     <string name="calendar_template_blank_sub">Tyhjä kulkusuunnitelma</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d kohtaa</string>
     <string name="calendar_add_service_save">Lisää tilaisuus</string>
     <string name="calendar_new_service_on">Uusi tilaisuus · %1$s</string>
     <string name="calendar_kind_sunday_short">Sunnuntai</string>
     <string name="calendar_kind_midweek_short">Arkena</string>
     <string name="calendar_kind_special_short">Erityinen</string>
-    <string name="calendar_close_sheet">Sulje</string>
     <string name="calendar_settings">Kalenterin asetukset</string>
     <string name="calendar_settings_sub">Koskee kaikkia tilaisuuksia, ei vain tämänpäiväistä</string>
     <string name="calendar_settings_sections">Osiot</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Kohta ei ole enää tässä kulkusuunnitelmassa</string>
     <string name="calendar_copy_include_cues">Automaatiomerkit</string>
     <string name="calendar_copy_include_cues_sub">%1$d merkkiä, siirtymät säilytetään</string>
-    <string name="calendar_template_include_cues">Automaatiomerkit</string>
     <string name="calendar_template_include_cues_sub">Suhteelliset siirtymät</string>
     <string name="calendar_templates_empty_sub">Tallenna sellainen mistä tahansa tilaisuudesta painikkeella ”Malli” kulkusuunnitelman otsikkorivillä. Siihen asti uusi tilaisuus voi alkaa minkä tahansa aiemman kopiosta.</string>
     <string name="calendar_templates_note">Malleja tarjotaan kohdassa ”Aloita pohjasta”, kun lisäät tilaisuuden. Tallenna uusi mistä tahansa tilaisuudesta painikkeella ”Malli” kulkusuunnitelman otsikkorivillä.</string>

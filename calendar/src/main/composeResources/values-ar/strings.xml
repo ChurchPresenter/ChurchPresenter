@@ -70,13 +70,11 @@
     <string name="calendar_start_from">ابدأ من</string>
     <string name="calendar_template_blank">اجتماع فارغ</string>
     <string name="calendar_template_blank_sub">ترتيب اجتماع فارغ</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d عنصرًا</string>
     <string name="calendar_add_service_save">إضافة اجتماع</string>
     <string name="calendar_new_service_on">اجتماع جديد · %1$s</string>
     <string name="calendar_kind_sunday_short">الأحد</string>
     <string name="calendar_kind_midweek_short">منتصف الأسبوع</string>
     <string name="calendar_kind_special_short">خاص</string>
-    <string name="calendar_close_sheet">إغلاق</string>
     <string name="calendar_settings">إعدادات التقويم</string>
     <string name="calendar_settings_sub">تنطبق على كل اجتماع، وليس على اليوم فقط</string>
     <string name="calendar_settings_sections">الأقسام</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">لم يعد العنصر في ترتيب الاجتماع هذا</string>
     <string name="calendar_copy_include_cues">علامات الأتمتة</string>
     <string name="calendar_copy_include_cues_sub">%1$d علامات، مع الحفاظ على الفروق الزمنية</string>
-    <string name="calendar_template_include_cues">علامات الأتمتة</string>
     <string name="calendar_template_include_cues_sub">فروق زمنية نسبية</string>
     <string name="calendar_templates_empty_sub">احفظ قالبًا من أي اجتماع عبر «قالب» في رأس ترتيب الاجتماع. وحتى ذلك الحين يمكن أن يبدأ اجتماع جديد من نسخة أي اجتماع سابق.</string>
     <string name="calendar_templates_note">تُعرض القوالب تحت «ابدأ من» عند إضافة اجتماع. احفظ قالبًا جديدًا من أي اجتماع عبر «قالب» في رأس ترتيب الاجتماع.</string>

@@ -29,7 +29,6 @@
     <string name="empty_title">Tidak ada lagu yang cocok dengan filter Anda</string>
     <string name="reset_filters">Atur ulang filter</string>
     <string name="library_empty">Pustaka ini belum memiliki lagu</string>
-    <string name="footer_songs">%1$s lagu</string>
     <string name="unsaved_changes">%1$s belum disimpan</string>
     <string name="revert">Kembalikan</string>
     <string name="save_changes">Simpan Perubahan</string>

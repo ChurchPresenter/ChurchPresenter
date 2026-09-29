@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">拡大</string>
     <string name="tooltip_schedule_zoom_out">縮小</string>
     <string name="tooltip_add_to_schedule">進行表に追加</string>
-    <string name="tooltip_clear_schedule">進行表をクリア</string>
     <string name="tooltip_clear_display">表示をクリア</string>
     <string name="remote_action_clear_display">表示をクリア</string>
     <string name="schedule_add_files_title">進行表にファイルを追加</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">システムテーマ</string>
     <string name="tooltip_remove">削除</string>
     <string name="tooltip_edit">編集</string>
-    <string name="tooltip_edit_label">ラベルを編集</string>
     <string name="tooltip_go_live">ライブ表示</string>
     <string name="tooltip_presentation_remote">リモコンを開く</string>
     <string name="tooltip_qa_remote">共有とリモートアクセス</string>
     <string name="tooltip_stt_settings">STT の表示設定</string>
     <string name="tooltip_send_to_stage_monitor">ステージモニターに送る</string>
     <string name="tooltip_hide_from_stage_monitor">お知らせを隠す</string>
-    <string name="tooltip_add_label">ラベルを追加</string>
     <string name="tooltip_collapse_schedule">進行表を折りたたむ</string>
     <string name="tooltip_expand_schedule">進行表を展開</string>
     <string name="schedule_drop_hint">ここにファイルをドラッグすると進行表に追加されます</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC は見つかりましたが読み込めませんでした。videolan.org から VLC を再インストールし（Windows では Microsoft Visual C++ 再頒布可能パッケージもインストールしてください）、アプリを再起動してください。</string>
     <string name="vlc_custom_path">VLC のパスを指定</string>
     <string name="vlc_browse">参照</string>
-    <string name="vlc_path_hint">VLC のインストールフォルダーを選択してください</string>
     <string name="vlc_directory_chooser_title">VLC のインストールフォルダーを選択してください</string>
     <string name="vlc_path_invalid">このフォルダーには VLC のライブラリがありません</string>
     <string name="media_audio_continues">タブを切り替えたり別の内容を表示しても、音声はバックグラウンドで再生され続けます</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">この状態が続く場合は、システム設定 &gt; プライバシーとセキュリティ &gt; 画面収録\nで画面収録を許可してください</string>
     <string name="website_dialog_title">Web サイトを追加</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">タイトル（任意）</string>
     <string name="website_title_hint">表示名を入力…</string>
     <string name="website_disclaimer">表示された Web サイトに現れる広告や内容について、当方は責任を負いません。</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">別の形式の聖書をお持ちですか？賛美歌・聖書コンバーター（ヘルプ → 賛美歌・聖書コンバーター）で変換できます。</string>
     <string name="setup_step3_title">曲集を追加</string>
     <string name="setup_step3_subtitle">曲のライブラリーのフォルダーをアプリに指定します</string>
-    <string name="setup_step3_step1">1. ツールバーの ⚙ ボタンから設定を開きます</string>
-    <string name="setup_step3_step2">2.「システム」タブを開きます</string>
     <string name="setup_step3_step3">3.「曲の保存フォルダー」の横にある「参照…」を押します</string>
     <string name="setup_step3_step4">4. 曲のファイルが入ったフォルダーを選びます</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">帯の上</string>
     <string name="background_above_band_fill">塗りの色</string>
     <string name="background_above_band_opacity">塗りの不透明度</string>
-    <string name="quick_background_title">クイック背景</string>
     <string name="quick_background_reset">元に戻す</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · 設定で管理</string>

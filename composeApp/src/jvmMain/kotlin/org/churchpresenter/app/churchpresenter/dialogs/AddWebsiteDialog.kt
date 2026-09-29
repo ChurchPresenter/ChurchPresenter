@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import churchpresenter.composeapp.generated.resources.web_url_hint
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -37,7 +38,6 @@ import churchpresenter.composeapp.generated.resources.website_disclaimer
 import churchpresenter.composeapp.generated.resources.website_dialog_title
 import churchpresenter.composeapp.generated.resources.website_title_hint
 import churchpresenter.composeapp.generated.resources.website_title_label
-import churchpresenter.composeapp.generated.resources.website_url_hint
 import churchpresenter.composeapp.generated.resources.website_url_label
 import org.jetbrains.compose.resources.stringResource
 
@@ -131,7 +131,7 @@ internal fun AddWebsiteDialogContent(
                             onValueChange = { url = it },
                             placeholder = {
                                 Text(
-                                    stringResource(Res.string.website_url_hint),
+                                    stringResource(Res.string.web_url_hint),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             },

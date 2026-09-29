@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Kuza</string>
     <string name="tooltip_schedule_zoom_out">Punguza</string>
     <string name="tooltip_add_to_schedule">Ongeza kwenye Ratiba</string>
-    <string name="tooltip_clear_schedule">Futa Ratiba</string>
     <string name="tooltip_clear_display">Futa Onyesho</string>
     <string name="remote_action_clear_display">Futa Onyesho</string>
     <string name="schedule_add_files_title">Ongeza Faili kwenye Ratiba</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Mandhari ya Mfumo</string>
     <string name="tooltip_remove">Ondoa</string>
     <string name="tooltip_edit">Hariri</string>
-    <string name="tooltip_edit_label">Hariri Lebo</string>
     <string name="tooltip_go_live">Onyesha Live</string>
     <string name="tooltip_presentation_remote">Fungua Kidhibiti cha Mbali</string>
     <string name="tooltip_qa_remote">Kushiriki na Ufikiaji wa Mbali</string>
     <string name="tooltip_stt_settings">Mipangilio ya Onyesho la STT</string>
     <string name="tooltip_send_to_stage_monitor">Tuma kwenye Kifuatiliaji cha Jukwaa</string>
     <string name="tooltip_hide_from_stage_monitor">Ficha Tangazo</string>
-    <string name="tooltip_add_label">Ongeza Lebo</string>
     <string name="tooltip_collapse_schedule">Kunja Ratiba</string>
     <string name="tooltip_expand_schedule">Panua Ratiba</string>
     <string name="schedule_drop_hint">Vuta faili hapa kuziongeza kwenye ratiba</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC ilipatikana lakini haikuweza kupakiwa. Jaribu kusakinisha VLC upya kutoka videolan.org (kwenye Windows, sakinisha pia Microsoft Visual C++ Redistributable), kisha uanzishe programu upya.</string>
     <string name="vlc_custom_path">Njia maalum ya VLC</string>
     <string name="vlc_browse">Vinjari</string>
-    <string name="vlc_path_hint">Chagua saraka ya usakinishaji wa VLC</string>
     <string name="vlc_directory_chooser_title">Chagua saraka ya usakinishaji wa VLC</string>
     <string name="vlc_path_invalid">Saraka haina maktaba za VLC</string>
     <string name="media_audio_continues">Sauti itaendelea kucheza chinichini unapobadilisha vichupo au kuonyesha maudhui mengine</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Ikiendelea, toa ruhusa ya Screen Recording\nkatika System Settings &gt; Privacy &amp; Security &gt; Screen Recording</string>
     <string name="website_dialog_title">Ongeza Tovuti</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Kichwa (si lazima)</string>
     <string name="website_title_hint">Weka jina la kuonyesha…</string>
     <string name="website_disclaimer">Hatuwajibiki kwa matangazo au maudhui yoyote yanayoweza kuonekana kwenye tovuti inayoonyeshwa.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">Una Biblia katika muundo mwingine? Kibadilishaji cha Nyimbo na Biblia (Msaada → Kibadilishaji cha Nyimbo na Biblia) kinaweza kuibadilisha.</string>
     <string name="setup_step3_title">Ongeza vitabu vya nyimbo</string>
     <string name="setup_step3_subtitle">Elekeza programu kwenye folda ya mkusanyiko wako wa nyimbo</string>
-    <string name="setup_step3_step1">1. Fungua Mipangilio kwa kitufe cha ⚙ kwenye upau wa vitendea kazi</string>
-    <string name="setup_step3_step2">2. Nenda kwenye kichupo cha Mfumo</string>
     <string name="setup_step3_step3">3. Bofya "Vinjari…" kando ya Folda ya kuhifadhi nyimbo</string>
     <string name="setup_step3_step4">4. Chagua folda yenye faili zako za nyimbo</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Juu ya Mstari</string>
     <string name="background_above_band_fill">Rangi ya Kujaza</string>
     <string name="background_above_band_opacity">Ukolezi wa Kujaza</string>
-    <string name="quick_background_title">Usuli wa haraka</string>
     <string name="quick_background_reset">Rudi kawaida</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · dhibiti katika Mipangilio</string>

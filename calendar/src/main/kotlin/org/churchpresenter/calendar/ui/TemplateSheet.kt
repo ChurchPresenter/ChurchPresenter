@@ -23,11 +23,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_cancel
+import org.churchpresenter.calendar.generated.resources.calendar_copy_include_cues
 import org.churchpresenter.calendar.generated.resources.calendar_include
 import org.churchpresenter.calendar.generated.resources.calendar_save_template_sub
 import org.churchpresenter.calendar.generated.resources.calendar_save_template_title
 import org.churchpresenter.calendar.generated.resources.calendar_template_footer
-import org.churchpresenter.calendar.generated.resources.calendar_template_include_cues
 import org.churchpresenter.calendar.generated.resources.calendar_template_include_cues_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_include_items
 import org.churchpresenter.calendar.generated.resources.calendar_template_include_items_sub
@@ -126,7 +126,7 @@ fun TemplateSheet(
                         onToggle = { items = !items },
                     )
                     IncludeRow(
-                        label = stringResource(Res.string.calendar_template_include_cues),
+                        label = stringResource(Res.string.calendar_copy_include_cues),
                         sub = stringResource(Res.string.calendar_template_include_cues_sub),
                         on = cues,
                         onToggle = { cues = !cues },

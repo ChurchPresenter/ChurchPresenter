@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">بزرگ‌نمایی</string>
     <string name="tooltip_schedule_zoom_out">کوچک‌نمایی</string>
     <string name="tooltip_add_to_schedule">افزودن به برنامه</string>
-    <string name="tooltip_clear_schedule">پاک کردن برنامه</string>
     <string name="tooltip_clear_display">پاک کردن نمایش</string>
     <string name="remote_action_clear_display">پاک کردن نمایش</string>
     <string name="schedule_add_files_title">افزودن فایل‌ها به برنامه</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">پوسته سیستم</string>
     <string name="tooltip_remove">حذف</string>
     <string name="tooltip_edit">ویرایش</string>
-    <string name="tooltip_edit_label">ویرایش برچسب</string>
     <string name="tooltip_go_live">پخش زنده</string>
     <string name="tooltip_presentation_remote">باز کردن کنترل از راه دور</string>
     <string name="tooltip_qa_remote">هم‌رسانی و دسترسی از راه دور</string>
     <string name="tooltip_stt_settings">تنظیمات نمایش زیرنویس</string>
     <string name="tooltip_send_to_stage_monitor">فرستادن به مانیتور صحنه</string>
     <string name="tooltip_hide_from_stage_monitor">پنهان کردن اطلاعیه</string>
-    <string name="tooltip_add_label">افزودن برچسب</string>
     <string name="tooltip_collapse_schedule">جمع کردن برنامه</string>
     <string name="tooltip_expand_schedule">گسترش برنامه</string>
     <string name="schedule_drop_hint">فایل‌ها را برای افزودن به برنامه اینجا بکشید</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC پیدا شد اما بارگذاری نشد. VLC را از videolan.org دوباره نصب کنید (در ویندوز، Microsoft Visual C++ Redistributable را هم نصب کنید) و سپس برنامه را دوباره راه‌اندازی کنید.</string>
     <string name="vlc_custom_path">مسیر دلخواه VLC</string>
     <string name="vlc_browse">مرور</string>
-    <string name="vlc_path_hint">پوشه نصب VLC را انتخاب کنید</string>
     <string name="vlc_directory_chooser_title">پوشه نصب VLC را انتخاب کنید</string>
     <string name="vlc_path_invalid">این پوشه کتابخانه‌های VLC را ندارد</string>
     <string name="media_audio_continues">هنگام جابه‌جایی بین زبانه‌ها یا نمایش محتوای دیگر، پخش صدا در پس‌زمینه ادامه می‌یابد</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">اگر این پیام ادامه یافت، اجازه Screen Recording را\nدر System Settings &gt; Privacy &amp; Security &gt; Screen Recording بدهید</string>
     <string name="website_dialog_title">افزودن وب‌سایت</string>
     <string name="website_url_label">نشانی</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">عنوان (اختیاری)</string>
     <string name="website_title_hint">یک نام نمایشی وارد کنید…</string>
     <string name="website_disclaimer">ما مسئول هیچ تبلیغ یا محتوایی که ممکن است در وب‌سایت نمایش‌داده‌شده ظاهر شود نیستیم.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">کتاب‌مقدسی در قالبی دیگر دارید؟ مبدل سرود و کتاب‌مقدس (راهنما ← مبدل سرود و کتاب‌مقدس) می‌تواند آن را تبدیل کند.</string>
     <string name="setup_step3_title">افزودن کتاب‌های سرود</string>
     <string name="setup_step3_subtitle">برنامه را به پوشهٔ کتابخانهٔ سرودهایتان اشاره دهید</string>
-    <string name="setup_step3_step1">۱. تنظیمات را با دکمهٔ ⚙ در نوار ابزار باز کنید</string>
-    <string name="setup_step3_step2">۲. به زبانهٔ «سامانه» بروید</string>
     <string name="setup_step3_step3">۳. کنار «پوشهٔ نگهداری سرودها» روی «مرور…» بزنید</string>
     <string name="setup_step3_step4">۴. پوشه‌ای را برگزینید که پرونده‌های سرود شما در آن است</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">بالای نوار</string>
     <string name="background_above_band_fill">رنگ پرکننده</string>
     <string name="background_above_band_opacity">کدری پرکننده</string>
-    <string name="quick_background_title">پس‌زمینه‌های سریع</string>
     <string name="quick_background_reset">بازگشت به حالت عادی</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · مدیریت در تنظیمات</string>

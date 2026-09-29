@@ -70,13 +70,11 @@
     <string name="calendar_start_from">इससे शुरू करें</string>
     <string name="calendar_template_blank">खाली सभा</string>
     <string name="calendar_template_blank_sub">खाली सभा क्रम</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d आइटम</string>
     <string name="calendar_add_service_save">सभा जोड़ें</string>
     <string name="calendar_new_service_on">नई सभा · %1$s</string>
     <string name="calendar_kind_sunday_short">रविवार</string>
     <string name="calendar_kind_midweek_short">सप्ताह के बीच</string>
     <string name="calendar_kind_special_short">विशेष</string>
-    <string name="calendar_close_sheet">बंद करें</string>
     <string name="calendar_settings">कैलेंडर सेटिंग्स</string>
     <string name="calendar_settings_sub">हर सभा पर लागू होता है, केवल आज की पर नहीं</string>
     <string name="calendar_settings_sections">खंड</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">यह आइटम अब इस सभा क्रम में नहीं है</string>
     <string name="calendar_copy_include_cues">स्वचालन चिह्न</string>
     <string name="calendar_copy_include_cues_sub">%1$d चिह्न, समय अंतर बरकरार</string>
-    <string name="calendar_template_include_cues">स्वचालन चिह्न</string>
     <string name="calendar_template_include_cues_sub">सापेक्ष समय अंतर</string>
     <string name="calendar_templates_empty_sub">सभा क्रम शीर्षक में „टेम्पलेट” से किसी भी सभा से एक सहेजें। तब तक नई सभा किसी भी पुरानी सभा की नकल से शुरू हो सकती है।</string>
     <string name="calendar_templates_note">सभा जोड़ते समय टेम्पलेट „इससे शुरू करें” के नीचे दिखाए जाते हैं। सभा क्रम शीर्षक में „टेम्पलेट” से किसी भी सभा से नया सहेजें।</string>

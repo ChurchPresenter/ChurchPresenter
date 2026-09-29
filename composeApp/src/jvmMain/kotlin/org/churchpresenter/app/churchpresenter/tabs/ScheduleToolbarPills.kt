@@ -3,6 +3,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import churchpresenter.composeapp.generated.resources.add_label
+import churchpresenter.composeapp.generated.resources.menu_clear_schedule
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -35,8 +37,6 @@ import churchpresenter.composeapp.generated.resources.planning_center_import_tit
 import churchpresenter.composeapp.generated.resources.schedule_density_compact
 import churchpresenter.composeapp.generated.resources.schedule_density_detailed
 import churchpresenter.composeapp.generated.resources.schedule_density_normal
-import churchpresenter.composeapp.generated.resources.tooltip_add_label
-import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_redo
@@ -165,7 +165,7 @@ internal fun ScheduleFileButtons(
     if (ScheduleToolbarButton.CLEAR.shownIn(hiddenButtons)) {
         ToolbarButton(
             painter = painterResource(Res.drawable.ic_delete),
-            text = stringResource(Res.string.tooltip_clear_schedule),
+            text = stringResource(Res.string.menu_clear_schedule),
             onClick = onClearSchedule,
             enabled = canClear,
             tint = MaterialTheme.colorScheme.error,
@@ -227,7 +227,7 @@ internal fun SchedulePlanningButtons(
 ) {
     if (ScheduleToolbarButton.ADD_LABEL.shownIn(hiddenButtons)) {
         ToolbarButton(
-            painterResource(Res.drawable.ic_label), stringResource(Res.string.tooltip_add_label), onAddLabel,
+            painterResource(Res.drawable.ic_label), stringResource(Res.string.add_label), onAddLabel,
             buttonSize = size.buttonSize, iconSize = size.iconSize,
         )
     }

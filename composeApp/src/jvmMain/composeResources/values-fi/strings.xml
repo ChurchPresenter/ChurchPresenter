@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Lähennä</string>
     <string name="tooltip_schedule_zoom_out">Loitonna</string>
     <string name="tooltip_add_to_schedule">Lisää ohjelmaan</string>
-    <string name="tooltip_clear_schedule">Tyhjennä ohjelma</string>
     <string name="tooltip_clear_display">Tyhjennä näyttö</string>
     <string name="remote_action_clear_display">Tyhjennä näyttö</string>
     <string name="schedule_add_files_title">Lisää tiedostoja ohjelmaan</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Järjestelmän teema</string>
     <string name="tooltip_remove">Poista</string>
     <string name="tooltip_edit">Muokkaa</string>
-    <string name="tooltip_edit_label">Muokkaa merkintää</string>
     <string name="tooltip_go_live">Näytä livenä</string>
     <string name="tooltip_presentation_remote">Avaa kaukosäädin</string>
     <string name="tooltip_qa_remote">Jakaminen ja etäkäyttö</string>
     <string name="tooltip_stt_settings">Puheentunnistuksen näyttöasetukset</string>
     <string name="tooltip_send_to_stage_monitor">Lähetä lavamonitoriin</string>
     <string name="tooltip_hide_from_stage_monitor">Piilota tiedote</string>
-    <string name="tooltip_add_label">Lisää merkintä</string>
     <string name="tooltip_collapse_schedule">Kutista ohjelma</string>
     <string name="tooltip_expand_schedule">Laajenna ohjelma</string>
     <string name="schedule_drop_hint">Vedä tiedostot tähän lisätäksesi ne ohjelmaan</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC löytyi, mutta sitä ei voitu ladata. Yritä asentaa VLC uudelleen osoitteesta videolan.org (asenna Windowsissa myös Microsoft Visual C++ Redistributable) ja käynnistä sovellus sen jälkeen uudelleen.</string>
     <string name="vlc_custom_path">Oma VLC-polku</string>
     <string name="vlc_browse">Selaa</string>
-    <string name="vlc_path_hint">Valitse VLC:n asennuskansio</string>
     <string name="vlc_directory_chooser_title">Valitse VLC:n asennuskansio</string>
     <string name="vlc_path_invalid">Kansio ei sisällä VLC-kirjastoja</string>
     <string name="media_audio_continues">Ääni jatkuu taustalla, kun vaihdat välilehteä tai näytät muuta sisältöä</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Jos tämä jatkuu, myönnä näytön tallennuksen oikeus\nkohdassa Järjestelmäasetukset &gt; Tietosuoja ja suojaus &gt; Näytön tallennus</string>
     <string name="website_dialog_title">Lisää verkkosivu</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Otsikko (valinnainen)</string>
     <string name="website_title_hint">Anna näytettävä nimi…</string>
     <string name="website_disclaimer">Emme vastaa mainoksista tai sisällöstä, joka näytetyllä verkkosivulla voi näkyä.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">Onko sinulla Raamattu toisessa muodossa? Laulu- ja Raamattumuunnin (Ohje → Laulu- ja Raamattumuunnin) voi muuntaa sen.</string>
     <string name="setup_step3_title">Lisää laulukirjoja</string>
     <string name="setup_step3_subtitle">Osoita sovellus laulukokoelmasi kansioon</string>
-    <string name="setup_step3_step1">1. Avaa asetukset työkalurivin ⚙-painikkeesta</string>
-    <string name="setup_step3_step2">2. Siirry Järjestelmä-välilehdelle</string>
     <string name="setup_step3_step3">3. Napsauta ”Selaa…” kohdan Laulujen tallennuskansio vierestä</string>
     <string name="setup_step3_step4">4. Valitse kansio, joka sisältää laulutiedostosi</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Palkin yläpuolella</string>
     <string name="background_above_band_fill">Täyttöväri</string>
     <string name="background_above_band_opacity">Täytön peittävyys</string>
-    <string name="quick_background_title">Pikataustat</string>
     <string name="quick_background_reset">Takaisin normaaliin</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hallinta asetuksissa</string>

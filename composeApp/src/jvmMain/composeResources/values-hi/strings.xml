@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">ज़ूम इन</string>
     <string name="tooltip_schedule_zoom_out">ज़ूम आउट</string>
     <string name="tooltip_add_to_schedule">कार्यक्रम में जोड़ें</string>
-    <string name="tooltip_clear_schedule">कार्यक्रम खाली करें</string>
     <string name="tooltip_clear_display">स्क्रीन साफ़ करें</string>
     <string name="remote_action_clear_display">स्क्रीन साफ़ करें</string>
     <string name="schedule_add_files_title">कार्यक्रम में फ़ाइलें जोड़ें</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">सिस्टम थीम</string>
     <string name="tooltip_remove">हटाएँ</string>
     <string name="tooltip_edit">संपादित करें</string>
-    <string name="tooltip_edit_label">लेबल संपादित करें</string>
     <string name="tooltip_go_live">लाइव करें</string>
     <string name="tooltip_presentation_remote">रिमोट कंट्रोल खोलें</string>
     <string name="tooltip_qa_remote">साझा करना और रिमोट पहुँच</string>
     <string name="tooltip_stt_settings">STT डिस्प्ले सेटिंग्स</string>
     <string name="tooltip_send_to_stage_monitor">स्टेज मॉनिटर पर भेजें</string>
     <string name="tooltip_hide_from_stage_monitor">सूचना छिपाएँ</string>
-    <string name="tooltip_add_label">लेबल जोड़ें</string>
     <string name="tooltip_collapse_schedule">कार्यक्रम समेटें</string>
     <string name="tooltip_expand_schedule">कार्यक्रम फैलाएँ</string>
     <string name="schedule_drop_hint">कार्यक्रम में जोड़ने के लिए फ़ाइलें यहाँ खींचकर छोड़ें</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC मिल गया लेकिन लोड नहीं हो सका। videolan.org से VLC फिर से इंस्टॉल करके देखें (Windows पर Microsoft Visual C++ Redistributable भी इंस्टॉल करें), फिर ऐप फिर से शुरू करें।</string>
     <string name="vlc_custom_path">VLC का अपना पथ</string>
     <string name="vlc_browse">ब्राउज़ करें</string>
-    <string name="vlc_path_hint">VLC इंस्टॉलेशन फ़ोल्डर चुनें</string>
     <string name="vlc_directory_chooser_title">VLC इंस्टॉलेशन फ़ोल्डर चुनें</string>
     <string name="vlc_path_invalid">इस फ़ोल्डर में VLC लाइब्रेरी नहीं हैं</string>
     <string name="media_audio_continues">टैब बदलने या दूसरी सामग्री दिखाने पर भी ऑडियो बैकग्राउंड में चलता रहेगा</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">अगर ऐसा ही रहे तो सिस्टम सेटिंग्स &gt; Privacy &amp; Security &gt; Screen Recording में\nस्क्रीन रिकॉर्डिंग की अनुमति दें</string>
     <string name="website_dialog_title">वेबसाइट जोड़ें</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">शीर्षक (वैकल्पिक)</string>
     <string name="website_title_hint">दिखाने के लिए नाम लिखें…</string>
     <string name="website_disclaimer">दिखाई गई वेबसाइट पर आने वाले विज्ञापनों या सामग्री के लिए हम ज़िम्मेदार नहीं हैं।</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">किसी दूसरे प्रारूप में बाइबल है? गीत और बाइबल कन्वर्टर (सहायता → गीत और बाइबल कन्वर्टर) उसे बदल सकता है।</string>
     <string name="setup_step3_title">गीत पुस्तकें जोड़ें</string>
     <string name="setup_step3_subtitle">ऐप को अपनी गीत लाइब्रेरी का फ़ोल्डर बताएँ</string>
-    <string name="setup_step3_step1">1. टूलबार के ⚙ बटन से सेटिंग्स खोलें</string>
-    <string name="setup_step3_step2">2. सिस्टम टैब पर जाएँ</string>
     <string name="setup_step3_step3">3. गीत संग्रह फ़ोल्डर के आगे "ब्राउज़ करें…" पर क्लिक करें</string>
     <string name="setup_step3_step4">4. वह फ़ोल्डर चुनें जिसमें आपकी गीत फ़ाइलें हैं</string>
     <string name="setup_step5_title">VLC media player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">पट्टी के ऊपर</string>
     <string name="background_above_band_fill">भरण रंग</string>
     <string name="background_above_band_opacity">भरण अपारदर्शिता</string>
-    <string name="quick_background_title">त्वरित बैकग्राउंड</string>
     <string name="quick_background_reset">सामान्य पर वापस</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · सेटिंग्स में प्रबंधित करें</string>

@@ -29,7 +29,6 @@
     <string name="empty_title">Нет песен, подходящих под фильтры</string>
     <string name="reset_filters">Сбросить фильтры</string>
     <string name="library_empty">В этой библиотеке пока нет песен</string>
-    <string name="footer_songs">%1$s песен</string>
     <string name="unsaved_changes">%1$s не сохранено</string>
     <string name="revert">Отменить изменения</string>
     <string name="save_changes">Сохранить изменения</string>

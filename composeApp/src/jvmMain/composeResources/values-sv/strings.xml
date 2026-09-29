@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Zooma in</string>
     <string name="tooltip_schedule_zoom_out">Zooma ut</string>
     <string name="tooltip_add_to_schedule">Lägg till i programmet</string>
-    <string name="tooltip_clear_schedule">Rensa programmet</string>
     <string name="tooltip_clear_display">Rensa skärmen</string>
     <string name="remote_action_clear_display">Rensa skärmen</string>
     <string name="schedule_add_files_title">Lägg till filer i programmet</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Systemtema</string>
     <string name="tooltip_remove">Ta bort</string>
     <string name="tooltip_edit">Redigera</string>
-    <string name="tooltip_edit_label">Redigera etikett</string>
     <string name="tooltip_go_live">Gå live</string>
     <string name="tooltip_presentation_remote">Öppna fjärrkontroll</string>
     <string name="tooltip_qa_remote">Delning och fjärråtkomst</string>
     <string name="tooltip_stt_settings">Visningsinställningar för tal till text</string>
     <string name="tooltip_send_to_stage_monitor">Skicka till scenmonitor</string>
     <string name="tooltip_hide_from_stage_monitor">Dölj meddelande</string>
-    <string name="tooltip_add_label">Lägg till etikett</string>
     <string name="tooltip_collapse_schedule">Fäll ihop programmet</string>
     <string name="tooltip_expand_schedule">Expandera programmet</string>
     <string name="schedule_drop_hint">Dra filer hit för att lägga till i programmet</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC hittades men kunde inte läsas in. Prova att installera om VLC från videolan.org (installera även Microsoft Visual C++ Redistributable på Windows) och starta sedan om programmet.</string>
     <string name="vlc_custom_path">Egen sökväg till VLC</string>
     <string name="vlc_browse">Bläddra</string>
-    <string name="vlc_path_hint">Välj VLC:s installationsmapp</string>
     <string name="vlc_directory_chooser_title">Välj VLC:s installationsmapp</string>
     <string name="vlc_path_invalid">Mappen innehåller inga VLC-bibliotek</string>
     <string name="media_audio_continues">Ljudet fortsätter spelas i bakgrunden när du byter flik eller visar annat innehåll</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Om detta inte försvinner, ge behörighet för skärminspelning\ni Systeminställningar &gt; Integritet och säkerhet &gt; Skärminspelning</string>
     <string name="website_dialog_title">Lägg till webbplats</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Titel (valfritt)</string>
     <string name="website_title_hint">Ange ett visningsnamn…</string>
     <string name="website_disclaimer">Vi ansvarar inte för reklam eller innehåll som kan förekomma på den visade webbplatsen.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">Har du en bibel i ett annat format? Sång- och bibelkonverteraren (Hjälp → Sång- och bibelkonverterare) kan konvertera den.</string>
     <string name="setup_step3_title">Lägg till sångböcker</string>
     <string name="setup_step3_subtitle">Visa programmet var ditt sångbibliotek finns</string>
-    <string name="setup_step3_step1">1. Öppna Inställningar med ⚙-knappen i verktygsfältet</string>
-    <string name="setup_step3_step2">2. Gå till fliken System</string>
     <string name="setup_step3_step3">3. Klicka på "Bläddra…" vid Mapp för sånger</string>
     <string name="setup_step3_step4">4. Välj en mapp som innehåller dina sångfiler</string>
     <string name="setup_step5_title">VLC media player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Ovanför bandet</string>
     <string name="background_above_band_fill">Fyllningsfärg</string>
     <string name="background_above_band_opacity">Fyllningens opacitet</string>
-    <string name="quick_background_title">Snabbbakgrunder</string>
     <string name="quick_background_reset">Tillbaka till normalt</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hanteras i inställningarna</string>

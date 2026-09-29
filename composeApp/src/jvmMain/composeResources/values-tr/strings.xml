@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Yakınlaştır</string>
     <string name="tooltip_schedule_zoom_out">Uzaklaştır</string>
     <string name="tooltip_add_to_schedule">Programa Ekle</string>
-    <string name="tooltip_clear_schedule">Programı Temizle</string>
     <string name="tooltip_clear_display">Ekranı Temizle</string>
     <string name="remote_action_clear_display">Ekranı Temizle</string>
     <string name="schedule_add_files_title">Programa Dosya Ekle</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Sistem Teması</string>
     <string name="tooltip_remove">Kaldır</string>
     <string name="tooltip_edit">Düzenle</string>
-    <string name="tooltip_edit_label">Etiketi Düzenle</string>
     <string name="tooltip_go_live">Yayına Al</string>
     <string name="tooltip_presentation_remote">Uzaktan Kumandayı Aç</string>
     <string name="tooltip_qa_remote">Paylaşım ve Uzaktan Erişim</string>
     <string name="tooltip_stt_settings">STT Görüntü Ayarları</string>
     <string name="tooltip_send_to_stage_monitor">Sahne Monitörüne Gönder</string>
     <string name="tooltip_hide_from_stage_monitor">Duyuruyu Gizle</string>
-    <string name="tooltip_add_label">Etiket Ekle</string>
     <string name="tooltip_collapse_schedule">Programı Daralt</string>
     <string name="tooltip_expand_schedule">Programı Genişlet</string>
     <string name="schedule_drop_hint">Programa eklemek için dosyaları buraya sürükleyin</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC bulundu ama yüklenemedi. VLC'yi videolan.org adresinden yeniden kurmayı deneyin (Windows'ta Microsoft Visual C++ Redistributable paketini de kurun), sonra uygulamayı yeniden başlatın.</string>
     <string name="vlc_custom_path">Özel VLC yolu</string>
     <string name="vlc_browse">Gözat</string>
-    <string name="vlc_path_hint">VLC kurulum klasörünü seçin</string>
     <string name="vlc_directory_chooser_title">VLC kurulum klasörünü seçin</string>
     <string name="vlc_path_invalid">Klasör VLC kitaplıklarını içermiyor</string>
     <string name="media_audio_continues">Sekmeler arasında geçiş yaptığınızda veya başka içerik gösterdiğinizde ses arka planda çalmaya devam eder</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Bu sürerse Sistem Ayarları &gt; Gizlilik ve Güvenlik &gt; Ekran Kaydı\nbölümünden Ekran Kaydı izni verin</string>
     <string name="website_dialog_title">Web Sitesi Ekle</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Başlık (isteğe bağlı)</string>
     <string name="website_title_hint">Görünecek adı girin…</string>
     <string name="website_disclaimer">Gösterilen web sitesinde çıkabilecek reklamlardan veya içerikten sorumlu değiliz.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">Başka biçimde bir Kutsal Kitap mı var? İlahi ve Kutsal Kitap Dönüştürücü (Yardım → İlahi ve Kutsal Kitap Dönüştürücü) onu dönüştürebilir.</string>
     <string name="setup_step3_title">İlahi kitapları ekleyin</string>
     <string name="setup_step3_subtitle">Uygulamayı ilahi arşivinizin klasörüne yönlendirin</string>
-    <string name="setup_step3_step1">1. Araç çubuğundaki ⚙ düğmesiyle Ayarlar'ı açın</string>
-    <string name="setup_step3_step2">2. Sistem sekmesine gidin</string>
     <string name="setup_step3_step3">3. İlahi klasörünün yanındaki "Gözat…" düğmesine tıklayın</string>
     <string name="setup_step3_step4">4. İlahi dosyalarınızın bulunduğu klasörü seçin</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Bandın Üstü</string>
     <string name="background_above_band_fill">Dolgu Rengi</string>
     <string name="background_above_band_opacity">Dolgu Opaklığı</string>
-    <string name="quick_background_title">Hızlı arka planlar</string>
     <string name="quick_background_reset">Normale dön</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · ayarlardan yönetilir</string>

@@ -70,13 +70,11 @@
     <string name="calendar_start_from">यसबाट सुरु गर्नुहोस्</string>
     <string name="calendar_template_blank">खाली सभा</string>
     <string name="calendar_template_blank_sub">खाली सभाको क्रम</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d वस्तु</string>
     <string name="calendar_add_service_save">सभा थप्नुहोस्</string>
     <string name="calendar_new_service_on">नयाँ सभा · %1$s</string>
     <string name="calendar_kind_sunday_short">आइतबार</string>
     <string name="calendar_kind_midweek_short">हप्ताको बीच</string>
     <string name="calendar_kind_special_short">विशेष</string>
-    <string name="calendar_close_sheet">बन्द गर्नुहोस्</string>
     <string name="calendar_settings">पात्रो सेटिङ</string>
     <string name="calendar_settings_sub">आजको मात्र होइन, हरेक सभामा लागू हुन्छ</string>
     <string name="calendar_settings_sections">खण्डहरू</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">यो वस्तु अब यो सभाको क्रममा छैन</string>
     <string name="calendar_copy_include_cues">स्वचालन चिन्हहरू</string>
     <string name="calendar_copy_include_cues_sub">%1$d चिन्ह, समय अन्तर कायम</string>
-    <string name="calendar_template_include_cues">स्वचालन चिन्हहरू</string>
     <string name="calendar_template_include_cues_sub">सापेक्ष समय अन्तर</string>
     <string name="calendar_templates_empty_sub">सभाको क्रमको शीर्षकमा रहेको „टेम्प्लेट” बाट कुनै पनि सभाबाट एउटा सुरक्षित गर्नुहोस्। त्यतिन्जेल नयाँ सभा कुनै पनि पुरानो सभाको प्रतिलिपिबाट सुरु हुन सक्छ।</string>
     <string name="calendar_templates_note">सभा थप्दा टेम्प्लेटहरू „यसबाट सुरु गर्नुहोस्” मुनि देखाइन्छन्। सभाको क्रमको शीर्षकमा रहेको „टेम्प्लेट” बाट नयाँ सुरक्षित गर्नुहोस्।</string>

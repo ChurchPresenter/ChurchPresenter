@@ -29,7 +29,6 @@
     <string name="empty_title">Nenhuma música corresponde aos filtros</string>
     <string name="reset_filters">Redefinir filtros</string>
     <string name="library_empty">Esta biblioteca ainda não tem músicas</string>
-    <string name="footer_songs">%1$s músicas</string>
     <string name="unsaved_changes">%1$s não salvas</string>
     <string name="revert">Reverter</string>
     <string name="save_changes">Salvar alterações</string>

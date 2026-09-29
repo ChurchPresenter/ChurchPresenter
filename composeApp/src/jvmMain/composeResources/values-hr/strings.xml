@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Povećaj</string>
     <string name="tooltip_schedule_zoom_out">Smanji</string>
     <string name="tooltip_add_to_schedule">Dodaj u raspored</string>
-    <string name="tooltip_clear_schedule">Očisti raspored</string>
     <string name="tooltip_clear_display">Očisti prikaz</string>
     <string name="remote_action_clear_display">Očisti prikaz</string>
     <string name="schedule_add_files_title">Dodaj datoteke u raspored</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Tema sustava</string>
     <string name="tooltip_remove">Ukloni</string>
     <string name="tooltip_edit">Uredi</string>
-    <string name="tooltip_edit_label">Uredi oznaku</string>
     <string name="tooltip_go_live">Prikaži uživo</string>
     <string name="tooltip_presentation_remote">Otvori daljinsko upravljanje</string>
     <string name="tooltip_qa_remote">Dijeljenje i daljinski pristup</string>
     <string name="tooltip_stt_settings">Postavke prikaza titlova</string>
     <string name="tooltip_send_to_stage_monitor">Pošalji na scenski monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Sakrij objavu</string>
-    <string name="tooltip_add_label">Dodaj oznaku</string>
     <string name="tooltip_collapse_schedule">Sklopi raspored</string>
     <string name="tooltip_expand_schedule">Raširi raspored</string>
     <string name="schedule_drop_hint">Povucite datoteke ovamo da ih dodate u raspored</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC je pronađen, ali se nije mogao učitati. Pokušajte ponovno instalirati VLC s videolan.org (na Windowsu instalirajte i Microsoft Visual C++ Redistributable) pa ponovno pokrenite aplikaciju.</string>
     <string name="vlc_custom_path">Prilagođena putanja do VLC-a</string>
     <string name="vlc_browse">Pregledaj</string>
-    <string name="vlc_path_hint">Odaberite mapu u koju je instaliran VLC</string>
     <string name="vlc_directory_chooser_title">Odaberite mapu u koju je instaliran VLC</string>
     <string name="vlc_path_invalid">Mapa ne sadrži VLC biblioteke</string>
     <string name="media_audio_continues">Zvuk će se nastaviti reproducirati u pozadini kada prelazite između kartica ili prikazujete drugi sadržaj</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Ako se ovo ne prekine, dopustite snimanje zaslona\nu Postavke sustava &gt; Privatnost i sigurnost &gt; Snimanje zaslona</string>
     <string name="website_dialog_title">Dodaj web stranicu</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Naslov (nije obavezno)</string>
     <string name="website_title_hint">Unesite naziv za prikaz…</string>
     <string name="website_disclaimer">Ne odgovaramo za oglase ni sadržaj koji se može pojaviti na prikazanoj web stranici.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">Imate Bibliju u drugom formatu? Pretvarač pjesama i Biblije (Pomoć → Pretvarač pjesama i Biblije) može je pretvoriti.</string>
     <string name="setup_step3_title">Dodajte pjesmarice</string>
     <string name="setup_step3_subtitle">Usmjerite aplikaciju na mapu sa svojom zbirkom pjesama</string>
-    <string name="setup_step3_step1">1. Otvorite Postavke gumbom ⚙ na alatnoj traci</string>
-    <string name="setup_step3_step2">2. Idite na karticu Sustav</string>
     <string name="setup_step3_step3">3. Kliknite „Pregledaj…" pored Mape s pjesmama</string>
     <string name="setup_step3_step4">4. Odaberite mapu koja sadrži vaše datoteke pjesama</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Iznad trake</string>
     <string name="background_above_band_fill">Boja ispune</string>
     <string name="background_above_band_opacity">Prozirnost ispune</string>
-    <string name="quick_background_title">Brze pozadine</string>
     <string name="quick_background_reset">Natrag na normalno</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · uređuje se u postavkama</string>

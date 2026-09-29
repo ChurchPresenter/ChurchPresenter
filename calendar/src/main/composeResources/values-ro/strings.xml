@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Pornește de la</string>
     <string name="calendar_template_blank">Serviciu gol</string>
     <string name="calendar_template_blank_sub">Desfășurare goală</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d elemente</string>
     <string name="calendar_add_service_save">Adaugă serviciu</string>
     <string name="calendar_new_service_on">Serviciu nou · %1$s</string>
     <string name="calendar_kind_sunday_short">Duminică</string>
     <string name="calendar_kind_midweek_short">Mijlocul săptămânii</string>
     <string name="calendar_kind_special_short">Special</string>
-    <string name="calendar_close_sheet">Închide</string>
     <string name="calendar_settings">Setările calendarului</string>
     <string name="calendar_settings_sub">Se aplică fiecărui serviciu, nu doar celui de azi</string>
     <string name="calendar_settings_sections">Secțiuni</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Elementul nu mai este în această desfășurare</string>
     <string name="calendar_copy_include_cues">Marcaje de automatizare</string>
     <string name="calendar_copy_include_cues_sub">%1$d marcaje, decalajele se păstrează</string>
-    <string name="calendar_template_include_cues">Marcaje de automatizare</string>
     <string name="calendar_template_include_cues_sub">Decalaje relative</string>
     <string name="calendar_templates_empty_sub">Salvați unul din orice serviciu cu „Șablon”, în antetul desfășurării. Până atunci, un serviciu nou poate porni de la o copie a oricăruia anterior.</string>
     <string name="calendar_templates_note">Șabloanele sunt oferite la „Pornește de la” când adăugați un serviciu. Salvați unul nou din orice serviciu cu „Șablon”, în antetul desfășurării.</string>

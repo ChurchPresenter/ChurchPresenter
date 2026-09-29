@@ -70,13 +70,11 @@
     <string name="calendar_start_from">இதிலிருந்து தொடங்கு</string>
     <string name="calendar_template_blank">வெற்று ஆராதனை</string>
     <string name="calendar_template_blank_sub">வெற்று ஆராதனை வரிசை</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d உருப்படிகள்</string>
     <string name="calendar_add_service_save">ஆராதனை சேர்</string>
     <string name="calendar_new_service_on">புதிய ஆராதனை · %1$s</string>
     <string name="calendar_kind_sunday_short">ஞாயிறு</string>
     <string name="calendar_kind_midweek_short">வாரநடு</string>
     <string name="calendar_kind_special_short">சிறப்பு</string>
-    <string name="calendar_close_sheet">மூடு</string>
     <string name="calendar_settings">நாட்காட்டி அமைப்புகள்</string>
     <string name="calendar_settings_sub">இன்றைய ஆராதனைக்கு மட்டுமல்ல, ஒவ்வொன்றுக்கும் பொருந்தும்</string>
     <string name="calendar_settings_sections">பிரிவுகள்</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">இந்த உருப்படி இனி இந்த ஆராதனை வரிசையில் இல்லை</string>
     <string name="calendar_copy_include_cues">தன்னியக்கக் குறிகள்</string>
     <string name="calendar_copy_include_cues_sub">%1$d குறிகள், நேர இடைவெளிகள் அப்படியே</string>
-    <string name="calendar_template_include_cues">தன்னியக்கக் குறிகள்</string>
     <string name="calendar_template_include_cues_sub">தொடர்புடைய நேர இடைவெளிகள்</string>
     <string name="calendar_templates_empty_sub">ஆராதனை வரிசைத் தலைப்பில் உள்ள „வார்ப்புரு” மூலம் எந்த ஆராதனையிலிருந்தும் ஒன்றைச் சேமிக்கவும். அதுவரை புதிய ஆராதனை முந்தைய எதன் நகலிலிருந்தும் தொடங்கலாம்.</string>
     <string name="calendar_templates_note">ஆராதனையைச் சேர்க்கும்போது வார்ப்புருக்கள் „இதிலிருந்து தொடங்கு” கீழ் வழங்கப்படும். ஆராதனை வரிசைத் தலைப்பில் உள்ள „வார்ப்புரு” மூலம் புதியதைச் சேமிக்கவும்.</string>

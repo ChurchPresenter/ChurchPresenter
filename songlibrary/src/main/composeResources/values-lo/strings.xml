@@ -29,7 +29,6 @@
     <string name="empty_title">ບໍ່ມີເພງທີ່ກົງກັບຕົວກັ່ນຕອງ</string>
     <string name="reset_filters">ຕັ້ງຕົວກັ່ນຕອງຄືນ</string>
     <string name="library_empty">ຄັງນີ້ຍັງບໍ່ມີເພງ</string>
-    <string name="footer_songs">%1$s ເພງ</string>
     <string name="unsaved_changes">ຍັງບໍ່ໄດ້ບັນທຶກ %1$s</string>
     <string name="revert">ຍ້ອນກັບ</string>
     <string name="save_changes">ບັນທຶກການປ່ຽນແປງ</string>

@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">تكبير</string>
     <string name="tooltip_schedule_zoom_out">تصغير</string>
     <string name="tooltip_add_to_schedule">إضافة إلى البرنامج</string>
-    <string name="tooltip_clear_schedule">إفراغ البرنامج</string>
     <string name="tooltip_clear_display">مسح الشاشة</string>
     <string name="remote_action_clear_display">مسح الشاشة</string>
     <string name="schedule_add_files_title">إضافة ملفات إلى البرنامج</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">مظهر النظام</string>
     <string name="tooltip_remove">إزالة</string>
     <string name="tooltip_edit">تحرير</string>
-    <string name="tooltip_edit_label">تحرير الملصق</string>
     <string name="tooltip_go_live">عرض مباشر</string>
     <string name="tooltip_presentation_remote">فتح التحكم عن بُعد</string>
     <string name="tooltip_qa_remote">المشاركة والوصول عن بُعد</string>
     <string name="tooltip_stt_settings">إعدادات عرض النص الحي</string>
     <string name="tooltip_send_to_stage_monitor">إرسال إلى شاشة المنصة</string>
     <string name="tooltip_hide_from_stage_monitor">إخفاء الإعلان</string>
-    <string name="tooltip_add_label">إضافة ملصق</string>
     <string name="tooltip_collapse_schedule">طي البرنامج</string>
     <string name="tooltip_expand_schedule">توسيع البرنامج</string>
     <string name="schedule_drop_hint">اسحب الملفات هنا لإضافتها إلى البرنامج</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">تم العثور على VLC لكن تعذّر تحميله. حاول إعادة تثبيت VLC من videolan.org (وعلى Windows ثبّت أيضًا Microsoft Visual C++ Redistributable)، ثم أعد تشغيل التطبيق.</string>
     <string name="vlc_custom_path">مسار VLC المخصص</string>
     <string name="vlc_browse">استعراض</string>
-    <string name="vlc_path_hint">اختر مجلد تثبيت VLC</string>
     <string name="vlc_directory_chooser_title">اختر مجلد تثبيت VLC</string>
     <string name="vlc_path_invalid">المجلد لا يحتوي على مكتبات VLC</string>
     <string name="media_audio_continues">سيستمر تشغيل الصوت في الخلفية عند التبديل بين التبويبات أو عرض محتوى آخر</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">إذا استمر هذا، فامنح إذن تسجيل الشاشة\nمن إعدادات النظام &gt; الخصوصية والأمان &gt; تسجيل الشاشة</string>
     <string name="website_dialog_title">إضافة موقع ويب</string>
     <string name="website_url_label">الرابط</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">العنوان (اختياري)</string>
     <string name="website_title_hint">أدخل اسمًا للعرض…</string>
     <string name="website_disclaimer">لسنا مسؤولين عن أي إعلانات أو محتوى قد يظهر في الموقع المعروض.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">هل لديك كتاب مقدس بصيغة أخرى؟ يمكن لمحوّل الترانيم والكتاب المقدس (مساعدة → محوّل الترانيم والكتاب المقدس) تحويله.</string>
     <string name="setup_step3_title">أضف كتب الترانيم</string>
     <string name="setup_step3_subtitle">وجّه التطبيق إلى مجلد مكتبة الترانيم لديك</string>
-    <string name="setup_step3_step1">1. افتح الإعدادات بزر ⚙ في شريط الأدوات</string>
-    <string name="setup_step3_step2">2. انتقل إلى تبويب "النظام"</string>
     <string name="setup_step3_step3">3. اضغط "استعراض…" بجوار "مجلد تخزين الترانيم"</string>
     <string name="setup_step3_step4">4. اختر مجلدًا يحتوي على ملفات الترانيم</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">فوق الشريط</string>
     <string name="background_above_band_fill">لون التعبئة</string>
     <string name="background_above_band_opacity">عتامة التعبئة</string>
-    <string name="quick_background_title">خلفيات سريعة</string>
     <string name="quick_background_reset">العودة إلى الوضع الطبيعي</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · تُدار في الإعدادات</string>
