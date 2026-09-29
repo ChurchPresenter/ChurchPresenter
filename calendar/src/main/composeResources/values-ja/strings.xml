@@ -70,13 +70,11 @@
     <string name="calendar_start_from">元にするもの</string>
     <string name="calendar_template_blank">空の礼拝</string>
     <string name="calendar_template_blank_sub">空の進行表</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d 項目</string>
     <string name="calendar_add_service_save">礼拝を追加</string>
     <string name="calendar_new_service_on">新しい礼拝 · %1$s</string>
     <string name="calendar_kind_sunday_short">日曜</string>
     <string name="calendar_kind_midweek_short">週半ば</string>
     <string name="calendar_kind_special_short">特別</string>
-    <string name="calendar_close_sheet">閉じる</string>
     <string name="calendar_settings">カレンダー設定</string>
     <string name="calendar_settings_sub">今日の礼拝だけでなく、すべての礼拝に適用されます</string>
     <string name="calendar_settings_sections">区切り</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">この項目はもうこの進行表にありません</string>
     <string name="calendar_copy_include_cues">自動化キュー</string>
     <string name="calendar_copy_include_cues_sub">%1$d 件のキュー、時間差はそのまま</string>
-    <string name="calendar_template_include_cues">自動化キュー</string>
     <string name="calendar_template_include_cues_sub">相対的な時間差</string>
     <string name="calendar_templates_empty_sub">進行表の見出しにある「テンプレート」から、どの礼拝でも保存できます。それまでは、新しい礼拝は過去の礼拝の複製から始められます。</string>
     <string name="calendar_templates_note">テンプレートは礼拝を追加するときに「元にするもの」の下に表示されます。進行表の見出しの「テンプレート」から新しく保存できます。</string>

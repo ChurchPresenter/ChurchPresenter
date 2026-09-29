@@ -29,7 +29,6 @@
     <string name="empty_title">Aucun cantique ne correspond aux filtres</string>
     <string name="reset_filters">Réinitialiser les filtres</string>
     <string name="library_empty">Cette bibliothèque ne contient encore aucun cantique</string>
-    <string name="footer_songs">%1$s cantiques</string>
     <string name="unsaved_changes">%1$s non enregistrés</string>
     <string name="revert">Annuler les modifications</string>
     <string name="save_changes">Enregistrer les modifications</string>

@@ -133,8 +133,6 @@ import churchpresenter.composeapp.generated.resources.setup_step2_subtitle
 import churchpresenter.composeapp.generated.resources.setup_step2_tip
 import churchpresenter.composeapp.generated.resources.setup_step2_tip2
 import churchpresenter.composeapp.generated.resources.setup_step2_title
-import churchpresenter.composeapp.generated.resources.setup_step3_step1
-import churchpresenter.composeapp.generated.resources.setup_step3_step2
 import churchpresenter.composeapp.generated.resources.setup_step3_step3
 import churchpresenter.composeapp.generated.resources.setup_step3_step4
 import churchpresenter.composeapp.generated.resources.setup_step3_subtitle
@@ -828,10 +826,10 @@ private fun SongsStep(onOpenSettings: () -> Unit, onOpenConverter: () -> Unit) {
         subtitle = stringResource(Res.string.setup_step3_subtitle),
         instructionCount = SONG_INSTRUCTIONS,
     )
-    InstructionStep(number = 1, text = stringResource(Res.string.setup_step3_step1)) {
+    InstructionStep(number = 1, text = stringResource(Res.string.setup_step2_step1)) {
         OpenSettingsButton(onOpenSettings)
     }
-    InstructionStep(number = 2, text = stringResource(Res.string.setup_step3_step2)) {
+    InstructionStep(number = 2, text = stringResource(Res.string.setup_step2_step2)) {
         SettingsTabHint(highlightedTab = stringResource(Res.string.appearance))
     }
     InstructionStep(number = 3, text = stringResource(Res.string.setup_step3_step3))

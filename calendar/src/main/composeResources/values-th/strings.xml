@@ -70,13 +70,11 @@
     <string name="calendar_start_from">เริ่มจาก</string>
     <string name="calendar_template_blank">การนมัสการเปล่า</string>
     <string name="calendar_template_blank_sub">ลำดับรายการที่ว่างเปล่า</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d รายการ</string>
     <string name="calendar_add_service_save">เพิ่มการนมัสการ</string>
     <string name="calendar_new_service_on">การนมัสการใหม่ · %1$s</string>
     <string name="calendar_kind_sunday_short">อาทิตย์</string>
     <string name="calendar_kind_midweek_short">กลางสัปดาห์</string>
     <string name="calendar_kind_special_short">พิเศษ</string>
-    <string name="calendar_close_sheet">ปิด</string>
     <string name="calendar_settings">การตั้งค่าปฏิทิน</string>
     <string name="calendar_settings_sub">มีผลกับทุกการนมัสการ ไม่ใช่เฉพาะวันนี้</string>
     <string name="calendar_settings_sections">หัวข้อ</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">รายการนี้ไม่อยู่ในลำดับรายการนี้แล้ว</string>
     <string name="calendar_copy_include_cues">เครื่องหมายอัตโนมัติ</string>
     <string name="calendar_copy_include_cues_sub">%1$d เครื่องหมาย คงระยะเวลาเดิมไว้</string>
-    <string name="calendar_template_include_cues">เครื่องหมายอัตโนมัติ</string>
     <string name="calendar_template_include_cues_sub">ระยะเวลาสัมพัทธ์</string>
     <string name="calendar_templates_empty_sub">บันทึกได้จากการนมัสการใดก็ได้ด้วยปุ่ม „เทมเพลต” ที่หัวลำดับรายการ ระหว่างนี้การนมัสการใหม่เริ่มจากสำเนาของครั้งก่อน ๆ ได้</string>
     <string name="calendar_templates_note">เทมเพลตจะปรากฏใต้ „เริ่มจาก” เมื่อเพิ่มการนมัสการ บันทึกอันใหม่จากการนมัสการใดก็ได้ด้วยปุ่ม „เทมเพลต” ที่หัวลำดับรายการ</string>

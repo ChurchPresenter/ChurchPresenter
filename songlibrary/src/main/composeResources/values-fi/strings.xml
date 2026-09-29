@@ -29,7 +29,6 @@
     <string name="empty_title">Mikään laulu ei vastaa suodattimia</string>
     <string name="reset_filters">Tyhjennä suodattimet</string>
     <string name="library_empty">Tässä kirjastossa ei ole vielä lauluja</string>
-    <string name="footer_songs">%1$s laulua</string>
     <string name="unsaved_changes">%1$s tallentamatta</string>
     <string name="revert">Kumoa</string>
     <string name="save_changes">Tallenna muutokset</string>

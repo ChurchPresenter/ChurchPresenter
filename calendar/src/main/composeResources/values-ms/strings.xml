@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Mula daripada</string>
     <string name="calendar_template_blank">Kebaktian kosong</string>
     <string name="calendar_template_blank_sub">Aturcara kosong</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d item</string>
     <string name="calendar_add_service_save">Tambah kebaktian</string>
     <string name="calendar_new_service_on">Kebaktian baharu · %1$s</string>
     <string name="calendar_kind_sunday_short">Ahad</string>
     <string name="calendar_kind_midweek_short">Pertengahan minggu</string>
     <string name="calendar_kind_special_short">Khas</string>
-    <string name="calendar_close_sheet">Tutup</string>
     <string name="calendar_settings">Tetapan kalendar</string>
     <string name="calendar_settings_sub">Terpakai untuk setiap kebaktian, bukan hanya hari ini</string>
     <string name="calendar_settings_sections">Bahagian</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Item tiada lagi dalam aturcara ini</string>
     <string name="calendar_copy_include_cues">Penanda automasi</string>
     <string name="calendar_copy_include_cues_sub">%1$d penanda, ofset dikekalkan</string>
-    <string name="calendar_template_include_cues">Penanda automasi</string>
     <string name="calendar_template_include_cues_sub">Ofset relatif</string>
     <string name="calendar_templates_empty_sub">Simpan satu daripada mana-mana kebaktian dengan „Templat”, pada pengepala aturcara. Sehingga itu, kebaktian baharu boleh bermula daripada salinan mana-mana yang terdahulu.</string>
     <string name="calendar_templates_note">Templat ditawarkan di bawah „Mula daripada” apabila anda menambah kebaktian. Simpan yang baharu daripada mana-mana kebaktian dengan „Templat”, pada pengepala aturcara.</string>

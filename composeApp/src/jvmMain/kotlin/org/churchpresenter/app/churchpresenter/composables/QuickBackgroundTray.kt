@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import churchpresenter.composeapp.generated.resources.quick_backgrounds
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -40,7 +41,6 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.quick_background_hint
 import churchpresenter.composeapp.generated.resources.quick_background_reset
 import churchpresenter.composeapp.generated.resources.quick_background_slot_hint
-import churchpresenter.composeapp.generated.resources.quick_background_title
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundFill
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.label
@@ -136,7 +136,7 @@ private fun TrayHeader(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = stringResource(Res.string.quick_background_title).uppercase(),
+                text = stringResource(Res.string.quick_backgrounds).uppercase(),
                 fontSize = 9.5.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.9.sp,

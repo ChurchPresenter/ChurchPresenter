@@ -33,7 +33,6 @@
     <string name="empty_title">No songs match your filters</string>
     <string name="reset_filters">Reset filters</string>
     <string name="library_empty">This library has no songs yet</string>
-    <string name="footer_songs">%1$s songs</string>
     <string name="unsaved_changes">%1$s unsaved</string>
     <string name="revert">Revert</string>
     <string name="save_changes">Save Changes</string>

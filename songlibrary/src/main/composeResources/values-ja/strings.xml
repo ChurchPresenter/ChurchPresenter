@@ -29,7 +29,6 @@
     <string name="empty_title">条件に一致する賛美歌はありません</string>
     <string name="reset_filters">フィルターをリセット</string>
     <string name="library_empty">このライブラリにはまだ賛美歌がありません</string>
-    <string name="footer_songs">%1$s 曲</string>
     <string name="unsaved_changes">%1$s 件未保存</string>
     <string name="revert">元に戻す</string>
     <string name="save_changes">変更を保存</string>

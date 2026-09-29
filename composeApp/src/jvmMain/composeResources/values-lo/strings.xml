@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">ຂະຫຍາຍ</string>
     <string name="tooltip_schedule_zoom_out">ຫຍໍ້</string>
     <string name="tooltip_add_to_schedule">ເພີ່ມເຂົ້າລາຍການ</string>
-    <string name="tooltip_clear_schedule">ລ້າງລາຍການ</string>
     <string name="tooltip_clear_display">ລ້າງໜ້າຈໍ</string>
     <string name="remote_action_clear_display">ລ້າງໜ້າຈໍ</string>
     <string name="schedule_add_files_title">ເພີ່ມໄຟລ໌ໃສ່ລາຍການ</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">ຕາມລະບົບ</string>
     <string name="tooltip_remove">ລຶບ</string>
     <string name="tooltip_edit">ແກ້ໄຂ</string>
-    <string name="tooltip_edit_label">ແກ້ໄຂປ້າຍ</string>
     <string name="tooltip_go_live">ສາຍສົດ</string>
     <string name="tooltip_presentation_remote">ເປີດການຄວບຄຸມທາງໄກ</string>
     <string name="tooltip_qa_remote">ການແບ່ງປັນ ແລະ ການເຂົ້າເຖິງທາງໄກ</string>
     <string name="tooltip_stt_settings">ການຕັ້ງຄ່າການສະແດງ STT</string>
     <string name="tooltip_send_to_stage_monitor">ສົ່ງໄປຈໍເວທີ</string>
     <string name="tooltip_hide_from_stage_monitor">ເຊື່ອງປະກາດ</string>
-    <string name="tooltip_add_label">ເພີ່ມປ້າຍ</string>
     <string name="tooltip_collapse_schedule">ຫຍໍ້ລາຍການ</string>
     <string name="tooltip_expand_schedule">ຂະຫຍາຍລາຍການ</string>
     <string name="schedule_drop_hint">ລາກໄຟລ໌ມາທີ່ນີ້ເພື່ອເພີ່ມເຂົ້າລາຍການ</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">ພົບ VLC ແຕ່ໂຫຼດບໍ່ໄດ້. ລອງຕິດຕັ້ງ VLC ຄືນຈາກ videolan.org (ໃນ Windows ໃຫ້ຕິດຕັ້ງ Microsoft Visual C++ Redistributable ນຳ) ແລ້ວເປີດໂປຣແກຣມຄືນໃໝ່.</string>
     <string name="vlc_custom_path">ເສັ້ນທາງ VLC ກຳນົດເອງ</string>
     <string name="vlc_browse">ເລືອກ</string>
-    <string name="vlc_path_hint">ເລືອກໂຟນເດີທີ່ຕິດຕັ້ງ VLC</string>
     <string name="vlc_directory_chooser_title">ເລືອກໂຟນເດີທີ່ຕິດຕັ້ງ VLC</string>
     <string name="vlc_path_invalid">ໂຟນເດີນີ້ບໍ່ມີໄລບຣາຣີຂອງ VLC</string>
     <string name="media_audio_continues">ສຽງຈະຫຼິ້ນຕໍ່ຢູ່ເບື້ອງຫຼັງ ເມື່ອສະຫຼັບແຖບ ຫຼື ສະແດງເນື້ອຫາອື່ນ</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">ຖ້າຍັງເປັນແບບນີ້ ໃຫ້ອະນຸຍາດການບັນທຶກໜ້າຈໍ\nໃນ System Settings &gt; Privacy &amp; Security &gt; Screen Recording</string>
     <string name="website_dialog_title">ເພີ່ມເວັບໄຊ</string>
     <string name="website_url_label">ລິ້ງ</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">ຊື່ (ບໍ່ບັງຄັບ)</string>
     <string name="website_title_hint">ພິມຊື່ທີ່ຈະສະແດງ…</string>
     <string name="website_disclaimer">ພວກເຮົາບໍ່ຮັບຜິດຊອບຕໍ່ໂຄສະນາ ຫຼື ເນື້ອຫາໃດໆ ທີ່ອາດປາກົດຢູ່ໃນເວັບໄຊທີ່ສະແດງ.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">ມີພຣະຄຳພີໃນຮູບແບບອື່ນບໍ່? ຕົວແປງເພງ ແລະ ພຣະຄຳພີ (ຊ່ວຍເຫຼືອ → ຕົວແປງເພງ ແລະ ພຣະຄຳພີ) ສາມາດແປງໃຫ້ໄດ້.</string>
     <string name="setup_step3_title">ເພີ່ມປຶ້ມເພງ</string>
     <string name="setup_step3_subtitle">ຊີ້ໂປຣແກຣມໄປຫາໂຟນເດີຄັງເພງຂອງທ່ານ</string>
-    <string name="setup_step3_step1">1. ເປີດການຕັ້ງຄ່າດ້ວຍປຸ່ມ ⚙ ໃນແຖບເຄື່ອງມື</string>
-    <string name="setup_step3_step2">2. ໄປທີ່ແຖບ "ລະບົບ"</string>
     <string name="setup_step3_step3">3. ຄລິກ "ເລືອກ…" ຢູ່ຂ້າງ "ໂຟນເດີເກັບເພງ"</string>
     <string name="setup_step3_step4">4. ເລືອກໂຟນເດີທີ່ມີໄຟລ໌ເພງຂອງທ່ານ</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">ເໜືອແຖບ</string>
     <string name="background_above_band_fill">ສີເຕີມ</string>
     <string name="background_above_band_opacity">ຄວາມທຶບຂອງສີເຕີມ</string>
-    <string name="quick_background_title">ພື້ນຫຼັງດ່ວນ</string>
     <string name="quick_background_reset">ກັບສູ່ປົກກະຕິ</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · ຈັດການໃນການຕັ້ງຄ່າ</string>

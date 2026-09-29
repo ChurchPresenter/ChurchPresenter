@@ -393,7 +393,6 @@
     <string name="tooltip_move_up">Presunúť nahor</string>
     <string name="tooltip_move_down">Presunúť nadol</string>
     <string name="tooltip_add_to_schedule">Pridať do programu</string>
-    <string name="tooltip_clear_schedule">Vymazať program</string>
     <string name="tooltip_clear_display">Vymazať obrazovku</string>
     <string name="remote_action_clear_display">Vymazať obrazovku</string>
     <string name="schedule_add_files_title">Pridať súbory do programu</string>
@@ -404,13 +403,11 @@
     <string name="tooltip_theme_system">Systémová téma</string>
     <string name="tooltip_remove">Odstrániť</string>
     <string name="tooltip_edit">Upraviť</string>
-    <string name="tooltip_edit_label">Upraviť štítok</string>
     <string name="tooltip_go_live">Spustiť naživo</string>
     <string name="tooltip_presentation_remote">Otvoriť diaľkové ovládanie</string>
     <string name="tooltip_qa_remote">Zdieľanie a vzdialený prístup</string>
     <string name="tooltip_send_to_stage_monitor">Odoslať na monitor javiska</string>
     <string name="tooltip_hide_from_stage_monitor">Skryť oznámenie</string>
-    <string name="tooltip_add_label">Pridať štítok</string>
     <string name="tooltip_collapse_schedule">Zbaliť program</string>
     <string name="tooltip_expand_schedule">Rozbaliť program</string>
     <string name="schedule_drop_hint">Pretiahnite súbory sem a pridajte ich do programu</string>
@@ -589,7 +586,6 @@
     <string name="media_vlc_load_failed">VLC bolo nájdené, ale nepodarilo sa ho načítať. Skúste VLC preinštalovať z videolan.org (vo Windows nainštalujte aj Microsoft Visual C++ Redistributable) a potom aplikáciu reštartujte.</string>
     <string name="vlc_custom_path">Vlastná cesta VLC</string>
     <string name="vlc_browse">Prehľadávať</string>
-    <string name="vlc_path_hint">Vyberte inštalačný priečinok VLC</string>
     <string name="vlc_directory_chooser_title">Vyberte inštalačný priečinok VLC</string>
     <string name="vlc_path_invalid">Priečinok neobsahuje knižnice VLC</string>
     <string name="media_audio_continues">Zvuk bude pokračovať v pozadí pri prepínaní záložiek alebo zobrazovaní iného obsahu</string>
@@ -703,7 +699,6 @@
     <string name="web_zoom_out">Oddialiť</string>
     <string name="website_dialog_title">Pridať webstránku</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://priklad.sk</string>
     <string name="website_title_label">Názov (voliteľné)</string>
     <string name="website_title_hint">Zadajte zobrazovaný názov…</string>
     <string name="website_disclaimer">Nezodpovedáme za reklamy ani obsah, ktorý sa môže objaviť na zobrazovanej webstránke.</string>
@@ -1497,8 +1492,6 @@
     <string name="setup_step2_tip2">Máte Bibliu v inom formáte? Prevodník piesní a Biblie (Pomoc → Prevodník piesní a Biblie) ju dokáže previesť.</string>
     <string name="setup_step3_title">Pridať spevníky</string>
     <string name="setup_step3_subtitle">Ukážte aplikácii na priečinok vašej knižnice piesní</string>
-    <string name="setup_step3_step1">1. Otvorte Nastavenia pomocou tlačidla ⚙ na paneli nástrojov</string>
-    <string name="setup_step3_step2">2. Prejdite na kartu Systém</string>
     <string name="setup_step3_step3">3. Kliknite na "Prehľadávať…" vedľa Adresára úložiska piesní</string>
     <string name="setup_step3_step4">4. Vyberte priečinok obsahujúci vaše súbory piesní</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2058,7 +2051,6 @@
     <string name="background_above_band_caption">Nad pásom</string>
     <string name="background_above_band_fill">Farba výplne</string>
     <string name="background_above_band_opacity">Nepriehľadnosť výplne</string>
-    <string name="quick_background_title">Rýchle pozadia</string>
     <string name="quick_background_reset">Späť do normálu</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · správa v nastaveniach</string>

@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Начать с</string>
     <string name="calendar_template_blank">Пустое служение</string>
     <string name="calendar_template_blank_sub">Пустой порядок служения</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d элементов</string>
     <string name="calendar_add_service_save">Добавить служение</string>
     <string name="calendar_new_service_on">Новое служение · %1$s</string>
     <string name="calendar_kind_sunday_short">Воскресенье</string>
     <string name="calendar_kind_midweek_short">Среди недели</string>
     <string name="calendar_kind_special_short">Особое</string>
-    <string name="calendar_close_sheet">Закрыть</string>
     <string name="calendar_settings">Настройки календаря</string>
     <string name="calendar_settings_sub">Применяется ко всем служениям, не только к сегодняшнему</string>
     <string name="calendar_settings_sections">Разделы</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Элемента больше нет в этом порядке служения</string>
     <string name="calendar_copy_include_cues">Метки автоматизации</string>
     <string name="calendar_copy_include_cues_sub">%1$d меток, смещения сохранены</string>
-    <string name="calendar_template_include_cues">Метки автоматизации</string>
     <string name="calendar_template_include_cues_sub">Относительные смещения</string>
     <string name="calendar_templates_empty_sub">Сохраните шаблон из любого служения кнопкой «Шаблон» в заголовке порядка служения. А пока новое служение может начинаться с копии любого предыдущего.</string>
     <string name="calendar_templates_note">Шаблоны предлагаются в разделе «Начать с» при добавлении служения. Новый шаблон сохраняется из любого служения кнопкой «Шаблон» в заголовке порядка служения.</string>

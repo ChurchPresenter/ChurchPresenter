@@ -29,7 +29,6 @@
     <string name="empty_title">没有符合筛选条件的歌曲</string>
     <string name="reset_filters">重置筛选</string>
     <string name="library_empty">该歌曲库中还没有歌曲</string>
-    <string name="footer_songs">%1$s 首歌曲</string>
     <string name="unsaved_changes">%1$s 项未保存</string>
     <string name="revert">还原</string>
     <string name="save_changes">保存更改</string>

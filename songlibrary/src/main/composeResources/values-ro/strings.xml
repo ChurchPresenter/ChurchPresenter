@@ -29,7 +29,6 @@
     <string name="empty_title">Nicio cântare nu corespunde filtrelor</string>
     <string name="reset_filters">Resetează filtrele</string>
     <string name="library_empty">Această bibliotecă nu are încă nicio cântare</string>
-    <string name="footer_songs">%1$s cântări</string>
     <string name="unsaved_changes">%1$s nesalvate</string>
     <string name="revert">Revino</string>
     <string name="save_changes">Salvează modificările</string>

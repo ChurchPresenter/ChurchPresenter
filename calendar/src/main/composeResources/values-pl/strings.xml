@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Zacznij od</string>
     <string name="calendar_template_blank">Puste nabożeństwo</string>
     <string name="calendar_template_blank_sub">Pusty przebieg nabożeństwa</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d pozycji</string>
     <string name="calendar_add_service_save">Dodaj nabożeństwo</string>
     <string name="calendar_new_service_on">Nowe nabożeństwo · %1$s</string>
     <string name="calendar_kind_sunday_short">Niedziela</string>
     <string name="calendar_kind_midweek_short">W tygodniu</string>
     <string name="calendar_kind_special_short">Specjalne</string>
-    <string name="calendar_close_sheet">Zamknij</string>
     <string name="calendar_settings">Ustawienia kalendarza</string>
     <string name="calendar_settings_sub">Dotyczy każdego nabożeństwa, nie tylko dzisiejszego</string>
     <string name="calendar_settings_sections">Sekcje</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Pozycji nie ma już w tym przebiegu nabożeństwa</string>
     <string name="calendar_copy_include_cues">Znaczniki automatyzacji</string>
     <string name="calendar_copy_include_cues_sub">%1$d znaczników, przesunięcia zachowane</string>
-    <string name="calendar_template_include_cues">Znaczniki automatyzacji</string>
     <string name="calendar_template_include_cues_sub">Przesunięcia względne</string>
     <string name="calendar_templates_empty_sub">Zapisz szablon z dowolnego nabożeństwa przyciskiem „Szablon” w nagłówku przebiegu. Do tego czasu nowe nabożeństwo może zacząć się od kopii dowolnego wcześniejszego.</string>
     <string name="calendar_templates_note">Szablony są proponowane w sekcji „Zacznij od” przy dodawaniu nabożeństwa. Nowy zapiszesz z dowolnego nabożeństwa przyciskiem „Szablon” w nagłówku przebiegu.</string>

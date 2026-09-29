@@ -70,13 +70,11 @@
     <string name="calendar_start_from">从此开始</string>
     <string name="calendar_template_blank">空白聚会</string>
     <string name="calendar_template_blank_sub">空的聚会流程</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d 个项目</string>
     <string name="calendar_add_service_save">添加聚会</string>
     <string name="calendar_new_service_on">新建聚会 · %1$s</string>
     <string name="calendar_kind_sunday_short">主日</string>
     <string name="calendar_kind_midweek_short">周间</string>
     <string name="calendar_kind_special_short">特别</string>
-    <string name="calendar_close_sheet">关闭</string>
     <string name="calendar_settings">日历设置</string>
     <string name="calendar_settings_sub">适用于每一场聚会，不只是今天的</string>
     <string name="calendar_settings_sections">分段</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">该项目已不在此聚会流程中</string>
     <string name="calendar_copy_include_cues">自动化标记</string>
     <string name="calendar_copy_include_cues_sub">%1$d 个标记，保留时间偏移</string>
-    <string name="calendar_template_include_cues">自动化标记</string>
     <string name="calendar_template_include_cues_sub">相对偏移</string>
     <string name="calendar_templates_empty_sub">在聚会流程标题栏的「模板」按钮，可从任意一场聚会保存一个。在此之前，新聚会可以从任意一场以往聚会的副本开始。</string>
     <string name="calendar_templates_note">添加聚会时，模板会出现在「从此开始」下。用聚会流程标题栏的「模板」从任意一场聚会保存新的模板。</string>

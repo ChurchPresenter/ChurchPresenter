@@ -31,7 +31,6 @@
     <string name="empty_title">உங்கள் வடிகட்டிகளுக்குப் பொருந்தும் பாடல்கள் இல்லை</string>
     <string name="reset_filters">வடிகட்டிகளை மீட்டமை</string>
     <string name="library_empty">இந்த நூலகத்தில் இன்னும் பாடல்கள் இல்லை</string>
-    <string name="footer_songs">%1$s பாடல்கள்</string>
     <string name="unsaved_changes">%1$s சேமிக்கப்படவில்லை</string>
     <string name="revert">மீளமை</string>
     <string name="save_changes">மாற்றங்களைச் சேமி</string>

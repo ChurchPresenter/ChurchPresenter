@@ -29,7 +29,6 @@
     <string name="empty_title">لا توجد ترانيم تطابق عوامل التصفية</string>
     <string name="reset_filters">إعادة ضبط عوامل التصفية</string>
     <string name="library_empty">لا توجد ترانيم في هذه المكتبة بعد</string>
-    <string name="footer_songs">%1$s ترنيمة</string>
     <string name="unsaved_changes">%1$s غير محفوظة</string>
     <string name="revert">تراجع</string>
     <string name="save_changes">حفظ التغييرات</string>

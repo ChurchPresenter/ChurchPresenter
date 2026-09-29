@@ -393,7 +393,6 @@
     <string name="tooltip_move_up">Déplacer vers le haut</string>
     <string name="tooltip_move_down">Déplacer vers le bas</string>
     <string name="tooltip_add_to_schedule">Ajouter au programme</string>
-    <string name="tooltip_clear_schedule">Effacer le programme</string>
     <string name="tooltip_clear_display">Effacer l'affichage</string>
     <string name="remote_action_clear_display">Effacer l'affichage</string>
     <string name="schedule_add_files_title">Ajouter des fichiers au programme</string>
@@ -404,13 +403,11 @@
     <string name="tooltip_theme_system">Thème système</string>
     <string name="tooltip_remove">Supprimer</string>
     <string name="tooltip_edit">Modifier</string>
-    <string name="tooltip_edit_label">Modifier l'étiquette</string>
     <string name="tooltip_go_live">Diffuser en direct</string>
     <string name="tooltip_presentation_remote">Ouvrir la télécommande</string>
     <string name="tooltip_qa_remote">Partage et Accès à Distance</string>
     <string name="tooltip_send_to_stage_monitor">Envoyer au moniteur de scène</string>
     <string name="tooltip_hide_from_stage_monitor">Masquer l\'annonce</string>
-    <string name="tooltip_add_label">Ajouter une étiquette</string>
     <string name="tooltip_collapse_schedule">Réduire le programme</string>
     <string name="tooltip_expand_schedule">Développer le programme</string>
     <string name="schedule_drop_hint">Faites glisser des fichiers ici pour les ajouter au programme</string>
@@ -589,7 +586,6 @@
     <string name="media_vlc_load_failed">VLC a été trouvé mais n'a pas pu être chargé. Essayez de réinstaller VLC depuis videolan.org (sous Windows, installez aussi le Microsoft Visual C++ Redistributable), puis redémarrez l'application.</string>
     <string name="vlc_custom_path">Chemin VLC personnalisé</string>
     <string name="vlc_browse">Parcourir</string>
-    <string name="vlc_path_hint">Sélectionner le répertoire d'installation de VLC</string>
     <string name="vlc_directory_chooser_title">Sélectionner le répertoire d'installation de VLC</string>
     <string name="vlc_path_invalid">Le répertoire ne contient pas les bibliothèques VLC</string>
     <string name="media_audio_continues">L'audio continuera à jouer en arrière-plan lors du changement d'onglet ou de l'affichage d'autre contenu</string>
@@ -703,7 +699,6 @@
     <string name="web_zoom_out">Zoom arrière</string>
     <string name="website_dialog_title">Ajouter un site web</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Titre (facultatif)</string>
     <string name="website_title_hint">Saisir un nom d'affichage…</string>
     <string name="website_disclaimer">Nous ne sommes pas responsables des publicités ou du contenu qui pourrait apparaître sur le site web affiché.</string>
@@ -1497,8 +1492,6 @@
     <string name="setup_step2_tip2">Vous avez une Bible dans un autre format ? Le Convertisseur de cantiques et de Bibles (Aide → Convertisseur de cantiques et de Bibles) peut la convertir.</string>
     <string name="setup_step3_title">Ajouter des recueils de cantiques</string>
     <string name="setup_step3_subtitle">Indiquez à l'application le dossier de votre bibliothèque de cantiques</string>
-    <string name="setup_step3_step1">1. Ouvrez les Paramètres en utilisant le bouton ⚙ dans la barre d'outils</string>
-    <string name="setup_step3_step2">2. Accédez à l'onglet Système</string>
     <string name="setup_step3_step3">3. Cliquez sur "Parcourir…" à côté de Répertoire de stockage des cantiques</string>
     <string name="setup_step3_step4">4. Sélectionnez un dossier contenant vos fichiers de cantiques</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2056,7 +2049,6 @@
     <string name="background_above_band_caption">Au-dessus du bandeau</string>
     <string name="background_above_band_fill">Couleur de remplissage</string>
     <string name="background_above_band_opacity">Opacité du remplissage</string>
-    <string name="quick_background_title">Arrière-plans rapides</string>
     <string name="quick_background_reset">Revenir à la normale</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · à gérer dans les paramètres</string>

@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Partir de</string>
     <string name="calendar_template_blank">Culte vierge</string>
     <string name="calendar_template_blank_sub">Déroulé vide</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d éléments</string>
     <string name="calendar_add_service_save">Ajouter le culte</string>
     <string name="calendar_new_service_on">Nouveau culte · %1$s</string>
     <string name="calendar_kind_sunday_short">Dimanche</string>
     <string name="calendar_kind_midweek_short">En semaine</string>
     <string name="calendar_kind_special_short">Spécial</string>
-    <string name="calendar_close_sheet">Fermer</string>
     <string name="calendar_settings">Paramètres du calendrier</string>
     <string name="calendar_settings_sub">S'applique à tous les cultes, pas seulement à celui d'aujourd'hui</string>
     <string name="calendar_settings_sections">Sections</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">L'élément n'est plus dans ce déroulé</string>
     <string name="calendar_copy_include_cues">Repères d'automatisation</string>
     <string name="calendar_copy_include_cues_sub">%1$d repères, décalages conservés</string>
-    <string name="calendar_template_include_cues">Repères d'automatisation</string>
     <string name="calendar_template_include_cues_sub">Décalages relatifs</string>
     <string name="calendar_templates_empty_sub">Enregistrez-en un depuis n'importe quel culte avec « Modèle », dans l'en-tête du déroulé. En attendant, un nouveau culte peut partir d'une copie de n'importe quel culte antérieur.</string>
     <string name="calendar_templates_note">Les modèles sont proposés sous « Partir de » quand vous ajoutez un culte. Enregistrez-en un nouveau depuis n'importe quel culte avec « Modèle », dans l'en-tête du déroulé.</string>

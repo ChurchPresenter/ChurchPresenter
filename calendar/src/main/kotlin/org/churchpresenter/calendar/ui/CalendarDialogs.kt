@@ -3,6 +3,7 @@ package org.churchpresenter.calendar.ui
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import org.churchpresenter.calendar.generated.resources.calendar_copy_sub
 import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -18,7 +19,6 @@ import org.churchpresenter.calendar.generated.resources.calendar_load_replace
 import org.churchpresenter.calendar.generated.resources.calendar_load_title
 import org.churchpresenter.calendar.generated.resources.calendar_template_blank
 import org.churchpresenter.calendar.generated.resources.calendar_template_blank_sub
-import org.churchpresenter.calendar.generated.resources.calendar_template_copy_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_saved_sub
 import org.churchpresenter.calendar.generated.resources.calendar_template_schedule
 import org.churchpresenter.calendar.generated.resources.calendar_template_schedule_sub
@@ -287,7 +287,7 @@ private fun templateLabel(option: ServiceTemplate): Pair<String, String> = when 
     is ServiceTemplate.CopyOf -> {
         val date = parseStoredDate(option.service.date)?.let(::shortDate).orEmpty()
         option.service.name to stringResource(
-            Res.string.calendar_template_copy_sub,
+            Res.string.calendar_copy_sub,
             date,
             option.service.contentItems().size,
         )

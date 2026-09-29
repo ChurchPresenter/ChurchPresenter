@@ -29,7 +29,6 @@
     <string name="empty_title">Filtrům neodpovídá žádná píseň</string>
     <string name="reset_filters">Zrušit filtry</string>
     <string name="library_empty">Tato knihovna zatím nemá žádné písně</string>
-    <string name="footer_songs">%1$s písní</string>
     <string name="unsaved_changes">%1$s neuloženo</string>
     <string name="revert">Vrátit zpět</string>
     <string name="save_changes">Uložit změny</string>

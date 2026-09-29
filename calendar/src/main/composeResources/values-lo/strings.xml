@@ -70,13 +70,11 @@
     <string name="calendar_start_from">ເລີ່ມຈາກ</string>
     <string name="calendar_template_blank">ການນະມັດສະການຫວ່າງ</string>
     <string name="calendar_template_blank_sub">ລຳດັບລາຍການຫວ່າງເປົ່າ</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d ລາຍການ</string>
     <string name="calendar_add_service_save">ເພີ່ມການນະມັດສະການ</string>
     <string name="calendar_new_service_on">ການນະມັດສະການໃໝ່ · %1$s</string>
     <string name="calendar_kind_sunday_short">ວັນອາທິດ</string>
     <string name="calendar_kind_midweek_short">ກາງອາທິດ</string>
     <string name="calendar_kind_special_short">ພິເສດ</string>
-    <string name="calendar_close_sheet">ປິດ</string>
     <string name="calendar_settings">ການຕັ້ງຄ່າປະຕິທິນ</string>
     <string name="calendar_settings_sub">ໃຊ້ກັບທຸກການນະມັດສະການ ບໍ່ແມ່ນສະເພາະມື້ນີ້</string>
     <string name="calendar_settings_sections">ຫົວຂໍ້</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">ລາຍການນີ້ບໍ່ມີຢູ່ໃນລຳດັບລາຍການນີ້ແລ້ວ</string>
     <string name="calendar_copy_include_cues">ເຄື່ອງໝາຍອັດຕະໂນມັດ</string>
     <string name="calendar_copy_include_cues_sub">%1$d ເຄື່ອງໝາຍ ຮັກສາໄລຍະເວລາເດີມ</string>
-    <string name="calendar_template_include_cues">ເຄື່ອງໝາຍອັດຕະໂນມັດ</string>
     <string name="calendar_template_include_cues_sub">ໄລຍະເວລາທຽບຖານ</string>
     <string name="calendar_templates_empty_sub">ບັນທຶກໄດ້ຈາກການນະມັດສະການໃດກໍໄດ້ດ້ວຍປຸ່ມ „ແມ່ແບບ” ຢູ່ຫົວລຳດັບລາຍການ ໃນລະຫວ່າງນີ້ການນະມັດສະການໃໝ່ສາມາດເລີ່ມຈາກສຳເນົາຂອງຄັ້ງກ່ອນໄດ້</string>
     <string name="calendar_templates_note">ແມ່ແບບຈະປາກົດຢູ່ໃຕ້ „ເລີ່ມຈາກ” ເມື່ອເພີ່ມການນະມັດສະການ ບັນທຶກອັນໃໝ່ຈາກການນະມັດສະການໃດກໍໄດ້ດ້ວຍປຸ່ມ „ແມ່ແບບ” ຢູ່ຫົວລຳດັບລາຍການ</string>

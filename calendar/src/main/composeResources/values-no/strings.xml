@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Ta utgangspunkt i</string>
     <string name="calendar_template_blank">Tom gudstjeneste</string>
     <string name="calendar_template_blank_sub">Tom kjøreplan</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d poster</string>
     <string name="calendar_add_service_save">Legg til gudstjeneste</string>
     <string name="calendar_new_service_on">Ny gudstjeneste · %1$s</string>
     <string name="calendar_kind_sunday_short">Søndag</string>
     <string name="calendar_kind_midweek_short">Midt i uken</string>
     <string name="calendar_kind_special_short">Spesiell</string>
-    <string name="calendar_close_sheet">Lukk</string>
     <string name="calendar_settings">Kalenderinnstillinger</string>
     <string name="calendar_settings_sub">Gjelder alle gudstjenester, ikke bare dagens</string>
     <string name="calendar_settings_sections">Seksjoner</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Posten er ikke lenger i denne kjøreplanen</string>
     <string name="calendar_copy_include_cues">Automatikkmerker</string>
     <string name="calendar_copy_include_cues_sub">%1$d merker, tidsforskyvninger beholdes</string>
-    <string name="calendar_template_include_cues">Automatikkmerker</string>
     <string name="calendar_template_include_cues_sub">Relative forskyvninger</string>
     <string name="calendar_templates_empty_sub">Lagre en fra hvilken som helst gudstjeneste med «Mal», i kjøreplanens topptekst. Inntil da kan en ny gudstjeneste ta utgangspunkt i en kopi av en tidligere.</string>
     <string name="calendar_templates_note">Maler tilbys under «Ta utgangspunkt i» når du legger til en gudstjeneste. Lagre en ny fra hvilken som helst gudstjeneste med «Mal», i kjøreplanens topptekst.</string>

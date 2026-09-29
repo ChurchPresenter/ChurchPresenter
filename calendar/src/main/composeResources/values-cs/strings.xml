@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Začít z</string>
     <string name="calendar_template_blank">Prázdná bohoslužba</string>
     <string name="calendar_template_blank_sub">Prázdný průběh bohoslužby</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d položek</string>
     <string name="calendar_add_service_save">Přidat bohoslužbu</string>
     <string name="calendar_new_service_on">Nová bohoslužba · %1$s</string>
     <string name="calendar_kind_sunday_short">Neděle</string>
     <string name="calendar_kind_midweek_short">Všední den</string>
     <string name="calendar_kind_special_short">Zvláštní</string>
-    <string name="calendar_close_sheet">Zavřít</string>
     <string name="calendar_settings">Nastavení kalendáře</string>
     <string name="calendar_settings_sub">Platí pro každou bohoslužbu, nejen pro dnešní</string>
     <string name="calendar_settings_sections">Sekce</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Položka už v tomto průběhu bohoslužby není</string>
     <string name="calendar_copy_include_cues">Značky automatizace</string>
     <string name="calendar_copy_include_cues_sub">%1$d značek, posuny zachovány</string>
-    <string name="calendar_template_include_cues">Značky automatizace</string>
     <string name="calendar_template_include_cues_sub">Relativní posuny</string>
     <string name="calendar_templates_empty_sub">Uložte šablonu z libovolné bohoslužby tlačítkem „Šablona“ v záhlaví průběhu. Do té doby může nová bohoslužba začít kopií kterékoli dřívější.</string>
     <string name="calendar_templates_note">Šablony se nabízejí v sekci „Začít z“ při přidávání bohoslužby. Novou uložíte z libovolné bohoslužby tlačítkem „Šablona“ v záhlaví průběhu.</string>

@@ -29,7 +29,6 @@
     <string name="empty_title">هیچ سرودی با فیلترهای شما مطابقت ندارد</string>
     <string name="reset_filters">بازنشانی فیلترها</string>
     <string name="library_empty">این کتابخانه هنوز سرودی ندارد</string>
-    <string name="footer_songs">%1$s سرود</string>
     <string name="unsaved_changes">%1$s ذخیره‌نشده</string>
     <string name="revert">برگرداندن</string>
     <string name="save_changes">ذخیرهٔ تغییرات</string>
