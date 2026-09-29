@@ -29,7 +29,8 @@ operator has to install.
 - **Windows and macOS** come from the publisher's binary release, unmodified.
 - **Linux** has no published binary, so `.github/workflows/omt-linux.yml` builds one from pinned
   commits and attaches it to a release of this repository; `linux-x86_64` in the properties file
-  pins that. Until it is pinned, a Linux build ships no OMT and the card says so.
+  pins that — release `omt-libs-1.0.0.19`, built and loopback-tested by the workflow on
+  2026-09-29. A version bump means running the workflow again with `publish` ticked and re-pinning.
 - **`libomt` is a .NET NativeAOT library** that resolves `libvmx` by name at run time — there is no
   link-time dependency for the loader to follow. `JnaOmtLibrary.load` therefore loads `libvmx` from
   beside `libomt` first, by full path, so it is already in the process when `libomt` asks. On macOS
