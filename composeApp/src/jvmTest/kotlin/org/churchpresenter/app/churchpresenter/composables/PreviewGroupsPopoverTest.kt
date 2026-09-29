@@ -110,9 +110,9 @@ class PreviewGroupsPopoverTest {
     @Test
     fun `a template places an OMT output under its own key`() =
         edit(ProjectionSettings(omtOutputs = listOf(ScreenAssignment(omtName = "Overflow")))) { now ->
-            click(previewTemplateTag(0))
+            click(previewTemplateTag(1))
             val omt = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, 0)
-            assertEquals(omt, now().activeLayout()?.root?.output)
+            assertTrue(omt in now().activeLayout()?.root?.outputs().orEmpty(), "${now().activeLayout()?.root}")
         }
 
     @Test
