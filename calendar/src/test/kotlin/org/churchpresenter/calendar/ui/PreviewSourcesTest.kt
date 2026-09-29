@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.runComposeUiTest
@@ -35,7 +36,7 @@ class PreviewSourcesTest {
     private fun preview(
         item: ScheduleItem,
         sources: PreviewSources,
-        body: androidx.compose.ui.test.ComposeUiTest.() -> Unit,
+        body: ComposeUiTest.() -> Unit,
     ) {
         runComposeUiTest {
             setContent {
@@ -48,7 +49,7 @@ class PreviewSourcesTest {
         }
     }
 
-    private fun shows(test: androidx.compose.ui.test.ComposeUiTest, text: String) =
+    private fun shows(test: ComposeUiTest, text: String) =
         test.onAllNodesWithText(text, substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
 
     @Test

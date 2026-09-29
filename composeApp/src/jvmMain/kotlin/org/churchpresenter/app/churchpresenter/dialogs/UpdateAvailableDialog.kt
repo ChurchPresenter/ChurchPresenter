@@ -549,7 +549,7 @@ internal fun UpdateAvailableContent(
                         downloadState is DownloadState.Done -> {
                             RaisedButton(
                                 shape = AppShape(6.dp),
-                                onClick = { onInstall((downloadState as DownloadState.Done).file) }
+                                onClick = { onInstall(downloadState.file) }
                             ) {
                                 Text(stringResource(Res.string.update_dialog_install_now))
                             }

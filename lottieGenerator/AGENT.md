@@ -105,12 +105,10 @@ Both CI steps are gated on this directory or the shared build files changing.
 
 ## Gates
 
-- **Coverage**: the root build's default six counters at 85% — only **branch (0.83) and
-  complexity (0.81)** are named in `extra["coverageFloors"]`, added 2026-09 when wiring the
-  optional Detail line into the 12 compiled styles turned each one's `if(isName)` into a 3-way
-  `when(kind)` with no automated test exercising the new branches (compiled/Path A styles are
-  verified by live preview only — see `ADDING_ANIMATIONS.md`). A ratchet, not a target: raise it
-  as generator tests are added, never lower it to make a change fit. `extra["coverageExcludes"]`
+- **Coverage**: the root build's default, 85% on all six counters — no `extra["coverageFloors"]`.
+  The compiled (Path A) styles are covered by `CompiledStyleMatrixTest`, which renders every one
+  across alignment, Detail, logo, background and hidden Name; a new `AnimationStyle` entry is
+  picked up by it automatically. `extra["coverageExcludes"]`
   drops `**/ui/**` and `**/MainKt*`, which need a display. The `spec/` and `lottie/` packages are
   where the coverage lives, and the `SpecPort*Test` suites exist so a spec style stays
   byte-comparable with the code style it replaced.

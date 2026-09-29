@@ -11,17 +11,6 @@ plugins {
 
 group = "org.churchpresenter"
 
-// Only branch and complexity fall short of the root build's 85% default — wiring the optional
-// Detail line into the 12 compiled styles turned each one's `if(isName)` into a 3-way
-// `when(kind)`, and this module has never had dedicated tests for the compiled (Path A) style
-// generators (see ADDING_ANIMATIONS.md: verified by live preview, not automated tests). Both are
-// the measured value rounded down: a ratchet, raised as tests are added for the generator
-// classes, never lowered to make a change fit, and deleted outright once a counter clears 85%.
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.83",
-    "COMPLEXITY" to "0.81",
-)
-
 extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingletons*")
 
 kotlin {

@@ -1666,6 +1666,10 @@
     <string name="remote_client_blocked_badge">⛔ blocked</string>
     <string name="remote_queue_waiting_one">1 more request waiting in queue</string>
     <string name="remote_queue_waiting_many">%1$d more requests waiting in queue</string>
+    <string name="remote_label_song">Song %1$s</string>
+    <string name="remote_label_section">Section %1$d</string>
+    <string name="remote_label_image">Image %1$d</string>
+    <string name="remote_label_kilobytes">%1$d KB</string>
     <string name="remote_activity_added_to_schedule">Added to Schedule</string>
     <string name="remote_activity_removed_from_schedule">Removed from Schedule</string>
     <string name="remote_activity_projected">Projected (Go Live)</string>

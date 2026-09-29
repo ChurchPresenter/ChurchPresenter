@@ -181,8 +181,8 @@ private fun Route.songSelectRoutes(
                     scope.launch { server.onSelectSongSection.emit(SelectSongSectionRequest(number, sectionIndex)) }
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "present",
-                        title = "Song $number",
-                        detail = "Section $sectionIndex",
+                        title = RemoteLabel.Song(number),
+                        detail = RemoteLabel.Section(sectionIndex),
                         clientId = clientId
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)

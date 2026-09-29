@@ -63,7 +63,9 @@ bash cleanup_check.sh          # wildcard, Material 2, prints, FQN, unused-code 
 ./gradlew :composeApp:detekt   # CI's first gate — run it last
 ```
 
-`cleanup_check.sh` scans `composeApp/src/` only. For a module, run its own `detekt` task.
+`cleanup_check.sh` checks `composeApp/src/` in full and every module of the build for wildcard
+imports, Material 2, prints and fully qualified names (listing only the modules with a finding),
+then compiles everything for the unused-code counts. Run each touched module's `detekt` as well.
 
 ### Detailed checks
 
@@ -103,9 +105,9 @@ comm -23 \
 | `System.err.println` in `composeApp` | 84 | error diagnostics (VLC, JCEF, cameras, NDI/OMT, server); see the decision log |
 | Fully qualified `androidx.compose.*` in code | 0 | whole repo, excluding imports, `@OptIn` and KDoc ✅ |
 | Fully qualified names where the import already exists | 0 | ✅ |
-| `!!` in `composeApp` | 3 | `CrosswordData.kt` — pending |
+| `!!` in `composeApp` | 0 | ✅ |
 | Unused string resources | 0 | ✅ |
-| Hardcoded UI strings | known exceptions only | `Text("$w×$h")` resolutions; remote-activity toast titles built in `server/*Routes.kt` (`"Song $number"`, `"Slide ${n}"`) — pending, they are composed off the UI thread |
+| Hardcoded UI strings | known exceptions only | `Text("$w×$h")` resolutions. Remote-activity toasts carry a `RemoteLabel` that the desktop words in the operator's language ✅ |
 | Emoji used as icons | pending | the icon maps in `ScheduleItemDisplay`, `ThemeSwitcher`, `RemoteActivityToast`, `ThemeSegmentedButton` and `BibleTab`'s 📖 — need icon assets |
 
 ### Decision log
@@ -120,6 +122,9 @@ comm -23 \
   trace of a native library failing on an operator's machine.
 - `println` in the CLI tools (`presentation-engine` `DumpKeynote`/`DumpTiming`/`MakeSampleDeck`,
   `bible-engine` `tools/`, `lottieGenerator` `DumpStyleReview`) — printing is their purpose.
+- `println` in `bible-engine`'s standalone launch (`Main.kt`, `AppConfig.kt`) and behind its
+  `verboseLog` flag — the engine's own console output; the app runs it in-process with the flag
+  off. `cleanup_check.sh` skips exactly these and the `tools/` packages.
 - Hardcoded `"%"` suffixes on dynamic values — the percent sign is identical in every supported
   locale.
 

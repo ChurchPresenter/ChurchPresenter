@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.dialogs.text
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.ApplicationScope
@@ -1752,9 +1753,12 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     remoteActivityNotifications.add(
                                         RemoteActivityNotification(
                                             type = type,
-                                            title =
-                                                if (type == RemoteEventType.CLEAR) clearDisplayTitle else action.title,
-                                            detail = action.detail,
+                                            title = if (type == RemoteEventType.CLEAR) {
+                                                clearDisplayTitle
+                                            } else {
+                                                action.title.text()
+                                            },
+                                            detail = action.detail.text(),
                                             clientId = action.clientId,
                                             clientLabel = remoteClientManager.getLabel(action.clientId)
                                         )

@@ -388,10 +388,10 @@ private fun Route.pictureSelectAndUploadRoutes(
                         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onSelectPicture.emit(req.copy(index = resolvedIndex)) }
                         val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
-                        val imageLabel = req.fileName ?: "Image $resolvedIndex"
+                        val imageLabel = req.fileName?.let(RemoteLabel::Text) ?: RemoteLabel.Image(resolvedIndex)
                         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                             actionType = "present",
-                            title = folderName,
+                            title = RemoteLabel.Text(folderName),
                             detail = imageLabel,
                             clientId = clientId
                         )) }
@@ -480,8 +480,8 @@ private fun Route.pictureSelectAndUploadRoutes(
                         val picUploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                             actionType = "upload",
-                            title = file.name,
-                            detail = catalog.folderName,
+                            title = RemoteLabel.Text(file.name),
+                            detail = RemoteLabel.Text(catalog.folderName),
                             clientId = picUploadClientId
                         )) }
                         call.respondText(

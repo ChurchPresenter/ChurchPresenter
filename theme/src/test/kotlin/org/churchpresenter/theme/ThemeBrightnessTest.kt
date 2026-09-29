@@ -1,5 +1,6 @@
 package org.churchpresenter.theme
 
+import androidx.compose.ui.graphics.Color
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -16,7 +17,7 @@ import kotlin.test.assertTrue
 class ThemeBrightnessTest {
 
     /** Relative luminance, WCAG 2.1 — the same maths the ramp test uses. */
-    private fun luminance(argb: androidx.compose.ui.graphics.Color): Double {
+    private fun luminance(argb: Color): Double {
         fun channel(v: Float): Double =
             if (v <= 0.03928f) v / 12.92 else Math.pow((v + 0.055) / 1.055, 2.4)
         return 0.2126 * channel(argb.red) + 0.7152 * channel(argb.green) + 0.0722 * channel(argb.blue)

@@ -27,7 +27,6 @@ import org.churchpresenter.settings.utils.Constants
 
 private const val MAX_UPLOAD_MB = 200
 private const val BYTES_PER_MB = 1024 * 1024
-private const val BYTES_PER_KB = 1024
 private val UPLOADABLE_DECK_EXTENSIONS = setOf("pdf", "ppt", "pptx", "key")
 
 /**
@@ -182,8 +181,8 @@ private fun Route.presentationSlideRoutes(
                         _presentationCatalogs[_scheduleItemToPresentationId[id] ?: id]?.fileName ?: id
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "present",
-                        title = presentationName,
-                        detail = "Slide ${index + 1}",
+                        title = RemoteLabel.Text(presentationName),
+                        detail = RemoteLabel.Slide(index + 1),
                         clientId = clientId
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
@@ -291,8 +290,8 @@ private fun Route.mediaUploadRoutes(
                         val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                             actionType = "upload",
-                            title = file.name,
-                            detail = "${written / 1024} KB",
+                            title = RemoteLabel.Text(file.name),
+                            detail = RemoteLabel.Size(written),
                             clientId = uploadClientId
                         )) }
                         val escapedPath = file.absolutePath.replace("\\", "\\\\").replace("\"", "\\\"")
@@ -344,8 +343,8 @@ private suspend fun storeUploadedPresentation(
         scope.launch { server.onPresentationUploaded.emit(file) }
         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
             actionType = "upload",
-            title = file.name,
-            detail = "${fileBytes.size / BYTES_PER_KB} KB",
+            title = RemoteLabel.Text(file.name),
+            detail = RemoteLabel.Size(fileBytes.size.toLong()),
             clientId = uploadClientId
         )) }
         call.respondText(
