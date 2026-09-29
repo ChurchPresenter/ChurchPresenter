@@ -13,7 +13,7 @@ class ChurchPresenterRuleSetProviderTest {
     fun `provides the churchpresenter rule set with every rule`() {
         val ruleSet = ChurchPresenterRuleSetProvider().instance(Config.empty)
         assertEquals("churchpresenter", ruleSet.id)
-        assertEquals(listOf("HardcodedUiString"), ruleSet.rules.map { it.ruleId })
+        assertEquals(listOf("HardcodedUiString", "HardcodedColor"), ruleSet.rules.map { it.ruleId })
     }
 
     @Test

@@ -8,5 +8,5 @@ class ChurchPresenterRuleSetProvider : RuleSetProvider {
     override val ruleSetId: String = "churchpresenter"
 
     override fun instance(config: Config): RuleSet =
-        RuleSet(ruleSetId, listOf(HardcodedUiString(config)))
+        RuleSet(ruleSetId, listOf(HardcodedUiString(config), HardcodedColor(config)))
 }

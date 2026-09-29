@@ -1,3 +1,7 @@
+config:
+  validation: true
+  excludes: 'churchpresenter.*'
+
 build:
   maxIssues: 0
 
@@ -109,3 +113,6 @@ churchpresenter:
   HardcodedUiString:
     active: true
     excludes: ['**/test/**', '**/jvmTest/**']
+  HardcodedColor:
+    active: true
+    excludes: ['**/test/**', '**/jvmTest/**', '**/theme/src/main/**']
