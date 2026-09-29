@@ -59,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_c
 import churchpresenter.composeapp.generated.resources.remote_activity_musician_connect
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect_detail
 import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
+import churchpresenter.composeapp.generated.resources.remote_activity_more
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -226,7 +227,7 @@ private fun RemoteActivityToast(
                     if (remaining > 0) {
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            text = "+$remaining more",
+                            text = stringResource(Res.string.remote_activity_more, remaining),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary

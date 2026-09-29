@@ -5,11 +5,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.crossword.ui.AdminApp
+import org.churchpresenter.crossword.ui.Strings
 
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "ChurchPresenter Cross Editor",
+        title = Strings.windowTitle,
         state = rememberWindowState(width = 1100.dp, height = 700.dp)
     ) {
         AdminApp()

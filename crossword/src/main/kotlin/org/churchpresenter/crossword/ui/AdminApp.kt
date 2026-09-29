@@ -170,7 +170,7 @@ private fun UnexportedWarnings(state: AdminState) {
     if (templates.isNotEmpty()) {
         Spacer(Modifier.width(16.dp))
         Text(
-            text = "⚠ Level ${templates.joinToString(", ")}: clues not yet entered",
+            text = "${Strings.warningLevel} ${templates.joinToString(", ")}: ${Strings.cluesNotEntered}",
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.labelMedium
         )
@@ -178,7 +178,7 @@ private fun UnexportedWarnings(state: AdminState) {
     if (unexported.isNotEmpty()) {
         Spacer(Modifier.width(16.dp))
         Text(
-            text = "⚠ Level ${unexported.joinToString(", ")} not exported",
+            text = "${Strings.warningLevel} ${unexported.joinToString(", ")} ${Strings.notExported}",
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.labelMedium
         )

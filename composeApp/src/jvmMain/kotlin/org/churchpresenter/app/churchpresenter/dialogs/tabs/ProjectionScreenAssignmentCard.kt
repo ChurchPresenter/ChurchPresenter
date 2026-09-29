@@ -387,7 +387,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     if (DeckLinkManager.isAvailable()) {
                         DeckLinkManager.listDevices().forEachIndexed { di, device ->
                             opts.add(KeyOutputOption(
-                                label = "DeckLink ${di + 1}: ${device.name}",
+                                label = "${Constants.DECKLINK_BRAND} ${di + 1}: ${device.name}",
                                 shortLabel = "DK${di + 1}: ${device.name}",
                                 targetDisplay = device.index, targetType = Constants.TARGET_TYPE_DECKLINK
                             ))

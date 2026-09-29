@@ -244,6 +244,7 @@ object Constants {
     // Screen assignment target types
     const val TARGET_TYPE_SCREEN = "screen"
     const val TARGET_TYPE_DECKLINK = "decklink"
+    const val DECKLINK_BRAND = "DeckLink"
 
     // Output Role (fill+key for video mixers)
     const val OUTPUT_ROLE_NORMAL = "normal"

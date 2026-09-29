@@ -15,4 +15,8 @@ internal object Strings {
     const val previewEmpty = "Enter clues to see preview"
     const val cluesAcross = "Across"
     const val cluesDown = "Down"
+    const val windowTitle = "ChurchPresenter Cross Editor"
+    const val warningLevel = "⚠ Level"
+    const val cluesNotEntered = "clues not yet entered"
+    const val notExported = "not exported"
 }

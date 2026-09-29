@@ -159,6 +159,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
+import churchpresenter.composeapp.generated.resources.atem_clip_summary
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.theme.semantic
 import java.awt.Window
@@ -704,7 +705,7 @@ fun LowerThirdTab(
                                 }
                             }
                             Text(
-                                "ATEM: ${parts.joinToString(", ")}",
+                                stringResource(Res.string.atem_clip_summary, parts.joinToString(", ")),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )

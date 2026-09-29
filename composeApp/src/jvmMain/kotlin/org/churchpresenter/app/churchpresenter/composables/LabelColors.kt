@@ -190,7 +190,7 @@ private fun LabelColorColumn(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Aa",
+                        text = TYPE_SAMPLE_TEXT,
                         style = MaterialTheme.typography.labelSmall,
                         // What the label will actually look like, contrast fix included: the row
                         // itself renders through ensureContrast, so a swatch showing the raw pair
@@ -202,3 +202,5 @@ private fun LabelColorColumn(
         }
     }
 }
+
+internal const val TYPE_SAMPLE_TEXT = "Aa"

@@ -339,7 +339,7 @@ internal fun titleSlideSample(settings: SongSettings, slot: PreviewSampleSlot): 
     val song = when (slot) {
         PreviewSampleSlot.SHORT -> SongItem(
             number = SAMPLE_SONG_NUMBER.toString(),
-            title = "Grace",
+            title = SAMPLE_SHORT_TITLE,
             author = SAMPLE_AUTHOR,
         )
         PreviewSampleSlot.MEDIUM -> SongItem(
@@ -352,10 +352,10 @@ internal fun titleSlideSample(settings: SongSettings, slot: PreviewSampleSlot): 
         )
         PreviewSampleSlot.LONG -> SongItem(
             number = SAMPLE_SONG_NUMBER.toString(),
-            title = "Great Is Thy Faithfulness, O God My Father",
-            secondaryTitle = "Велика верность Твоя, о Боже, Отец наш",
-            author = "Thomas O. Chisholm, William M. Runyan",
-            composer = "William M. Runyan, arr. Chris Tomlin",
+            title = SAMPLE_LONG_TITLE,
+            secondaryTitle = SAMPLE_LONG_SECONDARY_TITLE,
+            author = SAMPLE_LONG_AUTHOR,
+            composer = SAMPLE_LONG_COMPOSER,
             ccliNumber = SAMPLE_CCLI,
         )
     }
@@ -369,3 +369,8 @@ private const val SAMPLE_AUTHOR = "John Newton"
 private const val SAMPLE_COMPOSER = "William Walker"
 private const val SAMPLE_CCLI = "22025"
 private const val SAMPLE_BPM = 84
+private const val SAMPLE_SHORT_TITLE = "Grace"
+private const val SAMPLE_LONG_TITLE = "Great Is Thy Faithfulness, O God My Father"
+private const val SAMPLE_LONG_SECONDARY_TITLE = "Велика верность Твоя, о Боже, Отец наш"
+private const val SAMPLE_LONG_AUTHOR = "Thomas O. Chisholm, William M. Runyan"
+private const val SAMPLE_LONG_COMPOSER = "William M. Runyan, arr. Chris Tomlin"

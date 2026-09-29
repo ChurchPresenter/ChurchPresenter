@@ -698,7 +698,7 @@ private fun rememberDisplayOptions(
             DeckLinkManager.listDevices().forEachIndexed { i, device ->
                 options.add(
                     DisplayOption(
-                        label = "DeckLink ${i + 1}: ${device.name}",
+                        label = "${Constants.DECKLINK_BRAND} ${i + 1}: ${device.name}",
                         shortLabel = "DK${i + 1}: ${device.name}",
                         targetDisplay = device.index,
                         targetType = Constants.TARGET_TYPE_DECKLINK

@@ -1680,6 +1680,7 @@
     <string name="remote_activity_qa_admin_connect_detail">Now connected</string>
     <string name="remote_activity_musician_connect">Transpose control connected</string>
     <string name="remote_activity_presented">Presenting</string>
+    <string name="remote_activity_more">+%1$d more</string>
     <string name="remote_activity_uploaded">Uploaded</string>
     <string name="remote_activity_cleared">Cleared Display</string>
     <string name="remote_activity_qa_add">Q&amp;A Question Added</string>
@@ -2259,6 +2260,7 @@
     <!-- ATEM Switcher integration -->
     <string name="atem_settings">ATEM</string>
     <string name="atem_description">Upload lower third animations to a Blackmagic ATEM switcher's media pool. Use Bitfocus Companion to trigger the DSK on/off.</string>
+    <string name="atem_clip_summary">ATEM: %1$s</string>
     <string name="atem_downstream_keyer">Downstream keyer (DSK)</string>
     <string name="atem_downstream_keyer_hint">Drive the key as a downstream keyer instead of an upstream keyer (USK)</string>
     <string name="atem_host">ATEM IP Address</string>
