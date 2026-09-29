@@ -172,7 +172,10 @@ class PresentationViewModelRemoteTest {
     fun `a failed remote deck leaves no cache directory behind`() {
         val vm = viewModel()
         vm.loadPresentationFromRemote("sched-cleanup", remotePath, slideCount = 2) { null }
-        awaitUntil("the failure") { vm.loadError != null }
+        // The error is published before the load's `finally` deletes the directory, so wait for
+        // the load to end too: isLoading drops only after the cleanup, and the error being set
+        // proves the load had started, so `!isLoading` cannot be the value from before it ran.
+        awaitUntil("the failed load to finish cleaning up") { vm.loadError != null && !vm.isLoading }
 
         val cacheDir = File(File(testHome, ".churchpresenter/slides"), "remote_sched-cleanup")
         assertFalse(cacheDir.exists(), "a half-built cache would be served as complete next time")
