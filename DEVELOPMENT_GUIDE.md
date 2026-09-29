@@ -105,9 +105,9 @@ comm -23 \
 | `System.err.println` in `composeApp` | 84 | error diagnostics (VLC, JCEF, cameras, NDI/OMT, server); see the decision log |
 | Fully qualified `androidx.compose.*` in code | 0 | whole repo, excluding imports, `@OptIn` and KDoc ✅ |
 | Fully qualified names where the import already exists | 0 | ✅ |
-| `!!` in `composeApp` | 3 | `CrosswordData.kt` — pending |
+| `!!` in `composeApp` | 0 | ✅ |
 | Unused string resources | 0 | ✅ |
-| Hardcoded UI strings | known exceptions only | `Text("$w×$h")` resolutions; remote-activity toast titles built in `server/*Routes.kt` (`"Song $number"`, `"Slide ${n}"`) — pending, they are composed off the UI thread |
+| Hardcoded UI strings | known exceptions only | `Text("$w×$h")` resolutions. Remote-activity toasts carry a `RemoteLabel` that the desktop words in the operator's language ✅ |
 | Emoji used as icons | pending | the icon maps in `ScheduleItemDisplay`, `ThemeSwitcher`, `RemoteActivityToast`, `ThemeSegmentedButton` and `BibleTab`'s 📖 — need icon assets |
 
 ### Decision log

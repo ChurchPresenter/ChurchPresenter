@@ -1633,8 +1633,8 @@ class CompanionServerRemoteControlTest {
                 command(Constants.WS_CMD_SELECT_PICTURE, """{"folder-id":"folder-1","index":1}"""),
             )
 
-            assertEquals("Easter Slides", action.title)
-            assertEquals("Image 1", action.detail)
+            assertEquals(RemoteLabel.Text("Easter Slides"), action.title)
+            assertEquals(RemoteLabel.Image(1), action.detail)
         } finally {
             dir.deleteRecursively()
         }
@@ -1646,7 +1646,10 @@ class CompanionServerRemoteControlTest {
             command(Constants.WS_CMD_SELECT_PICTURE, """{"folder-id":"unknown-folder","index":0}"""),
         )
 
-        assertEquals("unknown-folder", action.title, "an id reads badly but tells the operator more than a blank")
+        assertEquals(
+            RemoteLabel.Text("unknown-folder"), action.title,
+            "an id reads badly but tells the operator more than a blank",
+        )
     }
 
     @Test
@@ -1658,7 +1661,7 @@ class CompanionServerRemoteControlTest {
             ),
         )
 
-        assertEquals("sunrise.jpg", action.detail)
+        assertEquals(RemoteLabel.Text("sunrise.jpg"), action.detail)
     }
 
     @Test
@@ -1667,8 +1670,8 @@ class CompanionServerRemoteControlTest {
             command(Constants.WS_CMD_SELECT_SLIDE, """{"id":"unknown-deck","index":2}"""),
         )
 
-        assertEquals("unknown-deck", action.title)
-        assertEquals("Slide 3", action.detail, "the operator counts slides from one")
+        assertEquals(RemoteLabel.Text("unknown-deck"), action.title)
+        assertEquals(RemoteLabel.Slide(3), action.detail, "the operator counts slides from one")
     }
 
     @Test
@@ -1680,8 +1683,8 @@ class CompanionServerRemoteControlTest {
             ),
         )
 
-        assertEquals("John 3:16", action.title)
-        assertTrue(action.detail.startsWith("For God so loved"))
+        assertEquals(RemoteLabel.Text("John 3:16"), action.title)
+        assertTrue((action.detail as RemoteLabel.Text).value.startsWith("For God so loved"))
     }
 
     @Test
@@ -1693,7 +1696,7 @@ class CompanionServerRemoteControlTest {
             ),
         )
 
-        assertEquals("John 3:16-17", action.title)
+        assertEquals(RemoteLabel.Text("John 3:16-17"), action.title)
     }
 
     @Test
@@ -1702,8 +1705,8 @@ class CompanionServerRemoteControlTest {
             command(Constants.WS_CMD_SELECT_SONG_SECTION, """{"number":"42","section":2}"""),
         )
 
-        assertEquals("Song 42", action.title)
-        assertEquals("Section 2", action.detail)
+        assertEquals(RemoteLabel.Song("42"), action.title)
+        assertEquals(RemoteLabel.Section(2), action.detail)
     }
 
     @Test

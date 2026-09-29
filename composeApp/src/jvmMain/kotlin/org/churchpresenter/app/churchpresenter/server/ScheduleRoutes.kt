@@ -139,7 +139,7 @@ internal fun Route.scheduleRoutes(
                         actionType = "clear",
                         // Titled where it is shown: a string resource needs the UI, and this
                         // runs on the server's IO scope.
-                        title = "",
+                        title = RemoteLabel.EMPTY,
                         clientId = clientId
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)

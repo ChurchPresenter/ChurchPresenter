@@ -181,7 +181,7 @@ class CompanionServerPresentationRemoteUploadTest {
         awaitUntil("onInstantAction") { actions.isNotEmpty() }
         val action = actions.single()
         assertEquals("upload", action.actionType)
-        assertEquals("sermon.pdf", action.title)
+        assertEquals(RemoteLabel.Text("sermon.pdf"), action.title)
         assertEquals("speaker-phone", action.clientId, "the toast must name the phone that sent it")
     }
 

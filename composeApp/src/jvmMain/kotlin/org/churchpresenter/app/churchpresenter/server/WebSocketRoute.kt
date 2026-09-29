@@ -236,10 +236,10 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
                         val req = json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
                         scope.launch { server.onSelectPicture.emit(req) }
                         val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
-                        val imageLabel = req.fileName ?: "Image ${req.index}"
+                        val imageLabel = req.fileName?.let(RemoteLabel::Text) ?: RemoteLabel.Image(req.index)
                         scope.launch {
                             server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", folderName, imageLabel, wsClientId
+                                "present", RemoteLabel.Text(folderName), imageLabel, wsClientId
                             ))
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
@@ -249,7 +249,7 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
                         scope.launch { server.onSelectSongSection.emit(req) }
                         scope.launch {
                             server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", "Song ${req.number}", "Section ${req.section}", wsClientId
+                                "present", RemoteLabel.Song(req.number), RemoteLabel.Section(req.section), wsClientId
                             ))
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
@@ -261,7 +261,7 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
                             _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]?.fileName ?: req.id
                         scope.launch {
                             server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", presName, "Slide ${req.index + 1}", wsClientId
+                                "present", RemoteLabel.Text(presName), RemoteLabel.Slide(req.index + 1), wsClientId
                             ))
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
@@ -273,7 +273,10 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
                         scope.launch {
                             server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "present", ref, req.verseText.take(SUMMARY_PREVIEW_CHARS), wsClientId
+                                "present",
+                                RemoteLabel.Text(ref),
+                                RemoteLabel.Text(req.verseText.take(SUMMARY_PREVIEW_CHARS)),
+                                wsClientId,
                             ))
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
@@ -282,7 +285,7 @@ private suspend fun DefaultWebSocketServerSession.handleWsCommand(
                         scope.launch { server.onClear.emit(Unit) }
                         scope.launch {
                             server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "clear", "Clear Display", clientId = wsClientId
+                                "clear", RemoteLabel.EMPTY, clientId = wsClientId
                             ))
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)

@@ -249,8 +249,8 @@ private fun Route.bibleSelectRoutes(
                                    else "${req.bookName} ${req.chapter}:${req.verseNumber}"
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "present",
-                        title = verseRef,
-                        detail = req.verseText.take(SUMMARY_PREVIEW_CHARS),
+                        title = RemoteLabel.Text(verseRef),
+                        detail = RemoteLabel.Text(req.verseText.take(SUMMARY_PREVIEW_CHARS)),
                         clientId = clientId
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)

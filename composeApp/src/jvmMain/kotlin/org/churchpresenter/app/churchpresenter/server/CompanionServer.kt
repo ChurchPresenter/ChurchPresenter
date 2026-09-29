@@ -556,8 +556,8 @@ class CompanionServer {
     data class RemoteInstantAction(
         /** One of: "present", "upload", "clear" — maps to RemoteEventType in the UI layer. */
         val actionType: String,
-        val title: String,
-        val detail: String = "",
+        val title: RemoteLabel,
+        val detail: RemoteLabel = RemoteLabel.EMPTY,
         val clientId: String = ""
     )
 
@@ -1242,8 +1242,8 @@ class CompanionServer {
             scope.launch { onPresentationUploaded.emit(file) }
             scope.launch { onInstantAction.emit(RemoteInstantAction(
                 actionType = "upload",
-                title = file.name,
-                detail = "${fileBytes.size / 1024} KB",
+                title = RemoteLabel.Text(file.name),
+                detail = RemoteLabel.Size(fileBytes.size.toLong()),
                 clientId = uploadClientId
             )) }
             call.respondText(
