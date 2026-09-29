@@ -26,6 +26,12 @@ if (layout.projectDirectory.file(".git").asFile.exists()) {
 
 subprojects {
     version = "1.0.0"
+
+    if (path != ":lintrules") {
+        plugins.withId("io.gitlab.arturbosch.detekt") {
+            dependencies.add("detektPlugins", project(":lintrules"))
+        }
+    }
 }
 
 val isFilteredTestRun = gradle.startParameter.taskRequests.any { request ->

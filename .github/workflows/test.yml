@@ -214,6 +214,9 @@ jobs:
               - 'calendar/**'
               - 'core-models/**'          # implementation(projects.coreModels)
               - 'theme/**'                # implementation(projects.theme)
+            lintrules:
+              - *shared
+              - 'lintrules/**'            # depends on nothing else: detekt loads it as a plugin
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -243,7 +246,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt
+          :calendar:detekt :lottieGenerator:detekt :lintrules:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -534,6 +537,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.calendar == 'true' }}
         run: ./gradlew :calendar:jacocoTestCoverageVerification -x test
 
+      - name: Lint rules tests
+        if: ${{ !cancelled() && steps.modules.outputs.lintrules == 'true' }}
+        run: ./gradlew :lintrules:test
+
+      - name: Lint rules coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.lintrules == 'true' }}
+        run: ./gradlew :lintrules:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -570,6 +581,7 @@ jobs:
             song-chords/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             calendar/build/test-results/**/TEST-*.xml
+            lintrules/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -589,11 +601,13 @@ jobs:
             Diagnostics
             ATEM client
             NDI client
+            OMT client
             Planning Center
             Bible formats
             Song chords
             Bible
             Calendar
+            Lint rules
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -765,3 +779,5 @@ jobs:
             bible-formats/build/test-results/
             song-chords/build/reports/tests/
             song-chords/build/test-results/
+            lintrules/build/reports/tests/
+            lintrules/build/test-results/

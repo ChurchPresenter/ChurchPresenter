@@ -99,3 +99,5 @@ include(":bible")
 // from settings and from any `.schedule` file. Depended on by :composeApp, which opens it from the
 // Help menu beside the Song Library Manager and loads a planned service into the Schedule tab.
 include(":calendar")
+
+include(":lintrules")

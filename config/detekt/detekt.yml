@@ -103,3 +103,9 @@ exceptions:
 performance:
   SpreadOperator:
     active: true
+
+churchpresenter:
+  active: true
+  HardcodedUiString:
+    active: true
+    excludes: ['**/test/**', '**/jvmTest/**']
