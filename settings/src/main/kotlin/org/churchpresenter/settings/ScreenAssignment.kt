@@ -102,6 +102,25 @@ data class ScreenAssignment(
      */
     val ndiMode: String = Constants.NDI_MODE_ALPHA,
     /**
+     * What the operator calls this OMT output — the name receivers see on the network, advertised
+     * as `HOSTNAME (name)`. Blank means the numbered default, exactly as [ndiName] works.
+     *
+     * Only used by ProjectionSettings.omtOutputs entries, as are the five below.
+     */
+    val omtName: String = "",
+    val omtEnabled: Boolean = true,
+    val omtWidth: Int = 1920,
+    val omtHeight: Int = 1080,
+    val omtFps: Int = 30,
+    /** One of `Constants.OMT_MODE_*`. Alpha by default, for the reason [ndiMode] gives. */
+    val omtMode: String = Constants.OMT_MODE_ALPHA,
+    /**
+     * One of `Constants.OMT_QUALITY_*`. Default lets each receiver ask for the quality it needs and
+     * uses the highest request, which is right for an output whose receivers the operator does not
+     * control.
+     */
+    val omtQuality: String = Constants.OMT_QUALITY_DEFAULT,
+    /**
      * The [OutputProfile] this output follows -- every behavioral and style decision this output
      * draws with comes from there; see `AppSettings.resolvedFor(profile)`
      * (`OutputProfileResolution.kt`) and [ProjectionSettings.profileFor].
@@ -142,6 +161,9 @@ data class ScreenAssignment(
      * advertised under a name of nothing but spaces is one an operator cannot pick out of a list.
      */
     fun ndiLabelOr(default: String): String = ndiName.trim().ifBlank { default }
+
+    /** This OMT output's name on the network, as [ndiLabelOr] is for NDI. */
+    fun omtLabelOr(default: String): String = omtName.trim().ifBlank { default }
 }
 
 /**

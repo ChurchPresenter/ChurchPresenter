@@ -62,6 +62,10 @@ composeApp/src/jvmMain/appResources/macos/ffmpeg
 composeApp/src/jvmMain/appResources/linux/ffmpeg
 composeApp/src/jvmMain/appResources/windows/ffmpeg.exe
 
+# The bundled OMT libraries, fetched by :composeApp:fetchBundledOmt from the pinned url + digest in
+# gradle/omt-builds.properties, for the same reason ffmpeg is fetched rather than committed.
+composeApp/src/jvmMain/appResources/*/omt/
+
 # Roborazzi writes each theme's half here before stacking them into the committed golden.
 # Scratch: cleaned up after every run, and never something to commit.
 composeApp/screenshots/.parts/

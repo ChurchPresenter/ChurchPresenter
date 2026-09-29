@@ -141,10 +141,20 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raisedHover
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.Dp
+import churchpresenter.composeapp.generated.resources.song_search_match_lyrics
+import churchpresenter.composeapp.generated.resources.song_search_match_translation
+import org.churchpresenter.app.churchpresenter.utils.highlightedText
+import org.churchpresenter.app.churchpresenter.viewmodel.SongMatchKind
+import org.churchpresenter.app.churchpresenter.viewmodel.SongSearchMatch
 
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
 private const val SCROLL_SETTLE_MS = 100L
+private val CELL_GAP = 6.dp
+private val ACTION_CELL = 24.dp
+private const val LANGUAGE_TAG_ALPHA = 0.6f
 
 /**
  * Shared minimum height for the two bars across the top of the Songs tab — the search row on the
@@ -196,6 +206,8 @@ internal fun RowScope.SongListPane(
     tabFocusRequester: FocusRequester,
     favoriteSongs: () -> List<SongItem>,
     playCountFor: (String) -> Int?,
+    /** Where the current search found a song, for the line under its row; null draws no line. */
+    searchMatchFor: (SongItem) -> SongSearchMatch?,
     onSearchQueryChange: (String) -> Unit,
     onSearchFocusChanged: (Boolean) -> Unit,
     onFilterTypeChange: (String) -> Unit,
@@ -669,8 +681,11 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     val isRowSelected = index == selectedSongIndex
                     val (rowHover, rowHovered) = rememberRowHover()
                     val rowColors = bibleRowColors(isRowSelected, rowHovered)
+                    val match = searchMatchFor(song)
                     Box {
-                    Row(
+                    // The row and the search-match line under it are one target: selected, clicked,
+                    // double-clicked and right-clicked together.
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(BibleListRowShape)
@@ -711,9 +726,9 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     }
                                 }
                             },
-                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val textColor = if (isRowSelected) rowColors.ink else MaterialTheme.colorScheme.onSurface
+                    val textColor = if (isRowSelected) rowColors.ink else MaterialTheme.colorScheme.onSurface
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         // All columns in visibleCols order — data cols use per-cell initialPassClickable,
                         // action cols are inline so reordering them is reflected in both header and rows
                         visibleCols.forEach { colId ->
@@ -754,7 +769,11 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     )
                                 ) {
                                     Text(
-                                        cellText,
+                                        if (colId == "title" && match.isOwnTitle()) {
+                                            highlightedText(cellText, searchQuery)
+                                        } else {
+                                            AnnotatedString(cellText)
+                                        },
                                         style = MaterialTheme.typography.bodySmall,
                                         textAlign = if (colId == "play_count") TextAlign.End else TextAlign.Start,
                                         modifier = Modifier
@@ -824,6 +843,14 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                 }
                             }
                         }
+                    }
+                    if (match != null) {
+                        SongMatchLine(
+                            match = match,
+                            query = searchQuery,
+                            indent = titleOffset(visibleCols, actionCols) { with(density) { colWidth(it).toDp() } },
+                        )
+                    }
                     }
                     DropdownMenu(
                         expanded = showContextMenu,
@@ -1062,6 +1089,86 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+/** True when the search matched the song's own title, which the title cell then highlights. */
+private fun SongSearchMatch?.isOwnTitle(): Boolean = this?.kind == SongMatchKind.TITLE && languageIndex == 0
+
+/**
+ * How far the title column starts from the row's left edge, so the match line lines up under it: each
+ * data cell is its width plus the 6dp gap after it, each action cell a 6dp gap and its 24dp button.
+ */
+private fun titleOffset(visibleCols: List<String>, actionCols: Set<String>, widthOf: (String) -> Dp): Dp {
+    var offset = 0.dp
+    for (col in visibleCols) {
+        if (col == "title") break
+        offset += if (col in actionCols) CELL_GAP + ACTION_CELL else widthOf(col) + CELL_GAP
+    }
+    return offset
+}
+
+/**
+ * The line under a matching song: a chip saying where the search found it -- Title, the section's own
+ * name, or Lyrics, with the language when it was a translation -- and the words around the match.
+ */
+@Composable
+private fun SongMatchLine(match: SongSearchMatch, query: String, indent: Dp) {
+    val (container, onContainer) = when (match.kind) {
+        SongMatchKind.TITLE -> MaterialTheme.colorScheme.secondaryContainer to
+            MaterialTheme.colorScheme.onSecondaryContainer
+        SongMatchKind.VERSE -> MaterialTheme.colorScheme.tertiaryContainer to
+            MaterialTheme.colorScheme.onTertiaryContainer
+        SongMatchKind.CHORUS -> MaterialTheme.colorScheme.primaryContainer to
+            MaterialTheme.colorScheme.onPrimaryContainer
+        SongMatchKind.OTHER_SECTION, SongMatchKind.LYRICS -> MaterialTheme.colorScheme.surfaceVariant to
+            MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val name = when (match.kind) {
+        SongMatchKind.TITLE -> stringResource(Res.string.title)
+        else -> match.sectionName ?: stringResource(Res.string.song_search_match_lyrics)
+    }
+    val language = when {
+        match.languageIndex == 0 -> null
+        match.languageLabel.isNotBlank() -> match.languageLabel
+        else -> stringResource(Res.string.song_search_match_translation, match.languageIndex + 1)
+    }
+    Row(
+        modifier = Modifier.padding(start = indent + 8.dp, end = 8.dp, top = 3.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(AppShape(6.dp))
+                .background(container)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(name, style = MaterialTheme.typography.labelSmall, color = onContainer, maxLines = 1)
+            if (language != null) {
+                Text(
+                    language,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = onContainer,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .clip(AppShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = LANGUAGE_TAG_ALPHA))
+                        .padding(horizontal = 4.dp),
+                )
+            }
+        }
+        if (match.snippet != null) {
+            Text(
+                highlightedText(match.snippet, query),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

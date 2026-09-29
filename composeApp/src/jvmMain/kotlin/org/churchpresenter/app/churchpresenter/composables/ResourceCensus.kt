@@ -17,6 +17,7 @@ internal enum class SharedResource {
     VIDEO_DECODE,
     SCREEN_GRAB,
     NDI_RECEIVER,
+    OMT_RECEIVER,
     BROWSER_SOURCE,
 }
 

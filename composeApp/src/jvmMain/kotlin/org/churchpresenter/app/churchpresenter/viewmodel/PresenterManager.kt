@@ -176,6 +176,16 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _ndiLocks.value = updated
     }
 
+    // Per-OMT-output lock: a fourth independent index space, for the reason the NDI one is its own.
+    private val _omtLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+    val omtLocks: State<Map<Int, Presenting>> = _omtLocks
+
+    fun setOmtLock(index: Int, mode: Presenting?) {
+        val updated = _omtLocks.value.toMutableMap()
+        if (mode == null) updated.remove(index) else updated[index] = mode
+        _omtLocks.value = updated
+    }
+
     // Indices of Browser Source outputs currently showing the "Identify" overlay
     // (their output number, briefly flashed) — same idea as identifyingScreen for
     // physical displays, but per-output since there's no window to flash instead.
@@ -201,6 +211,18 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         preRenderScope.launch {
             delay(WATCHDOG_INTERVAL_MS)
             _ndiIdentifying.value = _ndiIdentifying.value - index
+        }
+    }
+
+    // The same, for OMT outputs, in a set of their own for the reason NDI's is.
+    private val _omtIdentifying = mutableStateOf<Set<Int>>(emptySet())
+    val omtIdentifying: State<Set<Int>> = _omtIdentifying
+
+    fun identifyOmtOutput(index: Int) {
+        _omtIdentifying.value = _omtIdentifying.value + index
+        preRenderScope.launch {
+            delay(WATCHDOG_INTERVAL_MS)
+            _omtIdentifying.value = _omtIdentifying.value - index
         }
     }
 
@@ -942,9 +964,31 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     private var announcementTickerJob: Job? = null
 
+    // Which ticker is current. `cancel()` only lands at the ticker's next `delay`, so a tick that had
+    // already read the clock used to write its value after a pause or a Reset and undo it (#711).
+    // Every start and every pause takes a new generation under [announcementTickerLock]; a ticker
+    // writes only while its own is still current, under the same lock, so once a start or pause has
+    // returned no older tick can land.
+    private val announcementTickerLock = Any()
+    private var announcementTickerGeneration = 0L
+
+    /** Stops the current ticker and returns the generation the next one runs under. */
+    private fun nextAnnouncementTicker(): Long = synchronized(announcementTickerLock) {
+        announcementTickerJob?.cancel()
+        ++announcementTickerGeneration
+    }
+
+    /** Runs [write] if [generation] is still the current ticker; false when a newer one replaced it. */
+    private inline fun whileCurrentTicker(generation: Long, write: () -> Unit): Boolean =
+        synchronized(announcementTickerLock) {
+            if (generation != announcementTickerGeneration) return false
+            write()
+            true
+        }
+
     /** Duration/Countdown — ticks down from [remainingSeconds] and shows [expiredText] on reaching zero. */
     fun startAnnouncementCountdown(remainingSeconds: Int, expiredText: String) {
-        announcementTickerJob?.cancel()
+        val generation = nextAnnouncementTicker()
         if (remainingSeconds <= 0) return
         val endEpochSecond = java.time.Instant.now().epochSecond + remainingSeconds
         _timerRemainingSeconds.value = remainingSeconds
@@ -955,26 +999,31 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
             while (true) {
                 val remaining = (endEpochSecond - java.time.Instant.now().epochSecond).toInt()
                 if (remaining <= 0) break
-                _timerRemainingSeconds.value = remaining
-                pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                val current = whileCurrentTicker(generation) {
+                    _timerRemainingSeconds.value = remaining
+                    pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                }
+                if (!current) return@launch
                 delay(TICK_INTERVAL_MS)
             }
-            _timerRemainingSeconds.value = 0
-            _timerRunning.value = false
-            _announcementTickerActive.value = false
-            _announcementTimerExpired.value = true
-            pushAnnouncementTextIfLive(expiredText)
-            // Only where the timer is still what is on screen. A countdown row set to advance at
-            // its end hands on at the very second it reaches zero, and this used to drag the
-            // output straight back to the expired message -- the next item appeared for an
-            // instant and then vanished. Same condition the push above is guarded by.
-            if (announcementIsLive()) setPresentingMode(Presenting.ANNOUNCEMENTS)
+            whileCurrentTicker(generation) {
+                _timerRemainingSeconds.value = 0
+                _timerRunning.value = false
+                _announcementTickerActive.value = false
+                _announcementTimerExpired.value = true
+                pushAnnouncementTextIfLive(expiredText)
+                // Only where the timer is still what is on screen. A countdown row set to advance at
+                // its end hands on at the very second it reaches zero, and this used to drag the
+                // output straight back to the expired message -- the next item appeared for an
+                // instant and then vanished. Same condition the push above is guarded by.
+                if (announcementIsLive()) setPresentingMode(Presenting.ANNOUNCEMENTS)
+            }
         }
     }
 
     /** Count-up — an open-ended stopwatch starting from [initialElapsedSeconds]. */
     fun startAnnouncementCountUp(initialElapsedSeconds: Int) {
-        announcementTickerJob?.cancel()
+        val generation = nextAnnouncementTicker()
         val startEpochSecond = java.time.Instant.now().epochSecond - initialElapsedSeconds
         _timerRemainingSeconds.value = initialElapsedSeconds
         _timerRunning.value = true
@@ -983,8 +1032,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         announcementTickerJob = preRenderScope.launch {
             while (true) {
                 val elapsed = (java.time.Instant.now().epochSecond - startEpochSecond).toInt().coerceAtLeast(0)
-                _timerRemainingSeconds.value = elapsed
-                pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(elapsed))
+                val current = whileCurrentTicker(generation) {
+                    _timerRemainingSeconds.value = elapsed
+                    pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(elapsed))
+                }
+                if (!current) return@launch
                 delay(TICK_INTERVAL_MS)
             }
         }
@@ -992,7 +1044,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     /** Specific Time — always-on countdown to the next occurrence of [targetHour]:[targetMinute]:[targetSecond]. */
     fun startAnnouncementSpecificTime(targetHour: Int, targetMinute: Int, targetSecond: Int) {
-        announcementTickerJob?.cancel()
+        val generation = nextAnnouncementTicker()
         _timerRunning.value = false
         _announcementTickerActive.value = true
         announcementTickerJob = preRenderScope.launch {
@@ -1001,8 +1053,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
                 val targetSec = targetHour * 3600 + targetMinute * 60 + targetSecond
                 val diff = targetSec - nowSec
                 val remaining = if (diff > 0) diff else diff + 86400
-                _timerRemainingSeconds.value = remaining
-                pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                val current = whileCurrentTicker(generation) {
+                    _timerRemainingSeconds.value = remaining
+                    pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                }
+                if (!current) return@launch
                 delay(TICK_INTERVAL_MS)
             }
         }
@@ -1010,13 +1065,13 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     /** Clock Display — always-on live wall clock formatted with [formatPattern]. */
     fun startAnnouncementClockDisplay(formatPattern: String) {
-        announcementTickerJob?.cancel()
+        val generation = nextAnnouncementTicker()
         _timerRunning.value = false
         _announcementTickerActive.value = true
         announcementTickerJob = preRenderScope.launch {
             while (true) {
                 val text = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern(formatPattern))
-                pushAnnouncementTextIfLive(text)
+                if (!whileCurrentTicker(generation) { pushAnnouncementTextIfLive(text) }) return@launch
                 delay(TICK_INTERVAL_MS)
             }
         }
@@ -1061,11 +1116,13 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     /** Pauses/stops whichever announcement ticker is active, optionally pinning the mirrored remaining value (e.g. on Reset). */
     fun pauseAnnouncementTimer(remainingSeconds: Int? = null) {
-        announcementTickerJob?.cancel()
-        _timerRunning.value = false
-        _announcementTickerActive.value = false
-        _announcementTimerExpired.value = false
-        if (remainingSeconds != null) _timerRemainingSeconds.value = remainingSeconds
+        synchronized(announcementTickerLock) {
+            nextAnnouncementTicker()
+            _timerRunning.value = false
+            _announcementTickerActive.value = false
+            _announcementTimerExpired.value = false
+            if (remainingSeconds != null) _timerRemainingSeconds.value = remainingSeconds
+        }
     }
 
     internal fun pushAnnouncementTextIfLive(text: String) {

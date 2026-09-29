@@ -560,6 +560,7 @@ fun SongsTab(
             tabFocusRequester = tabFocusRequester,
             favoriteSongs = { viewModel.getFavoriteSongs() },
             playCountFor = { id -> statisticsManager?.getSongPlayCount(id) },
+            searchMatchFor = viewModel::searchMatchFor,
             onSearchQueryChange = { viewModel.updateSearchQuery(it) },
             onSearchFocusChanged = { searchFieldFocused = it },
             onFilterTypeChange = { viewModel.updateFilterType(it) },

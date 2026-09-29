@@ -61,5 +61,6 @@ internal fun previewOutputKeys(proj: ProjectionSettings): List<String> {
     fun keys(kind: String, count: Int) = List(count) { Constants.previewOutputKey(kind, it) }
     return keys(Constants.PREVIEW_OUTPUT_SCREEN, proj.screenAssignments.size) +
         keys(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, proj.browserSourceOutputs.size) +
-        keys(Constants.PREVIEW_OUTPUT_NDI, proj.ndiOutputs.size)
+        keys(Constants.PREVIEW_OUTPUT_NDI, proj.ndiOutputs.size) +
+        keys(Constants.PREVIEW_OUTPUT_OMT, proj.omtOutputs.size)
 }

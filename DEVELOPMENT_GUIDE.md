@@ -482,6 +482,7 @@ execution order, so it can appear on one machine and not another.
 ./gradlew :diagnostics:test            # the crash-reporting module's suite
 ./gradlew :atem:test                   # the ATEM protocol client's suite
 ./gradlew :ndi:test                    # the NDI client's suite, send and receive
+./gradlew :omt:test                    # the OMT client's suite, send and receive
 ./gradlew :planning-center:test        # the Planning Center client's suite
 ```
 

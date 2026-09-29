@@ -21,6 +21,7 @@ import org.churchpresenter.settings.SPLIT_ACROSS
 import org.churchpresenter.settings.SPLIT_DOWN
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.activeLayout
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -105,6 +106,14 @@ class PreviewGroupsPopoverTest {
         assertEquals(previewOutputKeys(now()).first(), root?.children?.first()?.output)
         assertEquals(3, root?.children?.last()?.children?.size)
     }
+
+    @Test
+    fun `a template places an OMT output under its own key`() =
+        edit(ProjectionSettings(omtOutputs = listOf(ScreenAssignment(omtName = "Overflow")))) { now ->
+            click(previewTemplateTag(0))
+            val omt = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, 0)
+            assertEquals(omt, now().activeLayout()?.root?.output)
+        }
 
     @Test
     fun `every template makes a layout that is drawn at once`() = edit(base()) { now ->

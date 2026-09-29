@@ -75,6 +75,11 @@ include(":atem")
 // every native call behind one interface. Depended on by :composeApp, which wires it to settings
 // and the presenters in NdiVideoRenderer.
 include(":ndi")
+// OMT (Open Media Transport): the open-source IP video protocol, both directions, over the libomt
+// and libvmx the app bundles — both are MIT, so unlike NDI they ship inside the installer. Plain
+// Kotlin over JNA, every native call behind one interface. Depended on by :composeApp, which wires
+// it to settings and the presenters in OmtVideoRenderer and to the Canvas in OmtFrameCache.
+include(":omt")
 include(":planning-center")
 // Bible formats: the .spb converters (USFX, Zefania XML, Beblia) and the catalogues the app
 // downloads modules from. Depended on by :composeApp for the in-app browser and by :converter,

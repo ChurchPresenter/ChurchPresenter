@@ -234,6 +234,7 @@ object Constants {
     const val PREVIEW_OUTPUT_SCREEN = "screen"
     const val PREVIEW_OUTPUT_BROWSER_SOURCE = "browserSource"
     const val PREVIEW_OUTPUT_NDI = "ndi"
+    const val PREVIEW_OUTPUT_OMT = "omt"
 
     /** The stored identity of one output: which list it came from, and its index in that list. */
     fun previewOutputKey(kind: String, index: Int): String = "$kind:$index"
@@ -257,6 +258,17 @@ object Constants {
     const val NDI_MODE_ALPHA = "alpha"
     const val NDI_MODE_FILL = "fill"
     const val NDI_MODE_FILL_AND_KEY = "fill_key"
+
+    // What an OMT output puts on the network, stored as strings for the reason the NDI modes are.
+    // Two where NDI has three: OMT carries alpha in the one stream, so it has no separate key source.
+    const val OMT_MODE_ALPHA = "alpha"
+    const val OMT_MODE_FILL = "fill"
+
+    // An OMT output's encoding quality. The `:omt` module's OmtQuality is the behaviour.
+    const val OMT_QUALITY_DEFAULT = "default"
+    const val OMT_QUALITY_LOW = "low"
+    const val OMT_QUALITY_MEDIUM = "medium"
+    const val OMT_QUALITY_HIGH = "high"
 
     // Seek amount in ms
     const val MEDIA_SEEK_MS = 10_000L

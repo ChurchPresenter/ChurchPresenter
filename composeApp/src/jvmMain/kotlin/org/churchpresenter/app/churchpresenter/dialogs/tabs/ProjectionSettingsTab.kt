@@ -65,7 +65,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
+import org.churchpresenter.app.churchpresenter.presenter.OmtManager
 import org.churchpresenter.ndi.NdiRuntimeStatus
+import org.churchpresenter.omt.OmtRuntimeStatus
 import androidx.compose.runtime.collectAsState
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
@@ -180,6 +182,7 @@ fun ProjectionSettingsTab(
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
     onIdentifyNdi: (Int) -> Unit = {},
+    onIdentifyOmt: (Int) -> Unit = {},
     scenes: List<Scene> = emptyList(),
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt,
     /**
@@ -190,6 +193,10 @@ fun ProjectionSettingsTab(
      */
     ndiStatus: @Composable () -> NdiRuntimeStatus = { NdiManager.status.collectAsState().value },
     ndiReceiverCount: (Int) -> Int = NdiManager::connectionCount,
+    /** The OMT card's counterparts of [ndiStatus] and [ndiReceiverCount], for the same reason. */
+    omtStatus: @Composable () -> OmtRuntimeStatus = { OmtManager.status.collectAsState().value },
+    omtReceiverCount: (Int) -> Int = OmtManager::receiverCount,
+    omtAddressOf: (Int) -> String = OmtManager::addressOf,
     /**
      * Which ffmpeg the Camera Capture card reports, for the same reason [ndiStatus] is a parameter:
      * it runs `ffmpeg -version` against the machine, and whether that machine has one decides how
@@ -301,6 +308,15 @@ fun ProjectionSettingsTab(
         receiverCount = ndiReceiverCount,
         settings = settings,
         onSettingsChange = onSettingsChange,
+    )
+
+    OmtOutputsCard(
+        settings = settings,
+        onSettingsChange = onSettingsChange,
+        onIdentifyOmt = onIdentifyOmt,
+        status = omtStatus(),
+        receiverCount = omtReceiverCount,
+        addressOf = omtAddressOf,
     )
 
     // ── Card 2: Audio Output ─────────────────────────────────────────────────

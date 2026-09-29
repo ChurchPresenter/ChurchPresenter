@@ -20,5 +20,7 @@ data class WindowLayoutSettings(
     val sttRightPanelWidthDp: Int = 280,
     val announcementsPreviewPanelWidthDp: Int = 260,
     val announcementsLeftPanelWidthDp: Int = 300,
+    /** Height of the Announcements text box, dragged by the user; 0 leaves it at its natural size. */
+    val announcementsTextHeightDp: Int = 0,
     val dictionaryListWidthDp: Int = 320,
 )

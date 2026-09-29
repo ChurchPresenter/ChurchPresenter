@@ -122,6 +122,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_source_ndi
+import churchpresenter.composeapp.generated.resources.canvas_source_omt
 import churchpresenter.composeapp.generated.resources.canvas_source_bible
 import churchpresenter.composeapp.generated.resources.canvas_tool_select
 import churchpresenter.composeapp.generated.resources.canvas_tool_rectangle
@@ -240,6 +241,7 @@ fun CanvasTab(
     val strCamera        = stringResource(Res.string.canvas_source_camera)
     val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
     val strNdi           = stringResource(Res.string.canvas_source_ndi)
+    val strOmt           = stringResource(Res.string.canvas_source_omt)
     val strBrowser       = stringResource(Res.string.canvas_source_browser)
     val strBible         = stringResource(Res.string.canvas_source_bible)
 
@@ -755,6 +757,19 @@ fun CanvasTab(
                                         SceneSource.NdiSource(
                                             id = UUID.randomUUID().toString(),
                                             name = strNdi,
+                                            transform = SourceTransform()
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_omt)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.OmtSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = strOmt,
                                             transform = SourceTransform()
                                         )
                                     )

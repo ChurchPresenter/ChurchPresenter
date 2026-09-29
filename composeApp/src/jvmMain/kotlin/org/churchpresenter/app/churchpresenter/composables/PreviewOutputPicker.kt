@@ -17,6 +17,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ic_warning
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
+import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.preview_output
 import churchpresenter.composeapp.generated.resources.preview_output_mode_disabled_warning
 import churchpresenter.composeapp.generated.resources.screen_number
@@ -121,6 +122,17 @@ fun outputsShowing(
             key = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, index),
             label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, index + 1)),
             size = outputSizeOf(output, OutputKind.NDI),
+            showsMode = mode == null || showsContentFor(mode, profile),
+            assignment = output,
+        )
+    }
+    proj.omtOutputs.forEachIndexed { index, output ->
+        if (!output.omtEnabled) return@forEachIndexed
+        val profile = proj.profileFor(output) ?: OutputProfile()
+        outputs += PreviewOutput(
+            key = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, index),
+            label = output.omtLabelOr(stringResource(Res.string.omt_output_numbered, index + 1)),
+            size = outputSizeOf(output, OutputKind.OMT),
             showsMode = mode == null || showsContentFor(mode, profile),
             assignment = output,
         )

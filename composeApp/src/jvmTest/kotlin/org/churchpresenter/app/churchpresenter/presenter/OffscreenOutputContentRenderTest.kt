@@ -158,6 +158,37 @@ class OffscreenOutputContentRenderTest {
     }
 
     @Test
+    fun `identify covers an omt output with its own number, or its own name`() {
+        render(
+            mode = Presenting.NONE,
+            outputIndex = 1,
+            kind = OffscreenOutputKind.OMT,
+            seed = { identifyOmtOutput(1) },
+        ) {
+            onNodeWithText("OMT Output 2").assertExists()
+        }
+        render(
+            mode = Presenting.NONE,
+            assignment = ScreenAssignment(omtName = "Overflow"),
+            outputIndex = 0,
+            kind = OffscreenOutputKind.OMT,
+            seed = { identifyOmtOutput(0) },
+        ) {
+            onNodeWithText("Overflow").assertExists()
+        }
+    }
+
+    @Test
+    fun `identifying an ndi output leaves the omt output of the same index alone`() = render(
+        mode = Presenting.NONE,
+        outputIndex = 0,
+        kind = OffscreenOutputKind.OMT,
+        seed = { identifyNdiOutput(0) },
+    ) {
+        onNodeWithText("OMT Output 1").assertDoesNotExist()
+    }
+
+    @Test
     fun `identifying a browser source leaves the ndi output of the same index alone`() = render(
         mode = Presenting.NONE,
         outputIndex = 0,

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
+import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.output_profile_empty_state
 import churchpresenter.composeapp.generated.resources.output_profile_new_name_default
 import churchpresenter.composeapp.generated.resources.profile_linked_name
@@ -264,6 +265,11 @@ internal fun profileUserLabels(proj: ProjectionSettings, id: String): List<Strin
     proj.ndiOutputs.forEachIndexed { index, output ->
         if (output.activeProfileId == id) {
             labels += output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, index + 1))
+        }
+    }
+    proj.omtOutputs.forEachIndexed { index, output ->
+        if (output.activeProfileId == id) {
+            labels += output.omtLabelOr(stringResource(Res.string.omt_output_numbered, index + 1))
         }
     }
     return labels

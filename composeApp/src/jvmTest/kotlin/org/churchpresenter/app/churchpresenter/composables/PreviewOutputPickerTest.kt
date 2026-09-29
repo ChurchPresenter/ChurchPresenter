@@ -46,6 +46,7 @@ class PreviewOutputPickerTest {
         screens: List<ScreenAssignment> = listOf(screen()),
         browserSources: List<ScreenAssignment> = emptyList(),
         ndi: List<ScreenAssignment> = emptyList(),
+        omt: List<ScreenAssignment> = emptyList(),
         stored: Map<String, String> = emptyMap(),
     ) = AppSettings(
         projectionSettings = ProjectionSettings(
@@ -56,6 +57,7 @@ class PreviewOutputPickerTest {
             screenAssignments = screens,
             browserSourceOutputs = browserSources,
             ndiOutputs = ndi,
+            omtOutputs = omt,
             previewOutputSelections = stored,
         ),
     )
@@ -165,6 +167,18 @@ class PreviewOutputPickerTest {
     fun `a disabled NDI output is not listed, because it sends nothing`() {
         val off = screen(target = -1).copy(ndiEnabled = false)
         assertEquals(listOf("screen:0"), outputs(settings(ndi = listOf(off))).map { it.key })
+    }
+
+    @Test
+    fun `an enabled OMT output comes after NDI, and a disabled one is not listed`() {
+        val listed = outputs(
+            settings(
+                ndi = listOf(screen(target = -1)),
+                omt = listOf(screen(target = -1), screen(target = -1).copy(omtEnabled = false)),
+            ),
+        )
+        assertEquals(listOf("screen:0", "ndi:0", "omt:0"), listed.map { it.key })
+        assertEquals("OMT Output 1", listed[2].label)
     }
 
     @Test

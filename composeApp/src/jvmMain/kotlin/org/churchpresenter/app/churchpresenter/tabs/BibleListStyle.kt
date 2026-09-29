@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
@@ -119,24 +120,34 @@ internal fun rememberRowHover(): Pair<MutableInteractionSource, Boolean> {
     return interaction to hovered
 }
 
-/** An 8dp gap between two lists that resizes them: a short grip, accented while it is dragged. */
+/**
+ * An 8dp gap between two lists that resizes them: a short grip, accented while it is dragged.
+ *
+ * [orientation] is the direction it drags in: [Orientation.Horizontal] sits between two columns,
+ * [Orientation.Vertical] between two stacked panes.
+ */
 @Composable
-internal fun DragHandle(onDragEnd: () -> Unit, onDrag: (Float) -> Unit) {
+internal fun DragHandle(
+    onDragEnd: () -> Unit,
+    orientation: Orientation = Orientation.Horizontal,
+    modifier: Modifier = Modifier,
+    onDrag: (Float) -> Unit,
+) {
     val (interaction, hovered) = rememberRowHover()
     var dragging by remember { mutableStateOf(false) }
     val scheme = MaterialTheme.colorScheme
+    val horizontal = orientation == Orientation.Horizontal
     Box(
-        modifier = Modifier
-            .width(8.dp)
-            .fillMaxHeight()
+        modifier = modifier
+            .then(if (horizontal) Modifier.width(8.dp).fillMaxHeight() else Modifier.height(8.dp).fillMaxWidth())
             .background(
                 if (hovered && !dragging) scheme.onSurface.copy(alpha = ROW_HOVER_ALPHA) else Color.Transparent,
                 AppShape(6.dp),
             )
             .hoverable(interaction)
-            .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+            .pointerHoverIcon(PointerIcon(Cursor(if (horizontal) Cursor.E_RESIZE_CURSOR else Cursor.N_RESIZE_CURSOR)))
             .draggable(
-                orientation = Orientation.Horizontal,
+                orientation = orientation,
                 state = rememberDraggableState { delta -> onDrag(delta) },
                 onDragStarted = { dragging = true },
                 onDragStopped = { dragging = false; onDragEnd() },
@@ -145,8 +156,7 @@ internal fun DragHandle(onDragEnd: () -> Unit, onDrag: (Float) -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .width(3.dp)
-                .height(40.dp)
+                .then(if (horizontal) Modifier.width(3.dp).height(40.dp) else Modifier.width(40.dp).height(3.dp))
                 .background(
                     if (dragging) scheme.primary else scheme.onSurface.copy(alpha = GRIP_ALPHA),
                     AppShape(3.dp),

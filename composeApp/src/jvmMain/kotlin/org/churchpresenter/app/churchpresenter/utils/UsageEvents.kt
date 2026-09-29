@@ -37,6 +37,9 @@ enum class UsageEvent(
      */
     NDI_OUTPUT("ndiOutput"),
 
+    /** An OMT receiver actually connected to one of this app's OMT sources. Once per run, as [NDI_OUTPUT]. */
+    OMT_OUTPUT("omtOutput"),
+
     /** A Browser Source client actually streamed frames from an output. Once per run. */
     BROWSER_SOURCE_OUTPUT("browserSourceOutput"),
 

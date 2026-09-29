@@ -77,7 +77,7 @@ class AnnouncementsTabScreenshotTest {
 
     @Test
     fun `the text on screen`() = shoot("text_live", initial = notice()) {
-        annButton(AnnouncementLabel.SHOW).performClick()
+        annButton(AnnouncementLabel.GO_LIVE).performClick()
         waitForIdle()
     }
 

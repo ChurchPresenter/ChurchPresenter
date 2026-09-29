@@ -39,6 +39,11 @@ class SongsLyricSearchTest {
             title = "Holy Holy Holy",
             lyrics = listOf("[Chorus]", "Lord God Almighty"),
         )
+        song(
+            number = "12",
+            title = "Psalm 23",
+            lyrics = listOf("[Verse 1]", "My shepherd leads me, 3 times over"),
+        )
     }
 
     @AfterTest
@@ -67,7 +72,7 @@ class SongsLyricSearchTest {
             enableFolderWatcher = false,
         )
         created.add(vm)
-        assertEquals(3, vm.filteredSongItems.value.size, "the library loads synchronously")
+        assertEquals(4, vm.filteredSongItems.value.size, "the library loads synchronously")
         vm.updateSort(Constants.SORT_NUMBER)
         vm.updateFilterType(filterType)
         return vm
@@ -116,5 +121,53 @@ class SongsLyricSearchTest {
     @Test
     fun `exact match does not look inside lyrics`() {
         assertTrue(viewModel(Constants.EXACT_MATCH).search("Lord God Almighty").isEmpty())
+    }
+
+    // ── Digits are a song number ────────────────────────────────────────────────
+
+    @Test
+    fun `digits alone search only song numbers, not titles or lyrics`() {
+        assertEquals(listOf("Holy Holy Holy"), viewModel().search("3"))
+        assertEquals(emptyList(), viewModel().search("23"))
+    }
+
+    @Test
+    fun `each filter type applies to the number`() {
+        assertEquals(listOf("Amazing Grace", "Psalm 23"), viewModel().search("1"))
+        assertEquals(listOf("Amazing Grace", "Psalm 23"), viewModel(Constants.STARTS_WITH).search("1"))
+        assertEquals(listOf("Amazing Grace"), viewModel(Constants.EXACT_MATCH).search("1"))
+    }
+
+    @Test
+    fun `digits beside letters are text, and search titles and lyrics`() {
+        assertEquals(listOf("Psalm 23"), viewModel().search("psalm 23"))
+    }
+
+    // ── Where it matched ────────────────────────────────────────────────────────
+
+    private fun SongsViewModel.matchFor(title: String) =
+        searchMatchFor(filteredSongItems.value.first { it.title == title })
+
+    @Test
+    fun `a text search says where each song matched`() {
+        val vm = viewModel()
+        vm.search("lord")
+        assertEquals(SongMatchKind.VERSE, vm.matchFor("Be Thou My Vision")?.kind)
+        assertEquals("Chorus", vm.matchFor("Holy Holy Holy")?.sectionName)
+
+        vm.search("владыка")
+        assertEquals(1, vm.matchFor("Be Thou My Vision")?.languageIndex)
+
+        vm.search("psalm")
+        assertEquals(SongMatchKind.TITLE, vm.matchFor("Psalm 23")?.kind)
+    }
+
+    @Test
+    fun `a number search and an empty box have nothing to say`() {
+        val vm = viewModel()
+        vm.search("12")
+        assertEquals(null, vm.matchFor("Psalm 23"))
+        vm.search("")
+        assertEquals(null, vm.matchFor("Psalm 23"))
     }
 }

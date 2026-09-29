@@ -107,6 +107,7 @@ class ResourceCensusTest {
             video_decode=12
             screen_grab=0
             ndi_receiver=0
+            omt_receiver=0
             browser_source=0
             """.trimIndent(),
             rendered,

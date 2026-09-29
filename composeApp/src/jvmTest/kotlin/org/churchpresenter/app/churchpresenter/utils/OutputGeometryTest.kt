@@ -31,6 +31,16 @@ class OutputGeometryTest {
     }
 
     @Test
+    fun `an OMT output reports its own resolution, not the NDI or browser source one`() {
+        val output = ScreenAssignment(
+            browserSourceWidth = 3840, browserSourceHeight = 2160,
+            ndiWidth = 1280, ndiHeight = 720,
+            omtWidth = 1080, omtHeight = 1920,
+        )
+        assertEquals(OutputSize(1080, 1920), outputSizeOf(output, OutputKind.OMT))
+    }
+
+    @Test
     fun `an NDI output reports its own resolution rather than the browser source one`() {
         // An NDI output carries the browser-source fields too (they are all one data class, and
         // the NDI card even passes ContentOutputsDialog isBrowserSource = true, meaning only "not a

@@ -100,7 +100,7 @@ private const val FFMPEG_ON_PATH = "ffmpeg"
  * that has not been given the property. `SwingFileChooser` walks up for its icon for the same
  * reason and in the same way.
  */
-private fun appResourcesDir(): File? = appResourcesDirFrom(
+internal fun appResourcesDir(): File? = appResourcesDirFrom(
     packagedDir = System.getProperty("compose.application.resources.dir"),
     workingDir = File(System.getProperty("user.dir", ".")).absoluteFile,
     osName = System.getProperty("os.name", ""),
