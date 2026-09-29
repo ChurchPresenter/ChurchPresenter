@@ -117,7 +117,7 @@ internal fun ColumnScope.BibleBrowserPane(
     footer: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
-        Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp, end = 4.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp, end = 4.dp, bottom = 4.dp)) {
 
             BookCard(
                 books = books,
