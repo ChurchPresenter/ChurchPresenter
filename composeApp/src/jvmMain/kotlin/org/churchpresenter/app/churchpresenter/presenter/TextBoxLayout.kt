@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
@@ -165,7 +166,10 @@ internal fun BoxedItem(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val cut = box.overflow == TextBoxOverflow.CUT
-    Box(
+    // Filling the parent first, so the offset is measured from its top-left corner whatever the
+    // parent aligns its children to -- a centred or bottom-aligned presenter would otherwise add its
+    // own alignment to the box's place.
+    Box(Modifier.fillMaxSize()) { Box(
         modifier = Modifier
             .absoluteOffset(rect.left.dp, rect.top.dp)
             .size(rect.width.dp, rect.height.dp)
@@ -181,7 +185,7 @@ internal fun BoxedItem(
         } else {
             content()
         }
-    }
+    } }
 }
 
 private fun verticalAlignmentOf(box: TextBox): Alignment.Vertical = when (box.vertical) {

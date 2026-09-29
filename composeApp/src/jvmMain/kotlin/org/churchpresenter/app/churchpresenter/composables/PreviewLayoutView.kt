@@ -34,6 +34,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -124,7 +125,7 @@ private fun AreaView(
             area.children.indices.forEach { index ->
                 child(index, Modifier.weight(area.ratios.getOrElse(index) { 1f }.coerceAtLeast(MIN_WEIGHT)))
                 if (edits != null && index < area.children.lastIndex) {
-                    Divider(edits, path, index, area, size.width.toFloat(), vertical = true)
+                    Divider(edits, path, index, area, size, vertical = true)
                 }
             }
         }
@@ -141,7 +142,7 @@ private fun AreaView(
                 }
                 child(index, placed.fillMaxWidth())
                 if (edits != null && index < area.children.lastIndex) {
-                    Divider(edits, path, index, area, size.height.toFloat(), vertical = false)
+                    Divider(edits, path, index, area, size, vertical = false)
                 }
             }
         }
@@ -289,8 +290,9 @@ private fun OutputPicker(
 }
 
 /**
- * The handle between two areas of a split, dragged to share their room differently. [total] is the
- * split's length along its axis, in pixels, which a drag is measured against.
+ * The handle between two areas of a split, dragged to share their room differently. [split] is the
+ * split's measured size: a drag is measured against its length along the axis, and the handle is
+ * as long as its other side -- a split in the scrolling panel has no height to fill.
  */
 @Composable
 private fun Divider(
@@ -298,28 +300,32 @@ private fun Divider(
     path: List<Int>,
     index: Int,
     area: PreviewArea,
-    total: Float,
+    split: IntSize,
     vertical: Boolean,
 ) {
     val latest by rememberUpdatedState(edits)
+    val latestArea by rememberUpdatedState(area)
+    val total by rememberUpdatedState(if (vertical) split.width.toFloat() else split.height.toFloat())
     var start by remember { mutableStateOf(0f) }
     var moved by remember { mutableStateOf(0f) }
+    val across = with(LocalDensity.current) { (if (vertical) split.height else split.width).toDp() }
     Box(
         Modifier
-            .then(if (vertical) Modifier.width(DIVIDER).fillMaxHeight() else Modifier.height(DIVIDER).fillMaxWidth())
+            .then(if (vertical) Modifier.width(DIVIDER).height(across) else Modifier.height(DIVIDER).width(across))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = DIVIDER_ALPHA))
             .pointerHoverIcon(PointerIcon(Cursor(if (vertical) Cursor.E_RESIZE_CURSOR else Cursor.N_RESIZE_CURSOR)))
             .pointerInput(path, index) {
                 detectDragGestures(
                     onDragStart = {
-                        val pair = area.ratios[index] + area.ratios[index + 1]
-                        start = area.ratios[index] / pair
+                        val ratios = latestArea.ratios
+                        start = ratios[index] / (ratios[index] + ratios[index + 1])
                         moved = 0f
                     },
                     onDrag = { change, amount ->
                         change.consume()
                         moved += if (vertical) amount.x else amount.y
-                        val pair = area.ratios[index] + area.ratios[index + 1]
+                        val ratios = latestArea.ratios
+                        val pair = ratios[index] + ratios[index + 1]
                         val share = start + moved / (total * pair).coerceAtLeast(1f)
                         latest.onRoot(latest.root.withDividerAt(path, index, share))
                     },
