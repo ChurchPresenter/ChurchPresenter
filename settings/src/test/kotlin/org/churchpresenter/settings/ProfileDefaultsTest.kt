@@ -68,6 +68,15 @@ class ProfileDefaultsTest {
     }
 
     @Test
+    fun `the own background kept aside while a surface follows its default is not a change`() {
+        val p = profile()
+        val backgrounds = p.backgroundSettings.copy(
+            bibleBackground = p.backgroundSettings.bibleBackground.copy(ownBackgroundType = Constants.BACKGROUND_IMAGE),
+        )
+        assertEquals(emptyList(), defaultChanges(p.copy(backgroundSettings = backgrounds)))
+    }
+
+    @Test
     fun `a value set where the default has none is listed by what it holds, and put back to none`() {
         val p = profile(
             song = SongSettings(

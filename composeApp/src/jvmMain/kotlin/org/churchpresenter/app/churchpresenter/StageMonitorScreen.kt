@@ -10,11 +10,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
@@ -57,6 +58,8 @@ import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.composables.backdropRoom
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.app.churchpresenter.presenter.BoxedItem
+import org.churchpresenter.app.churchpresenter.presenter.rectIn
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.StageMonitorContentType
@@ -64,6 +67,9 @@ import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.StageMonitorZoneStyle
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.boxAt
+import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.toStyleZone
 import org.churchpresenter.settings.toZone
 import org.churchpresenter.core.models.songs.LyricSection
@@ -288,20 +294,21 @@ fun StageMonitorScreen(
     }
 
     val fullScreenContent = contentFor(StageMonitorZone.FULL_SCREEN)
+    // A boxed zone is drawn in its box over the layout, and leaves its cell empty.
+    fun zoneBox(zone: StageMonitorStyleZone) = sm.textBoxes.boxAt(textBoxKey(zone.name, lowerThird = false))
+    fun inCell(zone: StageMonitorZone): StageMonitorContentType? =
+        contentFor(zone).takeUnless { zone.toStyleZone()?.let(::zoneBox)?.enabled == true }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
+        val area = Rect(0f, 0f, maxWidth.value, maxHeight.value)
+        val fullScreenBox = zoneBox(StageMonitorStyleZone.FULL_SCREEN)
         if (fullScreenContent != null) {
-            val style = sm.styleFor(StageMonitorStyleZone.FULL_SCREEN)
-            Box(
-                modifier = Modifier.fillMaxSize().background(parseHexColor(style.bgColor)).padding(12.dp),
-                contentAlignment = zoneContentAlignment(style)
-            ) {
-                ZoneContent(sm, fullScreenContent, style, renderData, mediaViewModel)
-            }
+            val box = fullScreenBox.takeIf { it.enabled }
+            StageFullScreenZone(sm, fullScreenContent, renderData, mediaViewModel, box, area)
         } else {
             // The grid the chosen layout describes: rows down the screen, cells across each row,
             // both weighted. The classic arrangement is one entry in that catalog, not a special
@@ -314,13 +321,14 @@ fun StageMonitorScreen(
                         layoutRow.cells.forEachIndexed { cellIndex, cell ->
                             if (cellIndex > 0) VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
                             StageZoneBox(
-                                sm, cell.slot.toZone(), renderData, mediaViewModel, ::contentFor,
+                                sm, cell.slot.toZone(), renderData, mediaViewModel, ::inCell,
                                 Modifier.weight(sizes.rowCellWidths[rowIndex][cellIndex])
                             )
                         }
                     }
                 }
             }
+            StageBoxedZones(sm, area, renderData, mediaViewModel, ::contentFor)
         }
 
         // Metronome — a silent flash dot, only while a song is actually projected.
@@ -332,6 +340,53 @@ fun StageMonitorScreen(
                 size = 36.dp,
                 modifier = Modifier.align(metronomeAlignment).padding(24.dp).testTag("stage_metronome")
             )
+        }
+    }
+}
+
+/** The full-screen zone, filling the screen -- or [box], where it has been given one. */
+@Composable
+private fun StageFullScreenZone(
+    sm: StageMonitorSettings,
+    content: StageMonitorContentType,
+    data: ZoneRenderData,
+    mediaViewModel: MediaViewModel?,
+    box: TextBox?,
+    area: Rect,
+) {
+    val style = sm.styleFor(StageMonitorStyleZone.FULL_SCREEN)
+    val zone: @Composable (Modifier) -> Unit = { placed ->
+        Box(
+            modifier = placed.background(parseHexColor(style.bgColor)).padding(12.dp),
+            contentAlignment = zoneContentAlignment(style)
+        ) {
+            ZoneContent(sm, content, style, data, mediaViewModel)
+        }
+    }
+    if (box == null) {
+        zone(Modifier.fillMaxSize())
+    } else {
+        BoxedItem(box.rectIn(area), box, Constants.CENTER, textBoxKey(StageMonitorStyleZone.FULL_SCREEN.name, false)) {
+            zone(Modifier.fillMaxSize())
+        }
+    }
+}
+
+/** Every zone of the layout given a box, drawn in it over the layout. */
+@Composable
+private fun StageBoxedZones(
+    sm: StageMonitorSettings,
+    area: Rect,
+    data: ZoneRenderData,
+    mediaViewModel: MediaViewModel?,
+    contentFor: (StageMonitorZone) -> StageMonitorContentType?,
+) {
+    StageMonitorStyleZone.entries.filter { it != StageMonitorStyleZone.FULL_SCREEN }.forEach { zone ->
+        val box = sm.textBoxes.boxAt(textBoxKey(zone.name, lowerThird = false))
+        if (box.enabled) {
+            BoxedItem(box.rectIn(area), box, Constants.CENTER, textBoxKey(zone.name, false)) {
+                StageZoneBox(sm, zone.toZone(), data, mediaViewModel, contentFor, Modifier.fillMaxSize())
+            }
         }
     }
 }

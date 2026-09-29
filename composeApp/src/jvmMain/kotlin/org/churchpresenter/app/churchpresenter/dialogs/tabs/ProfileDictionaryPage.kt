@@ -33,6 +33,7 @@ import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
+import org.churchpresenter.settings.TextBox
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -109,7 +110,31 @@ internal fun ProfileDictionaryPage(draft: AppSettings, onSettingsChange: ((AppSe
         onDuration = { v -> update { it.copy(transitionDuration = v) } },
         reset = null,
     )
+    ItemBoxGroup(
+        items = DictionaryPart.entries.mapIndexed { row, p ->
+            BoxItem(
+                p.name,
+                p.label(),
+                TextBox(
+                    xPercent = 10f,
+                    yPercent = DICT_BOX_TOP + row * DICT_BOX_STEP,
+                    widthPercent = 80f,
+                    heightPercent = DICT_BOX_HEIGHT,
+                ),
+            )
+        },
+        boxes = ds.textBoxes,
+        options = ds.textBoxOptions,
+        onBoxes = { boxes -> update { it.copy(textBoxes = boxes) } },
+        onOptions = { options -> update { it.copy(textBoxOptions = options) } },
+        paths = listOf("$DICT.textBoxes", "$DICT.textBoxOptions"),
+    )
 }
+
+// Where the parts' boxes start: a column of them down the screen, in the card's own order.
+private const val DICT_BOX_TOP = 10f
+private const val DICT_BOX_STEP = 21f
+private const val DICT_BOX_HEIGHT = 19f
 
 /** One part's rows: only the ones that part has a setting for. */
 @Composable

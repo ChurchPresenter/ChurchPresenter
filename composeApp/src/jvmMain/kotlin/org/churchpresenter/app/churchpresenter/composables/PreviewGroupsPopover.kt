@@ -1,88 +1,71 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.material3.minimumInteractiveComponentSize
-import org.churchpresenter.theme.components.toggleRow
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.remember
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.browser_source_output_label
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ndi_output_numbered
-import churchpresenter.composeapp.generated.resources.omt_output_numbered
-import churchpresenter.composeapp.generated.resources.preview_settings_add_output
-import churchpresenter.composeapp.generated.resources.preview_settings_delete_group
-import churchpresenter.composeapp.generated.resources.preview_settings_empty
-import churchpresenter.composeapp.generated.resources.preview_settings_group_title
-import churchpresenter.composeapp.generated.resources.preview_settings_hide_group
-import churchpresenter.composeapp.generated.resources.preview_settings_move_down
-import churchpresenter.composeapp.generated.resources.preview_settings_move_up
-import churchpresenter.composeapp.generated.resources.preview_settings_new_group
-import churchpresenter.composeapp.generated.resources.preview_settings_remove_output
+import churchpresenter.composeapp.generated.resources.preview_layout_default_name
+import churchpresenter.composeapp.generated.resources.preview_layout_edit
+import churchpresenter.composeapp.generated.resources.preview_layout_fills_panel
+import churchpresenter.composeapp.generated.resources.preview_layout_list_unplaced
+import churchpresenter.composeapp.generated.resources.preview_layout_new
+import churchpresenter.composeapp.generated.resources.preview_layout_none
+import churchpresenter.composeapp.generated.resources.preview_layout_delete
 import churchpresenter.composeapp.generated.resources.preview_settings_show_labels
 import churchpresenter.composeapp.generated.resources.preview_settings_show_modes
-import churchpresenter.composeapp.generated.resources.screen_number
-import org.churchpresenter.settings.PreviewGroup
-import org.churchpresenter.settings.PreviewGroupShape
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.settings.addPreviewGroup
-import org.churchpresenter.settings.addPreviewMember
-import org.churchpresenter.settings.movePreviewMember
-import org.churchpresenter.settings.newPreviewGroup
-import org.churchpresenter.settings.removePreviewGroup
-import org.churchpresenter.settings.removePreviewMember
-import org.churchpresenter.settings.updatePreviewGroup
-import org.churchpresenter.settings.utils.Constants
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.activeLayout
+import org.churchpresenter.settings.newPreviewLayout
+import org.churchpresenter.settings.updateLayout
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.churchpresenter.theme.components.SegmentTrack
 import org.churchpresenter.theme.components.SegmentTrackItem
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.ui.text.font.FontWeight
+import org.churchpresenter.theme.components.toggleRow
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /** Test handles for the switches, which carry no text of their own. */
 internal const val TAG_SHOW_LABELS = "preview_show_labels"
 internal const val TAG_SHOW_MODES = "preview_show_modes"
+internal const val TAG_FILLS_PANEL = "preview_fills_panel"
+internal const val TAG_LIST_UNPLACED = "preview_list_unplaced"
+internal const val TAG_EDIT_LAYOUT = "preview_edit_layout"
 
-internal fun hideGroupTag(groupId: String) = "preview_hide_$groupId"
+internal fun previewLayoutTag(id: String) = "preview_layout_$id"
+internal fun previewTemplateTag(index: Int) = "preview_template_$index"
 
 private val POPOVER_WIDTH = 340.dp
 
-/** The per-group Hide switch is drawn smaller than the full-size ones so it fits the title line. */
-private const val HIDE_SWITCH_SCALE = 0.75f
-
-/** One output the popover can place in a group: its stored key and the name to show for it. */
-private class OutputChoice(val key: String, val label: String)
-
-/** The grid a shape stands for, in the digits and sign every locale reads the same. */
-private fun PreviewGroupShape.title(): String = "$columns×$rows"
-
 /**
  * The editor for how the preview panel is arranged, opened from the gear beside the clear button:
- * whether outputs carry their names, and the groups the previews sit in.
+ * whether outputs carry their names and modes, and the panel's named layouts -- which one is drawn,
+ * new ones from a template, renaming and deleting them, and Edit layout, which turns the live panel
+ * itself into the layout's editor through [onEditLayout].
  *
  * Works on a [ProjectionSettings] value and hands the changed one back through [onChange] -- it
  * keeps no state of its own beyond what the caller keeps.
@@ -93,9 +76,8 @@ fun PreviewGroupsPopover(
     onDismiss: () -> Unit,
     proj: ProjectionSettings,
     onChange: (ProjectionSettings) -> Unit,
+    onEditLayout: () -> Unit = {},
 ) {
-    val choices = previewOutputChoices(proj)
-    val labelOf = choices.associate { it.key to it.label }
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier.width(POPOVER_WIDTH).padding(horizontal = 12.dp),
@@ -114,31 +96,142 @@ fun PreviewGroupsPopover(
                 onChange = { onChange(proj.copy(showOutputModes = it)) },
             )
             HorizontalDivider()
-            if (proj.previewGroups.isEmpty()) {
+            LayoutList(proj, onChange)
+            NewLayout(proj, onChange)
+            val active = proj.activeLayout()
+            if (active != null) {
+                HorizontalDivider()
+                TextButton(
+                    onClick = {
+                        onEditLayout()
+                        onDismiss()
+                    },
+                    modifier = Modifier.testTag(TAG_EDIT_LAYOUT),
+                ) { Text(stringResource(Res.string.preview_layout_edit)) }
+                SwitchRow(
+                    label = stringResource(Res.string.preview_layout_fills_panel),
+                    checked = proj.previewLayoutFillsPanel,
+                    tag = TAG_FILLS_PANEL,
+                    onChange = { onChange(proj.copy(previewLayoutFillsPanel = it)) },
+                )
+                SwitchRow(
+                    label = stringResource(Res.string.preview_layout_list_unplaced),
+                    checked = proj.listUnplacedOutputs,
+                    tag = TAG_LIST_UNPLACED,
+                    onChange = { onChange(proj.copy(listUnplacedOutputs = it)) },
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The layouts, one to a line: the one drawn is raised, a click draws another, the drawn one's name
+ * can be typed over, and each can be deleted. With none, a line saying the panel lists every output.
+ */
+@Composable
+private fun LayoutList(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
+    if (proj.previewLayouts.isEmpty()) {
+        Text(
+            stringResource(Res.string.preview_layout_none),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
+    val activeId = proj.activeLayout()?.id
+    proj.previewLayouts.forEachIndexed { position, layout ->
+        val active = layout.id == activeId
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().testTag(previewLayoutTag(layout.id)),
+        ) {
+            val shownName = layout.name.ifBlank { stringResource(Res.string.preview_layout_default_name, position + 1) }
+            if (active) {
+                BasicTextField(
+                    value = layout.name,
+                    onValueChange = { typed -> onChange(proj.updateLayout(layout.id) { it.copy(name = typed) }) },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    decorationBox = { field ->
+                        if (layout.name.isBlank()) {
+                            Text(shownName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        }
+                        field()
+                    },
+                    modifier = Modifier.weight(1f).padding(vertical = 6.dp),
+                )
+            } else {
                 Text(
-                    stringResource(Res.string.preview_settings_empty),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    shownName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onChange(proj.copy(activePreviewLayout = layout.id)) }
+                        .padding(vertical = 6.dp),
                 )
             }
-            proj.previewGroups.forEachIndexed { position, group ->
-                GroupEditor(
-                    title = stringResource(Res.string.preview_settings_group_title, position + 1),
-                    group = group,
-                    proj = proj,
-                    choices = choices,
-                    labelOf = labelOf,
-                    onChange = onChange,
-                )
-            }
-            Text(
-                text = stringResource(Res.string.preview_settings_new_group),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier
-                    .clickable { onChange(proj.addPreviewGroup(newPreviewGroup(proj.previewGroups))) }
-                    .padding(vertical = 6.dp),
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_delete),
+                text = stringResource(Res.string.preview_layout_delete),
+                onClick = {
+                    val rest = proj.previewLayouts.filterNot { it.id == layout.id }
+                    onChange(
+                        proj.copy(
+                            previewLayouts = rest,
+                            activePreviewLayout = if (active) {
+                                rest.firstOrNull()?.id.orEmpty()
+                            } else {
+                                proj.activePreviewLayout
+                            },
+                        ),
+                    )
+                },
+                iconSize = 16.dp,
+                buttonSize = 28.dp,
             )
+        }
+    }
+}
+
+/**
+ * New layout: a template to start from, which becomes a new layout -- drawn at once -- with the
+ * panel's outputs placed in its areas in order.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NewLayout(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
+    val templates = previewLayoutTemplates()
+    val outputs = previewOutputKeys(proj)
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(Res.string.preview_layout_new), style = MaterialTheme.typography.titleSmall)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            templates.forEachIndexed { index, template ->
+                SegmentTrack {
+                    SegmentTrackItem(
+                        selected = false,
+                        onClick = {
+                            val layout = newPreviewLayout(proj.previewLayouts, name = "")
+                                .copy(root = template.build(outputs))
+                            val layouts = proj.previewLayouts + layout
+                            onChange(proj.copy(previewLayouts = layouts, activePreviewLayout = layout.id))
+                        },
+                        modifier = Modifier.testTag(previewTemplateTag(index)),
+                    ) {
+                        Text(
+                            text = template.label,
+                            fontSize = 11.sp,
+                            color = LocalContentColor.current,
+                            maxLines = 1,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -158,165 +251,5 @@ private fun SwitchRow(label: String, checked: Boolean, tag: String, onChange: (B
             interactionSource = interaction,
             modifier = Modifier.minimumInteractiveComponentSize(),
         )
-    }
-}
-
-@Composable
-private fun GroupEditor(
-    title: String,
-    group: PreviewGroup,
-    proj: ProjectionSettings,
-    choices: List<OutputChoice>,
-    labelOf: Map<String, String>,
-    onChange: (ProjectionSettings) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            Text(
-                stringResource(Res.string.preview_settings_hide_group),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(end = 6.dp),
-            )
-            RaisedSwitch(
-                checked = group.hidden,
-                onCheckedChange = { hide -> onChange(proj.updatePreviewGroup(group.id) { it.copy(hidden = hide) }) },
-                modifier = Modifier.scale(HIDE_SWITCH_SCALE).testTag(hideGroupTag(group.id)),
-            )
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_delete),
-                text = stringResource(Res.string.preview_settings_delete_group),
-                onClick = { onChange(proj.removePreviewGroup(group.id)) },
-                iconSize = 16.dp,
-                buttonSize = 28.dp,
-            )
-        }
-        // One segmented control: the shapes share a sunken track and the chosen one is raised.
-        SegmentTrack {
-            PreviewGroupShape.entries.forEach { shape ->
-                val selected = shape == group.shape
-                SegmentTrackItem(
-                    selected = selected,
-                    onClick = { onChange(proj.updatePreviewGroup(group.id) { it.copy(shape = shape) }) },
-                ) {
-                    Text(
-                        text = shape.title(),
-                        fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                        color = LocalContentColor.current,
-                        maxLines = 1,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                    )
-                }
-            }
-        }
-        group.members.forEachIndexed { index, key ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                MemberRow(
-                    label = labelOf[key] ?: key,
-                    // Past the grid's capacity a member is stored but drawn with the ungrouped outputs.
-                    fits = index < group.shape.capacity,
-                    canMoveUp = index > 0,
-                    canMoveDown = index < group.members.lastIndex,
-                    onMoveUp = { onChange(proj.movePreviewMember(group.id, index, -1)) },
-                    onMoveDown = { onChange(proj.movePreviewMember(group.id, index, 1)) },
-                    onRemove = { onChange(proj.removePreviewMember(group.id, key)) },
-                )
-            }
-        }
-        // Outputs that are in no group yet, offered as one-tap additions to this one.
-        val placed = proj.previewGroups.flatMap { it.members }.toSet()
-        choices.filter { it.key !in placed }.forEach { choice ->
-            Text(
-                text = stringResource(Res.string.preview_settings_add_output, choice.label),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onChange(proj.addPreviewMember(group.id, choice.key)) }
-                    .padding(vertical = 2.dp),
-            )
-        }
-        HorizontalDivider(modifier = Modifier.padding(top = 2.dp))
-    }
-}
-
-@Composable
-private fun RowScope.MemberRow(
-    label: String,
-    fits: Boolean,
-    canMoveUp: Boolean,
-    canMoveDown: Boolean,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit,
-    onRemove: () -> Unit,
-) {
-    Text(
-        text = label,
-        fontSize = 12.sp,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (fits) 1f else 0.4f),
-        modifier = Modifier.weight(1f),
-    )
-    ReorderArrowButton(
-        icon = painterResource(Res.drawable.ic_arrow_up),
-        contentDescription = stringResource(Res.string.preview_settings_move_up),
-        enabled = canMoveUp,
-        onClick = onMoveUp,
-    )
-    ReorderArrowButton(
-        icon = painterResource(Res.drawable.ic_arrow_down),
-        contentDescription = stringResource(Res.string.preview_settings_move_down),
-        enabled = canMoveDown,
-        onClick = onMoveDown,
-    )
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_close),
-        text = stringResource(Res.string.preview_settings_remove_output),
-        onClick = onRemove,
-        iconSize = 14.dp,
-        buttonSize = 24.dp,
-    )
-}
-
-/** Every output the panel can show, named the way the panel names it. */
-@Composable
-private fun previewOutputChoices(proj: ProjectionSettings): List<OutputChoice> {
-    return buildList {
-        proj.screenAssignments.forEachIndexed { i, assignment ->
-            add(
-                OutputChoice(
-                    Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, i),
-                    proj.screenLabelOr(assignment, stringResource(Res.string.screen_number, i + 1)),
-                )
-            )
-        }
-        proj.browserSourceOutputs.forEachIndexed { i, output ->
-            add(
-                OutputChoice(
-                    Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i),
-                    output.browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1)),
-                )
-            )
-        }
-        proj.ndiOutputs.forEachIndexed { i, output ->
-            add(
-                OutputChoice(
-                    Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, i),
-                    output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1)),
-                )
-            )
-        }
-        proj.omtOutputs.forEachIndexed { i, output ->
-            add(
-                OutputChoice(
-                    Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, i),
-                    output.omtLabelOr(stringResource(Res.string.omt_output_numbered, i + 1)),
-                )
-            )
-        }
     }
 }

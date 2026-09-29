@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SectionTranslation
 
 /**
  * The part of a song the "each slide" auto-fit measures, lifted out of `SongPresenter.kt` for the
@@ -69,3 +70,16 @@ internal fun slideFitSections(
         )
     }
 }
+
+/** The fitted size shared by every language, and -- when they are fitted one by one -- each language's own. */
+internal data class SongFit(val shared: Int, val perLanguage: Map<Int, Int>)
+
+/** [this] with only language [language]'s lines, as the primary's, and no others. */
+internal fun LyricSection.onlyLanguage(language: Int): LyricSection =
+    copy(lines = allLanguageLines().getOrElse(language) { emptyList() }, translations = emptyList())
+
+/** [this] with the lines of every language in [languages] left out, the others where they were. */
+internal fun LyricSection.withoutLanguages(languages: Set<Int>): LyricSection = copy(
+    lines = if (0 in languages) emptyList() else lines,
+    translations = translations.mapIndexed { i, t -> if (i + 1 in languages) SectionTranslation() else t },
+)

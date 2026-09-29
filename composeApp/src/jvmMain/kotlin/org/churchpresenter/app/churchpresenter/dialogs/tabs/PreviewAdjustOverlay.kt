@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -35,8 +36,10 @@ import churchpresenter.composeapp.generated.resources.profile_adjust_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_size
 import churchpresenter.composeapp.generated.resources.profile_adjust_width
 import kotlin.math.roundToInt
+import org.churchpresenter.app.churchpresenter.presenter.BoxMargins
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.app.churchpresenter.presenter.textBoxArea
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.theme.AppShape
@@ -51,7 +54,6 @@ private val SIZE_CORNER = 12.dp
 private val BAND_BAR = 4.dp
 private const val WIDTH_DOT_HEIGHT = 0.72f
 private const val SIZE_PER_OUTPUT_PX = 0.2f
-private const val MAX_MARGIN_PX = 500
 private val TEXT_SIZE_RANGE = 8..200
 internal const val FULL_PERCENT = 100f
 
@@ -103,6 +105,10 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
             .onGloballyPositioned { origin = it.boundsInWindow().topLeft }
             .testTag(ADJUST_OVERLAY_TAG),
     ) {
+        if (model.boxesOnly) {
+            model.boxes?.let { BoxHandles(it, Rect(0f, 0f, stageWidth.value, stageHeight.value), scale) }
+            return@Box
+        }
         Box(
             Modifier
                 .offset(frame.left, frame.top)
@@ -110,13 +116,24 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
                 .dashedBorder(MaterialTheme.semantic.adjustHandle, 2.dp),
         )
         // Under every handle: a block is large, and the bars at its edges must still be caught.
-        if (targets != null) BlockOutlines(targets, blockFrames)
-        MarginBars(model, frame, scale)
+        if (targets != null) BlockOutlines(targets, blockFrames, scale)
+        model.boxes?.let { boxes ->
+            val bandRect = model.band?.let { Rect(0f, bandTop.value, stageWidth.value, stageHeight.value) }
+            val area = textBoxArea(
+                outputWidth = stageWidth.value,
+                outputHeight = stageHeight.value,
+                options = boxes.options,
+                margins = BoxMargins(m.left * scale, m.top * scale, m.right * scale, m.bottom * scale),
+                band = bandRect,
+            )
+            BoxHandles(boxes, area, scale)
+        }
+        MarginBars(model, frame, scale, MarginRoom.of(output.width, output.height, model.band?.value))
         model.band?.let { BandBar(it, bandTop, stageWidth, stageHeight) }
         val inner = innerBox(frame, model.region?.value)
         model.region?.let { WidthDots(it, frame, inner) }
         MoveHandle(model, frame, scale)
-        if (targets != null) BlockGrips(targets, blockFrames, referenceFrame, referenceBounds, scale)
+        if (targets != null) BlockGrips(targets, referenceFrame, referenceBounds, scale)
         // The size corner sits on what it sizes -- the reference, or the picked block -- drawn last,
         // since that corner is often where the reference sits too.
         val sized = if (targets?.reference?.picked == true) referenceFrame
@@ -158,8 +175,11 @@ internal fun Modifier.adjustDrag(
 }
 
 /** One margin, the way its bar moves it: which edge, and which way along the drag it grows. */
-private enum class MarginEdge(val horizontal: Boolean, val sign: Int) {
-    TOP(true, 1), BOTTOM(true, -1), LEFT(false, 1), RIGHT(false, -1);
+private enum class MarginEdge(val horizontal: Boolean, val sign: Int, val side: MarginSide) {
+    TOP(true, 1, MarginSide.TOP),
+    BOTTOM(true, -1, MarginSide.BOTTOM),
+    LEFT(false, 1, MarginSide.LEFT),
+    RIGHT(false, -1, MarginSide.RIGHT);
 
     fun of(m: Margins): Int = when (this) {
         TOP -> m.top
@@ -178,7 +198,7 @@ private enum class MarginEdge(val horizontal: Boolean, val sign: Int) {
 
 /** The four blue bars, one centred on each edge, with the margin each one sets. */
 @Composable
-private fun MarginBars(model: AdjustModel, frame: AdjustFrame, scale: Float) {
+private fun MarginBars(model: AdjustModel, frame: AdjustFrame, scale: Float, room: MarginRoom) {
     var from by remember { mutableStateOf(model.margins.value) }
     val midX = frame.left + frame.width / 2
     val midY = frame.top + frame.height / 2
@@ -195,7 +215,7 @@ private fun MarginBars(model: AdjustModel, frame: AdjustFrame, scale: Float) {
         }
         MarginBar(x, y, edge, edge.of(model.margins.value), scale, { from = model.margins.value }) { total ->
             val along = if (edge.horizontal) total.y else total.x
-            val value = (edge.of(from) + along * edge.sign).roundToInt().coerceIn(0, MAX_MARGIN_PX)
+            val value = (edge.of(from) + along * edge.sign).roundToInt().coerceIn(0, room.maxFor(edge.side, from))
             model.margins.onChange(edge.set(from, value))
         }
     }

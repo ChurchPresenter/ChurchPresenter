@@ -28,6 +28,7 @@ import org.churchpresenter.settings.StageMonitorLayout
 import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
+import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.hasCustomZoneSizes
 import org.churchpresenter.settings.layoutSizes
 import org.churchpresenter.settings.toZone
@@ -93,7 +94,33 @@ internal fun ProfileStagePage(draft: AppSettings, onSettingsChange: ((AppSetting
         onDuration = { v -> update { copy(transitionDuration = v) } },
         reset = null,
     )
+    // Only the zones this layout draws, and the full screen, each can be moved out into a box.
+    val zones = sm.layout.slots + StageMonitorStyleZone.FULL_SCREEN
+    ItemBoxGroup(
+        items = zones.mapIndexed { index, zone ->
+            BoxItem(
+                zone.name,
+                zoneLabel(zone.toZone()),
+                TextBox(
+                    xPercent = STAGE_BOX_INSET + (index % 2) * STAGE_BOX_HALF,
+                    yPercent = STAGE_BOX_INSET + (index / 2 % 2) * STAGE_BOX_HALF,
+                    widthPercent = STAGE_BOX_SIZE,
+                    heightPercent = STAGE_BOX_SIZE,
+                ),
+            )
+        },
+        boxes = sm.textBoxes,
+        options = sm.textBoxOptions,
+        onBoxes = { boxes -> update { copy(textBoxes = boxes) } },
+        onOptions = { options -> update { copy(textBoxOptions = options) } },
+        paths = listOf("$STAGE_PATH.textBoxes", "$STAGE_PATH.textBoxOptions"),
+    )
 }
+
+// Where a zone's box starts: a quarter of the screen, laid out two by two in the zones' order.
+private const val STAGE_BOX_INSET = 2f
+private const val STAGE_BOX_HALF = 50f
+private const val STAGE_BOX_SIZE = 46f
 
 /**
  * LAYOUT: how many zones and in which arrangement, then the monitor drawn to scale -- every zone

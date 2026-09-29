@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import org.churchpresenter.app.churchpresenter.presenter.textOnly
+import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,7 +27,6 @@ import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_long
 import churchpresenter.composeapp.generated.resources.bible_preview_sample_verse_short
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
@@ -169,8 +170,9 @@ internal fun BiblePreviewPanel(
                         modifier = if (target.isLowerThird) {
                             Modifier
                         } else {
-                            Modifier.contentRegion(bible.contentRegion)
+                            Modifier.wholeOutputRegion(bible.contentRegion)
                         },
+                        textRegion = bible.contentRegion.textOnly(target.isLowerThird),
                         selectedVerses = selectedVerses,
                         appSettings = settings,
                         isLowerThird = target.isLowerThird,

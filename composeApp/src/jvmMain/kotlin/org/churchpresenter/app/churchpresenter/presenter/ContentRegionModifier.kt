@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import org.churchpresenter.settings.ContentRegion
@@ -84,6 +88,27 @@ internal fun Modifier.elementOffset(offset: ElementOffset?): Modifier {
             }
         },
     )
+}
+
+/** [region] applied to the whole presenter, background and all -- unless it keeps the background full screen. */
+internal fun Modifier.wholeOutputRegion(region: ContentRegion): Modifier =
+    if (region.movesBackground) contentRegion(region) else this
+
+/**
+ * The region the presenter places its text in by itself: [this] when it keeps the background full
+ * screen. None on a [lowerThird], whose band already is its region.
+ */
+internal fun ContentRegion.textOnly(lowerThird: Boolean): ContentRegion? =
+    takeUnless { movesBackground || lowerThird }
+
+/**
+ * The box a presenter lays its text out in, over a background that has already filled the screen:
+ * [region] when there is one, the whole presenter otherwise.
+ */
+@Composable
+internal fun TextRegionBox(region: ContentRegion?, content: @Composable BoxWithConstraintsScope.() -> Unit) {
+    val regionModifier = region?.let { Modifier.contentRegion(it) } ?: Modifier
+    BoxWithConstraints(Modifier.fillMaxSize().then(regionModifier), content = content)
 }
 
 /**

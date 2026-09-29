@@ -184,7 +184,14 @@ data class StageMonitorSettings(
     val fadeIn: Boolean = true,
     val fadeOut: Boolean = true,
     val crossfade: Boolean = false,
-    val transitionDuration: Float = DEFAULT_TRANSITION_MS
+    val transitionDuration: Float = DEFAULT_TRANSITION_MS,
+    /**
+     * Each item's own text box, keyed by [textBoxKey] with the name of the zone it places.
+     * An item with none, or with one turned off, is drawn where it always was.
+     */
+    val textBoxes: Map<String, TextBox> = emptyMap(),
+    /** How this page's boxes behave -- see [TextBoxOptions]. */
+    val textBoxOptions: TextBoxOptions = TextBoxOptions(),
 ) {
     /** Safe lookup that falls back to the built-in default zone for content types missing from older saved settings. */
     fun zoneFor(type: StageMonitorContentType): StageMonitorZone =

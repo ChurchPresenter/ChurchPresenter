@@ -201,6 +201,8 @@
 - **Linked profiles** — a profile can follow another and keep only what it changes: the overflow room is the sanctuary with a smaller font. Every value shows where it comes from, and one click reverts it, unlinks the profile or links it back.
 - **Style one translation or language** — set a look for all of them, then give one translation or song language a size, colour or position of its own.
 - **Adjust on the preview** — drag margins, position, width, text size and the band height straight on the picture, or open it across the window for finer steps. Click any song element, Bible translation or reference to point the settings at it and drag it on its own; Reset positions puts everything back.
+- **Text boxes** — give any piece of text on a profile page a box of its own: a song's title, number, label or one language of its lyrics, a Bible translation's verse or reference, a caption, a subtitle, a Q&A question or QR message, a dictionary word, a stage zone. Drag and resize it on the preview; the text shrinks to fit it, is cut off or spills over, sits at its top, middle or bottom, and can fill the box. Boxes can keep clear of each other and snap to guides, measured against the whole screen or inside the margins.
+- **Room to lay out** — margins go up to nine tenths of the screen, the gap between song languages is set per profile, each language can be fitted on its own, and the content region can move just the text while the background keeps the whole screen.
 - **See what you changed** — every setting a profile holds at other than its default is listed beside the preview, with the default and a Revert for each.
 - **Full screen or lower third** — present full-screen or as a lower-third band, per content type.
 - **Beautiful backgrounds** — solid colors, images, looping video, gradients or transparent — set defaults and per-type overrides.
@@ -211,6 +213,7 @@
 - **NDI output** — send live content over the network as an NDI® source and pick it up in OBS, vMix or a hardware switcher, with no capture card. Alpha mode carries genuine per-pixel transparency, so a lower third arrives already keyed — no second source, no downstream keyer. Fill-only and discrete fill + key are there for gear that wants them. Needs the free NDI Runtime, installed separately and detected automatically, exactly as VLC is.
 - **Typography that fits** — auto-fit text to the screen, with control over fonts, size, alignment, shadows and margins.
 - **Live preview** — always see exactly what's on screen, and lock any output to a chosen tab.
+- **Design the preview panel** — arrange the live previews the way the booth wants them: start a layout from a template, split areas across or down, drag the dividers, choose what each area shows and where it sits, keep several named layouts and switch between them, and let a layout fill the panel.
 
 **Source locations:**
 - `PresenterScreen.kt` — output window
@@ -242,6 +245,12 @@
 - `data/settings/ProfileDefaults.kt`, `dialogs/tabs/ProfileLinkCard.kt` — what a profile changes from the defaults, listed beside the preview with Revert
 - `dialogs/tabs/CustomizePane.kt`, `dialogs/tabs/ProfileFormStages.kt`, `dialogs/tabs/PreviewBackgroundLayer.kt`, `dialogs/tabs/Customize*.kt` — the picture beside each page, with the output's real background
 - `data/settings/OutputProfile.kt`, `data/settings/OutputProfileResolution.kt` — the profile, and what an output renders with
+- `data/settings/TextBox.kt` — text boxes: the box, its options and the keys items are boxed under
+- `presenter/TextBoxLayout.kt`, `presenter/SongBoxLayer.kt`, `presenter/BibleBoxLayer.kt`, `presenter/SongSlideFit.kt` — drawing boxed items, and fitting what is left and each language on its own
+- `dialogs/tabs/TextBoxRows.kt`, `dialogs/tabs/BoxItem.kt`, `dialogs/tabs/ItemBoxGroup.kt`, `dialogs/tabs/SongBoxRows.kt`, `dialogs/tabs/BibleBoxTarget.kt`, `dialogs/tabs/PreviewAdjustBoxes.kt` — a page's box rows, and moving and resizing boxes on the preview
+- `dialogs/tabs/MarginRoom.kt`, `presenter/ContentRegionModifier.kt`, `dialogs/tabs/ContentBackgroundOwn.kt` — how far margins go, a region that moves only the text, and a content background that remembers its own
+- `data/settings/PreviewLayouts.kt`, `data/settings/PreviewLayoutSettings.kt` — preview layouts: the area tree and the layouts kept on the projection settings
+- `composables/PreviewLayoutView.kt`, `composables/PreviewLayoutTemplate.kt`, `composables/PreviewGroupsPopover.kt` — the panel drawn and edited as its layout says, the templates, and the gear's layout list
 
 ## Stage Monitor
 - **Confidence display for the platform** — give worship leaders and speakers their own screen showing the current slide, next slide, a clock, the countdown timer, section labels and presenter notes — in vertical, horizontal or four-quadrant layouts.

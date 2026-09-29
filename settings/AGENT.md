@@ -116,6 +116,21 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **"Different from defaults" compares with `defaultBaseline()`** (`ProfileDefaults.kt`): the profile a
   new one would be. A field that is working state rather than a setting -- like the All layers and
   `ownStyleKeys` -- belongs in its `BOOKKEEPING_PATHS`, or every profile lists it as a change.
+  `BackgroundConfig.ownBackgroundType` -- the type a surface remembers while it follows the
+  profile's default -- is one of them.
+- **Text boxes are per profile** (`TextBox.kt`): every category that draws text carries
+  `textBoxes`, a map from `textBoxKey(item, lowerThird, language)` -- `"LYRICS#1@LT"` -- to a
+  `TextBox` in percent of its area, and `textBoxOptions` for the page. Songs keep theirs on
+  `SongLayoutExtras`; Bible on `BibleSettings` itself, keyed by translation file name. A box that is
+  turned off keeps its rectangle, so a key's presence says nothing about whether it draws -- read
+  `boxAt(key).enabled`. A new item that gets a box names its key in a constant beside the others.
+- **Preview layouts are one per install**, on `ProjectionSettings` (`previewLayouts`,
+  `activePreviewLayout`, `previewLayoutFillsPanel`, `listUnplacedOutputs`), not on a profile: they
+  arrange the operator's own panel, not an output. The tree operations are in `PreviewLayouts.kt`
+  and never mutate -- each returns the new root.
+- **Version 19** moves the four per-translation Bible offsets onto boxes (`migrateBibleOffsetsToBoxes`),
+  and **version 20** turns preview groups into one layout (`migratePreviewGroupsToLayout`), leaving
+  outputs no group held out of the panel as they were.
 
 ## Gates
 

@@ -5,6 +5,10 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.platform.testTag
+import churchpresenter.composeapp.generated.resources.preview_layout_done
+import churchpresenter.composeapp.generated.resources.preview_layout_edit
 import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
@@ -28,6 +32,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import org.churchpresenter.settings.activeLayout
+import org.churchpresenter.settings.updateLayout
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -127,7 +133,6 @@ import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.app.churchpresenter.utils.OutputKind
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.settings.visibleMembers
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -159,6 +164,10 @@ fun LivePreviewPanel(
     qaDisplayUrl: String = "",
     sttManager: STTManager? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    /** Whether the active layout is being edited -- every area carries its controls. */
+    editingLayout: Boolean = false,
+    /** Ends editing the layout; the Done bar above it calls this. */
+    onDoneEditing: () -> Unit = {},
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
@@ -169,10 +178,14 @@ fun LivePreviewPanel(
     val displayCount = realWindowCount + if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
     val mediaViewModel = LocalMediaViewModel.current
 
-    // Scrollable: with several outputs (displays, dev-fallback windows, browser sources, NDI) the
+    val layout = proj.activeLayout()
+    // A layout that fills the panel takes its height and does not scroll; otherwise the panel is
+    // scrollable: with several outputs (displays, dev-fallback windows, browser sources, NDI) the
     // previews are taller than the sidebar and would otherwise be clipped at the bottom.
+    val fills = layout != null && proj.previewLayoutFillsPanel
     Column(
-        modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+        modifier = modifier.fillMaxWidth()
+            .then(if (fills) Modifier else Modifier.verticalScroll(rememberScrollState())),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         val entries = previewEntries(
@@ -180,21 +193,46 @@ fun LivePreviewPanel(
             presenterManager, appSettings, serverUrl, qaDisplayUrl, sttManager, onSettingsChange,
         )
 
-        // With no group the panel lists every output, one per row. Once groups exist they are the
-        // whole panel: an output no group claims is deliberately left out.
+        // With no layout the panel lists every output, one per row. With one, the layout draws the
+        // outputs its areas name, and the rest are listed under it or left out as the panel says.
         val byKey = entries.associateBy { it.key }
-        val placed = mutableSetOf<String>()
-        for (group in proj.previewGroups) {
-            val cells = group.visibleMembers().mapNotNull { key -> byKey[key]?.takeIf { placed.add(key) } }
-            if (!group.hidden && cells.isNotEmpty()) {
-                PreviewGroupGrid(
-                    columns = group.shape.columns,
-                    cells = cells.map { entry -> { m: Modifier -> entry.content(m, true) } },
-                )
-            }
-        }
-        if (proj.previewGroups.isEmpty()) {
+        if (layout == null) {
             for (entry in entries) entry.content(Modifier.fillMaxWidth(), false)
+        } else {
+            if (editingLayout) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(Res.string.preview_layout_edit),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = onDoneEditing, modifier = Modifier.testTag(PREVIEW_LAYOUT_DONE_TAG)) {
+                        Text(stringResource(Res.string.preview_layout_done))
+                    }
+                }
+            }
+            val edits = if (editingLayout) {
+                PreviewLayoutEdits(layout.root) { root ->
+                    onSettingsChange { s ->
+                        val updated = s.projectionSettings.updateLayout(layout.id) { it.copy(root = root) }
+                        s.copy(projectionSettings = updated)
+                    }
+                }
+            } else {
+                null
+            }
+            PreviewLayoutView(
+                root = layout.root,
+                entries = byKey,
+                fills = fills,
+                headerAllowance = if (proj.showOutputLabels || proj.showOutputModes) PREVIEW_HEADER_ALLOWANCE else 0.dp,
+                edits = edits,
+                modifier = if (fills) Modifier.weight(1f) else Modifier,
+            )
+            if (proj.listUnplacedOutputs) {
+                val shown = layout.root.outputs().toSet()
+                for (entry in entries) if (entry.key !in shown) entry.content(Modifier.fillMaxWidth(), false)
+            }
         }
 
         // Media controls — for the clip this panel can still do something with; see
@@ -217,6 +255,12 @@ fun LivePreviewPanel(
         }
     }
 }
+
+/** Test handle for the Done button that ends editing the layout. */
+internal const val PREVIEW_LAYOUT_DONE_TAG = "preview_layout_done"
+
+/** The height a preview's name line takes above its picture, for fitting a preview to an area's height. */
+private val PREVIEW_HEADER_ALLOWANCE = 26.dp
 
 /**
  * Whether the panel's transport row can still do anything for the loaded clip.
@@ -314,13 +358,7 @@ private class PreviewContext(
      * are all chosen by [kind] here rather than passed in, where they could be crossed.
      */
     fun entry(kind: OutputKind, index: Int, output: ScreenAssignment, label: String): PreviewEntry {
-        val keyKind = when (kind) {
-            OutputKind.SCREEN -> Constants.PREVIEW_OUTPUT_SCREEN
-            OutputKind.BROWSER_SOURCE -> Constants.PREVIEW_OUTPUT_BROWSER_SOURCE
-            OutputKind.NDI -> Constants.PREVIEW_OUTPUT_NDI
-            OutputKind.OMT -> Constants.PREVIEW_OUTPUT_OMT
-        }
-        return PreviewEntry(Constants.previewOutputKey(keyKind, index)) { m, grouped ->
+        return PreviewEntry.of(kind, index, label, output) { m, grouped ->
             val locks = when (kind) {
                 OutputKind.SCREEN -> presenterManager.screenLocks.value
                 OutputKind.BROWSER_SOURCE -> presenterManager.browserSourceLocks.value
@@ -375,8 +413,41 @@ private class PreviewContext(
     }
 }
 
-/** One output's preview, identified by its `Constants.previewOutputKey` so a group can claim it. */
-private class PreviewEntry(val key: String, val content: @Composable (Modifier, Boolean) -> Unit)
+/**
+ * One output's preview, identified by its `Constants.previewOutputKey` so a layout's area can claim
+ * it, with the name it goes by and the shape of its picture -- width over height -- for fitting it
+ * into an area of a given height.
+ */
+internal class PreviewEntry(
+    val key: String,
+    val label: String,
+    val aspect: Float,
+    val content: @Composable (Modifier, Boolean) -> Unit,
+) {
+    companion object {
+        /** Output [index] of [kind], drawn by [content] at [assignment]'s own shape. */
+        fun of(
+            kind: OutputKind,
+            index: Int,
+            label: String,
+            assignment: ScreenAssignment,
+            content: @Composable (Modifier, Boolean) -> Unit,
+        ): PreviewEntry {
+            val prefix = when (kind) {
+                OutputKind.SCREEN -> Constants.PREVIEW_OUTPUT_SCREEN
+                OutputKind.BROWSER_SOURCE -> Constants.PREVIEW_OUTPUT_BROWSER_SOURCE
+                OutputKind.NDI -> Constants.PREVIEW_OUTPUT_NDI
+                OutputKind.OMT -> Constants.PREVIEW_OUTPUT_OMT
+            }
+            return PreviewEntry(
+                Constants.previewOutputKey(prefix, index),
+                label,
+                outputSizeOf(assignment, kind).aspectRatio,
+                content,
+            )
+        }
+    }
+}
 
 @Composable
 private fun SingleDisplayPreview(

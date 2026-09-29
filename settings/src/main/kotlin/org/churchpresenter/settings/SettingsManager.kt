@@ -32,6 +32,12 @@ import kotlinx.serialization.json.jsonPrimitive
 /** The key the band height is stored under, in all three of its homes. */
 private const val LOWER_THIRD_HEIGHT_KEY = "lowerThirdHeightPercent"
 
+/** Version 19: an offset no further down the frame than this percentage becomes a box aligned to its top. */
+private const val OFFSET_TOP_THIRD = 33
+
+/** Version 19: an offset at least this far down the frame becomes a box aligned to its bottom. */
+private const val OFFSET_BOTTOM_THIRD = 67
+
 private const val VERSION_HIDDEN_TABS = 5
 
 /** The preview shape a profile migrated from the old vertical lower-third mode is given. */
@@ -46,6 +52,9 @@ private const val VERSION_CALENDAR_BUTTON = 11
 
 /** A quick-tray tile's lower-third half may inherit the output's band — see [SettingsManager]. */
 private const val VERSION_QUICK_BACKGROUND_INHERITS = 17
+
+/** Version 20: the preview panel's groups became a layout. */
+private const val VERSION_PREVIEW_LAYOUTS = 20
 
 /** What the tray's old constructor seeded both halves of a tile with: opaque black, nothing else. */
 private val SEEDED_BLACK = SongBackground(type = SongBackgroundType.COLOR, color = "#000000")
@@ -136,6 +145,7 @@ class SettingsManager {
         15 to ::migrateScaleModesIntoProfiles,
         16 to ::migrateTitleSlideNumberStyle,
         18 to ::migrateSectionLabelStyle,
+        19 to ::migrateBibleOffsetsToBoxes,
     )
 
     /** The flat song-number field each [SongCreditStyle] property of the title slide's is seeded from. */
@@ -222,6 +232,90 @@ class SettingsManager {
                 mapOf("fullScreen" to style, "lowerThird" to style),
         )
         JsonObject(song + ("layoutExtras" to JsonObject(extras + ("sectionLabel" to migrated))))
+    }
+
+    /**
+     * Schema version 19. A Bible translation's verse text and reference are placed by a text box,
+     * where they used to take an X/Y offset, so every offset becomes the box that places it.
+     *
+     * An offset put its element somewhere in the frame inside the margins -- the band's, on a lower
+     * third -- by a percentage of the room left around it. The box it becomes covers that frame, so
+     * [TextBoxOptions.insideMargins] is turned on for any page that had one, and places the text
+     * by its old vertical percentage: the top, the middle or the bottom of the frame. Across, the
+     * element's own alignment places it, as it does everywhere a box is used.
+     *
+     * Runs over the document's `bibleSettings` and every profile's own copy of it.
+     */
+    private fun migrateBibleOffsetsToBoxes(raw: String): String = mapEveryBibleSettings(raw) { bible ->
+        val translations = bible["translations"]?.jsonArray ?: return@mapEveryBibleSettings bible
+        val boxes = mutableMapOf<String, JsonElement>()
+        val cleaned = translations.map { element ->
+            val translation = element as? JsonObject ?: return@map element
+            val fileName = translation["fileName"]?.jsonPrimitive?.contentOrNull.orEmpty()
+            bibleOffsetFields.forEach { (field, item, lowerThird) ->
+                val offset = translation[field] as? JsonObject ?: return@forEach
+                boxes[textBoxKey(item, lowerThird, fileName)] = boxForOffset(offset)
+            }
+            JsonObject(translation.filterKeys { key -> bibleOffsetFields.none { it.first == key } })
+        }
+        if (boxes.isEmpty()) return@mapEveryBibleSettings bible
+        val existing = bible["textBoxes"]?.jsonObject ?: JsonObject(emptyMap())
+        val options = bible["textBoxOptions"]?.jsonObject ?: JsonObject(emptyMap())
+        JsonObject(
+            bible + mapOf(
+                "translations" to JsonArray(cleaned),
+                "textBoxes" to JsonObject(boxes + existing),
+                "textBoxOptions" to JsonObject(options + ("insideMargins" to JsonPrimitive(true))),
+            ),
+        )
+    }
+
+    /** Each offset field version 19 turns into a box: the field, the box's item, and whether it is the band's. */
+    private val bibleOffsetFields = listOf(
+        Triple("textOffset", BIBLE_TEXT_BOX, false),
+        Triple("referenceOffset", BIBLE_REFERENCE_BOX, false),
+        Triple("lowerThirdTextOffset", BIBLE_TEXT_BOX, true),
+        Triple("lowerThirdReferenceOffset", BIBLE_REFERENCE_BOX, true),
+    )
+
+    /** The box covering the whole frame that places its text where [offset]'s vertical percentage did. */
+    private fun boxForOffset(offset: JsonObject): JsonObject {
+        val y = offset["yPercent"]?.jsonPrimitive?.intOrNull ?: ElementOffset.CENTRE
+        val vertical = when {
+            y <= OFFSET_TOP_THIRD -> Constants.TOP
+            y >= OFFSET_BOTTOM_THIRD -> Constants.BOTTOM
+            else -> Constants.MIDDLE
+        }
+        return JsonObject(
+            mapOf(
+                "enabled" to JsonPrimitive(true),
+                "xPercent" to JsonPrimitive(0f),
+                "yPercent" to JsonPrimitive(0f),
+                "widthPercent" to JsonPrimitive(TextBox.FULL_PERCENT),
+                "heightPercent" to JsonPrimitive(TextBox.FULL_PERCENT),
+                "vertical" to JsonPrimitive(vertical),
+            ),
+        )
+    }
+
+    /** [transform] applied to the document's `bibleSettings` and to every profile's own copy. */
+    private fun mapEveryBibleSettings(raw: String, transform: (JsonObject) -> JsonObject): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val seeded = root["bibleSettings"]?.jsonObject?.let(transform)
+        val projection = root["projectionSettings"]?.jsonObject
+        val profiles = projection?.get("outputProfiles")?.jsonArray
+        val newProfiles = profiles?.map { element ->
+            val profile = element as? JsonObject ?: return@map element
+            val bible = profile["bibleSettings"]?.jsonObject ?: return@map element
+            JsonObject(profile + ("bibleSettings" to transform(bible)))
+        }
+        var updated = root
+        if (seeded != null) updated = JsonObject(updated + ("bibleSettings" to seeded))
+        if (projection != null && newProfiles != null) {
+            val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(newProfiles)))
+            updated = JsonObject(updated + ("projectionSettings" to newProjection))
+        }
+        return updated.toString()
     }
 
     /** The flat fields version 18 folds into the label's per-output [SongCreditStyle]; same names there. */
@@ -379,6 +473,7 @@ class SettingsManager {
         if (fromVersion < VERSION_QUICK_BACKGROUND_INHERITS) {
             settings = migrateQuickBackgroundLowerThird(settings)
         }
+        if (fromVersion < VERSION_PREVIEW_LAYOUTS) settings = migratePreviewGroupsToLayout(settings)
         // The primary/secondary-bible output shorthand ("primary"/"secondary" bibleMode, converted
         // to a position in the stack) used to be migrated here as a typed, per-[ScreenAssignment]
         // step gated on `fromVersion < 6`. An output no longer carries `bibleMode` at all -- that
@@ -570,6 +665,24 @@ class SettingsManager {
      * band is a picture, a gradient, a dimmed black or any other colour comes through untouched.
      * A black band that *was* wanted is two clicks to set again, now that the switch exists.
      */
+    /**
+     * Version 20. The preview panel's groups become one layout that draws them the same -- see
+     * [layoutFromGroups] -- and outputs no group held stay out of the panel, as they did. A panel with
+     * no groups keeps no layout, which is still every output listed one per row.
+     */
+    private fun migratePreviewGroupsToLayout(settings: AppSettings): AppSettings {
+        val projection = settings.projectionSettings
+        if (projection.previewLayouts.isNotEmpty()) return settings
+        val layout = layoutFromGroups(projection.previewGroups, name = "") ?: return settings
+        return settings.copy(
+            projectionSettings = projection.copy(
+                previewLayouts = listOf(layout),
+                activePreviewLayout = layout.id,
+                listUnplacedOutputs = false,
+            ),
+        )
+    }
+
     private fun migrateQuickBackgroundLowerThird(settings: AppSettings): AppSettings {
         if (settings.quickBackgrounds.none { it.lowerThirdBackground == SEEDED_BLACK }) return settings
         return settings.copy(

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,18 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.zxing.BarcodeFormat
@@ -40,8 +44,14 @@ import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qr_code
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.settings.QASettings
 import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.settings.QASettings
+import org.churchpresenter.settings.QA_QR_CODE_BOX
+import org.churchpresenter.settings.QA_QR_MESSAGE_BOX
+import org.churchpresenter.settings.QA_QUESTION_BOX
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.boxAt
+import org.churchpresenter.settings.textBoxKey
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -102,7 +112,11 @@ fun QAPresenter(
             .graphicsLayer { alpha = transitionAlpha },
         contentAlignment = boxAlignment
     ) {
-        if (question != null) {
+        val questionBox = qaSettings.textBoxes.boxAt(textBoxKey(QA_QUESTION_BOX, lowerThird = false))
+        if (question != null && questionBox.enabled) {
+            val area = Rect(0f, 0f, maxWidth.value, maxHeight.value)
+            BoxedQuestion(question, qaSettings, questionBox, textStyle, cardBg, area)
+        } else if (question != null) {
             val textMeasurer = rememberTextMeasurer()
             // Measured in dp, not in pixels. `calculateAutoFitFontSize` measures at `Density(1f)`
             // and returns a size that is then drawn as `.sp`, which the platform scales by the
@@ -162,13 +176,27 @@ fun QAQRCodePresenter(
         parseHexColor(qaSettings.qrBackgroundColor).copy(alpha = qaSettings.qrBackgroundOpacity / 100f).toArgb()
     }
     val qrBitmap = remember(url, qrFgArgb, qrBgArgb) { generateQRCodeBitmap(url, 512, qrFgArgb, qrBgArgb) }
+    val codeBox = qaSettings.textBoxes.boxAt(textBoxKey(QA_QR_CODE_BOX, lowerThird = false))
+    val messageBox = qaSettings.textBoxes.boxAt(textBoxKey(QA_QR_MESSAGE_BOX, lowerThird = false))
+    val message = qaSettings.qrCodeMessage.ifEmpty { stringResource(Res.string.qa_qr_message_default) }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .graphicsLayer { alpha = transitionAlpha },
         contentAlignment = Alignment.Center
     ) {
+        val area = Rect(0f, 0f, maxWidth.value, maxHeight.value)
+        if (codeBox.enabled && qrBitmap != null) {
+            BoxedItem(codeBox.rectIn(area), codeBox, Constants.CENTER, textBoxKey(QA_QR_CODE_BOX, false)) {
+                QRCodeImage(qrBitmap, isKey, Modifier.fillMaxSize())
+            }
+        }
+        if (messageBox.enabled) {
+            BoxedQRMessage(message, textColor, messageBox, messageBox.rectIn(area))
+        }
+        // Whatever is not boxed keeps the card it has always been drawn in.
+        if (codeBox.enabled && messageBox.enabled) return@BoxWithConstraints
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -176,7 +204,7 @@ fun QAQRCodePresenter(
                 .background(bgColor)
                 .padding(48.dp)
         ) {
-            if (qrBitmap != null) {
+            if (qrBitmap != null && !codeBox.enabled) {
                 if (isKey) {
                     Box(
                         modifier = Modifier
@@ -193,12 +221,93 @@ fun QAQRCodePresenter(
                     )
                 }
             }
-            Text(
-                text = qaSettings.qrCodeMessage.ifEmpty { stringResource(Res.string.qa_qr_message_default) },
-                color = textColor,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
+            if (!messageBox.enabled) {
+                Text(
+                    text = message,
+                    color = textColor,
+                    fontSize = QR_MESSAGE_SIZE.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+/** The QR code's message size, in the points the card draws it at. */
+private const val QR_MESSAGE_SIZE = 32
+
+/** The QR code filling [modifier]'s room at its own shape -- a white square on a key output. */
+@Composable
+private fun QRCodeImage(bitmap: ImageBitmap, isKey: Boolean, modifier: Modifier) {
+    if (isKey) {
+        Box(modifier.aspectRatio(1f).background(Color.White))
+    } else {
+        Image(bitmap = bitmap, contentDescription = stringResource(Res.string.qr_code), modifier = modifier)
+    }
+}
+
+/** The QR code's message in its own box, fitted to it as the box says. */
+@Composable
+private fun BoxedQRMessage(message: String, color: Color, box: TextBox, rect: Rect) {
+    val measurer = rememberTextMeasurer()
+    val style = TextStyle(fontWeight = FontWeight.Medium)
+    val size = remember(message, rect, box) {
+        fitInBox(
+            measurer,
+            BoxFitText(AnnotatedString(message), style, QR_MESSAGE_SIZE),
+            box,
+            IntSize(rect.width.toInt(), rect.height.toInt()),
+        )
+    }
+    BoxedItem(rect, box, Constants.CENTER, textBoxKey(QA_QR_MESSAGE_BOX, false)) {
+        Text(text = message, color = color, fontSize = size.sp, style = style, textAlign = TextAlign.Center)
+    }
+}
+
+/**
+ * The question's card in its own box: the text fitted to the box less the card's own padding, and
+ * the card placed in the box by its vertical setting and the page's alignment.
+ */
+@Composable
+private fun BoxedQuestion(
+    question: Question,
+    qaSettings: QASettings,
+    box: TextBox,
+    textStyle: TextStyle,
+    cardBg: Color,
+    area: Rect,
+) {
+    val rect = box.rectIn(area)
+    val inner = CARD_INNER_PADDING.value * 2
+    val measurer = rememberTextMeasurer()
+    val fontSize = remember(question.text, rect, box, qaSettings.fontSize) {
+        fitInBox(
+            measurer,
+            BoxFitText(AnnotatedString(question.text), textStyle, qaSettings.fontSize),
+            box,
+            IntSize((rect.width - inner).toInt(), (rect.height - inner).toInt()),
+        )
+    }
+    BoxedItem(rect, box, qaSettings.horizontalAlignment, textBoxKey(QA_QUESTION_BOX, false)) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(24.dp))
+                .background(cardBg)
+                .padding(CARD_INNER_PADDING),
+            contentAlignment = Alignment.Center,
+        ) {
+            val painter = rememberTextBackdropPainter(qaSettings.backdrop)
+            OutlinedText(
+                modifier = painter.modifier,
+                onTextLayout = painter::onTextLayout,
+                text = question.text,
+                outline = qaSettings.outline,
+                scaleFactor = fontSize.toFloat() / qaSettings.fontSize.coerceAtLeast(1),
+                color = Color.Unspecified,
+                style = textStyle,
+                fontSize = fontSize.sp,
+                fillWidth = false,
             )
         }
     }

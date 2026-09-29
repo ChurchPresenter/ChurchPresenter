@@ -48,7 +48,6 @@ import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.BackgroundSurface
 import org.churchpresenter.settings.fieldKeys
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.AppShape
 import org.jetbrains.compose.resources.stringResource
 
@@ -148,11 +147,8 @@ internal fun ContentBackgroundGroup(
                     // Own on a surface still following the app's own takes it over as it is.
                     if (picked == source && (owned || picked != ContentBackgroundSource.OWN)) return@RowSegmented
                     val next = when (picked) {
-                        ContentBackgroundSource.PROFILE_DEFAULT ->
-                            config.copy(backgroundType = scope.inheritType.orEmpty())
-                        // Seeded from what was showing, so taking it over starts from the same picture
-                        // rather than from black.
-                        ContentBackgroundSource.OWN -> seedFrom(backgrounds.resolvedConfigFor(scope), config)
+                        ContentBackgroundSource.PROFILE_DEFAULT -> config.followingDefault(scope)
+                        ContentBackgroundSource.OWN -> config.ownAgain(backgrounds.resolvedConfigFor(scope))
                     }
                     onProfileChange(profile.withOwnSurface(scope, backgrounds, next))
                 },
@@ -191,20 +187,6 @@ internal fun ownershipEdit(
         onProfileChange(profile.withOwnSurface(scope, updated, updated.configFor(scope)))
     }
 }
-
-/** [resolved]'s picture on [own]'s other fields -- a surface taken over keeps the look it had. */
-private fun seedFrom(resolved: BackgroundConfig, own: BackgroundConfig): BackgroundConfig = own.copy(
-    backgroundType = resolved.backgroundType.takeUnless {
-        it == Constants.BACKGROUND_DEFAULT || it == Constants.BACKGROUND_FOLLOW_DEFAULT
-    } ?: Constants.BACKGROUND_COLOR,
-    backgroundColor = resolved.backgroundColor,
-    backgroundImage = resolved.backgroundImage,
-    backgroundVideo = resolved.backgroundVideo,
-    backgroundOpacity = resolved.backgroundOpacity,
-    dim = resolved.dim,
-    blur = resolved.blur,
-    camera = resolved.camera,
-)
 
 /**
  * "Comes from: App default · Black › Sanctuary default · worship.jpg › Youth night Bible · uses

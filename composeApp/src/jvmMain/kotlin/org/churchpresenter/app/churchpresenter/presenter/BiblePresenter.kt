@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleStyleElement
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
@@ -60,7 +62,7 @@ import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropP
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.ElementOffset
+import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualColumns
@@ -159,28 +161,6 @@ internal fun BibleTranslationSettings.textOutlineFor(lowerThird: Boolean): TextO
 internal fun BibleTranslationSettings.referenceOutlineFor(lowerThird: Boolean): TextOutline =
     if (lowerThird) lowerThirdReferenceOutline else referenceOutline
 
-/**
- * Where the verse text sits, or null while it is laid out in the stack as ever.
- *
- * A non-null offset takes the element out of the reference/verse column, so `referencePosition`
- * (above or below) stops applying to whichever of the pair has one -- there is no "above" left to be
- * when the two are placed independently.
- *
- * **The band has its own pair now.** This returned null for a band while only the two grid searches
- * knew how to account for a positioned half; the band's two hand-rolled layouts -- the side-by-side
- * pair and the single column -- have since been given the same `stacked`/`positioned` split, so
- * there is no longer a path that would place an element the fit search had measured into the stack.
- * That split is the whole of it: an offset honoured at draw time only would let a half grow past the
- * band and be clipped, and one measured into the sum would shrink the stack for height the half no
- * longer occupies.
- */
-internal fun BibleTranslationSettings.textOffsetFor(lowerThird: Boolean): ElementOffset? =
-    if (lowerThird) lowerThirdTextOffset else textOffset
-
-/** [textOffsetFor]'s reference twin, per output in the same way. */
-internal fun BibleTranslationSettings.referenceOffsetFor(lowerThird: Boolean): ElementOffset? =
-    if (lowerThird) lowerThirdReferenceOffset else referenceOffset
-
 internal fun buildRefText(verse: SelectedVerse, translation: BibleTranslationSettings): String {
     val label = if (translation.showAbbreviation) {
         translation.customAbbreviation.trim().ifBlank { verse.bibleAbbreviation.trim() }
@@ -209,6 +189,8 @@ fun BiblePresenter(
     crossfadeEnabled: Boolean = false,
     /** Positions in the translation stack this output shows; empty means all of them. */
     bibleTranslations: List<Int> = emptyList(),
+    /** Full screen: the region the text alone is placed in, the background filling the screen -- see [textOnly]. */
+    textRegion: ContentRegion? = null,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val bs = appSettings.bibleSettings
@@ -576,7 +558,6 @@ fun BiblePresenter(
             .then(if (!isLowerThird && !resolvedBg.isBlurred) bgModifier else Modifier)
     ) {
         val density = LocalDensity.current
-        val scaleFactor = presenterScale(maxWidth, maxHeight)
         val blurRadius = backgroundBlurRadius(resolvedBg.blurReferencePx, maxWidth)
         PresenterBackgroundLayers(
             background = resolvedBg,
@@ -584,6 +565,9 @@ fun BiblePresenter(
             isLowerThird = isLowerThird,
             blurRadius = blurRadius,
         )
+        // Everything but the background, in the region when the background stays full screen.
+        TextRegionBox(textRegion) {
+        val scaleFactor = presenterScale(maxWidth, maxHeight)
 
         // Scale shadow to be visible at projection resolution
         fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
@@ -864,13 +848,12 @@ fun BiblePresenter(
                             rememberTextBackdropPainter(item.textBackdropFor(isLowerThird))
                         val itemRefPainter =
                             rememberTextBackdropPainter(item.referenceBackdropFor(isLowerThird))
-                        val refOffset = item.referenceOffsetFor(isLowerThird)
-                        val textOffset = item.textOffsetFor(isLowerThird)
+                        // A boxed half is drawn in its box by the box layer, and leaves this block.
+                        val refBoxed = bs.isBoxed(item, BibleStyleElement.REFERENCE, isLowerThird)
+                        val textBoxed = bs.isBoxed(item, BibleStyleElement.TEXT, isLowerThird)
 
-                        // The two halves as their own composables, so the stacked and the
-                        // positioned paths draw the identical thing and cannot drift apart. A
-                        // positioned half drops `fillMaxWidth()`: filling the width leaves no room
-                        // to be moved through, and the offset would silently do nothing on X.
+                        // The two halves as their own composables, drawn the same wherever the
+                        // column puts them.
                         val reference: @Composable (Boolean) -> Unit = { fill ->
                             OutlinedText(
                                 text = itemRefText(item, buildRefText(verse, item)),
@@ -906,30 +889,10 @@ fun BiblePresenter(
                             )
                         }
 
-                        if (refOffset == null && textOffset == null) {
-                            // Every existing document: the column, unwrapped, exactly as before.
-                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                if (refPosition == Constants.POSITION_ABOVE) reference(true)
-                                verseText(true)
-                                if (refPosition == Constants.POSITION_BELOW) reference(true)
-                            }
-                        } else {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                                        .align(Alignment.BottomCenter),
-                                ) {
-                                    if (refPosition == Constants.POSITION_ABOVE && refOffset == null) reference(true)
-                                    if (textOffset == null) verseText(true)
-                                    if (refPosition == Constants.POSITION_BELOW && refOffset == null) reference(true)
-                                }
-                                if (textOffset != null) {
-                                    Box(modifier = Modifier.elementOffset(textOffset)) { verseText(false) }
-                                }
-                                if (refOffset != null) {
-                                    Box(modifier = Modifier.elementOffset(refOffset)) { reference(false) }
-                                }
-                            }
+                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                            if (refPosition == Constants.POSITION_ABOVE && !refBoxed) reference(true)
+                            if (!textBoxed) verseText(true)
+                            if (refPosition == Constants.POSITION_BELOW && !refBoxed) reference(true)
                         }
                     }
 
@@ -1008,30 +971,19 @@ fun BiblePresenter(
                                 constraints = Constraints(maxWidth = itemWidth(scale)),
                             ).size.height
                         }
-                        // Only the halves still stacked in the column add up; a positioned one is
-                        // placed in the band on its own and is checked against the band by itself
-                        // below. Both are needed: measuring a positioned half into the sum would
-                        // shrink the stack for height it no longer occupies, and leaving it out of
-                        // the search altogether would let it grow past the band and be clipped --
-                        // which is what an offset applied only at draw time would have done.
-                        fun stackedHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int =
-                            (if (item.textOffsetFor(isLowerThird) == null) textHeight(verse, item, scale) else 0) +
-                                (if (item.referenceOffsetFor(isLowerThird) == null) {
-                                    refHeight(verse, item, scale)
-                                } else {
-                                    0
-                                })
-                        fun positionedFits(
-                            verse: SelectedVerse,
-                            item: BibleTranslationSettings,
-                            scale: Float,
-                            band: Int,
-                        ): Boolean {
-                            val textOk = item.textOffsetFor(isLowerThird) == null ||
-                                textHeight(verse, item, scale) <= band
-                            val refOk = item.referenceOffsetFor(isLowerThird) == null ||
-                                refHeight(verse, item, scale) <= band
-                            return textOk && refOk
+                        // Only the halves still in the column add up: a boxed one is fitted in its box.
+                        fun stackedHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
+                            val textH = if (bs.isBoxed(item, BibleStyleElement.TEXT, isLowerThird)) {
+                                0
+                            } else {
+                                textHeight(verse, item, scale)
+                            }
+                            val refH = if (bs.isBoxed(item, BibleStyleElement.REFERENCE, isLowerThird)) {
+                                0
+                            } else {
+                                refHeight(verse, item, scale)
+                            }
+                            return textH + refH
                         }
                         // What one translation has to fit in: the frame less this axis's gaps, split
                         // over the rows. One row and it is the whole height, which is what side by
@@ -1048,10 +1000,7 @@ fun BiblePresenter(
                         // own band's text out through the clip.
                         fun everyBlockFits(scale: Float): Boolean {
                             val band = bandHeight(scale)
-                            return visible.all { (verse, item) ->
-                                stackedHeight(verse, item, scale) <= band &&
-                                    positionedFits(verse, item, scale, band)
-                            }
+                            return visible.all { (verse, item) -> stackedHeight(verse, item, scale) <= band }
                         }
                         // No full-size gate in front of the search: its own opening probe is that same
                         // measurement and returns 1f when it fits, so gating here measured every
@@ -1192,18 +1141,21 @@ fun BiblePresenter(
                             ).size.height
                         }
                         // Same split as the full-screen grid above, against the cell rather than the
-                        // band: what is stacked adds up, what is positioned is checked on its own.
+                        // band: what is stacked adds up, and a boxed half is fitted in its box.
                         fun everyBlockFits(scale: Float): Boolean {
                             val cell = cellHeight(scale)
                             return lowerThirdMultiVisible.all { (verse, item) ->
-                                val textPositioned = item.textOffsetFor(isLowerThird) != null
-                                val refPositioned = item.referenceOffsetFor(isLowerThird) != null
-                                val textH = cellTextHeight(verse, item, scale)
-                                val refH = cellRefHeight(verse, item, scale)
-                                val stacked = (if (textPositioned) 0 else textH) + (if (refPositioned) 0 else refH)
-                                stacked <= cell &&
-                                    (!textPositioned || textH <= cell) &&
-                                    (!refPositioned || refH <= cell)
+                                val textH = if (bs.isBoxed(item, BibleStyleElement.TEXT, isLowerThird)) {
+                                    0
+                                } else {
+                                    cellTextHeight(verse, item, scale)
+                                }
+                                val refH = if (bs.isBoxed(item, BibleStyleElement.REFERENCE, isLowerThird)) {
+                                    0
+                                } else {
+                                    cellRefHeight(verse, item, scale)
+                                }
+                                textH + refH <= cell
                             }
                         }
                         val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }
@@ -1264,14 +1216,12 @@ fun BiblePresenter(
                         val halfConstraint = Constraints(maxWidth = halfWidth.coerceAtLeast(1))
                         // Use 90% of available height as safety margin for line spacing/shadow/padding offsets
                         val availH = (constraints.maxHeight * 0.90f).toInt()
-                        // Which of the four halves have left their column. Read once: the fit search
-                        // below and the layout after it have to agree about this, and a search that
-                        // measured a half into the stack the layout then floats solves for a box
-                        // nothing is drawn in.
-                        val pTextOffset = t0.textOffsetFor(isLowerThird)
-                        val pRefOffset = t0.referenceOffsetFor(isLowerThird)
-                        val sTextOffset = t1.textOffsetFor(isLowerThird)
-                        val sRefOffset = t1.referenceOffsetFor(isLowerThird)
+                        // Which of the four halves are boxed and so have left their column. Read once:
+                        // the fit search below and the layout after it have to agree about this.
+                        val pTextBoxed = bs.isBoxed(t0, BibleStyleElement.TEXT, isLowerThird)
+                        val pRefBoxed = bs.isBoxed(t0, BibleStyleElement.REFERENCE, isLowerThird)
+                        val sTextBoxed = bs.isBoxed(t1, BibleStyleElement.TEXT, isLowerThird)
+                        val sRefBoxed = bs.isBoxed(t1, BibleStyleElement.REFERENCE, isLowerThird)
 
                         val primaryRefText = buildRefText(primary, t0)
                         val secondaryRefText = buildRefText(sec, t1)
@@ -1310,25 +1260,11 @@ fun BiblePresenter(
                             ),
                             constraints = halfConstraint,
                         ).size.height
-                        // Stacked halves add up; a positioned one is checked against the cell on its
-                        // own. Both are needed, and for the reasons the grid searches record: summing
-                        // a positioned half shrinks the stack for height it no longer occupies, and
-                        // leaving it out of the search altogether lets it grow past the band and be
-                        // clipped -- which is what an offset applied only at draw time would do.
-                        fun halfFits(
-                            refH: Int,
-                            textH: Int,
-                            refOffset: ElementOffset?,
-                            textOffset: ElementOffset?,
-                        ): Boolean {
-                            val stacked = (if (refOffset == null) refH else 0) +
-                                (if (textOffset == null) textH else 0)
-                            return stacked <= availH &&
-                                (refOffset == null || refH <= availH) &&
-                                (textOffset == null || textH <= availH)
-                        }
-                        val needsScaling = !halfFits(initialPRefH, initialPH, pRefOffset, pTextOffset) ||
-                            !halfFits(initialSRefH, initialSH, sRefOffset, sTextOffset)
+                        // Only the halves still stacked add up; a boxed one is fitted in its box.
+                        fun halfFits(refH: Int, textH: Int, refBoxed: Boolean, textBoxed: Boolean): Boolean =
+                            (if (refBoxed) 0 else refH) + (if (textBoxed) 0 else textH) <= availH
+                        val needsScaling = !halfFits(initialPRefH, initialPH, pRefBoxed, pTextBoxed) ||
+                            !halfFits(initialSRefH, initialSH, sRefBoxed, sTextBoxed)
 
                         val matchedScale = if (needsScaling) {
                             binarySearchFitScale { scale ->
@@ -1364,8 +1300,8 @@ fun BiblePresenter(
                                     ),
                                     constraints = halfConstraint,
                                 ).size.height
-                                halfFits(pRefH, pH, pRefOffset, pTextOffset) &&
-                                    halfFits(sRefH, sH, sRefOffset, sTextOffset)
+                                halfFits(pRefH, pH, pRefBoxed, pTextBoxed) &&
+                                    halfFits(sRefH, sH, sRefBoxed, sTextBoxed)
                             }
                         } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
@@ -1378,7 +1314,7 @@ fun BiblePresenter(
                         // Each element through one lambda, drawn either filling its half or sized to
                         // itself -- see [BandElement], which is also what decides stacked from
                         // floated. The reference's above/below setting becomes the order of the list.
-                        val pRef = BandElement(pRefOffset) { fill ->
+                        val pRef = BandElement(pRefBoxed) { fill ->
                             OutlinedText(
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1395,7 +1331,7 @@ fun BiblePresenter(
                                 onTextLayout = pRefPainter::onTextLayout,
                             )
                         }
-                        val pVerse = BandElement(pTextOffset) { fill ->
+                        val pVerse = BandElement(pTextBoxed) { fill ->
                             OutlinedText(
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1412,7 +1348,7 @@ fun BiblePresenter(
                                 onTextLayout = pTextPainter::onTextLayout,
                             )
                         }
-                        val sRef = BandElement(sRefOffset) { fill ->
+                        val sRef = BandElement(sRefBoxed) { fill ->
                             OutlinedText(
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1429,7 +1365,7 @@ fun BiblePresenter(
                                 onTextLayout = sRefPainter::onTextLayout,
                             )
                         }
-                        val sVerse = BandElement(sTextOffset) { fill ->
+                        val sVerse = BandElement(sTextBoxed) { fill ->
                             OutlinedText(
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1484,26 +1420,18 @@ fun BiblePresenter(
                         val secondaryRefText = secondary?.let { buildRefText(it, t1) } ?: ""
 
                         val maxH = constraints.maxHeight
-                        // Which of this column's elements have left it. As in the pair above, read
-                        // once and used by both the search and the layout.
-                        val colPTextOffset = t0.textOffsetFor(isLowerThird)
-                        val colPRefOffset = t0.referenceOffsetFor(isLowerThird)
-                        val colSTextOffset = if (showSecondary) t1.textOffsetFor(isLowerThird) else null
-                        val colSRefOffset = if (showSecondary) t1.referenceOffsetFor(isLowerThird) else null
-                        // The stacked elements add up; each positioned one is checked against the band
-                        // by itself. A second language that is not shown contributes nothing either
-                        // way, which is what its zero heights below already said.
-                        fun columnFits(pRefH: Int, pH: Int, sRefH: Int, sH: Int): Boolean {
-                            val stacked = (if (colPRefOffset == null) pRefH else 0) +
-                                (if (colPTextOffset == null) pH else 0) +
-                                (if (colSRefOffset == null) sRefH else 0) +
-                                (if (colSTextOffset == null) sH else 0)
-                            return stacked <= maxH &&
-                                (colPRefOffset == null || pRefH <= maxH) &&
-                                (colPTextOffset == null || pH <= maxH) &&
-                                (colSRefOffset == null || sRefH <= maxH) &&
-                                (colSTextOffset == null || sH <= maxH)
-                        }
+                        // Which of this column's elements are boxed and have left it. As in the pair
+                        // above, read once and used by both the search and the layout.
+                        val colPTextBoxed = bs.isBoxed(t0, BibleStyleElement.TEXT, isLowerThird)
+                        val colPRefBoxed = bs.isBoxed(t0, BibleStyleElement.REFERENCE, isLowerThird)
+                        val colSTextBoxed = showSecondary && bs.isBoxed(t1, BibleStyleElement.TEXT, isLowerThird)
+                        val colSRefBoxed = showSecondary && bs.isBoxed(t1, BibleStyleElement.REFERENCE, isLowerThird)
+                        // The stacked elements add up; a boxed one is fitted in its box. A second
+                        // language that is not shown contributes nothing either way, which is what
+                        // its zero heights below already said.
+                        fun columnFits(pRefH: Int, pH: Int, sRefH: Int, sH: Int): Boolean =
+                            (if (colPRefBoxed) 0 else pRefH) + (if (colPTextBoxed) 0 else pH) +
+                                (if (colSRefBoxed) 0 else sRefH) + (if (colSTextBoxed) 0 else sH) <= maxH
                         // The reference lines scale with the verse rather than staying at full size.
                         // Held fixed, they were a floor the search could not get under: a band whose
                         // references alone overfill it had no fitting scale to find, so the text ran off
@@ -1561,7 +1489,7 @@ fun BiblePresenter(
                         // One lambda per element, as in the pair above: drawn either filling the
                         // band's width or sized to itself, so a stacked and a positioned element
                         // cannot come apart.
-                        val colPRef = BandElement(colPRefOffset) { fill ->
+                        val colPRef = BandElement(colPRefBoxed) { fill ->
                             OutlinedText(
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1578,7 +1506,7 @@ fun BiblePresenter(
                                 onTextLayout = pRefPainter::onTextLayout,
                             )
                         }
-                        val colPVerse = BandElement(colPTextOffset) { fill ->
+                        val colPVerse = BandElement(colPTextBoxed) { fill ->
                             OutlinedText(
                                 fillWidth = fill,
                                 modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1603,7 +1531,7 @@ fun BiblePresenter(
                         val secondaryElements = if (!showSecondary) {
                             emptyList()
                         } else {
-                            val colSRef = BandElement(colSRefOffset) { fill ->
+                            val colSRef = BandElement(colSRefBoxed) { fill ->
                                 OutlinedText(
                                     fillWidth = fill,
                                     modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1620,7 +1548,7 @@ fun BiblePresenter(
                                     onTextLayout = sRefPainter::onTextLayout,
                                 )
                             }
-                            val colSVerse = BandElement(colSTextOffset) { fill ->
+                            val colSVerse = BandElement(colSTextBoxed) { fill ->
                                 OutlinedText(
                                     fillWidth = fill,
                                     modifier = (if (fill) Modifier.fillMaxWidth() else Modifier)
@@ -1646,10 +1574,47 @@ fun BiblePresenter(
                         BibleBandColumn(
                             elements = primaryElements + secondaryElements,
                             verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top,
-                            stackAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment,
                         )
                     }
                 }
+            }
+
+            /**
+             * The verses' boxed text and references, drawn over them at [alpha]. Nothing at all
+             * while the page has no box turned on.
+             */
+            @Composable
+            fun VerseBoxes(verses: List<SelectedVerse>, alpha: Float) {
+                if (bs.textBoxes.values.none { it.enabled } || verses.isEmpty()) return
+                val shown = verses.mapIndexed { index, verse ->
+                    val item = translationStack.firstOrNull { it.fileName == verse.translationFileName }
+                        ?: translationStack.getOrNull(index)
+                        ?: BibleTranslationSettings(fileName = verse.translationFileName)
+                    verse to item
+                }
+                val bandHeight = outputHeight.value * bs.lowerThirdHeightPercent / 100f
+                BibleBoxLayer(
+                    items = bibleBoxItems(bs, isLowerThird, shown),
+                    settings = bs,
+                    lowerThird = isLowerThird,
+                    area = textBoxArea(
+                        outputWidth = outputWidth.value,
+                        outputHeight = outputHeight.value,
+                        options = bs.textBoxOptions,
+                        margins = BoxMargins(leftOffSet.value, topOffSet.value, rightOffSet.value, bottomOffSet.value),
+                        band = if (isLowerThird) {
+                            Rect(0f, outputHeight.value - bandHeight, outputWidth.value, outputHeight.value)
+                        } else {
+                            null
+                        },
+                    ),
+                    // The layer fills the padded box on a full screen, and the whole output on a band.
+                    origin = if (isLowerThird) Offset.Zero else Offset(leftOffSet.value, topOffSet.value),
+                    scaleFactor = scaleFactor,
+                    alpha = alpha,
+                    isKey = isKey,
+                    shadowOf = ::scaleElementShadow,
+                )
             }
 
             if (crossfadeEnabled || appSettings.bibleSettings.fadeIn || appSettings.bibleSettings.fadeOut) {
@@ -1704,16 +1669,20 @@ fun BiblePresenter(
                         Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
                             TextContent(displayedPrevious)
                         }
+                        VerseBoxes(displayedPrevious, previousAlpha)
                     }
                     Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
                         TextContent(displayedCurrent)
                     }
+                    VerseBoxes(displayedCurrent, currentAlpha)
                 }
             } else {
                 Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
                     TextContent(effectiveVerses)
                 }
+                VerseBoxes(effectiveVerses, transitionAlpha)
             }
+        }
         }
     }
 }

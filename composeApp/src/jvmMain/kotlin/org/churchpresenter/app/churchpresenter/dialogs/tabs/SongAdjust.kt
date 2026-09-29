@@ -1,9 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.app.churchpresenter.presenter.songBoxKey
+import org.churchpresenter.app.churchpresenter.presenter.titleSlideBoxKey
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.boxAt
+import org.churchpresenter.settings.withBox
 
 /**
  * The languages the Songs Text strip offers beside All for [element]: every language reaching this
@@ -34,7 +38,7 @@ private class SongBlock(val element: SongStyleElement, val language: Int?, lower
 /**
  * The Adjust handles on the Songs page: its margins and block, the size of what the Text rows point
  * at, and every element on the slide as a block of its own -- clicked to point the rows at it, and
- * moved on its own by its blue dot.
+ * dragged by its body to move it on its own.
  */
 internal fun songAdjustModel(
     draft: AppSettings,
@@ -81,12 +85,20 @@ internal fun songAdjustModel(
             null
         },
         blocks = songBlockTargets(profile, targets, edit, update),
-        positions = PositionsReset(moved = song.layoutExtras.elementShifts.keys.any { it.onOutput(lowerThird) }) {
+        positions = PositionsReset(
+            moved = song.layoutExtras.elementShifts.keys.any { it.onOutput(lowerThird) } ||
+                song.layoutExtras.textBoxes.any { (key, box) -> box.enabled && key.onOutput(lowerThird) },
+        ) {
             update { s ->
                 val shifts = s.layoutExtras.elementShifts.filterKeys { !it.onOutput(lowerThird) }
-                s.copy(layoutExtras = s.layoutExtras.copy(elementShifts = shifts))
+                // Boxes are turned off, not forgotten: turning one back on puts it where it was.
+                val boxes = s.layoutExtras.textBoxes.mapValues { (key, box) ->
+                    if (key.onOutput(lowerThird)) box.copy(enabled = false) else box
+                }
+                s.copy(layoutExtras = s.layoutExtras.copy(elementShifts = shifts, textBoxes = boxes))
             }
         },
+        boxes = songBoxTargets(profile, targets, edit, update),
     )
 }
 
@@ -110,20 +122,8 @@ private fun songBlockTargets(
     val styleElement = edit.element
     val editing = edit.language
     val lowerThird = profile.isLowerThird
-    val languages = styleLanguagesFor(profile.songMode, profile.songTranslations).map { it.translation }
     val titleSlide = targets.element.value == CustomizeElement.SONG_TITLE_SLIDE
-    val blocks = if (titleSlide) {
-        listOf(SongBlock(SongStyleElement.TITLE_SLIDE_NUMBER, null, lowerThird, true)) +
-            languages.map { SongBlock(SongStyleElement.TITLE, it, lowerThird, true) } +
-            TITLE_SLIDE_ELEMENTS.filter { it.isCredit }.map { SongBlock(it, null, lowerThird, true) }
-    } else {
-        listOf(
-            SongBlock(SongStyleElement.NUMBER, null, lowerThird, false),
-            SongBlock(SongStyleElement.TITLE, languages.first(), lowerThird, false),
-            SongBlock(SongStyleElement.SECTION_LABEL, null, lowerThird, false),
-        ) + listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)
-            .flatMap { element -> languages.map { SongBlock(element, it, lowerThird, false) } }
-    }
+    val blocks = songBlocks(profile, titleSlide)
     val selected = blocks.indexOfFirst {
         it.element == styleElement && (it.language == null || it.language == (editing?.translation ?: it.language))
     }.takeIf { it >= 0 }
@@ -136,6 +136,65 @@ private fun songBlockTargets(
         onSelect = { index -> blocks[index].pickIn(targets, profile) },
         shift = Adjustable(song.shiftAt(shiftKey)) { (x, y) -> update { it.shiftedAt(shiftKey, x, y) } },
     )
+}
+
+/**
+ * The song's boxes on this output, one handle each -- an element whose languages share a box is one
+ * handle -- and the one the Text rows point at; null while none is turned on.
+ */
+private fun songBoxTargets(
+    profile: OutputProfile,
+    targets: SongTargets,
+    edit: SongEdit,
+    update: ((SongSettings) -> SongSettings) -> Unit,
+): BoxTargets? {
+    val song = edit.song
+    val lowerThird = profile.isLowerThird
+    val titleSlide = targets.element.value == CustomizeElement.SONG_TITLE_SLIDE
+    val handles = songBlocks(profile, titleSlide).mapNotNull { block ->
+        val key = if (titleSlide) {
+            song.titleSlideBoxKey(block.element, lowerThird, block.language)
+        } else {
+            song.songBoxKey(block.element, lowerThird, block.language)
+        }
+        val box = song.layoutExtras.textBoxes.boxAt(key)
+        if (!box.enabled) return@mapNotNull null
+        BoxHandle(
+            key = key,
+            box = box,
+            onChange = { changed ->
+                update {
+                    val extras = it.layoutExtras
+                    it.copy(layoutExtras = extras.copy(textBoxes = extras.textBoxes.withBox(key, changed)))
+                }
+            },
+            onPick = { block.pickIn(targets, profile) },
+        )
+    }.distinctBy { it.key }
+    if (handles.isEmpty()) return null
+    return BoxTargets(handles, edit.boxTarget(lowerThird, titleSlide)?.key, song.layoutExtras.textBoxOptions)
+}
+
+/**
+ * Every element the preview may draw on this slide kind, as blocks: the title slide's heading and
+ * credits, or the number, the title, the section label and -- per language -- the lyrics, the
+ * look-ahead and the next section.
+ */
+private fun songBlocks(profile: OutputProfile, titleSlide: Boolean): List<SongBlock> {
+    val lowerThird = profile.isLowerThird
+    val languages = styleLanguagesFor(profile.songMode, profile.songTranslations).map { it.translation }
+    return if (titleSlide) {
+        listOf(SongBlock(SongStyleElement.TITLE_SLIDE_NUMBER, null, lowerThird, true)) +
+            languages.map { SongBlock(SongStyleElement.TITLE, it, lowerThird, true) } +
+            TITLE_SLIDE_ELEMENTS.filter { it.isCredit }.map { SongBlock(it, null, lowerThird, true) }
+    } else {
+        listOf(
+            SongBlock(SongStyleElement.NUMBER, null, lowerThird, false),
+            SongBlock(SongStyleElement.TITLE, languages.first(), lowerThird, false),
+            SongBlock(SongStyleElement.SECTION_LABEL, null, lowerThird, false),
+        ) + listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)
+            .flatMap { element -> languages.map { SongBlock(element, it, lowerThird, false) } }
+    }
 }
 
 /** Points the Text rows at this block's element -- and at its language, where the page offers them. */

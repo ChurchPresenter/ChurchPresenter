@@ -48,6 +48,8 @@ import churchpresenter.composeapp.generated.resources.profile_margins
 import churchpresenter.composeapp.generated.resources.profile_ms
 import churchpresenter.composeapp.generated.resources.profile_place_freely
 import churchpresenter.composeapp.generated.resources.profile_place_freely_sub
+import churchpresenter.composeapp.generated.resources.profile_region_moves_background
+import churchpresenter.composeapp.generated.resources.profile_region_moves_background_sub
 import churchpresenter.composeapp.generated.resources.profile_reset_defaults
 import churchpresenter.composeapp.generated.resources.profile_vertical_alignment
 import churchpresenter.composeapp.generated.resources.profile_x_offset
@@ -102,6 +104,8 @@ internal fun PositionGroup(
     reset: (@Composable RowScope.() -> Unit)?,
     extraAdvanced: @Composable () -> Unit = {},
     paths: PositionPaths = PositionPaths(),
+    /** What the margins are taken from -- the screen, or the band on a lower third. */
+    room: MarginRoom = MarginRoom.FULL_SCREEN,
 ) {
     SettingsGroup(stringResource(Res.string.profile_group_position), action = reset, paths = paths.all) {
         if (verticalAlignment != null) {
@@ -118,7 +122,7 @@ internal fun PositionGroup(
             }
         }
         SettingsRow(stringResource(Res.string.profile_margins), paths = paths.margins) {
-            MarginFields(margins, onMargins)
+            MarginFields(margins, onMargins, room)
         }
         if (region != null) {
             val percent = stringResource(Res.string.percent_suffix)
@@ -158,22 +162,29 @@ internal fun PositionGroup(
                     unit = percent,
                 )
             }
+            SettingsSwitchRow(
+                stringResource(Res.string.profile_region_moves_background),
+                region.movesBackground,
+                { onRegion(region.copy(movesBackground = it)) },
+                sub = stringResource(Res.string.profile_region_moves_background_sub),
+                advanced = true,
+                paths = paths.region,
+            )
         }
         extraAdvanced()
     }
 }
 
-private val MARGIN_RANGE_PX = 0..500
 private val MARGIN_FIELD = 56.dp
 
 /** Top, bottom, left and right, four small fields captioned above. */
 @Composable
-internal fun MarginFields(margins: Margins, onMargins: (Margins) -> Unit) {
+internal fun MarginFields(margins: Margins, onMargins: (Margins) -> Unit, room: MarginRoom = MarginRoom.FULL_SCREEN) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         RowNumberField(
             margins.top,
             { onMargins(margins.copy(top = it)) },
-            MARGIN_RANGE_PX,
+            0..room.maxFor(MarginSide.TOP, margins),
             caption = stringResource(Res.string.top),
             width = MARGIN_FIELD,
             testTag = MARGIN_TOP_TAG,
@@ -181,7 +192,7 @@ internal fun MarginFields(margins: Margins, onMargins: (Margins) -> Unit) {
         RowNumberField(
             margins.bottom,
             { onMargins(margins.copy(bottom = it)) },
-            MARGIN_RANGE_PX,
+            0..room.maxFor(MarginSide.BOTTOM, margins),
             caption = stringResource(Res.string.bottom),
             width = MARGIN_FIELD,
             testTag = MARGIN_BOTTOM_TAG,
@@ -189,7 +200,7 @@ internal fun MarginFields(margins: Margins, onMargins: (Margins) -> Unit) {
         RowNumberField(
             margins.left,
             { onMargins(margins.copy(left = it)) },
-            MARGIN_RANGE_PX,
+            0..room.maxFor(MarginSide.LEFT, margins),
             caption = stringResource(Res.string.left),
             width = MARGIN_FIELD,
             testTag = MARGIN_LEFT_TAG,
@@ -197,7 +208,7 @@ internal fun MarginFields(margins: Margins, onMargins: (Margins) -> Unit) {
         RowNumberField(
             margins.right,
             { onMargins(margins.copy(right = it)) },
-            MARGIN_RANGE_PX,
+            0..room.maxFor(MarginSide.RIGHT, margins),
             caption = stringResource(Res.string.right),
             width = MARGIN_FIELD,
             testTag = MARGIN_RIGHT_TAG,

@@ -1,17 +1,16 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -26,7 +25,6 @@ import org.churchpresenter.theme.semantic
 import java.awt.Cursor
 import kotlin.math.roundToInt
 
-private val MOVE_DOT = 12.dp
 private const val UNPICKED_ALPHA = 0.55f
 
 /** Where [block] was drawn, in the overlay's own dp, or null while it has not been laid out. */
@@ -42,18 +40,25 @@ internal fun Map<PresentedBlock, Rect>.frameOf(block: PresentedBlock, origin: Of
 
 /**
  * The translation or language blocks: each one faintly outlined, and a click picks it as the target;
- * the picked one solidly outlined. Drawn under every other handle, since a block is large and a
- * handle over it is small.
+ * the picked one solidly outlined. Dragged, a block is picked and moves on its own -- the block
+ * itself is the handle. Drawn under every other handle, since a block is large and a handle over it
+ * is small.
  */
 @Composable
-internal fun BlockOutlines(targets: BlockTargets, frames: List<AdjustFrame?>) {
+internal fun BlockOutlines(targets: BlockTargets, frames: List<AdjustFrame?>, scale: Float) {
     val semantic = MaterialTheme.semantic
-    // A lone block has nothing to be picked from -- unless the reference is, when the verse is.
+    // A lone block has nothing to be picked from -- unless the reference is, when the verse is, or
+    // it can be moved, when it is the handle that moves it.
     val referencePicked = targets.reference?.picked == true
-    if (frames.size > 1 || referencePicked) frames.forEachIndexed { index, frame ->
+    val shift by rememberUpdatedState(targets.shift)
+    if (frames.size > 1 || referencePicked || targets.shift != null) frames.forEachIndexed { index, frame ->
         if (frame == null) return@forEachIndexed
         // With the reference picked, its verse's block is a click away from being picked again.
         val picked = index == targets.selected && !referencePicked
+        // Where the drag began and what the block's move was then, noted on the first frame the
+        // picked block's move is to hand -- a block picked by the drag itself only gets one after.
+        var from by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+        var base by remember { mutableStateOf(Offset.Zero) }
         Box(
             Modifier
                 .offset(frame.left, frame.top)
@@ -67,46 +72,38 @@ internal fun BlockOutlines(targets: BlockTargets, frames: List<AdjustFrame?>) {
                             .clickable { targets.onSelect(index) }
                     },
                 )
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.MOVE_CURSOR)))
+                .adjustDrag(
+                    scale,
+                    onStart = {
+                        if (!picked) targets.onSelect(index)
+                        from = null
+                    },
+                    onDrag = { total ->
+                        val move = shift ?: return@adjustDrag
+                        val start = from ?: move.value.also { from = it; base = total }
+                        val x = (start.first + total.x - base.x).roundToInt()
+                        move.onChange(x to (start.second + total.y - base.y).roundToInt())
+                    },
+                )
                 .testTag(adjustBlockTag(index)),
         )
     }
 }
 
 /**
- * The picked block's blue dot at its top left, which moves it on its own, and -- on the Bible page --
- * the reference outlined in orange, which is dragged anywhere on its own. Drawn over every other
- * handle: both are small and must win where they overlap a larger one.
+ * On the Bible page, the reference outlined in orange, which is dragged anywhere on its own. Drawn
+ * over every other handle: it is small and must win where it overlaps a larger one.
  */
 @Composable
 internal fun BlockGrips(
     targets: BlockTargets,
-    frames: List<AdjustFrame?>,
     reference: AdjustFrame?,
     referenceBounds: AdjustFrame,
     scale: Float,
 ) {
-    val shift = targets.shift
-    val pickedFrame = targets.selected?.let { frames.getOrNull(it) }
     val ref = targets.reference
     if (ref != null && reference != null) ReferenceHandle(ref, reference, referenceBounds, scale)
-    // The block's dot is left off while the reference is picked: the reference is what moves then.
-    if (shift != null && pickedFrame != null && ref?.picked != true) MoveDot(shift, pickedFrame, scale)
-}
-
-/** The picked block's own move, at its top left. */
-@Composable
-private fun MoveDot(shift: Adjustable<Pair<Int, Int>>, frame: AdjustFrame, scale: Float) {
-    var from by remember { mutableStateOf(shift.value) }
-    Box(
-        Modifier
-            .offset(frame.left - MOVE_DOT / 2, frame.top - MOVE_DOT / 2)
-            .size(MOVE_DOT)
-            .background(MaterialTheme.semantic.adjustHandle, CircleShape)
-            .adjustDrag(scale, onStart = { from = shift.value }, onDrag = { total ->
-                shift.onChange((from.first + total.x).roundToInt() to (from.second + total.y).roundToInt())
-            })
-            .testTag(ADJUST_BLOCK_MOVE_TAG),
-    )
 }
 
 /**
@@ -165,5 +162,4 @@ internal data class DragRoom(val left: Float, val right: Float, val up: Float, v
 
 /** Test handles for the block handles. */
 internal fun adjustBlockTag(index: Int): String = "profile_adjust_block_$index"
-internal const val ADJUST_BLOCK_MOVE_TAG = "profile_adjust_block_move"
 internal const val ADJUST_REFERENCE_TAG = "profile_adjust_reference"

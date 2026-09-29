@@ -20,6 +20,12 @@ data class ContentRegion(
     val xOffsetPercent: Int = 0,
     val yOffsetPercent: Int = 0,
     val widthPercent: Int = 100,
+    /**
+     * Whether the background narrows and moves with the text. True, the default, is how the region
+     * has always worked: the whole output shrinks, leaving the rest of the screen empty. False keeps
+     * the background filling the screen and places only the text in the region.
+     */
+    val movesBackground: Boolean = true,
 ) {
     companion object {
         val OFFSET_RANGE = -100..100

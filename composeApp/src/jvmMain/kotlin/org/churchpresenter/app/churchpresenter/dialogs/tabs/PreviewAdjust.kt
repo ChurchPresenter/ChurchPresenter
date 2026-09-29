@@ -4,6 +4,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -27,6 +29,13 @@ internal class AdjustModel(
     val blocks: BlockTargets? = null,
     /** Every element moved on its own put back where the layout puts it; null where nothing moves. */
     val positions: PositionsReset? = null,
+    /** The page's text boxes on this output, to pick, move and resize; null on a page without any. */
+    val boxes: BoxTargets? = null,
+    /**
+     * A page with nothing to adjust but its boxes -- captions, subtitles, Q&A, the dictionary --
+     * which has no margins, block or text size of its own to offer handles for.
+     */
+    val boxesOnly: Boolean = false,
 ) {
     /** More than one block to pick from, or a reference to drag. */
     val hasBlocks: Boolean get() = blocks != null && (blocks.keys.size > 1 || blocks.reference != null)
@@ -58,6 +67,39 @@ internal class ReferenceTarget(
     val shift: Adjustable<Pair<Int, Int>>,
     val picked: Boolean,
     val onPick: () -> Unit,
+)
+
+/**
+ * A page's text boxes on this output: each one turned on, as [handles], and the key of the one the
+ * Text rows point at -- [selected], which gets the move and resize handles. [options] say what the
+ * boxes are measured against and whether a dragged box snaps.
+ */
+internal class BoxTargets(
+    val handles: List<BoxHandle>,
+    val selected: String?,
+    val options: TextBoxOptions,
+)
+
+/** One text box on the preview: its key, the box as stored, how to write it, and how to point the rows at it. */
+internal class BoxHandle(
+    val key: String,
+    val box: TextBox,
+    val onChange: (TextBox) -> Unit,
+    val onPick: () -> Unit,
+)
+
+/**
+ * The Adjust model of a page with only [boxes] to offer: every other handle stands aside, and its
+ * values are inert placeholders nothing draws.
+ */
+internal fun boxesOnlyAdjustModel(boxes: BoxTargets?): AdjustModel = AdjustModel(
+    margins = Adjustable(Margins(0, 0, 0, 0)) {},
+    alignment = Adjustable(Constants.MIDDLE) {},
+    region = null,
+    textSize = Adjustable(0) {},
+    band = null,
+    boxes = boxes,
+    boxesOnly = true,
 )
 
 /** Reset positions under the preview: [moved] while anything on this output has been moved on its own. */

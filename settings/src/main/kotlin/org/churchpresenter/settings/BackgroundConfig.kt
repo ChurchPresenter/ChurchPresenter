@@ -78,4 +78,11 @@ data class BackgroundConfig(
     val aboveBandImage: String = "",
     val aboveBandVideo: String = "",
     val aboveBandCamera: CameraDeviceRef = CameraDeviceRef(),
+    /**
+     * The [backgroundType] this surface had of its own while it is set to follow the level before
+     * it, so choosing its own background again brings back the picture it had rather than starting
+     * over from the one it followed. Empty while the surface uses its own, or never had one.
+     * Appended last for the same positional-construction reason as [camera].
+     */
+    val ownBackgroundType: String = "",
 )

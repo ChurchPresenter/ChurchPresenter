@@ -34,6 +34,7 @@ import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_REFERENCE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_SWITCH_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.toggleCheckbox
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.PreviewBackgroundMode
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewBackgroundTag
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BIBLE_SOURCE_TRIGGER_TAG
@@ -263,6 +264,21 @@ class ProfilesTabScreenshotTest {
     @Test
     fun `every song element a block on the preview`() = shoot("songs_adjust_blocks") {
         tab(CustomizePane.SONGS)
+        waitForIdle()
+        onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
+    }
+
+    @Test
+    fun `a caption's text box turned on, with its handles`() = shoot("box_captions_adjust") {
+        tab(CustomizePane.CAPTIONS)
+        waitForIdle()
+        toggleCheckbox("Text box")
+        onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
+    }
+
+    @Test
+    fun `Adjust over a page with no box on yet`() = shoot("box_none_adjust") {
+        tab(CustomizePane.QA)
         waitForIdle()
         onNodeWithTag(ADJUST_SWITCH_TAG).performClick()
     }

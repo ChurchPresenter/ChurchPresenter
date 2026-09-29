@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.media_subtitle_settings_hint
 import churchpresenter.composeapp.generated.resources.percent_suffix
+import churchpresenter.composeapp.generated.resources.profile_box_item_qr_code
+import churchpresenter.composeapp.generated.resources.profile_box_item_qr_message
+import churchpresenter.composeapp.generated.resources.profile_box_item_question
+import churchpresenter.composeapp.generated.resources.profile_box_item_subtitle
 import churchpresenter.composeapp.generated.resources.profile_box_opacity
 import churchpresenter.composeapp.generated.resources.profile_caption_lines
 import churchpresenter.composeapp.generated.resources.profile_group_position
@@ -16,6 +20,11 @@ import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.QASettings
+import org.churchpresenter.settings.QA_QR_CODE_BOX
+import org.churchpresenter.settings.QA_QR_MESSAGE_BOX
+import org.churchpresenter.settings.QA_QUESTION_BOX
+import org.churchpresenter.settings.SUBTITLE_BOX
+import org.churchpresenter.settings.TextBox
 import org.jetbrains.compose.resources.stringResource
 
 private const val MEDIA = "mediaSettings"
@@ -99,6 +108,20 @@ internal fun ProfileSubtitlesPage(draft: AppSettings, onSettingsChange: ((AppSet
             )
         }
     }
+    ItemBoxGroup(
+        items = listOf(
+            BoxItem(
+                SUBTITLE_BOX,
+                stringResource(Res.string.profile_box_item_subtitle),
+                TextBox(xPercent = 10f, yPercent = 78f, widthPercent = 80f, heightPercent = 18f),
+            ),
+        ),
+        boxes = media.textBoxes,
+        options = media.textBoxOptions,
+        onBoxes = { boxes -> update { it.copy(textBoxes = boxes) } },
+        onOptions = { options -> update { it.copy(textBoxOptions = options) } },
+        paths = listOf("$MEDIA.textBoxes", "$MEDIA.textBoxOptions"),
+    )
 }
 
 /**
@@ -153,4 +176,28 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
             )
         }
     }
+    ItemBoxGroup(
+        items = listOf(
+            BoxItem(
+                QA_QUESTION_BOX,
+                stringResource(Res.string.profile_box_item_question),
+                TextBox(xPercent = 10f, yPercent = 20f, widthPercent = 60f, heightPercent = 60f),
+            ),
+            BoxItem(
+                QA_QR_CODE_BOX,
+                stringResource(Res.string.profile_box_item_qr_code),
+                TextBox(xPercent = 74f, yPercent = 20f, widthPercent = 22f, heightPercent = 40f),
+            ),
+            BoxItem(
+                QA_QR_MESSAGE_BOX,
+                stringResource(Res.string.profile_box_item_qr_message),
+                TextBox(xPercent = 72f, yPercent = 62f, widthPercent = 26f, heightPercent = 10f),
+            ),
+        ),
+        boxes = qa.textBoxes,
+        options = qa.textBoxOptions,
+        onBoxes = { boxes -> update { it.copy(textBoxes = boxes) } },
+        onOptions = { options -> update { it.copy(textBoxOptions = options) } },
+        paths = listOf("$QA.textBoxes", "$QA.textBoxOptions"),
+    )
 }

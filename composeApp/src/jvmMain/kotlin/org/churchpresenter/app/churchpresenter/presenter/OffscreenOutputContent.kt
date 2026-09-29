@@ -200,8 +200,9 @@ internal fun OffscreenOutputContent(
                                     modifier = if (isLowerThird) {
                                         Modifier
                                     } else {
-                                        Modifier.contentRegion(appSettings.bibleSettings.contentRegion)
+                                        Modifier.wholeOutputRegion(appSettings.bibleSettings.contentRegion)
                                     },
+                                    textRegion = appSettings.bibleSettings.contentRegion.textOnly(isLowerThird),
                                     selectedVerses = presenterManager.displayedVerses.value,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
@@ -216,8 +217,10 @@ internal fun OffscreenOutputContent(
                                     modifier = if (isLowerThird) {
                                         Modifier
                                     } else {
-                                        Modifier.contentRegion(appSettings.songSettings.layoutExtras.contentRegion)
+                                        Modifier.wholeOutputRegion(appSettings.songSettings.layoutExtras.contentRegion)
                                     },
+                                    textRegion = appSettings.songSettings.layoutExtras.contentRegion
+                                        .textOnly(isLowerThird),
                                     lyricSection = presenterManager.displayedLyricSection.value,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,

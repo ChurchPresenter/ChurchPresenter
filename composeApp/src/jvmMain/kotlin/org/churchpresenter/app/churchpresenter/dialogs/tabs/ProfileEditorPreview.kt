@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -31,6 +32,8 @@ import churchpresenter.composeapp.generated.resources.profile_adjust
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_blocks
+import churchpresenter.composeapp.generated.resources.profile_adjust_guide_boxes
+import churchpresenter.composeapp.generated.resources.profile_adjust_no_boxes
 import churchpresenter.composeapp.generated.resources.profile_page_title
 import churchpresenter.composeapp.generated.resources.profile_preview_larger
 import churchpresenter.composeapp.generated.resources.profile_reset_positions
@@ -40,8 +43,11 @@ import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedSwitch
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -67,7 +73,47 @@ internal fun adjustModelFor(
         translation,
     )
     CustomizePane.SONGS -> songAdjustModel(draft, profile, songTargets, onSettingsChange)
+    CustomizePane.CAPTIONS -> draft.sttSettings.let { stt ->
+        boxesOnlyAdjustModel(pageBoxTargets(stt.textBoxes, stt.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textBoxes = boxes)) }
+        })
+    }
+    CustomizePane.SUBTITLES -> draft.mediaSettings.let { media ->
+        boxesOnlyAdjustModel(pageBoxTargets(media.textBoxes, media.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) }
+        })
+    }
+    CustomizePane.QA -> draft.qaSettings.let { qa ->
+        boxesOnlyAdjustModel(pageBoxTargets(qa.textBoxes, qa.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textBoxes = boxes)) }
+        })
+    }
+    CustomizePane.DICTIONARY -> draft.dictionarySettings.let { ds ->
+        boxesOnlyAdjustModel(pageBoxTargets(ds.textBoxes, ds.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(textBoxes = boxes)) }
+        })
+    }
+    CustomizePane.STAGE_MONITOR -> draft.stageMonitorSettings.let { sm ->
+        boxesOnlyAdjustModel(pageBoxTargets(sm.textBoxes, sm.textBoxOptions) { boxes ->
+            onSettingsChange { s -> s.copy(stageMonitorSettings = s.stageMonitorSettings.copy(textBoxes = boxes)) }
+        })
+    }
     else -> null
+}
+
+/**
+ * The boxes of a single-form page, each turned on one a handle -- written back through [write] as
+ * the page's whole map -- or null while none is on.
+ */
+private fun pageBoxTargets(
+    boxes: Map<String, TextBox>,
+    options: TextBoxOptions,
+    write: (Map<String, TextBox>) -> Unit,
+): BoxTargets? {
+    val handles = boxes.filterValues { it.enabled }.map { (key, box) ->
+        BoxHandle(key = key, box = box, onChange = { changed -> write(boxes + (key to changed)) }, onPick = {})
+    }
+    return if (handles.isEmpty()) null else BoxTargets(handles, selected = null, options = options)
 }
 
 /**
@@ -118,6 +164,8 @@ internal fun EditorPreview(
                 { adjust = it },
                 adjustModel.band != null,
                 adjustModel.hasBlocks,
+                boxesOnly = adjustModel.boxesOnly,
+                noBoxes = adjustModel.boxesOnly && adjustModel.boxes == null,
             )
             adjustModel?.positions?.let { ResetPositionsKey(it) }
         },
@@ -160,7 +208,16 @@ internal fun LargerKey(onClick: () -> Unit) {
 
 /** Adjust on preview, and -- while it is on -- what the handles do. */
 @Composable
-internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: Boolean, blocks: Boolean = false) {
+internal fun AdjustSwitch(
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+    band: Boolean,
+    blocks: Boolean = false,
+    /** A page with only text boxes to adjust, whose guide says so. */
+    boxesOnly: Boolean = false,
+    /** On such a page, whether none of its boxes is on yet -- the note says where to turn one on. */
+    noBoxes: Boolean = false,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier
@@ -176,7 +233,24 @@ internal fun AdjustSwitch(checked: Boolean, onChange: (Boolean) -> Unit, band: B
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        if (checked) {
+        if (checked && boxesOnly && noBoxes) {
+            // Nothing on the preview to pick until a box is on, so say so plainly, not as a hint.
+            Text(
+                stringResource(Res.string.profile_adjust_no_boxes),
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.semantic.warning,
+                modifier = Modifier.testTag(ADJUST_NO_BOXES_TAG),
+            )
+        } else if (checked && boxesOnly) {
+            Text(
+                stringResource(Res.string.profile_adjust_guide_boxes),
+                fontSize = 11.sp,
+                lineHeight = 15.sp,
+                color = profilesPalette().faintText,
+            )
+        } else if (checked) {
             Text(
                 stringResource(if (band) Res.string.profile_adjust_guide_band else Res.string.profile_adjust_guide),
                 fontSize = 11.sp,
@@ -230,3 +304,6 @@ internal fun ResetPositionsKey(
 internal const val PREVIEW_LARGER_TAG = "profile_preview_larger"
 internal const val ADJUST_SWITCH_TAG = "profile_adjust_switch"
 internal const val RESET_POSITIONS_TAG = "profile_reset_positions"
+
+/** Test handle for the note shown while Adjust is on and none of the page's boxes is. */
+internal const val ADJUST_NO_BOXES_TAG = "profile_adjust_no_boxes"
