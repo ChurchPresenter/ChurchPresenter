@@ -73,6 +73,7 @@ import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
+import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.collapse_preview
 import churchpresenter.composeapp.generated.resources.expand_preview
@@ -96,10 +97,12 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.getBrowserSourceOutput
 import org.churchpresenter.settings.getNdiOutput
+import org.churchpresenter.settings.getOmtOutput
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.withBrowserSourceOutput
 import org.churchpresenter.settings.withNdiOutput
+import org.churchpresenter.settings.withOmtOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.contentRegion
@@ -232,7 +235,10 @@ fun LivePreviewPanel(
 internal fun mediaTransportUseful(isLoaded: Boolean, isPlaying: Boolean, presentingMode: Presenting): Boolean =
     isLoaded && (presentingMode == Presenting.MEDIA || isPlaying)
 
-/** Every output the panel can show, in screen, Browser Source, NDI order, each drawn by its own preview. */
+/**
+ * Every output the panel can show, in screen, Browser Source, NDI, OMT order, each drawn by its own
+ * preview.
+ */
 @Composable
 private fun previewEntries(
     proj: ProjectionSettings,
@@ -246,7 +252,7 @@ private fun previewEntries(
     sttManager: STTManager?,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ): List<PreviewEntry> {
-    val showLabels = proj.showOutputLabels
+    val context = PreviewContext(presenterManager, appSettings, serverUrl, qaDisplayUrl, sttManager, onSettingsChange)
     return buildList {
         for (i in 0 until displayCount) {
             val screenAssignment = proj.getAssignment(i)
@@ -261,97 +267,109 @@ private fun previewEntries(
             // panel is the one place they watch all service long, so a booth driving "Foyer TV"
             // and "Balcony" should not have to remember which of those is Screen 2.
             val label = proj.screenLabelOr(screenAssignment, stringResource(Res.string.screen_number, i + 1))
-            add(
-                PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, i)) { m, grouped ->
-                    SingleDisplayPreview(
-                        screenIndex = i,
-                        screenAssignment = screenAssignment,
-                        outputKind = OutputKind.SCREEN,
-                        presenterManager = presenterManager,
-                        appSettings = appSettings,
-                        modifier = m,
-                        serverUrl = serverUrl,
-                        qaDisplayUrl = qaDisplayUrl,
-                        sttManager = sttManager,
-                        locks = presenterManager.screenLocks.value,
-                        onToggleLock = { mode -> presenterManager.setScreenLock(i, mode) },
-                        label = label,
-                        showLabel = showLabels,
-                        showMode = proj.showOutputModes,
-                            collapsible = !grouped,
-                            onSettingsChange = onSettingsChange,
-                    )
-                }
-            )
+            add(context.entry(OutputKind.SCREEN, i, screenAssignment, label))
         }
 
         // Browser Source outputs — virtual, no physical hardware, so they get their own
         // loop over ProjectionSettings.browserSourceOutputs and their own lock index space.
-        for (i in proj.browserSourceOutputs.indices) {
-            val output = proj.browserSourceOutputs[i]
+        proj.browserSourceOutputs.forEachIndexed { i, output ->
             val label = output.browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1))
-            add(
-                PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i)) { m, grouped ->
-                    val transposes by presenterManager.browserSourceTranspose.collectAsState()
-                    SingleDisplayPreview(
-                        screenIndex = i,
-                        screenAssignment = output,
-                        outputKind = OutputKind.BROWSER_SOURCE,
-                        presenterManager = presenterManager,
-                        appSettings = appSettings,
-                        modifier = m,
-                        serverUrl = serverUrl,
-                        qaDisplayUrl = qaDisplayUrl,
-                        sttManager = sttManager,
-                        locks = presenterManager.browserSourceLocks.value,
-                        onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
-                        transposeSteps = transposes[i] ?: 0,
-                        onTranspose = { delta ->
-                            if (delta == null) {
-                                presenterManager.setBrowserSourceTranspose(i, 0)
-                            } else {
-                                presenterManager.stepBrowserSourceTranspose(i, delta)
-                            }
-                        },
-                        label = label,
-                        showLabel = showLabels,
-                        showMode = proj.showOutputModes,
-                            collapsible = !grouped,
-                            onSettingsChange = onSettingsChange,
-                    )
-                }
-            )
+            add(context.entry(OutputKind.BROWSER_SOURCE, i, output, label))
         }
 
         // NDI outputs — virtual in exactly the same way as the Browser Source ones above, so they
         // get their own loop over ProjectionSettings.ndiOutputs and their own lock index space.
         // A disabled output is skipped: main.kt renders nothing for it, so a preview would show a
         // picture the network is not actually receiving.
-        for (i in proj.ndiOutputs.indices) {
-            val output = proj.ndiOutputs[i]
-            if (!output.ndiEnabled) continue
+        proj.ndiOutputs.forEachIndexed { i, output ->
+            if (!output.ndiEnabled) return@forEachIndexed
             val label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1))
-            add(
-                PreviewEntry(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_NDI, i)) { m, grouped ->
-                    SingleDisplayPreview(
-                        screenIndex = i,
-                        screenAssignment = output,
-                        outputKind = OutputKind.NDI,
-                        presenterManager = presenterManager,
-                        appSettings = appSettings,
-                        modifier = m,
-                        serverUrl = serverUrl,
-                        qaDisplayUrl = qaDisplayUrl,
-                        sttManager = sttManager,
-                        locks = presenterManager.ndiLocks.value,
-                        onToggleLock = { mode -> presenterManager.setNdiLock(i, mode) },
-                        label = label,
-                        showLabel = showLabels,
-                        showMode = proj.showOutputModes,
-                            collapsible = !grouped,
-                            onSettingsChange = onSettingsChange,
-                    )
-                }
+            add(context.entry(OutputKind.NDI, i, output, label))
+        }
+
+        // OMT outputs, in their own loop and lock index space for the reasons NDI's are, and
+        // skipped when disabled for the same reason.
+        proj.omtOutputs.forEachIndexed { i, output ->
+            if (!output.omtEnabled) return@forEachIndexed
+            val label = output.omtLabelOr(stringResource(Res.string.omt_output_numbered, i + 1))
+            add(context.entry(OutputKind.OMT, i, output, label))
+        }
+    }
+}
+
+/** What every preview in the panel is drawn with, whichever output list it came from. */
+private class PreviewContext(
+    val presenterManager: PresenterManager,
+    val appSettings: AppSettings,
+    val serverUrl: String,
+    val qaDisplayUrl: String,
+    val sttManager: STTManager?,
+    val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    /**
+     * The preview of [output], the [index]th of its [kind].
+     *
+     * Each kind is its own 0-based index space with its own lock map — screen 0, Browser Source 0, NDI
+     * output 0 and OMT output 0 are four different outputs — so the key, the locks and the lock toggle
+     * are all chosen by [kind] here rather than passed in, where they could be crossed.
+     */
+    fun entry(kind: OutputKind, index: Int, output: ScreenAssignment, label: String): PreviewEntry {
+        val keyKind = when (kind) {
+            OutputKind.SCREEN -> Constants.PREVIEW_OUTPUT_SCREEN
+            OutputKind.BROWSER_SOURCE -> Constants.PREVIEW_OUTPUT_BROWSER_SOURCE
+            OutputKind.NDI -> Constants.PREVIEW_OUTPUT_NDI
+            OutputKind.OMT -> Constants.PREVIEW_OUTPUT_OMT
+        }
+        return PreviewEntry(Constants.previewOutputKey(keyKind, index)) { m, grouped ->
+            val locks = when (kind) {
+                OutputKind.SCREEN -> presenterManager.screenLocks.value
+                OutputKind.BROWSER_SOURCE -> presenterManager.browserSourceLocks.value
+                OutputKind.NDI -> presenterManager.ndiLocks.value
+                OutputKind.OMT -> presenterManager.omtLocks.value
+            }
+            // Only a Browser Source carries a per-output transpose. `kind` is fixed for this entry,
+            // so the collect below is either always or never part of its composition.
+            val transposes = if (kind == OutputKind.BROWSER_SOURCE) {
+                presenterManager.browserSourceTranspose.collectAsState().value
+            } else {
+                emptyMap()
+            }
+            SingleDisplayPreview(
+                screenIndex = index,
+                screenAssignment = output,
+                outputKind = kind,
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = m,
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
+                locks = locks,
+                onToggleLock = { mode ->
+                    when (kind) {
+                        OutputKind.SCREEN -> presenterManager.setScreenLock(index, mode)
+                        OutputKind.BROWSER_SOURCE -> presenterManager.setBrowserSourceLock(index, mode)
+                        OutputKind.NDI -> presenterManager.setNdiLock(index, mode)
+                        OutputKind.OMT -> presenterManager.setOmtLock(index, mode)
+                    }
+                },
+                transposeSteps = transposes[index] ?: 0,
+                onTranspose = if (kind == OutputKind.BROWSER_SOURCE) {
+                    { delta ->
+                        if (delta == null) {
+                            presenterManager.setBrowserSourceTranspose(index, 0)
+                        } else {
+                            presenterManager.stepBrowserSourceTranspose(index, delta)
+                        }
+                    }
+                } else {
+                    null
+                },
+                label = label,
+                showLabel = appSettings.projectionSettings.showOutputLabels,
+                showMode = appSettings.projectionSettings.showOutputModes,
+                collapsible = !grouped,
+                onSettingsChange = onSettingsChange,
             )
         }
     }
@@ -503,6 +521,9 @@ private fun SingleDisplayPreview(
                         )
                         OutputKind.NDI -> proj.withNdiOutput(
                             screenIndex, proj.getNdiOutput(screenIndex).copy(activeProfileId = pickedId),
+                        )
+                        OutputKind.OMT -> proj.withOmtOutput(
+                            screenIndex, proj.getOmtOutput(screenIndex).copy(activeProfileId = pickedId),
                         )
                     }
                     s.copy(projectionSettings = updatedProj)

@@ -364,6 +364,20 @@ class ProfilesRedesignTest {
     }
 
     @Test
+    fun `a profile used by an OMT output names it`() {
+        val doc = profileDocument().let { d ->
+            d.copy(
+                projectionSettings = d.projectionSettings.copy(
+                    omtOutputs = listOf(ScreenAssignment(activeProfileId = PROFILE_ID)),
+                ),
+            )
+        }
+        profilesTab(doc) { _ ->
+            onAllNodesWithText("OMT Output 1")[0].assertExists()
+        }
+    }
+
+    @Test
     fun `a profile no output uses says so`() {
         profilesTab(profileDocument()) { _ ->
             onAllNodesWithText("Not in use")[0].assertExists()

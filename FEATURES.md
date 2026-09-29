@@ -132,10 +132,11 @@
 
 ## Web & Canvas
 - **Live websites on screen** — present any web page with bookmarks, navigation and zoom, and even type into live pages.
-- **Canvas scene compositor** — build layered scenes from images, text, video, shapes, gradients, clocks, QR codes, live cameras, screen capture, NDI sources from the network, web pages and Bible verses — like a mini production switcher inside the app.
+- **Canvas scene compositor** — build layered scenes from images, text, video, shapes, gradients, clocks, QR codes, live cameras, screen capture, NDI and OMT sources from the network, web pages and Bible verses — like a mini production switcher inside the app.
 - **One scene for landscape and portrait screens** — give a scene a second layout from its size menu and arrange both side by side: the same layers, each placed on its own per layout. Every output draws the layout that matches its shape.
 - **QR codes made easy** — generate QR codes for URLs, WiFi, contact cards, email, SMS and more, right on the slide.
 - **Cameras that just work** — ChurchPresenter carries its own copy of ffmpeg, so a webcam or capture card can be put on the canvas without installing anything first. Point it at a different ffmpeg from Settings → Projection if you would rather use your own.
+- **OMT sources on the canvas** — receive any Open Media Transport source as a layer, picked from what is on the network or reached directly by its `omt://` address, with a preview-stream option for a small layer. Nothing to install.
 - **NDI sources on the canvas** — receive any NDI source on your network as a layer: a camera from another machine, a graphics feed, an overflow room's output. Pick it from a list of what is sending, or drop to the sender's low-bandwidth proxy for a small layer on a busy network. Needs the same free NDI Runtime as NDI output.
 
 **Source locations:**
@@ -147,6 +148,7 @@
 - `tabs/CanvasSizeMenu.kt`, `tabs/CanvasPlacement.kt` — a scene's size and layouts, and layers left off the canvas
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
 - `composables/NdiFrameCache.kt`, `composables/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
+- `composables/OmtFrameCache.kt`, `composables/SceneOmtEditor.kt`, `composables/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share
 - `composables/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
 - `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
@@ -205,6 +207,7 @@
 - **Built-in stock photo & video search** — search and download from Pexels and Pixabay right inside the app with a free API key, plus a set of preloaded backgrounds ready to use offline.
 - **Broadcast fill + key** — output separate fill and key signals for hardware keying, including SDI via Blackmagic DeckLink.
 - **Browser Source streaming output** — a transparent, OBS-ready browser-source overlay with true alpha transparency, crossfaded mode switching and configurable per-output resolution/fps — for lower thirds, media, websites and more, no OBS scene-switching integration required.
+- **OMT output** — send live content as an Open Media Transport source, the open-source alternative to NDI that vMix, OBS (with the OMT plugin) and FreeShow receive. Alpha mode carries real transparency in the one source, so a lower third arrives already keyed; choose the encoding quality, or let each receiver ask for what it needs. Nothing to install — the OMT libraries ship with the app.
 - **NDI output** — send live content over the network as an NDI® source and pick it up in OBS, vMix or a hardware switcher, with no capture card. Alpha mode carries genuine per-pixel transparency, so a lower third arrives already keyed — no second source, no downstream keyer. Fill-only and discrete fill + key are there for gear that wants them. Needs the free NDI Runtime, installed separately and detected automatically, exactly as VLC is.
 - **Typography that fits** — auto-fit text to the screen, with control over fonts, size, alignment, shadows and margins.
 - **Live preview** — always see exactly what's on screen, and lock any output to a chosen tab.
@@ -217,6 +220,9 @@
 - `presenter/ComposeScenePump.kt`, `presenter/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
 - `ndi/` (the `:ndi` Gradle module) — NDI itself: `NdiRuntime`, `NdiLibrary`/`JnaNdiLibrary`, `NdiSender` and `NdiOutputMode`
 - `presenter/NdiVideoRenderer.kt`, `presenter/NdiManager.kt`, `dialogs/tabs/ProjectionNdiCard.kt` — the app-side wiring and its settings card
+- `omt/` (the `:omt` Gradle module) — OMT itself: `OmtRuntime`, `OmtLibrary`/`JnaOmtLibrary`, `OmtSender`, `OmtReceiver`, `OmtDiscovery`
+- `presenter/OmtVideoRenderer.kt`, `presenter/OmtOutputRegistry.kt`, `presenter/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
+- `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `data/StockMediaClient.kt`, `dialogs/StockMediaBrowserDialog.kt`, `viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkIO.kt`, `composables/LivePreviewPanel.kt`, `composables/LoopingVideoBackground.kt`
 - `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`

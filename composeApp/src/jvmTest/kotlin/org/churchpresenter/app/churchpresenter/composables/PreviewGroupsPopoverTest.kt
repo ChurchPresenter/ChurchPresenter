@@ -92,6 +92,17 @@ class PreviewGroupsPopoverTest {
     }
 
     @Test
+    fun `an OMT output is offered by its name and joins the group under its own key`() =
+        edit(base(PreviewGroup("g")).copy(omtOutputs = listOf(ScreenAssignment(omtName = "Overflow")))) { now ->
+            onNodeWithText("Add Overflow").performClick()
+            waitForIdle()
+            assertEquals(
+                listOf(Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, 0)),
+                now().previewGroups.single().members,
+            )
+        }
+
+    @Test
     fun `adding an output puts it in the group and stops offering it`() =
         edit(base(PreviewGroup("g"))) { now ->
             onNodeWithText("Add Lobby").performClick()

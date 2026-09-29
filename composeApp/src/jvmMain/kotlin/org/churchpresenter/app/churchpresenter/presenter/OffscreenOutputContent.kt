@@ -98,6 +98,7 @@ internal fun OffscreenOutputContent(
                 OffscreenOutputKind.BROWSER_SOURCE ->
                     presenterManager.browserSourceIdentifying.value.contains(outputIndex)
                 OffscreenOutputKind.NDI -> presenterManager.ndiIdentifying.value.contains(outputIndex)
+                OffscreenOutputKind.OMT -> presenterManager.omtIdentifying.value.contains(outputIndex)
             }
             // A musician's transpose is a Browser Source feature: its musician page is where it is
             // set. NDI outputs draw the song in the key it is written in.
@@ -130,6 +131,8 @@ internal fun OffscreenOutputContent(
                                 rawScreenAssignment.browserSourceLabelOr("Browser Source ${outputIndex + 1}")
                             OffscreenOutputKind.NDI ->
                                 rawScreenAssignment.ndiLabelOr("NDI Output ${outputIndex + 1}")
+                            OffscreenOutputKind.OMT ->
+                                rawScreenAssignment.omtLabelOr("OMT Output ${outputIndex + 1}")
                         },
                         style = TextStyle(
                             color = Color.White,

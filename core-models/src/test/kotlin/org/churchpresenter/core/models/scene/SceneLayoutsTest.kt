@@ -134,6 +134,7 @@ class SceneLayoutsTest {
             SceneSource.CameraSource(id = "6", name = "Camera"),
             SceneSource.ScreenCaptureSource(id = "7", name = "Capture"),
             SceneSource.NdiSource(id = "8", name = "NDI"),
+            SceneSource.OmtSource(id = "9", name = "OMT"),
         )
 
         media.forEach { source ->

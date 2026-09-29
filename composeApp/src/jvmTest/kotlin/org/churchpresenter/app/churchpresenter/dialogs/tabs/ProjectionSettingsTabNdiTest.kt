@@ -48,8 +48,9 @@ class ProjectionSettingsTabNdiTest {
     fun `with no runtime installed the card offers a way to get one`() {
         projectionTab(ndiStatus = NdiRuntimeStatus.NotInstalled) { _ ->
             onNodeWithText("Get the NDI Runtime").assertExists()
-            // "Check again" is on the Camera Capture card too, so it is counted rather than found.
-            assertEquals(2, onAllNodesWithText("Check again").fetchSemanticsNodes().size)
+            // "Check again" is on the OMT and Camera Capture cards too, so it is counted rather than
+            // found.
+            assertEquals(3, onAllNodesWithText("Check again").fetchSemanticsNodes().size)
         }
     }
 

@@ -72,10 +72,12 @@ fun ProjectionSettings.duplicateOutputProfile(id: String, newName: String): Proj
     return addOutputProfile(source.copy(id = fresh.id, name = newName, parentId = null, overrides = emptySet()))
 }
 
-/** How many outputs, across all three output lists, currently follow the profile at [id]. */
+/** How many outputs, across all four output lists, currently follow the profile at [id]. */
 fun ProjectionSettings.outputProfileUsageCount(id: String): Int =
-    (screenAssignments + browserSourceOutputs + ndiOutputs).count { it.activeProfileId == id }
+    (screenAssignments + browserSourceOutputs + ndiOutputs + omtOutputs).count { it.activeProfileId == id }
 
-/** The outputs, across all three lists, currently following the profile at [id], labeled for display. */
+/** The outputs, across all four lists, currently following the profile at [id], labeled for display. */
 fun ProjectionSettings.outputProfileUsers(id: String, labelOf: (ScreenAssignment) -> String): List<String> =
-    (screenAssignments + browserSourceOutputs + ndiOutputs).filter { it.activeProfileId == id }.map(labelOf)
+    (screenAssignments + browserSourceOutputs + ndiOutputs + omtOutputs)
+        .filter { it.activeProfileId == id }
+        .map(labelOf)

@@ -3,7 +3,8 @@ package org.churchpresenter.settings
 import org.churchpresenter.settings.utils.Constants
 
 /**
- * The Browser Source and NDI output lists, read and written.
+ * The Browser Source and NDI output lists, read and written. The OMT one is `OmtOutputs.kt`, the
+ * same four operations again.
  *
  * Extensions in their own file rather than members of [ProjectionSettings], because the two
  * families are the same four operations twice and putting them here keeps that visible — and keeps
@@ -21,7 +22,7 @@ import org.churchpresenter.settings.utils.Constants
  * The growth is what lets a settings row write slot 3 before slots 1 and 2 have ever been touched,
  * which is the ordinary case when an output is configured out of order.
  */
-private fun List<ScreenAssignment>.withOutputAt(
+internal fun List<ScreenAssignment>.withOutputAt(
     index: Int,
     assignment: ScreenAssignment,
     fallbackProfileId: String,
@@ -65,3 +66,4 @@ fun ProjectionSettings.addNdiOutput(): ProjectionSettings =
 fun ProjectionSettings.removeNdiOutput(index: Int): ProjectionSettings =
     copy(ndiOutputs = ndiOutputs.filterIndexed { i, _ -> i != index })
         .shiftPreviewMembers(Constants.PREVIEW_OUTPUT_NDI, index)
+

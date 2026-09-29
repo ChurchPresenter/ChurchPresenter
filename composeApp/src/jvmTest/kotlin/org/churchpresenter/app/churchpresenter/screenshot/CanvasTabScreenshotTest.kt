@@ -277,6 +277,13 @@ class CanvasTabScreenshotTest {
         SceneSource.NdiSource(id = "ndi-1", name = "NDI Source"),
     )
 
+    /** With no OMT library loaded, as on every machine that renders this suite. */
+    @Test
+    fun `an OMT source with no library loaded`() = selected(
+        "source_omt",
+        SceneSource.OmtSource(id = "omt-1", name = "OMT Source"),
+    )
+
     // ── The drawing tools ───────────────────────────────────────────────────────────────────────
 
     /** Choosing a drawing tool opens the stroke and fill colour fields beside the tool row. */

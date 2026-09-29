@@ -15,7 +15,10 @@ import org.churchpresenter.settings.resolvedFor
  */
 internal fun AppSettings.captionSettingsOnScreen(): STTSettings {
     val projection = projectionSettings
-    val inUse = (projection.screenAssignments + projection.browserSourceOutputs + projection.ndiOutputs)
+    val inUse = (
+        projection.screenAssignments + projection.browserSourceOutputs +
+            projection.ndiOutputs + projection.omtOutputs
+        )
         .mapNotNull { it.activeProfileId }
         .toSet()
     val captioning = projection.outputProfiles.filter { it.showSTT }

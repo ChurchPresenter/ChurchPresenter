@@ -40,6 +40,34 @@ internal fun PropertyTextField(label: String, value: String, modifier: Modifier 
 }
 
 /**
+ * A text field that commits on Done or on losing focus, never per keystroke.
+ *
+ * For a value that is expensive to change — a network address, where every commit tears a
+ * connection down and opens another — so typing one does not connect to each prefix of it.
+ */
+@Composable
+internal fun PropertyCommitTextField(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    onCommit: (String) -> Unit,
+) {
+    var text by remember(value) { mutableStateOf(value) }
+    var hasFocus by remember { mutableStateOf(false) }
+    StyledTextField(
+        value = text,
+        onValueChange = { text = it },
+        label = label,
+        modifier = modifier.fillMaxWidth().onFocusChanged { state ->
+            if (hasFocus && !state.isFocused && text != value) onCommit(text.trim())
+            hasFocus = state.isFocused
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { if (text != value) onCommit(text.trim()) }),
+    )
+}
+
+/**
  * A whole-number field that keeps what is typed and applies it on Enter or when focus leaves.
  *
  * Checking on every keystroke fought the operator: with a range of 8–500, clearing the field and
@@ -176,6 +204,7 @@ internal fun updateName(source: SceneSource, name: String): SceneSource = when (
     is SceneSource.CameraSource -> source.copy(name = name)
     is SceneSource.ScreenCaptureSource -> source.copy(name = name)
     is SceneSource.NdiSource -> source.copy(name = name)
+    is SceneSource.OmtSource -> source.copy(name = name)
     is SceneSource.BibleSource -> source.copy(name = name)
 }
 
@@ -191,6 +220,7 @@ internal fun updateTransform(source: SceneSource, transform: SourceTransform): S
     is SceneSource.CameraSource -> source.copy(transform = transform)
     is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
     is SceneSource.NdiSource -> source.copy(transform = transform)
+    is SceneSource.OmtSource -> source.copy(transform = transform)
     is SceneSource.BibleSource -> source.copy(transform = transform)
 }
 

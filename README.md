@@ -61,6 +61,10 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > source, and finding and receiving someone else's to draw on the Canvas. The NDI Runtime is a
 > separate free download, detected at startup exactly as VLC is. `./gradlew :ndi:test`.
 >
+> **[`omt/`](./omt)** — Open Media Transport, both directions: an output put on the network as an
+> OMT source, and someone else's received onto the Canvas. Unlike NDI the libraries are MIT and ship
+> inside the app, fetched and pinned at build time as ffmpeg is. `./gradlew :omt:test`.
+>
 > **[`atem/`](./atem)** — the Blackmagic ATEM protocol client: the UDP conversation with the
 > switcher, from the handshake to a media-pool upload. Its suite runs against a loopback fake
 > switcher built from a capture of real hardware, so no device is needed.

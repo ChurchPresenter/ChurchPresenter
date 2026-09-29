@@ -87,6 +87,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `diagnostics/`         | `:diagnostics`         | Crash reporting: the crash log on disk and the Sentry bridge behind it            | [AGENT.md](diagnostics/AGENT.md)         |
 | `atem/`                | `:atem`                | The Blackmagic ATEM protocol client — UDP, state, keyers, media-pool upload       | [AGENT.md](atem/AGENT.md)                |
 | `ndi/`                 | `:ndi`                 | NDI in and out — runtime discovery, the send calls and the receive calls, behind one interface | [AGENT.md](ndi/AGENT.md)                 |
+| `omt/`                 | `:omt`                 | OMT (Open Media Transport) in and out, over the libomt the app bundles, behind one interface | [AGENT.md](omt/AGENT.md)                 |
 | `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback  | [AGENT.md](planning-center/AGENT.md)     |
 | `bible-formats/`       | `:bible-formats`       | The `.spb` converters and the Bible download catalogues (eBible, Zefania, Beblia)  | [AGENT.md](bible-formats/AGENT.md)       |
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
@@ -123,8 +124,8 @@ they must be set **above everything else** in the file:
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
   each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
-  `:diagnostics`, `:atem`, `:planning-center`, `:bible-formats`, `:song-chords`, `:bible` and
-  `:calendar` name none.
+  `:diagnostics`, `:atem`, `:ndi`, `:omt`, `:planning-center`, `:bible-formats`, `:song-chords`,
+  `:bible` and `:calendar` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

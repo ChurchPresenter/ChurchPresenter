@@ -537,7 +537,7 @@ private fun NdiOutputRow(
                     labelHeight = labelHeight,
                     onChange = { w, h -> update(output.copy(ndiWidth = w, ndiHeight = h)) },
                 )
-                NdiDropdownCell(
+                LabeledDropdownCell(
                     label = stringResource(Res.string.ndi_fps),
                     value = output.ndiFps.toString(),
                     options = NDI_FRAME_RATES.map { it.toString() to it.toString() },
@@ -617,14 +617,20 @@ private fun NdiModePicker(
     }
 }
 
-/** A labelled dropdown cell, the shape the sibling cards use for display mode, resolution and fps. */
+/**
+ * A labelled dropdown cell, the shape the sibling cards use for display mode, resolution and fps.
+ *
+ * [help], when given, is the current value's one-line explanation, shown as the button's tooltip —
+ * the OMT card's mode and quality cells use it.
+ */
 @Composable
-private fun NdiDropdownCell(
+internal fun LabeledDropdownCell(
     label: String,
     value: String,
     options: List<Pair<String, String>>,
     cellWidth: Dp,
     labelHeight: Dp,
+    help: String? = null,
     onPick: (String) -> Unit,
 ) {
     Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -638,18 +644,30 @@ private fun NdiDropdownCell(
             )
         }
         var expanded by remember { mutableStateOf(false) }
-        KeyButton(
-            shape = AppShape(6.dp),
-            onClick = { expanded = true },
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        val button = @Composable {
+            KeyButton(
+                shape = AppShape(6.dp),
+                onClick = { expanded = true },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        if (help == null) {
+            button()
+        } else {
+            @OptIn(ExperimentalMaterial3Api::class)
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { PlainTooltip { Text(help) } },
+                state = rememberTooltipState(),
+            ) { button() }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { (optionLabel, optionValue) ->

@@ -10,8 +10,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 /**
  * Everything an off-screen output needs in order to draw the live content.
  *
- * A type rather than nine parameters repeated at every call site, because there are now two
- * renderers drawing the same thing — [BrowserSourceVideoRenderer] and [NdiVideoRenderer] — and the
+ * A type rather than nine parameters repeated at every call site, because there are now three
+ * renderers drawing the same thing — [BrowserSourceVideoRenderer], [NdiVideoRenderer] and
+ * [OmtVideoRenderer] — and the
  * list was already long enough that the two `State` parameters of the same type could be swapped
  * silently.
  *
@@ -31,16 +32,17 @@ data class OffscreenOutputContext(
     val qaDisplayUrlState: State<String>? = null,
     val serverUrlState: State<String>? = null,
     /**
-     * Which of the two virtual-output lists this belongs to.
+     * Which of the virtual-output lists this belongs to.
      *
-     * Both are 0-based and independent, so the index alone does not say which output it is. The
+     * All are 0-based and independent, so the index alone does not say which output it is. The
      * kind decides which identify set to consult and how an unnamed output labels itself.
      */
     val kind: OffscreenOutputKind = OffscreenOutputKind.BROWSER_SOURCE,
 )
 
-/** The two kinds of virtual output that render through [OffscreenOutputContent]. */
+/** The kinds of virtual output that render through [OffscreenOutputContent]. */
 enum class OffscreenOutputKind {
     BROWSER_SOURCE,
     NDI,
+    OMT,
 }
