@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Nimadan boshlash</string>
     <string name="calendar_template_blank">Bo‘sh xizmat</string>
     <string name="calendar_template_blank_sub">Bo‘sh xizmat tartibi</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d ta element</string>
     <string name="calendar_add_service_save">Xizmat qo‘shish</string>
     <string name="calendar_new_service_on">Yangi xizmat · %1$s</string>
     <string name="calendar_kind_sunday_short">Yakshanba</string>
     <string name="calendar_kind_midweek_short">Hafta o‘rtasi</string>
     <string name="calendar_kind_special_short">Maxsus</string>
-    <string name="calendar_close_sheet">Yopish</string>
     <string name="calendar_settings">Kalendar sozlamalari</string>
     <string name="calendar_settings_sub">Faqat bugungiga emas, barcha xizmatga tegishli</string>
     <string name="calendar_settings_sections">Bo‘limlar</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Element bu xizmat tartibida endi yo‘q</string>
     <string name="calendar_copy_include_cues">Avtomatlashtirish belgilari</string>
     <string name="calendar_copy_include_cues_sub">%1$d ta belgi, siljishlar saqlandi</string>
-    <string name="calendar_template_include_cues">Avtomatlashtirish belgilari</string>
     <string name="calendar_template_include_cues_sub">Nisbiy siljishlar</string>
     <string name="calendar_templates_empty_sub">Istalgan xizmatdan xizmat tartibi sarlavhasidagi «Shablon» bilan saqlang. Unga qadar yangi xizmat istalgan oldingisining nusxasidan boshlanishi mumkin.</string>
     <string name="calendar_templates_note">Shablonlar xizmat qo‘shganda «Nimadan boshlash» bo‘limida taklif etiladi. Yangisini istalgan xizmatdan xizmat tartibi sarlavhasidagi «Shablon» bilan saqlang.</string>

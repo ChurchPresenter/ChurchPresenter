@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Začať z</string>
     <string name="calendar_template_blank">Prázdna bohoslužba</string>
     <string name="calendar_template_blank_sub">Prázdny priebeh bohoslužby</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d položiek</string>
     <string name="calendar_add_service_save">Pridať bohoslužbu</string>
     <string name="calendar_new_service_on">Nová bohoslužba · %1$s</string>
     <string name="calendar_kind_sunday_short">Nedeľa</string>
     <string name="calendar_kind_midweek_short">Cez týždeň</string>
     <string name="calendar_kind_special_short">Zvláštna</string>
-    <string name="calendar_close_sheet">Zavrieť</string>
     <string name="calendar_settings">Nastavenia kalendára</string>
     <string name="calendar_settings_sub">Platí pre každú bohoslužbu, nielen pre dnešnú</string>
     <string name="calendar_settings_sections">Sekcie</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Položka už v tomto priebehu bohoslužby nie je</string>
     <string name="calendar_copy_include_cues">Značky automatizácie</string>
     <string name="calendar_copy_include_cues_sub">%1$d značiek, posuny zachované</string>
-    <string name="calendar_template_include_cues">Značky automatizácie</string>
     <string name="calendar_template_include_cues_sub">Relatívne posuny</string>
     <string name="calendar_templates_empty_sub">Uložte šablónu z ľubovoľnej bohoslužby tlačidlom „Šablóna“ v hlavičke priebehu. Dovtedy môže nová bohoslužba začať kópiou ktorejkoľvek skoršej.</string>
     <string name="calendar_templates_note">Šablóny sa ponúkajú v sekcii „Začať z“ pri pridávaní bohoslužby. Novú uložíte z ľubovoľnej bohoslužby tlačidlom „Šablóna“ v hlavičke priebehu.</string>

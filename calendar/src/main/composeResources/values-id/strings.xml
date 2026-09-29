@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Mulai dari</string>
     <string name="calendar_template_blank">Ibadah kosong</string>
     <string name="calendar_template_blank_sub">Susunan acara kosong</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d item</string>
     <string name="calendar_add_service_save">Tambah ibadah</string>
     <string name="calendar_new_service_on">Ibadah baru · %1$s</string>
     <string name="calendar_kind_sunday_short">Minggu</string>
     <string name="calendar_kind_midweek_short">Tengah pekan</string>
     <string name="calendar_kind_special_short">Khusus</string>
-    <string name="calendar_close_sheet">Tutup</string>
     <string name="calendar_settings">Pengaturan kalender</string>
     <string name="calendar_settings_sub">Berlaku untuk setiap ibadah, bukan hanya hari ini</string>
     <string name="calendar_settings_sections">Bagian</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Item tidak lagi ada di susunan acara ini</string>
     <string name="calendar_copy_include_cues">Penanda otomatisasi</string>
     <string name="calendar_copy_include_cues_sub">%1$d penanda, selisih waktu dipertahankan</string>
-    <string name="calendar_template_include_cues">Penanda otomatisasi</string>
     <string name="calendar_template_include_cues_sub">Selisih relatif</string>
     <string name="calendar_templates_empty_sub">Simpan satu dari ibadah mana pun dengan „Templat”, di header susunan acara. Sampai saat itu, ibadah baru bisa dimulai dari salinan ibadah sebelumnya.</string>
     <string name="calendar_templates_note">Templat ditawarkan di „Mulai dari” saat Anda menambahkan ibadah. Simpan yang baru dari ibadah mana pun dengan „Templat”, di header susunan acara.</string>

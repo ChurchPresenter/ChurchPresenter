@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Şununla başla</string>
     <string name="calendar_template_blank">Boş toplantı</string>
     <string name="calendar_template_blank_sub">Boş akış planı</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d öğe</string>
     <string name="calendar_add_service_save">Toplantı ekle</string>
     <string name="calendar_new_service_on">Yeni toplantı · %1$s</string>
     <string name="calendar_kind_sunday_short">Pazar</string>
     <string name="calendar_kind_midweek_short">Hafta arası</string>
     <string name="calendar_kind_special_short">Özel</string>
-    <string name="calendar_close_sheet">Kapat</string>
     <string name="calendar_settings">Takvim ayarları</string>
     <string name="calendar_settings_sub">Yalnızca bugünküne değil, her toplantıya uygulanır</string>
     <string name="calendar_settings_sections">Bölümler</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Öğe artık bu akış planında değil</string>
     <string name="calendar_copy_include_cues">Otomasyon işaretleri</string>
     <string name="calendar_copy_include_cues_sub">%1$d işaret, kaymalar korunur</string>
-    <string name="calendar_template_include_cues">Otomasyon işaretleri</string>
     <string name="calendar_template_include_cues_sub">Göreli kaymalar</string>
     <string name="calendar_templates_empty_sub">Akış planı başlığındaki „Şablon” ile herhangi bir toplantıdan bir tane kaydedin. O zamana kadar yeni bir toplantı, daha önceki herhangi birinin kopyasıyla başlayabilir.</string>
     <string name="calendar_templates_note">Şablonlar, toplantı eklerken „Şununla başla” altında sunulur. Yenisini akış planı başlığındaki „Şablon” ile herhangi bir toplantıdan kaydedin.</string>

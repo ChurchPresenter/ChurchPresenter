@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Anza na</string>
     <string name="calendar_template_blank">Ibada tupu</string>
     <string name="calendar_template_blank_sub">Mtiririko tupu wa ibada</string>
-    <string name="calendar_template_copy_sub">%1$s · vipengee %2$d</string>
     <string name="calendar_add_service_save">Ongeza ibada</string>
     <string name="calendar_new_service_on">Ibada mpya · %1$s</string>
     <string name="calendar_kind_sunday_short">Jumapili</string>
     <string name="calendar_kind_midweek_short">Katikati ya juma</string>
     <string name="calendar_kind_special_short">Maalum</string>
-    <string name="calendar_close_sheet">Funga</string>
     <string name="calendar_settings">Mipangilio ya kalenda</string>
     <string name="calendar_settings_sub">Hutumika kwa kila ibada, si ya leo tu</string>
     <string name="calendar_settings_sections">Sehemu</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Kipengee hakipo tena katika mtiririko huu wa ibada</string>
     <string name="calendar_copy_include_cues">Alama za uendeshaji otomatiki</string>
     <string name="calendar_copy_include_cues_sub">Alama %1$d, nyakati zimehifadhiwa</string>
-    <string name="calendar_template_include_cues">Alama za uendeshaji otomatiki</string>
     <string name="calendar_template_include_cues_sub">Nyakati linganishi</string>
     <string name="calendar_templates_empty_sub">Hifadhi kimoja kutoka ibada yoyote kwa „Kiolezo”, kwenye kichwa cha mtiririko. Hadi hapo, ibada mpya inaweza kuanza kutoka nakala ya ibada yoyote ya awali.</string>
     <string name="calendar_templates_note">Violezo hutolewa chini ya „Anza na” unapoongeza ibada. Hifadhi kipya kutoka ibada yoyote kwa „Kiolezo”, kwenye kichwa cha mtiririko.</string>

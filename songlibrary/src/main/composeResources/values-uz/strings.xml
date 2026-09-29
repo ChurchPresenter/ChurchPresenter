@@ -29,7 +29,6 @@
     <string name="empty_title">Filtrlarga mos qoʻshiq yoʻq</string>
     <string name="reset_filters">Filtrlarni tiklash</string>
     <string name="library_empty">Bu kutubxonada hali qoʻshiq yoʻq</string>
-    <string name="footer_songs">%1$s qoʻshiq</string>
     <string name="unsaved_changes">%1$s saqlanmagan</string>
     <string name="revert">Qaytarish</string>
     <string name="save_changes">Oʻzgarishlarni saqlash</string>

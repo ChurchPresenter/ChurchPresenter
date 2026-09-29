@@ -29,7 +29,6 @@
     <string name="empty_title">Ingen sanger passer med filtrene</string>
     <string name="reset_filters">Nullstill filtre</string>
     <string name="library_empty">Dette biblioteket har ingen sanger ennå</string>
-    <string name="footer_songs">%1$s sanger</string>
     <string name="unsaved_changes">%1$s ulagret</string>
     <string name="revert">Tilbakestill</string>
     <string name="save_changes">Lagre endringer</string>

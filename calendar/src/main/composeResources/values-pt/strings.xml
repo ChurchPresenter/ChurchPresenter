@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Começar a partir de</string>
     <string name="calendar_template_blank">Culto em branco</string>
     <string name="calendar_template_blank_sub">Ordem do culto vazia</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d itens</string>
     <string name="calendar_add_service_save">Adicionar culto</string>
     <string name="calendar_new_service_on">Novo culto · %1$s</string>
     <string name="calendar_kind_sunday_short">Domingo</string>
     <string name="calendar_kind_midweek_short">Meio da semana</string>
     <string name="calendar_kind_special_short">Especial</string>
-    <string name="calendar_close_sheet">Fechar</string>
     <string name="calendar_settings">Definições do calendário</string>
     <string name="calendar_settings_sub">Aplica-se a todos os cultos, não apenas ao de hoje</string>
     <string name="calendar_settings_sections">Secções</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">O item já não está nesta ordem do culto</string>
     <string name="calendar_copy_include_cues">Marcas de automação</string>
     <string name="calendar_copy_include_cues_sub">%1$d marcas, desvios preservados</string>
-    <string name="calendar_template_include_cues">Marcas de automação</string>
     <string name="calendar_template_include_cues_sub">Desvios relativos</string>
     <string name="calendar_templates_empty_sub">Guarde um a partir de qualquer culto com «Modelo», no cabeçalho da ordem do culto. Até lá, um culto novo pode começar a partir de uma cópia de qualquer anterior.</string>
     <string name="calendar_templates_note">Os modelos são oferecidos em «Começar a partir de» quando adiciona um culto. Guarde um novo a partir de qualquer culto com «Modelo», no cabeçalho da ordem do culto.</string>

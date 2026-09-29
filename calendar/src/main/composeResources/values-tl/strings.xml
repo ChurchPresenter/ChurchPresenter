@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Magsimula mula sa</string>
     <string name="calendar_template_blank">Walang lamang serbisyo</string>
     <string name="calendar_template_blank_sub">Walang lamang takbo ng programa</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d item</string>
     <string name="calendar_add_service_save">Magdagdag ng serbisyo</string>
     <string name="calendar_new_service_on">Bagong serbisyo · %1$s</string>
     <string name="calendar_kind_sunday_short">Linggo</string>
     <string name="calendar_kind_midweek_short">Gitna ng linggo</string>
     <string name="calendar_kind_special_short">Natatangi</string>
-    <string name="calendar_close_sheet">Isara</string>
     <string name="calendar_settings">Mga setting ng kalendaryo</string>
     <string name="calendar_settings_sub">Nalalapat sa bawat serbisyo, hindi lang sa ngayon</string>
     <string name="calendar_settings_sections">Mga seksyon</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Wala na ang item sa takbong ito ng programa</string>
     <string name="calendar_copy_include_cues">Mga marka ng awtomasyon</string>
     <string name="calendar_copy_include_cues_sub">%1$d na marka, nananatili ang mga offset</string>
-    <string name="calendar_template_include_cues">Mga marka ng awtomasyon</string>
     <string name="calendar_template_include_cues_sub">Kaugnay na mga offset</string>
     <string name="calendar_templates_empty_sub">Mag-save ng isa mula sa kahit anong serbisyo gamit ang „Template”, sa header ng takbo ng programa. Hanggang doon, puwedeng magsimula ang bagong serbisyo mula sa kopya ng alinmang naunang serbisyo.</string>
     <string name="calendar_templates_note">Inaalok ang mga template sa ilalim ng „Magsimula mula sa” kapag nagdaragdag ka ng serbisyo. Mag-save ng bago mula sa kahit anong serbisyo gamit ang „Template”, sa header ng takbo ng programa.</string>

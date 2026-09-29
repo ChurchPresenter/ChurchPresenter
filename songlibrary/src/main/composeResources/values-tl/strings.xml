@@ -29,7 +29,6 @@
     <string name="empty_title">Walang awit na tumutugma sa iyong mga filter</string>
     <string name="reset_filters">I-reset ang mga filter</string>
     <string name="library_empty">Wala pang awit ang aklatang ito</string>
-    <string name="footer_songs">%1$s awit</string>
     <string name="unsaved_changes">%1$s ang hindi naka-save</string>
     <string name="revert">Ibalik</string>
     <string name="save_changes">I-save ang mga Pagbabago</string>

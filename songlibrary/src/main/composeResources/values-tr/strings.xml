@@ -29,7 +29,6 @@
     <string name="empty_title">Filtrelerinize uyan şarkı yok</string>
     <string name="reset_filters">Filtreleri sıfırla</string>
     <string name="library_empty">Bu kitaplıkta henüz şarkı yok</string>
-    <string name="footer_songs">%1$s şarkı</string>
     <string name="unsaved_changes">%1$s kaydedilmedi</string>
     <string name="revert">Geri al</string>
     <string name="save_changes">Değişiklikleri Kaydet</string>

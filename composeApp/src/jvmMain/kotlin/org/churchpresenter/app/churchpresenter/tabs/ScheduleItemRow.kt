@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import churchpresenter.composeapp.generated.resources.edit_label
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.calendar.model.RowClock
 import androidx.compose.animation.AnimatedVisibility
@@ -67,7 +68,6 @@ import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
 import churchpresenter.composeapp.generated.resources.tooltip_note
 import churchpresenter.composeapp.generated.resources.tooltip_note_clear
 import churchpresenter.composeapp.generated.resources.tooltip_note_done
-import churchpresenter.composeapp.generated.resources.tooltip_edit_label
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
@@ -204,7 +204,7 @@ private fun RowScope.ScheduleRowActionButtons(
     if (isSection) {
         ScheduleRowActionButton(
             painter = painterResource(Res.drawable.ic_edit),
-            text = stringResource(Res.string.tooltip_edit_label),
+            text = stringResource(Res.string.edit_label),
             onClick = onEditLabel,
             modifier = Modifier.padding(start = 2.dp),
             buttonSize = actionSize,

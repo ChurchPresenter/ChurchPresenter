@@ -29,7 +29,6 @@
     <string name="empty_title">Nijedna pjesma ne odgovara filtrima</string>
     <string name="reset_filters">Poništi filtre</string>
     <string name="library_empty">Ova knjižnica još nema pjesama</string>
-    <string name="footer_songs">%1$s pjesama</string>
     <string name="unsaved_changes">%1$s nespremljeno</string>
     <string name="revert">Vrati</string>
     <string name="save_changes">Spremi promjene</string>

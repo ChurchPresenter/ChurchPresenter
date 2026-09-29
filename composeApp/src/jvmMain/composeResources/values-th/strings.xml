@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">ขยาย</string>
     <string name="tooltip_schedule_zoom_out">ย่อ</string>
     <string name="tooltip_add_to_schedule">เพิ่มลงรายการ</string>
-    <string name="tooltip_clear_schedule">ล้างรายการ</string>
     <string name="tooltip_clear_display">ล้างจอ</string>
     <string name="remote_action_clear_display">ล้างจอ</string>
     <string name="schedule_add_files_title">เพิ่มไฟล์ลงรายการ</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">ธีมตามระบบ</string>
     <string name="tooltip_remove">นำออก</string>
     <string name="tooltip_edit">แก้ไข</string>
-    <string name="tooltip_edit_label">แก้ไขป้าย</string>
     <string name="tooltip_go_live">ขึ้นจอ</string>
     <string name="tooltip_presentation_remote">เปิดรีโมตควบคุม</string>
     <string name="tooltip_qa_remote">การแชร์และการเข้าถึงระยะไกล</string>
     <string name="tooltip_stt_settings">การตั้งค่าการแสดงผล STT</string>
     <string name="tooltip_send_to_stage_monitor">ส่งไปจอบนเวที</string>
     <string name="tooltip_hide_from_stage_monitor">ซ่อนประกาศ</string>
-    <string name="tooltip_add_label">เพิ่มป้าย</string>
     <string name="tooltip_collapse_schedule">ย่อรายการ</string>
     <string name="tooltip_expand_schedule">ขยายรายการ</string>
     <string name="schedule_drop_hint">ลากไฟล์มาที่นี่เพื่อเพิ่มลงรายการ</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">พบ VLC แต่โหลดไม่ได้ ลองติดตั้ง VLC ใหม่จาก videolan.org (บน Windows ให้ติดตั้ง Microsoft Visual C++ Redistributable ด้วย) แล้วเริ่มโปรแกรมใหม่</string>
     <string name="vlc_custom_path">พาธ VLC ที่กำหนดเอง</string>
     <string name="vlc_browse">เรียกดู</string>
-    <string name="vlc_path_hint">เลือกโฟลเดอร์ที่ติดตั้ง VLC</string>
     <string name="vlc_directory_chooser_title">เลือกโฟลเดอร์ที่ติดตั้ง VLC</string>
     <string name="vlc_path_invalid">โฟลเดอร์นี้ไม่มีไลบรารีของ VLC</string>
     <string name="media_audio_continues">เสียงจะเล่นต่อเบื้องหลังเมื่อสลับแท็บหรือแสดงเนื้อหาอื่น</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">หากยังเป็นเช่นนี้ ให้อนุญาตการบันทึกหน้าจอ\nใน System Settings &gt; Privacy &amp; Security &gt; Screen Recording</string>
     <string name="website_dialog_title">เพิ่มเว็บไซต์</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">ชื่อ (ไม่บังคับ)</string>
     <string name="website_title_hint">พิมพ์ชื่อที่จะแสดง…</string>
     <string name="website_disclaimer">เราไม่รับผิดชอบต่อโฆษณาหรือเนื้อหาใดๆ ที่อาจปรากฏบนเว็บไซต์ที่แสดง</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">มีพระคัมภีร์ในรูปแบบอื่นใช่ไหม ตัวแปลงเพลงและพระคัมภีร์ (ช่วยเหลือ → ตัวแปลงเพลงและพระคัมภีร์) แปลงให้ได้</string>
     <string name="setup_step3_title">เพิ่มหนังสือเพลง</string>
     <string name="setup_step3_subtitle">ชี้โปรแกรมไปที่โฟลเดอร์คลังเพลงของคุณ</string>
-    <string name="setup_step3_step1">1. เปิดการตั้งค่าด้วยปุ่ม ⚙ บนแถบเครื่องมือ</string>
-    <string name="setup_step3_step2">2. ไปที่แท็บ "ระบบ"</string>
     <string name="setup_step3_step3">3. คลิก "เรียกดู…" ข้าง "โฟลเดอร์เก็บเพลง"</string>
     <string name="setup_step3_step4">4. เลือกโฟลเดอร์ที่มีไฟล์เพลงของคุณ</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">เหนือแถบ</string>
     <string name="background_above_band_fill">สีเติม</string>
     <string name="background_above_band_opacity">ความทึบของสีเติม</string>
-    <string name="quick_background_title">พื้นหลังด่วน</string>
     <string name="quick_background_reset">กลับสู่ปกติ</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · จัดการในการตั้งค่า</string>

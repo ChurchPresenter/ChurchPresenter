@@ -329,7 +329,6 @@
     <string name="tooltip_move_up">Перемістити вгору</string>
     <string name="tooltip_move_down">Перемістити вниз</string>
     <string name="tooltip_add_to_schedule">Додати до програми</string>
-    <string name="tooltip_clear_schedule">Очистити програму</string>
     <string name="tooltip_settings">Налаштування</string>
     <string name="tooltip_go_live">В ефір</string>
     <string name="tooltip_presentation_remote">Відкрити дистанційне керування</string>
@@ -338,8 +337,6 @@
     <string name="tooltip_hide_from_stage_monitor">Приховати оголошення</string>
     <string name="tooltip_remove">Видалити</string>
     <string name="tooltip_edit">Редагувати</string>
-    <string name="tooltip_edit_label">Редагувати мітку</string>
-    <string name="tooltip_add_label">Додати мітку</string>
 
     <!-- Label Strings -->
     <string name="add_label">Додати мітку</string>
@@ -645,7 +642,6 @@
     <string name="media_vlc_required">Для відтворення медіа потрібен VLC media player</string>
     <string name="vlc_custom_path">Шлях до VLC</string>
     <string name="vlc_browse">Огляд</string>
-    <string name="vlc_path_hint">Оберіть каталог встановлення VLC</string>
     <string name="vlc_directory_chooser_title">Оберіть каталог встановлення VLC</string>
     <string name="vlc_path_invalid">Каталог не містить бібліотек VLC</string>
     <string name="menu_view">Вигляд</string>
@@ -743,7 +739,6 @@
     <string name="website_disclaimer">Ми не несемо відповідальності за будь-яку рекламу або вміст, що може з'являтися на відображуваному вебсайті.</string>
     <string name="website_title_hint">Введіть назву для відображення…</string>
     <string name="website_title_label">Назва (необов'язково)</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
     <string name="new_song">Нова пісня</string>
     <string name="back_to_live">Повернутися до ефіру</string>
@@ -1472,8 +1467,6 @@
     <string name="setup_step2_tip2">Маєте Біблію в іншому форматі? Конвертер пісень і Біблій (Довідка → Конвертер пісень і Біблій) може її перетворити.</string>
     <string name="setup_step3_title">Додати співаники</string>
     <string name="setup_step3_subtitle">Вкажіть програмі папку вашої бібліотеки пісень</string>
-    <string name="setup_step3_step1">1. Відкрийте Налаштування за допомогою кнопки ⚙ на панелі інструментів</string>
-    <string name="setup_step3_step2">2. Перейдіть на вкладку Система</string>
     <string name="setup_step3_step3">3. Натисніть "Огляд…" поряд з Каталогом зберігання пісень</string>
     <string name="setup_step3_step4">4. Виберіть папку з файлами пісень</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2028,7 +2021,6 @@
     <string name="background_above_band_caption">Над смугою</string>
     <string name="background_above_band_fill">Колір заливки</string>
     <string name="background_above_band_opacity">Прозорість заливки</string>
-    <string name="quick_background_title">Швидкі фони</string>
     <string name="quick_background_reset">Повернути як було</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · налаштування в параметрах</string>

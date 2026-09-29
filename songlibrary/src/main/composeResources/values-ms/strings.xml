@@ -29,7 +29,6 @@
     <string name="empty_title">Tiada lagu sepadan dengan penapis anda</string>
     <string name="reset_filters">Set semula penapis</string>
     <string name="library_empty">Pustaka ini belum mempunyai lagu</string>
-    <string name="footer_songs">%1$s lagu</string>
     <string name="unsaved_changes">%1$s belum disimpan</string>
     <string name="revert">Kembalikan</string>
     <string name="save_changes">Simpan Perubahan</string>

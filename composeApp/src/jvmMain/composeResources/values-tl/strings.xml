@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Zoom In</string>
     <string name="tooltip_schedule_zoom_out">Zoom Out</string>
     <string name="tooltip_add_to_schedule">Idagdag sa Schedule</string>
-    <string name="tooltip_clear_schedule">I-clear ang Schedule</string>
     <string name="tooltip_clear_display">I-clear ang Display</string>
     <string name="remote_action_clear_display">I-clear ang Display</string>
     <string name="schedule_add_files_title">Magdagdag ng mga File sa Schedule</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Tema ng System</string>
     <string name="tooltip_remove">Alisin</string>
     <string name="tooltip_edit">I-edit</string>
-    <string name="tooltip_edit_label">I-edit ang Label</string>
     <string name="tooltip_go_live">I-Live</string>
     <string name="tooltip_presentation_remote">Buksan ang Remote Control</string>
     <string name="tooltip_qa_remote">Pagbabahagi at Remote Access</string>
     <string name="tooltip_stt_settings">Mga Setting ng STT Display</string>
     <string name="tooltip_send_to_stage_monitor">Ipadala sa Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Itago ang Anunsyo</string>
-    <string name="tooltip_add_label">Magdagdag ng Label</string>
     <string name="tooltip_collapse_schedule">I-collapse ang Schedule</string>
     <string name="tooltip_expand_schedule">I-expand ang Schedule</string>
     <string name="schedule_drop_hint">I-drag dito ang mga file para idagdag sa schedule</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">Nakita ang VLC pero hindi ma-load. Subukang i-install muli ang VLC mula sa videolan.org (sa Windows, i-install din ang Microsoft Visual C++ Redistributable), pagkatapos i-restart ang application.</string>
     <string name="vlc_custom_path">Custom na path ng VLC</string>
     <string name="vlc_browse">Mag-browse</string>
-    <string name="vlc_path_hint">Piliin ang folder kung saan naka-install ang VLC</string>
     <string name="vlc_directory_chooser_title">Piliin ang folder kung saan naka-install ang VLC</string>
     <string name="vlc_path_invalid">Walang VLC libraries ang folder na ito</string>
     <string name="media_audio_continues">Magpapatuloy ang audio sa background kapag lumipat ng tab o nagpakita ng ibang content</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Kung magpatuloy ito, magbigay ng Screen Recording permission\nsa System Settings &gt; Privacy &amp; Security &gt; Screen Recording</string>
     <string name="website_dialog_title">Magdagdag ng Website</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Pamagat (opsyonal)</string>
     <string name="website_title_hint">Ilagay ang pangalang ipapakita…</string>
     <string name="website_disclaimer">Wala kaming pananagutan sa anumang advertisement o content na maaaring lumabas sa ipinapakitang website.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">May Bibliya ka sa ibang format? Kayang i-convert iyon ng Converter ng Awit at Bibliya (Tulong → Converter ng Awit at Bibliya).</string>
     <string name="setup_step3_title">Magdagdag ng aklat ng awit</string>
     <string name="setup_step3_subtitle">Ituro sa app ang folder ng iyong koleksyon ng awit</string>
-    <string name="setup_step3_step1">1. Buksan ang Mga Setting gamit ang ⚙ na buton sa toolbar</string>
-    <string name="setup_step3_step2">2. Pumunta sa tab na Sistema</string>
     <string name="setup_step3_step3">3. Pindutin ang "Mag-browse…" katabi ng Direktoryo ng mga Awit</string>
     <string name="setup_step3_step4">4. Pumili ng folder na naglalaman ng iyong mga file ng awit</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Sa Itaas ng Banda</string>
     <string name="background_above_band_fill">Kulay ng Fill</string>
     <string name="background_above_band_opacity">Opacity ng Fill</string>
-    <string name="quick_background_title">Mabilisang background</string>
     <string name="quick_background_reset">Balik sa normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · pamahalaan sa Mga Setting</string>

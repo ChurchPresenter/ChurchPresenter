@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">Perbesar</string>
     <string name="tooltip_schedule_zoom_out">Perkecil</string>
     <string name="tooltip_add_to_schedule">Tambahkan ke Jadwal</string>
-    <string name="tooltip_clear_schedule">Bersihkan Jadwal</string>
     <string name="tooltip_clear_display">Bersihkan Tampilan</string>
     <string name="remote_action_clear_display">Bersihkan Tampilan</string>
     <string name="schedule_add_files_title">Tambahkan Berkas ke Jadwal</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">Tema Sistem</string>
     <string name="tooltip_remove">Hapus</string>
     <string name="tooltip_edit">Edit</string>
-    <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Tayangkan</string>
     <string name="tooltip_presentation_remote">Buka Kendali Jarak Jauh</string>
     <string name="tooltip_qa_remote">Pembagian &amp; Akses Jarak Jauh</string>
     <string name="tooltip_stt_settings">Pengaturan Tampilan STT</string>
     <string name="tooltip_send_to_stage_monitor">Kirim ke Monitor Panggung</string>
     <string name="tooltip_hide_from_stage_monitor">Sembunyikan Pengumuman</string>
-    <string name="tooltip_add_label">Tambah Label</string>
     <string name="tooltip_collapse_schedule">Sembunyikan Jadwal</string>
     <string name="tooltip_expand_schedule">Tampilkan Jadwal</string>
     <string name="schedule_drop_hint">Tarik file ke sini untuk menambahkannya ke jadwal</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">VLC ditemukan tetapi tidak dapat dimuat. Coba instal ulang VLC dari videolan.org (di Windows, instal juga Microsoft Visual C++ Redistributable), lalu jalankan ulang aplikasi.</string>
     <string name="vlc_custom_path">Lokasi VLC khusus</string>
     <string name="vlc_browse">Telusuri</string>
-    <string name="vlc_path_hint">Pilih folder pemasangan VLC</string>
     <string name="vlc_directory_chooser_title">Pilih folder pemasangan VLC</string>
     <string name="vlc_path_invalid">Folder ini tidak memuat pustaka VLC</string>
     <string name="media_audio_continues">Audio akan terus diputar di latar belakang saat Anda berpindah tab atau menampilkan konten lain</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">Jika ini terus terjadi, berikan izin Screen Recording\ndi System Settings &gt; Privacy &amp; Security &gt; Screen Recording</string>
     <string name="website_dialog_title">Tambah Situs Web</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Judul (opsional)</string>
     <string name="website_title_hint">Masukkan nama tampilan…</string>
     <string name="website_disclaimer">Kami tidak bertanggung jawab atas iklan atau konten apa pun yang mungkin muncul di situs web yang ditampilkan.</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">Punya Alkitab dalam format lain? Konverter Lagu dan Alkitab (Bantuan → Konverter Lagu dan Alkitab) dapat mengubahnya.</string>
     <string name="setup_step3_title">Tambahkan buku lagu</string>
     <string name="setup_step3_subtitle">Arahkan aplikasi ke folder koleksi lagu Anda</string>
-    <string name="setup_step3_step1">1. Buka Pengaturan dengan tombol ⚙ di bilah alat</string>
-    <string name="setup_step3_step2">2. Buka tab Sistem</string>
     <string name="setup_step3_step3">3. Klik "Telusuri…" di samping Direktori Penyimpanan Lagu</string>
     <string name="setup_step3_step4">4. Pilih folder yang berisi berkas lagu Anda</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">Di Atas Bilah</string>
     <string name="background_above_band_fill">Warna Isian</string>
     <string name="background_above_band_opacity">Opasitas Isian</string>
-    <string name="quick_background_title">Latar cepat</string>
     <string name="quick_background_reset">Kembali normal</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · dikelola di Pengaturan</string>

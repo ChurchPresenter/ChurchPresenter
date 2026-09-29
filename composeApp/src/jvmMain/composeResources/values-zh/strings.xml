@@ -557,7 +557,6 @@
     <string name="tooltip_schedule_zoom_in">放大</string>
     <string name="tooltip_schedule_zoom_out">缩小</string>
     <string name="tooltip_add_to_schedule">添加到程序单</string>
-    <string name="tooltip_clear_schedule">清空程序单</string>
     <string name="tooltip_clear_display">清除画面</string>
     <string name="remote_action_clear_display">清除画面</string>
     <string name="schedule_add_files_title">向程序单添加文件</string>
@@ -568,14 +567,12 @@
     <string name="tooltip_theme_system">跟随系统主题</string>
     <string name="tooltip_remove">移除</string>
     <string name="tooltip_edit">编辑</string>
-    <string name="tooltip_edit_label">编辑标签</string>
     <string name="tooltip_go_live">上屏</string>
     <string name="tooltip_presentation_remote">打开远程控制</string>
     <string name="tooltip_qa_remote">共享与远程访问</string>
     <string name="tooltip_stt_settings">语音转文字显示设置</string>
     <string name="tooltip_send_to_stage_monitor">发送到舞台监视器</string>
     <string name="tooltip_hide_from_stage_monitor">隐藏通告</string>
-    <string name="tooltip_add_label">添加标签</string>
     <string name="tooltip_collapse_schedule">收起程序单</string>
     <string name="tooltip_expand_schedule">展开程序单</string>
     <string name="schedule_drop_hint">将文件拖到此处即可添加到程序单</string>
@@ -789,7 +786,6 @@
     <string name="media_vlc_load_failed">找到了 VLC，但无法加载。请尝试从 videolan.org 重新安装 VLC（在 Windows 上还需安装 Microsoft Visual C++ Redistributable），然后重启应用。</string>
     <string name="vlc_custom_path">自定义 VLC 路径</string>
     <string name="vlc_browse">浏览</string>
-    <string name="vlc_path_hint">选择 VLC 的安装目录</string>
     <string name="vlc_directory_chooser_title">选择 VLC 的安装目录</string>
     <string name="vlc_path_invalid">该目录不包含 VLC 库文件</string>
     <string name="media_audio_continues">切换标签页或显示其他内容时，音频会在后台继续播放</string>
@@ -913,7 +909,6 @@
     <string name="web_snapshot_screen_recording_hint">如果一直这样，请在\n系统设置 &gt; 隐私与安全性 &gt; 屏幕录制中授予屏幕录制权限</string>
     <string name="website_dialog_title">添加网站</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">标题（可选）</string>
     <string name="website_title_hint">输入一个显示名称…</string>
     <string name="website_disclaimer">我们不对所显示网站上出现的任何广告或内容负责。</string>
@@ -1692,8 +1687,6 @@
     <string name="setup_step2_tip2">有其他格式的圣经？歌曲与圣经转换器（帮助 → 歌曲与圣经转换器）可以转换它。</string>
     <string name="setup_step3_title">添加诗歌本</string>
     <string name="setup_step3_subtitle">把应用指向你的诗歌库文件夹</string>
-    <string name="setup_step3_step1">1. 用工具栏上的 ⚙ 按钮打开设置</string>
-    <string name="setup_step3_step2">2. 切换到“系统”选项卡</string>
     <string name="setup_step3_step3">3. 点击“诗歌存放文件夹”旁的“浏览…”</string>
     <string name="setup_step3_step4">4. 选择包含诗歌文件的文件夹</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2073,7 +2066,6 @@
     <string name="background_above_band_caption">条带上方</string>
     <string name="background_above_band_fill">填充颜色</string>
     <string name="background_above_band_opacity">填充不透明度</string>
-    <string name="quick_background_title">快捷背景</string>
     <string name="quick_background_reset">恢复正常</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · 在设置中管理</string>

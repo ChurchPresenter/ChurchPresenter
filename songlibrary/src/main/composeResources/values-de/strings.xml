@@ -29,7 +29,6 @@
     <string name="empty_title">Keine Lieder entsprechen den Filtern</string>
     <string name="reset_filters">Filter zurücksetzen</string>
     <string name="library_empty">Diese Bibliothek enthält noch keine Lieder</string>
-    <string name="footer_songs">%1$s Lieder</string>
     <string name="unsaved_changes">%1$s nicht gespeichert</string>
     <string name="revert">Verwerfen</string>
     <string name="save_changes">Änderungen speichern</string>

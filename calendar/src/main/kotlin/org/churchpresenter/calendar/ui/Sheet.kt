@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import org.churchpresenter.calendar.generated.resources.calendar_close
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -34,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.calendar.generated.resources.Res
-import org.churchpresenter.calendar.generated.resources.calendar_close_sheet
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
@@ -119,7 +119,7 @@ fun SheetScaffold(
                     ) {
                         Icon(
                             Icons.Filled.Close,
-                            contentDescription = stringResource(Res.string.calendar_close_sheet),
+                            contentDescription = stringResource(Res.string.calendar_close),
                             tint = scheme.onSurfaceVariant,
                             modifier = Modifier.size(12.dp),
                         )

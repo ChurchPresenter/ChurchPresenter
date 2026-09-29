@@ -29,7 +29,6 @@
     <string name="empty_title">Ükski laul ei vasta filtritele</string>
     <string name="reset_filters">Lähtesta filtrid</string>
     <string name="library_empty">Selles kogus pole veel ühtegi laulu</string>
-    <string name="footer_songs">%1$s laulu</string>
     <string name="unsaved_changes">%1$s salvestamata</string>
     <string name="revert">Ennista</string>
     <string name="save_changes">Salvesta muudatused</string>

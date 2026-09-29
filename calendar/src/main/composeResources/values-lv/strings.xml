@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Sākt no</string>
     <string name="calendar_template_blank">Tukšs dievkalpojums</string>
     <string name="calendar_template_blank_sub">Tukša norises kārtība</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d punkti</string>
     <string name="calendar_add_service_save">Pievienot dievkalpojumu</string>
     <string name="calendar_new_service_on">Jauns dievkalpojums · %1$s</string>
     <string name="calendar_kind_sunday_short">Svētdiena</string>
     <string name="calendar_kind_midweek_short">Nedēļas vidus</string>
     <string name="calendar_kind_special_short">Īpašs</string>
-    <string name="calendar_close_sheet">Aizvērt</string>
     <string name="calendar_settings">Kalendāra iestatījumi</string>
     <string name="calendar_settings_sub">Attiecas uz visiem dievkalpojumiem, ne tikai šodienas</string>
     <string name="calendar_settings_sections">Sadaļas</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Punkta vairs nav šajā norises kārtībā</string>
     <string name="calendar_copy_include_cues">Automatizācijas atzīmes</string>
     <string name="calendar_copy_include_cues_sub">%1$d atzīmes, nobīdes saglabātas</string>
-    <string name="calendar_template_include_cues">Automatizācijas atzīmes</string>
     <string name="calendar_template_include_cues_sub">Relatīvās nobīdes</string>
     <string name="calendar_templates_empty_sub">Saglabājiet to no jebkura dievkalpojuma ar „Veidne” norises kārtības galvenē. Līdz tam jauns dievkalpojums var sākties ar jebkura iepriekšējā kopiju.</string>
     <string name="calendar_templates_note">Veidnes tiek piedāvātas sadaļā „Sākt no”, kad pievienojat dievkalpojumu. Jaunu saglabājiet no jebkura dievkalpojuma ar „Veidne” norises kārtības galvenē.</string>

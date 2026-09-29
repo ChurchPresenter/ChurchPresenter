@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Empezar desde</string>
     <string name="calendar_template_blank">Servicio en blanco</string>
     <string name="calendar_template_blank_sub">Orden del servicio vacío</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d elementos</string>
     <string name="calendar_add_service_save">Añadir servicio</string>
     <string name="calendar_new_service_on">Nuevo servicio · %1$s</string>
     <string name="calendar_kind_sunday_short">Domingo</string>
     <string name="calendar_kind_midweek_short">Entre semana</string>
     <string name="calendar_kind_special_short">Especial</string>
-    <string name="calendar_close_sheet">Cerrar</string>
     <string name="calendar_settings">Ajustes del calendario</string>
     <string name="calendar_settings_sub">Se aplica a todos los servicios, no solo al de hoy</string>
     <string name="calendar_settings_sections">Secciones</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">El elemento ya no está en este orden del servicio</string>
     <string name="calendar_copy_include_cues">Marcas de automatización</string>
     <string name="calendar_copy_include_cues_sub">%1$d marcas, se conservan los desfases</string>
-    <string name="calendar_template_include_cues">Marcas de automatización</string>
     <string name="calendar_template_include_cues_sub">Desfases relativos</string>
     <string name="calendar_templates_empty_sub">Guarda una desde cualquier servicio con «Plantilla», en la cabecera del orden del servicio. Hasta entonces, un servicio nuevo puede empezar desde una copia de cualquier anterior.</string>
     <string name="calendar_templates_note">Las plantillas se ofrecen en «Empezar desde» al añadir un servicio. Guarda una nueva desde cualquier servicio con «Plantilla», en la cabecera del orden del servicio.</string>

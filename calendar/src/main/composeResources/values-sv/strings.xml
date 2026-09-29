@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Utgå från</string>
     <string name="calendar_template_blank">Tom gudstjänst</string>
     <string name="calendar_template_blank_sub">Tomt körschema</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d punkter</string>
     <string name="calendar_add_service_save">Lägg till gudstjänst</string>
     <string name="calendar_new_service_on">Ny gudstjänst · %1$s</string>
     <string name="calendar_kind_sunday_short">Söndag</string>
     <string name="calendar_kind_midweek_short">Mitt i veckan</string>
     <string name="calendar_kind_special_short">Särskild</string>
-    <string name="calendar_close_sheet">Stäng</string>
     <string name="calendar_settings">Kalenderinställningar</string>
     <string name="calendar_settings_sub">Gäller alla gudstjänster, inte bara dagens</string>
     <string name="calendar_settings_sections">Avsnitt</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Punkten finns inte längre i det här körschemat</string>
     <string name="calendar_copy_include_cues">Automatikmarkeringar</string>
     <string name="calendar_copy_include_cues_sub">%1$d markeringar, tidsförskjutningar bevaras</string>
-    <string name="calendar_template_include_cues">Automatikmarkeringar</string>
     <string name="calendar_template_include_cues_sub">Relativa förskjutningar</string>
     <string name="calendar_templates_empty_sub">Spara en från valfri gudstjänst med ”Mall”, i körschemats rubrik. Till dess kan en ny gudstjänst utgå från en kopia av en tidigare.</string>
     <string name="calendar_templates_note">Mallar erbjuds under ”Utgå från” när du lägger till en gudstjänst. Spara en ny från valfri gudstjänst med ”Mall”, i körschemats rubrik.</string>

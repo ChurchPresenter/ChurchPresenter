@@ -29,7 +29,6 @@
     <string name="empty_title">Ningún canto coincide con los filtros</string>
     <string name="reset_filters">Restablecer filtros</string>
     <string name="library_empty">Esta biblioteca aún no tiene cantos</string>
-    <string name="footer_songs">%1$s cantos</string>
     <string name="unsaved_changes">%1$s sin guardar</string>
     <string name="revert">Descartar</string>
     <string name="save_changes">Guardar cambios</string>

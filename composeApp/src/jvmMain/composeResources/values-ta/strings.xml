@@ -564,7 +564,6 @@
     <string name="tooltip_schedule_zoom_in">பெரிதாக்கு</string>
     <string name="tooltip_schedule_zoom_out">சிறிதாக்கு</string>
     <string name="tooltip_add_to_schedule">அட்டவணையில் சேர்</string>
-    <string name="tooltip_clear_schedule">அட்டவணையை அழி</string>
     <string name="tooltip_clear_display">காட்சியை அழி</string>
     <string name="remote_action_clear_display">காட்சியை அழி</string>
     <string name="schedule_add_files_title">அட்டவணையில் கோப்புகளைச் சேர்</string>
@@ -575,14 +574,12 @@
     <string name="tooltip_theme_system">கணினித் தோற்றம்</string>
     <string name="tooltip_remove">நீக்கு</string>
     <string name="tooltip_edit">திருத்து</string>
-    <string name="tooltip_edit_label">சிட்டையைத் திருத்து</string>
     <string name="tooltip_go_live">நேரலைக்கு</string>
     <string name="tooltip_presentation_remote">தொலைக் கட்டுப்பாட்டைத் திற</string>
     <string name="tooltip_qa_remote">பகிர்வு &amp; தொலை அணுகல்</string>
     <string name="tooltip_stt_settings">STT காட்சி அமைப்புகள்</string>
     <string name="tooltip_send_to_stage_monitor">மேடைத் திரைக்கு அனுப்பு</string>
     <string name="tooltip_hide_from_stage_monitor">அறிவிப்பை மறை</string>
-    <string name="tooltip_add_label">சிட்டையைச் சேர்</string>
     <string name="tooltip_collapse_schedule">அட்டவணையைச் சுருக்கு</string>
     <string name="tooltip_expand_schedule">அட்டவணையை விரி</string>
     <string name="schedule_drop_hint">அட்டவணையில் சேர்க்க கோப்புகளை இங்கே இழுக்கவும்</string>
@@ -794,7 +791,6 @@
     <string name="media_vlc_load_failed">VLC கண்டறியப்பட்டது ஆனால் ஏற்ற முடியவில்லை. videolan.org இலிருந்து VLC ஐ மீண்டும் நிறுவ முயற்சிக்கவும் (Windows இல், Microsoft Visual C++ Redistributable ஐயும் நிறுவவும்), பிறகு பயன்பாட்டை மீண்டும் தொடங்கவும்.</string>
     <string name="vlc_custom_path">தனிப்பயன் VLC பாதை</string>
     <string name="vlc_browse">உலாவு</string>
-    <string name="vlc_path_hint">VLC நிறுவல் கோப்பகத்தைத் தேர்ந்தெடு</string>
     <string name="vlc_directory_chooser_title">VLC நிறுவல் கோப்பகத்தைத் தேர்ந்தெடு</string>
     <string name="vlc_path_invalid">கோப்பகத்தில் VLC நூலகங்கள் இல்லை</string>
     <string name="media_audio_continues">தாவல்களை மாற்றும்போது அல்லது வேறு உள்ளடக்கத்தைக் காட்டும்போது ஒலி பின்னணியில் தொடர்ந்து இயங்கும்</string>
@@ -918,7 +914,6 @@
     <string name="web_snapshot_screen_recording_hint">இது தொடர்ந்தால், System Settings > Privacy &amp; Security > Screen Recording இல்\nதிரைப் பதிவு அனுமதியை வழங்கவும்</string>
     <string name="website_dialog_title">இணையதளத்தைச் சேர்</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">தலைப்பு (விருப்பத்தேர்வு)</string>
     <string name="website_title_hint">காட்சிப் பெயரை உள்ளிடவும்…</string>
     <string name="website_disclaimer">காட்டப்படும் இணையதளத்தில் தோன்றக்கூடிய விளம்பரங்கள் அல்லது உள்ளடக்கத்திற்கு நாங்கள் பொறுப்பல்ல.</string>
@@ -1697,8 +1692,6 @@
     <string name="setup_step2_tip2">வேறு வடிவத்தில் வேதாகமம் உள்ளதா? பாடல் மற்றும் வேதாகம மாற்றி (உதவி → பாடல் மற்றும் வேதாகம மாற்றி) அதை மாற்ற முடியும்.</string>
     <string name="setup_step3_title">பாடல் புத்தகங்களைச் சேர்</string>
     <string name="setup_step3_subtitle">உங்கள் பாடல் நூலகக் கோப்புறையைப் பயன்பாட்டிற்குச் சுட்டிக்காட்டவும்</string>
-    <string name="setup_step3_step1">1. கருவிப்பட்டையில் உள்ள ⚙ பொத்தானைப் பயன்படுத்தி அமைப்புகளைத் திறக்கவும்</string>
-    <string name="setup_step3_step2">2. கணினித் தாவலுக்குச் செல்லவும்</string>
     <string name="setup_step3_step3">3. பாடல்கள் சேமிப்பு கோப்பகத்திற்கு அருகில் உள்ள "உலாவு…" என்பதைச் சொடுக்கவும்</string>
     <string name="setup_step3_step4">4. உங்கள் பாடல் கோப்புகளைக் கொண்ட கோப்புறையைத் தேர்ந்தெடுக்கவும்</string>
     <string name="setup_step5_title">VLC ஊடகப் பிளேயர்</string>
@@ -2078,7 +2071,6 @@
     <string name="background_above_band_caption">பட்டைக்கு மேலே</string>
     <string name="background_above_band_fill">நிரப்பு நிறம்</string>
     <string name="background_above_band_opacity">நிரப்பு ஒளிபுகாநிலை</string>
-    <string name="quick_background_title">விரைவுப் பின்னணிகள்</string>
     <string name="quick_background_reset">வழக்கத்திற்குத் திரும்பு</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · அமைப்புகளில் நிர்வகிக்கவும்</string>

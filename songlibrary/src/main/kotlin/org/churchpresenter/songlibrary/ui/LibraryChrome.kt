@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import org.churchpresenter.songlibrary.generated.resources.song_count
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -47,7 +48,6 @@ import org.churchpresenter.songlibrary.generated.resources.columns_always
 import org.churchpresenter.songlibrary.generated.resources.columns_show_all
 import org.churchpresenter.songlibrary.generated.resources.delete
 import org.churchpresenter.songlibrary.generated.resources.done
-import org.churchpresenter.songlibrary.generated.resources.footer_songs
 import org.churchpresenter.songlibrary.generated.resources.loading
 import org.churchpresenter.songlibrary.generated.resources.new_song
 import org.churchpresenter.songlibrary.generated.resources.no_song_folder
@@ -152,7 +152,7 @@ internal fun LibraryFooter(state: SongLibraryState, io: CoroutineDispatcher, onC
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                stringResource(Res.string.footer_songs, state.songs.size),
+                stringResource(Res.string.song_count, state.songs.size),
                 style = LibraryType.small,
                 color = scheme.onSurfaceVariant,
             )

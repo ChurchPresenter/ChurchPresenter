@@ -29,7 +29,6 @@
     <string name="empty_title">Inga sånger matchar dina filter</string>
     <string name="reset_filters">Återställ filter</string>
     <string name="library_empty">Det här biblioteket har inga sånger ännu</string>
-    <string name="footer_songs">%1$s sånger</string>
     <string name="unsaved_changes">%1$s osparade</string>
     <string name="revert">Återställ</string>
     <string name="save_changes">Spara ändringar</string>

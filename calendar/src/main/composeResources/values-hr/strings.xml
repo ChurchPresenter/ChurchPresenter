@@ -70,13 +70,11 @@
     <string name="calendar_start_from">Počni od</string>
     <string name="calendar_template_blank">Prazno bogoslužje</string>
     <string name="calendar_template_blank_sub">Prazan tijek bogoslužja</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d stavki</string>
     <string name="calendar_add_service_save">Dodaj bogoslužje</string>
     <string name="calendar_new_service_on">Novo bogoslužje · %1$s</string>
     <string name="calendar_kind_sunday_short">Nedjelja</string>
     <string name="calendar_kind_midweek_short">Sredina tjedna</string>
     <string name="calendar_kind_special_short">Posebno</string>
-    <string name="calendar_close_sheet">Zatvori</string>
     <string name="calendar_settings">Postavke kalendara</string>
     <string name="calendar_settings_sub">Primjenjuje se na svako bogoslužje, ne samo na današnje</string>
     <string name="calendar_settings_sections">Odjeljci</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">Stavke više nema u ovom tijeku bogoslužja</string>
     <string name="calendar_copy_include_cues">Oznake automatizacije</string>
     <string name="calendar_copy_include_cues_sub">%1$d oznaka, pomaci sačuvani</string>
-    <string name="calendar_template_include_cues">Oznake automatizacije</string>
     <string name="calendar_template_include_cues_sub">Relativni pomaci</string>
     <string name="calendar_templates_empty_sub">Spremite ga iz bilo kojeg bogoslužja pomoću „Predložak” u zaglavlju tijeka. Do tada novo bogoslužje može početi od kopije bilo kojeg ranijeg.</string>
     <string name="calendar_templates_note">Predlošci se nude pod „Počni od” kad dodajete bogoslužje. Novi spremite iz bilo kojeg bogoslužja pomoću „Predložak” u zaglavlju tijeka.</string>

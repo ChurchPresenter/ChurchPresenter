@@ -329,7 +329,6 @@
     <string name="tooltip_move_up">Przenieś w górę</string>
     <string name="tooltip_move_down">Przenieś w dół</string>
     <string name="tooltip_add_to_schedule">Dodaj do programu</string>
-    <string name="tooltip_clear_schedule">Wyczyść program</string>
     <string name="tooltip_settings">Ustawienia</string>
     <string name="tooltip_go_live">Na żywo</string>
     <string name="tooltip_presentation_remote">Otwórz zdalne sterowanie</string>
@@ -338,8 +337,6 @@
     <string name="tooltip_hide_from_stage_monitor">Ukryj ogłoszenie</string>
     <string name="tooltip_remove">Usuń</string>
     <string name="tooltip_edit">Edytuj</string>
-    <string name="tooltip_edit_label">Edytuj etykietę</string>
-    <string name="tooltip_add_label">Dodaj etykietę</string>
 
     <!-- Label Strings -->
     <string name="add_label">Dodaj etykietę</string>
@@ -644,7 +641,6 @@
     <string name="media_vlc_required">Odtwarzacz VLC jest wymagany do odtwarzania mediów</string>
     <string name="vlc_custom_path">Ścieżka do VLC</string>
     <string name="vlc_browse">Przeglądaj</string>
-    <string name="vlc_path_hint">Wybierz katalog instalacji VLC</string>
     <string name="vlc_directory_chooser_title">Wybierz katalog instalacji VLC</string>
     <string name="vlc_path_invalid">Katalog nie zawiera bibliotek VLC</string>
     <string name="menu_view">Widok</string>
@@ -742,7 +738,6 @@
     <string name="website_disclaimer">Nie ponosimy odpowiedzialności za reklamy ani treści, które mogą pojawić się na wyświetlanej stronie internetowej.</string>
     <string name="website_title_hint">Wprowadź nazwę wyświetlaną…</string>
     <string name="website_title_label">Tytuł (opcjonalnie)</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
     <string name="new_song">Nowa pieśń</string>
     <string name="back_to_live">Wróć do transmisji</string>
@@ -1472,8 +1467,6 @@
     <string name="setup_step2_tip2">Masz Biblię w innym formacie? Konwerter pieśni i Biblii (Pomoc → Konwerter pieśni i Biblii) może ją przekonwertować.</string>
     <string name="setup_step3_title">Dodaj śpiewniki</string>
     <string name="setup_step3_subtitle">Wskaż aplikacji folder biblioteki piosenek</string>
-    <string name="setup_step3_step1">1. Otwórz Ustawienia używając przycisku ⚙ w pasku narzędzi</string>
-    <string name="setup_step3_step2">2. Przejdź do karty System</string>
     <string name="setup_step3_step3">3. Kliknij "Przeglądaj…" obok Katalogu przechowywania piosenek</string>
     <string name="setup_step3_step4">4. Wybierz folder zawierający pliki piosenek</string>
     <string name="setup_step5_title">VLC Media Player</string>
@@ -2028,7 +2021,6 @@
     <string name="background_above_band_caption">Nad paskiem</string>
     <string name="background_above_band_fill">Kolor wypełnienia</string>
     <string name="background_above_band_opacity">Przezroczystość wypełnienia</string>
-    <string name="quick_background_title">Szybkie tła</string>
     <string name="quick_background_reset">Powrót do normalnego</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · zarządzanie w ustawieniach</string>

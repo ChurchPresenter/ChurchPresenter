@@ -455,7 +455,6 @@
     <string name="tooltip_move_up">Liiguta üles</string>
     <string name="tooltip_move_down">Liiguta alla</string>
     <string name="tooltip_add_to_schedule">Lisa kavasse</string>
-    <string name="tooltip_clear_schedule">Tühjenda kava</string>
     <string name="tooltip_clear_display">Tühjenda kuva</string>
     <string name="remote_action_clear_display">Tühjenda kuva</string>
     <string name="schedule_add_files_title">Lisa failid kavasse</string>
@@ -466,13 +465,11 @@
     <string name="tooltip_theme_system">Süsteemi teema</string>
     <string name="tooltip_remove">Eemalda</string>
     <string name="tooltip_edit">Muuda</string>
-    <string name="tooltip_edit_label">Muuda silti</string>
     <string name="tooltip_go_live">Mine eetrisse</string>
     <string name="tooltip_presentation_remote">Ava kaugjuhtimine</string>
     <string name="tooltip_qa_remote">Jagamine ja kaugjuurdepääs</string>
     <string name="tooltip_send_to_stage_monitor">Saada lavamonitorile</string>
     <string name="tooltip_hide_from_stage_monitor">Peida teade</string>
-    <string name="tooltip_add_label">Lisa silt</string>
     <string name="tooltip_collapse_schedule">Ahenda kava</string>
     <string name="tooltip_expand_schedule">Laienda kava</string>
     <string name="schedule_drop_hint">Lohista failid siia, et lisada need kavasse</string>
@@ -662,7 +659,6 @@
     <string name="media_vlc_load_failed">VLC leiti, kuid seda ei õnnestunud laadida. Proovi VLC uuesti installida veebisaidilt videolan.org (Windowsis installi ka Microsoft Visual C++ Redistributable) ja taaskäivita seejärel rakendus.</string>
     <string name="vlc_custom_path">Kohandatud VLC asukoht</string>
     <string name="vlc_browse">Sirvi</string>
-    <string name="vlc_path_hint">Vali VLC paigalduskaust</string>
     <string name="vlc_directory_chooser_title">Vali VLC paigalduskaust</string>
     <string name="vlc_path_invalid">Kaust ei sisalda VLC teeke</string>
     <string name="media_audio_continues">Heli jätkub taustal mängimist, kui vahetad vahekaarte või kuvad muud sisu</string>
@@ -784,7 +780,6 @@
     <string name="web_zoom_out">Vähenda</string>
     <string name="website_dialog_title">Lisa veebisait</string>
     <string name="website_url_label">URL</string>
-    <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Pealkiri (valikuline)</string>
     <string name="website_title_hint">Sisesta kuvatav nimi…</string>
     <string name="website_disclaimer">Me ei vastuta reklaamide ega sisu eest, mis võib kuvatud veebisaidil ilmuda.</string>
@@ -1523,8 +1518,6 @@
     <string name="setup_step2_tip2">Kas sul on Piibel muus vormingus? Laulude ja Piibli teisendaja (Abi → Laulude ja Piibli teisendaja) oskab selle teisendada.</string>
     <string name="setup_step3_title">Lisa laulikud</string>
     <string name="setup_step3_subtitle">Suuna rakendus oma laulukogu kausta</string>
-    <string name="setup_step3_step1">1. Ava seaded tööriistariba nupuga ⚙</string>
-    <string name="setup_step3_step2">2. Mine süsteemi vahekaardile</string>
     <string name="setup_step3_step3">3. Klõpsa Laulude säilituskausta kõrval nuppu "Sirvi…"</string>
     <string name="setup_step3_step4">4. Vali kaust, mis sisaldab su laulufaile</string>
     <string name="setup_step5_title">VLC meediapleier</string>
@@ -2061,7 +2054,6 @@
     <string name="background_above_band_caption">Riba kohal</string>
     <string name="background_above_band_fill">Täitevärv</string>
     <string name="background_above_band_opacity">Täite läbipaistmatus</string>
-    <string name="quick_background_title">Kiirtaustad</string>
     <string name="quick_background_reset">Tagasi tavaolekusse</string>
     <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hallatakse seadetes</string>

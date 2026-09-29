@@ -29,7 +29,6 @@
     <string name="empty_title">Żadna pieśń nie pasuje do filtrów</string>
     <string name="reset_filters">Wyczyść filtry</string>
     <string name="library_empty">Ta biblioteka nie zawiera jeszcze pieśni</string>
-    <string name="footer_songs">%1$s pieśni</string>
     <string name="unsaved_changes">%1$s niezapisanych</string>
     <string name="revert">Przywróć</string>
     <string name="save_changes">Zapisz zmiany</string>

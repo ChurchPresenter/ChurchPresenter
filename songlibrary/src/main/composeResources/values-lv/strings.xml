@@ -29,7 +29,6 @@
     <string name="empty_title">Neviena dziesma neatbilst filtriem</string>
     <string name="reset_filters">Atiestatīt filtrus</string>
     <string name="library_empty">Šajā bibliotēkā vēl nav dziesmu</string>
-    <string name="footer_songs">%1$s dziesmas</string>
     <string name="unsaved_changes">%1$s nesaglabātas</string>
     <string name="revert">Atsaukt</string>
     <string name="save_changes">Saglabāt izmaiņas</string>

@@ -29,7 +29,6 @@
     <string name="empty_title">आपके फ़िल्टर से कोई गीत मेल नहीं खाता</string>
     <string name="reset_filters">फ़िल्टर रीसेट करें</string>
     <string name="library_empty">इस लाइब्रेरी में अभी कोई गीत नहीं है</string>
-    <string name="footer_songs">%1$s गीत</string>
     <string name="unsaved_changes">%1$s सहेजे नहीं गए</string>
     <string name="revert">पूर्ववत करें</string>
     <string name="save_changes">बदलाव सहेजें</string>

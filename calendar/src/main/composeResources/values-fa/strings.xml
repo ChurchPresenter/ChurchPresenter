@@ -70,13 +70,11 @@
     <string name="calendar_start_from">شروع از</string>
     <string name="calendar_template_blank">جلسهٔ خالی</string>
     <string name="calendar_template_blank_sub">ترتیب برنامهٔ خالی</string>
-    <string name="calendar_template_copy_sub">%1$s · %2$d مورد</string>
     <string name="calendar_add_service_save">افزودن جلسه</string>
     <string name="calendar_new_service_on">جلسهٔ جدید · %1$s</string>
     <string name="calendar_kind_sunday_short">یکشنبه</string>
     <string name="calendar_kind_midweek_short">میان هفته</string>
     <string name="calendar_kind_special_short">ویژه</string>
-    <string name="calendar_close_sheet">بستن</string>
     <string name="calendar_settings">تنظیمات تقویم</string>
     <string name="calendar_settings_sub">برای همهٔ جلسات اعمال می‌شود، نه فقط جلسهٔ امروز</string>
     <string name="calendar_settings_sections">بخش‌ها</string>
@@ -103,7 +101,6 @@
     <string name="calendar_cue_item_missing">این مورد دیگر در این ترتیب برنامه نیست</string>
     <string name="calendar_copy_include_cues">نشانه‌های خودکارسازی</string>
     <string name="calendar_copy_include_cues_sub">%1$d نشانه، فاصله‌های زمانی حفظ می‌شود</string>
-    <string name="calendar_template_include_cues">نشانه‌های خودکارسازی</string>
     <string name="calendar_template_include_cues_sub">فاصله‌های نسبی</string>
     <string name="calendar_templates_empty_sub">یکی را از هر جلسه‌ای با «قالب» در سربرگ ترتیب برنامه ذخیره کنید. تا آن زمان، جلسهٔ جدید می‌تواند از روی نسخه‌ای از هر جلسهٔ پیشین شروع شود.</string>
     <string name="calendar_templates_note">قالب‌ها هنگام افزودن جلسه زیر «شروع از» پیشنهاد می‌شوند. قالب تازه‌ای را از هر جلسه‌ای با «قالب» در سربرگ ترتیب برنامه ذخیره کنید.</string>
