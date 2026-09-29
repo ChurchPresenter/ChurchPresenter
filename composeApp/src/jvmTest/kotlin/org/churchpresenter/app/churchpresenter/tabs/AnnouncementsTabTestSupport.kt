@@ -20,7 +20,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Dp
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
@@ -51,6 +51,9 @@ internal class AnnouncementReports {
 
     /** The most recent settings the tab asked to have persisted. */
     var settings: AnnouncementsSettings? = null
+
+    /** The whole of the most recent settings, for what the tab keeps outside its own section. */
+    var appSettings: AppSettings? = null
 }
 
 /**
@@ -58,6 +61,10 @@ internal class AnnouncementReports {
  *
  * The tab is given its settings back on every change, so the state it renders from is the state it
  * just asked for — the same loop `MainDesktop` runs.
+ *
+ * The window is [WINDOW_HEIGHT] tall rather than the default 768: the text card sits above the timer
+ * in the left column, and at 768 the timer's controls scroll out of view, where they measure as
+ * zero-size and cannot be clicked.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun announcementsTab(
@@ -72,7 +79,7 @@ internal fun announcementsTab(
 ) {
     val presenter = PresenterManager()
     val reports = AnnouncementReports()
-    runComposeUiTest {
+    runDesktopComposeUiTest(width = WINDOW_WIDTH, height = WINDOW_HEIGHT) {
         setContent {
             var appSettings by remember {
                 mutableStateOf(
@@ -87,6 +94,7 @@ internal fun announcementsTab(
                             appSettings = transform(appSettings)
                             reports.settingsChanges++
                             reports.settings = appSettings.announcementsSettings
+                            reports.appSettings = appSettings
                         },
                         presenterManager = presenter.takeIf { withPresenter },
                         onAddToSchedule =
@@ -101,6 +109,9 @@ internal fun announcementsTab(
     }
 }
 
+private const val WINDOW_WIDTH = 1024
+private const val WINDOW_HEIGHT = 1200
+
 @Composable
 private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
     if (themeMode == null) MaterialTheme(content = content)
@@ -113,8 +124,6 @@ internal object AnnouncementLabel {
     const val TEXT_HINT = "Enter announcement text here…"
     const val GO_LIVE = "Go Live"
     const val ADD_TO_SCHEDULE = "Add to Schedule"
-    const val SHOW = "Show Announcement on Display"
-    const val HIDE = "Hide Announcement from Display"
     const val START = "Start"
     const val PAUSE = "Pause"
     const val RESET = "Reset"
@@ -200,12 +209,16 @@ internal fun ComposeUiTest.announcementField() = onAllNodes(hasSetTextAction())[
  *
  * Not by index: the tab has eight fields (the announcement, the font name and size, the three timer
  * digits, this, and the loop count) and their order in the semantics tree is not the order they are
- * drawn in. The expiry message is the bottom-most of them, and it is the only one whose presence
- * depends on the timer mode.
+ * drawn in. The expiry message is the bottom-most of them in the left column — the loop count sits
+ * lower, pinned under the preview in the right column — and it is the only one whose presence
+ * depends on the timer mode. The left column is told apart by the announcement field, which spans it.
  */
 internal fun ComposeUiTest.expiredTextField(): SemanticsNodeInteraction {
     val fields = onAllNodes(hasSetTextAction()).fetchSemanticsNodes(atLeastOneRootRequired = false)
-    val lowest = fields.indices.maxByOrNull { fields[it].boundsInRoot.top }
+    val leftColumnEnd = fields.firstOrNull()?.boundsInRoot?.right ?: error("no text fields are on screen")
+    val lowest = fields.indices
+        .filter { fields[it].boundsInRoot.left < leftColumnEnd }
+        .maxByOrNull { fields[it].boundsInRoot.top }
         ?: error("no text fields are on screen")
     return onAllNodes(hasSetTextAction())[lowest]
 }
