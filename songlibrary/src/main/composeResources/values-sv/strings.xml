@@ -34,7 +34,6 @@
     <string name="revert">Återställ</string>
     <string name="save_changes">Spara ändringar</string>
     <string name="done">Klar</string>
-    <string name="saved">%1$s sparade</string>
     <string name="save_failed">%1$s kunde inte sparas</string>
     <string name="new_song_book">Ny sångbok</string>
     <string name="new_song_book_subhead">En samling som sånger kan läggas i</string>

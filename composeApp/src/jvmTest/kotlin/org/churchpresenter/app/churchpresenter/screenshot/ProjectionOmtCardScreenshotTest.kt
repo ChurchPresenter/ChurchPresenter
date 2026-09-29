@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.screenshot
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
@@ -54,7 +55,7 @@ class ProjectionOmtCardScreenshotTest {
         receivers: Int = 0,
         address: String = "",
         rootIndex: Int = 0,
-        drive: androidx.compose.ui.test.ComposeUiTest.() -> Unit = {},
+        drive: ComposeUiTest.() -> Unit = {},
     ) = captureComponent(SECTION, name, rootIndex = rootIndex, drive = drive) {
         Box(Modifier.width(CARD_WIDTH)) {
             OmtOutputsCard(

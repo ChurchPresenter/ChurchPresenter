@@ -5,6 +5,8 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.OmtProperties
 import org.churchpresenter.core.models.scene.SceneSource
@@ -24,10 +26,25 @@ class CanvasOmtSourceScreenshotTest {
     private companion object {
         const val SECTION = "canvasOmtSource"
         val PANEL_WIDTH = 280.dp
+        const val REFRESH = "Refresh Sources"
+        const val LOOKS_TIMEOUT_MS = 5_000L
     }
 
+    /**
+     * The panel's discovery looks run on `Dispatchers.IO`, which the test's idling does not track, so
+     * the capture waits for them to finish -- Refresh comes back enabled -- rather than landing on
+     * whichever look happened to be in flight.
+     */
     private fun shoot(name: String, source: SceneSource.OmtSource, network: List<String>) =
-        captureComponent(SECTION, name) {
+        captureComponent(
+            SECTION,
+            name,
+            drive = {
+                waitUntil("discovery to finish", timeoutMillis = LOOKS_TIMEOUT_MS) {
+                    onAllNodes(hasText(REFRESH) and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+                }
+            },
+        ) {
             Column(Modifier.width(PANEL_WIDTH)) {
                 OmtProperties(
                     source = source,

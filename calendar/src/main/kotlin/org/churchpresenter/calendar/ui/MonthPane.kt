@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -165,7 +166,7 @@ private fun MonthHeader(month: YearMonth, onPrevious: () -> Unit, onNext: () -> 
 /** The design's 24dp square, bordered, rounded month-navigation button. */
 @Composable
 private fun NavButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     description: String,
     onClick: () -> Unit,
 ) {

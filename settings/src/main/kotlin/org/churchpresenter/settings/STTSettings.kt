@@ -20,7 +20,7 @@ data class STTSettings(
     val dripFeedSpeed: Int = 25, // ms per character
     val textColor: String = "#FFFFFF",
     val translationTextColor: String = "#FFFFFF",
-    val backgroundColor: String = "transparent",
+    val backgroundColor: String = Constants.COLOR_VALUE_TRANSPARENT,
     val backgroundOpacity: Int = 0,
     val fontSize: Int = 42,
     val lineSpacing: Int = 130, // line height as percentage of font size (100 = no extra spacing)

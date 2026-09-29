@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.ui.components
 
+import androidx.compose.runtime.mutableStateListOf
 import org.churchpresenter.lottiegen.lottie.hexToRgb
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -67,7 +68,7 @@ private val ButtonShape = AppShape(6.dp)
 private object RecentColors {
     private const val MAX = 12
     private val file = java.io.File(System.getProperty("user.home"), ".churchpresenter/recent_colors.json")
-    val colors = androidx.compose.runtime.mutableStateListOf<String>()
+    val colors = mutableStateListOf<String>()
 
     init { load() }
 

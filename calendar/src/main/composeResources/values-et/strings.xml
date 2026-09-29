@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kalendrihaldur</string>
     <string name="calendar_title">Kalender</string>
     <string name="calendar_today">Täna</string>
     <string name="calendar_close">Sulge</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Eriüritus</string>
 
     <string name="calendar_add_service">Lisa teenistus</string>
-    <string name="calendar_new_service">Uus teenistus</string>
     <string name="calendar_edit_service">Muuda teenistust</string>
     <string name="calendar_service_name">Nimi</string>
     <string name="calendar_service_start">Algusaeg</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Loobu</string>
     <string name="calendar_delete">Kustuta</string>
 
-    <string name="calendar_run_of_show">Teenistuse kava</string>
-    <string name="calendar_nothing_planned">Sellele päevale pole midagi plaanitud</string>
-    <string name="calendar_no_service_hint">Lisa teenistus, et planeerimist alustada.</string>
-    <string name="calendar_run_empty">Sellel teenistusel pole veel punkte.</string>
     <string name="calendar_items_count_one">%1$d punkt</string>
     <string name="calendar_items_count">%1$d punkti</string>
-    <string name="calendar_planned_total">%1$s plaanitud</string>
     <string name="calendar_duration">Kestus</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Kui kaua see kestma peaks — klõpsa ja kirjuta, näiteks 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Laulud</string>
     <string name="calendar_pick_bible">Piibel</string>
     <string name="calendar_pick_section">Osa</string>
-    <string name="calendar_pick_schedule">Kava vahekaart</string>
     <string name="calendar_pick_presets">Eelseaded</string>
     <string name="calendar_presets_empty">Eelseadeid veel pole</string>
     <string name="calendar_presets_empty_sub">Salvesta üks nupuga „Salvesta eelseade“, mis on „Lisa kavasse“ kõrval vahekaartidel Pildid, Esitlus, Meedia, Teated ja Lõuend.</string>
     <string name="calendar_presets_note">Eelseaded ilmuvad jaotises „Eelseaded“, kui lisad punkti, ja jaotises „Punkt“, kui märge midagi näitab.</string>
     <string name="calendar_settings_presets">Eelseaded</string>
     <string name="calendar_preset_remove">Kustuta eelseade</string>
-    <string name="calendar_cue_from_run">Sellest kavast</string>
     <string name="calendar_cue_loops">kordub</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Salvestatud eelseaded</string>
-    <string name="calendar_search_songs_hint">Otsi laule pealkirja või numbri järgi</string>
-    <string name="calendar_bible_hint">Kirjuta viide, näiteks Jh 3:16-17</string>
     <string name="calendar_section_hint">Osa nimi, näiteks Ülistus</string>
-    <string name="calendar_add">Lisa</string>
     <string name="calendar_no_results">Midagi ei sobi</string>
     <string name="calendar_songs_loading">Laulukogu lugemine…</string>
-    <string name="calendar_schedule_empty">Kava vahekaart on tühi.</string>
-    <string name="calendar_capture_schedule">Lisa kõik punktid Kava vahekaardilt</string>
 
     <string name="calendar_load_into_schedule">Laadi kavasse</string>
     <string name="calendar_load_title">Kas asendada kava?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Eemalda osa</string>
     <string name="calendar_default_start">Vaikimisi algusaeg</string>
     <string name="calendar_default_start_sub">Kellaaeg, millega uus teenistus luuakse</string>
-    <string name="calendar_automation_empty">Märkeid veel pole</string>
-    <string name="calendar_automation_title">Automaatika</string>
     <string name="calendar_armed">Sees</string>
     <string name="calendar_armed_off">Väljas</string>
     <string name="calendar_arm_tip">Lülita kõik märked sisse või välja</string>
     <string name="calendar_cue_skip_tip">Jäta see märge vahele</string>
-    <string name="calendar_automation_note">tähistab punkte, mis käivituvad ise. Linnukese eemaldamine jätab märke selles teenistuses vahele.</string>
-    <string name="calendar_edit_cues">Muuda märkeid</string>
     <string name="calendar_cue_action_countdown">Käivita loendur</string>
     <string name="calendar_cue_action_go_live">Mine otse</string>
     <string name="calendar_cue_action_project">Teadete kordus</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Tühjenda väljundid</string>
     <string name="calendar_cue_badge_timer">Taimer</string>
     <string name="calendar_cue_badge_go_live">Otse</string>
-    <string name="calendar_cue_item">Punkt</string>
     <string name="calendar_cue_item_missing">Punkti pole enam selles kavas</string>
     <string name="calendar_copy_include_cues">Automaatikamärked</string>
     <string name="calendar_copy_include_cues_sub">%1$d märget, nihked säilivad</string>
     <string name="calendar_template_include_cues">Automaatikamärked</string>
     <string name="calendar_template_include_cues_sub">Suhtelised nihked</string>
-    <string name="calendar_templates_empty">Salvestatud malle pole</string>
     <string name="calendar_templates_empty_sub">Salvesta üks mis tahes teenistusest nupuga „Mall“ kava päises. Seni võib uus teenistus alata mis tahes varasema koopiast.</string>
     <string name="calendar_templates_note">Malle pakutakse jaotises „Alusta millest“, kui lisad teenistuse. Uue salvestad mis tahes teenistusest nupuga „Mall“ kava päises.</string>
     <string name="calendar_template_remove">Kustuta mall</string>
     <string name="calendar_template_saved_sub">Mall · %1$s · %2$d punkti</string>
-    <string name="calendar_copy_service">Kopeeri</string>
     <string name="calendar_copy_service_tip">Kopeeri see teenistus teisele kuupäevale või korda seda</string>
-    <string name="calendar_save_template">Mall</string>
     <string name="calendar_save_template_tip">Salvesta see kava mallina</string>
     <string name="calendar_copy_title">Kopeeri %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d punkti</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Kordub %1$s · %2$d teenistust selles seerias</string>
     <string name="calendar_export_pdf">Ekspordi PDF</string>
     <string name="calendar_settings_open">Kalendri seaded</string>
-    <string name="calendar_export_failed">Kava ei õnnestunud eksportida.</string>
     <string name="calendar_section_new">Uus osa</string>
     <string name="calendar_section_insert">Lisa</string>
     <string name="calendar_auto_load">Laadi teenistus automaatselt</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Pakutakse, kui laulul pole veel mõõdetud kestust</string>
     <string name="calendar_pick_search">Otsi laule või kirjuta viide</string>
     <string name="calendar_pick_adds_to">Lisatakse: %1$s</string>
-    <string name="calendar_pick_duration">Kestus</string>
     <string name="calendar_pick_all_books">Kõik lauluraamatud</string>
     <string name="calendar_pick_reference">Viide</string>
     <string name="calendar_pick_all_bible_books">Kõik raamatud</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Lisa kavasse</string>
     <string name="calendar_pick_add_range">Lisa %1$s</string>
     <string name="calendar_pick_verse_hint">Puuduta salmi, seejärel teist, et saada vahemik</string>
-    <string name="calendar_pick_clear">Tühjenda</string>
     <string name="calendar_edit_song">Muuda seda laulu</string>
-    <string name="calendar_replace_row">Asendatakse %1$s</string>
-    <string name="calendar_change_row">Vaheta see punkt</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · käivitub ise kell %2$s — klõpsa, et kohe käivitada</string>
     <string name="calendar_cue_fire_now">Käivita see märge kohe</string>
     <string name="calendar_cue_fired_at">Käivitus %1$s</string>
     <string name="calendar_cue_next_in">Järgmine · %1$d min pärast</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Kell keritud · klõpsa veel 5 min jaoks, × naaseb tegeliku aja juurde</string>
     <string name="calendar_run_clock_reset">Tagasi tegeliku aja juurde</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d märget %3$d-st käivitub automaatselt</string>
     <string name="calendar_cue_fired_title">Märge käivitus</string>
     <string name="calendar_cue_toast_close">Peida</string>
     <string name="calendar_preset_kind_all">Kõik</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Järgmine</string>
     <string name="calendar_chip_blank">Tühjenda</string>
-    <string name="calendar_chip_manual">Käsitsi</string>
     <string name="calendar_auto_starts">%1$d automaatset algust</string>
     <string name="calendar_auto_start_one">1 automaatne algus</string>
     <string name="calendar_all_manual">Kõik käsitsi</string>

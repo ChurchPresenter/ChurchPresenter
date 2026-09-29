@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.font.FontFamily
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -329,7 +332,7 @@ private fun SectionRow(
             )
             // Transparent and unbordered: the design edits the name in place, not in a box.
             Box(Modifier.weight(1f)) {
-                androidx.compose.foundation.text.BasicTextField(
+                BasicTextField(
                     value = name,
                     onValueChange = { name = it },
                     singleLine = true,
@@ -338,7 +341,7 @@ private fun SectionRow(
                         fontWeight = FontWeight.SemiBold,
                         color = scheme.onSurface,
                     ),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(scheme.onSurface),
+                    cursorBrush = SolidColor(scheme.onSurface),
                     modifier = Modifier
                         .fillMaxWidth()
                         .commitOnExit(name != section.name) { onRename(name) },
@@ -408,7 +411,7 @@ private fun HexReadout(hex: String, onClick: () -> Unit) {
             text = hex.uppercase(),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontSize = 11.sp,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                fontFamily = FontFamily.Monospace,
             ),
             color = scheme.onSurfaceVariant,
             maxLines = 1,

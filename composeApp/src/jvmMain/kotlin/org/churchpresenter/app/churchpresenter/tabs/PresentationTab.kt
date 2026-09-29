@@ -1361,7 +1361,7 @@ private fun SlideThumbnail(
 }
 
 /** The open deck as the schedule row that identifies it -- the same shape Add to Schedule and Save Preset build. */
-private fun presentationRow(file: java.io.File, slideCount: Int): ScheduleItem.PresentationItem =
+private fun presentationRow(file: File, slideCount: Int): ScheduleItem.PresentationItem =
     ScheduleItem.PresentationItem(
         id = java.util.UUID.randomUUID().toString(),
         filePath = file.absolutePath,

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Менеджер календаря</string>
     <string name="calendar_title">Календар</string>
     <string name="calendar_today">Сьогодні</string>
     <string name="calendar_close">Закрити</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Особлива подія</string>
 
     <string name="calendar_add_service">Додати служіння</string>
-    <string name="calendar_new_service">Нове служіння</string>
     <string name="calendar_edit_service">Змінити служіння</string>
     <string name="calendar_service_name">Назва</string>
     <string name="calendar_service_start">Час початку</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Скасувати</string>
     <string name="calendar_delete">Видалити</string>
 
-    <string name="calendar_run_of_show">Порядок служіння</string>
-    <string name="calendar_nothing_planned">На цей день нічого не заплановано</string>
-    <string name="calendar_no_service_hint">Додайте служіння, щоб почати планування.</string>
-    <string name="calendar_run_empty">У цьому служінні ще немає елементів.</string>
     <string name="calendar_items_count_one">%1$d елемент</string>
     <string name="calendar_items_count">%1$d елементів</string>
-    <string name="calendar_planned_total">%1$s заплановано</string>
     <string name="calendar_duration">Тривалість</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Скільки це має тривати — натисніть, щоб ввести, наприклад 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Пісні</string>
     <string name="calendar_pick_bible">Біблія</string>
     <string name="calendar_pick_section">Розділ</string>
-    <string name="calendar_pick_schedule">Вкладка розкладу</string>
     <string name="calendar_pick_presets">Заготовки</string>
     <string name="calendar_presets_empty">Заготовок ще немає</string>
     <string name="calendar_presets_empty_sub">Збережіть її кнопкою «Зберегти заготовку» поруч із «Додати до розкладу» на вкладках «Картинки», «Презентація», «Медіа», «Оголошення» та «Полотно».</string>
     <string name="calendar_presets_note">Заготовки з’являються в розділі «Заготовки» під час додавання елемента і в розділі «Елемент», коли мітка щось показує.</string>
     <string name="calendar_settings_presets">Заготовки</string>
     <string name="calendar_preset_remove">Видалити заготовку</string>
-    <string name="calendar_cue_from_run">З цього порядку служіння</string>
     <string name="calendar_cue_loops">повторюється</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Збережені заготовки</string>
-    <string name="calendar_search_songs_hint">Пошук пісень за назвою або номером</string>
-    <string name="calendar_bible_hint">Введіть посилання, наприклад Івана 3:16-17</string>
     <string name="calendar_section_hint">Назва розділу, наприклад «Прославлення»</string>
-    <string name="calendar_add">Додати</string>
     <string name="calendar_no_results">Нічого не знайдено</string>
     <string name="calendar_songs_loading">Читання бібліотеки пісень…</string>
-    <string name="calendar_schedule_empty">Вкладка розкладу порожня.</string>
-    <string name="calendar_capture_schedule">Додати всі елементи з вкладки розкладу</string>
 
     <string name="calendar_load_into_schedule">Завантажити в розклад</string>
     <string name="calendar_load_title">Замінити розклад?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Видалити розділ</string>
     <string name="calendar_default_start">Час початку за умовчанням</string>
     <string name="calendar_default_start_sub">Час, з яким створюється нове служіння</string>
-    <string name="calendar_automation_empty">Міток ще немає</string>
-    <string name="calendar_automation_title">Автоматизація</string>
     <string name="calendar_armed">Увімкнено</string>
     <string name="calendar_armed_off">Вимк.</string>
     <string name="calendar_arm_tip">Увімкнути або вимкнути всі мітки</string>
     <string name="calendar_cue_skip_tip">Пропустити цю мітку</string>
-    <string name="calendar_automation_note">позначає елементи, що запускаються самі. Знята галочка пропускає мітку для цього служіння.</string>
-    <string name="calendar_edit_cues">Змінити мітки</string>
     <string name="calendar_cue_action_countdown">Запустити зворотний відлік</string>
     <string name="calendar_cue_action_go_live">В ефір</string>
     <string name="calendar_cue_action_project">Цикл оголошень</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Очистити виводи</string>
     <string name="calendar_cue_badge_timer">Таймер</string>
     <string name="calendar_cue_badge_go_live">В ефір</string>
-    <string name="calendar_cue_item">Елемент</string>
     <string name="calendar_cue_item_missing">Елемента більше немає в цьому порядку служіння</string>
     <string name="calendar_copy_include_cues">Мітки автоматизації</string>
     <string name="calendar_copy_include_cues_sub">%1$d міток, зміщення збережено</string>
     <string name="calendar_template_include_cues">Мітки автоматизації</string>
     <string name="calendar_template_include_cues_sub">Відносні зміщення</string>
-    <string name="calendar_templates_empty">Немає збережених шаблонів</string>
     <string name="calendar_templates_empty_sub">Збережіть шаблон з будь-якого служіння кнопкою «Шаблон» у заголовку порядку служіння. А поки нове служіння може починатися з копії будь-якого попереднього.</string>
     <string name="calendar_templates_note">Шаблони пропонуються в розділі «Почати з» під час додавання служіння. Новий шаблон зберігається з будь-якого служіння кнопкою «Шаблон» у заголовку порядку служіння.</string>
     <string name="calendar_template_remove">Видалити шаблон</string>
     <string name="calendar_template_saved_sub">Шаблон · %1$s · %2$d елементів</string>
-    <string name="calendar_copy_service">Копіювати</string>
     <string name="calendar_copy_service_tip">Скопіювати це служіння на іншу дату або повторити його</string>
-    <string name="calendar_save_template">Шаблон</string>
     <string name="calendar_save_template_tip">Зберегти цей порядок служіння як шаблон</string>
     <string name="calendar_copy_title">Копіювати %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d елементів</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Повторюється %1$s · %2$d служінь у цій серії</string>
     <string name="calendar_export_pdf">Експорт у PDF</string>
     <string name="calendar_settings_open">Налаштування календаря</string>
-    <string name="calendar_export_failed">Не вдалося експортувати порядок служіння.</string>
     <string name="calendar_section_new">Новий розділ</string>
     <string name="calendar_section_insert">Вставити</string>
     <string name="calendar_auto_load">Завантажувати служіння автоматично</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Пропонується, коли пісня ще не має виміряної тривалості</string>
     <string name="calendar_pick_search">Шукайте пісні або введіть посилання</string>
     <string name="calendar_pick_adds_to">Додається до %1$s</string>
-    <string name="calendar_pick_duration">Тривалість</string>
     <string name="calendar_pick_all_books">Усі збірники пісень</string>
     <string name="calendar_pick_reference">Посилання</string>
     <string name="calendar_pick_all_bible_books">Усі книги</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Додати до порядку служіння</string>
     <string name="calendar_pick_add_range">Додати %1$s</string>
     <string name="calendar_pick_verse_hint">Натисніть на вірш, потім на інший, щоб вибрати діапазон</string>
-    <string name="calendar_pick_clear">Очистити</string>
     <string name="calendar_edit_song">Змінити цю пісню</string>
-    <string name="calendar_replace_row">Заміна: %1$s</string>
-    <string name="calendar_change_row">Замінити цей елемент</string>
-    <string name="calendar_cue_auto">Авто</string>
-    <string name="calendar_cue_auto_tip">%1$s · запускається сам о %2$s — натисніть, щоб запустити зараз</string>
     <string name="calendar_cue_fire_now">Запустити цю мітку зараз</string>
     <string name="calendar_cue_fired_at">Спрацювала %1$s</string>
     <string name="calendar_cue_next_in">Наступна · через %1$d хв</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Годинник переведено · натисніть, щоб додати 5 хв, × — повернутися до реального часу</string>
     <string name="calendar_run_clock_reset">Повернутися до реального часу</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d хв</string>
-    <string name="calendar_footer_cues">%1$s · %2$d з %3$d міток спрацюють автоматично</string>
     <string name="calendar_cue_fired_title">Мітка спрацювала</string>
     <string name="calendar_cue_toast_close">Сховати</string>
     <string name="calendar_preset_kind_all">Усі</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Далі</string>
     <string name="calendar_chip_blank">Очистити</string>
-    <string name="calendar_chip_manual">Вручну</string>
     <string name="calendar_auto_starts">%1$d автозапусків</string>
     <string name="calendar_auto_start_one">1 автозапуск</string>
     <string name="calendar_all_manual">Усе вручну</string>

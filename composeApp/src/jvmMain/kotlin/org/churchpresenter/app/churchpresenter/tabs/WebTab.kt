@@ -289,7 +289,8 @@ fun WebTab(
                 val proj = appSettings.projectionSettings
                 val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
                 assignments.any {
-                    it.targetType != "decklink" && it.targetDisplay >= 0 && (proj.profileFor(it)?.showWebsite ?: false)
+                    it.targetType != Constants.TARGET_TYPE_DECKLINK && it.targetDisplay >= 0 &&
+                        (proj.profileFor(it)?.showWebsite ?: false)
                 }
             }
 

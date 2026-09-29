@@ -34,7 +34,6 @@
     <string name="revert">برگرداندن</string>
     <string name="save_changes">ذخیرهٔ تغییرات</string>
     <string name="done">انجام شد</string>
-    <string name="saved">%1$s ذخیره شد</string>
     <string name="save_failed">ذخیرهٔ %1$s ممکن نشد</string>
     <string name="new_song_book">کتاب سرود جدید</string>
     <string name="new_song_book_subhead">مجموعه‌ای که سرودها را می‌توان در آن جای داد</string>

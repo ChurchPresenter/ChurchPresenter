@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.core.models.camera.CameraDeviceRef
@@ -185,6 +186,6 @@ class PresenterCameraBackgroundTest {
     }
 
     private companion object {
-        val BLACK = androidx.compose.ui.graphics.Color.Black
+        val BLACK = Color.Black
     }
 }

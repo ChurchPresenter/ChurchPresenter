@@ -34,7 +34,6 @@
     <string name="revert">Отменить изменения</string>
     <string name="save_changes">Сохранить изменения</string>
     <string name="done">Готово</string>
-    <string name="saved">Сохранено: %1$s</string>
     <string name="save_failed">Не удалось сохранить: %1$s</string>
     <string name="new_song_book">Новый сборник</string>
     <string name="new_song_book_subhead">Собрание, к которому можно отнести песни</string>

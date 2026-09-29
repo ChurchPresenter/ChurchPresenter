@@ -34,7 +34,6 @@
     <string name="revert">ຍ້ອນກັບ</string>
     <string name="save_changes">ບັນທຶກການປ່ຽນແປງ</string>
     <string name="done">ແລ້ວ</string>
-    <string name="saved">ບັນທຶກແລ້ວ %1$s</string>
     <string name="save_failed">ບໍ່ສາມາດບັນທຶກ %1$s ໄດ້</string>
     <string name="new_song_book">ປຶ້ມເພງໃໝ່</string>
     <string name="new_song_book_subhead">ຊຸດທີ່ສາມາດຈັດເກັບເພງໄວ້</string>

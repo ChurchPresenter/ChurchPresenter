@@ -1,65 +1,28 @@
 # 📚 ChurchPresenter Documentation
 
-## Main Documentation
+| File | What it holds |
+|------|---------------|
+| [CODING_STANDARDS.md](CODING_STANDARDS.md) | The style rules: imports, string resources, Material 3, type names |
+| [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) | Workflow, verification commands, audit status, contributing |
+| [AGENT.md](AGENT.md) | Architecture, modules, commands, screenshot and test rules (read by coding agents, useful to anyone) |
+| [FEATURES.md](FEATURES.md) | Every feature and where its source lives |
+| `<module>/AGENT.md` | Each module's own layout, commands and rules |
+| [BUILD_INSTALLERS.md](BUILD_INSTALLERS.md), [QUICK_START_INSTALLERS.md](QUICK_START_INSTALLERS.md) | Building the installers |
 
-👉 **[DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md)** - Complete development guide including:
-- Coding standards
-- Style rules
-- String management
-- Cleanup tasks
-- Verification commands
-- Development workflow
+## Before every commit
 
-## Quick Reference
-
-### Zero Tolerance Rules
-❌ No wildcard imports  
-❌ No hardcoded UI strings  
-❌ No Material 2 components  
-❌ No fully qualified type names  
-❌ No debug print statements  
-
-### Before Every Commit
 ```bash
-# Run these checks
-bash cleanup_check.sh
-
-# Or manually:
-grep -r "import.*\.\*" --include="*.kt" composeApp/src/ | wc -l  # Should be 0
-grep -rE "(println|print\()" --include="*.kt" composeApp/src/jvmMain/kotlin/ | wc -l  # Should be 0
-./gradlew compileKotlinJvm --no-daemon 2>&1 | grep -E "(Unused|never used)"  # Review output
+bash cleanup_check.sh          # wildcard imports, Material 2, prints, fully qualified names, unused code
+./gradlew :composeApp:detekt   # CI's first gate — run it last
 ```
 
-### Quick Style Rules
+## File locations
 
-✅ **DO:**
-```kotlin
-import androidx.compose.ui.unit.Dp
-fun myFunction(width: Dp = 120.dp)
-Text(stringResource(Res.string.save))
-```
+- **String resources:** `composeApp/src/jvmMain/composeResources/values/strings.xml` (English only)
+- **Constants:** `settings/src/main/kotlin/org/churchpresenter/settings/utils/Constants.kt` (anything
+  persisted or shared with the settings) and
+  `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt` (the app's
+  own)
 
-❌ **DON'T:**
-```kotlin
-import androidx.compose.ui.unit.*
-fun myFunction(width: androidx.compose.ui.unit.Dp = 120.dp)
-Text("Save")
-```
-
-## File Locations
-
-- **String Resources:** `composeApp/src/jvmMain/composeResources/values/strings.xml`
-- **Constants:** `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt`
-- **Cleanup Tasks:** See DEVELOPMENT_GUIDE.md § Cleanup TODO List
-
-## Archived Documentation
-
-The following files have been consolidated into DEVELOPMENT_GUIDE.md:
-- ~~CODING_STANDARDS_SUMMARY.md~~ → Now in DEVELOPMENT_GUIDE.md
-- ~~TODO_CLEANUP.md~~ → Now in DEVELOPMENT_GUIDE.md § Cleanup TODO List
-- ~~PERSONAL_NOTES.md~~ → Now in DEVELOPMENT_GUIDE.md
-
----
-
-**For full details, see [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md)**
-
+Older notes (`CODING_STANDARDS_SUMMARY.md`, `TODO_CLEANUP.md`, …) are kept in `docs_archive/` for
+history only.

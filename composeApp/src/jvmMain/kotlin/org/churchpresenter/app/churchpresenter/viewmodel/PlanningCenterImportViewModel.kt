@@ -3,6 +3,12 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.planning_center_error_not_connected
+import churchpresenter.composeapp.generated.resources.planning_center_error_plan_items
+import churchpresenter.composeapp.generated.resources.planning_center_error_plans
+import churchpresenter.composeapp.generated.resources.planning_center_error_service_types
+import churchpresenter.composeapp.generated.resources.planning_center_error_session_expired
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -10,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.bible.Bible
+import org.churchpresenter.planningcenter.PcoItemType
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.planningcenter.PlanningCenterLyricsFormatter
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterScriptureDetector
@@ -19,6 +26,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
 import java.io.File
+import org.jetbrains.compose.resources.StringResource
 
 private const val TOKEN_REFRESH_MARGIN_MS = 60_000
 
@@ -67,7 +75,7 @@ class PlanningCenterImportViewModel(
         private set
     var isLoadingItems by mutableStateOf(false)
         private set
-    var errorMessage by mutableStateOf<String?>(null)
+    var errorMessage by mutableStateOf<StringResource?>(null)
         private set
 
     private fun currentSongCatalog(): List<SongItem> {
@@ -139,7 +147,7 @@ class PlanningCenterImportViewModel(
             isLoadingServiceTypes = true
             errorMessage = null
             if (!ensureValidToken()) {
-                errorMessage = "Not connected to Planning Center"
+                errorMessage = Res.string.planning_center_error_not_connected
                 isLoadingServiceTypes = false
                 return@launch
             }
@@ -152,8 +160,8 @@ class PlanningCenterImportViewModel(
                     if (selectedServiceTypeId.isNotBlank()) loadPlans(selectedServiceTypeId)
                 }
                 PlanningCenterClient.ServiceTypesOutcome.Unauthorized ->
-                    errorMessage = "Planning Center session expired — reconnect in Settings"
-                else -> errorMessage = "Couldn't load service types"
+                    errorMessage = Res.string.planning_center_error_session_expired
+                else -> errorMessage = Res.string.planning_center_error_service_types
             }
             isLoadingServiceTypes = false
         }
@@ -183,8 +191,8 @@ class PlanningCenterImportViewModel(
                     plans.firstOrNull()?.let { selectPlan(it.id) }
                 }
                 PlanningCenterClient.PlansOutcome.Unauthorized ->
-                    errorMessage = "Planning Center session expired — reconnect in Settings"
-                else -> errorMessage = "Couldn't load plans"
+                    errorMessage = Res.string.planning_center_error_session_expired
+                else -> errorMessage = Res.string.planning_center_error_plans
             }
             isLoadingPlans = false
         }
@@ -210,7 +218,7 @@ class PlanningCenterImportViewModel(
                     // unlike attachments, which stay lazy since they need a request per item.
                     val scriptureMap = mutableMapOf<String, List<PlanningCenterScriptureDetector.ResolvedVerses>>()
                     for (pco in outcome.items) {
-                        if (pco.itemType != "item") continue
+                        if (pco.itemType != PcoItemType.ITEM) continue
                         val combinedText = listOf(pco.title, pco.description).filter { it.isNotBlank() }.joinToString("\n")
                         val detected = detectScriptureReferences(combinedText)
                         if (detected.isNotEmpty()) scriptureMap[pco.id] = detected
@@ -226,12 +234,12 @@ class PlanningCenterImportViewModel(
                     // represents, so surfacing them as importable is misleading — there's nothing
                     // usable to fetch for these rows.
                     for (pco in outcome.items) {
-                        if (pco.itemType == "item") loadAttachments(pco.id)
+                        if (pco.itemType == PcoItemType.ITEM) loadAttachments(pco.id)
                     }
                 }
                 PlanningCenterClient.PlanItemsOutcome.Unauthorized ->
-                    errorMessage = "Planning Center session expired — reconnect in Settings"
-                else -> errorMessage = "Couldn't load plan items"
+                    errorMessage = Res.string.planning_center_error_session_expired
+                else -> errorMessage = Res.string.planning_center_error_plan_items
             }
             isLoadingItems = false
         }
@@ -252,7 +260,7 @@ class PlanningCenterImportViewModel(
     private val leadingSongNumberRegex = Regex("""^(\d{4})(?!\d)""")
 
     internal fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<SongItem>): SongItem? {
-        if (pco.itemType != "song") return null
+        if (pco.itemType != PcoItemType.SONG) return null
         val ccli = pco.songCcliNumber
         if (!ccli.isNullOrBlank()) {
             catalog.firstOrNull { it.ccliNumber.isNotBlank() && it.ccliNumber == ccli }?.let { return it }

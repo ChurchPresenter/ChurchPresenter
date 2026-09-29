@@ -34,7 +34,6 @@
     <string name="revert">Verwerfen</string>
     <string name="save_changes">Änderungen speichern</string>
     <string name="done">Fertig</string>
-    <string name="saved">%1$s gespeichert</string>
     <string name="save_failed">%1$s konnte nicht gespeichert werden</string>
     <string name="new_song_book">Neues Liederbuch</string>
     <string name="new_song_book_subhead">Eine Sammlung, der Lieder zugeordnet werden können</string>

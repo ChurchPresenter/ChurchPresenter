@@ -36,7 +36,6 @@
     <string name="revert">மீளமை</string>
     <string name="save_changes">மாற்றங்களைச் சேமி</string>
     <string name="done">முடிந்தது</string>
-    <string name="saved">%1$s சேமிக்கப்பட்டது</string>
     <string name="save_failed">%1$s ஐச் சேமிக்க முடியவில்லை</string>
     <string name="new_song_book">புதிய பாடல் புத்தகம்</string>
     <string name="new_song_book_subhead">பாடல்களைத் தொகுத்து வைக்கும் ஒரு தொகுப்பு</string>

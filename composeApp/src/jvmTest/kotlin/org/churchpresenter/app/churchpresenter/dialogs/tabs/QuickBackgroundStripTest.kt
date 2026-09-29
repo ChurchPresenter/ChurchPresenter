@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
@@ -149,7 +150,7 @@ class QuickBackgroundStripTest {
         }
 
     /** Clicks the first tile's swatch, which is what opens the panel over it. */
-    private fun androidx.compose.ui.test.ComposeUiTest.openTilePanel() {
+    private fun ComposeUiTest.openTilePanel() {
         onNodeWithText("1").performClick()
         waitForIdle()
     }
@@ -165,6 +166,6 @@ class QuickBackgroundStripTest {
      * not to cover the tab's own look buttons; once it grew, the tab's "Cinema" sat under the
      * panel and was picked instead, and the click silently went to the wrong control.
      */
-    private fun androidx.compose.ui.test.ComposeUiTest.inPanel(text: String): SemanticsNodeInteraction =
+    private fun ComposeUiTest.inPanel(text: String): SemanticsNodeInteraction =
         onNode(hasText(text) and hasAnyAncestor(hasTestTag(SONG_BACKGROUND_PANEL_TAG)))
 }

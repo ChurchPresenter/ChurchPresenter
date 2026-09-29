@@ -34,7 +34,6 @@
     <string name="revert">Vrátit zpět</string>
     <string name="save_changes">Uložit změny</string>
     <string name="done">Hotovo</string>
-    <string name="saved">Uloženo: %1$s</string>
     <string name="save_failed">%1$s se nepodařilo uložit</string>
     <string name="new_song_book">Nový zpěvník</string>
     <string name="new_song_book_subhead">Sbírka, do které lze písně zařadit</string>

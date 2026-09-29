@@ -4,7 +4,6 @@
     <string name="scope">Omfang</string>
     <string name="title">Tittel</string>
     <string name="number">Nummer</string>
-    <string name="no_song_selected">Ingen sang valgt</string>
     <string name="go_live">Gå live</string>
     <string name="add_to_schedule">Legg til i kjøreplan</string>
     <string name="copy_verse">Kopier vers</string>
@@ -22,7 +21,6 @@
     <string name="bible_load_failed_detail">%1$s — %2$s</string>
     <string name="bible_load_failed_partial_hint">Bare den delen som kunne leses, vises. Bøker eller vers etter det skadde punktet mangler.</string>
     <string name="bible_load_failed_report_hint">Detaljene ligger i mappen for krasjrapporter – legg ved den nyeste filen når du melder dette.</string>
-    <string name="replace">Erstatt med</string>
     <string name="search_songs">Søk i sanger...</string>
     <string name="song_book">Sangbok</string>
     <string name="all_song_books">Alle sangbøker</string>
@@ -32,11 +30,7 @@
     <string name="contains">Inneholder</string>
     <string name="starts_with">Begynner med</string>
     <string name="exact_match">Eksakt treff</string>
-    <string name="all_song_categories">Alle sangkategorier</string>
     <string name="filter">Filter</string>
-    <string name="filter_colon">Filter:</string>
-    <string name="filter_type_colon">Filtertype:</string>
-    <string name="service_schedule">Kjøreplan:</string>
     <string name="songs">Sanger</string>
     <string name="song">Sang</string>
     <string name="output_profiles_tab">Profiler</string>
@@ -44,32 +38,22 @@
     <string name="pictures">Bilder</string>
     <string name="presentation">Presentasjon</string>
     <string name="media">Media</string>
-    <string name="notes">Notater</string>
     <string name="book">Bok</string>
     <string name="chapter">Kapittel</string>
     <string name="verse">Vers</string>
     <string name="options">Alternativer</string>
     <string name="appearance">System</string>
-    <string name="bible_storage_directory">Mappe for bibelfiler</string>
-    <string name="songs_storage_directory">Mappe for sangfiler</string>
-    <string name="lower_third_storage_directory">Mappe for nedre tredjedel</string>
-    <string name="pictures_storage_directory">Mappe for bilder</string>
-    <string name="presentation_storage_directory">Mappe for presentasjoner</string>
-    <string name="media_storage_directory">Mappe for mediefiler</string>
     <string name="screen_number">Skjerm %1$d</string>
-    <string name="font_preview_text">ABCDabcd1234</string>
     <string name="cancel">Avbryt</string>
     <string name="ok">OK</string>
     <string name="apply">Bruk</string>
     <string name="none">Ingen</string>
     <string name="first_page">Første side</string>
     <string name="every_page">Hver side</string>
-    <string name="show">Vis</string>
     <string name="show_title">Vis tittel:</string>
     <string name="show_number">Vis nummer:</string>
     <string name="font_size">Skriftstørrelse:</string>
     <string name="font_type">Skrifttype:</string>
-    <string name="style">Stil</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">U</string>
@@ -78,7 +62,6 @@
     <string name="tooltip_italic">Kursiv</string>
     <string name="tooltip_underline">Understreket</string>
     <string name="tooltip_shadow">Skygge</string>
-    <string name="shadow_settings">Skygge</string>
     <string name="shadow_size">Størrelse (%)</string>
     <string name="shadow_opacity">Intensitet (%)</string>
     <string name="hold_live">Hold live</string>
@@ -98,9 +81,6 @@
     <string name="bible_cross_references_keep_open">Hold åpen</string>
     <string name="bible_cross_references_close">Lukk panelet</string>
     <string name="bible_cross_references_dismiss_hint">Esc for å lukke</string>
-    <string name="bible_live_view">Live</string>
-    <string name="fade_in">Inntoning</string>
-    <string name="fade_out">Uttoning</string>
     <string name="menu_file">Fil</string>
     <string name="menu_new_schedule">Ny kjøreplan</string>
     <string name="menu_open_schedule">Åpne kjøreplan</string>
@@ -118,9 +98,6 @@
 
     <!-- Schedule Tab Strings -->
     <string name="schedule">Kjøreplan</string>
-    <string name="quick_selection">Hurtigvalg</string>
-    <string name="clear_schedule">Tøm kjøreplan</string>
-    <string name="search_results">Søkeresultater</string>
     <string name="clear">Tøm</string>
     <string name="clear_recents">Tøm nylige</string>
     <string name="recent">Nylige:</string>
@@ -223,7 +200,6 @@
     <string name="shortcut_description_play_pause">Spill / pause</string>
     <string name="shortcut_description_prev_slide">Forrige lysbilde</string>
     <string name="shortcut_description_next_slide">Neste lysbilde</string>
-    <string name="shortcut_category_tab_switching">Fanebytte</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Åpne hurtigtaster</string>
     <string name="shortcut_description_open_song_library">Åpne sangbibliotekbehandleren</string>
     <string name="shortcut_description_open_converter">Åpne sang- og bibelkonvertereren</string>
@@ -254,10 +230,7 @@
     <string name="search_clear">Tøm søket</string>
     <string name="shortcut_settings_reset">Tilbakestill</string>
     <string name="shortcut_settings_clear">Tøm</string>
-    <string name="shortcut_settings_change">Endre</string>
-    <string name="shortcut_settings_customized">Tilpasset</string>
     <string name="shortcut_capture_title">Trykk en tastekombinasjon</string>
-    <string name="shortcut_capture_prompt">Trykk tastene du vil bruke for denne handlingen.</string>
     <string name="shortcut_capture_conflict">Allerede i bruk av: %1$s</string>
     <string name="key_mod_ctrl">Ctrl</string>
     <string name="key_mod_shift">Skift</string>
@@ -283,12 +256,10 @@
     <string name="shortcut_description_delete_source">Slett valgt kilde</string>
     <string name="shortcut_key_right_click">Høyreklikk</string>
     <string name="shortcut_key_shift_drag">Skift+dra</string>
-    <string name="shortcut_category_schedule">Kjøreplan</string>
     <string name="shortcut_description_context_menu">Vis hurtigmeny</string>
     <string name="shortcut_description_undo">Angre siste endring i kjøreplanen</string>
     <string name="shortcut_description_redo">Gjør om siste angrede endring</string>
     <string name="shortcut_description_reorder_item">Endre rekkefølge på element</string>
-    <string name="shortcut_description_reorder_image">Endre rekkefølge på bilde</string>
 
     <!-- Keyboard Shortcuts dialog: category rail, conflicts filter and inline rebinding -->
     <string name="shortcut_scope_menus_hint">Menysnarveier, håndteres før alt annet</string>
@@ -315,45 +286,23 @@
     <string name="shortcut_recording_stop">Slutt å lytte</string>
 
     <!-- Options Dialog Strings -->
-    <string name="text_settings_and_colors">Tekstinnstillinger og farger</string>
     <string name="background">Bakgrunn</string>
-    <string name="background_images">Bakgrunnsbilder</string>
-    <string name="folders">Mapper</string>
     <string name="projection">Projeksjon</string>
-    <string name="other">Annet</string>
 
     <!-- Song Settings Strings -->
-    <string name="lyrics">Sangtekst</string>
     <string name="song_number">Sangnummer</string>
-    <string name="min">Min:</string>
-    <string name="max">Maks:</string>
-    <string name="alpha">Alfa:</string>
-    <string name="vertical_alignment">Vertikal justering:</string>
-    <string name="horizontal_alignment">Horisontal justering:</string>
-    <string name="text_alignment">Tekstjustering:</string>
     <string name="top">Øverst</string>
-    <string name="above_verse">Over verset</string>
-    <string name="below_verse">Under verset</string>
     <string name="middle">Midten</string>
     <string name="bottom">Nederst</string>
     <string name="left">Venstre</string>
     <string name="center">Midtstilt</string>
     <string name="right">Høyre</string>
-    <string name="song_files">Sangfiler</string>
-    <string name="storage_directory">Lagringsmappe</string>
     <string name="browse_directory">Bla gjennom...</string>
     <string name="set_all_directories">Sett alle</string>
     <string name="no_directory_selected">Ingen mappe valgt</string>
     <string name="no_files_detected">Ingen filer funnet</string>
     <string name="scanning_directory">Leser mappen…</string>
     <string name="detected_files_label">Funnet:</string>
-    <string name="files_in_directory">Filer i mappen</string>
-    <string name="import_song_file">Importer sangfil</string>
-    <string name="remove_song_file">Fjern sangfil</string>
-    <string name="select_song_file">Velg sangfil...</string>
-    <string name="no_song_files">Ingen sangfiler er lastet inn</string>
-    <string name="word_wrap">Tekstbryting</string>
-    <string name="show_on_first_page_only">Vis bare på første side</string>
     <string name="position_on_screen">Plassering på skjermen:</string>
     <string name="position_showing_at">Vises ved</string>
     <string name="top_left">Øverst til venstre</string>
@@ -373,13 +322,6 @@
     <string name="studio_theme">Studiotema</string>
 
     <!-- Placeholder strings for other tabs -->
-    <string name="bible_tab_content">Innholdet i Bibel-fanen kommer senere</string>
-    <string name="text_settings_tab_content">Innholdet i fanen Tekstinnstillinger og farger kommer senere</string>
-    <string name="background_tab_content">Innholdet i Bakgrunn-fanen kommer senere</string>
-    <string name="background_images_tab_content">Innholdet i fanen Bakgrunnsbilder kommer senere</string>
-    <string name="folders_tab_content">Innholdet i Mapper-fanen kommer senere</string>
-    <string name="projection_tab_content">Innholdet i Projeksjon-fanen kommer senere</string>
-    <string name="other_tab_content">Innholdet i Annet-fanen kommer senere</string>
     <string name="bible_book_1">Første Mosebok</string>
     <string name="bible_book_2">Andre Mosebok</string>
     <string name="bible_book_3">Tredje Mosebok</string>
@@ -518,35 +460,11 @@
     <string name="bible_book_abbrev_66">Åp|Åpenb|Åpenbaringen</string>
 
     <!-- Bible Settings -->
-    <string name="bible_files">Bibelfiler</string>
     <string name="position">Plassering</string>
-    <string name="no_bible_files">Ingen bibelfiler er lastet inn</string>
-    <string name="import_bible_file">Importer bibelfil</string>
-    <string name="remove_bible_file">Fjern bibelfil</string>
-    <string name="bible_selection">Valg av bibel</string>
-    <string name="primary_bible">Hovedbibel:</string>
-    <string name="secondary_bible">Sekundærbibel:</string>
-    <string name="background_type">Bakgrunnstype:</string>
-    <string name="background_color">Bakgrunnsfarge:</string>
-    <string name="background_image">Bakgrunnsbilde:</string>
-    <string name="select_image">Velg bilde</string>
-    <string name="primary_bible_text">Tekst fra hovedbibel</string>
-    <string name="primary_bible_reference">Bokreferanse for hovedbibel</string>
-    <string name="secondary_bible_text">Tekst fra sekundærbibel</string>
-    <string name="show_in_lower_third">Vis i nedre tredjedel</string>
-    <string name="secondary_bible_reference">Bokreferanse for sekundærbibel</string>
-    <string name="show_abbreviation">Vis forkortelse for boken</string>
-    <string name="caption_language">Språk for teksting</string>
-    <string name="language_source">Språkkilde:</string>
 
     <!-- Dialog Messages -->
-    <string name="please_select_directory_first">Velg en lagringsmappe først.</string>
-    <string name="please_select_file_first">Velg en fil fra listen først.</string>
-    <string name="no_file_selected_title">Ingen fil er valgt</string>
     <string name="confirm_delete">Bekreft sletting</string>
     <string name="confirm_delete_file">Er du sikker på at du vil slette «%1$s»?</string>
-    <string name="import_error">Importfeil</string>
-    <string name="delete_error">Slettefeil</string>
 
     <!-- Background Type Options -->
     <string name="background_default">Standard</string>
@@ -555,34 +473,20 @@
     <string name="background_video_option">Videoløkke</string>
     <string name="background_transparent_option">Gjennomsiktig</string>
     <string name="background_follow_default_option">Følg standard</string>
-    <string name="background_video">Bakgrunnsvideo:</string>
 
     <!-- Projection Settings -->
-    <string name="projection_content_song_la">Sang NV</string>
-    <string name="projection_content_song_la_tooltip">Neste-visning for sang</string>
-    <string name="projection_content_chords_tooltip">Vis en sang med akkorder som akkordark, akkorder over teksten</string>
-    <string name="projection_content_stt_tooltip">Tale til tekst – teksting og oversettelse i sanntid</string>
     <string name="projection_content_web">Nett</string>
     <string name="projection_content_background">Bakgrunn</string>
     <string name="projection_content_lt_background">Bakgrunn for nedre tredjedel</string>
-    <string name="projection_web_decklink_tooltip">Nettleseren kan ikke vises på DeckLink-utganger</string>
-    <string name="browser_source_content_unavailable_tooltip">Ikke tilgjengelig for Browser Source-utgang ennå</string>
     <string name="browser_source_resolution">Oppløsning</string>
     <string name="browser_source_fps">Maks FPS</string>
-    <string name="browser_source_website_snapshot_tooltip">Speiler nettsiden som vises på hovedutgangen – bare aktiv mens Nett-fanen eller et utgangsvindu viser den</string>
     <string name="projection_decklink_io_conflict_tooltip">Brukes også til inngang – fungerer kanskje ikke på enheter uten samtidig inn- og utgang</string>
-    <string name="projection_web_go_live_tooltip">Krever en vanlig skjerm (ikke DeckLink) med Nett aktivert i projeksjonsinnstillingene</string>
 
     <!-- Crash Recovery -->
-    <string name="crash_video_bg_disabled">Videobakgrunner er slått av etter %1$d krasj på rad.  [Slå på igjen]  [Lukk]</string>
 
     <!-- Position Options -->
-    <string name="position_above">Over</string>
-    <string name="position_below">Under</string>
 
     <!-- Language Options -->
-    <string name="language_interface">Grensesnitt</string>
-    <string name="language_database">Database</string>
 
     <!-- Language Menu -->
     <string name="menu_language">Språk</string>
@@ -626,11 +530,6 @@
     <string name="no_results_found">Ingen treff for «%1$s»</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Målmappen finnes ikke: %1$s</string>
-    <string name="error_copying_file">Feil ved kopiering av %1$s: %2$s</string>
-    <string name="error_failed_delete">Kunne ikke slette filen</string>
-    <string name="error_deleting_file">Feil ved sletting av filen: %1$s</string>
-    <string name="warning">Advarsel</string>
 
     <!-- Edit Song Dialog -->
     <string name="edit_song">Rediger sang</string>
@@ -638,7 +537,6 @@
     <string name="author">Forfatter</string>
     <string name="composer">Komponist</string>
     <string name="enter_lyrics_here">Skriv inn sangteksten her...</string>
-    <string name="lyrics_format_help">Format: Bruk [Verse 1], [Verse 2] osv. som versoverskrifter og {Chorus} for refreng. Skill avsnittene med en tom linje.</string>
     <string name="save">Lagre</string>
 
     <!-- Tooltips -->
@@ -653,15 +551,12 @@
     <string name="tooltip_note_done">Lagre notat</string>
     <string name="tooltip_note_clear">Fjern notat</string>
     <string name="schedule_note_placeholder">Legg til notat…</string>
-    <string name="tooltip_move_to_top">Flytt til toppen</string>
     <string name="tooltip_move_up">Flytt opp</string>
     <string name="tooltip_move_down">Flytt ned</string>
-    <string name="tooltip_move_to_bottom">Flytt til bunnen</string>
     <string name="schedule_drop_to_remove">Slipp her for å fjerne</string>
     <string name="tooltip_schedule_zoom_in">Zoom inn</string>
     <string name="tooltip_schedule_zoom_out">Zoom ut</string>
     <string name="tooltip_add_to_schedule">Legg til i kjøreplan</string>
-    <string name="tooltip_remove_from_schedule">Fjern fra kjøreplan</string>
     <string name="tooltip_clear_schedule">Tøm kjøreplan</string>
     <string name="tooltip_clear_display">Tøm skjermen</string>
     <string name="remote_action_clear_display">Tøm skjermen</string>
@@ -678,7 +573,6 @@
     <string name="tooltip_presentation_remote">Åpne fjernkontroll</string>
     <string name="tooltip_qa_remote">Deling og fjerntilgang</string>
     <string name="tooltip_stt_settings">Visningsinnstillinger for STT</string>
-    <string name="tooltip_dictionary_settings">Visningsinnstillinger for ordbok</string>
     <string name="tooltip_send_to_stage_monitor">Send til scenemonitor</string>
     <string name="tooltip_hide_from_stage_monitor">Skjul kunngjøringen</string>
     <string name="tooltip_add_label">Legg til etikett</string>
@@ -707,7 +601,6 @@
     <!-- Pictures Tab Strings -->
     <string name="select_folder">Velg mappe</string>
     <string name="no_folder_selected">Ingen mappe valgt</string>
-    <string name="images_count">%1$d bilder</string>
     <string name="previous_image">Forrige bilde</string>
     <string name="pause">Pause</string>
     <string name="play">Spill</string>
@@ -723,7 +616,6 @@
     <string name="loop">Gjenta</string>
     <string name="loop_on">Gjenta: på</string>
     <string name="loop_off">Gjenta: av</string>
-    <string name="output_scale_mode">Skala: %1$s</string>
     <string name="transition_duration">Overgangstid:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
@@ -734,8 +626,6 @@
     <string name="animation_slide_right">Skyv mot høyre</string>
     <string name="animation_none">Ingen</string>
     <string name="milliseconds_suffix">ms</string>
-    <string name="settings">Innstillinger</string>
-    <string name="images_suffix">bilder</string>
     <string name="pictures_arrow_key_hint">%1$s neste/forrige bilde  ·  %2$s bytt rad</string>
     <string name="presentation_arrow_key_hint">%1$s – forrige/neste trinn og lysbilde  ·  %2$s – spill/pause  ·  %3$s – svart skjerm</string>
     <string name="pictures_reorder_hint">Skift+dra miniatyrbildene for å endre rekkefølgen</string>
@@ -745,7 +635,6 @@
 
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Ingen fil er valgt</string>
-    <string name="slide_count">%1$d lysbilder</string>
     <string name="loading_slides_progress">%1$d / %2$d lysbilder</string>
     <string name="slide_counter">Lysbilde %1$d av %2$d</string>
     <string name="presentation_builds_counter">Trinn %1$d av %2$d</string>
@@ -764,16 +653,12 @@
     <string name="remove">Fjern</string>
     <string name="bible_translation">Oversettelse %1$d</string>
     <string name="add_bible_translation">Legg til oversettelse</string>
-    <string name="bible_reference">Bibelreferanse</string>
     <string name="bible_translation_order">Rekkefølge på oversettelser</string>
     <string name="bible_translation_order_panel_title">Visningsrekkefølge</string>
     <string name="bible_translation_order_panel_subtitle">Versene vises stablet ovenfra og ned på skjermen</string>
     <string name="bible_translation_order_hint">Dra en rad eller bruk pilene for å endre rekkefølgen.</string>
     <string name="bible_translation_order_more">+%1$d</string>
     <string name="drag_to_reorder_translation">Dra for å endre rekkefølgen</string>
-    <string name="bible_multi_layout">Oppsett for flere oversettelser</string>
-    <string name="bible_translation_spacing">Avstand mellom oversettelser</string>
-    <string name="bible_translation_divider">Vis skillelinje mellom oversettelser</string>
     <string name="pixels_short">px</string>
     <string name="move_translation_up">Flytt oversettelsen opp</string>
     <string name="move_translation_down">Flytt oversettelsen ned</string>
@@ -789,35 +674,19 @@
     <string name="presentation_remote_tunnel_temporary_note">Offentlige tunnellenker er midlertidige og endres hver gang du starter en ny tunnel.</string>
     <string name="presentation_public_access_description">La tilkoblede mobiler og nettbrett styre presentasjonen over mobildata uten å koble seg til WiFi-nettet ditt</string>
     <string name="presentation_server_not_running">Serveren kjører ikke – start companion-serveren i Innstillinger for å bruke fjernkontroll</string>
-    <string name="select_presentation_file_dialog">Velg presentasjonsfil</string>
 
     <!-- Projection Settings Tab -->
-    <string name="number_of_projection_windows">Antall projeksjonsvinduer</string>
-    <string name="windows_count_label">Vinduer (1-3)</string>
     <string name="window_position">Vindusplassering</string>
-    <string name="text_margins">Tekstmarger</string>
-    <string name="content_region">Innholdsområde</string>
-    <string name="content_region_width">Bredde %</string>
-    <string name="content_region_x_offset">X-forskyvning %</string>
-    <string name="content_region_y_offset">Y-forskyvning %</string>
-    <string name="end_of_song_spacing">Avstand ved sangslutt (*)</string>
-    <string name="auto_fit">Auto</string>
-    <string name="auto_fit_checkbox_tooltip">Tilpass teksten til skjermen automatisk, med skriftstørrelsen som øvre grense</string>
-    <string name="auto_fit_button_tooltip">Beregn den beste skriftstørrelsen for dette verset</string>
     <string name="screen">Skjerm</string>
     <string name="projection_position_help">Plasseringsverdiene er antall piksler fra skjermkantene. Bruk dem til å justere hvor projeksjonsvinduet ligger på sekundære skjermer.</string>
     <string name="screen_assignment">Skjermtilordning</string>
-    <string name="num_screens_label">Antall skjermer:</string>
     <string name="screen_col_label">Skjerm %1$d</string>
     <string name="dev_window_label">Utviklervindu</string>
     <string name="detected_screens">Skjermer funnet: %1$d</string>
     <string name="presenter_windows_count">Presentasjonsvinduer: %1$d</string>
     <string name="projection_simulate_outputs">Simuler utganger</string>
-    <string name="content_bible">Bibel</string>
-    <string name="content_songs">Sanger</string>
     <string name="content_bible_background">Bakgrunn for bibel</string>
     <string name="content_songs_background">Bakgrunn for sanger</string>
-    <string name="content_background_layered_tooltip">Får bare virkning når avmerkingsboksen Bakgrunn (eller Bakgrunn for nedre tredjedel) over også er på.</string>
     <string name="content_pictures">Bilder/presentasjon</string>
     <string name="content_media">Media</string>
     <string name="content_streaming">Nedre tredjedel</string>
@@ -825,45 +694,16 @@
     <string name="display_mode">Visningsmodus</string>
     <string name="display_fullscreen">Fullskjerm</string>
     <string name="display_lower_third">Nedre tredjedel</string>
-    <string name="lower_third_height">Høyde på nedre tredjedel i % (for bibel og sanger)</string>
     <string name="full_screen">Fullskjerm</string>
     <string name="lower_third_size">Nedre tredjedel</string>
     <string name="identify_screen">Identifiser</string>
     <string name="projection_target_display">Skjerm</string>
     <string name="projection_auto_display">Auto</string>
-    <string name="projection_display_label">Skjerm %1$d (%2$dx%3$d)</string>
 
     <!-- Content Outputs dialog -->
     <string name="content_outputs">Innholdsutganger</string>
-    <string name="content_outputs_for">Innholdsutganger – %1$s</string>
     <string name="content_outputs_enabled_short">%1$d av %2$d aktivert</string>
-    <string name="content_outputs_enabled_subtitle">%1$d av %2$d innholdstyper er aktivert på denne skjermen</string>
-    <string name="content_outputs_quick_select">Hurtigvalg</string>
-    <string name="content_outputs_select_all">Velg alle</string>
-    <string name="content_outputs_clear_all">Fjern alle</string>
-    <string name="content_outputs_translations_header">Bibeloversettelser</string>
-    <string name="content_outputs_translations_summary">%1$d av %2$d oversettelser er aktivert</string>
-    <string name="content_outputs_translations_more">%1$s +%2$d</string>
-    <string name="content_outputs_translations_none">Ingen</string>
-    <string name="content_outputs_translations_chip_all">Alle</string>
-    <string name="content_outputs_translations_chip_clear">Tøm</string>
-    <string name="content_outputs_translation_primary">Hoved</string>
-    <string name="content_outputs_section_content">Innhold</string>
-    <string name="content_outputs_section_backgrounds">Bakgrunner</string>
-    <string name="content_outputs_done">Ferdig</string>
-    <string name="content_outputs_preview">Denne utgangen viser</string>
-    <string name="content_outputs_preview_empty">Ingenting er aktivert – denne utgangen holdes tom</string>
-    <string name="content_outputs_preview_translations">%1$s (%2$s)</string>
-    <string name="content_bible_translations_header">Bibeloversettelser</string>
     <string name="content_bible_translations_all">Alle</string>
-    <string name="content_bible_translations_enabled">%1$d av %2$d oversettelser er aktivert</string>
-    <string name="content_bible_translations_footer">Flere oversettelser vises stablet på skjermen, med hovedoversettelsen først.</string>
-    <string name="content_bible_translation_portion_ot_nt">GT+NT</string>
-    <string name="content_bible_translation_portion_nt">NT</string>
-    <string name="content_bible_translation_portion_ot">GT</string>
-    <string name="content_bible_translations_more">+%1$d flere</string>
-    <string name="content_bible_translations_all_selected">Alle bibler</string>
-    <string name="content_bible_translations_count_enabled">%1$d aktivert</string>
 
     <!-- Browser Source Outputs (OBS/vMix overlay) -->
     <string name="browser_source_outputs">Browser Source-utganger</string>
@@ -879,16 +719,11 @@
     <string name="copy_url_black_bg">Kopier URL for svart bakgrunn</string>
 
     <!-- Background Settings Tab -->
-    <string name="default_background_color">Standardbakgrunn</string>
-    <string name="default_background_color_help">Brukes når «Standard» er valgt for bibel eller sanger</string>
-    <string name="default_lower_third_background">Standardbakgrunn for nedre tredjedel</string>
-    <string name="default_lower_third_background_help">Brukes når «Standard» er valgt for bibel eller sanger i visningsmodusen nedre tredjedel</string>
 
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Øverste farge:</string>
     <string name="gradient_bottom_color">Nederste farge:</string>
-    <string name="gradient_opacity">Dekkevne</string>
     <string name="background_opacity">Dekkevne for bakgrunn</string>
     <string name="gradient_top_opacity">Dekkevne øverst</string>
     <string name="gradient_bottom_opacity">Dekkevne nederst</string>
@@ -937,7 +772,6 @@
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Media</string>
-    <string name="media_source">Mediekilde</string>
     <string name="media_local_file">Lokal fil</string>
     <string name="media_network_url">Nettverksadresse</string>
     <string name="media_url_placeholder">Skriv inn URL (http://, rtsp://, ...)</string>
@@ -965,59 +799,18 @@
     <string name="media_seek_forward">Spol 10 s fram</string>
     <string name="media_loop_count">Løkker</string>
     <string name="media_loop_count_tooltip">Hvor mange ganger gjenta (0 = uendelig)</string>
-    <string name="media_preview">Forhåndsvisning</string>
-    <string name="media_volume">Volum</string>
     <string name="stop">Stopp</string>
     <string name="media_mute">Demp</string>
     <string name="media_unmute">Opphev demping</string>
-    <string name="media_open_in_browser">Åpne i nettleser</string>
-    <string name="media_web_preview_note">Forhåndsvisning av nettvideo – avspillingen styres i nettleseren.</string>
-    <string name="media_local_preview_note">Lokal video – bruk kontrollene over for å styre avspillingen.</string>
 
     <!-- Lower Third Settings Tab -->
-    <string name="streaming">Strømming</string>
-    <string name="streaming_settings">Innstillinger for nedre tredjedel</string>
-    <string name="lower_third_folder">Mappe for animasjoner til nedre tredjedel</string>
-    <string name="lower_third_folder_hint">Ingen mappe valgt</string>
-    <string name="lower_third_folder_help">Velg en mappe med Lottie-animasjoner i JSON-format (.json) til bruk som nedre tredjedel.</string>
-    <string name="clear_folder">Tøm</string>
-    <string name="lower_third_files_found">%1$d animasjonsfil(er) funnet</string>
-    <string name="lower_third_no_files">Ingen .json-filer i den valgte mappen</string>
-    <string name="save_string">Lagre</string>
-    <string name="saved_strings">Lagrede verdier</string>
-    <string name="no_saved_strings">Ingen lagrede verdier</string>
     <string name="delete_saved_string">Slett</string>
 
     <!-- Lottie Preset Management -->
-    <string name="lottie_presets">Forhåndsinnstillinger for nedre tredjedel</string>
-    <string name="lottie_preset_import_file">Importer Lottie-fil</string>
-    <string name="lottie_select_json_file">Velg Lottie JSON-fil</string>
-    <string name="lottie_preset_label">Navn på forhåndsinnstilling</string>
-    <string name="lottie_preset_label_hint">Skriv inn et navn...</string>
-    <string name="lottie_preset_save">Lagre forhåndsinnstilling</string>
-    <string name="lottie_preset_delete">Slett forhåndsinnstilling</string>
-    <string name="lottie_preset_no_file">Ingen fil er valgt</string>
-    <string name="lottie_preset_add_pair">+ Legg til par</string>
-    <string name="lottie_preset_saved">Forhåndsinnstillingen er lagret</string>
-    <string name="lottie_presets_list">Lagrede forhåndsinnstillinger</string>
-    <string name="lottie_no_presets">Ingen forhåndsinnstillinger er lagret ennå</string>
     <string name="lottie_select_preset">Velg en forhåndsinnstilling for å forhåndsvise den</string>
-    <string name="lottie_pause_frame">Pausebilde</string>
-    <string name="lottie_pause_frame_none">Ingen</string>
-    <string name="lottie_pause_at_frame">Pause ved bilde</string>
-    <string name="lottie_pause_duration">Pauselengde (ms)</string>
-    <string name="lottie_play_next">Spill videre</string>
-    <string name="lottie_run_to_end">Spill til slutt</string>
-    <string name="lottie_files_folder">Mappe for Lottie-filer</string>
-    <string name="lottie_files">Lottie-filer</string>
     <string name="no_lottie_files">Ingen JSON-filer funnet</string>
-    <string name="import_lottie_file">Importer fil</string>
-    <string name="remove_lottie_file">Fjern fil</string>
     <string name="generate_lower_third">Generer</string>
-    <string name="song_transition_settings">Overgang</string>
-    <string name="bible_transition_settings">Overgang</string>
     <string name="announcements">Kunngjøringer</string>
-    <string name="announcement_text">Kunngjøringstekst</string>
     <string name="announcement_text_hint">Skriv inn kunngjøringsteksten her…</string>
     <string name="top_center">Øverst i midten</string>
     <string name="center_left">Midt til venstre</string>
@@ -1026,23 +819,13 @@
     <string name="announcement_background_color_label">Bakgrunnsfarge</string>
     <string name="transparent_default">Gjennomsiktig (standard)</string>
     <string name="announcement_animation">Animasjon</string>
-    <string name="animation_slide_up">Skyv opp (nedenfra og opp)</string>
     <string name="anim_slide_from_left">Skyv inn fra venstre</string>
     <string name="anim_slide_from_right">Skyv inn fra høyre</string>
     <string name="anim_slide_from_top">Skyv inn ovenfra</string>
     <string name="anim_slide_from_bottom">Skyv inn nedenfra</string>
-    <string name="anim_slide_along_top_ltr">Skyv langs toppen (V→H)</string>
-    <string name="anim_slide_along_top_rtl">Skyv langs toppen (H→V)</string>
-    <string name="anim_slide_along_bottom_ltr">Skyv langs bunnen (V→H)</string>
-    <string name="anim_slide_along_bottom_rtl">Skyv langs bunnen (H→V)</string>
-    <string name="animation_slide_left_to_right">Skyv fra venstre til høyre</string>
-    <string name="animation_slide_to_center">Skyv til midten</string>
-    <string name="announcement_animation_duration">Varighet (ms)</string>
     <string name="announcement_animation_speed">Hastighet</string>
     <string name="announcement_loop_count">Antall gjentakelser</string>
     <string name="announcement_loop_tooltip">0 = uendelig gjentakelse</string>
-    <string name="tooltip_announcement_show">Vis kunngjøringen på skjermen</string>
-    <string name="tooltip_announcement_hide">Skjul kunngjøringen fra skjermen</string>
     <string name="license_title">Sluttbrukeravtale (EULA)</string>
     <string name="license_accept_button">Jeg godtar</string>
     <string name="license_decline_button">Avslå og avslutt</string>
@@ -1065,9 +848,7 @@
     <string name="timer_clock_format_24h">24-timers (HH:mm)</string>
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>
-    <string name="timer_resume">Fortsett</string>
     <string name="timer_reset">Nullstill</string>
-    <string name="timer_text_color">Farge på nedtellingen</string>
     <string name="timer_expired_text_label">Tekst når tiden er ute</string>
     <string name="timer_expired_text_hint">Skriv inn meldingen som skal vises…</string>
     <string name="timer_expired">Tiden er ute!</string>
@@ -1093,9 +874,6 @@
     <string name="songs_no_db_step">Velg en mappe som inneholder en sangdatabasefil</string>
 
     <!-- Output role (fill+key) -->
-    <string name="output_role_normal">Normal</string>
-    <string name="output_role_fill">Fill</string>
-    <string name="output_role_key">Key</string>
     <string name="key_output">Key-utgang</string>
     <string name="key_output_none">Ingen</string>
 
@@ -1104,21 +882,12 @@
     <string name="live_preview_nothing">Ingenting er live</string>
     <string name="collapse_preview">Skjul denne forhåndsvisningen</string>
     <string name="expand_preview">Vis denne forhåndsvisningen</string>
-    <string name="live_preview_bible">Bibel</string>
-    <string name="live_preview_song">Sang</string>
-    <string name="live_preview_picture">Bilde</string>
-    <string name="live_preview_presentation">Presentasjon</string>
-    <string name="live_preview_media">Media</string>
-    <string name="live_preview_lower_third">Nedre tredjedel</string>
-    <string name="live_preview_announcement">Kunngjøring</string>
-    <string name="live_preview_website">Nettside</string>
     <string name="screen_locked_badge">LÅST</string>
     <string name="unlock_screen">Lås opp skjermen</string>
     <string name="lock_screen_to_tab">Lås skjermen til denne fanen</string>
     <string name="qr_code">QR-kode</string>
 
     <!-- Website / Web Tab -->
-    <string name="web_url_label">URL</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_add_to_schedule">Legg til i kjøreplan</string>
     <string name="web_go_live">Gå live</string>
@@ -1132,10 +901,8 @@
     <string name="web_engine_unavailable_windows_title">Nettleseren krever Windows 10 eller nyere</string>
     <string name="web_engine_unavailable_windows_body">ChurchPresenters nettlesermotor støtter ikke lenger denne versjonen av Windows. Oppdater til Windows 10 eller nyere for å bruke Nett-fanen og nettleserkilder.</string>
     <string name="web_live_badge">LIVE</string>
-    <string name="web_type_to_page_label">Skriv til siden</string>
     <string name="web_type_to_page_placeholder">Klikk først i et felt på den live siden</string>
     <string name="web_focus_first_input">Sett fokus i det første feltet på siden</string>
-    <string name="web_bookmarks">Bokmerker</string>
     <string name="web_clear_cache">Tøm hurtiglageret</string>
     <string name="web_back">Tilbake</string>
     <string name="web_forward">Fram</string>
@@ -1144,13 +911,11 @@
     <string name="web_zoom_out">Zoom ut</string>
     <string name="web_snapshot_waiting">Venter på bilde...</string>
     <string name="web_snapshot_screen_recording_hint">Hvis dette vedvarer, gi tilgang til skjermopptak\ni Systeminnstillinger &gt; Personvern og sikkerhet &gt; Skjermopptak</string>
-    <string name="tooltip_add_website">Legg til nettside</string>
     <string name="website_dialog_title">Legg til nettside</string>
     <string name="website_url_label">URL</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Tittel (valgfritt)</string>
     <string name="website_title_hint">Skriv inn et visningsnavn…</string>
-    <string name="website_go_live">Gå live</string>
     <string name="website_disclaimer">Vi er ikke ansvarlige for reklame eller innhold som kan dukke opp på nettsiden som vises.</string>
     <string name="tab_web">Nett</string>
     <string name="tab_canvas">Lerret</string>
@@ -1211,7 +976,6 @@
     <string name="canvas_scale_none">Ingen</string>
     <string name="canvas_text_content">Tekst</string>
     <string name="canvas_expand_text_field">Rediger i et større vindu</string>
-    <string name="canvas_line_spacing">Linjeavstand</string>
     <string name="canvas_font">Skrift</string>
     <string name="canvas_align_horizontal">Vannrett</string>
     <string name="canvas_align_vertical">Loddrett</string>
@@ -1260,14 +1024,10 @@
     <string name="canvas_bible_end_verse">Til vers</string>
     <string name="canvas_bible_ref_font_size">Skriftstørrelse for referanse</string>
     <string name="canvas_bible_ref_color">Farge på referanse</string>
-    <string name="canvas_bible_ref_bold">Fet referanse</string>
-    <string name="canvas_bible_ref_italic">Kursiv referanse</string>
     <string name="canvas_verse_style">Versstil</string>
     <string name="canvas_reference_style">Referansestil</string>
     <string name="canvas_text_color">Tekstfarge</string>
     <string name="canvas_text_bg_color">Bakgrunnsfarge</string>
-    <string name="canvas_text_bold">Fet</string>
-    <string name="canvas_text_italic">Kursiv</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24 t</string>
@@ -1275,9 +1035,6 @@
     <string name="canvas_clock_show_hours">Vis timer</string>
     <string name="canvas_clock_show_seconds">Vis sekunder</string>
     <string name="canvas_clock_font_size">Skriftstørrelse</string>
-    <string name="canvas_clock_target_hour">Varighet – timer</string>
-    <string name="canvas_clock_target_minute">Varighet – minutter</string>
-    <string name="canvas_clock_target_second">Varighet – sekunder</string>
     <string name="canvas_qr_type">Type</string>
     <string name="canvas_qr_content">Innhold</string>
     <string name="canvas_qr_foreground">Forgrunn</string>
@@ -1288,9 +1045,7 @@
     <string name="canvas_qr_wifi_hidden">Skjult nettverk</string>
     <string name="canvas_qr_error_correction">Feilretting</string>
     <string name="canvas_camera_device">Kamera</string>
-    <string name="canvas_camera_name">Enhetsnavn</string>
     <string name="canvas_camera_none_found">Ingen kameraer funnet</string>
-    <string name="canvas_camera_ffmpeg_hint">Installer ffmpeg for å oppdage virtuelle kameraer (OBS, NDI osv.)</string>
     <string name="canvas_camera_v4l2_hint">Installer v4l2loopback for virtuelle kameraer: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Oppdater kameralisten</string>
     <string name="canvas_camera_format">Videoformat</string>
@@ -1318,7 +1073,6 @@
     <string name="canvas_transform_h">H</string>
     <string name="canvas_qr_default_text">Teksten din her</string>
     <string name="canvas_decklink_device">DeckLink: %1$s</string>
-    <string name="web_under_construction">Denne funksjonen er under utvikling.</string>
 
     <!-- Server Settings -->
     <string name="server_settings">Server</string>
@@ -1341,64 +1095,15 @@
     <string name="generate_api_key">Generer</string>
     <string name="copy_api_key">Kopier</string>
     <string name="show_qr_code">QR</string>
-    <string name="cert_download_button">Last ned sertifikat</string>
-    <string name="cert_download_qr_title">Installer CA-sertifikat</string>
-    <string name="cert_download_scan_hint">Åpne ChurchPresenter-mobilappen → trykk ⚙ Innstillinger → Sertifikattillit → Oppsett, trykk «Skann QR-kode» og hold kameraet mot denne koden.</string>
-    <string name="cert_install_ios_title">🍎  Oppsett på iOS</string>
-    <string name="cert_install_ios_step1">Trykk «Skann QR-kode» i mobilappen og skann denne koden. Appen finner adressen til sertifikatet automatisk.</string>
-    <string name="cert_install_ios_step2">Trykk «Åpne sertifikatadresse» i appen – Safari åpnes og spør om å laste ned profilen. Trykk Tillat.</string>
-    <string name="cert_install_ios_step3">Åpne Innstillinger → Generelt → VPN og enhetsadministrasjon → trykk ChurchPresenter CA → Installer → skriv inn kodelåsen din.</string>
-    <string name="cert_install_ios_trust_title">⚠️  Påkrevd etter installasjonen</string>
-    <string name="cert_install_ios_trust_step">Innstillinger → Generelt → Om → Innstillinger for sertifikattillit → slå på full tillit for ChurchPresenter CA. Uten dette trinnet får ikke appen en sikker tilkobling.</string>
-    <string name="cert_install_android_title">🤖  Oppsett på Android</string>
-    <string name="cert_install_android_step1">Trykk «Skann QR-kode» i mobilappen og skann denne koden. Appen finner adressen til sertifikatet automatisk.</string>
-    <string name="cert_install_android_step2">Trykk «Åpne sertifikatadresse» – Chrome laster ned ChurchPresenter-CA.crt. Trykk på filen i varselet eller i Nedlastinger for å installere den direkte.</string>
-    <string name="cert_install_android_cant_title">🚫  Får du ikke installert sertifikatet, eller bare fra kjente kilder?</string>
-    <string name="cert_install_android_cant_intro">Noen Android-versjoner blokkerer direkte installasjon av sertifikater. Bruk den manuelle veien i stedet:</string>
-    <string name="cert_install_android_cant_step1">Innstillinger → Sikkerhet (eller Biometri og sikkerhet på Samsung).</string>
-    <string name="cert_install_android_cant_step2">Trykk Kryptering og legitimasjon → Installer et sertifikat → CA-sertifikat.</string>
-    <string name="cert_install_android_cant_step3">Finn fram til Nedlastinger, velg ChurchPresenter-CA.crt og bekreft.</string>
-    <string name="cert_fingerprint_label">SHA-256-fingeravtrykk</string>
-    <string name="cert_fingerprint_verify">Kontroller at dette fingeravtrykket stemmer etter installasjonen – da vet du at du har installert riktig sertifikat.</string>
-    <string name="api_key_qr_title">QR-kode for API-nøkkel</string>
     <string name="connection_qr_title">QR-kode for tilkobling</string>
-    <string name="connection_qr_url_label">Serveradresse</string>
-    <string name="connection_qr_key_label">API-nøkkel</string>
     <string name="close">Lukk</string>
     <string name="server_url_label">Serveradresse</string>
-    <string name="copy_url">Kopier URL</string>
     <string name="server_host_label">Overstyr vert</string>
     <string name="server_host_hint">f.eks. 192.168.1.50 eller church-mac.local</string>
     <string name="server_host_note">Fast IP-adresse eller vertsnavn som skal vises i URL-en. La feltet stå tomt for å oppdage det automatisk.</string>
-    <string name="server_endpoints">Tilgjengelige endepunkter</string>
     <string name="server_restart">Start på nytt</string>
-    <string name="server_endpoints_read">Lesing</string>
-    <string name="server_endpoints_actions">Handlinger</string>
-    <string name="server_endpoints_websocket">WebSocket</string>
-    <string name="server_payload_reference">Referanse for nyttelast (item-feltet)</string>
 
     <!-- Endpoint descriptions -->
-    <string name="endpoint_desc_server_info">serverinformasjon</string>
-    <string name="endpoint_desc_song_catalog">sangkatalog</string>
-    <string name="endpoint_desc_song_detail">fullstendige sangdetaljer med sangtekst</string>
-    <string name="endpoint_desc_filter_songbook">filtrer på sangbok</string>
-    <string name="endpoint_desc_bible_catalog">bibelkatalog</string>
-    <string name="endpoint_desc_filter_book">filtrer på bok</string>
-    <string name="endpoint_desc_filter_chapter">filtrer på kapittel</string>
-    <string name="endpoint_desc_schedule">gjeldende kjøreplan</string>
-    <string name="endpoint_desc_presentation_catalog">presentasjonskatalog</string>
-    <string name="endpoint_desc_slide_image">lysbilde som bilde (JPEG)</string>
-    <string name="endpoint_desc_picture_catalog">katalog over bildemappen</string>
-    <string name="endpoint_desc_picture_image">bildefil (JPEG)</string>
-    <string name="endpoint_desc_select_picture">velg bilde etter posisjon</string>
-    <string name="endpoint_desc_ws_select_picture">velg bilde (WS)</string>
-    <string name="endpoint_desc_bible_chapter">helt kapittel med verstekst</string>
-    <string name="endpoint_desc_add_to_schedule">legg til element i kjøreplanen</string>
-    <string name="endpoint_desc_add_batch_to_schedule">legg til flere elementer i kjøreplanen i ett kall</string>
-    <string name="endpoint_desc_project">send element direkte til projeksjon</string>
-    <string name="endpoint_desc_ws_realtime">oppdateringer i sanntid</string>
-    <string name="endpoint_desc_ws_add_to_schedule">legg til element i kjøreplanen (WS)</string>
-    <string name="endpoint_desc_ws_project">vis element direkte (WS)</string>
 
     <!-- Hardcoded strings moved to resources -->
     <string name="no_image_selected">Ingen bilde er valgt</string>
@@ -1409,8 +1114,6 @@
     <string name="align_top">Juster øverst</string>
     <string name="align_middle">Juster i midten</string>
     <string name="align_bottom">Juster nederst</string>
-    <string name="position_above_desc">Over</string>
-    <string name="position_below_desc">Under</string>
     <string name="increment">Øk</string>
     <string name="decrement">Reduser</string>
     <string name="presented_image">Bildet som vises</string>
@@ -1420,47 +1123,31 @@
     <string name="presenter_view_title">Presentasjonsvisning %1$d</string>
     <string name="key_output_title">Key-utgang %1$d</string>
     <string name="decklink_output_title">DeckLink-utgang %1$d</string>
-    <string name="lower_third_generator">Generator for nedre tredjedel</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Sideforholdet stemmer ikke: filen er %1$dx%2$d (%3$s), men utgangen er %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobil</string>
     <string name="desktop_view">Skrivebord</string>
     <string name="interactive_mode">Interaktiv</string>
     <string name="mirror_mode">Speiling</string>
-    <string name="time_separator">:</string>
 
     <!-- Misc UI -->
     <string name="theme">Tema</string>
     <string name="menu_view">Vis</string>
     <string name="symbol_ok">✓</string>
     <string name="symbol_cancel">✗</string>
-    <string name="symbol_dropdown">▾</string>
 
     <!-- Generator dialog messages -->
     <string name="image_files_filter">Bildefiler (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Videofiler (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="swap_bibles">Bytt om</string>
     <string name="swap_bibles_hint">Bytt om hovedbibel og sekundærbibel</string>
-    <string name="multi_verse">Flere vers</string>
     <string name="new_song">Ny sang</string>
     <string name="back_to_live">Tilbake til live</string>
     <string name="line_navigation_hint">Bruk %1$s for å bytte linje og %2$s for å bytte vers</string>
 
     <!-- Statistics -->
-    <string name="statistics">Statistikk</string>
-    <string name="top_songs">Mest brukte sanger</string>
-    <string name="top_verses">Mest brukte vers</string>
-    <string name="statistics_song_count">%1$d sanger</string>
-    <string name="statistics_verse_count">%1$d vers</string>
     <string name="clear_statistics">Tøm statistikken</string>
-    <string name="times_displayed">ganger</string>
     <string name="menu_statistics">CCLI-rapporter</string>
-    <string name="export_to_xls">Eksporter til XLS</string>
-    <string name="statistics_exported_success">Statistikken ble eksportert.</string>
-    <string name="statistics_exported_error">Kunne ikke eksportere statistikken.</string>
-    <string name="file_chooser_save_statistics">Lagre statistikk som</string>
-    <string name="file_filter_xls">Excel-regneark (*.xls)</string>
-    <string name="stats_period_label">Periode:</string>
     <string name="stats_period_all_time">Alle tider</string>
     <string name="stats_period_last_3_months">Siste 3 måneder</string>
     <string name="stats_period_last_6_months">Siste 6 måneder</string>
@@ -1521,7 +1208,6 @@
     <string name="allow_for_session">Tillat i denne økten</string>
     <string name="allow_permanently">Tillat permanent</string>
     <string name="deny">Avslå</string>
-    <string name="deny_all">Avslå alle</string>
     <string name="block_for_session">Blokker i denne økten</string>
     <string name="block_permanently">Blokker permanent</string>
 
@@ -1545,11 +1231,9 @@
     <string name="client_label_cancel">Avbryt</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
-    <string name="new_songbook">Ny sangbok</string>
     <string name="add_new">Legg til ny...</string>
     <string name="secondary_title">Sekundærtittel</string>
     <string name="duplicate_song_error">Det finnes allerede en sang med dette nummeret og denne tittelen i sangboken</string>
-    <string name="secondary_lyrics">Sekundær sangtekst</string>
     <string name="enter_secondary_lyrics_here">Skriv inn den sekundære sangteksten her...</string>
 
     <!-- Edit Song Dialog - Chords, tempo and preview -->
@@ -1565,12 +1249,9 @@
     <string name="song_key">Toneart</string>
     <string name="song_capo">Capo</string>
     <string name="song_play">Spill</string>
-    <string name="song_chord_color">Akkordfarge</string>
-    <string name="song_lyrics_color">Farge på sangteksten</string>
     <string name="song_transpose_down">Transponer ned</string>
     <string name="song_transpose_up">Transponer opp</string>
     <string name="song_transpose_reset">%1$s – nullstill</string>
-    <string name="song_chords_in_key">Akkorder i %1$s</string>
     <string name="song_chords_used">%1$d i bruk</string>
     <string name="song_insert_chord">Sett inn akkord</string>
     <string name="song_stats">%1$d avsnitt · %2$d linjer · %3$d ord</string>
@@ -1581,7 +1262,6 @@
     <string name="song_samples_overwrite_confirm">Mappen «Song Samples» finnes allerede. Dette overskriver eksisterende filer.\nVil du fortsette?</string>
     <string name="song_samples_copied">Kopierte %1$d eksempelsanger til mappen «Song Samples».</string>
     <string name="add_song_samples">Legg til eksempelsanger</string>
-    <string name="sps_file_not_supported">%1$s (støttes ikke)</string>
     <string name="folder_overwrite_confirm">Mappen «%1$s» finnes allerede. Dette overskriver eksisterende sangfiler.\nVil du fortsette?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
@@ -1697,34 +1377,9 @@
     <string name="song_number_offset_needs_corner">Velg et hjørne ovenfor for å plassere nummeret fritt</string>
     <string name="song_number_offset_x">Forskyvning X %</string>
     <string name="song_number_offset_y">Forskyvning Y %</string>
-    <string name="song_section_label">Avsnittsetikett</string>
-    <string name="song_section_label_enabled">Vis gjeldende avsnitt (Vers, Refreng…)</string>
-    <string name="song_section_label_font_size">Skriftstørrelse</string>
-    <string name="song_section_label_color">Farge</string>
-    <string name="fullscreen_display">Fullskjermvisning</string>
-    <string name="display_mode_label">Visningsmodus:</string>
-    <string name="display_mode_one_verse">1 vers</string>
-    <string name="display_mode_one_line">1 linje</string>
     <string name="song_language_both">Begge</string>
     <string name="song_language_primary">Hovedspråk</string>
     <string name="song_language_secondary">Sekundærspråk</string>
-    <string name="screen_lang_off">Av</string>
-    <string name="screen_lang_language_1">Språk 1</string>
-    <string name="screen_lang_language_2">Språk 2</string>
-    <string name="screen_lang_bible_1">Bibel 1</string>
-    <string name="screen_lang_bible_2">Bibel 2</string>
-    <string name="screen_lang_tooltip_off">Ikke vis på denne skjermen</string>
-    <string name="screen_lang_tooltip_primary">Vis bare hovedspråket</string>
-    <string name="screen_lang_tooltip_secondary">Vis bare sekundærspråket</string>
-    <string name="screen_lang_tooltip_both">Vis begge språkene</string>
-    <string name="lower_third_display">Visning som nedre tredjedel</string>
-    <string name="bilingual_layout">Tospråklig oppsett:</string>
-    <string name="bilingual_left_right">Venstre / høyre</string>
-    <string name="bilingual_top_bottom">Øverst / nederst</string>
-    <string name="look_ahead_fullscreen">Neste-visning (fullskjerm)</string>
-    <string name="look_ahead_next_fullscreen">Neste-visning: neste avsnitt (fullskjerm)</string>
-    <string name="look_ahead_lower_third">Neste-visning (nedre tredjedel)</string>
-    <string name="look_ahead_next_lower_third">Neste-visning: neste avsnitt (nedre tredjedel)</string>
 
     <!-- Color Picker Dialog -->
     <string name="dialog_choose_color">Velg farge</string>
@@ -1733,38 +1388,14 @@
     <!-- Song Title Slide -->
     <string name="song_title_slide">Tittelbilde for sang</string>
     <string name="show_song_number_before_title">Vis sangnummer før tittelen</string>
-    <string name="enabled">Aktivert</string>
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Scenemonitor</string>
-    <string name="stage_monitor_enable">Aktiver scenemonitor</string>
-    <string name="stage_monitor_display">Målskjerm</string>
-    <string name="stage_monitor_display_none">Ingen (av)</string>
-    <string name="stage_monitor_show_next_slide">Vis forhåndsvisning av neste lysbilde</string>
-    <string name="stage_monitor_show_clock">Vis klokke</string>
-    <string name="stage_monitor_show_timer">Vis nedtelling</string>
-    <string name="stage_monitor_show_section_label">Vis avsnittsetikett</string>
-    <string name="stage_monitor_show_notes">Vis presentatørnotater</string>
     <string name="general">Generelt</string>
-    <string name="stage_monitor_section_general">Generelt</string>
-    <string name="stage_monitor_section_current">Gjeldende lysbilde</string>
-    <string name="stage_monitor_section_next">Forhåndsvisning av neste lysbilde</string>
-    <string name="stage_monitor_section_label_style">Etikettstil</string>
-    <string name="stage_monitor_section_clock">Klokke og nedtelling</string>
-    <string name="stage_monitor_text_color">Tekstfarge</string>
-    <string name="stage_monitor_font_size">Skriftstørrelse</string>
-    <string name="stage_monitor_background_color">Bakgrunnsfarge</string>
-    <string name="stage_monitor_layout">Oppsett</string>
-    <string name="stage_monitor_layout_vertical">Loddrett</string>
-    <string name="stage_monitor_layout_horizontal">Vannrett</string>
-    <string name="stage_monitor_no_extra_displays">Ingen sekundære skjermer er funnet. Koble til en ekstra skjerm for å bruke scenemonitor.</string>
     <string name="display_stage_monitor">Scenemonitor</string>
-    <string name="stage_monitor_layout_quadrants">Oppsett med fire ruter</string>
-    <string name="stage_monitor_quadrant_current">Gjeldende lysbilde</string>
     <string name="stage_monitor_quadrant_next">Neste</string>
     <string name="stage_monitor_quadrant_clock">Klokke</string>
     <string name="stage_monitor_quadrant_notes">Presentatørnotater</string>
-    <string name="stage_monitor_layout_section">Skjermoppsett</string>
     <string name="stage_monitor_zone_top_left">Øverst til venstre</string>
     <string name="stage_monitor_zone_top_right">Øverst til høyre</string>
     <string name="stage_monitor_zone_bottom_left">Nederst til venstre</string>
@@ -1772,13 +1403,8 @@
     <string name="stage_monitor_zone_bottom_right">Nederst til høyre</string>
     <string name="stage_monitor_zone_full_screen">Fullskjerm</string>
     <string name="stage_monitor_zone_none">Ingen</string>
-    <string name="stage_monitor_notes_from_presentation">Notatene vises automatisk fra det aktive PowerPoint- eller Keynote-lysbildet.</string>
-    <string name="stage_monitor_content_section">Skjerminnhold</string>
     <string name="stage_monitor_zone_n">Sone %1$d</string>
-    <string name="stage_monitor_zone_shows">Viser</string>
-    <string name="stage_monitor_zone_count">%1$d soner</string>
     <string name="stage_monitor_layout_stranded">Vises ikke i dette oppsettet: %1$s</string>
-    <string name="stage_monitor_size_section">Sonestørrelse</string>
     <string name="stage_monitor_zone_width">Bredde (%)</string>
     <string name="stage_monitor_zone_row_height">Radhøyde (%)</string>
     <string name="stage_monitor_size_selected">Valgt</string>
@@ -1800,7 +1426,6 @@
     <string name="stage_monitor_position_middle_left">Midt til venstre</string>
     <string name="stage_monitor_position_center">Midten</string>
     <string name="stage_monitor_position_middle_right">Midt til høyre</string>
-    <string name="metronome_bpm_label">BPM for metronom</string>
     <string name="unit_bpm">BPM</string>
 
     <!-- Q&A Tab -->
@@ -1814,13 +1439,9 @@
     <string name="qa_incoming_approved">Innkommende + godkjente</string>
     <string name="qa_done">Ferdige</string>
     <string name="qa_denied">Avslåtte</string>
-    <string name="qa_questions">Spørsmål</string>
     <string name="qa_finished">Ferdige</string>
     <string name="qa_history">Historikk</string>
     <string name="qa_clear_all_questions">Tøm alle spørsmål</string>
-    <string name="qa_incoming_tab">Innkommende (%1$d)</string>
-    <string name="qa_finished_tab">Ferdige (%1$d)</string>
-    <string name="qa_history_tab">Historikk (%1$d)</string>
     <string name="qa_displaying">Viser: %1$s…</string>
     <string name="qa_waiting">Venter på spørsmål…</string>
     <string name="qa_start_session_hint">Start en økt for å ta imot spørsmål</string>
@@ -1840,18 +1461,6 @@
     <string name="qa_show_qr">Vis QR-koden på skjermen</string>
     <string name="qa_admin_panel">Administrasjonspanel</string>
     <string name="qa_server_hint">Start companion-serveren for å bruke Q&amp;A</string>
-    <string name="qa_display_styling">Utforming av visningen</string>
-    <string name="qa_styling_qr_group">QR-kode</string>
-    <string name="qa_styling_text_group">Tekst og bakgrunn</string>
-    <string name="qa_text_color">Tekstfarge</string>
-    <string name="qa_qr_fg_color">Forgrunn på QR-koden</string>
-    <string name="qa_qr_bg_color">Bakgrunn på QR-koden</string>
-    <string name="qa_font">Skrift</string>
-    <string name="qa_size">Størrelse</string>
-    <string name="qa_background_color">Bakgrunnsfarge</string>
-    <string name="qa_transparent">Gjennomsiktig</string>
-    <string name="qa_position">Plassering</string>
-    <string name="qa_settings_section">Innstillinger</string>
     <string name="qa_cooldown_label">Ventetid mellom spørsmål (sek)</string>
     <string name="qa_qr_message_label">Melding ved QR-koden</string>
     <string name="qa_qr_message_default">Skann for å stille et spørsmål</string>
@@ -1879,18 +1488,8 @@
     <string name="qa_local">Lokal</string>
     <string name="qa_public">Offentlig</string>
     <string name="qa_retry">Prøv igjen</string>
-    <string name="qa_pos_tl">ØV</string>
-    <string name="qa_pos_tc">ØM</string>
-    <string name="qa_pos_tr">ØH</string>
-    <string name="qa_pos_cl">MV</string>
-    <string name="qa_pos_c">M</string>
-    <string name="qa_pos_cr">MH</string>
-    <string name="qa_pos_bl">NV</string>
-    <string name="qa_pos_bc">NM</string>
-    <string name="qa_pos_br">NH</string>
 
     <!-- QA: missing strings -->
-    <string name="qa_sort">Sortering: %1$s</string>
     <string name="qa_sort_newest">Nyeste først</string>
     <string name="qa_sort_oldest">Eldste først</string>
     <string name="qa_sort_most_votes">Flest stemmer</string>
@@ -1904,54 +1503,21 @@
     <string name="qa_copy_url">Kopier URL</string>
     <string name="qa_voting_enabled">Stemmegivning er på</string>
     <string name="qa_voting_disabled">Stemmegivning er av</string>
-    <string name="qa_opacity">Dekkevne:</string>
 
     <!-- STT tab -->
     <string name="stt_server_url">URL til STT-server</string>
     <string name="stt_disconnect">Koble fra</string>
     <string name="stt_connect">Koble til</string>
     <string name="stt_go_live">Gå live</string>
-    <string name="stt_display_mode">Visningsmodus</string>
-    <string name="stt_mode_transcribe">Bare transkripsjon</string>
-    <string name="stt_mode_translate">Bare oversettelse</string>
-    <string name="stt_mode_both">Begge</string>
-    <string name="stt_layout">Oppsett</string>
-    <string name="stt_layout_stacked">Stablet</string>
-    <string name="stt_layout_stacked_inverse">Stablet (omvendt)</string>
-    <string name="stt_layout_side_by_side">Side ved side</string>
-    <string name="stt_layout_side_by_side_inverse">Side ved side (omvendt)</string>
-    <string name="stt_max_segments">Maks antall segmenter</string>
-    <string name="stt_max_lines">Maks antall linjer</string>
-    <string name="stt_line_spacing">Linjeavstand %</string>
-    <string name="stt_word_highlighting">Uthev ord</string>
-    <string name="stt_in_progress_text">Tekst under arbeid</string>
-    <string name="stt_translation_in_progress">Oversettelse under arbeid</string>
-    <string name="stt_drip_feed">Bokstav for bokstav</string>
-    <string name="stt_drip_feed_speed">Hastighet (ms per bokstav)</string>
     <string name="stt_live_preview">Forhåndsvisning live</string>
     <string name="stt_not_connected">Ikke tilkoblet. Skriv inn URL-en til STT-serveren og trykk Koble til.</string>
     <string name="stt_waiting_for_transcription">Venter på transkripsjon…</string>
     <string name="stt_transcription_label">Transkripsjon</string>
     <string name="stt_translation_label">Oversettelse</string>
-    <string name="stt_display_styling">Utforming av visningen</string>
-    <string name="stt_text_color">Tekstfarge</string>
-    <string name="stt_translation_color">Farge på oversettelsen</string>
-    <string name="stt_font">Skrift</string>
-    <string name="stt_size">Størrelse</string>
-    <string name="stt_background_color">Bakgrunnsfarge</string>
-    <string name="stt_opacity">Dekkevne:</string>
-    <string name="stt_position">Plassering</string>
     <string name="stt_settings_dialog_title">Visningsinnstillinger for STT</string>
-    <string name="dictionary_settings_dialog_title">Visningsinnstillinger for ordbok</string>
 
     <!-- CCLI Report -->
-    <string name="ccli_report">CCLI-rapport</string>
     <string name="ccli_report_title">CCLI-rapporter</string>
-    <string name="ccli_preset_30d">Siste 30 dager</string>
-    <string name="ccli_preset_90d">Siste 90 dager</string>
-    <string name="ccli_preset_this_year">I år</string>
-    <string name="ccli_preset_last_year">I fjor</string>
-    <string name="ccli_preset_all_time">Alle tider</string>
     <string name="ccli_tab_songs">Sanger</string>
     <string name="ccli_tab_bible">Bibel</string>
     <string name="ccli_tab_activity">Aktivitet</string>
@@ -1979,7 +1545,6 @@
     <string name="ccli_col_last">Siste</string>
     <string name="ccli_col_verse">Vers</string>
     <string name="ccli_col_bible">Bibel</string>
-    <string name="ccli_report_description">Datofiltrert rapport med diagrammer — eksporter CSV for CCLI-lisensrapportering</string>
     <string name="ccli_export_csv">Eksporter CCLI-CSV</string>
     <string name="ccli_export_xls">Eksporter XLS</string>
     <string name="ccli_exported_success">Rapporten ble eksportert.</string>
@@ -2018,14 +1583,12 @@
     <string name="update_dialog_message">En ny versjon av Church Presenter er tilgjengelig: %1$s</string>
     <string name="update_dialog_channel_stable">Stabil utgivelse</string>
     <string name="update_dialog_channel_prerelease">Forhåndsutgivelse</string>
-    <string name="update_dialog_download">Last ned</string>
     <string name="update_dialog_dismiss">Senere</string>
     <string name="update_dialog_release_notes">Nyheter:</string>
     <string name="update_dialog_download_install">Last ned og installer</string>
     <string name="update_dialog_downloading">Laster ned …</string>
     <string name="update_dialog_install_now">Installer nå</string>
     <string name="update_dialog_open_page">Åpne nedlastingssiden</string>
-    <string name="update_check_menu">Se etter oppdateringer …</string>
     <string name="update_already_latest">Du kjører den nyeste versjonen.</string>
     <string name="update_dialog_up_to_date_title">Alt er oppdatert</string>
     <string name="update_dialog_view_on_github">Vis på GitHub</string>
@@ -2046,7 +1609,6 @@
     <string name="obs_enable">Koble til OBS Studio</string>
     <string name="obs_host">Vert</string>
     <string name="obs_host_hint">localhost</string>
-    <string name="obs_port">Port</string>
     <string name="obs_password">Passord</string>
     <string name="obs_password_hint">La stå tomt hvis det ikke er satt passord</string>
     <string name="obs_connect">Koble til</string>
@@ -2106,10 +1668,6 @@
     <string name="dictionary_in_scripture_none">Ingen merkede vers funnet for dette oppslaget</string>
     <string name="dictionary_in_scripture_count">Funnet i %1$d vers</string>
     <string name="dictionary_in_scripture_show_more">Vis %1$d til</string>
-    <string name="dictionary_in_scripture_all_books">Alle bøker</string>
-    <string name="dictionary_in_scripture_all_chapters">Alle kapitler</string>
-    <string name="dictionary_in_scripture_all_verses">Alle vers</string>
-    <string name="dictionary_in_scripture_count_filtered">Viser %1$d av %2$d vers</string>
 
     <!-- Setup Wizard -->
     <string name="setup_wizard_title">Kom i gang</string>
@@ -2128,10 +1686,7 @@
     <string name="setup_step2_subtitle">Sett opp bibelfilene dine for visning av vers</string>
     <string name="setup_step2_step1">1. Åpne Innstillinger med ⚙-knappen på verktøylinjen</string>
     <string name="setup_step2_step2">2. Gå til fanen System</string>
-    <string name="setup_step2_step3">3. Klikk «Bla gjennom …» ved siden av Lagringsmappe for bibler</string>
-    <string name="setup_step2_step4">4. Velg en mappe der bibelfilene skal ligge</string>
     <string name="setup_step2_step5">5. Klikk «Last ned bibler …» og installer oversettelsene du trenger</string>
-    <string name="setup_step2_step6">6. Gå til Bibel-fanen og velg en primærbibel</string>
     <string name="setup_step2_download_hint">Over 1 500 oversettelser på mer enn 1 000 språk er tilgjengelige fra eBible.org og Zefania-arkivet. Hver av dem viser opphavsretten sin før du installerer den.</string>
     <string name="setup_step2_tip">Har du allerede bibelfiler? Pek mappen mot dem i stedet, så blir de plukket opp automatisk.</string>
     <string name="setup_step2_tip2">Har du en bibel i et annet format? Sang- og bibelkonvertereren (Hjelp → Sang- og bibelkonverterer) kan konvertere den.</string>
@@ -2141,7 +1696,6 @@
     <string name="setup_step3_step2">2. Gå til fanen System</string>
     <string name="setup_step3_step3">3. Klikk «Bla gjennom …» ved siden av Lagringsmappe for sanger</string>
     <string name="setup_step3_step4">4. Velg en mappe som inneholder sangfilene dine</string>
-    <string name="setup_step3_tip">Sanger kan være i formatene OpenLyrics, SongPro eller ChurchPresenter.</string>
     <string name="setup_step5_title">VLC Media Player</string>
     <string name="setup_step5_subtitle">Kreves for video- og lydavspilling i lysbilder</string>
     <string name="setup_step5_vlc_ok">VLC er installert og klar</string>
@@ -2159,8 +1713,6 @@
     <string name="setup_proj_subtitle">Bestem hvordan innholdet vises på skjermene dine</string>
     <string name="setup_proj_step1">1. Koble projektoren eller den andre skjermen til datamaskinen</string>
     <string name="setup_proj_step2">2. Åpne Innstillinger og gå til fanen Projeksjon</string>
-    <string name="setup_proj_step3">3. Sett antall projeksjonsvinduer slik at det passer med skjermene dine</string>
-    <string name="setup_proj_step4">4. Velg en målskjerm og en visningsmodus for hver skjerm. Sett så nedtrekkslistene for Bibel og Sanger til språket du vil vise — å velge en verdi slår på det innholdet på denne skjermen. Å krysse av for andre faner (Bilder, Media osv.) fungerer på samme måte.</string>
     <string name="setup_proj_step5">5. Klikk Identifiser for å bekrefte hvilken skjerm som er hvilken</string>
     <string name="setup_proj_tip">Alle faner — Sanger, Bibel, Lysbilder, Media, Lerret — sender innhold til det samme projeksjonsvinduet. Innstillingene per fane styrer skrifter, bakgrunner og oppsett.</string>
     <string name="setup_proj_tip2">Du kan åpne og lukke projeksjonsvinduet når som helst fra Vis-menyen eller med hurtigtasten.</string>
@@ -2178,7 +1730,6 @@
     <string name="atem_description">Last opp undertekstboks-animasjoner til mediepoolen på en Blackmagic ATEM-mikser. Bruk Bitfocus Companion til å slå DSK av og på.</string>
     <string name="atem_host">ATEM IP-adresse</string>
     <string name="atem_host_hint">f.eks. 192.168.1.100</string>
-    <string name="atem_port">Port</string>
     <string name="atem_test_connection">Test tilkobling</string>
     <string name="atem_test_connection_hint">Trykk Test tilkobling for å hente videoformat og FPS automatisk fra ATEM-en.</string>
     <string name="atem_status_connected">Tilkoblet</string>
@@ -2195,7 +1746,6 @@
     <string name="atem_render_resolution">Renderoppløsning</string>
     <string name="atem_render_width">Bredde</string>
     <string name="atem_render_height">Høyde</string>
-    <string name="atem_clip_fps">Klipp-FPS (samme som ATEM-videostandarden)</string>
     <string name="atem_clip_fps_hint">25, 30, 50 eller 60</string>
     <string name="atem_capacity_equal">Klippkapasitet: %1$d banker, hver på inntil %2$d bilder (≈%3$s s) ved %4$s fps</string>
     <string name="atem_capacity_mixed">Klippkapasitet: %1$d banker, inntil %2$s bilder ved %3$s fps</string>
@@ -2224,7 +1774,6 @@
     <string name="atem_mode_still">Stillbilde (ett bilde)</string>
     <string name="atem_mode_clip">Klipp (hele animasjonen)</string>
     <string name="atem_slot">Plass</string>
-    <string name="atem_slot_range">Tilgjengelig: 1–%1$d</string>
     <string name="atem_upload">Last opp</string>
     <string name="atem_uploading">Laster opp …</string>
     <string name="atem_preparing">Forbereder bilder …</string>
@@ -2233,7 +1782,6 @@
     <string name="atem_clip_capacity_info">klippet trenger %1$d av %2$d bilder (maks ≈%3$s s)</string>
     <string name="atem_clip_too_long">Klippet trenger %1$d bilder, men plass %2$d rommer inntil %3$d (≈%4$s s) — korte ned klippet, senk fps, eller øk klipptildelingen i ATEM Software Control</string>
     <string name="atem_ready">Klar til opplasting</string>
-    <string name="atem_upload_done">Opplastingen er fullført</string>
     <string name="atem_upload_error">Opplastingen mislyktes: %1$s</string>
     <string name="atem_uploading_image">Laster opp %1$s → bildeplass %2$d</string>
     <string name="atem_uploading_video">Laster opp %1$s → videoplass %2$d</string>
@@ -2241,7 +1789,6 @@
     <string name="atem_detected_video_mode">Funnet: %1$s</string>
     <string name="atem_loading_slots">Laster plasser …</string>
     <string name="atem_slots_error">Kunne ikke laste plassene: %1$s</string>
-    <string name="atem_not_configured">Sett opp ATEM i Innstillinger for å aktivere denne knappen.</string>
     <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_lower_third_uploads">Opplastinger av undertekstboks</string>
     <string name="atem_slot_unnamed">Plass %1$d</string>
@@ -2252,7 +1799,6 @@
     <!-- Companion Satellite surface (ChurchPresenter as a Bitfocus Companion Satellite client) -->
     <string name="tab_companion_surface">Companion</string>
     <string name="companion_satellite_settings">Companion Satellite</string>
-    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
     <string name="companion_satellite_description">Koble til en Bitfocus Companion på nettverket ditt som en Satellite-flate, og trykk på knappene derfra inne i ChurchPresenter.</string>
     <string name="companion_satellite_host">Vert</string>
     <string name="companion_satellite_host_hint">f.eks. 192.168.1.50</string>
@@ -2274,7 +1820,6 @@
     <string name="companion_satellite_connect">Koble til</string>
     <string name="companion_satellite_disconnect">Koble fra</string>
     <string name="companion_satellite_no_host">Sett en Companion-vert i Innstillinger → Companion Satellite for å koble til.</string>
-    <string name="companion_satellite_status_connected">Tilkoblet</string>
     <string name="companion_satellite_status_connecting">Kobler til …</string>
     <string name="companion_satellite_status_disconnected">Frakoblet</string>
     <string name="companion_satellite_status_error">Feil: %1$s</string>
@@ -2285,8 +1830,6 @@
     <string name="companion_satellite_remove_connection">Fjern tilkobling</string>
 
     <!-- ATEM Media Upload Triggers (Server tab / Bitfocus Companion) -->
-    <string name="companion_atem_triggers">Utløsere for ATEM-medieopplasting</string>
-    <string name="companion_atem_triggers_desc">Kopier en URL inn i en HTTP-knapp i Bitfocus Companion for å laste denne undertekstboksen opp til en ATEM-medieplass. Legg inn en forsinkelse i Companion før du utløser key-en — opplastinger tar noen sekunder.</string>
     <string name="companion_atem_upload_note">⚠ Medieopplastinger tar noen sekunder.</string>
     <string name="companion_atem_clip_key_note">Klipp + key laster opp klippet, venter til ATEM-en er ferdig med å behandle det, og slår så key-en på automatisk — ingen forsinkelse i Companion trengs. (Bare klipp, med en egen key, trenger fortsatt en manuell forsinkelse.)</string>
     <string name="companion_atem_still_key">Stillbilde + key</string>
@@ -2297,10 +1840,8 @@
     <string name="companion_atem_key_desc">Utløs key-en for seg (oppstrøms eller nedstrøms, etter ATEM-innstillingene).</string>
     <string name="companion_atem_key_on">Kopier «Key på»</string>
     <string name="companion_atem_key_off">Kopier «Key av»</string>
-    <string name="companion_atem_not_configured">Sett opp ATEM-verten i Innstillinger › ATEM for å aktivere opplastingsutløsere.</string>
     <string name="companion_lt_copy_hide">Skjul undertekstboks</string>
     <string name="companion_lt_takedown_desc">Skjul undertekstboks fjerner bare en undertekstboks. Tøm skjermen fjerner alt innhold (bibel, sang, undertekstboks …).</string>
-    <string name="bible_stt_heard">Hørt</string>
     <string name="bible_stt_listening">Lytter …</string>
     <string name="bible_stt_auto_follow">Følg automatisk</string>
     <string name="bible_stt_auto_follow_hint">Åpne den siste opplesne henvisningen automatisk</string>
@@ -2347,13 +1888,6 @@
     <string name="bible_engine_host">Motorvert</string>
     <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Hjelp utviklerne — vis tilbakemeldingsknapper på Bibel-fanen (feil avsnitt / for tidlig / avsnitt gikk tapt)</string>
-    <string name="dictionary_settings_word_text">Ord (original)</string>
-    <string name="dictionary_settings_reference_text">Henvisning og translitterasjon</string>
-    <string name="dictionary_settings_definition_text">Definisjon</string>
-    <string name="dictionary_settings_kjv_usage">KJV-bruk</string>
-    <string name="dictionary_settings_card_background">Kortbakgrunn</string>
-    <string name="dictionary_settings_opacity">Tetthet</string>
-    <string name="dictionary_settings_transitions">Overgangsinnstillinger</string>
     <string name="dictionary_back">Tilbake</string>
     <string name="dictionary_forward">Fram</string>
     <string name="dictionary_switch_language">Bytt ordbokspråk</string>
@@ -2383,7 +1917,6 @@
     <string name="ccli_number">CCLI-nummer</string>
 
     <!-- Planning Center Online integration -->
-    <string name="planning_center_settings">Planning Center</string>
     <string name="planning_center_description">Importer sanger, medier og møteorden fra en Planning Center Services-plan inn i programmet.</string>
     <string name="planning_center_connect">Koble til Planning Center</string>
     <string name="planning_center_disconnect">Koble fra</string>
@@ -2454,28 +1987,16 @@
     <string name="tooltip_strikethrough">Gjennomstreking</string>
     <string name="bible_custom_name">Navn</string>
     <string name="bible_custom_abbreviation">Forkortelse</string>
-    <string name="bible_custom_name_hint">La stå tomt for å bruke navnet fra modulen</string>
     <string name="bible_translations">Oversettelser</string>
     <string name="bible_miscellaneous">Diverse</string>
-    <string name="bible_block_and_transition">Blokk &amp; overgang</string>
-    <string name="bible_editing">Redigering</string>
-    <string name="bible_verse_text">Versetekst</string>
-    <string name="bible_reference_element">Henvisning</string>
-    <string name="bible_alignment">Justering</string>
-    <string name="bible_reference_position">Henvisningens plassering</string>
     <string name="bible_font">Skrift</string>
-    <string name="bible_size">Størrelse</string>
     <string name="bible_letter_spacing">Tegnavstand</string>
     <string name="bible_word_spacing">Ordavstand</string>
-    <string name="bible_text_transform">Teksttransformasjon</string>
     <string name="bible_text_transform_uppercase">STORE BOKSTAVER</string>
     <string name="bible_text_transform_lowercase">små bokstaver</string>
     <string name="bible_text_transform_capitalize">Stor Forbokstav</string>
-    <string name="bible_reset_element">Tilbakestill</string>
     <string name="bible_preview_full_screen">Forhåndsvisning fullskjerm</string>
     <string name="bible_preview_lower_third">Forhåndsvisning nedre tredjedel</string>
-    <string name="bible_scope_full_screen">Fullskjerm · %1$d × %2$d</string>
-    <string name="bible_scope_lower_third">Nedre tredjedel · %1$d × %2$d</string>
     <string name="bible_preview_sample_verse">For så høyt har Gud elsket verden at han ga sin Sønn, den enbårne.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Legg til en oversettelse for å se den her</string>
@@ -2491,23 +2012,13 @@
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Tittellysbilde</string>
     <string name="song_show_on_title_slide">Vis på tittellysbildet</string>
-    <string name="song_scope_title_slide">Tittellysbilde · %1$d × %2$d</string>
     <string name="song_preview_title_slide">Forhåndsvisning av tittellysbilde</string>
     <string name="song_chunk_verse">1 vers</string>
     <string name="song_chunk_line">1 linje</string>
-    <string name="song_preview_chords">Akkorder</string>
-    <string name="song_preview_label">Forhåndsvisning</string>
     <string name="song_preview_sample_title">Amazing Grace</string>
-    <string name="song_languages">Sangspråk</string>
-    <string name="song_language_single">1 · Ett</string>
-    <string name="song_language_bilingual">2 · Tospråklig</string>
-    <string name="song_lyrics_layout">Tekstoppsett</string>
-    <string name="song_transition_and_markers">Overgang &amp; markører</string>
     <string name="song_element_look_ahead">Forhåndsvisning</string>
     <string name="song_chunk">Avsnitt</string>
     <string name="song_language_scope">Språk</string>
-    <string name="song_style_language">Stil</string>
-    <string name="song_preview_look_ahead">Forhåndsvisning</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Bakgrunn</string>
     <string name="song_background_full_screen">Fullskjerm</string>
@@ -2554,7 +2065,6 @@
     <string name="background_following_default">Følger standard</string>
     <string name="background_use_default">Bruk standard</string>
     <string name="background_set_explicitly">Satt separat for denne flaten</string>
-    <string name="background_copy_look_to">Kopier dette utseendet til</string>
     <string name="background_type_caption">Type</string>
     <string name="background_color_caption">Farge</string>
     <string name="background_image_file">Bildefil</string>
@@ -2583,95 +2093,27 @@
     <string name="shortcut_description_quick_background_10">Hurtigbakgrunn 10</string>
 
     <!-- Per-output Customize dialog -->
-    <string name="customize">Overskriv stiler</string>
-    <string name="customize_count">Overskrevet · %1$d</string>
-    <string name="customize_tooltip_overwritten">Overskrevet på denne skjermen: %1$s</string>
-    <string name="customize_tooltip_none">Følger de globale innstillingene — klikk for å gi denne skjermen egne stiler</string>
-    <string name="customize_dialog_title">Visningsinnstillinger — %1$s</string>
-    <string name="customize_dialog_subtitle">%1$d av %2$d tilpasset</string>
-    <string name="customize_pane_header">%1$s på denne skjermen</string>
-    <string name="customize_hint_on">Bruker innstillinger spesifikke for denne skjermen</string>
-    <string name="customize_hint_off">Følger de globale innstillingene — slå på for å tilpasse</string>
-    <string name="customize_hint_stage_on">Denne skjermen har sitt eget soneoppsett</string>
-    <string name="customize_hint_stage_off">Slå på for å gi denne skjermen et soneoppsett</string>
-    <string name="customize_hint_lower_third">Formen på denne skjermens nedre tredjedel</string>
-    <string name="customize_reset_to_global">Tilbakestill til globalt</string>
-    <string name="customize_done">Ferdig</string>
-    <string name="customize_screen_heading">Skjerm</string>
-    <string name="customize_screen_geometry">%1$d × %2$d · %3$s</string>
-    <string name="customize_screen_geometry_unknown">%1$s</string>
-    <string name="customize_motion">Bevegelse</string>
-    <string name="customize_layout">Oppsett</string>
-    <string name="customize_marker">Markør</string>
-    <string name="customize_bilingual">Tospråklig</string>
-    <string name="customize_no_preview">Ingen forhåndsvisning for denne delen</string>
-    <string name="output_profile_none">Ingen</string>
-    <string name="output_profile_new">Ny profil</string>
-    <string name="output_profile_create_default">Opprett standardprofil</string>
-    <string name="output_profile_create_default_tooltip">Legg til en ny profil med appens fabrikkstandardstil, som en reserve å falle tilbake på</string>
     <string name="output_profile_duplicate">Dupliser</string>
-    <string name="output_profile_rename">Gi nytt navn</string>
     <string name="output_profile_delete">Slett</string>
     <string name="output_profile_delete_confirm">Slette «%1$s»? Dette kan ikke angres.</string>
     <string name="output_profile_delete_blocked">Kan ikke slette «%1$s» — den brukes fortsatt av: %2$s</string>
-    <string name="output_profile_usage_count">Brukes av %1$d utgang(er)</string>
-    <string name="output_profile_name_hint">Profilnavn</string>
     <string name="output_profile_picker_tooltip">Utgangsprofil</string>
     <string name="output_profile_swap_menu_tooltip">Bytt utgangsprofil</string>
     <string name="output_profile_new_name_default">Ny profil</string>
-    <string name="output_profile_display_mode">Visningsmodus</string>
-    <string name="output_profile_content">Innhold</string>
     <string name="output_profile_empty_state">Opprett en profil for å begynne å style den</string>
-    <string name="output_profile_preview_resolution_tooltip">Kun forhåndsvisningens form — endrer ikke utgangens faktiske oppløsning</string>
     <string name="customize_bible">Bibel</string>
     <string name="customize_songs">Sanger</string>
-    <string name="customize_lower_third_vertical_hint">En stripe langs siden i stedet for et bånd nederst.</string>
-    <string name="customize_lower_third_orientation">Retning</string>
     <string name="customize_group_verse_text">Versetekst</string>
-    <string name="customize_group_lyrics">Sangtekst</string>
-    <string name="customize_group_typography">Typografi</string>
     <string name="customize_group_reference">Referanse</string>
-    <string name="customize_group_chords">Akkorder</string>
-    <string name="customize_group_title_number">Tittel og nummer</string>
-    <string name="customize_group_margins">Marger</string>
-    <string name="customize_group_word">Ord</string>
-    <string name="customize_group_definition">Definisjon</string>
-    <string name="customize_group_card">Kort</string>
-    <string name="customize_group_background">Skjermbakgrunn</string>
-    <string name="customize_group_background_lower_third">Bakgrunn for nedre tredjedel</string>
-    <string name="customize_background_source">Bakgrunn</string>
-    <string name="customize_background_follow">Følg Bakgrunn-fanen</string>
-    <string name="customize_background_own">Egendefinert</string>
     <string name="customize_background_type">Type</string>
-    <string name="customize_background_image">Bilde</string>
-    <string name="customize_background_video">Video</string>
     <string name="customize_type_color">Farge</string>
     <string name="customize_type_image">Bilde</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Gjennomsiktig</string>
     <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_style">Stil</string>
-    <string name="customize_letter_spacing">Tegnavstand</string>
-    <string name="customize_word_spacing">Ordavstand</string>
-    <string name="customize_text_transform">Teksttransformasjon</string>
-    <string name="customize_transform_none">Ingen</string>
-    <string name="customize_transform_uppercase">AA</string>
-    <string name="customize_transform_lowercase">aa</string>
-    <string name="customize_transform_capitalize">Aa</string>
-    <string name="customize_margin_vertical">Øverst / nederst</string>
-    <string name="customize_margin_horizontal">Venstre / høyre</string>
     <string name="customize_show_abbreviation">Forkortelse</string>
-    <string name="customize_reference_above">Over</string>
-    <string name="customize_reference_below">Under</string>
-    <string name="customize_card_background">Bakgrunn</string>
     <string name="customize_background_opacity">Dekkevne</string>
-    <string name="customize_align_left">Venstre</string>
-    <string name="customize_align_center">Midtstilt</string>
-    <string name="customize_align_right">Høyre</string>
-    <string name="customize_align_top">Øverst</string>
-    <string name="customize_align_middle">Midten</string>
-    <string name="customize_align_bottom">Nederst</string>
     <string name="slate_theme">Skifer-tema</string>
     <string name="sand_theme">Sand-tema</string>
     <string name="plum_theme">Plomme-tema</string>
@@ -2709,13 +2151,9 @@
     <string name="setup_summary_bible_value">%1$d installert</string>
     <string name="setup_summary_songs_value">%1$d bøker · %2$d sanger</string>
     <string name="background_lottie_option">Lottie</string>
-    <string name="lower_third_animation">Animasjon av nedre tredjedel</string>
-    <string name="lower_third_animation_use_lottie">Animer båndet med en Lottie-mal</string>
     <string name="lower_third_animation_file">Mal</string>
     <string name="lower_third_animation_none">Ingen mal valgt</string>
     <string name="lower_third_animation_generate">Lag…</string>
-    <string name="lower_third_animation_clear">Fjern mal</string>
-    <string name="lottie_files_filter">Lottie-filer</string>
     <string name="bible_lottie_gen_window_title">Generator for nedre tredjedeler</string>
     <string name="song_lottie_unsupported_note">Malen bestemmer oppsettet og hvor tittelen står. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking, ordavstand, forhåndsvisning av neste og akkorder gjelder ikke.</string>
     <string name="bible_lottie_unsupported_note">Malen bestemmer oppsettet, plasseringen av referansen og hvordan to språk deler båndet. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking og ordavstand gjelder ikke.</string>
@@ -2776,20 +2214,13 @@
     <string name="songs_search_focus_hint">Tastaturet er i søkefeltet — klikk her for å slå på tastaturstyring igjen</string>
     <string name="bible_preview_sample_verse_short">Jesus gråt.</string>
     <string name="bible_preview_sample_verse_long">Jesus sa til dem: Sannelig, sannelig, jeg sier dere: Hvis dere ikke spiser Menneskesønnens kjøtt og drikker hans blod, har dere ikke livet i dere.</string>
-    <string name="preview_sample">Eksempel</string>
     <string name="preview_sample_short">Kort</string>
     <string name="preview_sample_medium">Middels</string>
     <string name="preview_sample_long">Lang</string>
-    <string name="preview_on_screen">Forhåndsvis på skjermen</string>
-    <string name="preview_on_screen_stop">Stopp forhåndsvisning</string>
     <string name="song_background_applies_to">Gjelder for</string>
     <string name="song_background_whole_song">Hele sangen</string>
     <string name="song_background_untitled_section">Del uten tittel</string>
     <string name="song_insert_slide_break">Lysbildeskift</string>
-    <string name="song_auto_repeat_chorus">Gjenta refrenget etter hvert vers</string>
-    <string name="customize_element_slide">Lysbilde</string>
-    <string name="lower_third_band">Navneskiltbånd</string>
-    <string name="customize_tooltip_separator">, </string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI-utganger</string>
     <string name="ndi_outputs_help">Virtuelle utganger sendt over nettverket som NDI®-kilder — velg en i OBS, vMix eller en mikser. Alfamodus bærer ekte gjennomsiktighet, så et navneskilt kommer allerede keyet.</string>
@@ -2927,50 +2358,18 @@
     <string name="bilingual_grid_2x2">2x2</string>
     <string name="bilingual_grid_3x1">3x1</string>
     <string name="bilingual_grid_4x1">4x1</string>
-    <string name="bilingual_left_right_short">V / H</string>
-    <string name="bilingual_top_bottom_short">Ø / N</string>
-    <string name="content_song_languages_all_selected">Alle sanger</string>
-    <string name="content_song_languages_enabled">%1$d av %2$d språk aktivert</string>
-    <string name="content_song_languages_footer">Flere språk vises side ved side eller stablet, som angitt i sanginnstillingene.</string>
-    <string name="content_song_languages_header">Sangspråk</string>
     <string name="enter_translation_lyrics_here">Skriv inn teksten for språk %1$d her...</string>
     <string name="preview_output_mode_disabled_warning">Denne utgangen viser ikke dette innholdet for øyeblikket.</string>
-    <string name="preview_output_partial_translations_warning">Denne utgangen viser ikke alle språkene i stabelen din.</string>
-    <string name="preview_output_single_language_warning">Denne utgangen viser bare ett språk, ikke begge.</string>
-    <string name="preview_settings_add_output">Legg til %1$s</string>
-    <string name="preview_settings_delete_group">Slett gruppe</string>
-    <string name="preview_settings_empty">Ingen grupper ennå, så alle utganger vises. Når du legger til en gruppe, vises bare utgangene du plasserer i grupper.</string>
-    <string name="preview_settings_group_title">Gruppe %1$d</string>
-    <string name="preview_settings_hide_group">Skjul</string>
-    <string name="preview_settings_move_down">Flytt ned</string>
-    <string name="preview_settings_move_up">Flytt opp</string>
-    <string name="preview_settings_new_group">Ny gruppe</string>
-    <string name="preview_settings_remove_output">Fjern fra gruppe</string>
     <string name="preview_settings_show_labels">Vis utgangsetiketter</string>
     <string name="preview_settings_show_modes">Vis visningstype</string>
-    <string name="screen_lang_language_n">Språk %1$d</string>
     <string name="song_add_translation">Legg til et språk</string>
     <string name="song_fourth_language">Språk 4</string>
-    <string name="song_language_all">Alle</string>
     <string name="song_language_fourth">Språk 4</string>
-    <string name="song_language_scope_label">Språk</string>
     <string name="song_language_third">Språk 3</string>
     <string name="song_pane_translation">Språk %1$d</string>
-    <string name="song_remove_translation">Fjern dette språket</string>
     <string name="song_third_language">Språk 3</string>
-    <string name="song_translation_follows_primary">Dette språket vises nøyaktig som Språk 1. Slå på egen stil for å gi det en annen skrift, størrelse eller farge.</string>
     <string name="song_translation_label">Språknavn</string>
-    <string name="song_translation_own_style">Gi dette språket sin egen stil</string>
     <string name="song_translation_title">Tittel for Språk %1$d</string>
     <string name="tooltip_preview_settings">Forhåndsvisningsinnstillinger</string>
-    <string name="media_subtitle_settings">Undertekstinnstillinger</string>
     <string name="media_subtitle_settings_hint">Gjelder for SRT/WebVTT-undertekstfiler, som appen tegner selv. Et innebygd spor eller en ASS/SSA/SUB-fil beholder VLCs eget utseende.</string>
-    <string name="media_subtitle_text_color">Tekstfarge</string>
-    <string name="media_subtitle_background_color">Bakgrunnsfarge</string>
-    <string name="media_subtitle_font">Skrift</string>
-    <string name="media_subtitle_size">Størrelse</string>
-    <string name="media_subtitle_position">Plassering</string>
-    <string name="media_subtitle_opacity">Dekkevne:</string>
-    <string name="media_subtitle_max_lines">Maks antall linjer</string>
-    <string name="tooltip_media_subtitle_settings">Visningsinnstillinger for undertekster</string>
 </resources>

@@ -34,7 +34,6 @@
     <string name="revert">Revino</string>
     <string name="save_changes">Salvează modificările</string>
     <string name="done">Gata</string>
-    <string name="saved">%1$s salvate</string>
     <string name="save_failed">%1$s nu a putut fi salvată</string>
     <string name="new_song_book">Carte de Cântări Nouă</string>
     <string name="new_song_book_subhead">O colecție în care pot fi grupate cântările</string>

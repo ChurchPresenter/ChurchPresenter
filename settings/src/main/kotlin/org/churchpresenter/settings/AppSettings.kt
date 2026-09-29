@@ -115,7 +115,9 @@ data class AppSettings(
     val songBpm: Map<String, Int> = emptyMap(), // songId -> metronome BPM (0 = off), not stored in the .song file
     val songCapo: Map<String, Int> = emptyMap(), // songId -> capo fret (0 = none), not stored in the .song file
     val songColOrder: List<String> = emptyList(),
-    val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer"),
+    val songHiddenCols: Set<String> = setOf(
+        SongColumnId.TUNE, SongColumnId.PLAY_COUNT, SongColumnId.AUTHOR, SongColumnId.COMPOSER,
+    ),
     val setupWizardShown: Boolean = false,
     val analyticsReportingEnabled: Boolean = true,
     val participateInPrereleases: Boolean = false,

@@ -1,387 +1,154 @@
 # ChurchPresenter Development Guide
 
-> **Comprehensive documentation for coding standards, cleanup tasks, and development practices**
+> Workflow, verification and contributing. The style rules themselves are in
+> [CODING_STANDARDS.md](CODING_STANDARDS.md); agent-specific rules, architecture and the test rules
+> are in [AGENT.md](AGENT.md).
 >
-> Last Updated: March 8, 2026
-
----
-
-## 📚 Table of Contents
-
-1. [Zero Tolerance Policy](#-zero-tolerance-policy)
-2. [Coding Standards](#-coding-standards)
-3. [Code Style Rules](#-code-style-rules)
-4. [String Management](#-string-management)
-5. [Cleanup TODO List](#-cleanup-todo-list)
-6. [Verification Commands](#-verification-commands)
-7. [Development Workflow](#-development-workflow)
-8. [Crash Reporting](#-crash-reporting)
-9. [Contributing](#-contributing)
+> Last updated: 2026-09-29
 
 ---
 
 ## 🎯 Zero Tolerance Policy
 
-The following are **NOT** acceptable in any commit:
+The following are **NOT** acceptable in any commit (each is explained in CODING_STANDARDS.md):
 
-❌ Wildcard imports (`import ... .*`)  
-❌ Hardcoded UI strings (`Text("Save")`)  
-❌ Magic strings in logic (`if (type == "song")`)  
-❌ Unnamed color values (`Color(0xFF123456)`)  
-❌ Material 2 components (`androidx.compose.material.*`)  
-❌ Legacy UI components (use Material 3 only)  
-❌ Unused imports (run "Optimize Imports")  
-❌ Debug print statements (`println()`, `print()`)  
-❌ Commented-out code blocks  
-❌ Fully qualified type names (`androidx.compose.ui.unit.Dp`)  
+❌ Wildcard imports (`import ... .*`)
+❌ Hardcoded UI strings (`Text("Save")`)
+❌ Magic strings in logic (`if (type == "song")`)
+❌ Unnamed color values (`Color(0xFF123456)`)
+❌ Material 2 components (`androidx.compose.material.*`, other than `material.icons`)
+❌ Text or emoji used as an icon (`Text("✕")`)
+❌ Unused imports
+❌ Debug print statements (`println()`, `print()`)
+❌ Commented-out code blocks
+❌ Fully qualified type names where an import would do (`androidx.compose.ui.unit.Dp`)
 
 **All violations must be fixed before merging!**
 
 ---
 
-## 📋 Coding Standards
+## 📝 Strings and constants
 
-### Import Rules
+**User-facing strings** go in `composeApp/src/jvmMain/composeResources/values/strings.xml` —
+English only; the other locales are managed separately (see AGENT.md). Modules with their own UI
+(`calendar`, `songlibrary`) keep their own `composeResources`; `converter` and `lottieGenerator` use
+a `ResourceBundle`-backed `Strings`.
 
-1. **NEVER** use wildcard imports (`import ... .*`)
-2. **ALWAYS** use explicit imports
-3. Group imports logically (Compose, Material, Resources, App)
-4. Remove unused imports before committing
-
-**Status:** ✅ All wildcard imports eliminated from codebase
-
-### Material Design Rules
-
-1. **ALWAYS** use Material 3 components
-2. **NEVER** use Material 2 or legacy components
-3. Import from `androidx.compose.material3.*` (not `material.*`)
-4. Use Material 3 icons: `androidx.compose.material.icons.*`
-
-**Examples:**
-
-```kotlin
-// ❌ WRONG - Material 2
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-
-// ✅ CORRECT - Material 3
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
-```
-
-### Code Cleanup Standards
-
-1. **Remove unused imports** - Run IDE "Optimize Imports" before committing
-2. **Remove unused functions/properties** - Or document why they're kept
-3. **Remove commented-out code** - Use version control instead
-4. **Fix compiler warnings** - Or suppress with justification
-5. **No debug print statements** - Use proper logging or remove
-
----
-
-## 🎨 Code Style Rules
-
-### Type Names in Parameters
-
-❌ **WRONG** - Fully qualified type names:
-```kotlin
-fun myFunction(width: androidx.compose.ui.unit.Dp = 120.dp)
-fun myFunction(color: androidx.compose.ui.graphics.Color = Color.Red)
-fun myRow(modifier: androidx.compose.ui.Modifier = Modifier)
-```
-
-✅ **CORRECT** - Import and use simple name:
-```kotlin
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.Modifier
-
-fun myFunction(width: Dp = 120.dp)
-fun myFunction(color: Color = Color.Red)
-fun myRow(modifier: Modifier = Modifier)
-```
-
-**Why**: Fully qualified names are redundant when imports exist, clutter code, and trigger IDE warnings ("Remove redundant qualifier name").
-
-### Import Organization
-
-```kotlin
-// Group 1: Compose Foundation
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
-
-// Group 2: Material 3
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
-
-// Group 3: Runtime & UI
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-
-// Group 4: Resources
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.save
-
-// Group 5: App Classes
-import org.churchpresenter.core.models.schedule.*
-import org.churchpresenter.app.churchpresenter.viewmodel.*
-```
-
----
-
-## 📝 String Management
-
-### User-Facing Strings
-
-**Location:** `composeApp/src/jvmMain/composeResources/values/strings.xml`
-
-**Pattern:**
-```kotlin
-// ❌ OLD (Never use)
-Text("Save")
-tooltip = "Move Up"
-Button(onClick = {}) { Text("Cancel") }
-
-// ✅ NEW (Always use)
-Text(stringResource(Res.string.save))
-tooltip = stringResource(Res.string.tooltip_move_up)
-Button(onClick = {}) { Text(stringResource(Res.string.cancel)) }
-```
-
-**Naming Convention:**
+Naming convention:
 - Actions: `action_save`, `action_delete`
 - Labels: `label_song_title`, `label_author`
 - Tooltips: `tooltip_move_up`, `tooltip_add_to_schedule`
 - Messages: `message_no_songs_found`
 - Errors: `error_file_not_found`
 
-### Technical Strings (Constants)
+A string that stops being referenced is deleted in the same change, from `values/` and from every
+`values-*/` (deleting a key is not translating it).
 
-**Location:** `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt`
-
-**Pattern:**
-```kotlin
-// ❌ OLD (Never use)
-if (type == "song") { ... }
-val ext = ".sps"
-if (mode == "light") { ... }
-
-// ✅ NEW (Always use)
-if (type == ContentType.SONG) { ... }
-val ext = FileConstants.SONG_FILE_EXTENSION
-if (mode == ThemeMode.LIGHT) { ... }
-```
-
-**Organization:**
-```kotlin
-object Constants {
-    object FileConstants {
-        const val SONG_FILE_EXTENSION = ".sps"
-        const val BIBLE_FILE_EXTENSION = ".spb"
-    }
-    
-    object ContentType {
-        const val SONG = "song"
-        const val BIBLE = "bible"
-    }
-}
-```
+**Technical strings** are constants:
+- `settings/src/main/kotlin/org/churchpresenter/settings/utils/Constants.kt` — anything persisted or
+  shared with the settings (keys, target types, sort keys, background types).
+- `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt` — the
+  app's own.
+- A closed set of ids that belongs to one feature gets its own small object next to it
+  (`SongColumnId`, `PcoItemType`).
 
 ---
 
-## 🧹 Cleanup TODO List
+## 🔍 Verification
 
-> Last audited: July 13, 2026 (scoped review of commits `67b49f16..HEAD`, 204 commits /
-> 2026-07-01 to 2026-07-13 — zero violations found; full-tree audit last confirmed clean at
-> `adf83cc3`, 2026-07-06)
-
-### Previously Flagged — Now Resolved ✅
-
-- [x] **PresenterManager.kt** — `selectedVerse`, `setSelectedVerse`, `togglePresenterWindow` are all actively used. Singular/plural verse API is intentional (singular derived from first element of plural list).
-- [x] **BibleSettingsTab.kt** — `availableFonts` parameter is actively used, passed to `FontSettingsDropdown`.
-- [x] **MediaTab.kt, PicturesTab.kt, AnnouncementsTab.kt** — All fully implemented. `modifier` parameter is actively used in each.
-- [x] Removed all Material 2 imports
-- [x] Most user-facing strings moved to strings.xml
-- [x] Technical strings moved to Constants.kt
-- [x] No significant commented-out code blocks found
-
-### Pending ⚠️
-
-| Item | Count | Files | Notes |
-|------|-------|-------|-------|
-| Wildcard imports | 0 | — | All expanded to explicit imports ✅ |
-| Debug prints | ~8 | VideoPlayer.kt, LowerThirdSettingsTab.kt, WebsitePresenter.kt | All `System.err.println` for error diagnostics — kept intentionally |
-| Non-null assertions (`!!`) | 0 | — | Replaced with smart casts and `getValue()` ✅ |
-| Hardcoded UI strings | 1, and it is fine | `ProjectionSettingsTab.kt:1246` | `Text("$w×$h")` renders `1920×1080` — digits and a multiplication sign, identical in every locale. **Re-audited 2026-08-06 with the corrected grep below; three real violations found and fixed since this row last said "0"** — `WebTab.kt` ×2 (`0375f909`) and `BibleTab.kt`'s Ctrl/Shift selection hint. All three were **instructions**, the only sentence explaining how something works, rather than labels. |
-| Fully qualified `androidx.compose.*` | 0 | — | 20 sites removed 2026-07-28; the verification grep below returns nothing ✅ |
-| Fully qualified `java.*` where the import exists | 0 | — | 27 redundant sites removed 2026-07-28 ✅ |
-| Fully qualified `java.*` with no import | ~164 | Widespread | **Kept deliberately** — see the decision log |
-
-### Decision Log
-
-**Kept intentionally:**
-- Fully qualified `java.*` references that have **no** matching import (~164, audited 2026-07-28).
-  Unlike the redundant ones, these are not automatic: many exist to disambiguate against a Compose
-  type of the same simple name — `java.awt.Window` (×8) against Compose's `Window`,
-  `java.awt.image.BufferedImage` (×7) — and
-  `java.awt.Toolkit.getDefaultToolkit().systemClipboard` is the settled form for the clipboard
-  one-liner in five files. Shortening them would need a per-site judgement and could make the code
-  less clear, not more. The zero-tolerance rule is about writing the long form when an import
-  already binds the name; that count is now 0.
-- Singular/plural verse API in PresenterManager — convenience accessors
-- `System.err.println` in VideoPlayer/WebsitePresenter/LowerThirdSettingsTab — error diagnostics for VLC/JCEF/WebView issues
-- Emoji strings — not translatable, no benefit to moving to resources
-- `println` in the PresentationEngine module's `DumpKeynote.kt`/`DumpTiming.kt`/`MakeSampleDeck.kt` — these are CLI diagnostic tools (`dumpKeynote`/`dumpTiming`/`makeSampleDeck` gradle tasks) whose entire purpose is printing to stdout, not stray debug output
-- Hardcoded `"%"` suffix on dynamic values (~14 sites across `SourcePropertiesPanel.kt`,
-  `BackgroundSettingsTab.kt`, `QARemoteDialog.kt`, `STTSettingsDialog.kt`, `DictionarySettingsTab.kt`,
-  `MediaTab.kt`, `UpdateAvailableDialog.kt`) — **kept because the percent sign is identical across all
-  14 supported locales**, so extracting it buys no translation correctness, only consistency with
-  `unit_s`/`unit_ms`, at the cost of threading a resource through fourteen call sites in seven files.
-
-  > **The tooling reason previously recorded here was wrong and has been removed.** This entry used to
-  > say a `unit_percent` extraction had been *attempted* on 2026-07-13 and abandoned because
-  > `./gradlew compileKotlinJvm` reproducibly failed with `Unresolved reference` on any new string
-  > resource in this dev environment, cause never found. **That is not true of this environment.** Two
-  > separate changes have since added new strings to `values/strings.xml` and compiled green first
-  > try — `web_snapshot_waiting` and `web_snapshot_screen_recording_hint` (commit `0375f909`), and
-  > `bible_verse_selection_hint` — and `strings.xml` has been edited by dozens of commits besides.
-  > Whatever happened that day was local and transient.
-  >
-  > It is left recorded rather than silently deleted because the false version was actively harmful: a
-  > documented "adding a string resource does not compile here" is a reason not to extract *any*
-  > hardcoded string, and #184 and #212 both found user-facing English literals — each one the only
-  > explanation of its kind in the UI — that should have been extracted long before. **A decision-log
-  > entry that blames the tooling deters far more work than the one item it is filed against.**
-- `CompanionSatelliteViewModel` passed as a parameter into `CompanionSurfaceTab`/`CompanionSurfacePanel` (added 2026-07-06, commit `ff9e1ef5`) — a new instance of the same already-documented `MainDesktop.kt` top-down ViewModel wiring, not a fresh isolated violation
-
----
-
-## 🔍 Verification Commands
-
-### Before Every Commit
+### Before every commit
 
 ```bash
-# Check for wildcard imports (should return 0)
-grep -r "import.*\.\*" --include="*.kt" composeApp/src/ | wc -l
-
-# Check for Material 2 usage (should return 0)
-grep -r "import androidx.compose.material\.[^3]" --include="*.kt" composeApp/src/ | wc -l
-
-# Check for debug prints (should return 0)
-grep -rE "(println|print\()" --include="*.kt" composeApp/src/jvmMain/kotlin/ | wc -l
-
-# Check for unused code (review output)
-./gradlew compileKotlinJvm --no-daemon 2>&1 | grep -E "(Unused|never used)"
+bash cleanup_check.sh          # wildcard, Material 2, prints, FQN, unused-code counts; exits non-zero on failure
+./gradlew :composeApp:detekt   # CI's first gate — run it last
 ```
 
-### Detailed Checks
+`cleanup_check.sh` scans `composeApp/src/` only. For a module, run its own `detekt` task.
+
+### Detailed checks
 
 ```bash
-# Find potential hardcoded strings.
-#
-# The old form of this command was `grep -r 'Text("'`, which is wrong in both directions: it matches
-# `call.respondText(` and `Frame.Text(` (server payloads, not UI — 50 of its 51 hits), and it misses
-# any literal that is not the FIRST argument to `Text(`. The BibleTab selection hint that PR #213
-# extracted lived inside a conditional — `Text(if (active) resStr else "Ctrl+Click…")` — so no
-# variation of that grep would ever have reported it. Grep the *literals*, then read them.
+# Hardcoded UI strings. Grep the *literals*, then read them — a literal that is not the first
+# argument to Text( (inside a conditional, a label =, a supporting =) is what the simple grep misses.
 grep -rnE '(^|[^a-zA-Z.])Text\("[^"]' --include="*.kt" composeApp/src/jvmMain/kotlin/ \
   | grep -v stringResource | grep -vE 'respondText|Frame\.Text' | grep -vE 'Text\("[^a-zA-Z]*"'
 
-# Literals anywhere in a composable call, which is what the above misses. Noisier; skim it.
-# Sentence-shaped literals are the ones that matter: every violation found so far has been an
-# instruction ("Ctrl+Click to toggle…", "If this persists, grant Screen Recording permission…"),
-# never a one-word label.
+# Sentence-shaped literals anywhere in a tab. Noisier; skim it. Every violation found so far has
+# been an instruction, never a one-word label.
 grep -rnE '"[A-Z][a-z]+ [a-z]+ [^"]*"' --include="*.kt" \
   composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/tabs/ \
   | grep -v stringResource
 
-# Find unnecessary non-null assertions
-grep -r "!!" --include="*.kt" composeApp/src/jvmMain/kotlin/
+# Non-null assertions
+grep -rnE '[A-Za-z0-9_)\]]!!' --include="*.kt" composeApp/src/jvmMain/kotlin/
 
-# Find fully qualified type names
-grep -r "androidx\\.compose\\.[a-z]*\\.[a-zA-Z]*\\.[A-Z]" --include="*.kt" composeApp/src/
+# Text used as an icon
+grep -rnE 'Text\("[^a-zA-Z0-9" %$]{1,2}"' --include="*.kt" composeApp/src/jvmMain/kotlin/
+
+# Unused string resources (keys in values/strings.xml never referenced from Kotlin)
+comm -23 \
+  <(grep -oE '<(string|plurals|string-array) name="[^"]+"' composeApp/src/jvmMain/composeResources/values/strings.xml | sed -E 's/.*name="//;s/"//' | sort -u) \
+  <(git grep -hoE '(Res\.(string|plurals|array)\.|generated\.resources\.)[A-Za-z0-9_]+' -- '*.kt' | sed -E 's/.*\.//' | sort -u)
 ```
 
-### Cleanup Report Script
+### Audit status
 
-Create `cleanup_check.sh`:
-```bash
-#!/bin/bash
-echo "=== ChurchPresenter Code Quality Report ==="
-echo ""
-echo "Wildcard imports: $(grep -r 'import.*\.\*' --include='*.kt' composeApp/src/ | wc -l)"
-echo "Material 2 imports: $(grep -r 'import androidx.compose.material\.[^3]' --include='*.kt' composeApp/src/ | wc -l)"
-echo "Debug prints: $(grep -rE '(println|print\()' --include='*.kt' composeApp/src/jvmMain/kotlin/ | wc -l)"
-echo "Unused imports: $(./gradlew compileKotlinJvm --no-daemon 2>&1 | grep 'Unused import' | wc -l)"
-echo "Unused parameters: $(./gradlew compileKotlinJvm --no-daemon 2>&1 | grep 'Parameter.*never used' | wc -l)"
-echo "Unused functions: $(./gradlew compileKotlinJvm --no-daemon 2>&1 | grep 'Function.*never used' | wc -l)"
-echo "Unused properties: $(./gradlew compileKotlinJvm --no-daemon 2>&1 | grep 'Property.*never used' | wc -l)"
-echo ""
-echo "=== All counts should be 0 or near 0 ==="
-```
+> Last audited: 2026-09-29, whole tree at the `housekeeping` branch.
 
-Run with: `bash cleanup_check.sh`
+| Item | Count | Notes |
+|------|-------|-------|
+| Wildcard imports | 0 | whole repo ✅ |
+| Material 2 imports | 0 | whole repo ✅ |
+| `println` in `composeApp` | 0 | ✅ |
+| `System.err.println` in `composeApp` | 84 | error diagnostics (VLC, JCEF, cameras, NDI/OMT, server); see the decision log |
+| Fully qualified `androidx.compose.*` in code | 0 | whole repo, excluding imports, `@OptIn` and KDoc ✅ |
+| Fully qualified names where the import already exists | 0 | ✅ |
+| `!!` in `composeApp` | 3 | `CrosswordData.kt` — pending |
+| Unused string resources | 0 | ✅ |
+| Hardcoded UI strings | known exceptions only | `Text("$w×$h")` resolutions; remote-activity toast titles built in `server/*Routes.kt` (`"Song $number"`, `"Slide ${n}"`) — pending, they are composed off the UI thread |
+| Emoji used as icons | pending | the icon maps in `ScheduleItemDisplay`, `ThemeSwitcher`, `RemoteActivityToast`, `ThemeSegmentedButton` and `BibleTab`'s 📖 — need icon assets |
+
+### Decision log
+
+**Kept intentionally:**
+- Fully qualified `java.*` references that have **no** matching import. Many disambiguate against a
+  Compose type of the same simple name (`java.awt.Window` vs Compose's `Window`,
+  `java.awt.image.BufferedImage`); `java.awt.Toolkit.getDefaultToolkit().systemClipboard` is the
+  settled clipboard one-liner. The rule is about the long form where an import already binds the
+  name.
+- `System.err.println` for error diagnostics in media/web/capture/server code — they are the only
+  trace of a native library failing on an operator's machine.
+- `println` in the CLI tools (`presentation-engine` `DumpKeynote`/`DumpTiming`/`MakeSampleDeck`,
+  `bible-engine` `tools/`, `lottieGenerator` `DumpStyleReview`) — printing is their purpose.
+- Hardcoded `"%"` suffixes on dynamic values — the percent sign is identical in every supported
+  locale.
+
+**Not kept:** emoji strings used as icons. AGENT.md forbids them; the remaining icon maps are listed
+as pending above.
 
 ---
 
 ## 🚀 Development Workflow
 
-### Pre-Coding Checklist
-
-1. **Add string resources FIRST**
-   - Add to `strings.xml` before writing UI code
-   - Use descriptive names with prefixes
-
-2. **Add constants FIRST**
-   - Add to `Constants.kt` before using in logic
-   - Group by domain (file names, content types, etc.)
-
-3. **Import explicitly**
-   - Let IDE auto-import (it will NOT use wildcards)
-   - Review imports before committing
-
-### Pre-Commit Checklist
-
-- [ ] No wildcard imports (`import ... .*`)
-- [ ] No hardcoded UI strings
-- [ ] All technical strings use constants
-- [ ] No unused imports (run "Optimize Imports")
-- [ ] No debug print statements
-- [ ] All compiler warnings addressed or documented
-- [ ] No fully qualified type names in parameters
-- [ ] Material 3 only (no Material 2)
-- [ ] No commented-out code blocks
-
-### Adding New Features
-
-1. **Plan strings first** - Add to `strings.xml`
-2. **Plan constants** - Add to `Constants.kt`
-3. **Write code** - Use string resources and constants
-4. **Test** - Verify functionality
-5. **Clean up** - Remove unused code, optimize imports
-6. **Verify** - Run verification commands
-7. **Commit** - With clean, standards-compliant code
+1. **Plan strings first** — add them to `values/strings.xml`.
+2. **Plan constants** — add them to the right `Constants` object.
+3. **Write the code** — string resources and constants, explicit imports, Material 3.
+4. **Test** — `bash test-changed.sh` in the inner loop, `./gradlew :composeApp:check` before you
+   commit.
+5. **Clean up** — remove what the change made unused, including string resources.
+6. **Verify** — `bash cleanup_check.sh`, then `./gradlew :composeApp:detekt` last.
+7. **Commit** — on a branch, with clean, standards-compliant code.
 
 ---
 
 ## 🛡️ Crash Reporting
 
-ChurchPresenter includes a built-in crash reporter that writes crash logs to disk.
+Crash reporting lives in the `:diagnostics` module (`CrashReporter`). A global uncaught-exception
+handler installed at startup writes each crash — timestamp, app version, OS, Java version, stack
+trace — to `~/.churchpresenter/crash-reports/` (`C:\Users\<username>\.churchpresenter\crash-reports\`
+on Windows), deletes logs older than 30 days on startup, and forwards a PII-scrubbed event to Sentry.
 
-### How It Works
-
-- A global uncaught exception handler is installed at startup via `CrashReporter.initialize()`
-- Crash logs are saved to `~/.churchpresenter/crash-reports/`
-- Each log contains: timestamp, app version, OS, Java version, and full stack trace
-- Logs older than 30 days are automatically deleted on startup
-
-### Reporting Non-Fatal Errors
-
-Use `CrashReporter.reportException()` for important caught exceptions that should be tracked:
+Report important caught exceptions:
 
 ```kotlin
 try {
@@ -392,163 +159,93 @@ try {
 }
 ```
 
-### For Users
-
-If the app crashes, the crash log is saved automatically. Users can find it at:
-- **Windows:** `C:\Users\<username>\.churchpresenter\crash-reports\`
-- **macOS/Linux:** `~/.churchpresenter/crash-reports/`
-
-Submit crash logs by opening a GitHub Issue and attaching the file.
-
 ---
 
 ## 🤝 Contributing
 
-### Getting Started
+### Getting started
 
-1. Fork and clone the repository
-2. Install JDK 21 (Temurin recommended)
-3. Run `./gradlew :composeApp:run` to verify the build works
-4. Read this entire guide before making changes
+1. Fork and clone the repository — no submodules, a plain clone is everything.
+2. Install JDK 21 (Temurin recommended).
+3. Run `./gradlew :composeApp:run` to verify the build works.
+4. Read this guide, CODING_STANDARDS.md and AGENT.md before making changes.
 
 ### Never commit directly to `main`
 
 `main` is protected on GitHub for everyone, admins included — it takes a pull request with the
-`test` check passing. To catch it earlier, the repo also ships a `pre-commit` hook in `.githooks/`
-that refuses a commit made while `main` (or `master`) is checked out.
-
-Git never clones `core.hooksPath` — a checkout is not allowed to activate hooks on your machine by
-itself — so it is set per working copy. **Any `./gradlew` invocation sets it for you**; the root
-build script does it on configuration when it isn't already pointing at `.githooks`. To set it by
-hand instead:
-
-```bash
-git config core.hooksPath .githooks
-```
-
-Work on a branch and open a PR. `git commit --no-verify` skips the hook, but the server-side
-protection still stands, so that only buys you a commit you will have to move onto a branch anyway.
+`test` check passing. The repo also ships a `pre-commit` hook in `.githooks/` that refuses a commit
+made while `main` (or `master`) is checked out. Any `./gradlew` invocation sets `core.hooksPath` for
+you; to set it by hand: `git config core.hooksPath .githooks`.
 
 ### Running the tests, per platform
 
-The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and nothing else — the
-sub-builds live in this repository as ordinary directories, so a plain `git clone` gives you
-everything `composeApp` mounts via `kotlin.srcDir`.
+The app's own suite is `./gradlew :composeApp:check` and needs only **JDK 21**. In the inner loop,
+`bash test-changed.sh` runs only the suites that name what you changed — a heuristic that cannot see
+through a symbol three layers down or know a composable moved pixels in an unrelated screenshot
+suite, so run the full `check` before you commit.
 
-**In the inner loop, don't run the whole thing.** `bash test-changed.sh` maps what you have changed
-onto the suites that name it and runs only those — seconds instead of minutes. It is a heuristic and
-says so in its own header: it cannot see through a symbol three layers down, and it cannot know that
-a composable change moves pixels in a screenshot suite that never mentions the composable. Run the
-full `check` before you commit; the script is for the thirty times before that.
-
-The full suite runs on **4 parallel JVMs** (~5 min, down from ~12). If you write a test that binds a
-port, go through `testPort()`; if you write one that uses the shared fake home, know that it is per
-fork now. Both are explained in `AGENT.md` under "The suite runs in parallel forks".
-
-Beyond that there is nothing platform-specific to install:
+The suite runs on up to 4 parallel JVMs (~5 min). Tests that bind a port go through `testPort()`,
+and the shared fake home is per fork — see AGENT.md, "The suite runs in parallel forks".
 
 | Platform | Status |
 |----------|--------|
 | **Linux** | What CI runs (`ubuntu-latest`), fully headless. |
 | **Windows** | Runs the full suite, including the Compose UI tests. |
-| **macOS** | Unverified — no one has run the suite on it. Treat a failure there as unknown territory rather than a regression. |
+| **macOS** | Runs the suite; the committed screenshot set is recorded here. |
 
-**If Compose UI tests fail with `NoClassDefFoundError: Could not initialize class
-org.jetbrains.skia.Surface`**, that is not a stale build and `--rerun-tasks` will not clear it.
-Skiko resolves its host OS from `os.name` in a JVM-wide `by lazy` and throws on a name it does not
-know, so a test that fakes `os.name` and is the first to touch Compose kills every Compose test
-after it in that JVM. `TestSingletons.latchSkikoHostOs()` exists to prevent exactly this and must
-be called *before* any `os.name` swap — `withOsName` already does. Whether it bites depends on test
-execution order, so it can appear on one machine and not another.
+If Compose UI tests fail with `NoClassDefFoundError: Could not initialize class
+org.jetbrains.skia.Surface`, a test faked `os.name` before Compose was first touched — see AGENT.md
+(`TestSingletons.latchSkikoHostOs()`). `--rerun-tasks` will not clear it.
 
 ### The modules of this build
 
-`converter/`, `companion-satellite/`, `theme/`, `core-models/`, `bible-engine/`,
-`lottieGenerator/`, `crossword/`, `presentation-engine/`, `settings/`, `diagnostics/`, `atem/` and
-`planning-center/` are all part of this build, so none of them needs a wrapper of its own:
+Every module is part of this one build (see the table in AGENT.md), tested through the root
+wrapper:
 
 ```bash
-./gradlew :converter:test              # its suite
-./gradlew :converter:run               # the converter on its own, without the app
-./gradlew :companion-satellite:test    # the Satellite protocol client's suite
-./gradlew :theme:test                  # the theme module's suite
-./gradlew :core-models:test            # the shared data models' suite
-./gradlew :bible-engine:test           # the Bible Lookup Engine's suite
-./gradlew :lottieGenerator:test        # the Lottie generator's suite
-./gradlew :crossword:test              # the crossword authoring tool's suite
-./gradlew :crossword:run               # the crossword admin editor on its own
-./gradlew :presentation-engine:test    # the PPTX/Keynote/PDF engine's suite
-./gradlew :settings:test               # the persisted-settings module's suite
-./gradlew :diagnostics:test            # the crash-reporting module's suite
-./gradlew :atem:test                   # the ATEM protocol client's suite
-./gradlew :ndi:test                    # the NDI client's suite, send and receive
-./gradlew :omt:test                    # the OMT client's suite, send and receive
-./gradlew :planning-center:test        # the Planning Center client's suite
+./gradlew :converter:test              # song/Bible converter (also :converter:run)
+./gradlew :companion-satellite:test    # Companion Satellite protocol client
+./gradlew :theme:test                  # color schemes, type and shape scales
+./gradlew :core-models:test            # shared data models
+./gradlew :bible-engine:test           # Bible Lookup Engine
+./gradlew :lottieGenerator:test        # Lottie lower-third generator
+./gradlew :crossword:test              # crossword authoring tool (also :crossword:run)
+./gradlew :presentation-engine:test    # PPTX/Keynote/PDF engine
+./gradlew :songlibrary:test            # Song Library Manager
+./gradlew :settings:test               # persisted settings
+./gradlew :diagnostics:test            # crash reporting
+./gradlew :atem:test                   # ATEM protocol client
+./gradlew :ndi:test                    # NDI send and receive
+./gradlew :omt:test                    # OMT send and receive
+./gradlew :planning-center:test        # Planning Center client
+./gradlew :bible-formats:test          # Bible download catalogues and .spb converters
+./gradlew :song-chords:test            # chord grammar and transposition
+./gradlew :bible:test                  # loaded .spb translations and search
+./gradlew :calendar:test               # Calendar Manager
 ```
 
-`:composeApp:check` does **not** reach any of them — each has its own suite, run through the root
-wrapper as above. CI runs them as their own steps, and only for the modules whose directory (or the
-shared build files) the change touched.
-
-There are **no separate sub-builds left**: nothing under `composeApp/src/jvmMain/appResources/`
-carries a Gradle wrapper any more, and `bash test-changed.sh` names the module tasks a change
-implies. The Satellite client was promoted first because it was the smallest; the Presentation
-Engine last because it was the largest.
+`:composeApp:check` does **not** reach any of them. CI runs each as its own step, only for the
+modules whose directory (or the shared build files) the change touched; `bash test-changed.sh` names
+the module tasks a change implies.
 
 ### DeckLink hardware tests
 
-`DeckLinkHardwareTest` drives a real Blackmagic card and is **opt-in**, because opening the output
-pushes a frame to whatever that card is wired to — a visible glitch on the program feed if it were
-to run mid-service — and installs a JVM shutdown hook. It is inert in every ordinary run. To do a
-deliberate hardware pass on a machine with a card fitted:
+`DeckLinkHardwareTest` drives a real Blackmagic card and is **opt-in** — opening the output pushes a
+frame to whatever the card is wired to. To do a deliberate hardware pass on a machine with a card:
 
 ```bash
 ./gradlew :composeApp:jvmTest -PdecklinkHardware=true --tests '*DeckLinkHardwareTest*'
 ```
 
-### Pull Request Guidelines
+### Pull request guidelines
 
-- Keep PRs focused on a single feature or fix
-- Follow all coding standards documented above
-- Add string resources for any new UI text (no hardcoded strings)
-- Run the verification commands before submitting
-- Test on your platform before submitting
+- Keep PRs focused on a single feature or fix.
+- Follow CODING_STANDARDS.md; add string resources for any new UI text.
+- Re-record the screenshots of any state you changed (AGENT.md, "Screenshots").
+- Run the verification commands before submitting.
 
-### Credential Files
+### Credential files
 
-**Never commit credential or config files** to the repository. The `.gitignore` excludes:
-- `firebase-config.json`, `google-services.json`, `serviceAccountKey.json`
-- `.env` files
-- `.p12` certificates
-
-If you need access to project credentials, contact the maintainer directly.
-
----
-
-## 💡 Developer Mantras
-
-> **"If it's unused, remove it or document why it stays"**
-
-> **"No wildcards, no hardcoded strings, no debug prints"**
-
-> **"Always use Material 3, always use string resources"**
-
-> **"Never use fully qualified type names when import exists"**
-
-> **"Clean code is working code that reads well"**
-
----
-
-## ✅ Benefits Achieved
-
-1. **Maintainability** - Easy to find and update strings
-2. **Internationalization** - Ready for translation
-3. **Type Safety** - Constants prevent typos
-4. **Code Clarity** - Explicit imports show dependencies
-5. **Professionalism** - Clean, organized codebase
-6. **Scalability** - Easy to extend and refactor
-7. **Consistency** - Uniform style across project
-8. **Quality** - Compiler warnings addressed
-
----
-
+**Never commit credential or config files.** The `.gitignore` excludes `firebase-config.json`,
+`google-services.json`, `serviceAccountKey.json`, `.env` files and `.p12` certificates. For project
+credentials, contact the maintainer directly.

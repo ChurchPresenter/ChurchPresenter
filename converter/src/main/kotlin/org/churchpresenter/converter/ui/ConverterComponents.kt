@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.style.TextDecoration
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -290,8 +292,8 @@ private fun Modifier.dashedOutline(color: Color, cornerRadius: Dp) = drawBehind 
     val inset = stroke.width / 2f
     drawRoundRect(
         color = color,
-        topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
-        size = androidx.compose.ui.geometry.Size(size.width - stroke.width, size.height - stroke.width),
+        topLeft = Offset(inset, inset),
+        size = Size(size.width - stroke.width, size.height - stroke.width),
         cornerRadius = CornerRadius(cornerRadius.toPx()),
         style = stroke
     )
@@ -364,7 +366,7 @@ fun SelectedFilesCard(
                 shape = FieldShape,
                 onClick = onChange,
                 modifier = Modifier.height(26.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
             ) {
                 Text(Strings.change, style = MaterialTheme.typography.labelSmall)
             }
@@ -372,7 +374,7 @@ fun SelectedFilesCard(
                 shape = FieldShape,
                 onClick = onClear,
                 modifier = Modifier.height(26.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
             ) {
                 Text(Strings.clear, style = MaterialTheme.typography.labelSmall)
             }
@@ -685,7 +687,7 @@ fun RenameExampleCard(before: String, after: String) {
                 before,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontFamily = FontFamily.Monospace,
-                    textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
+                    textDecoration = TextDecoration.LineThrough
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

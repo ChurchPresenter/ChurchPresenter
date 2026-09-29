@@ -34,7 +34,6 @@
     <string name="revert">تراجع</string>
     <string name="save_changes">حفظ التغييرات</string>
     <string name="done">تم</string>
-    <string name="saved">تم حفظ %1$s</string>
     <string name="save_failed">تعذّر حفظ %1$s</string>
     <string name="new_song_book">كتاب ترانيم جديد</string>
     <string name="new_song_book_subhead">مجموعة يمكن تصنيف الترانيم ضمنها</string>

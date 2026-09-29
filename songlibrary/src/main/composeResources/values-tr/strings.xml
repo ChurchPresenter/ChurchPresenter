@@ -34,7 +34,6 @@
     <string name="revert">Geri al</string>
     <string name="save_changes">Değişiklikleri Kaydet</string>
     <string name="done">Bitti</string>
-    <string name="saved">%1$s kaydedildi</string>
     <string name="save_failed">%1$s kaydedilemedi</string>
     <string name="new_song_book">Yeni Şarkı Kitabı</string>
     <string name="new_song_book_subhead">Şarkıların altında toplanabileceği bir derleme</string>

@@ -5,7 +5,6 @@
   CalendarTime.monthName.
 -->
 <resources>
-    <string name="calendar_window_title">Calendar Manager</string>
     <string name="calendar_title">Calendar</string>
     <string name="calendar_today">Today</string>
     <string name="calendar_close">Close</string>
@@ -24,7 +23,6 @@
     <string name="calendar_kind_special">Special event</string>
 
     <string name="calendar_add_service">Add service</string>
-    <string name="calendar_new_service">New service</string>
     <string name="calendar_edit_service">Edit service</string>
     <string name="calendar_service_date">Date</string>
     <string name="calendar_template_schedule">The Schedule tab</string>
@@ -38,13 +36,8 @@
     <string name="calendar_cancel">Cancel</string>
     <string name="calendar_delete">Delete</string>
 
-    <string name="calendar_run_of_show">Run of show</string>
-    <string name="calendar_nothing_planned">Nothing planned for this day</string>
-    <string name="calendar_no_service_hint">Add a service to start planning.</string>
-    <string name="calendar_run_empty">This service has no items yet.</string>
     <string name="calendar_items_count_one">%1$d item</string>
     <string name="calendar_items_count">%1$d items</string>
-    <string name="calendar_planned_total">%1$s planned</string>
     <string name="calendar_duration">Duration</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">How long this is planned to run — click to type it, like 4:30</string>
@@ -56,7 +49,6 @@
     <string name="calendar_pick_songs">Songs</string>
     <string name="calendar_pick_bible">Bible</string>
     <string name="calendar_pick_section">Section</string>
-    <string name="calendar_pick_schedule">Schedule tab</string>
     <string name="calendar_pick_presets">Presets</string>
     <string name="calendar_pick_ministry">Ministry</string>
     <string name="calendar_ministry_what">What happens</string>
@@ -72,18 +64,11 @@
     <string name="calendar_presets_note">Presets are picked up under Presets when you add an item, and under Item when a cue shows one.</string>
     <string name="calendar_settings_presets">Presets</string>
     <string name="calendar_preset_remove">Delete preset</string>
-    <string name="calendar_cue_from_run">From this run of show</string>
     <string name="calendar_cue_loops">loops</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Saved presets</string>
-    <string name="calendar_search_songs_hint">Search songs by title or number</string>
-    <string name="calendar_bible_hint">Type a reference, such as John 3:16-17</string>
     <string name="calendar_section_hint">Section name, such as Worship</string>
-    <string name="calendar_add">Add</string>
     <string name="calendar_no_results">Nothing matches that</string>
     <string name="calendar_songs_loading">Reading the song library…</string>
-    <string name="calendar_schedule_empty">The Schedule tab is empty.</string>
-    <string name="calendar_capture_schedule">Add every item from the Schedule tab</string>
 
     <string name="calendar_load_into_schedule">Load into Schedule</string>
     <string name="calendar_load_title">Replace the schedule?</string>
@@ -122,14 +107,10 @@
     <string name="calendar_section_remove">Remove section</string>
     <string name="calendar_default_start">Default start time</string>
     <string name="calendar_default_start_sub">The time a newly added service is created with</string>
-    <string name="calendar_automation_empty">No cues yet</string>
-    <string name="calendar_automation_title">Automation</string>
     <string name="calendar_armed">Armed</string>
     <string name="calendar_armed_off">Off</string>
     <string name="calendar_arm_tip">Arm or disarm every cue</string>
     <string name="calendar_cue_skip_tip">Skip this cue</string>
-    <string name="calendar_automation_note">marks items that run on their own. Unticking skips a cue for this service.</string>
-    <string name="calendar_edit_cues">Edit cues</string>
     <string name="calendar_cue_action_countdown">Start countdown</string>
     <string name="calendar_cue_action_go_live">Go live</string>
     <string name="calendar_cue_action_project">Announcement loop</string>
@@ -138,20 +119,16 @@
     <string name="calendar_cue_action_blank">Blank outputs</string>
     <string name="calendar_cue_badge_timer">Timer</string>
     <string name="calendar_cue_badge_go_live">Go live</string>
-    <string name="calendar_cue_item">Item</string>
     <string name="calendar_cue_item_missing">Item no longer in this run of show</string>
     <string name="calendar_copy_include_cues">Automation cues</string>
     <string name="calendar_copy_include_cues_sub">%1$d cues, offsets preserved</string>
     <string name="calendar_template_include_cues">Automation cues</string>
     <string name="calendar_template_include_cues_sub">Relative offsets</string>
-    <string name="calendar_templates_empty">No saved templates</string>
     <string name="calendar_templates_empty_sub">Save one from any service with Template, in the Run of show header. Until then a new service can start from a copy of any earlier one.</string>
     <string name="calendar_templates_note">Templates are offered under Start from when you add a service. Save a new one from any service with Template, in the Run of show header.</string>
     <string name="calendar_template_remove">Delete template</string>
     <string name="calendar_template_saved_sub">Template · %1$s · %2$d items</string>
-    <string name="calendar_copy_service">Copy</string>
     <string name="calendar_copy_service_tip">Copy this service to another date, or repeat it</string>
-    <string name="calendar_save_template">Template</string>
     <string name="calendar_save_template_tip">Save this run of show as a template</string>
     <string name="calendar_copy_title">Copy %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d items</string>
@@ -196,7 +173,6 @@
     <string name="calendar_series_note">Repeats %1$s · %2$d services in this series</string>
     <string name="calendar_export_pdf">Export PDF</string>
     <string name="calendar_settings_open">Calendar settings</string>
-    <string name="calendar_export_failed">The run of show could not be exported.</string>
     <string name="calendar_section_new">New section</string>
     <string name="calendar_section_insert">Insert</string>
     <string name="calendar_cloud_sync">Sync with the cloud and mobile devices</string>
@@ -218,7 +194,6 @@
     <string name="calendar_default_item_sub">Offered when a song has no measured length yet</string>
     <string name="calendar_pick_search">Search songs, or type a reference</string>
     <string name="calendar_pick_adds_to">Adds to %1$s</string>
-    <string name="calendar_pick_duration">Duration</string>
     <string name="calendar_pick_all_books">All song books</string>
     <string name="calendar_pick_reference">Reference</string>
     <string name="calendar_pick_all_bible_books">All books</string>
@@ -232,13 +207,8 @@
     <string name="calendar_pick_add_range">Add %1$s</string>
     <string name="calendar_pick_replace_with">Replace with %1$s</string>
     <string name="calendar_pick_verse_hint">Tap a verse, then tap another for a range</string>
-    <string name="calendar_pick_clear">Clear</string>
     <string name="calendar_edit_song">Edit this song</string>
-    <string name="calendar_replace_row">Replacing %1$s</string>
-    <string name="calendar_change_row">Change this item</string>
     <!-- The run of show with the cues merged in -->
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · runs on its own at %2$s — click to fire now</string>
     <string name="calendar_cue_fire_now">Fire this cue now</string>
     <string name="calendar_cue_fired_at">Fired %1$s</string>
     <string name="calendar_cue_skipped_at">Skipped %1$s</string>
@@ -249,7 +219,6 @@
     <string name="calendar_run_clock_tip_stepped">Stepped clock · click to go on 5 min, × to go back to the real time</string>
     <string name="calendar_run_clock_reset">Back to the real time</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d of %3$d cues will fire automatically</string>
     <string name="calendar_cue_fired_title">Cue fired</string>
     <string name="calendar_cue_skipped_title">Cue skipped</string>
     <string name="calendar_cue_skipped_reason">Something else was live — fire it by hand if it should still go</string>
@@ -312,7 +281,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Next</string>
     <string name="calendar_chip_blank">Blank</string>
-    <string name="calendar_chip_manual">Manual</string>
     <string name="calendar_auto_starts">%1$d auto starts</string>
     <string name="calendar_auto_start_one">1 auto start</string>
     <string name="calendar_all_manual">All manual</string>

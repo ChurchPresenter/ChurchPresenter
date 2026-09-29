@@ -34,7 +34,6 @@
     <string name="revert">元に戻す</string>
     <string name="save_changes">変更を保存</string>
     <string name="done">完了</string>
-    <string name="saved">%1$s 件を保存しました</string>
     <string name="save_failed">%1$s を保存できませんでした</string>
     <string name="new_song_book">新しい賛美歌集</string>
     <string name="new_song_book_subhead">賛美歌をまとめておけるコレクション</string>

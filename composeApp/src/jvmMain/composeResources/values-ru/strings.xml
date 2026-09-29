@@ -4,13 +4,11 @@
     <string name="scope">Область</string>
     <string name="title">Название</string>
     <string name="number">Номер</string>
-    <string name="no_song_selected">Песня не выбрана</string>
     <string name="go_live">В эфир</string>
     <string name="add_to_schedule">Добавить в программу</string>
     <string name="no_lyrics_available">Текст песни недоступен</string>
     <string name="tune">Мелодия</string>
     <string name="search">Поиск</string>
-    <string name="replace">Заменить на</string>
     <string name="search_songs">Искать песни...</string>
     <string name="song_book">Сборник песен</string>
     <string name="all_song_books">Все сборники</string>
@@ -20,18 +18,13 @@
     <string name="contains">Содержит</string>
     <string name="starts_with">Начинается с</string>
     <string name="exact_match">Точное совпадение</string>
-    <string name="all_song_categories">Все категории</string>
     <string name="filter">Фильтр</string>
-    <string name="filter_colon">Фильтр:</string>
-    <string name="filter_type_colon">Тип фильтра:</string>
-    <string name="service_schedule">Программа служения:</string>
     <string name="songs">Песни</string>
     <string name="song">Песня</string>
     <string name="output_profiles_tab">Профили</string>
     <string name="bible">Библия</string>
     <string name="pictures">Изображения</string>
     <string name="media">Медиа</string>
-    <string name="notes">Заметки</string>
     <string name="book">Книга</string>
     <string name="chapter">Глава</string>
     <string name="verse">Стих</string>
@@ -41,12 +34,10 @@
     <string name="none">Нет</string>
     <string name="first_page">Первая страница</string>
     <string name="every_page">Каждая страница</string>
-    <string name="show">Показать</string>
     <string name="show_title">Показать название:</string>
     <string name="show_number">Показать номер:</string>
     <string name="font_size">Размер шрифта:</string>
     <string name="font_type">Тип шрифта:</string>
-    <string name="style">Стиль</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">U</string>
@@ -55,7 +46,6 @@
     <string name="tooltip_italic">Курсив</string>
     <string name="tooltip_underline">Подчёркнутый</string>
     <string name="tooltip_shadow">Тень</string>
-    <string name="shadow_settings">Тень</string>
     <string name="shadow_size">Размер (%)</string>
     <string name="shadow_opacity">Интенсивность (%)</string>
     <string name="hold_live">Удержать эфир</string>
@@ -74,10 +64,7 @@
     <string name="bible_cross_references_keep_open">Закрепить</string>
     <string name="bible_cross_references_close">Закрыть панель</string>
     <string name="bible_cross_references_dismiss_hint">Esc — закрыть</string>
-    <string name="bible_live_view">Эфир</string>
     <string name="copy_verse">Копировать стих</string>
-    <string name="fade_in">Плавное появление</string>
-    <string name="fade_out">Плавное исчезание</string>
     <string name="announcements">Объявления</string>
     <string name="menu_file">Файл</string>
     <string name="menu_new_schedule">Новая программа</string>
@@ -97,9 +84,6 @@
 
     <!-- Schedule Tab Strings -->
     <string name="schedule">Программа</string>
-    <string name="quick_selection">Быстрый выбор</string>
-    <string name="clear_schedule">Очистить программу</string>
-    <string name="search_results">Результаты поиска</string>
     <string name="clear">Очистить</string>
     <string name="found_results">Найдено %1$d результат(ов)</string>
 
@@ -124,43 +108,21 @@
     <string name="menu_check_for_updates">Проверить обновления…</string>
 
     <!-- Options Dialog Strings -->
-    <string name="text_settings_and_colors">Настройки текста и цвета</string>
     <string name="background">Фон</string>
-    <string name="background_images">Фоновые изображения</string>
-    <string name="folders">Папки</string>
     <string name="projection">Проекция</string>
-    <string name="other">Другое</string>
 
     <!-- Song Settings Strings -->
-    <string name="lyrics">Текст</string>
     <string name="song_number">Номер песни</string>
-    <string name="min">Мин:</string>
-    <string name="max">Макс:</string>
-    <string name="alpha">Прозрачность:</string>
-    <string name="vertical_alignment">Вертикальное выравнивание:</string>
-    <string name="horizontal_alignment">Горизонтальное выравнивание:</string>
-    <string name="text_alignment">Выравнивание текста:</string>
     <string name="top">Сверху</string>
-    <string name="above_verse">Над стихом</string>
-    <string name="below_verse">Под стихом</string>
     <string name="middle">По центру</string>
     <string name="bottom">Снизу</string>
     <string name="left">Слева</string>
     <string name="center">По центру</string>
     <string name="right">Справа</string>
-    <string name="song_files">Файлы песен</string>
-    <string name="storage_directory">Папка хранения</string>
     <string name="browse_directory">Обзор...</string>
     <string name="no_directory_selected">Папка не выбрана</string>
     <string name="no_files_detected">Файлы не найдены</string>
     <string name="detected_files_label">Обнаружено:</string>
-    <string name="files_in_directory">Файлы в папке</string>
-    <string name="import_song_file">Импорт файла песен</string>
-    <string name="remove_song_file">Удалить файл песен</string>
-    <string name="select_song_file">Выбрать файл песен...</string>
-    <string name="no_song_files">Файлы песен не загружены</string>
-    <string name="word_wrap">Перенос слов</string>
-    <string name="show_on_first_page_only">Показывать только на первой странице</string>
     <string name="position_on_screen">Положение на экране:</string>
     <string name="position_showing_at">Расположение</string>
     <string name="top_left">Вверху слева</string>
@@ -179,13 +141,6 @@
     <string name="mocha_theme">Мокко тема</string>
     <string name="studio_theme">Студийная тема</string>
     <!-- Placeholder strings for other tabs -->
-    <string name="bible_tab_content">Содержимое вкладки Библия будет реализовано</string>
-    <string name="text_settings_tab_content">Содержимое вкладки настроек текста будет реализовано</string>
-    <string name="background_tab_content">Содержимое вкладки фона будет реализовано</string>
-    <string name="background_images_tab_content">Содержимое вкладки фоновых изображений будет реализовано</string>
-    <string name="folders_tab_content">Содержимое вкладки папок будет реализовано</string>
-    <string name="projection_tab_content">Содержимое вкладки проекции будет реализовано</string>
-    <string name="other_tab_content">Содержимое вкладки другое будет реализовано</string>
 
     <string name="bible_book_1">Бытие</string>
     <string name="bible_book_2">Исход</string>
@@ -324,34 +279,11 @@
     <string name="bible_book_abbrev_66">Откр</string>
 
     <!-- Bible Settings -->
-    <string name="bible_files">Файлы Библии</string>
     <string name="position">Положение</string>
-    <string name="no_bible_files">Файлы Библии не загружены</string>
-    <string name="import_bible_file">Импорт файла Библии</string>
-    <string name="remove_bible_file">Удалить файл Библии</string>
-    <string name="bible_selection">Выбор Библии</string>
-    <string name="primary_bible">Основная Библия:</string>
-    <string name="secondary_bible">Дополнительная Библия:</string>
-    <string name="background_type">Тип фона:</string>
-    <string name="background_color">Цвет фона:</string>
-    <string name="background_image">Фоновое изображение:</string>
-    <string name="select_image">Выбрать изображение</string>
-    <string name="primary_bible_text">Текст основной Библии</string>
-    <string name="primary_bible_reference">Ссылка на книгу основной Библии</string>
-    <string name="secondary_bible_text">Текст дополнительной Библии</string>
-    <string name="secondary_bible_reference">Ссылка на книгу дополнительной Библии</string>
-    <string name="show_abbreviation">Показать сокращение книги</string>
-    <string name="caption_language">Язык подписей</string>
-    <string name="language_source">Источник языка:</string>
 
     <!-- Dialog Messages -->
-    <string name="please_select_directory_first">Пожалуйста, сначала выберите папку.</string>
-    <string name="please_select_file_first">Пожалуйста, сначала выберите файл из списка.</string>
-    <string name="no_file_selected_title">Файл не выбран</string>
     <string name="confirm_delete">Подтвердите удаление</string>
     <string name="confirm_delete_file">Вы уверены, что хотите удалить «%1$s»?</string>
-    <string name="import_error">Ошибка импорта</string>
-    <string name="delete_error">Ошибка удаления</string>
 
     <!-- Background Type Options -->
     <string name="background_default">По умолчанию</string>
@@ -359,12 +291,8 @@
     <string name="background_image_option">Изображение</string>
 
     <!-- Position Options -->
-    <string name="position_above">Сверху</string>
-    <string name="position_below">Снизу</string>
 
     <!-- Language Options -->
-    <string name="language_interface">Интерфейс</string>
-    <string name="language_database">База данных</string>
 
     <!-- Language Menu -->
     <string name="menu_language">Язык</string>
@@ -408,11 +336,6 @@
     <string name="no_results_found">Результаты не найдены для "%1$s"</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Целевая папка не существует: %1$s</string>
-    <string name="error_copying_file">Ошибка копирования %1$s: %2$s</string>
-    <string name="error_failed_delete">Не удалось удалить файл</string>
-    <string name="error_deleting_file">Ошибка удаления файла: %1$s</string>
-    <string name="warning">Предупреждение</string>
 
     <!-- Edit Song Dialog -->
     <string name="edit_song">Редактировать песню</string>
@@ -420,7 +343,6 @@
     <string name="author">Автор</string>
     <string name="composer">Композитор</string>
     <string name="enter_lyrics_here">Введите текст здесь...</string>
-    <string name="lyrics_format_help">Формат: Используйте [Verse 1], [Verse 2] и т.д. для заголовков куплетов и {Chorus} для припева. Разделяйте секции пустыми строками.</string>
     <string name="save">Сохранить</string>
 
     <!-- Tooltips -->
@@ -432,12 +354,9 @@
     <string name="tooltip_note">Заметка</string>
     <string name="tooltip_note_done">Сохранить заметку</string>
     <string name="tooltip_note_clear">Очистить заметку</string>
-    <string name="tooltip_move_to_top">Переместить наверх</string>
     <string name="tooltip_move_up">Переместить вверх</string>
     <string name="tooltip_move_down">Переместить вниз</string>
-    <string name="tooltip_move_to_bottom">Переместить вниз</string>
     <string name="tooltip_add_to_schedule">Добавить в программу</string>
-    <string name="tooltip_remove_from_schedule">Удалить из программы</string>
     <string name="tooltip_clear_schedule">Очистить программу</string>
     <string name="tooltip_settings">Настройки</string>
     <string name="tooltip_go_live">В эфир</string>
@@ -461,7 +380,6 @@
     <!-- Pictures Tab Strings -->
     <string name="select_folder">Выбрать папку</string>
     <string name="no_folder_selected">Папка не выбрана</string>
-    <string name="images_count">%1$d изображений</string>
     <string name="previous_image">Предыдущее изображение</string>
     <string name="pause">Пауза</string>
     <string name="stop">Стоп</string>
@@ -485,8 +403,6 @@
     <string name="animation_slide_right">Сдвиг вправо</string>
     <string name="animation_none">Без анимации</string>
     <string name="milliseconds_suffix">мс</string>
-    <string name="settings">Настройки</string>
-    <string name="images_suffix">изображений</string>
     <string name="pictures_arrow_key_hint">%1$s следующее/предыдущее изображение  ·  %2$s навигация по строкам</string>
     <string name="presentation_arrow_key_hint">%1$s — пред./след. шаг и слайд  ·  %2$s — воспроизведение/пауза  ·  %3$s — чёрный экран</string>
     <string name="pictures_reorder_hint">Shift+перетащить для изменения порядка</string>
@@ -497,7 +413,6 @@
 
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Файл не выбран</string>
-    <string name="slide_count">%1$d слайдов</string>
     <string name="loading_slides_progress">%1$d / %2$d слайдов</string>
     <string name="slide_counter">Слайд %1$d из %2$d</string>
     <string name="loading_slides">Загрузка слайдов...</string>
@@ -522,22 +437,16 @@
     <string name="presentation_remote_tunnel_temporary_note">Ссылки публичного туннеля временные и меняются каждый раз при запуске нового туннеля.</string>
     <string name="presentation_public_access_description">Позвольте подключённым телефонам и планшетам управлять презентацией через мобильный интернет без подключения к вашему Wi-Fi</string>
     <string name="presentation_server_not_running">Сервер не запущен — запустите сопутствующий сервер в Настройках, чтобы включить удалённое управление</string>
-    <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
-    <string name="number_of_projection_windows">Количество окон проекции</string>
-    <string name="windows_count_label">Окна (1-3)</string>
     <string name="window_position">Положение окна</string>
     <string name="screen">Экран</string>
     <string name="projection_position_help">Значения положения задают смещение в пикселях от краёв экрана. Используйте их для настройки положения окна проекции на дополнительных дисплеях.</string>
 
     <!-- Background Settings Tab -->
-    <string name="default_background_color">Цвет фона по умолчанию</string>
-    <string name="default_background_color_help">Этот цвет используется, когда для Библии или Песнопений выбран тип фона «По умолчанию»</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Медиа</string>
-    <string name="media_source">Источник медиа</string>
     <string name="media_local_file">Локальный файл</string>
     <string name="media_network_url">Сетевой URL</string>
     <string name="media_url_placeholder">Введите URL (http://, rtsp://, ...)</string>
@@ -551,63 +460,34 @@
     <string name="media_seek_forward">Вперёд на 10 сек</string>
     <string name="media_loop_count">Повторы</string>
     <string name="media_loop_count_tooltip">Сколько раз повторить (0 = бесконечно)</string>
-    <string name="media_preview">Предпросмотр</string>
-    <string name="media_volume">Громкость</string>
     <string name="media_mute">Выключить звук</string>
     <string name="media_unmute">Включить звук</string>
-    <string name="media_open_in_browser">Открыть в браузере</string>
-    <string name="media_web_preview_note">Веб-видео — управление воспроизведением через браузер.</string>
-    <string name="media_local_preview_note">Локальное видео — используйте элементы управления выше.</string>
 
     <!-- Streaming Settings Tab -->
-    <string name="streaming">Стриминг</string>
-    <string name="streaming_settings">Настройки стриминга</string>
-    <string name="lower_third_folder">Папка анимаций нижней трети</string>
-    <string name="lower_third_folder_hint">Папка не выбрана</string>
-    <string name="lower_third_folder_help">Выберите папку с файлами анимации Lottie JSON (.json) для нижних третей.</string>
-    <string name="clear_folder">Очистить</string>
-    <string name="lower_third_files_found">Найдено файлов анимации: %1$d</string>
-    <string name="lower_third_no_files">Файлы .json не найдены в выбранной папке</string>
 
     <!-- Announcement animations -->
     <string name="anim_slide_from_left">Слева</string>
     <string name="anim_slide_from_right">Справа</string>
     <string name="anim_slide_from_top">Сверху</string>
     <string name="anim_slide_from_bottom">Снизу</string>
-    <string name="anim_slide_along_top_ltr">Вдоль верха (Л→П)</string>
-    <string name="anim_slide_along_top_rtl">Вдоль верха (П→Л)</string>
-    <string name="anim_slide_along_bottom_ltr">Вдоль низа (Л→П)</string>
-    <string name="anim_slide_along_bottom_rtl">Вдоль низа (П→Л)</string>
-    <string name="animation_slide_up">Вверх (снизу вверх)</string>
-    <string name="animation_slide_left_to_right">Слева направо</string>
-    <string name="animation_slide_to_center">К центру</string>
     <string name="announcement_animation">Анимация</string>
-    <string name="announcement_animation_duration">Длительность (мс)</string>
     <string name="announcement_animation_speed">Скорость</string>
     <string name="announcement_loop_count">Количество повторов</string>
     <string name="announcement_loop_tooltip">0 = бесконечный повтор</string>
     <string name="announcement_background_color_label">Цвет фона</string>
-    <string name="announcement_text">Текст объявления</string>
     <string name="announcement_text_hint">Введите текст объявления…</string>
-    <string name="bible_transition_settings">Переход</string>
-    <string name="song_transition_settings">Переход</string>
     <string name="top_center">По центру сверху</string>
     <string name="bottom_center">По центру снизу</string>
     <string name="center_left">По центру слева</string>
     <string name="center_right">По центру справа</string>
-    <string name="show_in_lower_third">Показать в нижней трети</string>
-    <string name="content_bible">Библия</string>
-    <string name="content_songs">Песни</string>
     <string name="content_bible_background">Фон Библии</string>
     <string name="content_songs_background">Фон песен</string>
-    <string name="content_background_layered_tooltip">Действует только если также включён общий флажок «Фон» (или «Фон нижнего титра») выше.</string>
     <string name="content_pictures">Фото/Презентация</string>
     <string name="content_media">Медиа</string>
     <string name="content_streaming">Нижняя треть</string>
     <string name="content_announcements">Объявления</string>
     <string name="detected_screens">Обнаружено экранов: %1$d</string>
     <string name="presenter_windows_count">Окон презентации: %1$d</string>
-    <string name="num_screens_label">Количество экранов:</string>
     <string name="screen_col_label">Экран %1$d</string>
     <string name="screen_assignment">Назначение экранов</string>
     <string name="display_mode">Режим отображения</string>
@@ -616,33 +496,9 @@
     <string name="full_screen">Полный экран</string>
     <string name="lower_third_size">Нижняя треть</string>
     <string name="identify_screen">Определить</string>
-    <string name="lottie_files_folder">Папка с файлами Lottie</string>
-    <string name="lottie_files">Файлы Lottie</string>
     <string name="no_lottie_files">JSON-файлы не найдены</string>
-    <string name="import_lottie_file">Импортировать файл</string>
-    <string name="remove_lottie_file">Удалить файл</string>
     <string name="generate_lower_third">Создать</string>
-    <string name="lottie_presets">Пресеты нижней трети</string>
-    <string name="lottie_preset_import_file">Импортировать Lottie</string>
-    <string name="lottie_preset_label">Название пресета</string>
-    <string name="lottie_preset_label_hint">Введите название…</string>
-    <string name="lottie_preset_save">Сохранить пресет</string>
-    <string name="lottie_preset_delete">Удалить пресет</string>
-    <string name="lottie_preset_no_file">Файл не выбран</string>
-    <string name="lottie_preset_add_pair">+ Добавить пару</string>
-    <string name="lottie_preset_saved">Пресет сохранён</string>
-    <string name="lottie_presets_list">Сохранённые пресеты</string>
-    <string name="lottie_no_presets">Пресеты не сохранены</string>
     <string name="lottie_select_preset">Выберите пресет для просмотра</string>
-    <string name="lottie_pause_frame">Кадр паузы</string>
-    <string name="lottie_pause_frame_none">Нет</string>
-    <string name="lottie_pause_at_frame">Пауза на кадре</string>
-    <string name="lottie_pause_duration">Длительность паузы (мс)</string>
-    <string name="lottie_play_next">Следующее воспроизведение</string>
-    <string name="lottie_run_to_end">До конца</string>
-    <string name="save_string">Сохранить</string>
-    <string name="saved_strings">Сохранённые значения</string>
-    <string name="no_saved_strings">Нет сохранённых значений</string>
     <string name="delete_saved_string">Удалить</string>
     <string name="menu_keyboard_shortcuts">Сочетания клавиш</string>
     <string name="keyboard_shortcuts_title">Сочетания клавиш</string>
@@ -652,7 +508,6 @@
     <string name="shortcut_category_pictures">Вкладка Фото</string>
     <string name="shortcut_category_presentation">Вкладка Презентация</string>
     <string name="shortcut_category_media">Вкладка Медиа</string>
-    <string name="shortcut_category_tab_switching">Переключение вкладок</string>
     <string name="shortcut_description_new_schedule">Новое расписание</string>
     <string name="shortcut_description_open_schedule">Открыть расписание</string>
     <string name="shortcut_description_save_schedule">Сохранить расписание</string>
@@ -692,12 +547,10 @@
     <string name="shortcut_description_delete_source">Удалить выбранный источник</string>
     <string name="shortcut_key_right_click">Правая кнопка мыши</string>
     <string name="shortcut_key_shift_drag">Shift+Перетаскивание</string>
-    <string name="shortcut_category_schedule">Расписание</string>
     <string name="shortcut_description_context_menu">Контекстное меню</string>
     <string name="shortcut_description_reorder_item">Изменить порядок элемента</string>
     <string name="shortcut_description_undo">Отменить последнее изменение программы</string>
     <string name="shortcut_description_redo">Повторить последнее отменённое изменение</string>
-    <string name="shortcut_description_reorder_image">Изменить порядок изображения</string>
     <string name="shortcut_scope_menus_hint">Ускорители меню, обрабатываются в первую очередь</string>
     <string name="shortcut_scope_global_hint">Доступно в любом месте программы</string>
     <string name="shortcut_scope_bible_hint">Действует, когда активна вкладка Библия</string>
@@ -734,8 +587,6 @@
     <string name="align_top">Выровнять вверх</string>
     <string name="align_middle">Выровнять посередине</string>
     <string name="align_bottom">Выровнять вниз</string>
-    <string name="position_above_desc">Сверху</string>
-    <string name="position_below_desc">Снизу</string>
     <string name="increment">Увеличить</string>
     <string name="decrement">Уменьшить</string>
     <string name="presented_image">Показываемое изображение</string>
@@ -745,14 +596,12 @@
     <string name="presenter_view_title">Окно презентации %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="decklink_output_title">Выход DeckLink %1$d</string>
-    <string name="lower_third_generator">Генератор нижней трети</string>
     <string name="pause_duration_ms">Пауза %1$dмс</string>
     <string name="aspect_ratio_mismatch">Несоответствие соотношения сторон: файл %1$dx%2$d (%3$s), но вывод %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мобильный</string>
     <string name="desktop_view">Настольный</string>
     <string name="interactive_mode">Интерактивный</string>
     <string name="mirror_mode">Зеркало</string>
-    <string name="time_separator">:</string>
 
     <string name="image_files_filter">Файлы изображений (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Видеофайлы (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
@@ -770,24 +619,16 @@
     <string name="audio_output">Аудиовыход</string>
     <string name="audio_output_default">Системный по умолчанию</string>
     <string name="audio_output_device">Устройство вывода</string>
-    <string name="auto_fit">Авто</string>
     <string name="background_transparent_option">Прозрачный</string>
-    <string name="background_video">Фоновое видео:</string>
     <string name="background_video_option">Зацикленное видео</string>
     <string name="bible_history">История</string>
     <string name="bible_history_clear">Очистить</string>
-    <string name="bible_storage_directory">Папка хранения Библий</string>
     <string name="companion_server">Вспомогательный сервер</string>
     <string name="copy_api_key">Копировать</string>
-    <string name="copy_url">Копировать URL</string>
-    <string name="default_lower_third_background">Фон нижней трети по умолчанию</string>
-    <string name="default_lower_third_background_help">Используется, когда для Библии или Песен выбрано значение «По умолчанию» в режиме нижней трети</string>
     <string name="enable_server">Включить сервер</string>
-    <string name="font_preview_text">АБВГабвг1234</string>
     <string name="generate_api_key">Сгенерировать</string>
     <string name="gradient_bottom_color">Нижний цвет:</string>
     <string name="gradient_enabled">Градиент</string>
-    <string name="gradient_opacity">Непрозрачность</string>
     <string name="background_opacity">Непрозрачность фона</string>
     <string name="gradient_top_opacity">Непрозрачность сверху</string>
     <string name="gradient_bottom_opacity">Непрозрачность снизу</string>
@@ -827,26 +668,14 @@
     <string name="lock_screen_to_tab">Закрепить экран за текущей вкладкой</string>
     <string name="qr_code">QR-код</string>
     <string name="projection_decklink_io_conflict_tooltip">Также используется для ввода — может не работать на устройствах без одновременного ввода/вывода</string>
-    <string name="live_preview_announcement">Объявление</string>
-    <string name="live_preview_bible">Библия</string>
-    <string name="live_preview_lower_third">Нижняя треть</string>
-    <string name="live_preview_media">Медиа</string>
     <string name="live_preview_nothing">Ничего не транслируется</string>
     <string name="collapse_preview">Скрыть этот предпросмотр</string>
     <string name="expand_preview">Показать этот предпросмотр</string>
-    <string name="live_preview_picture">Изображение</string>
-    <string name="live_preview_presentation">Презентация</string>
-    <string name="live_preview_song">Песня</string>
     <string name="live_preview_title">Эфир</string>
-    <string name="live_preview_website">Веб-сайт</string>
     <string name="loop_off">Повтор выкл.</string>
-    <string name="output_scale_mode">Масштаб: %1$s</string>
     <string name="loop_on">Повтор вкл.</string>
-    <string name="lower_third_height">Высота нижней трети % (для Библии и Песен)</string>
-    <string name="lower_third_storage_directory">Папка хранения нижних третей</string>
     <string name="media_audio_continues">Аудио продолжит воспроизводиться в фоне при переключении вкладок или отображении другого контента</string>
     <string name="media_files_filter">Медиафайлы</string>
-    <string name="media_storage_directory">Папка хранения медиа</string>
     <string name="media_vlc_install">Пожалуйста, установите VLC с videolan.org и перезапустите приложение</string>
     <string name="media_vlc_required">Для воспроизведения медиа требуется VLC media player</string>
     <string name="vlc_custom_path">Путь к VLC</string>
@@ -855,13 +684,7 @@
     <string name="vlc_directory_chooser_title">Выберите каталог установки VLC</string>
     <string name="vlc_path_invalid">Каталог не содержит библиотек VLC</string>
     <string name="menu_view">Вид</string>
-    <string name="output_role_fill">Заливка</string>
-    <string name="output_role_key">Ключ</string>
-    <string name="output_role_normal">Обычный</string>
-    <string name="pictures_storage_directory">Папка хранения изображений</string>
-    <string name="presentation_storage_directory">Папка хранения презентаций</string>
     <string name="projection_auto_display">Авто</string>
-    <string name="projection_display_label">Дисплей %1$d (%2$dx%3$d)</string>
     <string name="browser_source_outputs">Выходы Browser Source</string>
     <string name="projection_target_display">Дисплей</string>
     <string name="reset_settings">Сбросить все настройки</string>
@@ -890,7 +713,6 @@
     <string name="schedule_note_placeholder">Добавить заметку…</string>
     <string name="screen_number">Экран %1$d</string>
     <string name="server_description">Позволяет мобильным устройствам и удалённым клиентам получать данные песен и Библии из этого приложения.</string>
-    <string name="server_endpoints">Доступные точки подключения</string>
     <string name="server_port">Порт</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Измените порт перед запуском сервера.</string>
@@ -900,19 +722,11 @@
     <string name="server_stopped">Остановлен</string>
     <string name="server_url_label">URL сервера</string>
     <string name="set_all_directories">Задать все</string>
-    <string name="songs_storage_directory">Папка хранения песен</string>
     <string name="symbol_cancel">✗</string>
-    <string name="symbol_dropdown">▾</string>
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Веб</string>
     <string name="tab_canvas">Холст</string>
     <string name="tab_visibility">Видимость вкладок</string>
-    <string name="text_margins">Отступы текста</string>
-    <string name="content_region">Область контента</string>
-    <string name="content_region_width">Ширина %</string>
-    <string name="content_region_x_offset">Смещение X %</string>
-    <string name="content_region_y_offset">Смещение Y %</string>
-    <string name="end_of_song_spacing">Конец песни (*) интервал</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Время вышло!</string>
     <string name="timer_expired_text_hint">Введите сообщение по окончании…</string>
@@ -921,7 +735,6 @@
     <string name="timer_minutes">мин</string>
     <string name="timer_pause">Пауза</string>
     <string name="timer_reset">Сброс</string>
-    <string name="timer_resume">Продолжить</string>
     <string name="timer_seconds">сек</string>
     <string name="timer_am">ДП</string>
     <string name="timer_pm">ПП</string>
@@ -931,12 +744,10 @@
     <string name="timer_clock_format_24h_sec">24-часовой (HH:mm:ss)</string>
     <string name="timer_clock_format_24h">24-часовой (HH:mm)</string>
     <string name="timer_start">Старт</string>
-    <string name="timer_text_color">Цвет таймера</string>
     <string name="timer_title">Таймер</string>
     <string name="timer_mode_duration">Длительность</string>
     <string name="timer_mode_clock">Конкретное время</string>
     <string name="timer_target_time">Отсчёт до</string>
-    <string name="tooltip_add_website">Добавить веб-сайт</string>
     <string name="tooltip_clear_display">Очистить экран</string>
     <string name="remote_action_clear_display">Очистить экран</string>
     <string name="schedule_add_files_title">Добавить файлы в программу</string>
@@ -950,7 +761,6 @@
     <string name="web_add_to_schedule">Добавить в программу</string>
     <string name="web_bookmark_add">В закладки</string>
     <string name="web_bookmark_remove">Удалить</string>
-    <string name="web_bookmarks">Закладки</string>
     <string name="web_clear_cache">Очистить кэш</string>
     <string name="web_back">Назад</string>
     <string name="web_forward">Вперёд</string>
@@ -966,12 +776,9 @@
     <string name="web_engine_unavailable_macos_body">Движок браузера ChurchPresenter больше не поддерживает эту версию macOS. Обновите систему до macOS 12 (Monterey) или новее, чтобы использовать вкладку "Веб" и источники браузера.</string>
     <string name="web_engine_unavailable_windows_title">Для веб-браузера требуется Windows 10 или новее</string>
     <string name="web_engine_unavailable_windows_body">Движок браузера ChurchPresenter больше не поддерживает эту версию Windows. Обновите систему до Windows 10 или новее, чтобы использовать вкладку "Веб" и источники браузера.</string>
-    <string name="web_under_construction">Эта функция находится в разработке.</string>
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_url_label">URL</string>
     <string name="website_dialog_title">Добавить веб-сайт</string>
     <string name="website_disclaimer">Мы не несём ответственности за рекламу или контент, который может отображаться на показываемом веб-сайте.</string>
-    <string name="website_go_live">В эфир</string>
     <string name="website_title_hint">Введите отображаемое имя…</string>
     <string name="website_title_label">Название (необязательно)</string>
     <string name="website_url_hint">https://example.com</string>
@@ -979,23 +786,10 @@
     <string name="new_song">Новая песня</string>
     <string name="back_to_live">Вернуться к прямому эфиру</string>
     <string name="line_navigation_hint">%1$s для навигации по строкам, %2$s для куплетов</string>
-    <string name="multi_verse">Несколько стихов</string>
 
     <!-- Statistics -->
-    <string name="statistics">Статистика</string>
-    <string name="top_songs">Топ песен</string>
-    <string name="top_verses">Топ стихов</string>
     <string name="clear_statistics">Очистить статистику</string>
-    <string name="times_displayed">раз</string>
     <string name="menu_statistics">Статистика</string>
-    <string name="export_to_xls">Экспортировать в XLS</string>
-    <string name="statistics_song_count">%1$d песен</string>
-    <string name="statistics_verse_count">%1$d стихов</string>
-    <string name="statistics_exported_success">Статистика успешно экспортирована.</string>
-    <string name="statistics_exported_error">Не удалось экспортировать статистику.</string>
-    <string name="file_chooser_save_statistics">Сохранить статистику как</string>
-    <string name="file_filter_xls">Электронная таблица Excel (*.xls)</string>
-    <string name="stats_period_label">Период:</string>
     <string name="stats_period_all_time">За всё время</string>
     <string name="stats_period_last_3_months">Последние 3 месяца</string>
     <string name="stats_period_last_6_months">Последние 6 месяцев</string>
@@ -1009,33 +803,6 @@
     <string name="stats_clear_all_confirm">Очистить всю статистику? Также будет удалена история показов, на которой строится отчёт CCLI. Это действие нельзя отменить.</string>
 
     <!-- Remote API / Companion Server (added) -->
-    <string name="auto_fit_button_tooltip">Вычислить оптимальный размер шрифта для текущего стиха</string>
-    <string name="auto_fit_checkbox_tooltip">Автоматически подгонять текст под экран, используя размер шрифта как максимум</string>
-    <string name="server_endpoints_read">Чтение</string>
-    <string name="server_endpoints_actions">Действия</string>
-    <string name="server_endpoints_websocket">WebSocket</string>
-    <string name="server_payload_reference">Справочник полей запроса (поле item)</string>
-    <string name="endpoint_desc_server_info">информация о сервере</string>
-    <string name="endpoint_desc_song_catalog">каталог песен</string>
-    <string name="endpoint_desc_song_detail">полные данные песни с текстом</string>
-    <string name="endpoint_desc_filter_songbook">фильтр по сборнику песен</string>
-    <string name="endpoint_desc_bible_catalog">каталог Библии</string>
-    <string name="endpoint_desc_filter_book">фильтр по книге</string>
-    <string name="endpoint_desc_filter_chapter">фильтр по главе</string>
-    <string name="endpoint_desc_schedule">текущее расписание</string>
-    <string name="endpoint_desc_presentation_catalog">каталог презентаций</string>
-    <string name="endpoint_desc_slide_image">изображение слайда (JPEG)</string>
-    <string name="endpoint_desc_picture_catalog">каталог папки с изображениями</string>
-    <string name="endpoint_desc_picture_image">изображение (JPEG)</string>
-    <string name="endpoint_desc_select_picture">выбрать изображение по индексу</string>
-    <string name="endpoint_desc_ws_select_picture">выбрать изображение (WS)</string>
-    <string name="endpoint_desc_bible_chapter">полная глава с текстом стихов</string>
-    <string name="endpoint_desc_add_to_schedule">добавить элемент в расписание</string>
-    <string name="endpoint_desc_add_batch_to_schedule">добавить несколько элементов в расписание за один вызов</string>
-    <string name="endpoint_desc_project">отправить элемент напрямую в проекцию</string>
-    <string name="endpoint_desc_ws_realtime">обновления в реальном времени</string>
-    <string name="endpoint_desc_ws_add_to_schedule">добавить элемент в расписание (WS)</string>
-    <string name="endpoint_desc_ws_project">транслировать элемент напрямую (WS)</string>
     <string name="remote_api_add_to_schedule">Добавить в расписание</string>
     <string name="remote_api_project">Транслировать (В эфир)</string>
     <string name="remote_api_presentation_connect">Подключиться к удалённому управлению презентацией</string>
@@ -1073,11 +840,9 @@
     <string name="client_label_cancel">Отмена</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
-    <string name="new_songbook">Новый сборник</string>
     <string name="add_new">Добавить новый...</string>
     <string name="secondary_title">Дополнительное название</string>
     <string name="duplicate_song_error">Песня с таким номером и названием уже существует в этом сборнике</string>
-    <string name="secondary_lyrics">Дополнительный текст</string>
     <string name="enter_secondary_lyrics_here">Введите дополнительный текст...</string>
 
     <!-- System Settings - Song Samples and File Conversion -->
@@ -1086,7 +851,6 @@
     <string name="song_samples_overwrite_confirm">Папка \"Образцы песен\" уже существует. Это перезапишет существующие файлы.\nПродолжить?</string>
     <string name="song_samples_copied">Скопировано %1$d образцов песен в папку \"Образцы песен\".</string>
     <string name="add_song_samples">Добавить образцы песен</string>
-    <string name="sps_file_not_supported">%1$s (не поддерживается)</string>
     <string name="folder_overwrite_confirm">Папка \"%1$s\" уже существует. Это перезапишет существующие файлы песен.\nПродолжить?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
@@ -1197,30 +961,9 @@
     <string name="song_number_offset_needs_corner">Выберите угол выше, чтобы свободно расположить номер</string>
     <string name="song_number_offset_x">Смещение X %</string>
     <string name="song_number_offset_y">Смещение Y %</string>
-    <string name="song_section_label">Подпись раздела</string>
-    <string name="song_section_label_enabled">Показывать текущий раздел (куплет, припев…)</string>
-    <string name="song_section_label_font_size">Размер шрифта</string>
-    <string name="song_section_label_color">Цвет</string>
-    <string name="fullscreen_display">Полноэкранный режим</string>
-    <string name="display_mode_label">Режим отображения:</string>
-    <string name="display_mode_one_verse">1 куплет</string>
-    <string name="display_mode_one_line">1 строка</string>
     <string name="song_language_both">Оба</string>
     <string name="song_language_primary">Основной</string>
     <string name="song_language_secondary">Дополнительный</string>
-    <string name="screen_lang_off">Выкл.</string>
-    <string name="screen_lang_language_1">Язык 1</string>
-    <string name="screen_lang_language_2">Язык 2</string>
-    <string name="screen_lang_bible_1">Библия 1</string>
-    <string name="screen_lang_bible_2">Библия 2</string>
-    <string name="lower_third_display">Нижняя треть</string>
-    <string name="bilingual_layout">Двуязычный макет:</string>
-    <string name="bilingual_left_right">Слева / Справа</string>
-    <string name="bilingual_top_bottom">Сверху / Снизу</string>
-    <string name="look_ahead_fullscreen">Предпросмотр (полный экран)</string>
-    <string name="look_ahead_next_fullscreen">Следующий раздел (полный экран)</string>
-    <string name="look_ahead_lower_third">Предпросмотр (нижняя треть)</string>
-    <string name="look_ahead_next_lower_third">Следующий раздел (нижняя треть)</string>
 
     <!-- Color Picker Dialog -->
     <string name="dialog_choose_color">Выбрать цвет</string>
@@ -1229,7 +972,6 @@
     <!-- Song Title Slide -->
     <string name="song_title_slide">Слайд с названием песни</string>
     <string name="show_song_number_before_title">Показывать номер песни перед названием</string>
-    <string name="enabled">Включено</string>
 
     <!-- Canvas Tab -->
     <string name="canvas_scenes">Сцены</string>
@@ -1283,15 +1025,11 @@
     <string name="canvas_source_screen_capture">Захват экрана</string>
     <string name="canvas_text_color">Цвет текста</string>
     <string name="canvas_text_bg_color">Цвет фона</string>
-    <string name="canvas_text_bold">Жирный</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
     <string name="canvas_clock_show_hours">Показывать часы</string>
     <string name="canvas_clock_show_seconds">Показывать секунды</string>
     <string name="canvas_clock_font_size">Размер шрифта</string>
-    <string name="canvas_clock_target_hour">Целевой час</string>
-    <string name="canvas_clock_target_minute">Целевая минута</string>
-    <string name="canvas_clock_target_second">Целевая секунда</string>
     <string name="canvas_qr_type">Тип</string>
     <string name="canvas_qr_content">Содержимое</string>
     <string name="canvas_qr_foreground">Передний план</string>
@@ -1302,9 +1040,7 @@
     <string name="canvas_qr_wifi_hidden">Скрытая сеть</string>
     <string name="canvas_qr_error_correction">Коррекция ошибок</string>
     <string name="canvas_camera_device">Камера</string>
-    <string name="canvas_camera_name">Название устройства</string>
     <string name="canvas_camera_none_found">Камеры не найдены</string>
-    <string name="canvas_camera_ffmpeg_hint">Установите ffmpeg для обнаружения виртуальных камер (OBS, NDI и т.д.)</string>
     <string name="canvas_camera_v4l2_hint">Установите v4l2loopback для виртуальных камер: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Обновить камеры</string>
     <string name="canvas_camera_format">Формат видео</string>
@@ -1348,7 +1084,6 @@
     <string name="canvas_scale_none">Исходный</string>
     <string name="canvas_text_content">Текст</string>
     <string name="canvas_expand_text_field">Редактировать в большом окне</string>
-    <string name="canvas_line_spacing">Межстрочный интервал</string>
     <string name="canvas_font">Шрифт</string>
     <string name="canvas_align_horizontal">По горизонтали</string>
     <string name="canvas_align_vertical">По вертикали</string>
@@ -1381,25 +1116,6 @@
     <string name="canvas_clock_format_24h">24h</string>
     <string name="canvas_clock_format_12h">12h</string>
     <string name="show_qr_code">QR</string>
-    <string name="cert_download_button">Скачать сертификат</string>
-    <string name="cert_download_qr_title">Установить CA-сертификат</string>
-    <string name="cert_download_scan_hint">Отсканируйте QR-код камерой телефона, чтобы открыть страницу загрузки сертификата.</string>
-    <string name="cert_install_ios_title">🍎  Установка на iOS</string>
-    <string name="cert_install_ios_step1">Отсканируйте QR-код — камера покажет баннер с URL вверху экрана.</string>
-    <string name="cert_install_ios_step2">Нажмите на баннер, чтобы открыть ссылку в Safari. При запросе нажмите «Разрешить» для скачивания профиля.</string>
-    <string name="cert_install_ios_step3">Откройте Настройки → Основные → VPN и управление устройством → нажмите ChurchPresenter CA → Установить → введите код-пароль.</string>
-    <string name="cert_install_ios_trust_title">⚠️  Обязательно после установки</string>
-    <string name="cert_install_ios_trust_step">Настройки → Основные → Об этом устройстве → Доверие сертификатам → включите полное доверие для ChurchPresenter CA. Без этого шага приложение не сможет установить защищённое соединение.</string>
-    <string name="cert_install_android_title">🤖  Установка на Android</string>
-    <string name="cert_install_android_step1">Отсканируйте QR-код — нажмите на URL, показанный камерой, чтобы открыть его в Chrome.</string>
-    <string name="cert_install_android_step2">Chrome скачает ChurchPresenter-CA.crt. Нажмите на файл в уведомлении или в «Загрузках», чтобы установить его.</string>
-    <string name="cert_install_android_cant_title">🚫  Не удаётся установить сертификат / только из известных источников?</string>
-    <string name="cert_install_android_cant_intro">Некоторые версии Android блокируют прямую установку сертификатов. Используйте ручной способ:</string>
-    <string name="cert_install_android_cant_step1">Настройки → Безопасность (или Биометрия и безопасность на Samsung).</string>
-    <string name="cert_install_android_cant_step2">Нажмите Шифрование и учётные данные → Установить сертификат → Сертификат ЦС.</string>
-    <string name="cert_install_android_cant_step3">Перейдите в Загрузки, выберите ChurchPresenter-CA.crt и подтвердите.</string>
-    <string name="cert_fingerprint_label">Отпечаток SHA-256</string>
-    <string name="cert_fingerprint_verify">Проверьте, что этот отпечаток совпадает после установки — это гарантирует, что вы установили правильный сертификат.</string>
     <string name="connection_qr_title">QR-код подключения</string>
     <string name="server_host_label">Хост (переопределение)</string>
     <string name="server_host_hint">например, 192.168.1.50 или church-mac.local</string>
@@ -1408,14 +1124,12 @@
     <!-- Update checker -->
     <string name="update_dialog_title">Доступно обновление</string>
     <string name="update_dialog_message">Доступна новая версия Church Presenter: %1$s</string>
-    <string name="update_dialog_download">Скачать</string>
     <string name="update_dialog_dismiss">Позже</string>
     <string name="update_dialog_release_notes">Что нового:</string>
     <string name="update_dialog_download_install">Скачать и установить</string>
     <string name="update_dialog_downloading">Загрузка...</string>
     <string name="update_dialog_install_now">Установить сейчас</string>
     <string name="update_dialog_open_page">Открыть страницу загрузки</string>
-    <string name="update_check_menu">Проверить обновления…</string>
     <string name="update_already_latest">У вас установлена последняя версия.</string>
     <string name="update_dialog_up_to_date_title">У вас последняя версия</string>
     <string name="update_dialog_view_on_github">Открыть на GitHub</string>
@@ -1432,33 +1146,10 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Монитор сцены</string>
     <string name="display_stage_monitor">Монитор сцены</string>
-    <string name="stage_monitor_enable">Включить монитор сцены</string>
-    <string name="stage_monitor_display">Целевой дисплей</string>
-    <string name="stage_monitor_display_none">Нет (отключён)</string>
-    <string name="stage_monitor_section_general">Основные</string>
-    <string name="stage_monitor_section_current">Текущий слайд</string>
-    <string name="stage_monitor_section_next">Следующий слайд</string>
-    <string name="stage_monitor_section_label_style">Стиль метки</string>
-    <string name="stage_monitor_section_clock">Часы и таймер</string>
-    <string name="stage_monitor_show_next_slide">Показывать следующий слайд</string>
-    <string name="stage_monitor_show_clock">Показывать часы</string>
-    <string name="stage_monitor_show_timer">Показывать обратный отсчёт</string>
-    <string name="stage_monitor_show_section_label">Показывать метку раздела</string>
-    <string name="stage_monitor_show_notes">Показывать заметки ведущего</string>
     <string name="general">Общие</string>
-    <string name="stage_monitor_text_color">Цвет текста</string>
-    <string name="stage_monitor_font_size">Размер шрифта</string>
-    <string name="stage_monitor_background_color">Цвет фона</string>
-    <string name="stage_monitor_layout">Макет</string>
-    <string name="stage_monitor_layout_vertical">Вертикальный</string>
-    <string name="stage_monitor_layout_horizontal">Горизонтальный</string>
-    <string name="stage_monitor_layout_quadrants">Разметка на 4 части</string>
-    <string name="stage_monitor_quadrant_current">Верх-лево: текущий слайд</string>
     <string name="stage_monitor_quadrant_next">Низ-лево: следующий слайд</string>
     <string name="stage_monitor_quadrant_clock">Низ-центр: часы</string>
     <string name="stage_monitor_quadrant_notes">Низ-право: заметки ведущего</string>
-    <string name="stage_monitor_no_extra_displays">Дополнительные мониторы не обнаружены. Подключите дополнительный монитор для использования монитора сцены.</string>
-    <string name="stage_monitor_layout_section">Раскладка экрана</string>
     <string name="stage_monitor_zone_top_left">Вверху слева</string>
     <string name="stage_monitor_zone_top_right">Вверху справа</string>
     <string name="stage_monitor_zone_bottom_left">Внизу слева</string>
@@ -1466,13 +1157,8 @@
     <string name="stage_monitor_zone_bottom_right">Внизу справа</string>
     <string name="stage_monitor_zone_full_screen">Весь экран</string>
     <string name="stage_monitor_zone_none">Нет</string>
-    <string name="stage_monitor_notes_from_presentation">Заметки автоматически отображаются из активного слайда PowerPoint или Keynote.</string>
-    <string name="stage_monitor_content_section">Содержимое экрана</string>
     <string name="stage_monitor_zone_n">Зона %1$d</string>
-    <string name="stage_monitor_zone_shows">Показывает</string>
-    <string name="stage_monitor_zone_count">Зон: %1$d</string>
     <string name="stage_monitor_layout_stranded">Не показывается в этой раскладке: %1$s</string>
-    <string name="stage_monitor_size_section">Размер зон</string>
     <string name="stage_monitor_zone_width">Ширина (%)</string>
     <string name="stage_monitor_zone_row_height">Высота ряда (%)</string>
     <string name="stage_monitor_size_selected">Выбрано</string>
@@ -1494,7 +1180,6 @@
     <string name="stage_monitor_position_middle_left">Посередине слева</string>
     <string name="stage_monitor_position_center">Центр</string>
     <string name="stage_monitor_position_middle_right">Посередине справа</string>
-    <string name="metronome_bpm_label">Темп метронома</string>
     <string name="unit_bpm">уд/мин</string>
 
     <!-- Q&A Tab -->
@@ -1510,14 +1195,10 @@
     <string name="qa_incoming_approved">Входящие + Одобренные</string>
     <string name="qa_done">Выполнено</string>
     <string name="qa_denied">Отклонено</string>
-    <string name="qa_questions">Вопросы</string>
 
     <string name="qa_finished">Завершённые</string>
     <string name="qa_history">История</string>
     <string name="qa_clear_all_questions">Очистить все вопросы</string>
-    <string name="qa_incoming_tab">Входящие (%1$d)</string>
-    <string name="qa_finished_tab">Завершённые (%1$d)</string>
-    <string name="qa_history_tab">История (%1$d)</string>
     <string name="qa_displaying">Отображается: %1$s…</string>
     <string name="qa_waiting">Ожидание вопросов…</string>
     <string name="qa_start_session_hint">Начните сеанс для получения вопросов</string>
@@ -1537,18 +1218,6 @@
     <string name="qa_show_qr">Показать QR на экране</string>
     <string name="qa_admin_panel">Панель администратора</string>
     <string name="qa_server_hint">Запустите companion-сервер для включения Q&amp;A</string>
-    <string name="qa_display_styling">Оформление отображения</string>
-    <string name="qa_styling_qr_group">QR-код</string>
-    <string name="qa_styling_text_group">Текст и фон</string>
-    <string name="qa_text_color">Цвет текста</string>
-    <string name="qa_qr_fg_color">Передний план QR</string>
-    <string name="qa_qr_bg_color">Фон QR</string>
-    <string name="qa_font">Шрифт</string>
-    <string name="qa_size">Размер</string>
-    <string name="qa_background_color">Цвет фона</string>
-    <string name="qa_transparent">Прозрачный</string>
-    <string name="qa_position">Положение</string>
-    <string name="qa_settings_section">Настройки</string>
     <string name="qa_cooldown_label">Пауза между вопросами (секунды)</string>
     <string name="qa_qr_message_label">Сообщение QR-кода</string>
     <string name="qa_qr_message_default">Отсканируйте, чтобы задать вопрос</string>
@@ -1575,18 +1244,8 @@
     <string name="qa_local">Локальный</string>
     <string name="qa_public">Публичный</string>
     <string name="qa_retry">Повторить</string>
-    <string name="qa_pos_tl">ВЛ</string>
-    <string name="qa_pos_tc">ВЦ</string>
-    <string name="qa_pos_tr">ВП</string>
-    <string name="qa_pos_cl">ЦЛ</string>
-    <string name="qa_pos_c">Ц</string>
-    <string name="qa_pos_cr">ЦП</string>
-    <string name="qa_pos_bl">НЛ</string>
-    <string name="qa_pos_bc">НЦ</string>
-    <string name="qa_pos_br">НП</string>
 
     <!-- QA: missing strings -->
-    <string name="qa_sort">Сортировка: %1$s</string>
     <string name="qa_sort_newest">Сначала новые</string>
     <string name="qa_sort_oldest">Сначала старые</string>
     <string name="qa_sort_most_votes">Больше голосов</string>
@@ -1600,51 +1259,19 @@
     <string name="qa_copy_url">Скопировать ссылку</string>
     <string name="qa_voting_enabled">Голосование включено</string>
     <string name="qa_voting_disabled">Голосование отключено</string>
-    <string name="qa_opacity">Прозрачность:</string>
     <!-- STT tab -->
     <string name="stt_server_url">URL-адрес сервера STT</string>
     <string name="stt_disconnect">Отключиться</string>
     <string name="stt_connect">Подключиться</string>
     <string name="stt_go_live">Начать прямой эфир</string>
-    <string name="stt_display_mode">Режим отображения</string>
-    <string name="stt_mode_transcribe">Только транскрипция</string>
-    <string name="stt_mode_translate">Только перевод</string>
-    <string name="stt_mode_both">Оба</string>
-    <string name="stt_layout">Макет</string>
-    <string name="stt_layout_stacked">Вертикально</string>
-    <string name="stt_layout_stacked_inverse">Вертикально (инверсия)</string>
-    <string name="stt_layout_side_by_side">Горизонтально</string>
-    <string name="stt_layout_side_by_side_inverse">Горизонтально (инверсия)</string>
-    <string name="stt_max_segments">Макс. сегментов:</string>
-    <string name="stt_max_lines">Макс. строк:</string>
-    <string name="stt_line_spacing">Межстрочный интервал %:</string>
-    <string name="stt_word_highlighting">Подсветка слов</string>
-    <string name="stt_in_progress_text">Текст в процессе</string>
-    <string name="stt_translation_in_progress">Перевод в процессе</string>
-    <string name="stt_drip_feed">Постепенный вывод</string>
-    <string name="stt_drip_feed_speed">Скорость (мс/слово):</string>
     <string name="stt_live_preview">Предпросмотр</string>
     <string name="stt_not_connected">Нет подключения. Введите URL-адрес сервера STT и нажмите «Подключиться».</string>
     <string name="stt_waiting_for_transcription">Ожидание транскрипции…</string>
     <string name="stt_transcription_label">Транскрипция</string>
     <string name="stt_translation_label">Перевод</string>
-    <string name="stt_display_styling">Оформление отображения</string>
-    <string name="stt_text_color">Цвет текста</string>
-    <string name="stt_translation_color">Цвет перевода</string>
-    <string name="stt_font">Шрифт</string>
-    <string name="stt_size">Размер</string>
-    <string name="stt_background_color">Цвет фона</string>
-    <string name="stt_opacity">Прозрачность:</string>
-    <string name="stt_position">Положение</string>
 
     <!-- CCLI Report -->
-    <string name="ccli_report">CCLI Отчёт</string>
     <string name="ccli_report_title">Отчёт по использованию CCLI</string>
-    <string name="ccli_preset_30d">Последние 30 дней</string>
-    <string name="ccli_preset_90d">Последние 90 дней</string>
-    <string name="ccli_preset_this_year">Этот год</string>
-    <string name="ccli_preset_last_year">Прошлый год</string>
-    <string name="ccli_preset_all_time">За всё время</string>
     <string name="ccli_tab_songs">Песни</string>
     <string name="ccli_tab_bible">Библия</string>
     <string name="ccli_tab_activity">Активность</string>
@@ -1672,7 +1299,6 @@
     <string name="ccli_col_last">Последний</string>
     <string name="ccli_col_verse">Стих</string>
     <string name="ccli_col_bible">Библия</string>
-    <string name="ccli_report_description">Отчёт с фильтром по дате и диаграммами — экспортируйте CSV для отчётности CCLI</string>
     <string name="ccli_export_csv">Экспорт CCLI CSV</string>
     <string name="ccli_export_xls">Экспорт XLS</string>
     <string name="ccli_exported_success">Отчёт успешно экспортирован.</string>
@@ -1713,7 +1339,6 @@
     <string name="obs_enable">Подключиться к OBS Studio</string>
     <string name="obs_host">Хост</string>
     <string name="obs_host_hint">localhost</string>
-    <string name="obs_port">Порт</string>
     <string name="obs_password">Пароль</string>
     <string name="obs_password_hint">Оставьте пустым, если пароль не задан</string>
     <string name="obs_connect">Подключить</string>
@@ -1750,7 +1375,6 @@
     <string name="song_favorites_clear">Очистить избранное</string>
     <string name="song_play_count">Воспр.</string>
     <string name="song_columns">Фильтр столбцов</string>
-    <string name="api_key_qr_title">QR-код ключа API</string>
     <string name="background_follow_default_option">По умолчанию</string>
     <string name="bible_no_primary_title">Основная Библия не настроена</string>
     <string name="bible_no_primary_hint">Откройте ⚙ Настройки и перейдите на вкладку «Библия», затем:</string>
@@ -1764,14 +1388,8 @@
     <string name="canvas_bible_end_verse">Конечный стих</string>
     <string name="canvas_bible_ref_font_size">Размер шрифта ссылки</string>
     <string name="canvas_bible_ref_color">Цвет ссылки</string>
-    <string name="canvas_bible_ref_bold">Жирная ссылка</string>
-    <string name="canvas_bible_ref_italic">Курсивная ссылка</string>
     <string name="canvas_source_bible">Библия</string>
-    <string name="canvas_text_italic">Курсив</string>
     <string name="close">Закрыть</string>
-    <string name="connection_qr_url_label">URL сервера</string>
-    <string name="connection_qr_key_label">Ключ API</string>
-    <string name="crash_video_bg_disabled">Видеофон отключён после %1$d последовательных сбоев.  [Включить]  [Закрыть]</string>
     <string name="crossword_tab">Кроссворд</string>
     <string name="crossword_across">По горизонтали</string>
     <string name="crossword_down">По вертикали</string>
@@ -1783,8 +1401,6 @@
     <string name="crossword_loading">Загрузка кроссвордов…</string>
     <string name="crossword_no_puzzles">Кроссвордов пока нет.</string>
     <string name="crossword_level_label">Уровень %1$d</string>
-    <string name="deny_all">Отклонить все</string>
-    <string name="lottie_select_json_file">Выбрать JSON-файл Lottie</string>
     <string name="media_vlc_arch_mismatch">Неверная архитектура VLC. Ваш Mac использует Apple Silicon (arm64), а установленный VLC поддерживает только Intel (x86_64). Скачайте версию VLC для Apple Silicon с сайта videolan.org и перезапустите программу.</string>
     <string name="media_vlc_load_failed">VLC найден, но не удалось его загрузить. Попробуйте переустановить VLC с сайта videolan.org (в Windows также установите Microsoft Visual C++ Redistributable), затем перезапустите приложение.</string>
     <string name="open_converter">Конвертер песен и Библий</string>
@@ -1792,10 +1408,6 @@
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Фон нижней трети</string>
-    <string name="projection_content_stt_tooltip">Речь в текст — субтитры в реальном времени и перевод</string>
-    <string name="projection_web_decklink_tooltip">Веб-браузер не может отображать на выходах DeckLink</string>
-    <string name="browser_source_content_unavailable_tooltip">Пока недоступно для выхода Browser Source</string>
-    <string name="projection_web_go_live_tooltip">Требуется обычный дисплей (не DeckLink) с включённым веб-режимом в настройках проекции</string>
     <string name="qa_add_question_hint">Добавить вопрос…</string>
     <string name="remote_activity_added_to_schedule">Добавлено в программу</string>
     <string name="remote_activity_projected">Выведено на экран</string>
@@ -1825,9 +1437,6 @@
     <string name="songs_no_db_title">База данных песен не настроена</string>
     <string name="songs_no_db_hint">Откройте ⚙ Настройки и перейдите на вкладку «Песни», затем:</string>
     <string name="songs_no_db_step">Укажите папку, содержащую базу данных песен</string>
-    <string name="tooltip_announcement_show">Показать объявление на экране</string>
-    <string name="tooltip_announcement_hide">Скрыть объявление с экрана</string>
-    <string name="web_type_to_page_label">Ввод на страницу</string>
     <string name="web_type_to_page_placeholder">Сначала нажмите на поле ввода на живой странице</string>
     <string name="web_focus_first_input">Фокус на первое поле ввода</string>
     <string name="tab_dictionary">Словарь</string>
@@ -1861,8 +1470,6 @@
     <string name="setup_step2_subtitle">Настройте файлы Библии для отображения стихов</string>
     <string name="setup_step2_step1">1. Откройте Настройки с помощью кнопки ⚙ на панели инструментов</string>
     <string name="setup_step2_step2">2. Перейдите на вкладку Система</string>
-    <string name="setup_step2_step3">3. Нажмите «Обзор…» рядом с директорией хранения Библии</string>
-    <string name="setup_step2_step4">4. Выберите папку с файлами Библии (.db3)</string>
     <string name="setup_step2_step5">5. Перейдите на вкладку Библия и выберите основную Библию</string>
     <string name="setup_step2_tip">Найдите в интернете XML-файл Библии на вашем языке.</string>
     <string name="setup_step2_tip2">Есть Библия в другом формате? Конвертер песен и Библий (Справка → Конвертер песен и Библий) может её преобразовать.</string>
@@ -1872,7 +1479,6 @@
     <string name="setup_step3_step2">2. Перейдите на вкладку Система</string>
     <string name="setup_step3_step3">3. Нажмите «Обзор…» рядом с директорией хранения песен</string>
     <string name="setup_step3_step4">4. Выберите папку с вашими файлами песен</string>
-    <string name="setup_step3_tip">Песни могут быть в формате OpenLyrics, SongPro или ChurchPresenter.</string>
     <string name="setup_step5_title">VLC Media Player</string>
     <string name="setup_step5_subtitle">Необходим для воспроизведения видео и аудио в слайдах</string>
     <string name="setup_step5_vlc_ok">VLC установлен и готов к работе</string>
@@ -1890,8 +1496,6 @@
     <string name="setup_proj_subtitle">Настройте отображение контента на ваших экранах</string>
     <string name="setup_proj_step1">1. Подключите проектор или дополнительный дисплей к компьютеру</string>
     <string name="setup_proj_step2">2. Откройте Настройки и перейдите на вкладку Проекция</string>
-    <string name="setup_proj_step3">3. Установите количество окон проекции в соответствии с вашими дисплеями</string>
-    <string name="setup_proj_step4">4. Для каждого экрана выберите целевой дисплей и режим отображения. Затем выберите в выпадающих списках Библии и Песен нужный язык — выбор значения включает этот контент на данном экране. Установка флажка для других вкладок (Картинки, Медиа и т.д.) работает аналогично.</string>
     <string name="setup_proj_step5">5. Нажмите Идентифицировать, чтобы определить, какой дисплей — какой</string>
     <string name="setup_proj_tip">Каждая вкладка — Песни, Библия, Слайды, Медиа, Холст — передаёт контент в одно и то же окно проекции. Настройки каждой вкладки управляют шрифтами, фонами и компоновкой.</string>
     <string name="setup_proj_tip2">Вы можете открывать и закрывать окно проекции в любое время через меню Вид или с помощью сочетания клавиш.</string>
@@ -1909,7 +1513,6 @@
     <string name="atem_description">Загрузка анимаций нижней трети в медиапул коммутатора Blackmagic ATEM. Используйте Bitfocus Companion для управления DSK.</string>
     <string name="atem_host">IP-адрес ATEM</string>
     <string name="atem_host_hint">например, 192.168.1.100</string>
-    <string name="atem_port">Порт</string>
     <string name="atem_test_connection">Проверить подключение</string>
     <string name="atem_test_connection_hint">Нажмите «Проверить подключение», чтобы автоматически определить видеоформат и FPS вашего ATEM.</string>
     <string name="atem_status_connected">Подключено</string>
@@ -1921,14 +1524,12 @@
     <string name="atem_render_resolution">Разрешение рендеринга</string>
     <string name="atem_render_width">Ширина</string>
     <string name="atem_render_height">Высота</string>
-    <string name="atem_clip_fps">FPS клипа (должен совпадать с видеостандартом ATEM)</string>
     <string name="atem_clip_fps_hint">25, 30, 50 или 60</string>
     <string name="atem_send_to_atem">Отправить на ATEM</string>
     <string name="atem_upload_mode">Режим загрузки</string>
     <string name="atem_mode_still">Статичное изображение (один кадр)</string>
     <string name="atem_mode_clip">Клип (полная анимация)</string>
     <string name="atem_slot">Слот</string>
-    <string name="atem_slot_range">Доступно: 1–%1$d</string>
     <string name="atem_upload">Загрузить</string>
     <string name="atem_uploading">Загрузка…</string>
     <string name="atem_preparing">Подготовка кадров…</string>
@@ -1937,12 +1538,10 @@
     <string name="atem_clip_capacity_info">клип требует %1$d из %2$d кадров (≈%3$s с макс.)</string>
     <string name="atem_clip_too_long">Клип требует %1$d кадров, но слот %2$d вмещает до %3$d (≈%4$s с) — сократите клип, уменьшите FPS или увеличьте выделение кадров в ATEM Software Control</string>
     <string name="atem_ready">Готово к загрузке</string>
-    <string name="atem_upload_done">Загрузка завершена</string>
     <string name="atem_upload_error">Ошибка загрузки: %1$s</string>
     <string name="atem_detected_video_mode">Определено: %1$s</string>
     <string name="atem_loading_slots">Загрузка слотов…</string>
     <string name="atem_slots_error">Не удалось загрузить слоты: %1$s</string>
-    <string name="atem_not_configured">Настройте ATEM в Настройках для активации этой кнопки.</string>
     <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_slot_unnamed">Слот %1$d</string>
     <string name="atem_slot_named">Слот %1$d – %2$s</string>
@@ -1950,7 +1549,6 @@
     <string name="atem_slot_empty">Слот %1$d (пуст)</string>
     <string name="tab_companion_surface">Companion</string>
     <string name="companion_satellite_settings">Companion Satellite</string>
-    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
     <string name="companion_satellite_description">Подключитесь к экземпляру Bitfocus Companion в вашей сети как поверхность Satellite и нажимайте его кнопки прямо из ChurchPresenter.</string>
     <string name="companion_satellite_host">Хост</string>
     <string name="companion_satellite_host_hint">напр. 192.168.1.50</string>
@@ -1972,7 +1570,6 @@
     <string name="companion_satellite_connect">Подключить</string>
     <string name="companion_satellite_disconnect">Отключить</string>
     <string name="companion_satellite_no_host">Укажите хост Companion в Настройки → Companion Satellite, чтобы подключиться.</string>
-    <string name="companion_satellite_status_connected">Подключено</string>
     <string name="companion_satellite_status_connecting">Подключение…</string>
     <string name="companion_satellite_status_disconnected">Отключено</string>
     <string name="companion_satellite_status_error">Ошибка: %1$s</string>
@@ -2002,7 +1599,6 @@
     <string name="companion_lt_server_off">Запустите сервер, чтобы получить URL триггеров</string>
     <string name="atem_detected_keyers">Обнаружено: %1$s</string>
     <string name="atem_detected_keyers_unknown">Выполните проверку подключения, чтобы определить число M/E и ключей</string>
-    <string name="bible_stt_heard">Распознано</string>
     <string name="bible_stt_listening">Слушаю…</string>
     <string name="bible_stt_auto_follow">Авто-переход</string>
     <string name="bible_stt_auto_follow_hint">Автоматически открывать последнюю произнесённую ссылку</string>
@@ -2037,17 +1633,6 @@
     <string name="dictionary_in_scripture_none">Теги для этой записи не найдены</string>
     <string name="dictionary_in_scripture_count">Встречается в %1$d стихах</string>
     <string name="dictionary_in_scripture_show_more">Показать ещё %1$d</string>
-    <string name="dictionary_in_scripture_all_books">Все книги</string>
-    <string name="dictionary_in_scripture_all_chapters">Все главы</string>
-    <string name="dictionary_in_scripture_all_verses">Все стихи</string>
-    <string name="dictionary_in_scripture_count_filtered">Показано %1$d из %2$d стихов</string>
-    <string name="dictionary_settings_word_text">Слово (оригинал)</string>
-    <string name="dictionary_settings_reference_text">Ссылка и транслитерация</string>
-    <string name="dictionary_settings_definition_text">Определение</string>
-    <string name="dictionary_settings_kjv_usage">Использование (KJV)</string>
-    <string name="dictionary_settings_card_background">Фон карточки</string>
-    <string name="dictionary_settings_opacity">Прозрачность</string>
-    <string name="dictionary_settings_transitions">Настройки перехода</string>
     <string name="dictionary_back">Назад</string>
     <string name="dictionary_forward">Вперёд</string>
     <string name="dictionary_go_to_verse">Перейти к стиху на вкладке Библия</string>
@@ -2057,20 +1642,11 @@
     <string name="bible_search_mode_reference">Ссылка</string>
     <string name="bible_search_mode_text">Текст</string>
     <string name="bible_search_mode_tooltip">Нажмите для переключения — Авто: переход к ссылкам, поиск по остальному. Ссылка: только навигация. Текст: всегда искать в тексте стихов.</string>
-    <string name="projection_content_song_la">LA песни</string>
-    <string name="projection_content_song_la_tooltip">Следующий раздел песни</string>
-    <string name="projection_content_chords_tooltip">Показывать песню с аккордами как аккордовую схему, аккорды над словами</string>
     <string name="swap_bibles_hint">Поменять местами основную и вторичную Библии</string>
-    <string name="screen_lang_tooltip_off">Не показывать на этом экране</string>
-    <string name="screen_lang_tooltip_primary">Показывать только основной язык</string>
-    <string name="screen_lang_tooltip_secondary">Показывать только вторичный язык</string>
-    <string name="screen_lang_tooltip_both">Показывать оба языка</string>
     <string name="atem_clip_fps_unit">кадр/с</string>
     <string name="atem_uploading_image">Загрузка %1$s → слот изображения %2$d</string>
     <string name="atem_uploading_video">Загрузка %1$s → слот видео %2$d</string>
     <string name="atem_processing">Обработка %1$s на ATEM…</string>
-    <string name="companion_atem_triggers">Триггеры загрузки медиа ATEM</string>
-    <string name="companion_atem_triggers_desc">Скопируйте URL в кнопку Bitfocus Companion HTTP, чтобы загрузить этот нижний титр в слот медиа ATEM. Добавьте задержку в Companion перед запуском ключа — загрузка занимает несколько секунд.</string>
     <string name="companion_atem_upload_note">⚠ Загрузка медиа занимает несколько секунд.</string>
     <string name="companion_atem_clip_key_note">Клип + ключ загружает клип, ожидает завершения обработки на ATEM, а затем автоматически включает ключ — задержка в Companion не нужна. (Только клип + отдельный ключ по-прежнему требуют ручной задержки.)</string>
     <string name="companion_atem_still_key">Статика + ключ</string>
@@ -2081,7 +1657,6 @@
     <string name="companion_atem_key_desc">Запустить ключ независимо (upstream или downstream, согласно настройкам ATEM).</string>
     <string name="companion_atem_key_on">Скопировать: ключ вкл.</string>
     <string name="companion_atem_key_off">Скопировать: ключ выкл.</string>
-    <string name="companion_atem_not_configured">Настройте хост ATEM в Настройки › ATEM для включения триггеров загрузки.</string>
     <string name="companion_lt_copy_hide">Скрыть нижний титр</string>
     <string name="companion_lt_takedown_desc">«Скрыть нижний титр» убирает только нижний титр. «Очистить экран» очищает любой вывод (Библия, песня, нижний титр…).</string>
     <string name="dictionary_switch_language">Переключить язык словаря</string>
@@ -2164,9 +1739,7 @@
     <string name="diagnostic_info_save_failed">Не удалось сохранить диагностическую информацию.</string>
     <string name="browser_source_resolution">Разрешение</string>
     <string name="browser_source_fps">Макс. FPS</string>
-    <string name="browser_source_website_snapshot_tooltip">Зеркалирует веб-сайт, показанный на основном выходе — активно, только пока вкладка «Веб» или окно вывода отображает его</string>
     <string name="tooltip_stt_settings">Настройки отображения STT</string>
-    <string name="tooltip_dictionary_settings">Настройки отображения словаря</string>
     <string name="presentation_builds_counter">Шаг анимации %1$d из %2$d</string>
     <string name="presentation_animate_keynote">Анимировать презентации Keynote</string>
     <string name="presentation_focus_lost">Клавиатурный фокус потерян — нажмите здесь, чтобы снова включить стрелки и кликер</string>
@@ -2180,7 +1753,6 @@
     <string name="instance_link_controlling_host">Управляет %1$s</string>
     <string name="instance_link_primary_badge">Основной — подключено ведомых: %1$d</string>
     <string name="stt_settings_dialog_title">Настройки отображения STT</string>
-    <string name="dictionary_settings_dialog_title">Настройки отображения словаря</string>
     <string name="update_dialog_channel_stable">Стабильный выпуск</string>
     <string name="update_dialog_channel_prerelease">Предварительный выпуск</string>
     <string name="atem_section_background_uploads">Загрузка фонов</string>
@@ -2203,7 +1775,6 @@
     <string name="bible_stt_flag_missed_hint">Отметить, что движок пропустил отрывок, который на самом деле только что читался или цитировался</string>
     <string name="stt_help_dev_mode">Помощь разработчику — показывать на вкладке «Библия» кнопки обратной связи в реальном времени (неверный отрывок / преждевременно / пропущенный отрывок)</string>
     <string name="ccli_number">Номер CCLI</string>
-    <string name="planning_center_settings">Planning Center</string>
     <string name="planning_center_description">Импортировать в программу песни, медиафайлы и порядок служения из плана Planning Center Services.</string>
     <string name="planning_center_connect">Подключиться к Planning Center</string>
     <string name="planning_center_disconnect">Отключиться</string>
@@ -2223,40 +1794,16 @@
     <string name="planning_center_import_file_count">%1$d файл(ов)</string>
     <!-- Content Outputs dialog -->
     <string name="content_outputs">Вывод контента</string>
-    <string name="content_outputs_for">Вывод контента — %1$s</string>
     <string name="content_outputs_enabled_short">%1$d из %2$d включено</string>
-    <string name="content_outputs_enabled_subtitle">На этом экране включено %1$d из %2$d типов контента</string>
-    <string name="content_outputs_quick_select">Быстрый выбор</string>
-    <string name="content_outputs_select_all">Выбрать всё</string>
-    <string name="content_outputs_clear_all">Очистить всё</string>
-    <string name="content_outputs_section_content">Контент</string>
-    <string name="content_outputs_section_backgrounds">Фоны</string>
-    <string name="content_outputs_done">Готово</string>
-    <string name="content_outputs_preview">Этот выход показывает</string>
-    <string name="content_outputs_preview_empty">Ничего не включено — выход останется пустым</string>
-    <string name="content_outputs_preview_translations">%1$s (%2$s)</string>
-    <string name="content_bible_translations_header">Переводы Библии</string>
     <string name="content_bible_translations_all">Все</string>
-    <string name="content_bible_translations_enabled">%1$d из %2$d переводов включено</string>
-    <string name="content_bible_translations_footer">Несколько переводов отображаются друг под другом на экране, основной — первым.</string>
-    <string name="content_bible_translation_portion_ot_nt">ВЗ+НЗ</string>
-    <string name="content_bible_translation_portion_nt">НЗ</string>
-    <string name="content_bible_translation_portion_ot">ВЗ</string>
-    <string name="content_bible_translations_more">+ещё %1$d</string>
-    <string name="content_bible_translations_all_selected">Все Библии</string>
-    <string name="content_bible_translations_count_enabled">%1$d включено</string>
     <string name="bible_translation">Перевод %1$d</string>
     <string name="add_bible_translation">Добавить перевод</string>
-    <string name="bible_reference">Библейская ссылка</string>
     <string name="bible_translation_order">Порядок переводов</string>
     <string name="bible_translation_order_panel_title">Порядок отображения</string>
     <string name="bible_translation_order_panel_subtitle">Стихи располагаются на экране сверху вниз</string>
     <string name="bible_translation_order_hint">Перетащите строку или используйте стрелки для изменения порядка.</string>
     <string name="bible_translation_order_more">+%1$d</string>
     <string name="drag_to_reorder_translation">Перетащите, чтобы изменить порядок</string>
-    <string name="bible_multi_layout">Размещение переводов</string>
-    <string name="bible_translation_spacing">Расстояние между переводами</string>
-    <string name="bible_translation_divider">Показывать разделитель между переводами</string>
     <string name="pixels_short">пкс</string>
     <string name="move_translation_up">Переместить перевод вверх</string>
     <string name="move_translation_down">Переместить перевод вниз</string>
@@ -2266,20 +1813,12 @@
     <string name="projection_simulate_outputs">Имитировать выходы</string>
     <string name="max_media_upload_label">Макс. размер медиафайла (МБ)</string>
     <string name="max_media_upload_description">Медиафайлы больше этого размера отклоняются. По умолчанию %1$d МБ (примерно 5-минутный HD-ролик) — достаточно для заставок и таймеров, но не для полнометражных фильмов.</string>
-    <string name="setup_step2_step6">6. Перейдите на вкладку «Библия» и выберите основную Библию</string>
     <string name="setup_step2_download_hint">Более 1 500 переводов на более чем 1 000 языков доступны с eBible.org и из архива Zefania. Для каждого показываются авторские права перед установкой.</string>
     <string name="bible_stt_detected_version_tooltip">Перевод, из которого, судя по всему, читает говорящий, сопоставленный со всеми Библиями в вашей папке. Только для сведения — показываемый текст стиха всё равно берётся из вашей Библии.</string>
     <string name="bible_stt_flag_needs_live">Доступно, когда стих в эфире — этот флаг описывает отрывок на экране</string>
     <string name="instance_link_reconnect_delay">Минимальная задержка переподключения</string>
     <string name="instance_link_reconnect_delay_hint">Наименьшее ожидание перед повторной попыткой подключения. При повторных сбоях задержка увеличивается сама.</string>
     <string name="scanning_directory">Сканирование папки…</string>
-    <string name="content_outputs_translations_header">Переводы Библии</string>
-    <string name="content_outputs_translations_summary">Включено переводов: %1$d из %2$d</string>
-    <string name="content_outputs_translations_more">%1$s +%2$d</string>
-    <string name="content_outputs_translations_none">Нет</string>
-    <string name="content_outputs_translations_chip_all">Все</string>
-    <string name="content_outputs_translations_chip_clear">Очистить</string>
-    <string name="content_outputs_translation_primary">Основной</string>
     <string name="song_tempo">Темп</string>
     <string name="song_pane_lyrics">Текст</string>
     <string name="song_pane_secondary">Второй язык</string>
@@ -2291,12 +1830,9 @@
     <string name="song_key">Тональность</string>
     <string name="song_capo">Каподастр</string>
     <string name="song_play">Играть</string>
-    <string name="song_chord_color">Цвет аккордов</string>
-    <string name="song_lyrics_color">Цвет текста</string>
     <string name="song_transpose_down">Транспонировать вниз</string>
     <string name="song_transpose_up">Транспонировать вверх</string>
     <string name="song_transpose_reset">%1$s — сброс</string>
-    <string name="song_chords_in_key">Аккорды в %1$s</string>
     <string name="song_chords_used">использовано: %1$d</string>
     <string name="song_insert_chord">Вставить аккорд</string>
     <string name="song_stats">Разделов: %1$d · Строк: %2$d · Слов: %3$d</string>
@@ -2343,10 +1879,7 @@
     <string name="search_clear">Очистить поиск</string>
     <string name="shortcut_settings_reset">Сбросить</string>
     <string name="shortcut_settings_clear">Очистить</string>
-    <string name="shortcut_settings_change">Изменить</string>
-    <string name="shortcut_settings_customized">Изменено</string>
     <string name="shortcut_capture_title">Нажмите сочетание клавиш</string>
-    <string name="shortcut_capture_prompt">Нажмите клавиши, которые хотите назначить для этого действия.</string>
     <string name="shortcut_capture_conflict">Уже используется: %1$s</string>
     <string name="key_mod_ctrl">Ctrl</string>
     <string name="key_mod_shift">Shift</string>
@@ -2412,28 +1945,16 @@
     <string name="tooltip_strikethrough">Зачёркнутый</string>
     <string name="bible_custom_name">Название</string>
     <string name="bible_custom_abbreviation">Сокращение</string>
-    <string name="bible_custom_name_hint">Оставьте пустым, чтобы использовать название из модуля</string>
     <string name="bible_translations">Переводы</string>
     <string name="bible_miscellaneous">Разное</string>
-    <string name="bible_block_and_transition">Блок и переход</string>
-    <string name="bible_editing">Редактирование</string>
-    <string name="bible_verse_text">Текст стиха</string>
-    <string name="bible_reference_element">Ссылка</string>
-    <string name="bible_alignment">Выравнивание</string>
-    <string name="bible_reference_position">Положение ссылки</string>
     <string name="bible_font">Шрифт</string>
-    <string name="bible_size">Размер</string>
     <string name="bible_letter_spacing">Межбуквенный интервал</string>
     <string name="bible_word_spacing">Межсловный интервал</string>
-    <string name="bible_text_transform">Регистр текста</string>
     <string name="bible_text_transform_uppercase">ПРОПИСНЫЕ</string>
     <string name="bible_text_transform_lowercase">строчные</string>
     <string name="bible_text_transform_capitalize">С Заглавной</string>
-    <string name="bible_reset_element">Сбросить</string>
     <string name="bible_preview_full_screen">Предпросмотр полного экрана</string>
     <string name="bible_preview_lower_third">Предпросмотр нижней трети</string>
-    <string name="bible_scope_full_screen">Полный экран · %1$d × %2$d</string>
-    <string name="bible_scope_lower_third">Нижняя треть · %1$d × %2$d</string>
     <string name="bible_preview_sample_verse">Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного.</string>
     <string name="bible_preview_sample_book">Иоанна</string>
     <string name="bible_preview_no_translations">Добавьте перевод, чтобы увидеть его здесь</string>
@@ -2449,23 +1970,13 @@
     <string name="song_element_tempo">Темп</string>
     <string name="song_target_title_slide">Титульный слайд</string>
     <string name="song_show_on_title_slide">Показывать на титульном слайде</string>
-    <string name="song_scope_title_slide">Титульный слайд · %1$d × %2$d</string>
     <string name="song_preview_title_slide">Предпросмотр титульного слайда</string>
     <string name="song_chunk_verse">1 куплет</string>
     <string name="song_chunk_line">1 строка</string>
-    <string name="song_preview_chords">Аккорды</string>
-    <string name="song_preview_label">Предпросмотр</string>
     <string name="song_preview_sample_title">Amazing Grace</string>
-    <string name="song_languages">Языки песни</string>
-    <string name="song_language_single">1 · Один</string>
-    <string name="song_language_bilingual">2 · Двуязычно</string>
-    <string name="song_lyrics_layout">Расположение текста</string>
-    <string name="song_transition_and_markers">Переход и метки</string>
     <string name="song_element_look_ahead">Предпросмотр</string>
     <string name="song_chunk">Фрагмент</string>
     <string name="song_language_scope">Язык</string>
-    <string name="song_style_language">Оформление</string>
-    <string name="song_preview_look_ahead">Предпросмотр</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Фон</string>
     <string name="song_background_full_screen">Полный экран</string>
@@ -2512,7 +2023,6 @@
     <string name="background_following_default">Наследует по умолчанию</string>
     <string name="background_use_default">Использовать по умолчанию</string>
     <string name="background_set_explicitly">Задан отдельно для этой поверхности</string>
-    <string name="background_copy_look_to">Скопировать этот вид в</string>
     <string name="background_type_caption">Тип</string>
     <string name="background_color_caption">Цвет</string>
     <string name="background_image_file">Файл изображения</string>
@@ -2541,95 +2051,27 @@
     <string name="shortcut_description_quick_background_10">Быстрый фон 10</string>
 
     <!-- Per-output Customize dialog -->
-    <string name="customize">Переопределить стили</string>
-    <string name="customize_count">Переопределено · %1$d</string>
-    <string name="customize_tooltip_overwritten">Переопределено на этом экране: %1$s</string>
-    <string name="customize_tooltip_none">Используются общие настройки — нажмите, чтобы задать этому экрану собственные стили</string>
-    <string name="customize_dialog_title">Настройки отображения — %1$s</string>
-    <string name="customize_dialog_subtitle">Настроено %1$d из %2$d</string>
-    <string name="customize_pane_header">%1$s на этом экране</string>
-    <string name="customize_hint_on">Используются настройки этого экрана</string>
-    <string name="customize_hint_off">Используются общие настройки — включите для настройки</string>
-    <string name="customize_hint_stage_on">У этого экрана собственный макет зон</string>
-    <string name="customize_hint_stage_off">Включите, чтобы задать экрану макет зон</string>
-    <string name="customize_hint_lower_third">Форма нижней трети этого экрана</string>
-    <string name="customize_reset_to_global">Сбросить к общим</string>
-    <string name="customize_done">Готово</string>
-    <string name="customize_screen_heading">Экран</string>
-    <string name="customize_screen_geometry">%1$d × %2$d · %3$s</string>
-    <string name="customize_screen_geometry_unknown">%1$s</string>
-    <string name="customize_motion">Движение</string>
-    <string name="customize_layout">Макет</string>
-    <string name="customize_marker">Маркер</string>
-    <string name="customize_bilingual">Два языка</string>
-    <string name="customize_no_preview">Для этого раздела нет предпросмотра</string>
-    <string name="output_profile_none">Нет</string>
-    <string name="output_profile_new">Новый профиль</string>
-    <string name="output_profile_create_default">Создать профиль по умолчанию</string>
-    <string name="output_profile_create_default_tooltip">Добавить новый профиль со стандартным оформлением приложения — как запасной вариант, к которому можно вернуться</string>
     <string name="output_profile_duplicate">Дублировать</string>
-    <string name="output_profile_rename">Переименовать</string>
     <string name="output_profile_delete">Удалить</string>
     <string name="output_profile_delete_confirm">Удалить «%1$s»? Это действие нельзя отменить.</string>
     <string name="output_profile_delete_blocked">Нельзя удалить «%1$s» — он всё ещё используется: %2$s</string>
-    <string name="output_profile_usage_count">Используется выходами: %1$d</string>
-    <string name="output_profile_name_hint">Название профиля</string>
     <string name="output_profile_picker_tooltip">Профиль вывода</string>
     <string name="output_profile_swap_menu_tooltip">Сменить профиль вывода</string>
     <string name="output_profile_new_name_default">Новый профиль</string>
-    <string name="output_profile_display_mode">Режим отображения</string>
-    <string name="output_profile_content">Контент</string>
     <string name="output_profile_empty_state">Создайте профиль, чтобы начать его оформлять</string>
-    <string name="output_profile_preview_resolution_tooltip">Только форма предпросмотра — не задаёт фактическое разрешение вывода</string>
     <string name="customize_bible">Библия</string>
     <string name="customize_songs">Песни</string>
-    <string name="customize_lower_third_vertical_hint">Полоса сбоку вместо ленты внизу.</string>
-    <string name="customize_lower_third_orientation">Ориентация</string>
     <string name="customize_group_verse_text">Текст стиха</string>
-    <string name="customize_group_lyrics">Текст</string>
-    <string name="customize_group_typography">Типографика</string>
     <string name="customize_group_reference">Ссылка</string>
-    <string name="customize_group_chords">Аккорды</string>
-    <string name="customize_group_title_number">Название и номер</string>
-    <string name="customize_group_margins">Отступы</string>
-    <string name="customize_group_word">Слово</string>
-    <string name="customize_group_definition">Определение</string>
-    <string name="customize_group_card">Карточка</string>
-    <string name="customize_group_background">Фон экрана</string>
-    <string name="customize_group_background_lower_third">Фон нижней трети</string>
-    <string name="customize_background_source">Фон</string>
-    <string name="customize_background_follow">Как на вкладке «Фон»</string>
-    <string name="customize_background_own">Свой</string>
     <string name="customize_background_type">Тип</string>
-    <string name="customize_background_image">Изображение</string>
-    <string name="customize_background_video">Видео</string>
     <string name="customize_type_color">Цвет</string>
     <string name="customize_type_image">Изображение</string>
     <string name="customize_type_video">Видео</string>
     <string name="customize_type_transparent">Прозрачный</string>
     <string name="customize_type_default">По умолчанию</string>
     <string name="customize_type_gradient">Градиент</string>
-    <string name="customize_style">Стиль</string>
-    <string name="customize_letter_spacing">Межбуквенный интервал</string>
-    <string name="customize_word_spacing">Межсловный интервал</string>
-    <string name="customize_text_transform">Регистр текста</string>
-    <string name="customize_transform_none">Нет</string>
-    <string name="customize_transform_uppercase">AA</string>
-    <string name="customize_transform_lowercase">aa</string>
-    <string name="customize_transform_capitalize">Aa</string>
-    <string name="customize_margin_vertical">Сверху / Снизу</string>
-    <string name="customize_margin_horizontal">Слева / Справа</string>
     <string name="customize_show_abbreviation">Сокращение</string>
-    <string name="customize_reference_above">Сверху</string>
-    <string name="customize_reference_below">Снизу</string>
-    <string name="customize_card_background">Фон</string>
     <string name="customize_background_opacity">Непрозрачность</string>
-    <string name="customize_align_left">Слева</string>
-    <string name="customize_align_center">По центру</string>
-    <string name="customize_align_right">Справа</string>
-    <string name="customize_align_top">Сверху</string>
-    <string name="customize_align_middle">По центру</string>
-    <string name="customize_align_bottom">Снизу</string>
     <string name="slate_theme">Тема «Сланец»</string>
     <string name="sand_theme">Тема «Песок»</string>
     <string name="plum_theme">Тема «Слива»</string>
@@ -2667,13 +2109,9 @@
     <string name="setup_summary_bible_value">установлено: %1$d</string>
     <string name="setup_summary_songs_value">%1$d сборников · %2$d песен</string>
     <string name="background_lottie_option">Lottie</string>
-    <string name="lower_third_animation">Анимация нижней трети</string>
-    <string name="lower_third_animation_use_lottie">Анимировать полосу шаблоном Lottie</string>
     <string name="lower_third_animation_file">Шаблон</string>
     <string name="lower_third_animation_none">Шаблон не выбран</string>
     <string name="lower_third_animation_generate">Создать…</string>
-    <string name="lower_third_animation_clear">Убрать шаблон</string>
-    <string name="lottie_files_filter">Файлы Lottie</string>
     <string name="bible_lottie_gen_window_title">Генератор нижних титров</string>
     <string name="song_lottie_unsupported_note">Шаблон определяет макет и положение названия. Стиль нижней трети задаёт шрифт, размер, цвет, выравнивание, межбуквенный интервал, регистр и тень; подложка, подчёркивание, зачёркивание, межсловный интервал, предпросмотр следующего и аккорды не применяются.</string>
     <string name="bible_lottie_unsupported_note">Шаблон определяет макет, положение ссылки и то, как два языка делят полосу. Стиль нижней трети задаёт шрифт, размер, цвет, выравнивание, межбуквенный интервал, регистр и тень; подложка, подчёркивание, зачёркивание и межсловный интервал не применяются.</string>
@@ -2734,20 +2172,13 @@
     <string name="songs_search_focus_hint">Клавиатура в поле поиска — нажмите здесь, чтобы снова включить управление с клавиатуры</string>
     <string name="bible_preview_sample_verse_short">Иисус прослезился.</string>
     <string name="bible_preview_sample_verse_long">Иисус же сказал им: истинно, истинно говорю вам: если не будете есть Плоти Сына Человеческого и пить Крови Его, то не будете иметь в себе жизни.</string>
-    <string name="preview_sample">Образец</string>
     <string name="preview_sample_short">Короткий</string>
     <string name="preview_sample_medium">Средний</string>
     <string name="preview_sample_long">Длинный</string>
-    <string name="preview_on_screen">Предпросмотр на экране</string>
-    <string name="preview_on_screen_stop">Остановить предпросмотр</string>
     <string name="song_background_applies_to">Применяется к</string>
     <string name="song_background_whole_song">Вся песня</string>
     <string name="song_background_untitled_section">Раздел без названия</string>
     <string name="song_insert_slide_break">Разрыв слайда</string>
-    <string name="song_auto_repeat_chorus">Повторять припев после каждого куплета</string>
-    <string name="customize_element_slide">Слайд</string>
-    <string name="lower_third_band">Полоса нижней трети</string>
-    <string name="customize_tooltip_separator">, </string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Выходы NDI</string>
     <string name="ndi_outputs_help">Виртуальные выходы, передаваемые по сети как источники NDI® — выберите их в OBS, vMix или на микшере. Режим Alpha передаёт настоящую прозрачность, поэтому нижняя треть приходит уже с ключом.</string>
@@ -2885,50 +2316,18 @@
     <string name="bilingual_grid_2x2">2x2</string>
     <string name="bilingual_grid_3x1">3x1</string>
     <string name="bilingual_grid_4x1">4x1</string>
-    <string name="bilingual_left_right_short">С / С</string>
-    <string name="bilingual_top_bottom_short">С / С</string>
-    <string name="content_song_languages_all_selected">Все песни</string>
-    <string name="content_song_languages_enabled">Включено %1$d из %2$d языков</string>
-    <string name="content_song_languages_footer">Несколько языков показываются рядом или друг над другом, как задано в настройках песен.</string>
-    <string name="content_song_languages_header">Языки песен</string>
     <string name="enter_translation_lyrics_here">Введите здесь текст языка %1$d...</string>
     <string name="preview_output_mode_disabled_warning">Этот выход сейчас не показывает этот контент.</string>
-    <string name="preview_output_partial_translations_warning">Этот выход показывает не все языки из вашего стека.</string>
-    <string name="preview_output_single_language_warning">Этот выход показывает только один язык, а не оба.</string>
-    <string name="preview_settings_add_output">Добавить %1$s</string>
-    <string name="preview_settings_delete_group">Удалить группу</string>
-    <string name="preview_settings_empty">Групп пока нет, поэтому показаны все выходы. После добавления группы будут показаны только выходы, помещённые в группы.</string>
-    <string name="preview_settings_group_title">Группа %1$d</string>
-    <string name="preview_settings_hide_group">Скрыть</string>
-    <string name="preview_settings_move_down">Переместить вниз</string>
-    <string name="preview_settings_move_up">Переместить вверх</string>
-    <string name="preview_settings_new_group">Новая группа</string>
-    <string name="preview_settings_remove_output">Убрать из группы</string>
     <string name="preview_settings_show_labels">Показывать подписи выходов</string>
     <string name="preview_settings_show_modes">Показывать тип отображения</string>
-    <string name="screen_lang_language_n">Язык %1$d</string>
     <string name="song_add_translation">Добавить язык</string>
     <string name="song_fourth_language">Язык 4</string>
-    <string name="song_language_all">Все</string>
     <string name="song_language_fourth">Язык 4</string>
-    <string name="song_language_scope_label">Язык</string>
     <string name="song_language_third">Язык 3</string>
     <string name="song_pane_translation">Язык %1$d</string>
-    <string name="song_remove_translation">Удалить этот язык</string>
     <string name="song_third_language">Язык 3</string>
-    <string name="song_translation_follows_primary">Этот язык отображается точно так же, как Язык 1. Включите собственный стиль, чтобы задать ему другой шрифт, размер или цвет.</string>
     <string name="song_translation_label">Название языка</string>
-    <string name="song_translation_own_style">Задать этому языку собственный стиль</string>
     <string name="song_translation_title">Заголовок для Языка %1$d</string>
     <string name="tooltip_preview_settings">Настройки предпросмотра</string>
-    <string name="media_subtitle_settings">Настройки субтитров</string>
     <string name="media_subtitle_settings_hint">Применяется к файлам субтитров SRT/WebVTT, которые приложение отрисовывает само. Встроенная дорожка или файл ASS/SSA/SUB сохраняют собственный вид VLC.</string>
-    <string name="media_subtitle_text_color">Цвет текста</string>
-    <string name="media_subtitle_background_color">Цвет фона</string>
-    <string name="media_subtitle_font">Шрифт</string>
-    <string name="media_subtitle_size">Размер</string>
-    <string name="media_subtitle_position">Положение</string>
-    <string name="media_subtitle_opacity">Прозрачность:</string>
-    <string name="media_subtitle_max_lines">Макс. строк:</string>
-    <string name="tooltip_media_subtitle_settings">Настройки отображения субтитров</string>
 </resources>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Upravitelj kalendara</string>
     <string name="calendar_title">Kalendar</string>
     <string name="calendar_today">Danas</string>
     <string name="calendar_close">Zatvori</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Poseban događaj</string>
 
     <string name="calendar_add_service">Dodaj bogoslužje</string>
-    <string name="calendar_new_service">Novo bogoslužje</string>
     <string name="calendar_edit_service">Uredi bogoslužje</string>
     <string name="calendar_service_name">Naziv</string>
     <string name="calendar_service_start">Vrijeme početka</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Odustani</string>
     <string name="calendar_delete">Obriši</string>
 
-    <string name="calendar_run_of_show">Tijek bogoslužja</string>
-    <string name="calendar_nothing_planned">Za ovaj dan nije ništa planirano</string>
-    <string name="calendar_no_service_hint">Dodajte bogoslužje da biste počeli planirati.</string>
-    <string name="calendar_run_empty">Ovo bogoslužje još nema stavki.</string>
     <string name="calendar_items_count_one">%1$d stavka</string>
     <string name="calendar_items_count">%1$d stavki</string>
-    <string name="calendar_planned_total">%1$s planirano</string>
     <string name="calendar_duration">Trajanje</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Koliko bi ovo trebalo trajati — kliknite da upišete, primjerice 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Pjesme</string>
     <string name="calendar_pick_bible">Biblija</string>
     <string name="calendar_pick_section">Odjeljak</string>
-    <string name="calendar_pick_schedule">Kartica Raspored</string>
     <string name="calendar_pick_presets">Predlošci stavki</string>
     <string name="calendar_presets_empty">Još nema predložaka</string>
     <string name="calendar_presets_empty_sub">Spremite ga s „Spremi predložak”, pokraj „Dodaj u raspored” na karticama Slike, Prezentacija, Mediji, Objave i Platno.</string>
     <string name="calendar_presets_note">Predlošci se pojavljuju pod „Predlošci stavki” kad dodajete stavku, i pod „Stavka” kad oznaka nešto prikazuje.</string>
     <string name="calendar_settings_presets">Predlošci stavki</string>
     <string name="calendar_preset_remove">Obriši predložak</string>
-    <string name="calendar_cue_from_run">Iz ovog tijeka bogoslužja</string>
     <string name="calendar_cue_loops">u petlji</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Spremljeni predlošci</string>
-    <string name="calendar_search_songs_hint">Traži pjesme po naslovu ili broju</string>
-    <string name="calendar_bible_hint">Upišite navod, primjerice Ivan 3:16-17</string>
     <string name="calendar_section_hint">Naziv odjeljka, primjerice Slavljenje</string>
-    <string name="calendar_add">Dodaj</string>
     <string name="calendar_no_results">Ništa ne odgovara</string>
     <string name="calendar_songs_loading">Čitanje knjižnice pjesama…</string>
-    <string name="calendar_schedule_empty">Kartica Raspored je prazna.</string>
-    <string name="calendar_capture_schedule">Dodaj sve stavke s kartice Raspored</string>
 
     <string name="calendar_load_into_schedule">Učitaj u raspored</string>
     <string name="calendar_load_title">Zamijeniti raspored?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Ukloni odjeljak</string>
     <string name="calendar_default_start">Zadano vrijeme početka</string>
     <string name="calendar_default_start_sub">Vrijeme s kojim se stvara novo bogoslužje</string>
-    <string name="calendar_automation_empty">Još nema oznaka</string>
-    <string name="calendar_automation_title">Automatizacija</string>
     <string name="calendar_armed">Uključeno</string>
     <string name="calendar_armed_off">Isklj.</string>
     <string name="calendar_arm_tip">Uključi ili isključi sve oznake</string>
     <string name="calendar_cue_skip_tip">Preskoči ovu oznaku</string>
-    <string name="calendar_automation_note">označava stavke koje se pokreću same. Uklanjanje kvačice preskače oznaku za ovo bogoslužje.</string>
-    <string name="calendar_edit_cues">Uredi oznake</string>
     <string name="calendar_cue_action_countdown">Pokreni odbrojavanje</string>
     <string name="calendar_cue_action_go_live">U program</string>
     <string name="calendar_cue_action_project">Petlja objava</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Očisti izlaze</string>
     <string name="calendar_cue_badge_timer">Timer</string>
     <string name="calendar_cue_badge_go_live">U programu</string>
-    <string name="calendar_cue_item">Stavka</string>
     <string name="calendar_cue_item_missing">Stavke više nema u ovom tijeku bogoslužja</string>
     <string name="calendar_copy_include_cues">Oznake automatizacije</string>
     <string name="calendar_copy_include_cues_sub">%1$d oznaka, pomaci sačuvani</string>
     <string name="calendar_template_include_cues">Oznake automatizacije</string>
     <string name="calendar_template_include_cues_sub">Relativni pomaci</string>
-    <string name="calendar_templates_empty">Nema spremljenih predložaka</string>
     <string name="calendar_templates_empty_sub">Spremite ga iz bilo kojeg bogoslužja pomoću „Predložak” u zaglavlju tijeka. Do tada novo bogoslužje može početi od kopije bilo kojeg ranijeg.</string>
     <string name="calendar_templates_note">Predlošci se nude pod „Počni od” kad dodajete bogoslužje. Novi spremite iz bilo kojeg bogoslužja pomoću „Predložak” u zaglavlju tijeka.</string>
     <string name="calendar_template_remove">Obriši predložak</string>
     <string name="calendar_template_saved_sub">Predložak · %1$s · %2$d stavki</string>
-    <string name="calendar_copy_service">Kopiraj</string>
     <string name="calendar_copy_service_tip">Kopiraj ovo bogoslužje na drugi datum ili ga ponovi</string>
-    <string name="calendar_save_template">Predložak</string>
     <string name="calendar_save_template_tip">Spremi ovaj tijek bogoslužja kao predložak</string>
     <string name="calendar_copy_title">Kopiraj %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d stavki</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Ponavlja se %1$s · %2$d bogoslužja u ovoj seriji</string>
     <string name="calendar_export_pdf">Izvezi PDF</string>
     <string name="calendar_settings_open">Postavke kalendara</string>
-    <string name="calendar_export_failed">Tijek bogoslužja nije bilo moguće izvesti.</string>
     <string name="calendar_section_new">Novi odjeljak</string>
     <string name="calendar_section_insert">Umetni</string>
     <string name="calendar_auto_load">Automatski učitaj bogoslužje</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Nudi se kad pjesma još nema izmjereno trajanje</string>
     <string name="calendar_pick_search">Tražite pjesme ili upišite navod</string>
     <string name="calendar_pick_adds_to">Dodaje se u %1$s</string>
-    <string name="calendar_pick_duration">Trajanje</string>
     <string name="calendar_pick_all_books">Sve pjesmarice</string>
     <string name="calendar_pick_reference">Navod</string>
     <string name="calendar_pick_all_bible_books">Sve knjige</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Dodaj u tijek bogoslužja</string>
     <string name="calendar_pick_add_range">Dodaj %1$s</string>
     <string name="calendar_pick_verse_hint">Dodirnite redak, zatim drugi za raspon</string>
-    <string name="calendar_pick_clear">Očisti</string>
     <string name="calendar_edit_song">Uredi ovu pjesmu</string>
-    <string name="calendar_replace_row">Zamjenjuje %1$s</string>
-    <string name="calendar_change_row">Promijeni ovu stavku</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · pokreće se sama u %2$s — kliknite da pokrenete odmah</string>
     <string name="calendar_cue_fire_now">Pokreni ovu oznaku sada</string>
     <string name="calendar_cue_fired_at">Pokrenuta %1$s</string>
     <string name="calendar_cue_next_in">Sljedeća · za %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Sat pomaknut · kliknite za još 5 min, × za povratak na stvarno vrijeme</string>
     <string name="calendar_run_clock_reset">Natrag na stvarno vrijeme</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d od %3$d oznaka pokrenut će se automatski</string>
     <string name="calendar_cue_fired_title">Oznaka pokrenuta</string>
     <string name="calendar_cue_toast_close">Sakrij</string>
     <string name="calendar_preset_kind_all">Sve</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Sljedeće</string>
     <string name="calendar_chip_blank">Očisti</string>
-    <string name="calendar_chip_manual">Ručno</string>
     <string name="calendar_auto_starts">%1$d automatskih pokretanja</string>
     <string name="calendar_auto_start_one">1 automatsko pokretanje</string>
     <string name="calendar_all_manual">Sve ručno</string>

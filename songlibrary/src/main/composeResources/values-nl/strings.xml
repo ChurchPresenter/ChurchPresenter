@@ -34,7 +34,6 @@
     <string name="revert">Ongedaan maken</string>
     <string name="save_changes">Wijzigingen opslaan</string>
     <string name="done">Klaar</string>
-    <string name="saved">%1$s opgeslagen</string>
     <string name="save_failed">%1$s kon niet worden opgeslagen</string>
     <string name="new_song_book">Nieuw liedboek</string>
     <string name="new_song_book_subhead">Een verzameling waarin liederen kunnen worden ondergebracht</string>

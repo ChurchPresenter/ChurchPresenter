@@ -4,6 +4,7 @@
  */
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import churchpresenter.composeapp.generated.resources.close
+import churchpresenter.composeapp.generated.resources.ic_close
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +57,7 @@ import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.song_background_preset_cinema
 import churchpresenter.composeapp.generated.resources.song_background_preset_legible
@@ -195,7 +200,7 @@ internal fun SongBackgroundPanel(
             .pointerInput(Unit) { detectTapGestures { } },
         shape = AppShape(13.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 16.dp,
     ) {
         Column(Modifier.fillMaxWidth()) {
@@ -322,7 +327,12 @@ private fun PanelHeader(
             modifier = Modifier.size(24.dp).clip(AppShape(6.dp)).clickable(onClick = onDismiss),
             contentAlignment = Alignment.Center,
         ) {
-            Text("✕", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(
+                painter = painterResource(Res.drawable.ic_close),
+                contentDescription = stringResource(Res.string.close),
+                modifier = Modifier.size(11.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

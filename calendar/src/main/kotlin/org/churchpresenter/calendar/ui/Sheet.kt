@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -71,7 +72,7 @@ fun SheetScaffold(
         shape = SheetMetrics.radius,
         color = scheme.surface,
         tonalElevation = 3.dp,
-        border = androidx.compose.foundation.BorderStroke(1.dp, scheme.outlineVariant),
+        border = BorderStroke(1.dp, scheme.outlineVariant),
         modifier = modifier.width(width),
     ) {
         Column {

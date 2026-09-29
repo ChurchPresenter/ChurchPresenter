@@ -437,7 +437,7 @@ object PlanningCenterClient {
                         title = attrs?.get("title")?.jsonPrimitive?.contentOrNull ?: "",
                         description = attrs?.get("description")?.jsonPrimitive?.contentOrNull ?: "",
                         htmlDetails = attrs?.get("html_details")?.jsonPrimitive?.contentOrNull ?: "",
-                        itemType = attrs?.get("item_type")?.jsonPrimitive?.contentOrNull ?: "item",
+                        itemType = attrs?.get("item_type")?.jsonPrimitive?.contentOrNull ?: PcoItemType.ITEM,
                         sequence = attrs?.get("sequence")?.jsonPrimitive?.int ?: 0,
                         songId = songId,
                         arrangementId = arrangementRef?.get("id")?.jsonPrimitive?.contentOrNull,

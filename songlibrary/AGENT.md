@@ -26,7 +26,7 @@ file explains.
 
 ## Rules
 
-- **It has no palette of its own.** `ui/Theme.kt` holds the window's metrics and *roles*, resolved
+- **It has no palette of its own.** `LibraryMetrics` and `LibraryType` (`ui/Controls.kt`) hold the window's metrics and type; its colours are roles resolved
   from `MaterialTheme.colorScheme` and `:theme`'s `MaterialTheme.semantic`; the recessive chrome the
   dense table wants is alpha over that scheme, never a darker literal. A color literal belongs in
   `:theme` or nowhere — and this window opens inside the app's `AppThemeWrapper`, including

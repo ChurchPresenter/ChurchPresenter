@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.json.Json
 import java.io.File
 import org.churchpresenter.core.models.io.writeTextAtomically
@@ -18,8 +19,8 @@ internal object RecentPictureFolders {
     private const val MAX = 10
     internal var file = File(System.getProperty("user.home"), ".churchpresenter/recent_picture_folders.json")
     internal var pinnedFile = File(System.getProperty("user.home"), ".churchpresenter/pinned_picture_folders.json")
-    val folders = androidx.compose.runtime.mutableStateListOf<String>()
-    val pinned = androidx.compose.runtime.mutableStateListOf<String>()
+    val folders = mutableStateListOf<String>()
+    val pinned = mutableStateListOf<String>()
 
     init { load() }
 

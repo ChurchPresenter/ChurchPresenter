@@ -33,8 +33,8 @@ import churchpresenter.composeapp.generated.resources.media_subtitles_embedded
 import churchpresenter.composeapp.generated.resources.media_subtitles_off
 import churchpresenter.composeapp.generated.resources.media_subtitles_output_count
 import churchpresenter.composeapp.generated.resources.media_subtitles_show_on
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SidecarSubtitle
+import org.churchpresenter.app.churchpresenter.viewmodel.SubtitleTrack
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -45,6 +45,22 @@ private val CHEVRON_SIZE = 14.dp
 
 /** Enough for a profile name; past that the open list is where the whole set is read. */
 private val ROUTING_SUMMARY_MAX = 110.dp
+
+/** What the Subtitles menu shows: the loaded files, the video's own tracks, and which are on. */
+internal data class SubtitleMenuState(
+    val subtitlesVisible: Boolean,
+    val sidecars: List<SidecarSubtitle>,
+    val embeddedTracks: List<SubtitleTrack>,
+    val selectedEmbeddedTrack: Int,
+)
+
+/** What the Subtitles menu asks for; the Media tab forwards each to its own ViewModel. */
+internal data class SubtitleMenuActions(
+    val onTurnOff: () -> Unit,
+    val onSidecarEnabled: (index: Int, enabled: Boolean) -> Unit,
+    val onSidecarOutputs: (index: Int, outputs: Set<String>) -> Unit,
+    val onSelectEmbedded: (id: Int) -> Unit,
+)
 
 /**
  * The Media tab's Subtitles menu: what is loaded, what is on, and which outputs each one goes to.
@@ -58,7 +74,8 @@ private val ROUTING_SUMMARY_MAX = 110.dp
  */
 @Composable
 internal fun SubtitleMenuItems(
-    viewModel: MediaViewModel,
+    state: SubtitleMenuState,
+    actions: SubtitleMenuActions,
     profiles: List<OutputProfile>,
     onLoadFile: () -> Unit,
     loadFileLabel: String,
@@ -69,30 +86,30 @@ internal fun SubtitleMenuItems(
 
     DropdownMenuItem(
         text = { Text(stringResource(Res.string.media_subtitles_off)) },
-        onClick = { viewModel.turnSubtitlesOff() },
-        trailingIcon = { if (!viewModel.subtitlesVisible) CheckMark() },
+        onClick = actions.onTurnOff,
+        trailingIcon = { if (!state.subtitlesVisible) CheckMark() },
         modifier = Modifier.testTag(SUBTITLE_OFF_TAG),
     )
 
-    viewModel.sidecarSubtitles.forEachIndexed { index, track ->
+    state.sidecars.forEachIndexed { index, track ->
         SidecarRow(
             index = index,
             track = track,
             profiles = profiles,
             routingOpen = routingOpen == index,
-            onToggle = { viewModel.setSidecarEnabled(index, !track.enabled) },
+            onToggle = { actions.onSidecarEnabled(index, !track.enabled) },
             onToggleRouting = { routingOpen = if (routingOpen == index) -1 else index },
         )
         if (routingOpen == index) {
             RoutingRows(
                 track = track,
                 profiles = profiles,
-                onOutputs = { viewModel.setSidecarOutputs(index, it) },
+                onOutputs = { actions.onSidecarOutputs(index, it) },
             )
         }
     }
 
-    val embedded = viewModel.subtitleTracks
+    val embedded = state.embeddedTracks
     if (embedded.isNotEmpty()) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
@@ -105,8 +122,8 @@ internal fun SubtitleMenuItems(
         embedded.forEach { embeddedTrack ->
             DropdownMenuItem(
                 text = { Text(embeddedTrack.name) },
-                onClick = { viewModel.selectSubtitleTrack(embeddedTrack.id) },
-                trailingIcon = { if (viewModel.selectedSubtitleTrack == embeddedTrack.id) CheckMark() },
+                onClick = { actions.onSelectEmbedded(embeddedTrack.id) },
+                trailingIcon = { if (state.selectedEmbeddedTrack == embeddedTrack.id) CheckMark() },
             )
         }
     }

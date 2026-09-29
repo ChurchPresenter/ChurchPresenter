@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">مدیر تقویم</string>
     <string name="calendar_title">تقویم</string>
     <string name="calendar_today">امروز</string>
     <string name="calendar_close">بستن</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">رویداد ویژه</string>
 
     <string name="calendar_add_service">افزودن جلسه</string>
-    <string name="calendar_new_service">جلسهٔ جدید</string>
     <string name="calendar_edit_service">ویرایش جلسه</string>
     <string name="calendar_service_name">نام</string>
     <string name="calendar_service_start">زمان شروع</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">لغو</string>
     <string name="calendar_delete">حذف</string>
 
-    <string name="calendar_run_of_show">ترتیب برنامه</string>
-    <string name="calendar_nothing_planned">برای این روز چیزی برنامه‌ریزی نشده است</string>
-    <string name="calendar_no_service_hint">برای شروع برنامه‌ریزی، یک جلسه اضافه کنید.</string>
-    <string name="calendar_run_empty">این جلسه هنوز موردی ندارد.</string>
     <string name="calendar_items_count_one">%1$d مورد</string>
     <string name="calendar_items_count">%1$d مورد</string>
-    <string name="calendar_planned_total">%1$s برنامه‌ریزی‌شده</string>
     <string name="calendar_duration">مدت</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">قرار است چقدر طول بکشد — برای نوشتن کلیک کنید، مثل 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">سرودها</string>
     <string name="calendar_pick_bible">کتاب‌مقدس</string>
     <string name="calendar_pick_section">بخش</string>
-    <string name="calendar_pick_schedule">زبانهٔ برنامه</string>
     <string name="calendar_pick_presets">پیش‌تنظیم‌ها</string>
     <string name="calendar_presets_empty">هنوز پیش‌تنظیمی نیست</string>
     <string name="calendar_presets_empty_sub">یکی را با «ذخیرهٔ پیش‌تنظیم» کنار «افزودن به برنامه» در زبانه‌های تصاویر، ارائه، رسانه، اعلان‌ها و بوم ذخیره کنید.</string>
     <string name="calendar_presets_note">پیش‌تنظیم‌ها هنگام افزودن یک مورد زیر «پیش‌تنظیم‌ها» و هنگامی که نشانه‌ای چیزی نشان می‌دهد زیر «مورد» دیده می‌شوند.</string>
     <string name="calendar_settings_presets">پیش‌تنظیم‌ها</string>
     <string name="calendar_preset_remove">حذف پیش‌تنظیم</string>
-    <string name="calendar_cue_from_run">از این ترتیب برنامه</string>
     <string name="calendar_cue_loops">تکرار</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">پیش‌تنظیم‌های ذخیره‌شده</string>
-    <string name="calendar_search_songs_hint">جست‌وجوی سرودها بر اساس عنوان یا شماره</string>
-    <string name="calendar_bible_hint">یک ارجاع بنویسید، مثل یوحنا ۳:۱۶-۱۷</string>
     <string name="calendar_section_hint">نام بخش، مثل پرستش</string>
-    <string name="calendar_add">افزودن</string>
     <string name="calendar_no_results">چیزی مطابقت ندارد</string>
     <string name="calendar_songs_loading">در حال خواندن کتابخانهٔ سرودها…</string>
-    <string name="calendar_schedule_empty">زبانهٔ برنامه خالی است.</string>
-    <string name="calendar_capture_schedule">افزودن همهٔ موارد از زبانهٔ برنامه</string>
 
     <string name="calendar_load_into_schedule">بارگذاری در برنامه</string>
     <string name="calendar_load_title">برنامه جایگزین شود؟</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">حذف بخش</string>
     <string name="calendar_default_start">زمان شروع پیش‌فرض</string>
     <string name="calendar_default_start_sub">زمانی که یک جلسهٔ جدید با آن ساخته می‌شود</string>
-    <string name="calendar_automation_empty">هنوز نشانه‌ای نیست</string>
-    <string name="calendar_automation_title">خودکارسازی</string>
     <string name="calendar_armed">روشن</string>
     <string name="calendar_armed_off">خاموش</string>
     <string name="calendar_arm_tip">روشن یا خاموش کردن همهٔ نشانه‌ها</string>
     <string name="calendar_cue_skip_tip">رد کردن این نشانه</string>
-    <string name="calendar_automation_note">مواردی را که خودبه‌خود اجرا می‌شوند مشخص می‌کند. برداشتن تیک، نشانه را در این جلسه رد می‌کند.</string>
-    <string name="calendar_edit_cues">ویرایش نشانه‌ها</string>
     <string name="calendar_cue_action_countdown">شروع شمارش معکوس</string>
     <string name="calendar_cue_action_go_live">پخش زنده</string>
     <string name="calendar_cue_action_project">حلقهٔ اعلان‌ها</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">پاک کردن خروجی‌ها</string>
     <string name="calendar_cue_badge_timer">زمان‌سنج</string>
     <string name="calendar_cue_badge_go_live">زنده</string>
-    <string name="calendar_cue_item">مورد</string>
     <string name="calendar_cue_item_missing">این مورد دیگر در این ترتیب برنامه نیست</string>
     <string name="calendar_copy_include_cues">نشانه‌های خودکارسازی</string>
     <string name="calendar_copy_include_cues_sub">%1$d نشانه، فاصله‌های زمانی حفظ می‌شود</string>
     <string name="calendar_template_include_cues">نشانه‌های خودکارسازی</string>
     <string name="calendar_template_include_cues_sub">فاصله‌های نسبی</string>
-    <string name="calendar_templates_empty">قالب ذخیره‌شده‌ای نیست</string>
     <string name="calendar_templates_empty_sub">یکی را از هر جلسه‌ای با «قالب» در سربرگ ترتیب برنامه ذخیره کنید. تا آن زمان، جلسهٔ جدید می‌تواند از روی نسخه‌ای از هر جلسهٔ پیشین شروع شود.</string>
     <string name="calendar_templates_note">قالب‌ها هنگام افزودن جلسه زیر «شروع از» پیشنهاد می‌شوند. قالب تازه‌ای را از هر جلسه‌ای با «قالب» در سربرگ ترتیب برنامه ذخیره کنید.</string>
     <string name="calendar_template_remove">حذف قالب</string>
     <string name="calendar_template_saved_sub">قالب · %1$s · %2$d مورد</string>
-    <string name="calendar_copy_service">کپی</string>
     <string name="calendar_copy_service_tip">این جلسه را به تاریخ دیگری کپی کنید، یا آن را تکرار کنید</string>
-    <string name="calendar_save_template">قالب</string>
     <string name="calendar_save_template_tip">این ترتیب برنامه را به‌عنوان قالب ذخیره کنید</string>
     <string name="calendar_copy_title">کپی %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d مورد</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">تکرار %1$s · %2$d جلسه در این مجموعه</string>
     <string name="calendar_export_pdf">خروجی PDF</string>
     <string name="calendar_settings_open">تنظیمات تقویم</string>
-    <string name="calendar_export_failed">ترتیب برنامه خروجی گرفته نشد.</string>
     <string name="calendar_section_new">بخش جدید</string>
     <string name="calendar_section_insert">درج</string>
     <string name="calendar_auto_load">بارگذاری خودکار جلسه</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">وقتی سرود هنوز مدت اندازه‌گیری‌شده ندارد پیشنهاد می‌شود</string>
     <string name="calendar_pick_search">سرودها را بجویید، یا ارجاعی بنویسید</string>
     <string name="calendar_pick_adds_to">به %1$s افزوده می‌شود</string>
-    <string name="calendar_pick_duration">مدت</string>
     <string name="calendar_pick_all_books">همهٔ کتاب‌های سرود</string>
     <string name="calendar_pick_reference">ارجاع</string>
     <string name="calendar_pick_all_bible_books">همهٔ کتاب‌ها</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">افزودن به ترتیب برنامه</string>
     <string name="calendar_pick_add_range">افزودن %1$s</string>
     <string name="calendar_pick_verse_hint">روی یک آیه بزنید، سپس روی آیه‌ای دیگر برای انتخاب بازه</string>
-    <string name="calendar_pick_clear">پاک کردن</string>
     <string name="calendar_edit_song">ویرایش این سرود</string>
-    <string name="calendar_replace_row">جایگزینی %1$s</string>
-    <string name="calendar_change_row">تغییر این مورد</string>
-    <string name="calendar_cue_auto">خودکار</string>
-    <string name="calendar_cue_auto_tip">%1$s · خودبه‌خود در %2$s اجرا می‌شود — برای اجرای همین حالا کلیک کنید</string>
     <string name="calendar_cue_fire_now">اجرای این نشانه همین حالا</string>
     <string name="calendar_cue_fired_at">اجرا شد %1$s</string>
     <string name="calendar_cue_next_in">بعدی · تا %1$d دقیقهٔ دیگر</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">ساعت جلو رفته است · برای ۵ دقیقهٔ دیگر کلیک کنید، × برای بازگشت به زمان واقعی</string>
     <string name="calendar_run_clock_reset">بازگشت به زمان واقعی</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d دقیقه</string>
-    <string name="calendar_footer_cues">%1$s · %2$d از %3$d نشانه خودکار اجرا می‌شود</string>
     <string name="calendar_cue_fired_title">نشانه اجرا شد</string>
     <string name="calendar_cue_toast_close">پنهان کردن</string>
     <string name="calendar_preset_kind_all">همه</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ بعدی</string>
     <string name="calendar_chip_blank">پاک کردن</string>
-    <string name="calendar_chip_manual">دستی</string>
     <string name="calendar_auto_starts">%1$d شروع خودکار</string>
     <string name="calendar_auto_start_one">۱ شروع خودکار</string>
     <string name="calendar_all_manual">همه دستی</string>

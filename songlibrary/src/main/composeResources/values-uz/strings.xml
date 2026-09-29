@@ -34,7 +34,6 @@
     <string name="revert">Qaytarish</string>
     <string name="save_changes">Oʻzgarishlarni saqlash</string>
     <string name="done">Tayyor</string>
-    <string name="saved">Saqlandi: %1$s</string>
     <string name="save_failed">%1$s saqlanmadi</string>
     <string name="new_song_book">Yangi qoʻshiq kitobi</string>
     <string name="new_song_book_subhead">Qoʻshiqlarni joylash mumkin boʻlgan toʻplam</string>

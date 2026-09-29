@@ -767,7 +767,18 @@ fun MediaTab(
                     }
                     DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
                         SubtitleMenuItems(
-                            viewModel = viewModel,
+                            state = SubtitleMenuState(
+                                subtitlesVisible = viewModel.subtitlesVisible,
+                                sidecars = viewModel.sidecarSubtitles,
+                                embeddedTracks = viewModel.subtitleTracks,
+                                selectedEmbeddedTrack = viewModel.selectedSubtitleTrack,
+                            ),
+                            actions = SubtitleMenuActions(
+                                onTurnOff = viewModel::turnSubtitlesOff,
+                                onSidecarEnabled = viewModel::setSidecarEnabled,
+                                onSidecarOutputs = viewModel::setSidecarOutputs,
+                                onSelectEmbedded = viewModel::selectSubtitleTrack,
+                            ),
                             profiles = appSettings.projectionSettings.outputProfiles,
                             loadFileLabel = subtitleFileTitle,
                             onLoadFile = {

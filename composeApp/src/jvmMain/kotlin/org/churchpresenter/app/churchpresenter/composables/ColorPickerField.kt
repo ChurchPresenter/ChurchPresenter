@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -53,7 +54,8 @@ fun ColorPickerField(
     label: String = "",
 ) {
     val currentColor = remember(color) { parseHexColor(color) }
-    val isTransparent = color.equals("transparent", ignoreCase = true) || currentColor == Color.Transparent
+    val isTransparent = color.equals(Constants.COLOR_VALUE_TRANSPARENT, ignoreCase = true) ||
+        currentColor == Color.Transparent
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {

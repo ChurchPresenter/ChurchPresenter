@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Agendabeheer</string>
     <string name="calendar_title">Agenda</string>
     <string name="calendar_today">Vandaag</string>
     <string name="calendar_close">Sluiten</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Bijzondere gelegenheid</string>
 
     <string name="calendar_add_service">Dienst toevoegen</string>
-    <string name="calendar_new_service">Nieuwe dienst</string>
     <string name="calendar_edit_service">Dienst bewerken</string>
     <string name="calendar_service_name">Naam</string>
     <string name="calendar_service_start">Begintijd</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Annuleren</string>
     <string name="calendar_delete">Verwijderen</string>
 
-    <string name="calendar_run_of_show">Draaiboek</string>
-    <string name="calendar_nothing_planned">Niets gepland voor deze dag</string>
-    <string name="calendar_no_service_hint">Voeg een dienst toe om te beginnen met plannen.</string>
-    <string name="calendar_run_empty">Deze dienst heeft nog geen onderdelen.</string>
     <string name="calendar_items_count_one">%1$d onderdeel</string>
     <string name="calendar_items_count">%1$d onderdelen</string>
-    <string name="calendar_planned_total">%1$s gepland</string>
     <string name="calendar_duration">Duur</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Hoe lang dit moet duren — klik om het te typen, zoals 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Liederen</string>
     <string name="calendar_pick_bible">Bijbel</string>
     <string name="calendar_pick_section">Sectie</string>
-    <string name="calendar_pick_schedule">Tabblad Programma</string>
     <string name="calendar_pick_presets">Voorinstellingen</string>
     <string name="calendar_presets_empty">Nog geen voorinstellingen</string>
     <string name="calendar_presets_empty_sub">Sla er een op met „Voorinstelling opslaan”, naast „Aan programma toevoegen” op de tabbladen Afbeeldingen, Presentatie, Media, Mededelingen en Canvas.</string>
     <string name="calendar_presets_note">Voorinstellingen verschijnen onder „Voorinstellingen” als je een onderdeel toevoegt, en onder „Onderdeel” als een markering iets toont.</string>
     <string name="calendar_settings_presets">Voorinstellingen</string>
     <string name="calendar_preset_remove">Voorinstelling verwijderen</string>
-    <string name="calendar_cue_from_run">Uit dit draaiboek</string>
     <string name="calendar_cue_loops">in herhaling</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Opgeslagen voorinstellingen</string>
-    <string name="calendar_search_songs_hint">Liederen zoeken op titel of nummer</string>
-    <string name="calendar_bible_hint">Typ een verwijzing, zoals Johannes 3:16-17</string>
     <string name="calendar_section_hint">Sectienaam, zoals Aanbidding</string>
-    <string name="calendar_add">Toevoegen</string>
     <string name="calendar_no_results">Niets komt overeen</string>
     <string name="calendar_songs_loading">Liederenbibliotheek wordt gelezen…</string>
-    <string name="calendar_schedule_empty">Het tabblad Programma is leeg.</string>
-    <string name="calendar_capture_schedule">Alle onderdelen uit het tabblad Programma toevoegen</string>
 
     <string name="calendar_load_into_schedule">In programma laden</string>
     <string name="calendar_load_title">Programma vervangen?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Sectie verwijderen</string>
     <string name="calendar_default_start">Standaard begintijd</string>
     <string name="calendar_default_start_sub">De tijd waarmee een nieuwe dienst wordt aangemaakt</string>
-    <string name="calendar_automation_empty">Nog geen markeringen</string>
-    <string name="calendar_automation_title">Automatisering</string>
     <string name="calendar_armed">Aan</string>
     <string name="calendar_armed_off">Uit</string>
     <string name="calendar_arm_tip">Alle markeringen aan- of uitzetten</string>
     <string name="calendar_cue_skip_tip">Deze markering overslaan</string>
-    <string name="calendar_automation_note">markeert onderdelen die vanzelf starten. Uitvinken slaat een markering over voor deze dienst.</string>
-    <string name="calendar_edit_cues">Markeringen bewerken</string>
     <string name="calendar_cue_action_countdown">Aftellen starten</string>
     <string name="calendar_cue_action_go_live">Live gaan</string>
     <string name="calendar_cue_action_project">Mededelingenlus</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Uitgangen leegmaken</string>
     <string name="calendar_cue_badge_timer">Timer</string>
     <string name="calendar_cue_badge_go_live">Live</string>
-    <string name="calendar_cue_item">Onderdeel</string>
     <string name="calendar_cue_item_missing">Onderdeel staat niet meer in dit draaiboek</string>
     <string name="calendar_copy_include_cues">Automatiseringsmarkeringen</string>
     <string name="calendar_copy_include_cues_sub">%1$d markeringen, tijdverschuivingen behouden</string>
     <string name="calendar_template_include_cues">Automatiseringsmarkeringen</string>
     <string name="calendar_template_include_cues_sub">Relatieve verschuivingen</string>
-    <string name="calendar_templates_empty">Geen opgeslagen sjablonen</string>
     <string name="calendar_templates_empty_sub">Sla er een op vanuit een willekeurige dienst met „Sjabloon”, in de kop van het draaiboek. Tot die tijd kan een nieuwe dienst beginnen met een kopie van een eerdere.</string>
     <string name="calendar_templates_note">Sjablonen worden aangeboden onder „Beginnen met” als je een dienst toevoegt. Sla een nieuwe op vanuit een willekeurige dienst met „Sjabloon”, in de kop van het draaiboek.</string>
     <string name="calendar_template_remove">Sjabloon verwijderen</string>
     <string name="calendar_template_saved_sub">Sjabloon · %1$s · %2$d onderdelen</string>
-    <string name="calendar_copy_service">Kopiëren</string>
     <string name="calendar_copy_service_tip">Deze dienst naar een andere datum kopiëren of herhalen</string>
-    <string name="calendar_save_template">Sjabloon</string>
     <string name="calendar_save_template_tip">Dit draaiboek als sjabloon opslaan</string>
     <string name="calendar_copy_title">%1$s kopiëren</string>
     <string name="calendar_copy_sub">%1$s · %2$d onderdelen</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Herhaalt %1$s · %2$d diensten in deze reeks</string>
     <string name="calendar_export_pdf">PDF exporteren</string>
     <string name="calendar_settings_open">Agenda-instellingen</string>
-    <string name="calendar_export_failed">Het draaiboek kon niet worden geëxporteerd.</string>
     <string name="calendar_section_new">Nieuwe sectie</string>
     <string name="calendar_section_insert">Invoegen</string>
     <string name="calendar_auto_load">Dienst automatisch laden</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Wordt voorgesteld als een lied nog geen gemeten duur heeft</string>
     <string name="calendar_pick_search">Zoek liederen, of typ een verwijzing</string>
     <string name="calendar_pick_adds_to">Wordt toegevoegd aan %1$s</string>
-    <string name="calendar_pick_duration">Duur</string>
     <string name="calendar_pick_all_books">Alle liedbundels</string>
     <string name="calendar_pick_reference">Verwijzing</string>
     <string name="calendar_pick_all_bible_books">Alle boeken</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Aan het draaiboek toevoegen</string>
     <string name="calendar_pick_add_range">%1$s toevoegen</string>
     <string name="calendar_pick_verse_hint">Tik op een vers, tik dan op een ander voor een bereik</string>
-    <string name="calendar_pick_clear">Wissen</string>
     <string name="calendar_edit_song">Dit lied bewerken</string>
-    <string name="calendar_replace_row">Vervangt %1$s</string>
-    <string name="calendar_change_row">Dit onderdeel wijzigen</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · start vanzelf om %2$s — klik om nu te starten</string>
     <string name="calendar_cue_fire_now">Deze markering nu afvuren</string>
     <string name="calendar_cue_fired_at">Afgevuurd %1$s</string>
     <string name="calendar_cue_next_in">Volgende · over %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Klok vooruitgezet · klik voor nog 5 min, × om terug te gaan naar de echte tijd</string>
     <string name="calendar_run_clock_reset">Terug naar de echte tijd</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d van %3$d markeringen vuren automatisch af</string>
     <string name="calendar_cue_fired_title">Markering afgevuurd</string>
     <string name="calendar_cue_toast_close">Verbergen</string>
     <string name="calendar_preset_kind_all">Alles</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Volgende</string>
     <string name="calendar_chip_blank">Leeg</string>
-    <string name="calendar_chip_manual">Handmatig</string>
     <string name="calendar_auto_starts">%1$d automatische starts</string>
     <string name="calendar_auto_start_one">1 automatische start</string>
     <string name="calendar_all_manual">Alles handmatig</string>

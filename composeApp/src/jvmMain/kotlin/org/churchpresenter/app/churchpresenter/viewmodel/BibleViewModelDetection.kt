@@ -141,8 +141,7 @@ internal fun BibleViewModel.onEngineScripture(
     if (added && _autoFollowEnabled.value) {
         usage.record(UsageEvent.BIBLE_REFERENCE_AUTO_FOLLOWED)
 
-        val instantGoLive = matchType == "explicit" || matchType == "continuation" ||
-            matchType == "chapter-scan"
+        val instantGoLive = detectionSourceOf(matchType) in INSTANT_GO_LIVE_SOURCES
         navigateToReference(
             SmartReference(bookIndex, dispChapter, dispVerseStart, verseEnd = null),
             goLive = instantGoLive,
@@ -264,6 +263,13 @@ internal fun BibleViewModel.buildDetectionLabel(bookIndex: Int, chapter: Int, vs
     }
     return "$bookName $chapter$versePart"
 }
+
+/** The detections clear enough to go straight to the screen rather than only being staged. */
+private val INSTANT_GO_LIVE_SOURCES = setOf(
+    DetectionSource.EXPLICIT,
+    DetectionSource.CONTINUATION,
+    DetectionSource.CHAPTER_SCAN,
+)
 
 /** The engine's matchType as the enum the UI tiers confidence by. */
 private fun detectionSourceOf(matchType: String): DetectionSource = when (matchType) {

@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -73,7 +74,7 @@ internal fun ComposeUiTest.typeInRow(label: String, value: Int, nth: Int = 0) {
  */
 internal fun ComposeUiTest.tap(tag: String, useUnmergedTree: Boolean = true) {
     val node = onAllNodes(hasTestTag(tag), useUnmergedTree)[0]
-    if (node.fetchSemanticsNode().config.contains(androidx.compose.ui.semantics.SemanticsProperties.TestTag)) {
+    if (node.fetchSemanticsNode().config.contains(SemanticsProperties.TestTag)) {
         runCatching { node.performScrollTo() }
     }
     node.performClick()

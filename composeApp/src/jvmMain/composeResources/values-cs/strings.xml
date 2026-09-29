@@ -4,13 +4,11 @@
     <string name="scope">Rozsah</string>
     <string name="title">Název</string>
     <string name="number">Číslo</string>
-    <string name="no_song_selected">Není vybrána žádná píseň</string>
     <string name="go_live">Zobrazit</string>
     <string name="add_to_schedule">Přidat do programu</string>
     <string name="no_lyrics_available">Pro tuto píseň nejsou k dispozici texty</string>
     <string name="tune">Melodie</string>
     <string name="search">Hledat</string>
-    <string name="replace">Nahradit</string>
     <string name="search_songs">Hledat písně...</string>
     <string name="song_book">Zpěvník</string>
     <string name="all_song_books">Všechny zpěvníky</string>
@@ -20,18 +18,13 @@
     <string name="contains">Obsahuje</string>
     <string name="starts_with">Začína na</string>
     <string name="exact_match">Přesná shoda</string>
-    <string name="all_song_categories">Všechny kategorie</string>
     <string name="filter">Filtr</string>
-    <string name="filter_colon">Filtr:</string>
-    <string name="filter_type_colon">Typ filtru:</string>
-    <string name="service_schedule">Plán bohoslužby:</string>
     <string name="songs">Písně</string>
     <string name="song">Píseň</string>
     <string name="output_profiles_tab">Profily</string>
     <string name="bible">Bible</string>
     <string name="pictures">Obrázky</string>
     <string name="media">Média</string>
-    <string name="notes">Poznámky</string>
     <string name="book">Kniha</string>
     <string name="chapter">Kapitola</string>
     <string name="verse">Verš</string>
@@ -41,12 +34,10 @@
     <string name="none">Žádný</string>
     <string name="first_page">První strana</string>
     <string name="every_page">Každá strana</string>
-    <string name="show">Zobrazit</string>
     <string name="show_title">Zobrazit název:</string>
     <string name="show_number">Zobrazit číslo:</string>
     <string name="font_size">Velikost písma:</string>
     <string name="font_type">Typ písma:</string>
-    <string name="style">Styl</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">U</string>
@@ -55,7 +46,6 @@
     <string name="tooltip_italic">Kurzíva</string>
     <string name="tooltip_underline">Podtržené</string>
     <string name="tooltip_shadow">Stín</string>
-    <string name="shadow_settings">Stín</string>
     <string name="shadow_size">Velikost (%)</string>
     <string name="shadow_opacity">Intenzita (%)</string>
     <string name="hold_live">Podržet živě</string>
@@ -74,10 +64,7 @@
     <string name="bible_cross_references_keep_open">Připnout</string>
     <string name="bible_cross_references_close">Zavřít panel</string>
     <string name="bible_cross_references_dismiss_hint">Esc — zavřít</string>
-    <string name="bible_live_view">Živě</string>
     <string name="copy_verse">Kopírovat verš</string>
-    <string name="fade_in">Postupné zobrazení</string>
-    <string name="fade_out">Postupné zmizení</string>
     <string name="announcements">Oznámení</string>
     <string name="menu_file">Soubor</string>
     <string name="menu_new_schedule">Nový program</string>
@@ -97,9 +84,6 @@
 
     <!-- Schedule Tab Strings -->
     <string name="schedule">Program</string>
-    <string name="quick_selection">Rychlý výběr</string>
-    <string name="clear_schedule">Vymazat program</string>
-    <string name="search_results">Výsledky vyhledávání</string>
     <string name="clear">Vymazat</string>
     <string name="found_results">Nalezeno %1$d výsledků</string>
 
@@ -124,45 +108,21 @@
     <string name="menu_check_for_updates">Zkontrolovat aktualizace…</string>
 
     <!-- Options Dialog Strings -->
-    <string name="text_settings_and_colors">Nastavení textu a barvy</string>
     <string name="background">Pozadí</string>
-    <string name="background_images">Obrázky pozadí</string>
-    <string name="folders">Složky</string>
     <string name="projection">Projekce</string>
-    <string name="other">Ostatní</string>
 
     <!-- Song Settings Strings -->
-    <string name="lyrics">Text</string>
     <string name="song_number">Číslo písně</string>
-    <string name="min">Min:</string>
-    <string name="max">Max:</string>
-    <string name="alpha">Průhlednost:</string>
-    <string name="vertical_alignment">Svislé zarovnání:</string>
-    <string name="horizontal_alignment">Vodorovné zarovnání:</string>
-    <string name="text_alignment">Zarovnání textu:</string>
     <string name="top">Nahoře</string>
-    <string name="above_verse">Nad veršem</string>
-    <string name="below_verse">Pod veršem</string>
     <string name="middle">Uprostřed</string>
     <string name="bottom">Dole</string>
     <string name="left">Vlevo</string>
     <string name="center">Na střed</string>
     <string name="right">Vpravo</string>
-    <string name="song_files">Soubory písní</string>
-    <string name="storage_directory">Adresář úložiště</string>
-    <string name="import_song_file">Importovat soubor písně</string>
-    <string name="remove_song_file">Odebrat soubor písně</string>
-    <string name="word_wrap">Zalamování řádků</string>
     <string name="position">Pozice:</string>
     <string name="color">Barva</string>
 
     <!-- Bible Settings Strings -->
-    <string name="primary_bible">Primární Bible</string>
-    <string name="secondary_bible">Sekundární Bible</string>
-    <string name="primary_bible_reference">Primární biblický odkaz</string>
-    <string name="secondary_bible_reference">Sekundární biblický odkaz</string>
-    <string name="caption_language">Jazyk titulků</string>
-    <string name="language_source">Zdroj jazyka:</string>
 
     <!-- Bible Books -->
 
@@ -180,8 +140,6 @@
     <string name="menu_language">Jazyk</string>
 
     <!-- Theme Manager Strings -->
-    <string name="language_interface">Rozhraní</string>
-    <string name="language_database">Databáze</string>
 
     <!-- Menu -->
     <string name="language_russian">Ruština</string>
@@ -232,12 +190,9 @@
     <string name="tooltip_note">Poznámka</string>
     <string name="tooltip_note_done">Uložit poznámku</string>
     <string name="tooltip_note_clear">Vymazat poznámku</string>
-    <string name="tooltip_move_to_top">Přesunout nahoru</string>
     <string name="tooltip_move_up">Posunout nahoru</string>
     <string name="tooltip_move_down">Posunout dolů</string>
-    <string name="tooltip_move_to_bottom">Přesunout dolů</string>
     <string name="tooltip_add_to_schedule">Přidat do programu</string>
-    <string name="tooltip_remove_from_schedule">Odebrat z programu</string>
     <string name="tooltip_clear_schedule">Vymazat program</string>
     <string name="tooltip_settings">Nastavení</string>
 
@@ -408,23 +363,10 @@
     <string name="no_directory_selected">Není vybrán adresář</string>
     <string name="no_files_detected">Nebyly nalezeny žádné soubory</string>
     <string name="detected_files_label">Nalezeno:</string>
-    <string name="files_in_directory">Soubory v adresáři</string>
-    <string name="select_song_file">Vybrat soubor písně...</string>
-    <string name="no_song_files">Nejsou načteny žádné soubory písní</string>
-    <string name="no_bible_files">Nejsou načteny žádné soubory Bible</string>
-    <string name="bible_files">Soubory Bible</string>
-    <string name="import_bible_file">Importovat soubor Bible</string>
-    <string name="remove_bible_file">Odebrat soubor Bible</string>
-    <string name="bible_selection">Výběr Bible</string>
 
     <!-- Dialog Messages -->
-    <string name="please_select_directory_first">Nejprve vyberte adresář úložiště.</string>
-    <string name="please_select_file_first">Nejprve vyberte soubor ze seznamu.</string>
-    <string name="no_file_selected_title">Není vybrán žádný soubor</string>
     <string name="confirm_delete">Potvrdit smazání</string>
     <string name="confirm_delete_file">Opravdu chcete smazat „%1$s“?</string>
-    <string name="import_error">Chyba importu</string>
-    <string name="delete_error">Chyba smazání</string>
 
     <!-- Background Type Options -->
     <string name="background_default">Výchozí</string>
@@ -432,18 +374,10 @@
     <string name="background_image_option">Obrázek</string>
 
     <!-- Position Options -->
-    <string name="position_above">Nahoře</string>
-    <string name="position_below">Dole</string>
 
     <!-- Error Messages -->
-    <string name="error_target_directory_not_exist">Cílový adresář neexistuje: %1$s</string>
-    <string name="error_copying_file">Chyba kopírování %1$s: %2$s</string>
-    <string name="error_failed_delete">Nepodařilo se smazat soubor</string>
-    <string name="error_deleting_file">Chyba mazání souboru: %1$s</string>
-    <string name="warning">Varování</string>
 
     <!-- Additional Strings -->
-    <string name="show_on_first_page_only">Zobrazit pouze na první straně</string>
     <string name="position_on_screen">Pozice na obrazovce:</string>
     <string name="position_showing_at">Umístění:</string>
     <string name="top_left">Vlevo nahoře</string>
@@ -451,28 +385,12 @@
     <string name="bottom_left">Vlevo dole</string>
     <string name="bottom_right">Vpravo dole</string>
     <string name="enter_lyrics_here">Zadejte text písně zde...</string>
-    <string name="lyrics_format_help">Formát: Použijte [Verse 1], [Verse 2] atd. pro záhlaví slok a {Chorus} pro refrén. Oddělte sekce prázdnými řádky.</string>
-    <string name="select_image">Vybrat obrázek</string>
-    <string name="background_type">Typ pozadí:</string>
-    <string name="background_color">Barva pozadí:</string>
-    <string name="background_image">Obrázek pozadí:</string>
-    <string name="show_abbreviation">Zobrazit zkratku knihy</string>
 
     <!-- Placeholder strings -->
-    <string name="bible_tab_content">Obsah karty Bible bude implementován</string>
-    <string name="text_settings_tab_content">Obsah karty Nastavení textu bude implementován</string>
-    <string name="background_tab_content">Obsah karty Pozadí bude implementován</string>
-    <string name="background_images_tab_content">Obsah karty Obrázky pozadí bude implementován</string>
-    <string name="folders_tab_content">Obsah karty Složky bude implementován</string>
-    <string name="projection_tab_content">Obsah karty Projekce bude implementován</string>
-    <string name="other_tab_content">Obsah karty Ostatní bude implementován</string>
-    <string name="primary_bible_text">Text primární Bible</string>
-    <string name="secondary_bible_text">Text sekundární Bible</string>
     <string name="tooltip_edit">Upravit</string>
 
     <!-- Pictures Tab Strings -->
     <string name="no_folder_selected">Žádná složka nevybrána</string>
-    <string name="images_count">%1$d obrázků</string>
     <string name="previous_image">Předchozí obrázek</string>
     <string name="pause">Pozastavit</string>
     <string name="stop">Zastavit</string>
@@ -496,8 +414,6 @@
     <string name="animation_slide_right">Posun doprava</string>
     <string name="animation_none">Bez animace</string>
     <string name="milliseconds_suffix">ms</string>
-    <string name="settings">Nastavení</string>
-    <string name="images_suffix">obrázků</string>
     <string name="pictures_arrow_key_hint">%1$s další/předchozí obrázek  ·  %2$s navigace v řádcích</string>
     <string name="presentation_arrow_key_hint">%1$s — předchozí/další krok a snímek  ·  %2$s — přehrát/pozastavit  ·  %3$s — prázdná obrazovka</string>
     <string name="pictures_reorder_hint">Shift+přetáhnout pro změnu pořadí</string>
@@ -508,7 +424,6 @@
 
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Žádný soubor nevybrán</string>
-    <string name="slide_count">%1$d snímků</string>
     <string name="loading_slides_progress">%1$d / %2$d snímků</string>
     <string name="slide_counter">Snímek %1$d z %2$d</string>
     <string name="loading_slides">Načítání snímků...</string>
@@ -533,22 +448,16 @@
     <string name="presentation_remote_tunnel_temporary_note">Odkazy veřejného tunelu jsou dočasné a mění se při každém spuštění nového tunelu.</string>
     <string name="presentation_public_access_description">Umožněte připojeným telefonům a tabletům ovládat prezentaci přes mobilní data bez nutnosti připojení k vaší Wi-Fi</string>
     <string name="presentation_server_not_running">Server neběží — spusťte doprovodný server v Nastavení pro povolení dálkového ovládání</string>
-    <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
-    <string name="number_of_projection_windows">Počet projekčních oken</string>
-    <string name="windows_count_label">Okna (1-3)</string>
     <string name="window_position">Poloha okna</string>
     <string name="screen">Obrazovka</string>
     <string name="projection_position_help">Hodnoty polohy představují pixelové posuny od okrajů obrazovky. Použijte je k úpravě umístění projekčního okna na sekundárních displejích.</string>
 
     <!-- Background Settings Tab -->
-    <string name="default_background_color">Výchozí barva pozadí</string>
-    <string name="default_background_color_help">Tato barva se používá, když je pro Bibli nebo Písně vybrán typ pozadí „Výchozí"</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Média</string>
-    <string name="media_source">Zdroj médií</string>
     <string name="media_local_file">Místní soubor</string>
     <string name="media_network_url">Síťová URL</string>
     <string name="media_url_placeholder">Zadejte URL (http://, rtsp://, ...)</string>
@@ -562,63 +471,34 @@
     <string name="media_seek_forward">Vpřed o 10 sek</string>
     <string name="media_loop_count">Smyčky</string>
     <string name="media_loop_count_tooltip">Kolikrát opakovat (0 = donekonečna)</string>
-    <string name="media_preview">Náhled</string>
-    <string name="media_volume">Hlasitost</string>
     <string name="media_mute">Ztlumit</string>
     <string name="media_unmute">Zrušit ztlumení</string>
-    <string name="media_open_in_browser">Otevřít v prohlížeči</string>
-    <string name="media_web_preview_note">Webové video — přehrávání ovládáno přes prohlížeč.</string>
-    <string name="media_local_preview_note">Místní video — použijte ovládací prvky výše.</string>
 
     <!-- Streaming Settings Tab -->
-    <string name="streaming">Streaming</string>
-    <string name="streaming_settings">Nastavení streamingu</string>
-    <string name="lower_third_folder">Složka animací dolní třetiny</string>
-    <string name="lower_third_folder_hint">Žádná složka nebyla vybrána</string>
-    <string name="lower_third_folder_help">Vyberte složku se soubory animací Lottie JSON (.json) pro překryvy dolní třetiny.</string>
     <string name="select_folder">Vybrat složku</string>
-    <string name="clear_folder">Vymazat</string>
-    <string name="lower_third_files_found">Nalezeno %1$d animačních souborů</string>
-    <string name="lower_third_no_files">V vybran složce nebyly nalezeny ždn soubory .json</string>
 
     <string name="anim_slide_from_left">Zleva</string>
     <string name="anim_slide_from_right">Zprava</string>
     <string name="anim_slide_from_top">Shora</string>
     <string name="anim_slide_from_bottom">Zdola</string>
-    <string name="anim_slide_along_top_ltr">Podél horního okraje (L→P)</string>
-    <string name="anim_slide_along_top_rtl">Podél horního okraje (P→L)</string>
-    <string name="anim_slide_along_bottom_ltr">Podél dolního okraje (L→P)</string>
-    <string name="anim_slide_along_bottom_rtl">Podél dolního okraje (P→L)</string>
-    <string name="animation_slide_up">Nahoru (zdola nahoru)</string>
-    <string name="animation_slide_left_to_right">Zleva doprava</string>
-    <string name="animation_slide_to_center">Do středu</string>
     <string name="announcement_animation">Animace</string>
-    <string name="announcement_animation_duration">Trvání (ms)</string>
     <string name="announcement_animation_speed">Rychlost</string>
     <string name="announcement_loop_count">Počet opakování</string>
     <string name="announcement_loop_tooltip">0 = nekonečná smyčka</string>
     <string name="announcement_background_color_label">Barva pozadí</string>
-    <string name="announcement_text">Text oznámení</string>
     <string name="announcement_text_hint">Zadejte text oznámení…</string>
-    <string name="bible_transition_settings">Přechod</string>
-    <string name="song_transition_settings">Přechod</string>
     <string name="top_center">Nahoře uprostřed</string>
     <string name="bottom_center">Dole uprostřed</string>
     <string name="center_left">Střed vlevo</string>
     <string name="center_right">Střed vpravo</string>
-    <string name="show_in_lower_third">Zobrazit ve spodní třetině</string>
-    <string name="content_bible">Bible</string>
-    <string name="content_songs">Písně</string>
     <string name="content_bible_background">Pozadí Bible</string>
     <string name="content_songs_background">Pozadí písní</string>
-    <string name="content_background_layered_tooltip">Projeví se pouze tehdy, když je výše zaškrtnuto i obecné pole Pozadí (nebo Pozadí titulkového pruhu).</string>
     <string name="content_pictures">Fotky/Prezentace</string>
     <string name="content_media">Média</string>
     <string name="content_streaming">Spodní třetina</string>
     <string name="content_announcements">Oznámení</string>
     <string name="detected_screens">Zjištěné obrazovky: %1$d</string>
     <string name="presenter_windows_count">Okna prezentace: %1$d</string>
-    <string name="num_screens_label">Počet obrazovek:</string>
     <string name="screen_col_label">Obrazovka %1$d</string>
     <string name="screen_assignment">Přiřazení obrazovek</string>
     <string name="display_mode">Režim zobrazení</string>
@@ -627,33 +507,9 @@
     <string name="full_screen">Celá obrazovka</string>
     <string name="lower_third_size">Spodní třetina</string>
     <string name="identify_screen">Identifikovat</string>
-    <string name="lottie_files_folder">Složka souborů Lottie</string>
-    <string name="lottie_files">Soubory Lottie</string>
     <string name="no_lottie_files">Žádné JSON soubory nenalezeny</string>
-    <string name="import_lottie_file">Importovat soubor</string>
-    <string name="remove_lottie_file">Odebrat soubor</string>
     <string name="generate_lower_third">Vytvořit</string>
-    <string name="lottie_presets">Předvolby spodní třetiny</string>
-    <string name="lottie_preset_import_file">Importovat Lottie</string>
-    <string name="lottie_preset_label">Název předvolby</string>
-    <string name="lottie_preset_label_hint">Zadejte název…</string>
-    <string name="lottie_preset_save">Uložit předvolbu</string>
-    <string name="lottie_preset_delete">Smazat předvolbu</string>
-    <string name="lottie_preset_no_file">Žádný soubor nevybrán</string>
-    <string name="lottie_preset_add_pair">+ Přidat pár</string>
-    <string name="lottie_preset_saved">Předvolba uložena</string>
-    <string name="lottie_presets_list">Uložené předvolby</string>
-    <string name="lottie_no_presets">Žádné předvolby neuloženy</string>
     <string name="lottie_select_preset">Vyberte předvolbu k náhledu</string>
-    <string name="lottie_pause_frame">Snímek pauzy</string>
-    <string name="lottie_pause_frame_none">Žádný</string>
-    <string name="lottie_pause_at_frame">Pauza na snímku</string>
-    <string name="lottie_pause_duration">Trvání pauzy (ms)</string>
-    <string name="lottie_play_next">Další přehrávání</string>
-    <string name="lottie_run_to_end">Do konce</string>
-    <string name="save_string">Uložit</string>
-    <string name="saved_strings">Uložené hodnoty</string>
-    <string name="no_saved_strings">Žádné uložené hodnoty</string>
     <string name="delete_saved_string">Smazat</string>
     <string name="menu_keyboard_shortcuts">Klávesové zkratky</string>
     <string name="keyboard_shortcuts_title">Klávesové zkratky</string>
@@ -663,7 +519,6 @@
     <string name="shortcut_category_pictures">Záložka Fotky</string>
     <string name="shortcut_category_presentation">Záložka Prezentace</string>
     <string name="shortcut_category_media">Záložka Média</string>
-    <string name="shortcut_category_tab_switching">Přepínání záložek</string>
     <string name="shortcut_description_new_schedule">Nový plán</string>
     <string name="shortcut_description_open_schedule">Otevřít plán</string>
     <string name="shortcut_description_save_schedule">Uložit plán</string>
@@ -703,12 +558,10 @@
     <string name="shortcut_description_delete_source">Smazat vybraný zdroj</string>
     <string name="shortcut_key_right_click">Pravé tlačítko</string>
     <string name="shortcut_key_shift_drag">Shift+Přetažení</string>
-    <string name="shortcut_category_schedule">Plán</string>
     <string name="shortcut_description_context_menu">Zobrazit kontextové menu</string>
     <string name="shortcut_description_reorder_item">Přeuspořádat položku</string>
     <string name="shortcut_description_undo">Zpět poslední změna programu</string>
     <string name="shortcut_description_redo">Znovu provést poslední zrušenou změnu</string>
-    <string name="shortcut_description_reorder_image">Přeuspořádat obrázek</string>
     <string name="shortcut_scope_menus_hint">Klávesové zkratky nabídek, zpracované jako první</string>
     <string name="shortcut_scope_global_hint">Dostupné kdekoli v aplikaci</string>
     <string name="shortcut_scope_bible_hint">Aktivní, když je vybrána záložka Bible</string>
@@ -745,8 +598,6 @@
     <string name="align_top">Zarovnat nahoru</string>
     <string name="align_middle">Zarovnat na střed</string>
     <string name="align_bottom">Zarovnat dolů</string>
-    <string name="position_above_desc">Nahoře</string>
-    <string name="position_below_desc">Dole</string>
     <string name="increment">Zvýšit</string>
     <string name="decrement">Snížit</string>
     <string name="presented_image">Zobrazený obrázek</string>
@@ -756,14 +607,12 @@
     <string name="presenter_view_title">Zobrazení prezentéra %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="decklink_output_title">Výstup DeckLink %1$d</string>
-    <string name="lower_third_generator">Generátor dolní třetiny</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
     <string name="aspect_ratio_mismatch">Nesoulad poměru stran: soubor je %1$dx%2$d (%3$s), ale výstup je %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobilní</string>
     <string name="desktop_view">Plocha</string>
     <string name="interactive_mode">Interaktivní</string>
     <string name="mirror_mode">Zrcadlo</string>
-    <string name="time_separator">:</string>
 
     <string name="image_files_filter">Soubory obrázků (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Video soubory (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
@@ -781,24 +630,16 @@
     <string name="audio_output">Zvukový výstup</string>
     <string name="audio_output_default">Výchozí systémový</string>
     <string name="audio_output_device">Výstupní zařízení</string>
-    <string name="auto_fit">Automaticky</string>
     <string name="background_transparent_option">Průhledné</string>
-    <string name="background_video">Video pozadí:</string>
     <string name="background_video_option">Smyčka videa</string>
     <string name="bible_history">Historie</string>
     <string name="bible_history_clear">Vymazat</string>
-    <string name="bible_storage_directory">Adresář úložiště Bible</string>
     <string name="companion_server">Doprovodný server</string>
     <string name="copy_api_key">Kopírovat</string>
-    <string name="copy_url">Kopírovat URL</string>
-    <string name="default_lower_third_background">Výchozí pozadí dolní třetiny</string>
-    <string name="default_lower_third_background_help">Použije se, když je pro Bibli nebo Písně v režimu zobrazení dolní třetiny vybráno 'Výchozí'</string>
     <string name="enable_server">Povolit server</string>
-    <string name="font_preview_text">ABCDabcd1234</string>
     <string name="generate_api_key">Vygenerovat</string>
     <string name="gradient_bottom_color">Spodní barva:</string>
     <string name="gradient_enabled">Přechod</string>
-    <string name="gradient_opacity">Neprůhlednost</string>
     <string name="background_opacity">Neprůhlednost pozadí</string>
     <string name="gradient_top_opacity">Neprůhlednost nahoře</string>
     <string name="gradient_bottom_opacity">Neprůhlednost dole</string>
@@ -838,26 +679,14 @@
     <string name="lock_screen_to_tab">Uzamknout obrazovku na aktuální záložku</string>
     <string name="qr_code">QR kód</string>
     <string name="projection_decklink_io_conflict_tooltip">Používáno také pro vstup — nemusí fungovat na zařízeních bez současného I/O</string>
-    <string name="live_preview_announcement">Oznámení</string>
-    <string name="live_preview_bible">Bible</string>
-    <string name="live_preview_lower_third">Dolní třetina</string>
-    <string name="live_preview_media">Média</string>
     <string name="live_preview_nothing">Nic není živě</string>
     <string name="collapse_preview">Skrýt tento náhled</string>
     <string name="expand_preview">Zobrazit tento náhled</string>
-    <string name="live_preview_picture">Obrázek</string>
-    <string name="live_preview_presentation">Prezentace</string>
-    <string name="live_preview_song">Píseň</string>
     <string name="live_preview_title">Živě</string>
-    <string name="live_preview_website">Webová stránka</string>
     <string name="loop_off">Smyčka vypnuta</string>
-    <string name="output_scale_mode">Měřítko: %1$s</string>
     <string name="loop_on">Smyčka zapnuta</string>
-    <string name="lower_third_height">Výška dolní třetiny % (pro Bibli a Písně)</string>
-    <string name="lower_third_storage_directory">Adresář úložiště dolní třetiny</string>
     <string name="media_audio_continues">Zvuk bude nadále hrát na pozadí při přepínání karet nebo zobrazování jiného obsahu</string>
     <string name="media_files_filter">Mediální soubory</string>
-    <string name="media_storage_directory">Adresář úložiště médií</string>
     <string name="media_vlc_install">Nainstalujte prosím VLC z videolan.org a restartujte aplikaci</string>
     <string name="media_vlc_required">Pro přehrávání médií je vyžadován přehrávač VLC</string>
     <string name="vlc_custom_path">Vlastní cesta k VLC</string>
@@ -866,13 +695,7 @@
     <string name="vlc_directory_chooser_title">Vyberte instalační adresář VLC</string>
     <string name="vlc_path_invalid">Adresář neobsahuje knihovny VLC</string>
     <string name="menu_view">Zobrazení</string>
-    <string name="output_role_fill">Výplň</string>
-    <string name="output_role_key">Klíč</string>
-    <string name="output_role_normal">Normální</string>
-    <string name="pictures_storage_directory">Adresář úložiště obrázků</string>
-    <string name="presentation_storage_directory">Adresář úložiště prezentací</string>
     <string name="projection_auto_display">Automaticky</string>
-    <string name="projection_display_label">Displej %1$d (%2$dx%3$d)</string>
     <string name="browser_source_outputs">Výstupy Browser Source</string>
     <string name="projection_target_display">Displej</string>
     <string name="reset_settings">Obnovit všechna nastavení</string>
@@ -901,7 +724,6 @@
     <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
     <string name="server_description">Umožňuje mobilním zařízením a vzdáleným klientům přijímat data písní a Bible z této aplikace.</string>
-    <string name="server_endpoints">Dostupné koncové body</string>
     <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Změňte port před spuštěním serveru.</string>
@@ -911,19 +733,11 @@
     <string name="server_stopped">Zastaveno</string>
     <string name="server_url_label">URL serveru</string>
     <string name="set_all_directories">Nastavit vše</string>
-    <string name="songs_storage_directory">Adresář úložiště písní</string>
     <string name="symbol_cancel">✗</string>
-    <string name="symbol_dropdown">▾</string>
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Plátno</string>
     <string name="tab_visibility">Viditelnost karet</string>
-    <string name="text_margins">Okraje textu</string>
-    <string name="content_region">Oblast obsahu</string>
-    <string name="content_region_width">Šířka %</string>
-    <string name="content_region_x_offset">Posun X %</string>
-    <string name="content_region_y_offset">Posun Y %</string>
-    <string name="end_of_song_spacing">Konec písně (*) rozestup</string>
     <string name="theme">Motiv</string>
     <string name="timer_expired">Čas vypršel!</string>
     <string name="timer_expired_text_hint">Zadejte zprávu pro zobrazení po skončení…</string>
@@ -932,7 +746,6 @@
     <string name="timer_minutes">min</string>
     <string name="timer_pause">Pozastavit</string>
     <string name="timer_reset">Resetovat</string>
-    <string name="timer_resume">Pokračovat</string>
     <string name="timer_seconds">sek</string>
     <string name="timer_am">dop.</string>
     <string name="timer_pm">odp.</string>
@@ -942,12 +755,10 @@
     <string name="timer_clock_format_24h_sec">24hodinový (HH:mm:ss)</string>
     <string name="timer_clock_format_24h">24hodinový (HH:mm)</string>
     <string name="timer_start">Spustit</string>
-    <string name="timer_text_color">Barva časovače</string>
     <string name="timer_title">Časovač</string>
     <string name="timer_mode_duration">Trvání</string>
     <string name="timer_mode_clock">Konkrétní čas</string>
     <string name="timer_target_time">Odpočítávat do</string>
-    <string name="tooltip_add_website">Přidat webovou stránku</string>
     <string name="tooltip_clear_display">Vymazat zobrazení</string>
     <string name="remote_action_clear_display">Vymazat zobrazení</string>
     <string name="schedule_add_files_title">Přidat soubory do programu</string>
@@ -961,7 +772,6 @@
     <string name="web_add_to_schedule">Přidat do programu</string>
     <string name="web_bookmark_add">Záložka</string>
     <string name="web_bookmark_remove">Odebrat</string>
-    <string name="web_bookmarks">Záložky</string>
     <string name="web_clear_cache">Vymazat mezipaměť</string>
     <string name="web_back">Zpět</string>
     <string name="web_forward">Vpřed</string>
@@ -977,12 +787,9 @@
     <string name="web_engine_unavailable_macos_body">Prohlížečové jádro ChurchPresenter už tuto verzi macOS nepodporuje. Aktualizujte na macOS 12 (Monterey) nebo novější, abyste mohli používat záložku Web a zdroje prohlížeče.</string>
     <string name="web_engine_unavailable_windows_title">Webový prohlížeč vyžaduje Windows 10 nebo novější</string>
     <string name="web_engine_unavailable_windows_body">Prohlížečové jádro ChurchPresenter již tuto verzi Windows nepodporuje. Aktualizujte na Windows 10 nebo novější, abyste mohli používat kartu Web a zdroje prohlížeče.</string>
-    <string name="web_under_construction">Tato funkce je ve vývoji.</string>
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_url_label">URL</string>
     <string name="website_dialog_title">Přidat webovou stránku</string>
     <string name="website_disclaimer">Neneseme odpovědnost za reklamy ani obsah, který se může zobrazit na zobrazené webové stránce.</string>
-    <string name="website_go_live">Zobrazit živě</string>
     <string name="website_title_hint">Zadejte zobrazovaný název…</string>
     <string name="website_title_label">Název (volitelný)</string>
     <string name="website_url_hint">https://example.com</string>
@@ -990,23 +797,10 @@
     <string name="new_song">Nová píseň</string>
     <string name="back_to_live">Zpět na živé vysílání</string>
     <string name="line_navigation_hint">%1$s pro navigaci v řádcích, %2$s pro sloky</string>
-    <string name="multi_verse">Více veršů</string>
 
     <!-- Statistics -->
-    <string name="statistics">Statistiky</string>
-    <string name="top_songs">Nejčastější písně</string>
-    <string name="top_verses">Nejčastější verše</string>
     <string name="clear_statistics">Vymazat statistiky</string>
-    <string name="times_displayed">krát</string>
     <string name="menu_statistics">Statistiky</string>
-    <string name="export_to_xls">Exportovat do XLS</string>
-    <string name="statistics_song_count">%1$d písní</string>
-    <string name="statistics_verse_count">%1$d veršů</string>
-    <string name="statistics_exported_success">Statistiky úspěšně exportovány.</string>
-    <string name="statistics_exported_error">Statistiky se nepodařilo exportovat.</string>
-    <string name="file_chooser_save_statistics">Uložit statistiky jako</string>
-    <string name="file_filter_xls">Tabulka Excel (*.xls)</string>
-    <string name="stats_period_label">Období:</string>
     <string name="stats_period_all_time">Celá doba</string>
     <string name="stats_period_last_3_months">Poslední 3 měsíce</string>
     <string name="stats_period_last_6_months">Posledních 6 měsíců</string>
@@ -1020,33 +814,6 @@
     <string name="stats_clear_all_confirm">Vymazat všechny statistiky? Odstraní se tím i historie přehrání, ze které se sestavuje zpráva CCLI. Tuto akci nelze vrátit zpět.</string>
 
     <!-- Remote API / Companion Server (added) -->
-    <string name="auto_fit_button_tooltip">Vypočítat optimální velikost písma pro aktuální verš</string>
-    <string name="auto_fit_checkbox_tooltip">Automaticky přizpůsobit text obrazovce s použitím velikosti písma jako maxima</string>
-    <string name="server_endpoints_read">Čtení</string>
-    <string name="server_endpoints_actions">Akce</string>
-    <string name="server_endpoints_websocket">WebSocket</string>
-    <string name="server_payload_reference">Přehled polí požadavku (pole item)</string>
-    <string name="endpoint_desc_server_info">informace o serveru</string>
-    <string name="endpoint_desc_song_catalog">katalog písní</string>
-    <string name="endpoint_desc_song_detail">úplné údaje písně s textem</string>
-    <string name="endpoint_desc_filter_songbook">filtrovat podle zpěvníku</string>
-    <string name="endpoint_desc_bible_catalog">katalog Bible</string>
-    <string name="endpoint_desc_filter_book">filtrovat podle knihy</string>
-    <string name="endpoint_desc_filter_chapter">filtrovat podle kapitoly</string>
-    <string name="endpoint_desc_schedule">aktuální plán</string>
-    <string name="endpoint_desc_presentation_catalog">katalog prezentací</string>
-    <string name="endpoint_desc_slide_image">obrázek snímku (JPEG)</string>
-    <string name="endpoint_desc_picture_catalog">katalog složky obrázků</string>
-    <string name="endpoint_desc_picture_image">obrázek (JPEG)</string>
-    <string name="endpoint_desc_select_picture">vybrat obrázek podle indexu</string>
-    <string name="endpoint_desc_ws_select_picture">vybrat obrázek (WS)</string>
-    <string name="endpoint_desc_bible_chapter">celá kapitola s textem veršů</string>
-    <string name="endpoint_desc_add_to_schedule">přidat položku do plánu</string>
-    <string name="endpoint_desc_add_batch_to_schedule">přidat více položek do plánu jedním voláním</string>
-    <string name="endpoint_desc_project">odeslat položku přímo do projekce</string>
-    <string name="endpoint_desc_ws_realtime">aktualizace v reálném čase</string>
-    <string name="endpoint_desc_ws_add_to_schedule">přidat položku do plánu (WS)</string>
-    <string name="endpoint_desc_ws_project">projektovat položku přímo (WS)</string>
     <string name="remote_api_add_to_schedule">Přidat do plánu</string>
     <string name="remote_api_project">Projektovat (Spustit živě)</string>
     <string name="remote_api_presentation_connect">Připojit k dálkovému ovládání prezentace</string>
@@ -1084,11 +851,9 @@
     <string name="client_label_cancel">Zrušit</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
-    <string name="new_songbook">Nový zpěvník</string>
     <string name="add_new">Přidat nový...</string>
     <string name="secondary_title">Vedlejší název</string>
     <string name="duplicate_song_error">Píseň s tímto číslem a názvem již v tomto zpěvníku existuje</string>
-    <string name="secondary_lyrics">Vedlejší text</string>
     <string name="enter_secondary_lyrics_here">Zadejte vedlejší text zde...</string>
 
     <!-- System Settings - Song Samples and File Conversion -->
@@ -1097,7 +862,6 @@
     <string name="song_samples_overwrite_confirm">Složka \"Ukázkové písně\" již existuje. Tím se přepíší existující soubory.\nPokračovat?</string>
     <string name="song_samples_copied">Zkopírováno %1$d ukázkových písní do složky \"Ukázkové písně\".</string>
     <string name="add_song_samples">Přidat ukázkové písně</string>
-    <string name="sps_file_not_supported">%1$s (není podporováno)</string>
     <string name="folder_overwrite_confirm">Složka \"%1$s\" již existuje. Tím se přepíší existující soubory písní.\nPokračovat?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
@@ -1208,30 +972,9 @@
     <string name="song_number_offset_needs_corner">Vyberte nahoře roh, abyste mohli číslo volně umístit</string>
     <string name="song_number_offset_x">Posun X %</string>
     <string name="song_number_offset_y">Posun Y %</string>
-    <string name="song_section_label">Popisek oddílu</string>
-    <string name="song_section_label_enabled">Zobrazit aktuální oddíl (sloka, refrén…)</string>
-    <string name="song_section_label_font_size">Velikost písma</string>
-    <string name="song_section_label_color">Barva</string>
-    <string name="fullscreen_display">Zobrazení na celou obrazovku</string>
-    <string name="display_mode_label">Režim zobrazení:</string>
-    <string name="display_mode_one_verse">1 sloka</string>
-    <string name="display_mode_one_line">1 řádek</string>
     <string name="song_language_both">Obojí</string>
     <string name="song_language_primary">Primární</string>
     <string name="song_language_secondary">Sekundární</string>
-    <string name="screen_lang_off">Vypnuto</string>
-    <string name="screen_lang_language_1">Jazyk 1</string>
-    <string name="screen_lang_language_2">Jazyk 2</string>
-    <string name="screen_lang_bible_1">Bible 1</string>
-    <string name="screen_lang_bible_2">Bible 2</string>
-    <string name="lower_third_display">Zobrazení dolní třetiny</string>
-    <string name="bilingual_layout">Dvojjazyčné rozložení:</string>
-    <string name="bilingual_left_right">Vlevo / Vpravo</string>
-    <string name="bilingual_top_bottom">Nahoře / Dole</string>
-    <string name="look_ahead_fullscreen">Náhled (celá obrazovka)</string>
-    <string name="look_ahead_next_fullscreen">Další sekce (celá obrazovka)</string>
-    <string name="look_ahead_lower_third">Náhled (dolní třetina)</string>
-    <string name="look_ahead_next_lower_third">Dalš sekce (doln třetina)</string>
 
     <!-- Canvas Tab -->
     <string name="canvas_scenes">Scény</string>
@@ -1285,15 +1028,11 @@
     <string name="canvas_source_screen_capture">Záznam obrazovky</string>
     <string name="canvas_text_color">Barva textu</string>
     <string name="canvas_text_bg_color">Barva pozadí</string>
-    <string name="canvas_text_bold">Tučné</string>
     <string name="canvas_clock_mode">Režim</string>
     <string name="canvas_clock_format">Formát</string>
     <string name="canvas_clock_show_hours">Zobrazit hodiny</string>
     <string name="canvas_clock_show_seconds">Zobrazit sekundy</string>
     <string name="canvas_clock_font_size">Velikost písma</string>
-    <string name="canvas_clock_target_hour">Cílová hodina</string>
-    <string name="canvas_clock_target_minute">Cílová minuta</string>
-    <string name="canvas_clock_target_second">Cílová sekunda</string>
     <string name="canvas_qr_type">Typ</string>
     <string name="canvas_qr_content">Obsah</string>
     <string name="canvas_qr_foreground">Popředí</string>
@@ -1304,9 +1043,7 @@
     <string name="canvas_qr_wifi_hidden">Skrytá síť</string>
     <string name="canvas_qr_error_correction">Oprava chyb</string>
     <string name="canvas_camera_device">Kamera</string>
-    <string name="canvas_camera_name">Název zařízení</string>
     <string name="canvas_camera_none_found">Žádná kamera nenalezena</string>
-    <string name="canvas_camera_ffmpeg_hint">Nainstalujte ffmpeg pro detekci virtuálních kamer (OBS, NDI atd.)</string>
     <string name="canvas_camera_v4l2_hint">Nainstalujte v4l2loopback pro virtuální kamery: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Obnovit kamery</string>
     <string name="canvas_camera_format">Formát videa</string>
@@ -1349,7 +1086,6 @@
     <string name="canvas_scale_stretch">Roztáhnout</string>
     <string name="canvas_scale_none">Původní</string>
     <string name="canvas_text_content">Text</string>
-    <string name="canvas_line_spacing">Řádkování</string>
     <string name="canvas_font">Písmo</string>
     <string name="canvas_align_horizontal">Vodorovně</string>
     <string name="canvas_align_vertical">Svisle</string>
@@ -1382,25 +1118,6 @@
     <string name="canvas_clock_format_24h">24h</string>
     <string name="canvas_clock_format_12h">12h</string>
     <string name="show_qr_code">QR</string>
-    <string name="cert_download_button">Stáhnout certifikát</string>
-    <string name="cert_download_qr_title">Instalovat CA certifikát</string>
-    <string name="cert_download_scan_hint">Naskenujte QR kód fotoaparátem telefonu a otevřete stránku pro stažení certifikátu.</string>
-    <string name="cert_install_ios_title">🍎  Instalace na iOS</string>
-    <string name="cert_install_ios_step1">Naskenujte QR kód — fotoaparát zobrazí banner s URL v horní části obrazovky.</string>
-    <string name="cert_install_ios_step2">Klepněte na banner a otevřete URL v Safari. Po zobrazení výzvy klepněte na Povolit a stáhněte profil.</string>
-    <string name="cert_install_ios_step3">Otevřete Nastavení → Obecné → Správa VPN a zařízení → klepněte na ChurchPresenter CA → Instalovat → zadejte přístupový kód.</string>
-    <string name="cert_install_ios_trust_title">⚠️  Povinné po instalaci</string>
-    <string name="cert_install_ios_trust_step">Nastavení → Obecné → O telefonu → Důvěryhodnost certifikátů → zapněte plnou důvěru pro ChurchPresenter CA. Bez tohoto kroku se aplikace nemůže připojit přes zabezpečené spojení.</string>
-    <string name="cert_install_android_title">🤖  Instalace na Android</string>
-    <string name="cert_install_android_step1">Naskenujte QR kód — klepněte na URL zobrazenou fotoaparátem a otevřete ji v Chrome.</string>
-    <string name="cert_install_android_step2">Chrome stáhne ChurchPresenter-CA.crt. Klepněte na soubor v oznámení nebo ve Stažených souborech a nainstalujte jej přímo.</string>
-    <string name="cert_install_android_cant_title">🚫  Nelze nainstalovat certifikát / pouze ze známých zdrojů?</string>
-    <string name="cert_install_android_cant_intro">Některé verze Androidu blokují přímou instalaci certifikátů. Použijte ruční postup:</string>
-    <string name="cert_install_android_cant_step1">Nastavení → Zabezpečení (nebo Biometrie a zabezpečení u Samsung).</string>
-    <string name="cert_install_android_cant_step2">Klepněte na Šifrování a přihlašovací údaje → Instalovat certifikát → Certifikát CA.</string>
-    <string name="cert_install_android_cant_step3">Přejděte do Stažených souborů, vyberte ChurchPresenter-CA.crt a potvrďte.</string>
-    <string name="cert_fingerprint_label">Otisk SHA-256</string>
-    <string name="cert_fingerprint_verify">Po instalaci ověřte, že tento otisk odpovídá — zajišťuje, že byl nainstalován správný certifikát.</string>
     <string name="connection_qr_title">QR kód připojení</string>
     <string name="server_host_label">Hostitel (přepis)</string>
     <string name="server_host_hint">např. 192.168.1.50 nebo church-mac.local</string>
@@ -1409,14 +1126,12 @@
     <!-- Update checker -->
     <string name="update_dialog_title">Dostupná aktualizace</string>
     <string name="update_dialog_message">Je dostupná nová verze Church Presenter: %1$s</string>
-    <string name="update_dialog_download">Stáhnout</string>
     <string name="update_dialog_dismiss">Později</string>
     <string name="update_dialog_release_notes">Co je nového:</string>
     <string name="update_dialog_download_install">Stáhnout a nainstalovat</string>
     <string name="update_dialog_downloading">Stahování...</string>
     <string name="update_dialog_install_now">Nainstalovat nyní</string>
     <string name="update_dialog_open_page">Otevřít stránku ke stažení</string>
-    <string name="update_check_menu">Zkontrolovat aktualizace…</string>
     <string name="update_already_latest">Máte nainstalovanou nejnovější verzi.</string>
     <string name="update_dialog_up_to_date_title">Máte nejnovější verzi</string>
     <string name="update_dialog_view_on_github">Zobrazit na GitHubu</string>
@@ -1433,33 +1148,10 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor scény</string>
     <string name="display_stage_monitor">Monitor scény</string>
-    <string name="stage_monitor_enable">Povolit monitor scény</string>
-    <string name="stage_monitor_display">Cílový displej</string>
-    <string name="stage_monitor_display_none">Žádný (vypnuto)</string>
-    <string name="stage_monitor_section_general">Obecné</string>
-    <string name="stage_monitor_section_current">Aktuální snímek</string>
-    <string name="stage_monitor_section_next">Náhled dalšího snímku</string>
-    <string name="stage_monitor_section_label_style">Styl popisku</string>
-    <string name="stage_monitor_section_clock">Hodiny a časovač</string>
-    <string name="stage_monitor_show_next_slide">Zobrazit náhled dalšího snímku</string>
-    <string name="stage_monitor_show_clock">Zobrazit hodiny</string>
-    <string name="stage_monitor_show_timer">Zobrazit odpočítávání</string>
-    <string name="stage_monitor_show_section_label">Zobrazit popisek sekce</string>
-    <string name="stage_monitor_show_notes">Zobrazit poznámky moderátora</string>
     <string name="general">Obecné</string>
-    <string name="stage_monitor_text_color">Barva textu</string>
-    <string name="stage_monitor_font_size">Velikost písma</string>
-    <string name="stage_monitor_background_color">Barva pozadí</string>
-    <string name="stage_monitor_layout">Rozložení</string>
-    <string name="stage_monitor_layout_vertical">Svislé</string>
-    <string name="stage_monitor_layout_horizontal">Vodorovné</string>
-    <string name="stage_monitor_layout_quadrants">Rozložení do 4 kvadrantů</string>
-    <string name="stage_monitor_quadrant_current">Vlevo nahoře: aktuální snímek</string>
     <string name="stage_monitor_quadrant_next">Vlevo dole: další snímek</string>
     <string name="stage_monitor_quadrant_clock">Dole uprostřed: hodiny</string>
     <string name="stage_monitor_quadrant_notes">Vpravo dole: poznámky moderátora</string>
-    <string name="stage_monitor_no_extra_displays">Žádný sekundární displej nebyl zjištěn. Připojte další monitor pro použití monitoru scény.</string>
-    <string name="stage_monitor_layout_section">Rozvržení obrazovky</string>
     <string name="stage_monitor_zone_top_left">Vlevo nahoře</string>
     <string name="stage_monitor_zone_top_right">Vpravo nahoře</string>
     <string name="stage_monitor_zone_bottom_left">Vlevo dole</string>
@@ -1467,13 +1159,8 @@
     <string name="stage_monitor_zone_bottom_right">Vpravo dole</string>
     <string name="stage_monitor_zone_full_screen">Celá obrazovka</string>
     <string name="stage_monitor_zone_none">Žádný</string>
-    <string name="stage_monitor_notes_from_presentation">Poznámky jsou automaticky zobrazovány z aktivního snímku PowerPointu nebo Keynote.</string>
-    <string name="stage_monitor_content_section">Obsah obrazovky</string>
     <string name="stage_monitor_zone_n">Zóna %1$d</string>
-    <string name="stage_monitor_zone_shows">Zobrazuje</string>
-    <string name="stage_monitor_zone_count">Zón: %1$d</string>
     <string name="stage_monitor_layout_stranded">V tomto rozvržení se nezobrazuje: %1$s</string>
-    <string name="stage_monitor_size_section">Velikost zón</string>
     <string name="stage_monitor_zone_width">Šířka (%)</string>
     <string name="stage_monitor_zone_row_height">Výška řádku (%)</string>
     <string name="stage_monitor_size_selected">Vybráno</string>
@@ -1495,7 +1182,6 @@
     <string name="stage_monitor_position_middle_left">Uprostřed vlevo</string>
     <string name="stage_monitor_position_center">Uprostřed</string>
     <string name="stage_monitor_position_middle_right">Uprostřed vpravo</string>
-    <string name="metronome_bpm_label">Tempo metronomu</string>
     <string name="unit_bpm">úd/min</string>
 
     <!-- Q&A Tab -->
@@ -1511,14 +1197,10 @@
     <string name="qa_incoming_approved">Příchozí + Schválené</string>
     <string name="qa_done">Hotovo</string>
     <string name="qa_denied">Zamítnuto</string>
-    <string name="qa_questions">Otázky</string>
 
     <string name="qa_finished">Dokončené</string>
     <string name="qa_history">Historie</string>
     <string name="qa_clear_all_questions">Vymazat všechny otázky</string>
-    <string name="qa_incoming_tab">Příchozí (%1$d)</string>
-    <string name="qa_finished_tab">Dokončené (%1$d)</string>
-    <string name="qa_history_tab">Historie (%1$d)</string>
     <string name="qa_displaying">Zobrazuje se: %1$s…</string>
     <string name="qa_waiting">Čekání na otázky…</string>
     <string name="qa_start_session_hint">Spusťte relaci pro příjem otázek</string>
@@ -1538,18 +1220,6 @@
     <string name="qa_show_qr">Zobrazit QR na displeji</string>
     <string name="qa_admin_panel">Administrační panel</string>
     <string name="qa_server_hint">Spusťte companion server pro aktivaci Q&amp;A</string>
-    <string name="qa_display_styling">Styl zobrazení</string>
-    <string name="qa_styling_qr_group">QR kód</string>
-    <string name="qa_styling_text_group">Text a pozadí</string>
-    <string name="qa_text_color">Barva textu</string>
-    <string name="qa_qr_fg_color">Popředí QR</string>
-    <string name="qa_qr_bg_color">Pozadí QR</string>
-    <string name="qa_font">Písmo</string>
-    <string name="qa_size">Velikost</string>
-    <string name="qa_background_color">Barva pozadí</string>
-    <string name="qa_transparent">Průhledné</string>
-    <string name="qa_position">Poloha</string>
-    <string name="qa_settings_section">Nastavení</string>
     <string name="qa_cooldown_label">Prodleva mezi otázkami (sekundy)</string>
     <string name="qa_qr_message_label">Zpráva QR kódu</string>
     <string name="qa_qr_message_default">Naskenujte pro zadání otázky</string>
@@ -1576,18 +1246,8 @@
     <string name="qa_local">Místní</string>
     <string name="qa_public">Veřejný</string>
     <string name="qa_retry">Zkusit znovu</string>
-    <string name="qa_pos_tl">NL</string>
-    <string name="qa_pos_tc">NS</string>
-    <string name="qa_pos_tr">NP</string>
-    <string name="qa_pos_cl">SL</string>
-    <string name="qa_pos_c">S</string>
-    <string name="qa_pos_cr">SP</string>
-    <string name="qa_pos_bl">DL</string>
-    <string name="qa_pos_bc">DS</string>
-    <string name="qa_pos_br">DP</string>
 
     <!-- QA: missing strings -->
-    <string name="qa_sort">Řazení: %1$s</string>
     <string name="qa_sort_newest">Nejnovější první</string>
     <string name="qa_sort_oldest">Nejstarší první</string>
     <string name="qa_sort_most_votes">Nejvíce hlasů</string>
@@ -1601,51 +1261,19 @@
     <string name="qa_copy_url">Kopírovat URL</string>
     <string name="qa_voting_enabled">Hlasování povoleno</string>
     <string name="qa_voting_disabled">Hlasování zakázáno</string>
-    <string name="qa_opacity">Průhlednost:</string>
     <!-- STT tab -->
     <string name="stt_server_url">URL serveru STT</string>
     <string name="stt_disconnect">Odpojit</string>
     <string name="stt_connect">Připojit</string>
     <string name="stt_go_live">Spustit živě</string>
-    <string name="stt_display_mode">Režim zobrazení</string>
-    <string name="stt_mode_transcribe">Pouze přepis</string>
-    <string name="stt_mode_translate">Pouze překlad</string>
-    <string name="stt_mode_both">Obojí</string>
-    <string name="stt_layout">Rozložení</string>
-    <string name="stt_layout_stacked">Vrstvené</string>
-    <string name="stt_layout_stacked_inverse">Vrstvené (Inverzní)</string>
-    <string name="stt_layout_side_by_side">Vedle sebe</string>
-    <string name="stt_layout_side_by_side_inverse">Vedle sebe (Inverzní)</string>
-    <string name="stt_max_segments">Max. segmentů:</string>
-    <string name="stt_max_lines">Max. řádků:</string>
-    <string name="stt_line_spacing">Řádkování %:</string>
-    <string name="stt_word_highlighting">Zvýraznění slov</string>
-    <string name="stt_in_progress_text">Text probíhá</string>
-    <string name="stt_translation_in_progress">Překlad probíhá</string>
-    <string name="stt_drip_feed">Postupné zobrazení</string>
-    <string name="stt_drip_feed_speed">Rychlost (ms/slovo):</string>
     <string name="stt_live_preview">Živý náhled</string>
     <string name="stt_not_connected">Nepřipojeno. Zadejte URL serveru STT a klikněte na Připojit.</string>
     <string name="stt_waiting_for_transcription">Čekání na přepis…</string>
     <string name="stt_transcription_label">Přepis</string>
     <string name="stt_translation_label">Překlad</string>
-    <string name="stt_display_styling">Styl zobrazení</string>
-    <string name="stt_text_color">Barva textu</string>
-    <string name="stt_translation_color">Barva překladu</string>
-    <string name="stt_font">Písmo</string>
-    <string name="stt_size">Velikost</string>
-    <string name="stt_background_color">Barva pozadí</string>
-    <string name="stt_opacity">Průhlednost:</string>
-    <string name="stt_position">Poloha</string>
 
     <!-- CCLI Report -->
-    <string name="ccli_report">Zpráva CCLI</string>
     <string name="ccli_report_title">Zpráva o využití CCLI</string>
-    <string name="ccli_preset_30d">Posledních 30 dní</string>
-    <string name="ccli_preset_90d">Posledních 90 dní</string>
-    <string name="ccli_preset_this_year">Tento rok</string>
-    <string name="ccli_preset_last_year">Loňský rok</string>
-    <string name="ccli_preset_all_time">Veškerý čas</string>
     <string name="ccli_tab_songs">Písně</string>
     <string name="ccli_tab_bible">Bible</string>
     <string name="ccli_tab_activity">Aktivita</string>
@@ -1673,7 +1301,6 @@
     <string name="ccli_col_last">Poslední</string>
     <string name="ccli_col_verse">Verš</string>
     <string name="ccli_col_bible">Bible</string>
-    <string name="ccli_report_description">Sestava s filtrem dat a grafy — exportujte CSV pro licenční zprávu CCLI</string>
     <string name="ccli_export_csv">Exportovat CCLI CSV</string>
     <string name="ccli_export_xls">Exportovat XLS</string>
     <string name="ccli_exported_success">Zpráva úspěšně exportována.</string>
@@ -1714,7 +1341,6 @@
     <string name="obs_enable">Připojit k OBS Studio</string>
     <string name="obs_host">Hostitel</string>
     <string name="obs_host_hint">localhost</string>
-    <string name="obs_port">Port</string>
     <string name="obs_password">Heslo</string>
     <string name="obs_password_hint">Nechte prázdné, pokud není heslo nastaveno</string>
     <string name="obs_connect">Připojit</string>
@@ -1753,7 +1379,6 @@
     <string name="song_columns">Filtrovat sloupce</string>
     <string name="song_title_slide">Titulní snímek písně</string>
     <string name="show_song_number_before_title">Zobrazit číslo písně před názvem</string>
-    <string name="api_key_qr_title">QR kód API klíče</string>
     <string name="background_follow_default_option">Sledovat výchozí</string>
     <string name="bible_no_primary_title">Primární Bible není nakonfigurována</string>
     <string name="bible_no_primary_hint">Otevři ⚙ Nastavení a přejdi na záložku „Bible", pak:</string>
@@ -1767,15 +1392,9 @@
     <string name="canvas_bible_end_verse">Závěrečný verš</string>
     <string name="canvas_bible_ref_font_size">Velikost písma odkazu</string>
     <string name="canvas_bible_ref_color">Barva odkazu</string>
-    <string name="canvas_bible_ref_bold">Tučný odkaz</string>
-    <string name="canvas_bible_ref_italic">Kurzivní odkaz</string>
     <string name="canvas_source_bible">Bible</string>
     <string name="canvas_expand_text_field">Upravit ve větším okně</string>
-    <string name="canvas_text_italic">Kurzíva</string>
     <string name="close">Zavřít</string>
-    <string name="connection_qr_url_label">URL serveru</string>
-    <string name="connection_qr_key_label">API klíč</string>
-    <string name="crash_video_bg_disabled">Videozadí bylo deaktivováno po %1$d po sobě jdoucích pádech.  [Znovu aktivovat]  [Zavřít]</string>
     <string name="crossword_tab">Křížovka</string>
     <string name="crossword_across">Vodorovně</string>
     <string name="crossword_down">Svisle</string>
@@ -1787,11 +1406,8 @@
     <string name="crossword_loading">Načítání křížovek…</string>
     <string name="crossword_no_puzzles">Zatím nejsou k dispozici žádné křížovky.</string>
     <string name="crossword_level_label">Úroveň %1$d</string>
-    <string name="deny_all">Odmítnout vše</string>
     <string name="dialog_choose_color">Vybrat barvu</string>
-    <string name="enabled">Povoleno</string>
     <string name="label_hex">Hex</string>
-    <string name="lottie_select_json_file">Vybrat soubor Lottie JSON</string>
     <string name="media_vlc_arch_mismatch">Špatná architektura VLC. Tvůj Mac používá Apple Silicon (arm64), ale nainstalované VLC je pouze pro Intel (x86_64). Stáhni verzi VLC pro Apple Silicon z videolan.org a restartuj.</string>
     <string name="media_vlc_load_failed">VLC bylo nalezeno, ale nepodařilo se jej načíst. Zkuste VLC přeinstalovat z videolan.org (ve Windows nainstalujte také Microsoft Visual C++ Redistributable) a poté aplikaci restartujte.</string>
     <string name="open_converter">Převodník písní a Bible</string>
@@ -1799,10 +1415,6 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Pozadí</string>
     <string name="projection_content_lt_background">Pozadí spodní třetiny</string>
-    <string name="projection_content_stt_tooltip">Převod řeči na text — živé titulky a překlad</string>
-    <string name="projection_web_decklink_tooltip">Webový prohlížeč nemůže renderovat na výstupech DeckLink</string>
-    <string name="browser_source_content_unavailable_tooltip">Zatím není k dispozici pro výstup Browser Source</string>
-    <string name="projection_web_go_live_tooltip">Vyžaduje běžný displej (ne DeckLink) s povoleným webem v nastavení projekce</string>
     <string name="qa_add_question_hint">Přidat otázku…</string>
     <string name="remote_activity_added_to_schedule">Přidáno do programu</string>
     <string name="remote_activity_projected">Promítáno (živě)</string>
@@ -1832,9 +1444,6 @@
     <string name="songs_no_db_title">Databáze písní není nakonfigurována</string>
     <string name="songs_no_db_hint">Otevři ⚙ Nastavení a přejdi na záložku „Písně", pak:</string>
     <string name="songs_no_db_step">Nastav složku obsahující soubor databáze písní</string>
-    <string name="tooltip_announcement_show">Zobrazit oznámení na obrazovce</string>
-    <string name="tooltip_announcement_hide">Skrýt oznámení z obrazovky</string>
-    <string name="web_type_to_page_label">Psát na stránku</string>
     <string name="web_type_to_page_placeholder">Nejdřív klikni na vstupní pole na živé stránce</string>
     <string name="web_focus_first_input">Zaměřit první vstupní pole na stránce</string>
     <string name="tab_dictionary">Slovník</string>
@@ -1868,8 +1477,6 @@
     <string name="setup_step2_subtitle">Nastavte soubory Bible pro zobrazení veršů</string>
     <string name="setup_step2_step1">1. Otevřete Nastavení pomocí tlačítka ⚙ v panelu nástrojů</string>
     <string name="setup_step2_step2">2. Přejděte na záložku Systém</string>
-    <string name="setup_step2_step3">3. Klikněte na „Procházet…" vedle Adresáře pro Bibli</string>
-    <string name="setup_step2_step4">4. Vyberte složku s vašimi soubory Bible (.db3)</string>
     <string name="setup_step2_step5">5. Přejděte na záložku Bible a vyberte primární Bibli</string>
     <string name="setup_step2_tip">Hledejte na internetu XML soubor Bible ve vašem jazyce.</string>
     <string name="setup_step2_tip2">Máte Bibli v jiném formátu? Převodník písní a Bible (Nápověda → Převodník písní a Bible) ji dokáže převést.</string>
@@ -1879,7 +1486,6 @@
     <string name="setup_step3_step2">2. Přejděte na záložku Systém</string>
     <string name="setup_step3_step3">3. Klikněte na „Procházet…" vedle Adresáře pro písně</string>
     <string name="setup_step3_step4">4. Vyberte složku s vašimi soubory písní</string>
-    <string name="setup_step3_tip">Písně mohou být ve formátu OpenLyrics, SongPro nebo ChurchPresenter.</string>
     <string name="setup_step5_title">VLC Media Player</string>
     <string name="setup_step5_subtitle">Potřebný pro přehrávání videa a zvuku v snímcích</string>
     <string name="setup_step5_vlc_ok">VLC je nainstalováno a připraveno</string>
@@ -1897,8 +1503,6 @@
     <string name="setup_proj_subtitle">Nastavte, jak se obsah zobrazuje na vašich obrazovkách</string>
     <string name="setup_proj_step1">1. Připojte projektor nebo sekundární displej k počítači</string>
     <string name="setup_proj_step2">2. Otevřete Nastavení a přejděte na záložku Projekce</string>
-    <string name="setup_proj_step3">3. Nastavte počet projekčních oken podle vašich displejů</string>
-    <string name="setup_proj_step4">4. Pro každou obrazovku vyberte cílový displej a režim zobrazení. Poté nastavte v rozevíracích seznamech Bible a Písní požadovaný jazyk — nastavení hodnoty aktivuje daný obsah na této obrazovce. Zaškrtnutí políčka pro ostatní záložky (Obrázky, Média atd.) funguje stejně.</string>
     <string name="setup_proj_step5">5. Klikněte na Identifikovat, abyste potvrdili, který displej je který</string>
     <string name="setup_proj_tip">Každá záložka — Písně, Bible, Snímky, Média, Plátno — odesílá obsah do stejného projekčního okna. Nastavení v každé záložce ovládá písma, pozadí a rozvržení.</string>
     <string name="setup_proj_tip2">Projekční okno můžete kdykoli otevřít a zavřít z nabídky Zobrazení nebo pomocí klávesové zkratky.</string>
@@ -1916,7 +1520,6 @@
     <string name="atem_description">Nahrávání animací dolní třetiny do mediálního úložiště přepínače Blackmagic ATEM. Pro spouštění DSK použijte Bitfocus Companion.</string>
     <string name="atem_host">IP adresa ATEM</string>
     <string name="atem_host_hint">např. 192.168.1.100</string>
-    <string name="atem_port">Port</string>
     <string name="atem_test_connection">Otestovat připojení</string>
     <string name="atem_test_connection_hint">Stiskněte «Otestovat připojení» pro automatické zjištění formátu videa a FPS vašeho ATEM.</string>
     <string name="atem_status_connected">Připojeno</string>
@@ -1928,14 +1531,12 @@
     <string name="atem_render_resolution">Rozlišení vykreslování</string>
     <string name="atem_render_width">Šířka</string>
     <string name="atem_render_height">Výška</string>
-    <string name="atem_clip_fps">FPS klipu (odpovídá videostandartu ATEM)</string>
     <string name="atem_clip_fps_hint">25, 30, 50 nebo 60</string>
     <string name="atem_send_to_atem">Odeslat do ATEM</string>
     <string name="atem_upload_mode">Režim nahrávání</string>
     <string name="atem_mode_still">Statický obraz (jeden snímek)</string>
     <string name="atem_mode_clip">Klip (plná animace)</string>
     <string name="atem_slot">Slot</string>
-    <string name="atem_slot_range">Dostupné: 1–%1$d</string>
     <string name="atem_upload">Nahrát</string>
     <string name="atem_uploading">Nahrávání…</string>
     <string name="atem_preparing">Příprava snímků…</string>
@@ -1944,12 +1545,10 @@
     <string name="atem_clip_capacity_info">klip potřebuje %1$d z %2$d snímků (≈%3$s s max.)</string>
     <string name="atem_clip_too_long">Klip potřebuje %1$d snímků, ale slot %2$d pojme nejvýše %3$d (≈%4$s s) — zkraťte klip, snižte FPS nebo zvětšete alokaci klipů v ATEM Software Control</string>
     <string name="atem_ready">Připraveno k nahrání</string>
-    <string name="atem_upload_done">Nahrávání dokončeno</string>
     <string name="atem_upload_error">Nahrávání selhalo: %1$s</string>
     <string name="atem_detected_video_mode">Zjištěno: %1$s</string>
     <string name="atem_loading_slots">Načítání slotů…</string>
     <string name="atem_slots_error">Sloty se nepodařilo načíst: %1$s</string>
-    <string name="atem_not_configured">Nakonfigurujte ATEM v Nastavení pro aktivaci tohoto tlačítka.</string>
     <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
@@ -1957,7 +1556,6 @@
     <string name="atem_slot_empty">Slot %1$d (prázdný)</string>
     <string name="tab_companion_surface">Companion</string>
     <string name="companion_satellite_settings">Companion Satellite</string>
-    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
     <string name="companion_satellite_description">Připojte se k instanci Bitfocus Companion ve své síti jako povrch Satellite a mačkejte její tlačítka přímo z ChurchPresenter.</string>
     <string name="companion_satellite_host">Hostitel</string>
     <string name="companion_satellite_host_hint">např. 192.168.1.50</string>
@@ -1979,7 +1577,6 @@
     <string name="companion_satellite_connect">Připojit</string>
     <string name="companion_satellite_disconnect">Odpojit</string>
     <string name="companion_satellite_no_host">Nastavte hostitele Companion v Nastavení → Companion Satellite pro připojení.</string>
-    <string name="companion_satellite_status_connected">Připojeno</string>
     <string name="companion_satellite_status_connecting">Připojování…</string>
     <string name="companion_satellite_status_disconnected">Odpojeno</string>
     <string name="companion_satellite_status_error">Chyba: %1$s</string>
@@ -2014,17 +1611,6 @@
     <string name="dictionary_in_scripture_none">Žádné označené verše pro tuto položku nebyly nalezeny</string>
     <string name="dictionary_in_scripture_count">Nalezeno v %1$d verších</string>
     <string name="dictionary_in_scripture_show_more">Zobrazit dalších %1$d</string>
-    <string name="dictionary_in_scripture_all_books">Všechny knihy</string>
-    <string name="dictionary_in_scripture_all_chapters">Všechny kapitoly</string>
-    <string name="dictionary_in_scripture_all_verses">Všechny verše</string>
-    <string name="dictionary_in_scripture_count_filtered">Zobrazeno %1$d z %2$d veršů</string>
-    <string name="dictionary_settings_word_text">Slovo (původní)</string>
-    <string name="dictionary_settings_reference_text">Odkaz a transliterace</string>
-    <string name="dictionary_settings_definition_text">Definice</string>
-    <string name="dictionary_settings_kjv_usage">Použití KJV</string>
-    <string name="dictionary_settings_card_background">Pozadí karty</string>
-    <string name="dictionary_settings_opacity">Průhlednost</string>
-    <string name="dictionary_settings_transitions">Nastavení přechodů</string>
     <string name="dictionary_back">Zpět</string>
     <string name="dictionary_forward">Vpřed</string>
     <string name="dictionary_go_to_verse">Přejít na verš na záložce Bible</string>
@@ -2034,20 +1620,11 @@
     <string name="bible_search_mode_reference">Odkaz</string>
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Klepnutím přepnete — Auto: přechod na odkaz, hledání ostatního. Odkaz: pouze navigace. Text: vždy hledat v textu verše.</string>
-    <string name="projection_content_song_la">LA písně</string>
-    <string name="projection_content_song_la_tooltip">Náhled písně</string>
-    <string name="projection_content_chords_tooltip">Zobrazit píseň s akordy jako akordový zápis, akordy nad textem</string>
     <string name="swap_bibles_hint">Prohodit primární a sekundární Bibli</string>
-    <string name="screen_lang_tooltip_off">Nezobrazovat na této obrazovce</string>
-    <string name="screen_lang_tooltip_primary">Zobrazovat pouze primární jazyk</string>
-    <string name="screen_lang_tooltip_secondary">Zobrazovat pouze sekundární jazyk</string>
-    <string name="screen_lang_tooltip_both">Zobrazovat oba jazyky</string>
     <string name="atem_clip_fps_unit">FPS</string>
     <string name="atem_uploading_image">Nahrávání %1$s → slot obrazu %2$d</string>
     <string name="atem_uploading_video">Nahrávání %1$s → slot videa %2$d</string>
     <string name="atem_processing">Zpracování %1$s na ATEM…</string>
-    <string name="companion_atem_triggers">Spouštěče nahrávání médií ATEM</string>
-    <string name="companion_atem_triggers_desc">Zkopírujte URL do tlačítka HTTP Bitfocus Companion pro nahrání tohoto titulku do slotu médií ATEM. Přidejte zpoždění v Companion před spuštěním klíče — nahrávání trvá několik sekund.</string>
     <string name="companion_atem_upload_note">⚠ Nahrávání médií trvá několik sekund.</string>
     <string name="companion_atem_clip_key_note">Klip + klíč nahraje klip, počká až ATEM dokončí zpracování a pak automaticky zapne klíč — zpoždění Companion není potřeba. (Pouze klip + samostatný klíč stále vyžaduje ruční zpoždění.)</string>
     <string name="companion_atem_still_key">Statický obraz + klíč</string>
@@ -2058,13 +1635,11 @@
     <string name="companion_atem_key_desc">Spustit klíč nezávisle (upstream nebo downstream, dle nastavení ATEM).</string>
     <string name="companion_atem_key_on">Kopírovat klíč Zapnuto</string>
     <string name="companion_atem_key_off">Kopírovat klíč Vypnuto</string>
-    <string name="companion_atem_not_configured">Nakonfigurujte hostitele ATEM v Nastavení › ATEM pro povolení spouštěčů nahrávání.</string>
     <string name="companion_lt_copy_hide">Skrýt titulkový pruh</string>
     <string name="companion_lt_takedown_desc">«Skrýt titulkový pruh» odstraní pouze titulkový pruh. «Vymazat zobrazení» vymaže jakýkoli výstup (Bible, píseň, titulkový pruh…).</string>
     <string name="dictionary_switch_language">Přepnout jazyk slovníku</string>
     <string name="dictionary_bible_primary">Primární Bible</string>
     <string name="dictionary_bible_select">Vybrat překlad Bible</string>
-    <string name="bible_stt_heard">Slyšeno</string>
     <string name="bible_stt_listening">Naslouchám…</string>
     <string name="bible_stt_auto_follow">Auto-sledování</string>
     <string name="bible_stt_auto_follow_hint">Automaticky otevírat naposledy vyslovený odkaz</string>
@@ -2171,9 +1746,7 @@
     <string name="diagnostic_info_save_failed">Diagnostické informace se nepodařilo uložit.</string>
     <string name="browser_source_resolution">Rozlišení</string>
     <string name="browser_source_fps">Max. FPS</string>
-    <string name="browser_source_website_snapshot_tooltip">Zrcadlí webovou stránku zobrazenou na hlavním výstupu — aktivní pouze, když ji zobrazuje záložka Web nebo výstupní okno</string>
     <string name="tooltip_stt_settings">Nastavení zobrazení STT</string>
-    <string name="tooltip_dictionary_settings">Nastavení zobrazení slovníku</string>
     <string name="presentation_builds_counter">Krok %1$d z %2$d</string>
     <string name="presentation_animate_keynote">Animovat prezentace Keynote</string>
     <string name="presentation_focus_lost">Ztraceno zaměření klávesnice — klikněte sem pro obnovení šipek a klikátka</string>
@@ -2187,7 +1760,6 @@
     <string name="instance_link_controlling_host">Ovládá %1$s</string>
     <string name="instance_link_primary_badge">Primární — připojeno %1$d instancí</string>
     <string name="stt_settings_dialog_title">Nastavení zobrazení STT</string>
-    <string name="dictionary_settings_dialog_title">Nastavení zobrazení slovníku</string>
     <string name="update_dialog_channel_stable">Stabilní verze</string>
     <string name="update_dialog_channel_prerelease">Předběžná verze</string>
     <string name="atem_section_background_uploads">Nahrávání pozadí</string>
@@ -2210,7 +1782,6 @@
     <string name="bible_stt_flag_missed_hint">Označit, že engine zmeškal pasáž, která byla právě čtena nebo citována</string>
     <string name="stt_help_dev_mode">Pomoc vývojářům — zobrazit tlačítka živé zpětné vazby na záložce Bible (nesprávná pasáž / předčasná / zmeškaná pasáž)</string>
     <string name="ccli_number">Číslo CCLI</string>
-    <string name="planning_center_settings">Planning Center</string>
     <string name="planning_center_description">Importujte písně, média a pořad bohoslužby z plánu Planning Center Services do programu.</string>
     <string name="planning_center_connect">Připojit k Planning Center</string>
     <string name="planning_center_disconnect">Odpojit</string>
@@ -2230,40 +1801,16 @@
     <string name="planning_center_import_file_count">%1$d souborů</string>
     <!-- Content Outputs dialog -->
     <string name="content_outputs">Výstupy obsahu</string>
-    <string name="content_outputs_for">Výstupy obsahu — %1$s</string>
     <string name="content_outputs_enabled_short">%1$d z %2$d povoleno</string>
-    <string name="content_outputs_enabled_subtitle">Na této obrazovce povoleno %1$d z %2$d typů obsahu</string>
-    <string name="content_outputs_quick_select">Rychlý výběr</string>
-    <string name="content_outputs_select_all">Vybrat vše</string>
-    <string name="content_outputs_clear_all">Vymazat vše</string>
-    <string name="content_outputs_section_content">Obsah</string>
-    <string name="content_outputs_section_backgrounds">Pozadí</string>
-    <string name="content_outputs_done">Hotovo</string>
-    <string name="content_outputs_preview">Tento výstup zobrazuje</string>
-    <string name="content_outputs_preview_empty">Nic není zapnuto — tento výstup zůstane prázdný</string>
-    <string name="content_outputs_preview_translations">%1$s (%2$s)</string>
-    <string name="content_bible_translations_header">Překlady Bible</string>
     <string name="content_bible_translations_all">Vše</string>
-    <string name="content_bible_translations_enabled">%1$d z %2$d překladů zapnuto</string>
-    <string name="content_bible_translations_footer">Více překladů se zobrazuje na obrazovce nad sebou, primární jako první.</string>
-    <string name="content_bible_translation_portion_ot_nt">SZ+NZ</string>
-    <string name="content_bible_translation_portion_nt">NZ</string>
-    <string name="content_bible_translation_portion_ot">SZ</string>
-    <string name="content_bible_translations_more">+%1$d další</string>
-    <string name="content_bible_translations_all_selected">Všechny Bible</string>
-    <string name="content_bible_translations_count_enabled">%1$d zapnuto</string>
     <string name="bible_translation">Překlad %1$d</string>
     <string name="add_bible_translation">Přidat překlad</string>
-    <string name="bible_reference">Biblický odkaz</string>
     <string name="bible_translation_order">Pořadí překladů</string>
     <string name="bible_translation_order_panel_title">Pořadí zobrazení</string>
     <string name="bible_translation_order_panel_subtitle">Verše se na obrazovce skládají shora dolů</string>
     <string name="bible_translation_order_hint">Přetáhněte řádek nebo použijte šipky ke změně pořadí.</string>
     <string name="bible_translation_order_more">+%1$d</string>
     <string name="drag_to_reorder_translation">Přetažením změníte pořadí</string>
-    <string name="bible_multi_layout">Rozložení více překladů</string>
-    <string name="bible_translation_spacing">Mezera mezi překlady</string>
-    <string name="bible_translation_divider">Zobrazit oddělovač mezi překlady</string>
     <string name="pixels_short">px</string>
     <string name="move_translation_up">Posunout překlad nahoru</string>
     <string name="move_translation_down">Posunout překlad dolů</string>
@@ -2273,20 +1820,12 @@
     <string name="projection_simulate_outputs">Simulovat výstupy</string>
     <string name="max_media_upload_label">Max. velikost médií (MB)</string>
     <string name="max_media_upload_description">Mediální soubory větší než toto jsou odmítnuty. Výchozí %1$d MB (přibližně pětiminutový HD klip) — dost na znělky a odpočty, ne na celé filmy.</string>
-    <string name="setup_step2_step6">6. Přejděte na kartu Bible a zvolte hlavní Bibli</string>
     <string name="setup_step2_download_hint">Přes 1 500 překladů ve více než 1 000 jazycích je dostupných z eBible.org a archivu Zefania. U každého se před instalací zobrazí autorská práva.</string>
     <string name="bible_stt_detected_version_tooltip">Překlad, ze kterého řečník podle všeho čte, porovnaný se všemi Biblemi ve vaší složce. Pouze informativní — zobrazený text verše stále pochází z vaší vlastní Bible.</string>
     <string name="bible_stt_flag_needs_live">Dostupné, jakmile je verš živě — tento příznak popisuje pasáž na obrazovce</string>
     <string name="instance_link_reconnect_delay">Minimální prodleva opětovného připojení</string>
     <string name="instance_link_reconnect_delay_hint">Nejkratší čekání před dalším pokusem o spojení. Opakované chyby prodlevu samy prodlužují.</string>
     <string name="scanning_directory">Prohledávání složky…</string>
-    <string name="content_outputs_translations_header">Překlady Bible</string>
-    <string name="content_outputs_translations_summary">Zapnuto překladů: %1$d z %2$d</string>
-    <string name="content_outputs_translations_more">%1$s +%2$d</string>
-    <string name="content_outputs_translations_none">Žádné</string>
-    <string name="content_outputs_translations_chip_all">Vše</string>
-    <string name="content_outputs_translations_chip_clear">Vymazat</string>
-    <string name="content_outputs_translation_primary">Hlavní</string>
     <string name="song_tempo">Tempo</string>
     <string name="song_pane_lyrics">Text</string>
     <string name="song_pane_secondary">Druhý jazyk</string>
@@ -2298,12 +1837,9 @@
     <string name="song_key">Tónina</string>
     <string name="song_capo">Kapodastr</string>
     <string name="song_play">Hrát</string>
-    <string name="song_chord_color">Barva akordů</string>
-    <string name="song_lyrics_color">Barva textu</string>
     <string name="song_transpose_down">Transponovat dolů</string>
     <string name="song_transpose_up">Transponovat nahoru</string>
     <string name="song_transpose_reset">%1$s — obnovit</string>
-    <string name="song_chords_in_key">Akordy v %1$s</string>
     <string name="song_chords_used">použito: %1$d</string>
     <string name="song_insert_chord">Vložit akord</string>
     <string name="song_stats">Sekcí: %1$d · Řádků: %2$d · Slov: %3$d</string>
@@ -2350,10 +1886,7 @@
     <string name="search_clear">Vymazat hledání</string>
     <string name="shortcut_settings_reset">Obnovit</string>
     <string name="shortcut_settings_clear">Vymazat</string>
-    <string name="shortcut_settings_change">Změnit</string>
-    <string name="shortcut_settings_customized">Upraveno</string>
     <string name="shortcut_capture_title">Stiskněte klávesovou zkratku</string>
-    <string name="shortcut_capture_prompt">Stiskněte klávesy, které chcete pro tuto akci použít.</string>
     <string name="shortcut_capture_conflict">Již používá: %1$s</string>
     <string name="key_mod_ctrl">Ctrl</string>
     <string name="key_mod_shift">Shift</string>
@@ -2419,28 +1952,16 @@
     <string name="tooltip_strikethrough">Přeškrtnutí</string>
     <string name="bible_custom_name">Název</string>
     <string name="bible_custom_abbreviation">Zkratka</string>
-    <string name="bible_custom_name_hint">Ponechte prázdné pro použití názvu z modulu</string>
     <string name="bible_translations">Překlady</string>
     <string name="bible_miscellaneous">Různé</string>
-    <string name="bible_block_and_transition">Blok a přechod</string>
-    <string name="bible_editing">Úpravy</string>
-    <string name="bible_verse_text">Text verše</string>
-    <string name="bible_reference_element">Odkaz</string>
-    <string name="bible_alignment">Zarovnání</string>
-    <string name="bible_reference_position">Umístění odkazu</string>
     <string name="bible_font">Písmo</string>
-    <string name="bible_size">Velikost</string>
     <string name="bible_letter_spacing">Prostrkání písmen</string>
     <string name="bible_word_spacing">Mezery mezi slovy</string>
-    <string name="bible_text_transform">Velikost písmen</string>
     <string name="bible_text_transform_uppercase">VELKÁ PÍSMENA</string>
     <string name="bible_text_transform_lowercase">malá písmena</string>
     <string name="bible_text_transform_capitalize">První Velké</string>
-    <string name="bible_reset_element">Obnovit</string>
     <string name="bible_preview_full_screen">Náhled celé obrazovky</string>
     <string name="bible_preview_lower_third">Náhled dolní třetiny</string>
-    <string name="bible_scope_full_screen">Celá obrazovka · %1$d × %2$d</string>
-    <string name="bible_scope_lower_third">Dolní třetina · %1$d × %2$d</string>
     <string name="bible_preview_sample_verse">Neboť tak Bůh miloval svět, že dal svého jednorozeného Syna.</string>
     <string name="bible_preview_sample_book">Jan</string>
     <string name="bible_preview_no_translations">Přidejte překlad, abyste jej zde viděli</string>
@@ -2456,23 +1977,13 @@
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Titulní snímek</string>
     <string name="song_show_on_title_slide">Zobrazit na titulním snímku</string>
-    <string name="song_scope_title_slide">Titulní snímek · %1$d × %2$d</string>
     <string name="song_preview_title_slide">Náhled titulního snímku</string>
     <string name="song_chunk_verse">1 sloka</string>
     <string name="song_chunk_line">1 řádek</string>
-    <string name="song_preview_chords">Akordy</string>
-    <string name="song_preview_label">Náhled</string>
     <string name="song_preview_sample_title">Amazing Grace</string>
-    <string name="song_languages">Jazyky písně</string>
-    <string name="song_language_single">1 · Jeden</string>
-    <string name="song_language_bilingual">2 · Dvojjazyčně</string>
-    <string name="song_lyrics_layout">Rozvržení textu</string>
-    <string name="song_transition_and_markers">Přechod a značky</string>
     <string name="song_element_look_ahead">Náhled dalšího</string>
     <string name="song_chunk">Úsek</string>
     <string name="song_language_scope">Jazyk</string>
-    <string name="song_style_language">Vzhled</string>
-    <string name="song_preview_look_ahead">Náhled dalšího</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
     <string name="song_background">Pozadí</string>
     <string name="song_background_full_screen">Celá obrazovka</string>
@@ -2519,7 +2030,6 @@
     <string name="background_following_default">Dědí výchozí</string>
     <string name="background_use_default">Použít výchozí</string>
     <string name="background_set_explicitly">Nastaveno zvlášť pro tuto plochu</string>
-    <string name="background_copy_look_to">Zkopírovat tento vzhled do</string>
     <string name="background_type_caption">Typ</string>
     <string name="background_color_caption">Barva</string>
     <string name="background_image_file">Soubor obrázku</string>
@@ -2548,95 +2058,27 @@
     <string name="shortcut_description_quick_background_10">Rychlé pozadí 10</string>
 
     <!-- Per-output Customize dialog -->
-    <string name="customize">Přepsat styly</string>
-    <string name="customize_count">Přepsáno · %1$d</string>
-    <string name="customize_tooltip_overwritten">Přepsáno na této obrazovce: %1$s</string>
-    <string name="customize_tooltip_none">Řídí se globálním nastavením — kliknutím dáte této obrazovce vlastní styly</string>
-    <string name="customize_dialog_title">Nastavení zobrazení — %1$s</string>
-    <string name="customize_dialog_subtitle">%1$d z %2$d přizpůsobeno</string>
-    <string name="customize_pane_header">%1$s na této obrazovce</string>
-    <string name="customize_hint_on">Používá nastavení specifická pro tuto obrazovku</string>
-    <string name="customize_hint_off">Řídí se globálním nastavením — zapněte pro přizpůsobení</string>
-    <string name="customize_hint_stage_on">Tato obrazovka má vlastní rozložení zón</string>
-    <string name="customize_hint_stage_off">Zapněte, chcete-li této obrazovce dát rozložení zón</string>
-    <string name="customize_hint_lower_third">Tvar spodní třetiny této obrazovky</string>
-    <string name="customize_reset_to_global">Obnovit na globální</string>
-    <string name="customize_done">Hotovo</string>
-    <string name="customize_screen_heading">Obrazovka</string>
-    <string name="customize_screen_geometry">%1$d × %2$d · %3$s</string>
-    <string name="customize_screen_geometry_unknown">%1$s</string>
-    <string name="customize_motion">Pohyb</string>
-    <string name="customize_layout">Rozložení</string>
-    <string name="customize_marker">Značka</string>
-    <string name="customize_bilingual">Dvojjazyčně</string>
-    <string name="customize_no_preview">Pro tuto sekci není náhled</string>
-    <string name="output_profile_none">Žádný</string>
-    <string name="output_profile_new">Nový profil</string>
-    <string name="output_profile_create_default">Vytvořit výchozí profil</string>
-    <string name="output_profile_create_default_tooltip">Přidat nový profil s továrním výchozím stylem aplikace jako zálohu, ke které se lze vrátit</string>
     <string name="output_profile_duplicate">Duplikovat</string>
-    <string name="output_profile_rename">Přejmenovat</string>
     <string name="output_profile_delete">Smazat</string>
     <string name="output_profile_delete_confirm">Smazat „%1$s“? Tuto akci nelze vrátit.</string>
     <string name="output_profile_delete_blocked">„%1$s“ nelze smazat — stále ho používá: %2$s</string>
-    <string name="output_profile_usage_count">Používá %1$d výstup(ů)</string>
-    <string name="output_profile_name_hint">Název profilu</string>
     <string name="output_profile_picker_tooltip">Výstupní profil</string>
     <string name="output_profile_swap_menu_tooltip">Přepnout výstupní profil</string>
     <string name="output_profile_new_name_default">Nový profil</string>
-    <string name="output_profile_display_mode">Režim zobrazení</string>
-    <string name="output_profile_content">Obsah</string>
     <string name="output_profile_empty_state">Vytvořte profil a začněte s úpravou stylu</string>
-    <string name="output_profile_preview_resolution_tooltip">Pouze tvar náhledu — nenastavuje skutečné rozlišení výstupu</string>
     <string name="customize_bible">Bible</string>
     <string name="customize_songs">Písně</string>
-    <string name="customize_lower_third_vertical_hint">Pruh po straně místo pásu přes spodní část.</string>
-    <string name="customize_lower_third_orientation">Orientace</string>
     <string name="customize_group_verse_text">Text verše</string>
-    <string name="customize_group_lyrics">Text</string>
-    <string name="customize_group_typography">Typografie</string>
     <string name="customize_group_reference">Odkaz</string>
-    <string name="customize_group_chords">Akordy</string>
-    <string name="customize_group_title_number">Název a číslo</string>
-    <string name="customize_group_margins">Okraje</string>
-    <string name="customize_group_word">Slovo</string>
-    <string name="customize_group_definition">Definice</string>
-    <string name="customize_group_card">Karta</string>
-    <string name="customize_group_background">Pozadí obrazovky</string>
-    <string name="customize_group_background_lower_third">Pozadí spodní třetiny</string>
-    <string name="customize_background_source">Pozadí</string>
-    <string name="customize_background_follow">Řídit se kartou Pozadí</string>
-    <string name="customize_background_own">Vlastní</string>
     <string name="customize_background_type">Typ</string>
-    <string name="customize_background_image">Obrázek</string>
-    <string name="customize_background_video">Video</string>
     <string name="customize_type_color">Barva</string>
     <string name="customize_type_image">Obrázek</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Průhledné</string>
     <string name="customize_type_default">Výchozí</string>
     <string name="customize_type_gradient">Přechod</string>
-    <string name="customize_style">Styl</string>
-    <string name="customize_letter_spacing">Prostrkání písmen</string>
-    <string name="customize_word_spacing">Mezery mezi slovy</string>
-    <string name="customize_text_transform">Velikost písmen</string>
-    <string name="customize_transform_none">Žádný</string>
-    <string name="customize_transform_uppercase">AA</string>
-    <string name="customize_transform_lowercase">aa</string>
-    <string name="customize_transform_capitalize">Aa</string>
-    <string name="customize_margin_vertical">Nahoře / Dole</string>
-    <string name="customize_margin_horizontal">Vlevo / Vpravo</string>
     <string name="customize_show_abbreviation">Zkratka</string>
-    <string name="customize_reference_above">Nahoře</string>
-    <string name="customize_reference_below">Dole</string>
-    <string name="customize_card_background">Pozadí</string>
     <string name="customize_background_opacity">Neprůhlednost</string>
-    <string name="customize_align_left">Vlevo</string>
-    <string name="customize_align_center">Na střed</string>
-    <string name="customize_align_right">Vpravo</string>
-    <string name="customize_align_top">Nahoře</string>
-    <string name="customize_align_middle">Uprostřed</string>
-    <string name="customize_align_bottom">Dole</string>
     <string name="slate_theme">Motiv Břidlice</string>
     <string name="sand_theme">Motiv Písek</string>
     <string name="plum_theme">Motiv Švestka</string>
@@ -2674,13 +2116,9 @@
     <string name="setup_summary_bible_value">nainstalováno: %1$d</string>
     <string name="setup_summary_songs_value">%1$d zpěvníků · %2$d písní</string>
     <string name="background_lottie_option">Lottie</string>
-    <string name="lower_third_animation">Animace spodní třetiny</string>
-    <string name="lower_third_animation_use_lottie">Animovat pruh šablonou Lottie</string>
     <string name="lower_third_animation_file">Šablona</string>
     <string name="lower_third_animation_none">Není vybrána žádná šablona</string>
     <string name="lower_third_animation_generate">Vytvořit…</string>
-    <string name="lower_third_animation_clear">Odebrat šablonu</string>
-    <string name="lottie_files_filter">Soubory Lottie</string>
     <string name="bible_lottie_gen_window_title">Generátor spodních třetin</string>
     <string name="song_lottie_unsupported_note">Šablona určuje rozvržení a umístění názvu. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí, mezery mezi slovy, náhled další části a akordy se nepoužijí.</string>
     <string name="bible_lottie_unsupported_note">Šablona určuje rozvržení, umístění odkazu a to, jak si dva jazyky pruh rozdělí. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí a mezery mezi slovy se nepoužijí.</string>
@@ -2741,20 +2179,13 @@
     <string name="songs_search_focus_hint">Klávesnice je ve vyhledávacím poli — klikněte sem pro opětovné zapnutí ovládání klávesnicí</string>
     <string name="bible_preview_sample_verse_short">Ježíš zaplakal.</string>
     <string name="bible_preview_sample_verse_long">Ježíš jim řekl: Amen, amen, pravím vám, nebudete-li jíst tělo Syna člověka a pít jeho krev, nebudete mít v sobě život.</string>
-    <string name="preview_sample">Ukázka</string>
     <string name="preview_sample_short">Krátká</string>
     <string name="preview_sample_medium">Střední</string>
     <string name="preview_sample_long">Dlouhá</string>
-    <string name="preview_on_screen">Náhled na obrazovce</string>
-    <string name="preview_on_screen_stop">Zastavit náhled</string>
     <string name="song_background_applies_to">Platí pro</string>
     <string name="song_background_whole_song">Celá píseň</string>
     <string name="song_background_untitled_section">Oddíl bez názvu</string>
     <string name="song_insert_slide_break">Zalomení snímku</string>
-    <string name="song_auto_repeat_chorus">Opakovat refrén po každé sloce</string>
-    <string name="customize_element_slide">Snímek</string>
-    <string name="lower_third_band">Pruh dolní třetiny</string>
-    <string name="customize_tooltip_separator">, </string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Výstupy NDI</string>
     <string name="ndi_outputs_help">Virtuální výstupy odesílané po síti jako zdroje NDI® — vyberte je v OBS, vMixu nebo střižně. Režim Alfa přenáší skutečnou průhlednost, takže dolní třetina dorazí už klíčovaná.</string>
@@ -2892,50 +2323,18 @@
     <string name="bilingual_grid_2x2">2x2</string>
     <string name="bilingual_grid_3x1">3x1</string>
     <string name="bilingual_grid_4x1">4x1</string>
-    <string name="bilingual_left_right_short">V / P</string>
-    <string name="bilingual_top_bottom_short">N / D</string>
-    <string name="content_song_languages_all_selected">Všechny písně</string>
-    <string name="content_song_languages_enabled">Povoleno %1$d z %2$d jazyků</string>
-    <string name="content_song_languages_footer">Více jazyků se zobrazuje vedle sebe nebo nad sebou, podle nastavení písní.</string>
-    <string name="content_song_languages_header">Jazyky písní</string>
     <string name="enter_translation_lyrics_here">Zadejte sem text jazyka %1$d...</string>
     <string name="preview_output_mode_disabled_warning">Tento výstup momentálně tento obsah nezobrazuje.</string>
-    <string name="preview_output_partial_translations_warning">Tento výstup nezobrazuje každý jazyk z vašeho zásobníku.</string>
-    <string name="preview_output_single_language_warning">Tento výstup zobrazuje jen jeden jazyk, ne oba.</string>
-    <string name="preview_settings_add_output">Přidat %1$s</string>
-    <string name="preview_settings_delete_group">Smazat skupinu</string>
-    <string name="preview_settings_empty">Zatím žádné skupiny, takže je uveden každý výstup. Jakmile přidáte skupinu, zobrazí se pouze výstupy umístěné do skupin.</string>
-    <string name="preview_settings_group_title">Skupina %1$d</string>
-    <string name="preview_settings_hide_group">Skrýt</string>
-    <string name="preview_settings_move_down">Posunout dolů</string>
-    <string name="preview_settings_move_up">Posunout nahoru</string>
-    <string name="preview_settings_new_group">Nová skupina</string>
-    <string name="preview_settings_remove_output">Odebrat ze skupiny</string>
     <string name="preview_settings_show_labels">Zobrazit štítky výstupů</string>
     <string name="preview_settings_show_modes">Zobrazit typ zobrazení</string>
-    <string name="screen_lang_language_n">Jazyk %1$d</string>
     <string name="song_add_translation">Přidat jazyk</string>
     <string name="song_fourth_language">Jazyk 4</string>
-    <string name="song_language_all">Všechny</string>
     <string name="song_language_fourth">Jazyk 4</string>
-    <string name="song_language_scope_label">Jazyk</string>
     <string name="song_language_third">Jazyk 3</string>
     <string name="song_pane_translation">Jazyk %1$d</string>
-    <string name="song_remove_translation">Odebrat tento jazyk</string>
     <string name="song_third_language">Jazyk 3</string>
-    <string name="song_translation_follows_primary">Tento jazyk se zobrazuje přesně jako Jazyk 1. Zapněte vlastní vzhled, chcete-li mu dát jiné písmo, velikost nebo barvu.</string>
     <string name="song_translation_label">Název jazyka</string>
-    <string name="song_translation_own_style">Dát tomuto jazyku vlastní vzhled</string>
     <string name="song_translation_title">Název pro Jazyk %1$d</string>
     <string name="tooltip_preview_settings">Nastavení náhledu</string>
-    <string name="media_subtitle_settings">Nastavení titulků</string>
     <string name="media_subtitle_settings_hint">Platí pro soubory titulků SRT/WebVTT, které aplikace vykresluje sama. Vložená stopa nebo soubor ASS/SSA/SUB si ponechají vlastní vzhled VLC.</string>
-    <string name="media_subtitle_text_color">Barva textu</string>
-    <string name="media_subtitle_background_color">Barva pozadí</string>
-    <string name="media_subtitle_font">Písmo</string>
-    <string name="media_subtitle_size">Velikost</string>
-    <string name="media_subtitle_position">Poloha</string>
-    <string name="media_subtitle_opacity">Průhlednost:</string>
-    <string name="media_subtitle_max_lines">Max. řádků:</string>
-    <string name="tooltip_media_subtitle_settings">Nastavení zobrazení titulků</string>
 </resources>

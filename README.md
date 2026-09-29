@@ -1,13 +1,9 @@
-This is a Kotlin Multiplatform project targeting Desktop (JVM).
+ChurchPresenter is a Compose Multiplatform desktop app (JVM only) for Windows, macOS and Linux.
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-    - [commonMain](./composeApp/src/commonMain/kotlin) is for code that's common for all targets.
-    - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-      For example, if you want to use Apple's CoreCrypto for the iOS part of your Kotlin app,
-      the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-      Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-      folder is the appropriate location.
+* [/composeApp](./composeApp/src) is the app itself: all of its code is in
+  [jvmMain](./composeApp/src/jvmMain/kotlin) and its tests in [jvmTest](./composeApp/src/jvmTest/kotlin).
+* Every other top-level directory with a `build.gradle.kts` is a module of the same build, listed
+  below.
 
 ---
 
@@ -48,6 +44,10 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > what counts as a section heading, transposition, and turning a pasted chord sheet into the inline
 > `[G]lyric` markup. Depends on nothing, so the app and the converter share one rule instead of two.
 > `./gradlew :song-chords:test`.
+>
+> **[`calendar/`](./calendar)** — the Calendar Manager: every planned service on a month grid, each
+> with a run of show that loads into the Schedule, opened from the Help menu. Pairs phones through an
+> end-to-end encrypted relay. `./gradlew :calendar:test`.
 >
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
@@ -202,7 +202,6 @@ not again. Treat `OPENGL` as unverified for captured outputs until checked on th
 **Build & deployment guides:**
 - 🔨 **[BUILD_INSTALLERS.md](BUILD_INSTALLERS.md)** - How to build installers
 - ⚡ **[QUICK_START_INSTALLERS.md](QUICK_START_INSTALLERS.md)** - Quick start guide
-- 💻 **[MEMORY_CONFIGURATION.md](MEMORY_CONFIGURATION.md)** - Memory settings
 
 **Before committing code:**
 ```bash

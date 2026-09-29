@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Kalenderhanterare</string>
     <string name="calendar_title">Kalender</string>
     <string name="calendar_today">I dag</string>
     <string name="calendar_close">Stäng</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Särskilt evenemang</string>
 
     <string name="calendar_add_service">Lägg till gudstjänst</string>
-    <string name="calendar_new_service">Ny gudstjänst</string>
     <string name="calendar_edit_service">Redigera gudstjänst</string>
     <string name="calendar_service_name">Namn</string>
     <string name="calendar_service_start">Starttid</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Avbryt</string>
     <string name="calendar_delete">Ta bort</string>
 
-    <string name="calendar_run_of_show">Körschema</string>
-    <string name="calendar_nothing_planned">Inget planerat för den här dagen</string>
-    <string name="calendar_no_service_hint">Lägg till en gudstjänst för att börja planera.</string>
-    <string name="calendar_run_empty">Den här gudstjänsten har inga punkter än.</string>
     <string name="calendar_items_count_one">%1$d punkt</string>
     <string name="calendar_items_count">%1$d punkter</string>
-    <string name="calendar_planned_total">%1$s planerat</string>
     <string name="calendar_duration">Längd</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Hur länge detta är tänkt att pågå — klicka för att skriva in, som 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Sånger</string>
     <string name="calendar_pick_bible">Bibel</string>
     <string name="calendar_pick_section">Avsnitt</string>
-    <string name="calendar_pick_schedule">Fliken Program</string>
     <string name="calendar_pick_presets">Förinställningar</string>
     <string name="calendar_presets_empty">Inga förinställningar än</string>
     <string name="calendar_presets_empty_sub">Spara en med ”Spara förinställning”, bredvid ”Lägg till i programmet” på flikarna Bilder, Presentation, Media, Meddelanden och Canvas.</string>
     <string name="calendar_presets_note">Förinställningar dyker upp under ”Förinställningar” när du lägger till en punkt, och under ”Punkt” när en markering visar något.</string>
     <string name="calendar_settings_presets">Förinställningar</string>
     <string name="calendar_preset_remove">Ta bort förinställning</string>
-    <string name="calendar_cue_from_run">Från det här körschemat</string>
     <string name="calendar_cue_loops">loopar</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Sparade förinställningar</string>
-    <string name="calendar_search_songs_hint">Sök sånger på titel eller nummer</string>
-    <string name="calendar_bible_hint">Skriv en hänvisning, som Joh 3:16-17</string>
     <string name="calendar_section_hint">Avsnittsnamn, som Lovsång</string>
-    <string name="calendar_add">Lägg till</string>
     <string name="calendar_no_results">Inget matchar</string>
     <string name="calendar_songs_loading">Läser sångbiblioteket…</string>
-    <string name="calendar_schedule_empty">Fliken Program är tom.</string>
-    <string name="calendar_capture_schedule">Lägg till alla punkter från fliken Program</string>
 
     <string name="calendar_load_into_schedule">Läs in i programmet</string>
     <string name="calendar_load_title">Ersätta programmet?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Ta bort avsnitt</string>
     <string name="calendar_default_start">Standardstarttid</string>
     <string name="calendar_default_start_sub">Tiden en ny gudstjänst skapas med</string>
-    <string name="calendar_automation_empty">Inga markeringar än</string>
-    <string name="calendar_automation_title">Automatik</string>
     <string name="calendar_armed">På</string>
     <string name="calendar_armed_off">Av</string>
     <string name="calendar_arm_tip">Slå på eller av alla markeringar</string>
     <string name="calendar_cue_skip_tip">Hoppa över den här markeringen</string>
-    <string name="calendar_automation_note">märker punkter som startar av sig själva. Avbockning hoppar över en markering för den här gudstjänsten.</string>
-    <string name="calendar_edit_cues">Redigera markeringar</string>
     <string name="calendar_cue_action_countdown">Starta nedräkning</string>
     <string name="calendar_cue_action_go_live">Gå live</string>
     <string name="calendar_cue_action_project">Meddelandeloop</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Töm utgångarna</string>
     <string name="calendar_cue_badge_timer">Timer</string>
     <string name="calendar_cue_badge_go_live">Live</string>
-    <string name="calendar_cue_item">Punkt</string>
     <string name="calendar_cue_item_missing">Punkten finns inte längre i det här körschemat</string>
     <string name="calendar_copy_include_cues">Automatikmarkeringar</string>
     <string name="calendar_copy_include_cues_sub">%1$d markeringar, tidsförskjutningar bevaras</string>
     <string name="calendar_template_include_cues">Automatikmarkeringar</string>
     <string name="calendar_template_include_cues_sub">Relativa förskjutningar</string>
-    <string name="calendar_templates_empty">Inga sparade mallar</string>
     <string name="calendar_templates_empty_sub">Spara en från valfri gudstjänst med ”Mall”, i körschemats rubrik. Till dess kan en ny gudstjänst utgå från en kopia av en tidigare.</string>
     <string name="calendar_templates_note">Mallar erbjuds under ”Utgå från” när du lägger till en gudstjänst. Spara en ny från valfri gudstjänst med ”Mall”, i körschemats rubrik.</string>
     <string name="calendar_template_remove">Ta bort mall</string>
     <string name="calendar_template_saved_sub">Mall · %1$s · %2$d punkter</string>
-    <string name="calendar_copy_service">Kopiera</string>
     <string name="calendar_copy_service_tip">Kopiera den här gudstjänsten till ett annat datum, eller upprepa den</string>
-    <string name="calendar_save_template">Mall</string>
     <string name="calendar_save_template_tip">Spara det här körschemat som en mall</string>
     <string name="calendar_copy_title">Kopiera %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d punkter</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Upprepas %1$s · %2$d gudstjänster i den här serien</string>
     <string name="calendar_export_pdf">Exportera PDF</string>
     <string name="calendar_settings_open">Kalenderinställningar</string>
-    <string name="calendar_export_failed">Körschemat kunde inte exporteras.</string>
     <string name="calendar_section_new">Nytt avsnitt</string>
     <string name="calendar_section_insert">Infoga</string>
     <string name="calendar_auto_load">Läs in gudstjänsten automatiskt</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Föreslås när en sång ännu inte har någon uppmätt längd</string>
     <string name="calendar_pick_search">Sök sånger, eller skriv en hänvisning</string>
     <string name="calendar_pick_adds_to">Läggs till i %1$s</string>
-    <string name="calendar_pick_duration">Längd</string>
     <string name="calendar_pick_all_books">Alla sångböcker</string>
     <string name="calendar_pick_reference">Hänvisning</string>
     <string name="calendar_pick_all_bible_books">Alla böcker</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Lägg till i körschemat</string>
     <string name="calendar_pick_add_range">Lägg till %1$s</string>
     <string name="calendar_pick_verse_hint">Tryck på en vers, tryck sedan på en till för ett intervall</string>
-    <string name="calendar_pick_clear">Rensa</string>
     <string name="calendar_edit_song">Redigera den här sången</string>
-    <string name="calendar_replace_row">Ersätter %1$s</string>
-    <string name="calendar_change_row">Byt ut den här punkten</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · startar av sig själv %2$s — klicka för att utlösa nu</string>
     <string name="calendar_cue_fire_now">Utlös den här markeringen nu</string>
     <string name="calendar_cue_fired_at">Utlöstes %1$s</string>
     <string name="calendar_cue_next_in">Nästa · om %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Klockan framflyttad · klicka för 5 min till, × för att gå tillbaka till riktig tid</string>
     <string name="calendar_run_clock_reset">Tillbaka till riktig tid</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d av %3$d markeringar utlöses automatiskt</string>
     <string name="calendar_cue_fired_title">Markering utlöst</string>
     <string name="calendar_cue_toast_close">Dölj</string>
     <string name="calendar_preset_kind_all">Alla</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Nästa</string>
     <string name="calendar_chip_blank">Töm</string>
-    <string name="calendar_chip_manual">Manuellt</string>
     <string name="calendar_auto_starts">%1$d automatiska starter</string>
     <string name="calendar_auto_start_one">1 automatisk start</string>
     <string name="calendar_all_manual">Allt manuellt</string>

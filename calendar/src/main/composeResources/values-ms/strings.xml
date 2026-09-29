@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Pengurus Kalendar</string>
     <string name="calendar_title">Kalendar</string>
     <string name="calendar_today">Hari ini</string>
     <string name="calendar_close">Tutup</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Acara khas</string>
 
     <string name="calendar_add_service">Tambah kebaktian</string>
-    <string name="calendar_new_service">Kebaktian baharu</string>
     <string name="calendar_edit_service">Edit kebaktian</string>
     <string name="calendar_service_name">Nama</string>
     <string name="calendar_service_start">Waktu mula</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Batal</string>
     <string name="calendar_delete">Padam</string>
 
-    <string name="calendar_run_of_show">Aturcara</string>
-    <string name="calendar_nothing_planned">Tiada apa-apa dirancang untuk hari ini</string>
-    <string name="calendar_no_service_hint">Tambah kebaktian untuk mula merancang.</string>
-    <string name="calendar_run_empty">Kebaktian ini belum mempunyai item.</string>
     <string name="calendar_items_count_one">%1$d item</string>
     <string name="calendar_items_count">%1$d item</string>
-    <string name="calendar_planned_total">%1$s dirancang</string>
     <string name="calendar_duration">Tempoh</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Berapa lama ini dirancang berjalan — klik untuk menaipnya, seperti 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Lagu</string>
     <string name="calendar_pick_bible">Alkitab</string>
     <string name="calendar_pick_section">Bahagian</string>
-    <string name="calendar_pick_schedule">Tab Jadual</string>
     <string name="calendar_pick_presets">Praset</string>
     <string name="calendar_presets_empty">Belum ada praset</string>
     <string name="calendar_presets_empty_sub">Simpan satu dengan „Simpan praset”, di sebelah „Tambah ke jadual” pada tab Gambar, Persembahan, Media, Pengumuman dan Kanvas.</string>
     <string name="calendar_presets_note">Praset muncul di bawah „Praset” apabila anda menambah item, dan di bawah „Item” apabila penanda memaparkan sesuatu.</string>
     <string name="calendar_settings_presets">Praset</string>
     <string name="calendar_preset_remove">Padam praset</string>
-    <string name="calendar_cue_from_run">Daripada aturcara ini</string>
     <string name="calendar_cue_loops">berulang</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Praset tersimpan</string>
-    <string name="calendar_search_songs_hint">Cari lagu mengikut tajuk atau nombor</string>
-    <string name="calendar_bible_hint">Taip rujukan, contohnya Yohanes 3:16-17</string>
     <string name="calendar_section_hint">Nama bahagian, contohnya Pujian</string>
-    <string name="calendar_add">Tambah</string>
     <string name="calendar_no_results">Tiada yang sepadan</string>
     <string name="calendar_songs_loading">Membaca pustaka lagu…</string>
-    <string name="calendar_schedule_empty">Tab Jadual kosong.</string>
-    <string name="calendar_capture_schedule">Tambah semua item daripada tab Jadual</string>
 
     <string name="calendar_load_into_schedule">Muat ke Jadual</string>
     <string name="calendar_load_title">Ganti jadual?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Buang bahagian</string>
     <string name="calendar_default_start">Waktu mula lalai</string>
     <string name="calendar_default_start_sub">Waktu yang digunakan apabila kebaktian baharu dicipta</string>
-    <string name="calendar_automation_empty">Belum ada penanda</string>
-    <string name="calendar_automation_title">Automasi</string>
     <string name="calendar_armed">Hidup</string>
     <string name="calendar_armed_off">Mati</string>
     <string name="calendar_arm_tip">Hidupkan atau matikan semua penanda</string>
     <string name="calendar_cue_skip_tip">Langkau penanda ini</string>
-    <string name="calendar_automation_note">menandakan item yang berjalan sendiri. Menanggalkan tanda akan melangkau penanda untuk kebaktian ini.</string>
-    <string name="calendar_edit_cues">Edit penanda</string>
     <string name="calendar_cue_action_countdown">Mula kira detik</string>
     <string name="calendar_cue_action_go_live">Siarkan</string>
     <string name="calendar_cue_action_project">Ulangan pengumuman</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Kosongkan output</string>
     <string name="calendar_cue_badge_timer">Pemasa</string>
     <string name="calendar_cue_badge_go_live">Siaran</string>
-    <string name="calendar_cue_item">Item</string>
     <string name="calendar_cue_item_missing">Item tiada lagi dalam aturcara ini</string>
     <string name="calendar_copy_include_cues">Penanda automasi</string>
     <string name="calendar_copy_include_cues_sub">%1$d penanda, ofset dikekalkan</string>
     <string name="calendar_template_include_cues">Penanda automasi</string>
     <string name="calendar_template_include_cues_sub">Ofset relatif</string>
-    <string name="calendar_templates_empty">Tiada templat tersimpan</string>
     <string name="calendar_templates_empty_sub">Simpan satu daripada mana-mana kebaktian dengan „Templat”, pada pengepala aturcara. Sehingga itu, kebaktian baharu boleh bermula daripada salinan mana-mana yang terdahulu.</string>
     <string name="calendar_templates_note">Templat ditawarkan di bawah „Mula daripada” apabila anda menambah kebaktian. Simpan yang baharu daripada mana-mana kebaktian dengan „Templat”, pada pengepala aturcara.</string>
     <string name="calendar_template_remove">Padam templat</string>
     <string name="calendar_template_saved_sub">Templat · %1$s · %2$d item</string>
-    <string name="calendar_copy_service">Salin</string>
     <string name="calendar_copy_service_tip">Salin kebaktian ini ke tarikh lain, atau ulang</string>
-    <string name="calendar_save_template">Templat</string>
     <string name="calendar_save_template_tip">Simpan aturcara ini sebagai templat</string>
     <string name="calendar_copy_title">Salin %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d item</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Berulang %1$s · %2$d kebaktian dalam siri ini</string>
     <string name="calendar_export_pdf">Eksport PDF</string>
     <string name="calendar_settings_open">Tetapan kalendar</string>
-    <string name="calendar_export_failed">Aturcara tidak dapat dieksport.</string>
     <string name="calendar_section_new">Bahagian baharu</string>
     <string name="calendar_section_insert">Sisip</string>
     <string name="calendar_auto_load">Muat kebaktian secara automatik</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Ditawarkan apabila lagu belum mempunyai tempoh yang diukur</string>
     <string name="calendar_pick_search">Cari lagu, atau taip rujukan</string>
     <string name="calendar_pick_adds_to">Ditambah ke %1$s</string>
-    <string name="calendar_pick_duration">Tempoh</string>
     <string name="calendar_pick_all_books">Semua buku lagu</string>
     <string name="calendar_pick_reference">Rujukan</string>
     <string name="calendar_pick_all_bible_books">Semua kitab</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Tambah ke aturcara</string>
     <string name="calendar_pick_add_range">Tambah %1$s</string>
     <string name="calendar_pick_verse_hint">Ketik satu ayat, kemudian ketik yang lain untuk julat</string>
-    <string name="calendar_pick_clear">Kosongkan</string>
     <string name="calendar_edit_song">Edit lagu ini</string>
-    <string name="calendar_replace_row">Menggantikan %1$s</string>
-    <string name="calendar_change_row">Tukar item ini</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · berjalan sendiri pada %2$s — klik untuk memicunya sekarang</string>
     <string name="calendar_cue_fire_now">Picu penanda ini sekarang</string>
     <string name="calendar_cue_fired_at">Dipicu %1$s</string>
     <string name="calendar_cue_next_in">Seterusnya · dalam %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Jam dimajukan · klik untuk 5 min lagi, × untuk kembali ke masa sebenar</string>
     <string name="calendar_run_clock_reset">Kembali ke masa sebenar</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d daripada %3$d penanda akan dipicu secara automatik</string>
     <string name="calendar_cue_fired_title">Penanda dipicu</string>
     <string name="calendar_cue_toast_close">Sembunyikan</string>
     <string name="calendar_preset_kind_all">Semua</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Seterusnya</string>
     <string name="calendar_chip_blank">Kosongkan</string>
-    <string name="calendar_chip_manual">Manual</string>
     <string name="calendar_auto_starts">%1$d permulaan automatik</string>
     <string name="calendar_auto_start_one">1 permulaan automatik</string>
     <string name="calendar_all_manual">Semua manual</string>

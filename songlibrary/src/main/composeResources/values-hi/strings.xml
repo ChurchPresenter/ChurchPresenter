@@ -34,7 +34,6 @@
     <string name="revert">पूर्ववत करें</string>
     <string name="save_changes">बदलाव सहेजें</string>
     <string name="done">पूर्ण</string>
-    <string name="saved">%1$s सहेजे गए</string>
     <string name="save_failed">%1$s सहेजा नहीं जा सका</string>
     <string name="new_song_book">नई गीत पुस्तक</string>
     <string name="new_song_book_subhead">एक संग्रह जिसमें गीत रखे जा सकते हैं</string>

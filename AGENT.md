@@ -1,11 +1,13 @@
 # Agent Development Notes
 
 Standards, structure, and commands only. Never add debugging narratives, past-bug write-ups, or
-one-off error stories — those belong in git commits and in the tests that encode them.
+one-off error stories — those belong in git commits and in the tests that encode them. A rule may
+carry one sentence of *why*; the story of how it was learned stays in git.
 
 General style rules (imports, string resources, Material 3, type names, cleanup) live in
-`CODING_STANDARDS.md` and `DEVELOPMENT_GUIDE.md`, which CLAUDE.md also loads. This file holds only
-the rules those don't cover.
+`CODING_STANDARDS.md`, which CLAUDE.md also loads. `DEVELOPMENT_GUIDE.md` (workflow, contributing,
+verification greps), `FEATURES.md` (feature → source map) and `README.md` (onboarding) are read on
+demand.
 
 ## Code Standards
 
@@ -23,7 +25,9 @@ the rules those don't cover.
 - Only acceptable exception: a rendering bridge whose panel lifecycle is tightly coupled to the
   ViewModel (`MediaPresenter`/`VideoPlayer`, `PresentationPlayer`, `LottieFrameStream`) — document
   it explicitly at the site.
-- Known standing deviation: `MainDesktop.kt` wires several ViewModels top-down. Not new precedent.
+- Known standing deviation: `MainDesktop.kt` and the wiring files split out of it
+  (`*Wiring.kt`, `PresenterWindows.kt`, `RemoteCommandEffects.kt`) pass ViewModels top-down. Not new
+  precedent.
 
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
@@ -46,15 +50,15 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 |------------------|---------------------------------------------------------------------|
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
-| `presenter/`     | Output window rendering (what the audience sees) — plus the two off-screen outputs, `BrowserSourceVideoRenderer` and `NdiVideoRenderer`, on the shared `ComposeScenePump`                    |
+| `presenter/`     | Output window rendering (what the audience sees), plus the off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`) on the shared `ComposeScenePump` |
 | `server/`        | Ktor REST/WebSocket server, ATEM *bridge*, tunnel, SSL — the ATEM client is `:atem`, the PCO OAuth callback listener is `:planning-center` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
-| `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
+| `models/`        | Only what needs the app: `ShortcutAction`, `PresetItems`, the two Companion UI states |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
-| `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
-| `ui/theme/`      | `LanguageProvider` only — the theme itself is the `:theme` module   |
+| `utils/`         | Stateless helpers (AutoFit, UpdateChecker, etc.) — crash reporting is `:diagnostics` |
+| `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
 
 ```
 main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
@@ -69,8 +73,8 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 
 **Each module documents itself.** Every one of these directories holds its own `AGENT.md` — what it
 is, what `:composeApp` uses from it, its layout, its commands, its gates and its rules — and a
-`CLAUDE.md` that loads it (plus the module's `README.md` where there is one). Read the module's own
-file before changing it, and **put module-specific notes there, not here.**
+`CLAUDE.md` that loads it. Read the module's own file before changing it, and **put
+module-specific notes there, not here.**
 
 | Module                 | Gradle                 | What it is                                                                        | Notes                                    |
 |------------------------|------------------------|-----------------------------------------------------------------------------------|------------------------------------------|
@@ -94,71 +98,43 @@ file before changing it, and **put module-specific notes there, not here.**
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
 | `calendar/`            | `:calendar`            | The Calendar Manager — planned services on a month grid, each with a run of show   | [AGENT.md](calendar/AGENT.md)            |
 
-**Every one of them is a real Gradle module of this build** — `include(":theme")`,
-`implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
-wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
-literals. Their `version` comes from the `subprojects` block in the root build; don't re-declare it.
-There are no mounted sub-builds and no second wrapper left: one `./gradlew` at the repo root builds
-and tests everything.
-
-**None of them are git submodules.** All of them are committed directly into this repository, so a
-plain `git clone` is enough and a change spanning the app and a module is one commit.
+Every one is a real Gradle module of this build and is committed directly (no git submodules, no
+second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
+from `gradle/libs.versions.toml`, `version` from the root `subprojects` block — don't re-declare it.
 
 ### POI is shared by three modules
 `:presentation-engine`, `:converter` and `:composeApp` all pull Apache POI, and **exactly ONE POI
-schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite`, because the
-engine's `<p:timing>` parser needs classes (`CTTLTimeNode*`, `CTTLAnimateBehavior`, …) the lite jar
-omits. The version lives in `gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and
-`:composeApp` excludes the lite module **graph-wide** in a `configurations.configureEach` block so
-no transitive path can reintroduce it.
+schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite` — the engine's
+`<p:timing>` parser needs classes the lite jar omits. The version lives in
+`gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and `:composeApp` excludes the lite
+module graph-wide in a `configurations.configureEach` block.
 
 ### JaCoCo lives in the root build
-Every module of this build shares one shape — a `test` task, `src/main/kotlin`,
-`classes/kotlin/main` — so the JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor are
-written **once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block.
-The default floor is 85% on all six counters.
-
-A module's build file carries only what differs, and both are read when the task is realized, so
-they must be set **above everything else** in the file:
-- `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
-  counters that need a different number (usually the one or two that cannot reach 85%), never all
-  six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
-  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
-  `:diagnostics`, `:atem`, `:ndi`, `:omt`, `:planning-center`, `:bible-formats`, `:song-chords`,
-  `:bible` and `:calendar` name none.
+The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all six) are written
+**once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block. A
+module's build file carries only what differs, set **above everything else** in the file:
+- `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
+  counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`,
+  `:presentation-engine` and `:lottieGenerator` name two each; every other module names none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
 
+**Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module** — configuring
+it there realizes the task before the `extra` above is set, and a second `violationRules` block adds
+rules rather than replacing them. `:composeApp` (Kotlin Multiplatform) registers its own task and is
+out of scope of the shared block.
+
 ### **NEVER exclude code from coverage without asking first**
-An exclude does not make code tested; it makes the gate stop asking. It is the one change that can
-turn a real coverage failure green while leaving the untested code exactly as it was, and it is
-invisible in the number afterwards — a module reporting 98% over a tenth of its classes reads the
-same as one reporting 98% over all of them.
+An exclude does not make code tested; it makes the gate stop asking, and it is invisible in the
+number afterwards. **Do not add a path to `extra["coverageExcludes"]`, widen an existing pattern, or
+lower `extra["coverageFloors"]` on your own initiative.** Raise it, say what cannot be tested and
+why, and let the person running the work decide.
 
-So: **do not add a path to `extra["coverageExcludes"]`, and do not widen an existing pattern, on
-your own initiative.** Raise it, say what cannot be tested and why, and let the person running the
-work decide. The same goes for lowering `extra["coverageFloors"]`.
-
-If the honest answer is "this needs a display / a device / a network", the first move is the split
-described under **Tests** below — pull the decisions out of the unreachable call and test those —
-not an exclude. A carve-out that survives that exercise is worth stating in the module's own
-`AGENT.md`: what is excluded, and what makes it unreachable.
-
-**Measure what an exclude is hiding before believing the number beside it.** `:songlibrary`
-reported 94.5% instructions over 15 classes; with its four-path exclude list removed the same suite
-measures **2.7% over 48** — 1,102 instructions of 40,871. Nothing about the tests changed. Take the
-headline figure from a module that excludes anything as a statement about the excluded set, not
-about the module, and say which it is.
-
-**Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module.** Configuring
-the task there realizes it during evaluation, before the `extra` above is set, and a second
-`violationRules` block adds rules rather than replacing them — so a floor can only ever be raised,
-never lowered, and silently.
-
-`:composeApp` is deliberately out of scope: it is Kotlin Multiplatform, with two exec files, a
-`jvmMain` source set and a long exclude list, and registers its own task. The `kotlin("jvm")` plugin
-id is what separates the two.
+If the answer is "this needs a display / a device / a network", the first move is the split under
+**Tests** below — not an exclude. A carve-out that survives it is stated in the module's own
+`AGENT.md`. When a module excludes anything, its headline percentage describes the included set
+only — measure with the excludes removed before quoting it.
 
 ## Commands
 
@@ -166,7 +142,7 @@ id is what separates the two.
 ./gradlew :composeApp:run              # run the app
 ./gradlew compileKotlinJvm             # fast compile check
 ./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
-./gradlew :theme:test :theme:detekt    # the theme module's own suite and gate
+./gradlew :theme:test :theme:detekt    # a module's own suite and gate
 # NEVER run :composeApp:detektBaseline — it rewrites baseline.xml and absorbs your own new findings
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
@@ -180,194 +156,67 @@ bash test-changed.sh --dry-run         # print the selection and the gradle comm
 ./gradlew :composeApp:verifyRoborazziJvm --tests '*ScreenshotTest*'   # gate: fails past 0.1% of pixels
 ```
 
-**Run `./gradlew :composeApp:detekt` as the last step of any change that touched Kotlin**, before
-saying the work is done. It is the first job in `.github/workflows/test.yml`, so anything it catches
-fails the PR before a single test runs. It catches what the compiler will not: an unused import left
-behind by a refactor is a warning to `compileKotlinJvm` and a **build failure** to detekt, so
-"it compiles" and "the tests pass" are both green while CI is red. A clean run is the expected
-result and every finding it prints is yours to fix.
-
-`:bible-engine` and `:presentation-engine` each carry their own `config/detekt/baseline.xml` too,
-written the day they joined the detekt step above. They had 205 findings between them and had never
-been gated: 44 were fixed outright (dead code, a swallowed exception, 26 over-long lines, and two
-parameters a public function ignored), the 7 in test sources carry `@Suppress` at the declaration,
-and the remaining 141 -- 86 in `:bible-engine` and 55 in `:presentation-engine`, all `src/main`,
-and mostly `MagicNumber`, `NestedBlockDepth` and `ReturnCount` against byte-format parsers -- are
-baselined so the rules gate new code. Those numbers
-are debt, not absolution: the modules are parsers, but a parser is not exempt from a named constant.
-
-`config/detekt/baseline.xml` holds pre-existing findings from the day the size/length rules
-(`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
-`TooGenericExceptionCaught`) were switched on — 1,590 of them, suppressed so those rules gate new
-code only. **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** The test suite
-was brought to zero findings instead: 616 lines were wrapped, and the 27 that cannot be wrapped
-carry `@Suppress` at the declaration — one-line raw-string JSON fixtures (wrapping changes the
-literal), one backtick test name too long to break (Kotlin identifiers cannot span lines), and two
-test classes over the `LargeClass` threshold. **Suppress at the site in tests; never add a test
-entry to the baseline.**
-
-Thresholds are deliberately not detekt's defaults: `LongMethod` 100 (60 flags 191 findings, most
-of them Compose UI; 100 is the knee of the curve and still catches `ChurchPresenterApp` at 1,418 lines
-and `MainDesktop` at 1,168), `LargeClass` 1000, and `LongParameterList` with
-`ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers — long lists of defaulted
-parameters, overridden by name per test — are not flagged.
-
-**NEVER run `./gradlew :composeApp:detektBaseline` again.** Not to refresh it, not to re-sort it,
-not "just to see". That task rewrites the file from the current tree, so it silently absorbs every
-finding you just introduced and the gate stops gating. The file is generated once and edited by
-hand from now on. **Never extend it to silence a new finding**, either. Entries are keyed by rule
-plus signature, so touching a baselined function can surface its finding — fix the finding and
-delete the entry.
-
-**Verify before you commit a UI change, and re-record what it moved.** `verifyRoborazziJvm` compares
-the committed images against a fresh render and fails past `ScreenshotSupport.CHANGE_THRESHOLD`
-(0.1% of an image's pixels — measured: one switch flipping costs 0.19%, a status line 0.66%, a row
-appearing 32.6%, so anything looser hides real regressions. It was 0.5%; the churn that needed that
-much slack was fixed at source instead, and `ScreenshotSupport` names each cause). A failure writes a reference|diff|new
-image to `composeApp/build/outputs/roborazzi/<name>_compare.png` and names it in the message.
-
-**It runs locally, not in CI.** The committed set is a macOS recording and CI renders on Linux, where
-essentially every file differs — see the table below. CI still records and posts the advisory
-`reg-actions` comparison; it does not verify.
-
-The pictures in that comment are served from a `reg_actions` branch, one directory per run. **How
-long they live is `retention-days` on the reg-actions step in `screenshots.yml` — the only place
-that window is set**; the action prunes expired directories itself. It prunes files and not history,
-though, so the pack grows regardless, which is what
-`.github/workflows/reg-actions-prune.yml` is for: monthly it rebuilds the branch as a single root
-commit over whatever the tip already holds, applying no retention of its own. Left alone the branch
-outgrew all of `main` in nine days.
-
-That branch is **not** the comparison baseline, despite the name. reg-actions resolves the expected
-images from the workflow *artifact* attached to the merge-base commit's run, so nothing done to the
-branch can affect whether a comparison works. Nothing under `composeApp/screenshots/` is affected
-either; those are the images reviewers approve.
-
-`previewApp/about_*` (the git hash in `BuildConfig.VERSION_DISPLAY`) and
-`previewApp/dictionary_light` (a count read mid-load) were both fixed in their suites rather than by
-widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
-`canvas_*`; `ScreenshotSupport` records what each one was.
-
-**One churn source is left, and it fails 2 of the 963 images on a clean `main`** — the font rows,
-added 2026-08-27. The clock and camera rows below **are fixed**: both now take the value they were
-leaking as a defaulted parameter, and their tests pin it, which is the remedy this section had
-always prescribed.
-
-| suite | images | why it changes every run |
-|---|---|---|
-| ~~`StageMonitorScreenshotTest`~~ | ~~22~~ | **Fixed.** Drew a live wall clock, *and* read the host's 12/24-hour locale. `StageMonitorScreen` now takes `now` and `use24Hour`; the test pins both. |
-| ~~`AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*`~~ | ~~1~~ | **Never the clock.** This is the Stage Monitor *settings tab*, which draws no clock and never calls `StageMonitorScreen`. Its diff was the text backdrop button — see below. |
-| ~~`CanvasTabScreenshotTest` → `source_camera`~~ | ~~1~~ | **Fixed.** Enumerated the host's real capture devices. `CameraProperties`/`SourcePropertiesPanel`/`CanvasTab` now take a `CameraHost` — the devices *and* whether ffmpeg runs, so the hints are pinned too — and `canvasTab()` pins a fixed pair by default. |
-| `SettingsFieldsScreenshotTest` → `font_picker`, `font_picker_open` | 2 | The **font list is pinned but the glyphs are not**. The picker renders each name in its own typeface, so a machine missing one of `FONTS` draws that row in a fallback face. The test's own comment says the list is fixed "not the machine's", which is true and not enough. |
-| `AppPreviewSettingsScreenshotTest` → `settings_bible_light` | 1 | The same dropdown, inside the Bible settings preview. |
-
-All of them are the same shape as the `about_*` git-hash case that *was* fixed — a value from
-outside the composition leaking into the picture — and all wanted the same remedy: take the value as
-a parameter and let the test pin it. For the font rows that means rendering the sample names in a
-bundled face rather than the installed one. Until then `verifyRoborazziJvm` cannot be read as
-pass/fail; check the failing names against this table first, and treat **anything else** as a real
-difference.
-
-**A whole suite failing is usually a re-record nobody did, not churn.** On 2026-09-06 five suites —
-`bibleSettingsTab`, `songSettingsTab`, `dictionarySettingsTab`, `qaRemoteDialog` and part of
-`previewApp`, 56 images — all failed with the same diff, and it was read as platform churn. It was
-not: the text backdrop button (`TextStyleButtons.kt`) had landed four days earlier and those five
-suites were never re-recorded. Every `*_compare.png` showed the same control appearing. Before
-calling anything churn, open one compare image and look at what actually moved.
-
-**`composeApp/screenshots/.parts` is git-ignored and cleaned up in a `finally`.** The per-theme
-halves are written there before being stacked. Cleanup used to run only on the happy path, so an
-interrupted run stranded them — and `git add -A` committed 30 of them three separate times, in
-commits whose messages were about something else entirely. A stranded half is also picked up by the
-*next* run's verify, surfacing as an extra failure that does not reproduce on its own.
-`BibleSettingsTabScreenshotTest → font_picker` appeared exactly this way and is *not* a
-churn source.
-
-Every state is shot in **both themes and stacked into one image**, light above dark — go through
-`stackedThemes` (or `captureComponent`, which wraps it) and a state is written once, not twice. One
-folder per test class (`screenshots/<section>/`). An
-open popup (dropdown, menu, tooltip) is its own compose root: pass `rootIndex = 1` or `onRoot()`
-fails with "expected exactly 1 node". Two captures that come out byte-identical mean the state was
-never reached — check with `md5 -q composeApp/screenshots/<section>/*.png | sort | uniq -d`.
-
-**Shoot a shared composable in its own suite rather than only through the tab that uses it** —
-`DropdownSelector`, `GoLiveButton`, `ActionIconButton` and friends are used by many tabs, so one
-image per state beats the same button appearing inside a dozen tab screenshots. `captureComponent`
-takes a `drive` block for the interaction (opening a menu) and `rootIndex` for the popup it opens,
-and crops what it shoots to the drawn content — a popup root is the whole window, so without that an
-open menu arrives as a menu on a screenful of empty background. Tab and presenter shots are **not**
-cropped: there the empty space is the layout.
-A tab's *own* extracted composables are `private` and stay that way: widening them to `internal` to
-photograph them is refactoring production code for testability. Their states are covered through
-the tab.
-
-### **NEVER move the screenshot location, and NEVER put screenshots under `build/`**
-This is a standing rule, not a preference to re-litigate. `composeApp/screenshots/` is where they
-live and they are **committed**. Do not change `SCREENSHOT_ROOT`, `roborazzi.outputDir`, the
-workflow's `image-directory-path`, or add `composeApp/screenshots/` to `.gitignore` — not to save
-repo size, not because CI renders its own copies, not because the committed images do not feed the
-reg-actions comparison. All of that is true and none of it is a reason: **under `build/` the images
-are git-ignored and wiped by `clean`, so they exist only on the machine that last recorded them and
-no reviewer can ever open them, approve them, or ask for a state to be changed before it merges.**
-That review is the entire point of having them.
-
-This has already been flipped three times in two days, each time undoing a merged decision.
-`ScreenshotInvariantsTest` now fails if the root moves under `build/`. If you think it should move,
-**ask first** — do not change it and explain afterwards.
-
-**Screenshots ARE committed**, under `composeApp/screenshots/`. They are the artifact a human opens
-and approves before a UI change is merged: a reviewer looks at the images and asks for changes when
-a state is wrong, missing, or badly framed. **Re-record and include the images in the commit
-whenever a state you touched changed.** `.github/workflows/screenshots.yml` additionally records
-both sides on one runner and posts the before/after as a PR comment — that comment is a convenience,
-not the approval. Note the record step overwrites the working copy before the comparison reads it,
-so the committed images are for humans and never enter the diff CI computes.
-
-The cost is real and does not go away by being committed. **Skia rasterises text per platform**, and
-git keeps every version of a binary for ever. Measured on 2026-08-08 against the 247-image set:
-
-| re-record                                                  | images that change     |
-|------------------------------------------------------------|------------------------|
-| same platform, unchanged states (macOS → macOS)            | **21 of 247 — 8.5%**   |
-| across platforms (the committed set vs CI's Linux renders) | **246 of 247 — 99.6%** |
-
-**The two numbers are what matter, not an average of them.** Re-recording on the platform the set
-was recorded on is cheap, so *do* re-record after a change and commit what moved. Re-recording on a
-different OS rewrites essentially the whole set for no visual change — so **record on ONE platform
-per branch**, and never re-record the whole suite out of habit.
-
-> An earlier version of this paragraph said "15 of 16, measured" without saying across what. That
-> conflated the two axes and understated the cross-platform case, which is the one the "ONE
-> platform" rule exists for. To measure it yourself:
-> `gh run download <run-id> -n screenshots -D <dir>` then `cmp -s` file by file. **A local
-> re-record does not measure this** — it compares against your own platform and returns a
-> comfortable 8%.
-
-**The committed set is currently a macOS recording and CI renders on Linux**, so the two disagree on
-almost every file. That is not a fault in either; it is what the table above describes. Which
-platform is canonical has not been decided — if you are about to re-record broadly, ask first.
-
-To hand images to the website, download the `screenshots` artifact from a run on `main`: those are
-the Linux renders and they are consistent with each other.
-
-**A capture must be written under `SCREENSHOT_ROOT`** (`ScreenshotSupport.kt`, the single definition
-of that path). Images are matched between the two sides of the comparison **by their path relative
-to that root**, so one written elsewhere is not reported as changed — it quietly has no counterpart
-and stops being compared. Go through `stackedThemes`/`captureComponent` and this is handled.
-
-**Name the class `…ScreenshotTest`.** The workflow records with `--tests '*ScreenshotTest*'`; a
-class outside that pattern is never rendered in CI, and its images are never compared.
-
-A difference in the comment is advisory, not a failure — a deliberate design change looks exactly
-like a regression.
-
 A failure that makes no sense — unresolved references to symbols that exist, unrelated suites
 failing, a `NoClassDefFoundError` at runtime — is a stale build. `clean` does not clear it;
 `--rerun-tasks` does.
 
+### detekt
+**Run `./gradlew :composeApp:detekt` (and the detekt task of every module you touched) as the last
+step of any change that touched Kotlin.** It is the first job in `.github/workflows/test.yml`, and it
+fails on what the compiler only warns about (an unused import). Every finding it prints is yours to
+fix.
+
+`config/detekt/baseline.xml` (1,467 entries) holds findings from the day the size/length rules
+(`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
+`TooGenericExceptionCaught`) were switched on; `:bible-engine` (86) and `:presentation-engine` (55)
+carry their own. They are debt, not absolution:
+- **NEVER run `detektBaseline`** — it rewrites the file from the current tree and silently absorbs
+  every finding you just introduced. The file is edited by hand.
+- **Never add an entry to silence a new finding.** Entries are keyed by rule plus signature (a
+  parameter's KDoc included), so touching a baselined function can surface its finding — fix the
+  finding and delete the entry rather than re-keying it.
+- **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** In tests, suppress at the
+  declaration (`@Suppress`) for what genuinely cannot be wrapped.
+
+Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass` 1000, and
+`LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are
+not flagged.
+
+### Screenshots
+- **Committed, under `composeApp/screenshots/`.** They are what a reviewer opens and approves before
+  a UI change merges. **Re-record and commit the images whenever a state you touched changed.**
+- **NEVER move them, and NEVER put them under `build/`** — not `SCREENSHOT_ROOT`,
+  `roborazzi.outputDir`, the workflow's `image-directory-path`, nor `.gitignore`. Under `build/` they
+  are wiped by `clean` and no reviewer can open them. `ScreenshotInvariantsTest` enforces this. If
+  you think it should move, **ask first**.
+- **Verify locally, not in CI.** The committed set is a macOS recording; CI renders on Linux, where
+  almost every file differs, so CI records and posts an advisory `reg-actions` comparison only.
+  **Record on ONE platform per branch** and never re-record the whole suite out of habit — across
+  platforms it rewrites nearly every file for no visual change. Which platform is canonical is
+  undecided; ask before re-recording broadly.
+- `verifyRoborazziJvm` fails past `ScreenshotSupport.CHANGE_THRESHOLD` (0.1% of pixels) and writes a
+  reference|diff|new image to `composeApp/build/outputs/roborazzi/<name>_compare.png`. **Open it
+  before calling anything churn** — a whole suite failing is usually a re-record nobody did.
+- Known churn on a clean `main`: `SettingsFieldsScreenshotTest → font_picker, font_picker_open` and
+  `AppPreviewSettingsScreenshotTest → settings_bible_light` (font rows render in installed faces).
+  Anything else failing is a real difference. The remedy for churn is always the same: take the
+  outside value as a parameter and let the test pin it — never widen the threshold.
+- Every state is shot in **both themes stacked into one image** — go through `stackedThemes` or
+  `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
+  compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
+- An open popup is its own compose root: pass `rootIndex = 1`. Byte-identical captures mean a state
+  was never reached (`md5 -q composeApp/screenshots/<section>/*.png | sort | uniq -d`).
+- Shoot a shared composable (`DropdownSelector`, `GoLiveButton`, …) in its own suite via
+  `captureComponent`; a tab's own `private` composables stay private and are covered through the tab.
+- `composeApp/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
+  never commit it.
+- The `reg_actions` branch holds the PR-comment images; retention is `retention-days` in
+  `screenshots.yml`, and `reg-actions-prune.yml` squashes the branch monthly. It is not the
+  comparison baseline.
+
+### Other commands
 Presentation Engine tooling (from that module's root):
 ```bash
-./gradlew test
 ./gradlew dumpTiming  -Pfile=/path/deck.pptx [-Pout=/dir]   # parse audit + PNG renders
 ./gradlew dumpKeynote -Pfile=/path/deck.key                 # IWA object-graph probe
 ./gradlew makeSampleDeck -Pout=/path/sample.pptx
@@ -382,205 +231,76 @@ JAVA_TOOL_OPTIONS="-Dchurchpresenter.singleInstancePort=47633 -Duser.home=$HOME/
 
 ### **NEVER write tests or re-record screenshots before the UI is approved**
 On a change that touches the UI, **stop when it compiles and the existing suites still pass, show
-what it looks like, and wait.** Do not write new unit tests, do not write new screenshot tests, and
-do not run `recordRoborazziJvm` until the person running the work has looked at the UI and said it
-is right.
+what it looks like, and wait.** No new unit tests, no new screenshot tests, no
+`recordRoborazziJvm` until the person running the work has said it is right ("looks good", "ship
+it", "add tests now"). Tests written against the first version get thrown away. Existing tests must
+keep passing, and a test your change invalidated is fixed or deleted as part of the change.
 
-The reason is cost, not principle: a screenshot recording and a suite of assertions both pin the
-design in place, and every round of "move that, make it bigger" after they exist means rewriting
-them. A control's spacing, wording and sizing typically change two or three times between the first
-working version and the approved one. Tests written against the first are thrown away.
+`composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`. CI (`.github/workflows/test.yml`)
+runs these plus each module's suite, only for the modules whose directory the change touched.
 
-What still holds while you wait: **existing** tests must keep passing, and a test your change
-invalidated (a checkbox that is now a slider, a signature that gained a parameter) is fixed or
-deleted as part of the change — that is maintenance, not new work. Run `detekt` as always.
+### The suite runs in parallel forks
+`jvmTest` runs on up to 4 parallel JVMs (`-PtestForks=N` to override). Breaking these produces
+failures that only appear under load:
+- **Never bind a fixed port directly.** Go through `testPort(39_xxx)` (`TestPorts.kt`), and store
+  the `testPort` value if the port is reused for the client URL.
+- **`user.home` is per fork** (`PerForkTestHome` points each at `build/test-home/worker-N`).
+- **Some classes cannot run beside anything**: `jvmTestSerial` (`maxParallelForks = 1`) holds those
+  listed in `serialTestClasses` (`composeApp/build.gradle.kts`). `jvmTest` excludes them and is
+  `finalizedBy` it. Passing `--tests` stands the exclusion down and runs the named class in `jvmTest`.
+- **A hung fork is killed with a diagnosis.** `HungTestReporter` dumps every thread and halts the
+  fork (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
+  `build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
+  Off-screen Compose scenes (`LowerThirdOffscreenRenderer`, `ComposeScenePump`) confine themselves
+  to the event queue to avoid a snapshot-observer lock inversion — keep any new one that way.
 
-The go-ahead is explicit. "Looks good", "ship it", "add tests now" — until one of those, the
-deliverable is the working UI and a note saying tests and screenshots are pending.
+The tests are **JUnit 4** on junit-vintage; `useJUnitPlatform()` exists for `PerForkTestHome`. Keep
+writing `kotlin.test` annotations. The `capabilitiesResolution` block in
+`composeApp/build.gradle.kts` pins `kotlin-test` to its JUnit 4 flavour — removing it silently stops
+every `@BeforeClass`.
 
-`composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`.
-CI is `.github/workflows/test.yml` (push/PR); it runs these plus each module's own suite, invoked
-one at a time through the module's own wrapper — and only for the modules whose own directory the
-change touched (the `Which sub-builds changed` paths-filter step).
+**`-PfastTest`** turns off JaCoCo instrumentation for the inner loop; `check` keeps it on.
 
-### The suite runs in parallel forks — what that costs you
-
-`jvmTest` runs on **4 parallel JVMs** (`maxParallelForks`, half the cores, capped at 4; override with
-`-PtestForks=N`). It went from ~12 minutes to ~5. Two rules follow from it, and breaking either one
-produces a failure that only appears under load and only sometimes:
-
-- **Never bind a fixed port directly.** Go through `testPort(39_xxx)` (`TestPorts.kt`), which shifts
-  the whole range by this fork's band. A bare literal is a `BindException` against another fork. If
-  a class stores its port and reuses it for the client URL, the *stored* value must be the
-  `testPort` one too — `CompanionServerAtemKeyTest` bound the offset port and then talked to the
-  literal, and every one of its tests failed with "connection refused".
-- **`user.home` is per fork, not shared.** `PerForkTestHome` (a `LauncherSessionListener`, which is
-  the only hook that runs before discovery) points each fork at `build/test-home/worker-N`. Suites
-  that deliberately use the shared fake home rather than swapping in a temp dir — and there are a
-  couple of dozen, several of which *delete* a directory in `@BeforeTest` — are isolated by that and
-  by nothing else.
-- **Some classes cannot run beside anything, and do not.** `jvmTestSerial` is a second `Test` task
-  over the same classes and classpath with `maxParallelForks = 1`, holding the classes listed in
-  `serialTestClasses` (`composeApp/build.gradle.kts`): the loopback-UDP suites, the one screenshot
-  test that binds a literal port, and the `AppPreview*ScreenshotTest` family, which all seed one
-  fixed directory that cannot move per fork without rewriting every image. `jvmTest` excludes them
-  and is `finalizedBy` it, so a plain `check` runs both. **Passing `--tests` stands that exclusion
-  down** and drops `jvmTest` itself to one fork — so `--tests '*SomeSerialClass*'` runs in `jvmTest`,
-  not in `jvmTestSerial`. That is deliberate (a named class must keep working), but it does mean the
-  serial task is not the one that ran.
-- **A fork that stops making progress is killed with a diagnosis.** `HungTestReporter`, a
-  `TestExecutionListener`, watches whichever test is running and, once one has been running past its
-  threshold (five minutes by default, **150s in CI** — far past anything this suite legitimately
-  does; the slowest class is 37.1s for all of its tests together), dumps every thread in the fork
-  and `halt`s it with exit code 93. **The hang it exists for was a deadlock, and the fifth
-  occurrence's dump proved it** — an ABBA lock inversion between the on-screen AWT scene's
-  `SnapshotStateObserver` and an off-screen one's, because `advanceGlobalSnapshot` fans out to every
-  registered observer. **Both off-screen scenes now confine themselves to the event queue** —
-  `LowerThirdOffscreenRenderer` first, `ComposeScenePump` after it (issue #498, closed 2026-09-12),
-  which is what removes the second lock order; there is no way to opt a scene out of the global
-  observer list. `ComposeScenePump` keeps `readInto`/`onFrame`, the expensive half, off that thread.
-  The cycle and what was ruled out first are recorded in `LowerThirdOffscreenRenderer`'s own comment,
-  in `ComposeScenePump`'s class doc and in `HungTestReporter`. The dump goes to stderr *and* to
-  `build/test-results/<task>/hung-test-dump.txt`, which is inside what the workflow already uploads
-  as `test-reports`, so it survives the halt losing Gradle's buffered output. Chasing a hang, tighten
-  it with `./gradlew :composeApp:jvmTest -PhangThresholdMs=30000`. It exists because the suite has
-  hung outright with no failing assertion, and a class name alone was not a cause — the recorded
-  stack is one thread waiting on another, which only a full dump shows.
-
-The tests themselves are still **JUnit 4**, running on junit-vintage under the JUnit Platform
-launcher. `useJUnitPlatform()` is there for `PerForkTestHome`, not for JUnit 5 syntax: keep writing
-`kotlin.test` annotations, and `@get:Rule`/`@BeforeClass` keep working. The
-`capabilitiesResolution` block in `composeApp/build.gradle.kts` is what pins `kotlin-test` to its
-JUnit 4 flavour — remove it and the JUnit 5 flavour resolves instead, which quietly stops running
-every `@BeforeClass` in the suite.
-
-**`-PfastTest`** turns off JaCoCo instrumentation (~15-25%) for the inner loop; `check` keeps it on.
-
-When writing tests here:
-- **Unreachable code is a refactor, not a dead end.** When a class is uncovered because it needs a
-  display, a bus, a network or a device, do not conclude it cannot be tested. Almost none of such a
-  class is actually the unreachable call — the rest is ordinary logic sitting around it. Split it:
-  - Pull each decision into its own function — what the dialog/request is configured with, what
-    its answer is turned into — and test those directly.
-  - Then shrink the unreachable call itself to **one step of its own**, and take the sequence
-    around it as a function with that step as a **parameter**. Tests pass a stand-in and exercise
-    the real order, the real wiring and the real helpers; only the one call stays uncovered.
-    `SwingFileChooser.openWith`/`saveWith`/`showOwned` is the worked example.
-  - **Count the lambdas.** JaCoCo scores every lambda as its own method, so a helper taking four
-    function parameters adds four uncovered methods at each call site and can score *worse* than
-    the inline code it replaced. Take one function parameter — the unreachable step — and call the
-    rest directly. Measure before and after; the report is the arbiter, not the intent.
-  - What must NOT be done to reach coverage: adding an **ad-hoc** mutable `internal var` seam on a
-    singleton and restoring it by hand in each test (leaks between tests — see the flaky-test rule
-    below), or asserting that a stub was called instead of that something works. If a test can only
-    prove a mock was invoked, don't write it.
-  - **The one permitted seam of that shape is the recent-files singletons**, and only through
-    `RecentFilesSwap` in `jvmTest`. `RecentPictureFolders`, `RecentMediaFiles` and
-    `RecentPresentationFiles` expose `internal var file`/`pinnedFile`; a test repoints them via that
-    helper, which restores both paths and both lists in one place, so the restore is structural
-    rather than something each author remembers. **Never assign those fields directly.** The
-    alternative — keeping them private and reaching in with `getDeclaredField` — is what this
-    replaced: it hides renames from the compiler (see the reflection rule below) and, run outside
-    Gradle, it deleted the developer's own recents. Adding a *fourth* such seam is not covered by
-    this exception; raise it first.
-- **Prefer `internal` over reflection to reach non-public code.** `jvmTest` is a friend of
-  `jvmMain`, so an `internal` member is callable straight from a test. Reflection costs a lookup
-  per call, throws at runtime instead of failing to compile when a signature changes, loses the
-  types (casts, `Array<Any?>`, `javaPrimitiveType`), and hides renames from the IDE. Widen the
-  member to `internal` and call it. Reflection is the fallback for what genuinely cannot be
-  widened — a private top-level function, or code that must stay private for a reason worth
-  stating. Existing reflection in `PlatformFileChooserTest`/`CrashReporterTest` predates this rule
-  and is not precedent for new tests.
-- **NEVER use `Thread.sleep` or `delay` to wait for async work.** A fixed pause asserts on timing,
-  not behaviour, and flakes on a loaded CI machine. Wait for the condition itself — a bounded
-  poll on observable state with a timeout that throws, or a callback/flag the code under test
-  sets. Never assert "nothing happened" after an arbitrary pause; wait for a positive signal that
-  the operation finished, then assert what did or didn't change.
-- **A route that answers before it finishes leaves a coroutine behind — track it, and join it
-  before tearing anything down.** `POST /api/atem/still|clip` responds `"uploading"` and transfers
-  on `CompanionServer`'s own scope. A test that asserts on the wire and then drops the shared
-  connection is racing that coroutine: its next `AtemConnectionManager.use` dials a switcher the
-  test has just closed, which holds the manager's mutex for the whole connect timeout and can leave
-  a client cached for a dead **ephemeral** port. Nothing detects either, because
-  `AtemClient.isAlive()` is `socket != null` — true for a UDP socket with nobody listening — so the
-  next test's switcher records no command of any name and times out with "got 0". One leak is enough:
-  each poisoned test burns its 5s deadline while leaving more stuck work behind, so the backlog
-  outgrows the suite and never drains. **Five `CompanionServerAtemUploadTest` tests failed exactly
-  this way, and did so again after a first fix that reached only the still tests and not the clip
-  ones.** `AtemBridge.trackUpload`/`cancelUpload` is the handle; `cancelUpload` joins, so it returns
-  only once the coroutine has stopped. Route **every** test in such a suite through the one helper —
-  a suite where some tests take the safe path and some do not is a suite that still fails.
-- **No unit test may cost more than ~1s of wall clock.** The suite is run constantly; a test that
-  waits is a tax on every future change. This rules out anything whose cost is a duration rather
-  than the work itself: retry/backoff delays, "wait for silence" idle windows, timeouts used as
-  the success path, polling loops that expect to time out, and fixed warm-up pauses. Concretely:
-  - A wait must end on a **positive signal** — the state you expect, a frame you can identify, a
-    callback firing. It must never end by the timeout expiring; the timeout exists only to fail
-    the test. A `waitFor { ... } == false` result costing the full timeout is the bug this rule
-    is about.
-  - For "must NOT happen", find the signal that the deciding code path **finished** and assert
-    against it. Example: `BibleViewModel.navigateToReference` bumps `verseSelectionToken` and then
-    — same coroutine, no suspension between — bumps `autoFollowLiveToken` only if the match
-    qualified, so waiting on the first and then asserting the second is race-free and instant.
-  - When the production code's own delay is the cost and is not injectable, **do not write the
-    test**; note the gap in the test class's doc comment instead. But first ask whether it has to
-    stay non-injectable: `BibleEngineClient`'s reconnect backoff was the standing example here, and
-    a defaulted `retryFloorMs` constructor parameter both unlocked the reconnect test and removed a
-    flake — a *defaulted constructor parameter* is not the ad-hoc mutable singleton seam banned
-    above. The schedule's shape stays pinned by a pure test of `retryDelayMs`.
-  - Where an idle window genuinely is the only terminator (a snapshot with no final frame), keep
-    it in the low hundreds of ms — it only has to outlast a loopback gap, not a network.
-  - Check the cost of what you added: `./gradlew :composeApp:jvmTest` then read the `time=`
-    attributes in `composeApp/build/test-results/jvmTest/TEST-*.xml`.
-- **No flaky tests.** A test that passes only most of the time is worse than no test: it trains
-  everyone to re-run instead of to read the failure. A new or changed test must pass on repeated
-  consecutive runs before it is committed — `./gradlew :composeApp:jvmTest --tests '<pattern>'
-  --rerun-tasks`, three times. If it cannot be made deterministic, delete it and note the gap in
-  the test class's doc comment. Never "fix" a flake by widening a timeout, adding a retry, or
-  loosening the assertion — those hide the race instead of removing it. The usual causes here:
-  racing a coroutine instead of waiting on a positive signal, depending on another test's leftover
-  state (`user.home`, a MockK object mock, a shared singleton), depending on test execution order,
-  or asserting on a real clock, a real port, or the filesystem outside a per-test temp dir.
-  (Not a flaky test: `:composeApp:jvmTest` itself sometimes fails with
-  `NoSuchFileException: .../test-results/jvmTest/binary/in-progress-results-*.bin` — that is
-  Gradle losing its own scratch file, unrelated to any assertion. Re-run.)
-- **`mockk`/`spyk`/reflection are a LAST RESORT, not a first reach.** Reach for a real fixture, a
-  plain fake (a stand-in lambda, a constructed data class), or widening a member to `internal`
-  first — those exercise real behaviour and don't rot when signatures change. Only when the branch
-  needs an object that genuinely cannot be built or driven any other way is a mock justified:
-  - A real example worth it: `PresenterManager.presentationShowSlide`'s animated branches need an
-    animated `Deck` (a real one means a POI-built PPTX with a `<p:transition>` and a `DeckRasterizer`
-    that renders — slow, graphics, flaky headless) and a `PresentationPlayer` that cannot be
-    constructed from a mock deck (its ctor rasterizes). `mockk<Deck>`/`mockk<PresentationPlayer>`
-    injected via the `internal presentationPlayer` field is the only way in.
-  - A counter-example NOT worth it: `SongsViewModel`'s remote follower path looks mock-shaped but is
-    fully reachable with plain fakes — a real `SongCatalogResponse` and a `fetchDetail` lambda
-    returning a constructed `SongDetailDto`, driven through `setInstanceLinkSource` → `selectSong`.
-    No mock. Prefer this.
-  - Even with a mock, **assert the real outcome** — which object ends up live, the resulting state,
-    an identity (`assertSame`) — over `verify { mock.method() }`. A lone "a stub was called"
-    assertion tests nothing; a supporting `verify` alongside a real-state assertion is fine.
-  - Use **reflection to READ** private `_` backing state in an assertion when it has no getter —
-    never to WRITE it to force a state the public API cannot produce (that just exercises dead
-    defensive code). Widening to `internal` is preferred over reflection where the field can be
-    widened; keep `_`-prefixed backing fields private.
-  - `mockk` of a final class pays a one-time JVM instrumentation cost (~1s) on first use; it is
-    amortised across the suite but can push an *isolated* first run near the 1s bar — check it, and
-    prefer non-mock approaches partly for this reason.
-- **Isolate `user.home` before constructing a ViewModel** — several resolve file paths from it at
-  construction and then write or delete there. `CrashReporter`, `InstanceLinkLogger` and
-  `TrainingDataLogger` resolve theirs once per JVM, so touch them before any swap or they latch
-  onto a temp dir that gets deleted.
-- **Isolate `os.name` the same way** — skiko maps it onto a known OS in a JVM-wide `by lazy` and
-  throws `Error: Unknown OS <name>` on anything else, from `org.jetbrains.skia.Surface`'s static
-  initializer. So a Compose test composed inside a faked `os.name` permanently breaks every later
-  Compose test in that JVM with `NoClassDefFoundError: Could not initialize class
-  org.jetbrains.skia.Surface`, blamed on whichever class ran next. Call
-  `TestSingletons.latchSkikoHostOs()` before the swap; `withOsName` already does.
+### Writing tests
+- **Unreachable code is a refactor, not a dead end.** Pull each decision out of the call that needs
+  a display/device/network and test it directly; shrink the unreachable call to one step taken as a
+  **single** function parameter (JaCoCo scores every lambda as a method, so more parameters can score
+  worse). `SwingFileChooser.openWith`/`saveWith`/`showOwned` is the worked example. Measure before and
+  after.
+- **No ad-hoc mutable `internal var` seams on singletons**, restored by hand per test. The one
+  permitted seam is the recent-files singletons (`RecentPictureFolders`, `RecentMediaFiles`,
+  `RecentPresentationFiles`), and only through `RecentFilesSwap` — never assign their fields directly.
+  A fourth such seam needs asking first. A *defaulted constructor parameter* is fine.
+- **Prefer `internal` over reflection** to reach non-public code (`jvmTest` is a friend of
+  `jvmMain`). Reflection is the fallback for what genuinely cannot be widened, and only to READ
+  private state in an assertion, never to WRITE it.
+- **NEVER use `Thread.sleep` or `delay` as the wait.** Wait for the condition itself — a bounded poll
+  on observable state, or a callback/flag/`Job` the code under test exposes. The timeout exists only
+  to fail the test. For "must NOT happen", find the signal that the deciding code path finished (a
+  token it bumps, the job it ran) and assert after it.
+- **No unit test may cost more than ~1s of wall clock.** No retry/backoff delays, idle windows,
+  timeouts as the success path, or warm-up pauses. When the production delay is the cost, make it an
+  injectable defaulted parameter; if that is impossible, don't write the test and note the gap in the
+  class doc. Check with the `time=` attributes in `composeApp/build/test-results/jvmTest/TEST-*.xml`.
+- **A route that answers before it finishes leaves a coroutine behind — track it and join it before
+  teardown.** `POST /api/atem/still|clip` transfers after responding; route every test in such a suite
+  through `AtemBridge.trackUpload`/`cancelUpload` (which joins).
+- **No flaky tests.** A new or changed test must pass three consecutive
+  `./gradlew :composeApp:jvmTest --tests '<pattern>' --rerun-tasks` runs. Never fix a flake with a
+  wider timeout, a retry or a looser assertion; if it cannot be made deterministic, delete it and note
+  the gap. (`NoSuchFileException: .../in-progress-results-*.bin` is Gradle losing its scratch file —
+  re-run.)
+- **`mockk`/`spyk` are a last resort.** Prefer a real fixture, a plain fake or widening to `internal`.
+  A mock is justified only when the object genuinely cannot be built or driven (e.g. an animated
+  `Deck` for `PresenterManager.presentationShowSlide`). Even then **assert the real outcome**, not
+  only `verify { … }`. First use of `mockk` on a final class costs ~1s of instrumentation.
+- **Isolate `user.home` before constructing a ViewModel.** `CrashReporter`, `InstanceLinkLogger` and
+  `TrainingDataLogger` resolve their path once per JVM — touch them before any swap.
+- **Isolate `os.name` the same way**: call `TestSingletons.latchSkikoHostOs()` before any swap
+  (`withOsName` does), or skiko's JVM-wide lazy breaks every later Compose test with
+  `NoClassDefFoundError: … org.jetbrains.skia.Surface`.
 - Tests run headless (`java.awt.headless=true`); anything reaching `GraphicsEnvironment` throws.
-  `BibleBookAbbreviations.resolveBookId` does so indirectly (Compose string resources) — stub it.
+  `BibleBookAbbreviations.resolveBookId` does so indirectly — stub it.
 - Assert invariants over exact pixel values — font metrics differ across the three target platforms.
-- **Build paths from real directories, not POSIX literals.** `Path("/tmp/x.png").parent` is `\tmp`
-  on Windows and does not exist, so `FileChooser` silently falls back to the home directory; and a
-  chosen path stored via `absolutePathString()` gains a drive letter. Create a temp dir and derive
-  the expectation from it rather than asserting a `/`-rooted string.
+- **Build paths from real temp directories, not POSIX literals** — `/tmp/x` does not exist on
+  Windows and a stored `absolutePathString()` gains a drive letter.

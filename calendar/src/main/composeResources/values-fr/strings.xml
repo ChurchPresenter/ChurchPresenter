@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_window_title">Gestionnaire de calendrier</string>
     <string name="calendar_title">Calendrier</string>
     <string name="calendar_today">Aujourd'hui</string>
     <string name="calendar_close">Fermer</string>
@@ -19,7 +18,6 @@
     <string name="calendar_kind_special">Événement spécial</string>
 
     <string name="calendar_add_service">Ajouter un culte</string>
-    <string name="calendar_new_service">Nouveau culte</string>
     <string name="calendar_edit_service">Modifier le culte</string>
     <string name="calendar_service_name">Nom</string>
     <string name="calendar_service_start">Heure de début</string>
@@ -30,13 +28,8 @@
     <string name="calendar_cancel">Annuler</string>
     <string name="calendar_delete">Supprimer</string>
 
-    <string name="calendar_run_of_show">Déroulé du culte</string>
-    <string name="calendar_nothing_planned">Rien de prévu pour ce jour</string>
-    <string name="calendar_no_service_hint">Ajoutez un culte pour commencer à planifier.</string>
-    <string name="calendar_run_empty">Ce culte n'a pas encore d'éléments.</string>
     <string name="calendar_items_count_one">%1$d élément</string>
     <string name="calendar_items_count">%1$d éléments</string>
-    <string name="calendar_planned_total">%1$s prévu</string>
     <string name="calendar_duration">Durée</string>
     <string name="calendar_duration_hint">4:30</string>
     <string name="calendar_duration_tip">Durée prévue — cliquez pour la saisir, comme 4:30</string>
@@ -48,25 +41,17 @@
     <string name="calendar_pick_songs">Chants</string>
     <string name="calendar_pick_bible">Bible</string>
     <string name="calendar_pick_section">Section</string>
-    <string name="calendar_pick_schedule">Onglet Programme</string>
     <string name="calendar_pick_presets">Préréglages</string>
     <string name="calendar_presets_empty">Aucun préréglage pour l'instant</string>
     <string name="calendar_presets_empty_sub">Enregistrez-en un avec « Enregistrer le préréglage », à côté de « Ajouter au programme » dans les onglets Images, Présentation, Médias, Annonces et Canevas.</string>
     <string name="calendar_presets_note">Les préréglages apparaissent sous « Préréglages » quand vous ajoutez un élément, et sous « Élément » quand un repère en affiche un.</string>
     <string name="calendar_settings_presets">Préréglages</string>
     <string name="calendar_preset_remove">Supprimer le préréglage</string>
-    <string name="calendar_cue_from_run">De ce déroulé</string>
     <string name="calendar_cue_loops">en boucle</string>
     <string name="calendar_cue_times">×%1$d</string>
-    <string name="calendar_cue_from_presets">Préréglages enregistrés</string>
-    <string name="calendar_search_songs_hint">Rechercher des chants par titre ou numéro</string>
-    <string name="calendar_bible_hint">Saisissez une référence, comme Jean 3:16-17</string>
     <string name="calendar_section_hint">Nom de section, comme Louange</string>
-    <string name="calendar_add">Ajouter</string>
     <string name="calendar_no_results">Aucun résultat</string>
     <string name="calendar_songs_loading">Lecture de la bibliothèque de chants…</string>
-    <string name="calendar_schedule_empty">L'onglet Programme est vide.</string>
-    <string name="calendar_capture_schedule">Ajouter tous les éléments de l'onglet Programme</string>
 
     <string name="calendar_load_into_schedule">Charger dans le programme</string>
     <string name="calendar_load_title">Remplacer le programme ?</string>
@@ -103,14 +88,10 @@
     <string name="calendar_section_remove">Retirer la section</string>
     <string name="calendar_default_start">Heure de début par défaut</string>
     <string name="calendar_default_start_sub">L'heure avec laquelle un nouveau culte est créé</string>
-    <string name="calendar_automation_empty">Aucun repère pour l'instant</string>
-    <string name="calendar_automation_title">Automatisation</string>
     <string name="calendar_armed">Activé</string>
     <string name="calendar_armed_off">Désactivé</string>
     <string name="calendar_arm_tip">Activer ou désactiver tous les repères</string>
     <string name="calendar_cue_skip_tip">Ignorer ce repère</string>
-    <string name="calendar_automation_note">signale les éléments qui se lancent seuls. Décocher ignore un repère pour ce culte.</string>
-    <string name="calendar_edit_cues">Modifier les repères</string>
     <string name="calendar_cue_action_countdown">Lancer le compte à rebours</string>
     <string name="calendar_cue_action_go_live">Passer à l'antenne</string>
     <string name="calendar_cue_action_project">Boucle d'annonces</string>
@@ -119,20 +100,16 @@
     <string name="calendar_cue_action_blank">Vider les sorties</string>
     <string name="calendar_cue_badge_timer">Minuteur</string>
     <string name="calendar_cue_badge_go_live">À l'antenne</string>
-    <string name="calendar_cue_item">Élément</string>
     <string name="calendar_cue_item_missing">L'élément n'est plus dans ce déroulé</string>
     <string name="calendar_copy_include_cues">Repères d'automatisation</string>
     <string name="calendar_copy_include_cues_sub">%1$d repères, décalages conservés</string>
     <string name="calendar_template_include_cues">Repères d'automatisation</string>
     <string name="calendar_template_include_cues_sub">Décalages relatifs</string>
-    <string name="calendar_templates_empty">Aucun modèle enregistré</string>
     <string name="calendar_templates_empty_sub">Enregistrez-en un depuis n'importe quel culte avec « Modèle », dans l'en-tête du déroulé. En attendant, un nouveau culte peut partir d'une copie de n'importe quel culte antérieur.</string>
     <string name="calendar_templates_note">Les modèles sont proposés sous « Partir de » quand vous ajoutez un culte. Enregistrez-en un nouveau depuis n'importe quel culte avec « Modèle », dans l'en-tête du déroulé.</string>
     <string name="calendar_template_remove">Supprimer le modèle</string>
     <string name="calendar_template_saved_sub">Modèle · %1$s · %2$d éléments</string>
-    <string name="calendar_copy_service">Copier</string>
     <string name="calendar_copy_service_tip">Copier ce culte à une autre date, ou le répéter</string>
-    <string name="calendar_save_template">Modèle</string>
     <string name="calendar_save_template_tip">Enregistrer ce déroulé comme modèle</string>
     <string name="calendar_copy_title">Copier %1$s</string>
     <string name="calendar_copy_sub">%1$s · %2$d éléments</string>
@@ -177,7 +154,6 @@
     <string name="calendar_series_note">Se répète %1$s · %2$d cultes dans cette série</string>
     <string name="calendar_export_pdf">Exporter en PDF</string>
     <string name="calendar_settings_open">Paramètres du calendrier</string>
-    <string name="calendar_export_failed">Le déroulé n'a pas pu être exporté.</string>
     <string name="calendar_section_new">Nouvelle section</string>
     <string name="calendar_section_insert">Insérer</string>
     <string name="calendar_auto_load">Charger le culte automatiquement</string>
@@ -194,7 +170,6 @@
     <string name="calendar_default_item_sub">Proposée quand un chant n'a pas encore de durée mesurée</string>
     <string name="calendar_pick_search">Cherchez des chants, ou saisissez une référence</string>
     <string name="calendar_pick_adds_to">Ajoute à %1$s</string>
-    <string name="calendar_pick_duration">Durée</string>
     <string name="calendar_pick_all_books">Tous les recueils</string>
     <string name="calendar_pick_reference">Référence</string>
     <string name="calendar_pick_all_bible_books">Tous les livres</string>
@@ -207,12 +182,7 @@
     <string name="calendar_pick_add_tip">Ajouter au déroulé</string>
     <string name="calendar_pick_add_range">Ajouter %1$s</string>
     <string name="calendar_pick_verse_hint">Touchez un verset, puis un autre pour une plage</string>
-    <string name="calendar_pick_clear">Effacer</string>
     <string name="calendar_edit_song">Modifier ce chant</string>
-    <string name="calendar_replace_row">Remplacement de %1$s</string>
-    <string name="calendar_change_row">Changer cet élément</string>
-    <string name="calendar_cue_auto">Auto</string>
-    <string name="calendar_cue_auto_tip">%1$s · se lance seul à %2$s — cliquez pour le déclencher maintenant</string>
     <string name="calendar_cue_fire_now">Déclencher ce repère maintenant</string>
     <string name="calendar_cue_fired_at">Déclenché %1$s</string>
     <string name="calendar_cue_next_in">Suivant · dans %1$d min</string>
@@ -222,7 +192,6 @@
     <string name="calendar_run_clock_tip_stepped">Horloge avancée · cliquez pour 5 min de plus, × pour revenir à l'heure réelle</string>
     <string name="calendar_run_clock_reset">Revenir à l'heure réelle</string>
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
-    <string name="calendar_footer_cues">%1$s · %2$d repères sur %3$d se déclencheront automatiquement</string>
     <string name="calendar_cue_fired_title">Repère déclenché</string>
     <string name="calendar_cue_toast_close">Masquer</string>
     <string name="calendar_preset_kind_all">Tous</string>
@@ -279,7 +248,6 @@
     <string name="calendar_chip_times">%1$d×</string>
     <string name="calendar_chip_next">→ Suivant</string>
     <string name="calendar_chip_blank">Vider</string>
-    <string name="calendar_chip_manual">Manuel</string>
     <string name="calendar_auto_starts">%1$d départs automatiques</string>
     <string name="calendar_auto_start_one">1 départ automatique</string>
     <string name="calendar_all_manual">Tout en manuel</string>

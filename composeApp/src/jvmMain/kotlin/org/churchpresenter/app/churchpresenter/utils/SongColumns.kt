@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.churchpresenter.settings.SongColumnId
 import org.churchpresenter.settings.utils.Constants
 /**
  * Table-column configuration for the song list — which columns exist, in what order, how a drag
@@ -13,14 +14,14 @@ import org.churchpresenter.settings.utils.Constants
  * is present.
  */
 internal fun availableSongColumns(songbookCount: Int, hasAddToSchedule: Boolean): List<String> = buildList {
-    add("number"); add("title")
-    if (songbookCount > 1) add("songbook")
-    add("tune")
-    add("play_count")
-    add("author")
-    add("composer")
-    if (hasAddToSchedule) add("add_to_schedule")
-    add("favorites")
+    add(SongColumnId.NUMBER); add(SongColumnId.TITLE)
+    if (songbookCount > 1) add(SongColumnId.SONGBOOK)
+    add(SongColumnId.TUNE)
+    add(SongColumnId.PLAY_COUNT)
+    add(SongColumnId.AUTHOR)
+    add(SongColumnId.COMPOSER)
+    if (hasAddToSchedule) add(SongColumnId.ADD_TO_SCHEDULE)
+    add(SongColumnId.FAVORITES)
 }
 
 /**
@@ -52,14 +53,14 @@ internal fun moveColumn(order: List<String>, colId: String, targetId: String): L
 
 /** The sort key a column header drives, or `""` for a column that isn't sortable. */
 internal fun songColumnSortKey(colId: String): String = when (colId) {
-    "number" -> Constants.SORT_NUMBER
-    "title" -> Constants.SORT_TITLE
-    "songbook" -> Constants.SORT_SONGBOOK
-    "tune" -> Constants.SORT_TUNE
-    "play_count" -> Constants.SORT_PLAY_COUNT
-    "favorites" -> Constants.SORT_FAVORITES
-    "author" -> Constants.SORT_AUTHOR
-    "composer" -> Constants.SORT_COMPOSER
+    SongColumnId.NUMBER -> Constants.SORT_NUMBER
+    SongColumnId.TITLE -> Constants.SORT_TITLE
+    SongColumnId.SONGBOOK -> Constants.SORT_SONGBOOK
+    SongColumnId.TUNE -> Constants.SORT_TUNE
+    SongColumnId.PLAY_COUNT -> Constants.SORT_PLAY_COUNT
+    SongColumnId.FAVORITES -> Constants.SORT_FAVORITES
+    SongColumnId.AUTHOR -> Constants.SORT_AUTHOR
+    SongColumnId.COMPOSER -> Constants.SORT_COMPOSER
     else -> ""
 }
 

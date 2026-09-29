@@ -1045,8 +1045,7 @@ fun AnnouncementsTab(
                                                 .then(if (isHorizontal) Modifier.wrapContentWidth(unbounded = true) else Modifier)
                                                 .wrapContentHeight()
                                                 .background(
-                                                    if (viewModel.backgroundColor == "transparent") Color.Transparent
-                                                    else Utils.parseHexColor(viewModel.backgroundColor),
+                                                    previewTextBackground(viewModel.backgroundColor),
                                                     AppShape(2.dp)
                                                 )
                                                 .padding(horizontal = scaledPadH, vertical = scaledPadV),
@@ -1123,8 +1122,7 @@ fun AnnouncementsTab(
                                                 modifier = Modifier
                                                     .wrapContentHeight()
                                                     .background(
-                                                        if (viewModel.backgroundColor == "transparent") Color.Transparent
-                                                        else Utils.parseHexColor(viewModel.backgroundColor),
+                                                        previewTextBackground(viewModel.backgroundColor),
                                                         AppShape(2.dp)
                                                     )
                                                     .padding(horizontal = scaledPadH, vertical = scaledPadV),
@@ -1185,7 +1183,7 @@ fun AnnouncementsTab(
                                 horizontalAlignment = Alignment.Start,
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                if (viewModel.backgroundColor == "transparent") {
+                                if (viewModel.backgroundColor == Constants.COLOR_VALUE_TRANSPARENT) {
                                     Row(
                                         modifier = Modifier
                                             .height(32.dp)
@@ -1480,3 +1478,7 @@ private fun AmPmToggle(isPm: Boolean, onToggle: () -> Unit) {
         Spacer(Modifier.height(STEP_KEY_HEIGHT))
     }
 }
+
+/** The preview's text background: the chosen colour, or none when it is set to transparent. */
+private fun previewTextBackground(hex: String): Color =
+    if (hex == Constants.COLOR_VALUE_TRANSPARENT) Color.Transparent else Utils.parseHexColor(hex)

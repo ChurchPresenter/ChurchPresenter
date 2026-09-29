@@ -61,7 +61,7 @@ fun AnnouncementsPresenter(
     val settings   = appSettings.announcementsSettings
     val textColor  = if (isKey) Color.White else parseHexColor(settings.textColor)
     val bgColor    = if (!showBackground) Color.Transparent
-                     else if (settings.backgroundColor == "transparent") Color.Transparent
+                     else if (settings.backgroundColor == Constants.COLOR_VALUE_TRANSPARENT) Color.Transparent
                      else parseHexColor(settings.backgroundColor)
     val fontFamily = systemFontFamilyOrDefault(settings.fontType)
 

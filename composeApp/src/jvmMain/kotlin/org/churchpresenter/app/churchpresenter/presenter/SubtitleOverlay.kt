@@ -70,7 +70,8 @@ fun SubtitleOverlay(
     val bgOpacity = (mediaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val cardBg = if (isKey) Color.White
                  else parseHexColor(
-                     if (mediaSettings.backgroundColor == "transparent") "#1E1E2E" else mediaSettings.backgroundColor
+                     if (mediaSettings.backgroundColor == Constants.COLOR_VALUE_TRANSPARENT) "#1E1E2E"
+                     else mediaSettings.backgroundColor
                  ).copy(alpha = bgOpacity)
     val fontFamily = systemFontFamilyOrDefault(mediaSettings.fontType)
     val boxAlignment = sttPositionToAlignment(mediaSettings.position)
