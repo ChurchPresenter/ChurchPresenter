@@ -92,6 +92,14 @@ data class SongLayoutExtras(
      * decides for that language alone.
      */
     val fitLanguagesSeparately: Boolean = false,
+    /**
+     * Each element's own text box, keyed by [textBoxKey] with the element's name, the language for
+     * an element drawn once per language, and the output -- `LYRICS#1@LT`. An element with none, or
+     * with one turned off, is laid out as it always was.
+     */
+    val textBoxes: Map<String, TextBox> = emptyMap(),
+    /** How the song page's boxes behave -- see [TextBoxOptions]. */
+    val textBoxOptions: TextBoxOptions = TextBoxOptions(),
 )
 
 /** The space between stacked languages while [SongLayoutExtras.languageGap] is not set. */

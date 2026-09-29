@@ -169,7 +169,9 @@ internal fun SongTitleSlideContent(
     // title's row, which carries it as `leading`. Filtered here at the draw site rather than in
     // `titleSlideLines`, because that is the shared definition the stage monitor and the companion
     // app read as plain text and the number belongs in what they read.
-    val lines = if (!cornered) allLines else allLines
+    // A boxed line is drawn in its box by the presenter's box layer, and leaves the slide here.
+    val unboxed = allLines.filterNot { settings.titleSlideBox(it.element, target.isLowerThird, it.language).enabled }
+    val lines = if (!cornered) unboxed else unboxed
         .filterNot { it.element == SongStyleElement.TITLE_SLIDE_NUMBER }
         .map { it.copy(number = null) }
     val fallbackTitleFont =
@@ -232,7 +234,9 @@ internal fun SongTitleSlideContent(
         // The number pinned to a corner, over the slide rather than in the flow -- the same
         // placement the lyric slides give theirs, through the same modifier, and the reason this
         // element has a profile of its own: top-left on every lyric slide and bottom-left here.
-        if (cornered && !corneredNumber.isNullOrBlank()) {
+        if (cornered && !corneredNumber.isNullOrBlank() &&
+            !settings.titleSlideBox(SongStyleElement.TITLE_SLIDE_NUMBER, target.isLowerThird).enabled
+        ) {
             TitleSlideText(
                 line = TitleSlideLine(SongStyleElement.TITLE_SLIDE_NUMBER, corneredNumber),
                 style = settings.elementStyle(SongStyleElement.TITLE_SLIDE_NUMBER, target),

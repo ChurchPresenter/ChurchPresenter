@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -519,7 +520,11 @@ fun SongPresenter(
             else {
                 // How many blocks the frame is actually divided into. One language fills it; more
                 // split it, in whichever direction the layout says.
-                val drawnLanguages = activeLanguages.size.coerceAtLeast(1)
+                // A language whose lyrics have a box of their own is fitted in it, not here.
+                val fitLyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+                val drawnLanguages = activeLanguages
+                    .count { !ss.isBoxed(fitLyricsElement, isLowerThird, it) }
+                    .coerceAtLeast(1)
                 // [bilingualLayout]'s value as the grid it lays blocks out in. A row (1 × N) or a
                 // column (N × 1) still divides by however many languages are actually drawn, exactly
                 // as it always did; only a real two-dimensional grid (2 × 2 today) divides by its own
@@ -644,7 +649,9 @@ fun SongPresenter(
                 val fitNumberFontSize = if (isLowerThird) ss.songNumberLowerThirdFontSize else ss.songNumberFontSize
 
                 var reserved = 0
-                if (fitTitleDisplay != Constants.NONE && fitTitlePosition != Constants.BELOW_VERSE) {
+                // A boxed element is drawn in its own box and takes nothing from the lyrics.
+                val titleInRow = fitTitleDisplay != Constants.NONE && fitTitlePosition != Constants.BELOW_VERSE
+                if (titleInRow && !ss.isBoxed(SongStyleElement.TITLE, isLowerThird)) {
                     val titleStyle = TextStyle(fontSize = fitTitleFontSize.sp, fontFamily = titleFontFamily)
                     val longestTitle = allLyricSections.maxOfOrNull { it.title.length }?.let { len ->
                         allLyricSections.first { it.title.length == len }.title
@@ -655,8 +662,9 @@ fun SongPresenter(
                 }
                 // A cornered number is drawn over the slide rather than in the row above it, so it
                 // takes no height from the lyrics and reserves none here.
-                if (fitNumberDisplay != Constants.NONE && fitNumberCorner == Constants.NONE &&
-                    fitNumberPosition != Constants.BELOW_VERSE
+                val numberInRow = fitNumberDisplay != Constants.NONE && fitNumberCorner == Constants.NONE
+                if (numberInRow && fitNumberPosition != Constants.BELOW_VERSE &&
+                    !ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
                 ) {
                     val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
                     val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
@@ -667,7 +675,9 @@ fun SongPresenter(
                 // The section label takes height from the lyrics exactly as the title row does,
                 // wherever it sits but the bottom edge -- measured with its own face and size.
                 val fitLabel = ss.layoutExtras.sectionLabel
-                sectionLabelToReserve(fitLabel, allLyricSections, isLowerThird)?.let { longestLabel ->
+                sectionLabelToReserve(fitLabel, allLyricSections, isLowerThird)
+                    ?.takeUnless { ss.isBoxed(SongStyleElement.SECTION_LABEL, isLowerThird) }
+                    ?.let { longestLabel ->
                     val labelProfile = ss.elementStyle(SongStyleElement.SECTION_LABEL, songTarget)
                     val labelStyle = TextStyle(
                         fontSize = labelProfile.fontSize.sp,
@@ -705,7 +715,11 @@ fun SongPresenter(
                 } else {
                     null
                 }
-                val fitSections = slideFit?.sections ?: sectionsForFit
+                // Languages boxed on their own are fitted in their boxes; the rest share the frame.
+                val boxedLanguages = activeLanguages.filter { ss.isBoxed(fitLyricsElement, isLowerThird, it) }.toSet()
+                val fitSections = (slideFit?.sections ?: sectionsForFit).let { sections ->
+                    if (boxedLanguages.isEmpty()) sections else sections.map { it.withoutLanguages(boxedLanguages) }
+                }
                 val shared = calculateAutoFitForAllSections(
                     textMeasurer = autoFitTextMeasurer,
                     sections = fitSections,
@@ -915,14 +929,18 @@ fun SongPresenter(
                 // lyrics', and the title row above the lyrics stays out of it: it would repeat the
                 // slide.
                 val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
+                // A boxed title or number is drawn in its box (`SlideBoxes`), never in the row.
+                val titleBoxed = ss.isBoxed(SongStyleElement.TITLE, isLowerThird)
+                val numberBoxed = ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
                 val shouldShowTitle =
-                    shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex) && !isTitleSlide
+                    shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex) && !isTitleSlide &&
+                        !titleBoxed
                 val shouldShowSongNumber =
                     shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex) &&
-                        section.songNumber > 0 && !isTitleSlide
+                        section.songNumber > 0 && !isTitleSlide && !numberBoxed
                 // "Configured" means not set to "None" — title/number could appear on some slides
-                val titleConfigured = titleDisplay != Constants.NONE
-                val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
+                val titleConfigured = titleDisplay != Constants.NONE && !titleBoxed
+                val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0 && !numberBoxed
                 val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
                 val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
                 // Which corner the number is pinned to, or NONE for the row it shares with the title.
@@ -989,7 +1007,7 @@ fun SongPresenter(
                     // words next. One call rather than the four parallel `val`s this replaced --
                     // primary main, primary look-ahead, secondary main, secondary look-ahead --
                     // which could not grow past two languages without becoming eight.
-                    val languageBlocks = songLanguageBlocks(
+                    val slideBlocks = songLanguageBlocks(
                         section = section,
                         nextSection = nextSection,
                         languages = activeLanguages,
@@ -1000,6 +1018,19 @@ fun SongPresenter(
                             lineIndex = effectiveLineIndex,
                         ),
                     )
+                    // The languages laid out here: a language whose lyrics are boxed is drawn in its
+                    // box instead, and one whose next section is boxed keeps only its lyrics here.
+                    val boxLyricsElement =
+                        if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+                    val languageBlocks = slideBlocks
+                        .filterNot { ss.isBoxed(boxLyricsElement, isLowerThird, it.index) }
+                        .map { block ->
+                            if (ss.isBoxed(SongStyleElement.NEXT_SECTION, isLowerThird, block.index)) {
+                                block.copy(lookAheadLines = emptyList())
+                            } else {
+                                block
+                            }
+                        }
 
                     // Sliced the way the words are: one row in line mode, the section in verse
                     // mode, the look-ahead's own row after it.
@@ -1028,7 +1059,7 @@ fun SongPresenter(
                     // back to the song's own whenever that language has none, which is the common
                     // case: a second language is often lyrics with no separate title.
                     val titles = section.allLanguageTitles()
-                    val effectiveTitle = languageBlocks.firstOrNull()
+                    val effectiveTitle = slideBlocks.firstOrNull()
                         ?.let { titles.getOrNull(it.index) }
                         ?.takeIf { it.isNotEmpty() }
                         ?: section.title
@@ -1036,7 +1067,7 @@ fun SongPresenter(
                     // The title is drawn in the leading language's own title profile once that
                     // language has a look of its own, and in the primary's otherwise -- the same
                     // rule the lyric lines follow.
-                    val titleLanguage = languageBlocks.firstOrNull()?.index ?: 0
+                    val titleLanguage = slideBlocks.firstOrNull()?.index ?: 0
                     val titleOwnStyling = if (ss.languageOverridesStyle(titleLanguage)) {
                         songLineStyling(
                             profile = ss.elementStyle(SongStyleElement.TITLE, songTarget, titleLanguage),
@@ -1252,7 +1283,8 @@ fun SongPresenter(
                     // [gapAfter] when it stands above what it is spaced from rather than below.
                     @Composable
                     fun NextSectionPlaceholder(block: SongLanguageBlock, gapAfter: Boolean) {
-                        if (lookAheadEnabled && block.lookAheadLines.isEmpty() && block.lines.isNotEmpty()) {
+                        val holdsNext = lookAheadEnabled && block.lookAheadLines.isEmpty() && block.lines.isNotEmpty()
+                        if (holdsNext && !ss.isBoxed(SongStyleElement.NEXT_SECTION, isLowerThird, block.index)) {
                             if (!laIsLineMode && !gapAfter) {
                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
                             }
@@ -1430,6 +1462,7 @@ fun SongPresenter(
                     @Composable
                     fun SectionLabelPart(position: String) {
                         if (sectionLabelPosition != position) return
+                        if (ss.isBoxed(SongStyleElement.SECTION_LABEL, isLowerThird)) return
                         val label = sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) ?: return
                         val profile = sectionLabelProfile
                         val labelStyling = songLineStyling(profile, null, scaleFactor, isKey, ::scaleElementShadow)
@@ -1733,6 +1766,97 @@ fun SongPresenter(
                 }
             }
 
+            /**
+             * The slide's boxed elements, drawn over it at [alpha] -- each in its own box, at the
+             * size that fits it. Nothing at all while the song has no box turned on.
+             */
+            @Composable
+            fun SlideBoxes(section: LyricSection, lineIndex: Int, alpha: Float) {
+                if (ss.layoutExtras.textBoxes.values.none { it.enabled }) return
+                val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
+                val displayMode = if (lookAheadEnabled) {
+                    if (isLowerThird) ss.lowerThirdLookAheadDisplayMode else ss.lookAheadDisplayMode
+                } else {
+                    if (isLowerThird) ss.lowerThirdDisplayMode else ss.fullscreenDisplayMode
+                }
+                val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE
+                val modes = SongSlideModes(
+                    lookAheadEnabled = lookAheadEnabled,
+                    isLineMode = isLineMode,
+                    laIsLineMode = isLineMode,
+                    lineIndex = if (isLineMode && lineIndex < 0) 0 else lineIndex,
+                )
+                fun nextOf(index: Int): LyricSection? = if (lookAheadEnabled && index >= 0) {
+                    allLyricSections.getOrNull(index + 1)?.takeIf { it.lines.isNotEmpty() }
+                } else {
+                    null
+                }
+                val blocks = songLanguageBlocks(section, nextOf(displaySectionIndex), activeLanguages, modes)
+                // Fitted as a whole song, every slide it has counts toward one size per box.
+                val songBlocks = if (fitEachSlide) {
+                    listOf(blocks)
+                } else {
+                    allLyricSections.flatMapIndexed { index, other ->
+                        val slides = if (isLineMode) other.lines.indices.toList().ifEmpty { listOf(0) } else listOf(-1)
+                        slides.map { line ->
+                            songLanguageBlocks(other, nextOf(index), activeLanguages, modes.copy(lineIndex = line))
+                        }
+                    }
+                }
+                val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
+                val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
+                val titleText = section.allLanguageTitles()
+                    .getOrNull(blocks.firstOrNull()?.index ?: 0)
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: section.title
+                val items = if (isTitleSlide) {
+                    titleSlideBoxItems(ss, isLowerThird, titleSlideLines(section, ss, activeLanguages))
+                } else {
+                    songBoxItems(
+                        settings = ss,
+                        lowerThird = isLowerThird,
+                        lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,
+                        slide = SongBoxSlide(
+                            blocks = blocks,
+                            songBlocks = songBlocks,
+                            texts = SongBoxTexts(
+                            title = titleText.takeIf {
+                                shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex)
+                            },
+                            number = section.songNumber.takeIf {
+                                it > 0 && shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex)
+                            }?.toString(),
+                                label = sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide = false),
+                            ),
+                        ),
+                    )
+                }
+                val bandHeight = outputHeight.value * ss.lowerThirdHeightPercent / 100f
+                SongBoxLayer(
+                    items = items,
+                    settings = ss,
+                    target = songTarget,
+                    area = textBoxArea(
+                        outputWidth = outputWidth.value,
+                        outputHeight = outputHeight.value,
+                        options = ss.layoutExtras.textBoxOptions,
+                        margins = BoxMargins(leftOffSet.value, topOffSet.value, rightOffSet.value, bottomOffSet.value),
+                        band = if (isLowerThird) {
+                            Rect(0f, outputHeight.value - bandHeight, outputWidth.value, outputHeight.value)
+                        } else {
+                            null
+                        },
+                    ),
+                    // The layer fills the padded box on a full screen, and the whole output on a band.
+                    origin = if (isLowerThird) Offset.Zero else Offset(leftOffSet.value, topOffSet.value),
+                    scaleFactor = scaleFactor,
+                    alpha = alpha,
+                    isKey = isKey,
+                    outlineOf = ::keyedOutline,
+                    shadowOf = ::scaleElementShadow,
+                )
+            }
+
             if (crossfadeEnabled || ss.fadeIn || ss.fadeOut) {
                 val duration = ss.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
@@ -1788,15 +1912,18 @@ fun SongPresenter(
                         Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
                             TextContent(displayedPrevious.section, displayedPrevious.lineIndex)
                         }
+                        SlideBoxes(displayedPrevious.section, displayedPrevious.lineIndex, previousAlpha)
                     }
                     Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
                         TextContent(displayedCurrent.section, displayedCurrent.lineIndex)
                     }
+                    SlideBoxes(displayedCurrent.section, displayedCurrent.lineIndex, currentAlpha)
                 }
             } else {
                 Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
                     TextContent(lyricSection, displayLineIndex)
                 }
+                SlideBoxes(lyricSection, displayLineIndex, transitionAlpha)
             }
         }
         }

@@ -209,11 +209,15 @@ private fun SongTextGroup(
             // One language picked: its own Auto-fit only means something while languages are
             // fitted one by one; fitted together, All's switch decides for every one of them.
             val ownFit = edit.picked && !song.layoutExtras.fitLanguagesSeparately
+            // A boxed item is placed by its box and fitted by its box's own choice; its place, its
+            // move and its Auto-fit switch stand aside until the box is turned off.
+            val boxes = edit.boxTarget(lowerThird, titleSlideView)
+            val boxed = boxes?.box?.enabled == true
             TextLookRows(
-                look = style.toLook(styleElement).let { if (ownFit) it.copy(autoFit = null) else it },
+                look = style.toLook(styleElement).let { if (ownFit || boxed) it.copy(autoFit = null) else it },
                 onChange = { look -> edit.write(style.withLook(look)) },
                 extraAdvanced = {
-                    SongMoveRow(
+                    if (!boxed) SongMoveRow(
                         song = song,
                         key = songShiftKey(styleElement, lowerThird, editingLanguage?.translation, titleSlideView),
                         language = editingLanguage != null,
@@ -236,12 +240,8 @@ private fun SongTextGroup(
                     if (styleElement == SongStyleElement.SECTION_LABEL) {
                         SectionLabelSwitch(song.layoutExtras.sectionLabel.enabled, updateSong)
                     }
-                    // A cornered number is drawn over the slide and never in the row this places.
-                    val cornered = styleElement == SongStyleElement.NUMBER &&
-                        song.numberCorner(lowerThird) != Constants.NONE
                     val stored = song.storedPosition(styleElement, lowerThird)
-                    val placed = styleElement.hasPosition || stored != null
-                    if (placed && !titleSlideView && !cornered) {
+                    if (song.offersPosition(styleElement, lowerThird, titleSlideView || boxed)) {
                         SongPositionRow(
                             selected = stored ?: style.position,
                             onSelect = { v ->
@@ -253,6 +253,7 @@ private fun SongTextGroup(
                             },
                         )
                     }
+                    SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong)
                 },
             )
         } }
@@ -553,3 +554,4 @@ private fun songLookPaths(
         }
     }
 }
+
