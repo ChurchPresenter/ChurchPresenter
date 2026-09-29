@@ -32,7 +32,10 @@ demand.
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
 
-### Debugging
+### Debugging and logging
+- Diagnostics go through `Log.info`/`warn`/`error` (`:diagnostics`), never `println` or
+  `System.err` — `bash cleanup_check.sh` counts both. A warning or error also lands in the crash
+  report's breadcrumb trail.
 - Keep debug logs until the fix is confirmed; ask before removing if unsure. Remove them once done.
 
 ### Commit authorship — **NEVER** add yourself

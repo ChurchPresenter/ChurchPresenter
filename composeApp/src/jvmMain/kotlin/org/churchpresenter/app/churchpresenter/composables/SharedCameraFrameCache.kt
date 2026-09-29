@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 
 private const val MAX_NULL_FRAMES_BEFORE_CLEAR = 30
 private const val DECKLINK_POLL_INTERVAL_MS = 16L
@@ -109,7 +110,7 @@ object SharedCameraFrameCache {
                 } catch (_: CancellationException) {
                     // Normal cleanup
                 } catch (e: Exception) {
-                    System.err.println("[SharedCameraFrameCache] Capture error for $key: ${e.message}")
+                    Log.warn("SharedCameraFrameCache", "Capture error for $key: ${e.message}")
                 }
             }
         }
@@ -190,12 +191,12 @@ object SharedCameraFrameCache {
             bi
         }
         entry.frame.value = img.toComposeImageBitmap()
-        if (first) System.err.println("[DeckLink Input] First frame: ${w}x${h}")
+        if (first) Log.info("DeckLink Input", "First frame: ${w}x${h}")
         return true
     }
 
     private suspend fun runDeckLinkCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
-        System.err.println("[DeckLink Input] Opening device ${source.deckLinkIndex}, " +
+        Log.info("DeckLink Input", "Opening device ${source.deckLinkIndex}, " +
             "format: ${source.videoFormat.ifEmpty { "auto" }}, connection: ${source.videoConnection}")
 
         val index = source.deckLinkIndex
@@ -203,7 +204,7 @@ object SharedCameraFrameCache {
         val inputModes = if (device != null) withContext(Dispatchers.IO) { DeckLinkManager.listInputModes(index) }
         else emptyList()
         deckLinkInputBlocker(present = device != null, hasInput = inputModes.isNotEmpty())?.let { blocker ->
-            System.err.println("[DeckLink Input] Not opening device $index: $blocker")
+            Log.warn("DeckLink Input", "Not opening device $index: $blocker")
             entry.error.value = blocker
             return
         }
@@ -212,7 +213,7 @@ object SharedCameraFrameCache {
             DeckLinkManager.openInput(index, source.videoFormat, source.videoConnection)
         }
         if (!opened) {
-            System.err.println("[DeckLink Input] Failed to open input on device $index")
+            Log.warn("DeckLink Input", "Failed to open input on device $index")
             val outputActive = DeckLinkManager.isOutputActive(index)
             if (!outputActive) {
                 reportDeckLinkOpenFailed(index, device?.name.orEmpty(), inputModes.size, deckLinkOpenReports)
@@ -222,7 +223,7 @@ object SharedCameraFrameCache {
         }
         entry.error.value = null
 
-        System.err.println("[DeckLink Input] Input opened, polling for frames...")
+        Log.info("DeckLink Input", "Input opened, polling for frames...")
         var frameCount = 0
         var nullCount = 0
 
@@ -254,7 +255,7 @@ object SharedCameraFrameCache {
 
         val resolved = awaitVideoDimensions(drain.videoDims)
         if (resolved == null) {
-            System.err.println("[Camera] Could not determine video dimensions from ffmpeg")
+            Log.warn("Camera", "Could not determine video dimensions from ffmpeg")
             val tail = drain.tail()
             drain.job.cancel()
             withContext(Dispatchers.IO) { killFfmpegProcess(process) }
@@ -277,10 +278,10 @@ object SharedCameraFrameCache {
         entry.ffmpegProcess = null
 
         if (frameCount > 0) {
-            System.err.println("[Camera] Stream interrupted after $frameCount frames (exit $exitCode), restarting...")
+            Log.warn("Camera", "Stream interrupted after $frameCount frames (exit $exitCode), restarting...")
         } else {
-            System.err.println("[Camera] ffmpeg exited with code $exitCode without producing any frames")
-            tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+            Log.warn("Camera", "ffmpeg exited with code $exitCode without producing any frames")
+            tail.forEach { Log.info("Camera", "ffmpeg stderr: $it") }
         }
         return FfmpegAttempt(frameCount > 0, exitCode, tail)
     }
@@ -288,7 +289,7 @@ object SharedCameraFrameCache {
     /** Frames read into [entry] until the stream stops; the count is the caller's success signal. */
     private suspend fun readFramesInto(process: Process, entry: CacheEntry, videoW: Int, videoH: Int): Int {
         val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
-        System.err.println("[Camera] Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
+        Log.info("Camera", "Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
 
         val inputStream = process.inputStream
         val frameBuf = ByteArray(frameBytes)
@@ -306,7 +307,7 @@ object SharedCameraFrameCache {
             entry.frame.value = img.toComposeImageBitmap()
             frameCount++
             if (frameCount == 1) {
-                System.err.println("[Camera] First frame received (${videoW}x${videoH})")
+                Log.info("Camera", "First frame received (${videoW}x${videoH})")
             }
         }
         return frameCount
@@ -357,7 +358,7 @@ object SharedCameraFrameCache {
                     started = try {
                         ProcessBuilder(command).redirectErrorStream(false).start()
                     } catch (e: IOException) {
-                        System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
+                        Log.warn("Camera", "Failed to start ffmpeg: ${e.message}")
                         null
                     }
                 }
@@ -371,9 +372,9 @@ object SharedCameraFrameCache {
                 if (!exitedImmediately) return@coroutineScope streamFrames(process, entry, drain)
 
                 val exitCode = process.exitValue()
-                System.err.println("[Camera] ffmpeg exited immediately with code $exitCode")
+                Log.warn("Camera", "ffmpeg exited immediately with code $exitCode")
                 val tail = drain.tail()
-                tail.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+                tail.forEach { Log.info("Camera", "ffmpeg stderr: $it") }
                 drain.job.cancel()
                 withContext(Dispatchers.IO) { killFfmpegProcess(process) }
                 FfmpegAttempt(framesProduced = false, exitCode = exitCode, stderrTail = tail, exitedImmediately = true)
@@ -385,12 +386,13 @@ object SharedCameraFrameCache {
 
     private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
         val path = source.devicePath
-        System.err.println(
-            "[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}"
+        Log.info(
+            "Camera",
+            "Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}"
         )
 
         if (buildFfmpegCommand(source) == null) {
-            System.err.println("[Camera] Unknown device path scheme: $path")
+            Log.warn("Camera", "Unknown device path scheme: $path")
             return
         }
 
@@ -408,7 +410,7 @@ object SharedCameraFrameCache {
         // used to be a `by lazy` that could not change in a process, and is now a cached value the
         // settings card's Check again clears.
         if (!withContext(Dispatchers.IO) { isFfmpegAvailable() }) {
-            System.err.println("[Camera] no usable ffmpeg found — cannot capture $path")
+            Log.warn("Camera", "no usable ffmpeg found — cannot capture $path")
             entry.error.value = CameraFailure.FFMPEG_MISSING
             reportCameraFfmpegMissing(
                 source,
@@ -458,8 +460,9 @@ object SharedCameraFrameCache {
                 releaseLingeringProcess(entry)
                 val command = buildFfmpegCommand(source, override) ?: return
                 lastCommand = command
-                System.err.println(
-                    "[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}"
+                Log.info(
+                    "Camera",
+                    "Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}"
                 )
 
                 val attempt = attemptCapture(command, entry)
@@ -510,7 +513,7 @@ object SharedCameraFrameCache {
             }.also { knownFormats = it }
 
             nextCaptureOverride(lastFailure, lastStderr, formats, tried)?.let {
-                System.err.println("[Camera] Device refused the defaults; retrying with $it")
+                Log.warn("Camera", "Device refused the defaults; retrying with $it")
                 override = it
                 tried += it
             }
@@ -519,7 +522,7 @@ object SharedCameraFrameCache {
         fun reportIfGaveUp() {
             if (consecutiveFailures < MAX_CONSECUTIVE_FAILURES && !stoppedEarly) return
             val reason = cameraGiveUpReason(everStarted, sawImmediateExit)
-            System.err.println("[Camera] Giving up after $consecutiveFailures failures ($reason/$lastFailure)")
+            Log.warn("Camera", "Giving up after $consecutiveFailures failures ($reason/$lastFailure)")
             // What enumeration found is carried alongside what capture saw, because on its own
             // "could not open" does not say whether the name we tried was one ffmpeg had offered.
             // That distinction is the whole of issue #462, and asking a reporter to run

@@ -20,6 +20,7 @@ import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.songs.LyricSection
 import org.cef.browser.CefBrowser
 import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
@@ -859,7 +860,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    System.err.println("[PresenterManager] Lottie pre-render failed: ${e.message}")
+                    Log.error("PresenterManager", "Lottie pre-render failed: ${e.message}")
                     CrashReporter.reportException(e, "Lottie pre-render")
                 } finally {
                     // Newer content cancelled this job after the stream was opened but before
