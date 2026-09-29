@@ -147,6 +147,29 @@ class SongsTabScreenshotTest {
         }
     }
 
+    /** One of every chip the match line draws: title, verse, chorus, another section, a translation. */
+    private val everyMatchKind = listOf(
+        SongFixture("12", "Be Thou My Vision", lyrics = listOf("[Verse 1]", "Be Thou my vision, O Lord of my heart")),
+        SongFixture("48", "Holy Holy Holy", lyrics = listOf("{Chorus}", "Lord God Almighty, early in the morning")),
+        SongFixture("73", "Lord I Lift Your Name On High"),
+        SongFixture(
+            "90",
+            "Великий Бог",
+            lyrics = listOf("[Куплет 1]", "Коли дивлюсь"),
+            secondaryTitle = "How Great Thou Art",
+            secondaryLyrics = listOf("{Chorus}", "Then sings my soul, how great Thou art, Lord"),
+        ),
+        SongFixture("120", "Doxology", lyrics = listOf("[Bridge]", "Praise the Lord, ye heavenly host")),
+    )
+
+    @Test
+    fun `where each search result matched`() = stackedThemes(SECTION, "search_matches") { mode, file ->
+        songsTab(songs = everyMatchKind, themeMode = mode) { _, _ ->
+            search("lord")
+            captureTo(file)
+        }
+    }
+
     @Test
     fun `searching by number`() = shoot("search_by_number") { search("12") }
 
