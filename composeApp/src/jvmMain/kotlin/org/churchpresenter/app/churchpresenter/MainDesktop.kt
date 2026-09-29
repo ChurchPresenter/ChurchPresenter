@@ -60,6 +60,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.DropdownMenu
@@ -2208,7 +2209,7 @@ private fun PreviewSettingsButton(
     Box {
         var open by remember { mutableStateOf(false) }
         ToolbarKey(
-            painter = painterResource(Res.drawable.ic_settings),
+            painter = rememberVectorPainter(Icons.Outlined.DisplaySettings),
             text = stringResource(Res.string.tooltip_preview_settings),
             onClick = { open = true },
             style = ToolbarKeyStyle.PANEL_TOGGLE,
