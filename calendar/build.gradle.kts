@@ -31,12 +31,12 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(compose.desktop.currentOs)
-    implementation(compose.components.resources)
+    implementation(libs.compose.components.resources)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
     testImplementation(kotlin("test"))
-    testImplementation(compose.desktop.uiTestJUnit4)
+    testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.kotlinx.coroutines.test)
 }
 
