@@ -489,7 +489,6 @@
     <ID>MaxLineLength:LowerThird.kt$Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))</ID>
     <ID>MaxLineLength:LowerThird.kt$Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))</ID>
     <ID>MaxLineLength:LowerThird.kt$Icon(painterResource(Res.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))</ID>
-    <ID>MaxLineLength:LowerThird.kt$Image(painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }, fontManager = LottieFonts), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())</ID>
     <ID>MaxLineLength:LowerThird.kt$LaunchedEffect(jsonContent) { if (jsonContent.isNotBlank()) { delay(COMPOSITION_LOAD_SETTLE_MS); isCompositionLoading = false } }</ID>
     <ID>MaxLineLength:LowerThird.kt$LinearProgressIndicator(progress = { atemPrepareProgress }, modifier = Modifier.fillMaxWidth())</ID>
     <ID>MaxLineLength:LowerThird.kt$Row</ID>

@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import kotlin.math.roundToInt
 
 /**
@@ -47,6 +48,7 @@ object BibleLottieGenerator {
                 put(METADATA_VERSION, JsonPrimitive(METADATA_VERSION_1))
                 put(METADATA_TEXT_ANIMATION, JsonPrimitive(cfg.textAnimation.name))
                 put(METADATA_TICKER_SPEED, JsonPrimitive(cfg.tickerPxPerSecond))
+                put(LottieTextShaping.TEXT_SHAPING, JsonPrimitive(cfg.textShaping.key))
                 // The crossfade is the player's, not the file's: nothing in the timeline plays
                 // two verses at once, so its length has nowhere to go but here.
                 put(METADATA_SWAP_MS, JsonPrimitive((cfg.swapSeconds * MILLIS_PER_SECOND).roundToInt()))

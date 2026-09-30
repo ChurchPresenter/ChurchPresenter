@@ -278,7 +278,8 @@ internal fun OffscreenOutputContent(
                                         composition = lottieComposition,
                                         progress = { presenterManager.lottieProgress.value },
                                         outputRole = outputRole,
-                                        frame = presenterManager.lottieFrame.value
+                                        frame = presenterManager.lottieFrame.value,
+                                        groupsText = presenterManager.lottieGroupsText.value,
                                     )
                                 }
                                 Presenting.MEDIA -> {

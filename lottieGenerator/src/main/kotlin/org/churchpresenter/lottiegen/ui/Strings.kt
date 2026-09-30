@@ -59,6 +59,8 @@ object Strings {
     val normal: String get() = bundle.getString("normal")
     val uppercase: String get() = bundle.getString("uppercase")
     val none: String get() = bundle.getString("none")
+    val textShaping: String get() = bundle.getString("text_shaping")
+    val textShapingHint: String get() = bundle.getString("text_shaping_hint")
 
     // Color labels
     val colorNameText: String get() = bundle.getString("color_name_text")
