@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Oyat uslubi</string>
     <string name="canvas_reference_style">Havola uslubi</string>
     <string name="canvas_text_color">Matn rangi</string>
-    <string name="canvas_text_bg_color">Fon rangi</string>
     <string name="canvas_clock_mode">Rejim</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24 soat</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Veb-sayt</string>
     <string name="obs_mode_canvas">Kanva</string>
     <string name="obs_mode_qa">Savol-javob</string>
-    <string name="obs_mode_stt">Matnga oʻgirish</string>
     <string name="obs_mode_none">Ekranni tozalash</string>
     <string name="konami_dialog_title">Topdingiz!</string>
     <string name="konami_dialog_headline">Maxfiy kod yoqildi</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Serifli</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Koʻrib chiqish</string>
     <string name="font_preview_sample">Tanlangan shriftdagi namuna matn</string>
     <string name="font_warning_no_cyrillic">%1$s kirill belgilariga ega emas — kirill oyatlari ekranda boshqa shriftda koʻrinadi.</string>
     <string name="font_warning_no_hebrew">%1$s ibroniy belgilariga ega emas — ibroniy matn ekranda boshqa shriftda koʻrinadi.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Fonlar</string>
     <string name="background_group_defaults">Standart</string>
-    <string name="background_scope_default">Standart</string>
     <string name="background_scope_default_lower_third">Standart pastki titr</string>
     <string name="background_scope_default_meta">Muqaddas Kitob yoki Qoʻshiqlar «Standart» boʻlganda</string>
     <string name="background_scope_default_lower_third_meta">Pastki titr «Standart» boʻlganda</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Toʻldirish rangi</string>
     <string name="background_above_band_opacity">Toʻldirish shaffofligi</string>
     <string name="quick_background_reset">Odatdagiga qaytish</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · sozlamalarda boshqariladi</string>
     <string name="quick_backgrounds">Tez fonlar</string>
     <string name="quick_backgrounds_help">Koʻrib chiqish paneli bir bosish naridagina saqlaydigan fonlar. Nima koʻrsatishini tanlash uchun katakchani bosing, unga qaysi tugma yetib borishini oʻzgartirish uchun suring. Xizmat vaqtida bittasini tanlash odatdagiga qaytmaguningizcha har bir ekranni qoplaydi — bu yerda hech narsani oʻzgartirmaydi.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Rasm</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Shaffof</string>
-    <string name="customize_type_default">Standart</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Qisqartma</string>
     <string name="customize_background_opacity">Shaffofligi</string>

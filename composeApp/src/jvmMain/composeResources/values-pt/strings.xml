@@ -809,7 +809,6 @@
     <string name="canvas_bible_ref_font_size">Tamanho da Fonte da Referência</string>
     <string name="canvas_bible_ref_color">Cor da Referência</string>
     <string name="canvas_text_color">Cor do Texto</string>
-    <string name="canvas_text_bg_color">Cor de Fundo</string>
     <string name="canvas_clock_mode">Modo</string>
     <string name="canvas_clock_format">Formato</string>
     <string name="canvas_clock_format_24h">24h</string>
@@ -1369,7 +1368,6 @@
     <string name="obs_mode_website">Website</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">P&amp;R</string>
-    <string name="obs_mode_stt">Transcrição</string>
     <string name="obs_mode_none">Limpar Tela</string>
     <string name="konami_dialog_title">Você encontrou!</string>
     <string name="konami_dialog_headline">Código de Trapaça Ativado</string>
@@ -1953,7 +1951,6 @@
     <string name="font_category_serif">Serifa</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Título</string>
-    <string name="font_preview">Pré-visualização</string>
     <string name="font_preview_sample">Texto de exemplo na fonte escolhida</string>
     <string name="font_warning_no_cyrillic">%1$s não tem glifos cirílicos: os versículos em cirílico aparecerão na tela com outra fonte.</string>
     <string name="font_warning_no_hebrew">%1$s não tem glifos hebraicos: o texto hebraico aparecerá na tela com outra fonte.</string>
@@ -2033,7 +2030,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Planos de Fundo</string>
     <string name="background_group_defaults">Padrões</string>
-    <string name="background_scope_default">Padrão</string>
     <string name="background_scope_default_lower_third">Lower Third padrão</string>
     <string name="background_scope_default_meta">Quando Bíblia ou Músicas estão em Padrão</string>
     <string name="background_scope_default_lower_third_meta">Quando o lower third está em Padrão</string>
@@ -2051,7 +2047,6 @@
     <string name="background_above_band_fill">Cor de preenchimento</string>
     <string name="background_above_band_opacity">Opacidade do preenchimento</string>
     <string name="quick_background_reset">Voltar ao normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · gerencie em Configurações</string>
     <string name="quick_backgrounds">Fundos rápidos</string>
     <string name="quick_backgrounds_help">Fundos que o painel de pré-visualização mantém a um clique. Clique num bloco para escolher o que ele mostra e arraste-o para mudar qual tecla o alcança. Escolher um durante o culto sobrepõe todas as telas até você voltar ao normal — aqui não muda nada.</string>
@@ -2086,7 +2081,6 @@
     <string name="customize_type_image">Imagem</string>
     <string name="customize_type_video">Vídeo</string>
     <string name="customize_type_transparent">Transparente</string>
-    <string name="customize_type_default">Padrão</string>
     <string name="customize_type_gradient">Gradiente</string>
     <string name="customize_show_abbreviation">Abreviatura</string>
     <string name="customize_background_opacity">Opacidade</string>

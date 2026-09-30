@@ -25,12 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
-import churchpresenter.composeapp.generated.resources.profile_default_value
+import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.profile_defaults
 import churchpresenter.composeapp.generated.resources.profile_different_from
 import churchpresenter.composeapp.generated.resources.profile_linked_profiles
 import churchpresenter.composeapp.generated.resources.profile_no_changes
-import churchpresenter.composeapp.generated.resources.profile_show_more
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_show_more
 import churchpresenter.composeapp.generated.resources.profile_unlink
 import churchpresenter.composeapp.generated.resources.profile_value_off
 import churchpresenter.composeapp.generated.resources.profile_value_on
@@ -113,7 +113,7 @@ private fun DefaultsCard(
     val changes = remember(profile) { groupedAcrossTranslations(defaultChanges(profile), profile) }
     val baseline = remember(profile) { profile.defaultBaseline() }
     val defaults = stringResource(Res.string.profile_defaults)
-    val source = stringResource(Res.string.profile_default_value)
+    val source = stringResource(Res.string.background_default)
     val all = stringResource(Res.string.content_bible_translations_all)
     PreviewSideCard(Modifier.testTag(DEFAULTS_CARD_TAG)) {
         CardTitle(stringResource(Res.string.profile_different_from, defaults), changes.size)
@@ -148,7 +148,10 @@ private fun DefaultsCard(
             }
         }
         if (!expanded && changes.size > SHOWN_CHANGES) {
-            LinkText(stringResource(Res.string.profile_show_more, changes.size - SHOWN_CHANGES), { expanded = true })
+            LinkText(
+                stringResource(Res.string.dictionary_in_scripture_show_more, changes.size - SHOWN_CHANGES),
+                { expanded = true },
+            )
         }
     }
 }
@@ -203,7 +206,10 @@ private fun DifferencesCard(
             }
         }
         if (!expanded && changes.size > SHOWN_CHANGES) {
-            LinkText(stringResource(Res.string.profile_show_more, changes.size - SHOWN_CHANGES), { expanded = true })
+            LinkText(
+                stringResource(Res.string.dictionary_in_scripture_show_more, changes.size - SHOWN_CHANGES),
+                { expanded = true },
+            )
         }
         ActionKey(Icons.Filled.LinkOff, stringResource(Res.string.profile_unlink), actions.onUnlink)
     }

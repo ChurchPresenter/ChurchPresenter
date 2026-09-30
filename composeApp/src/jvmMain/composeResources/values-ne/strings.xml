@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">पदको शैली</string>
     <string name="canvas_reference_style">सन्दर्भको शैली</string>
     <string name="canvas_text_color">पाठको रङ</string>
-    <string name="canvas_text_bg_color">पृष्ठभूमिको रङ</string>
     <string name="canvas_clock_mode">मोड</string>
     <string name="canvas_clock_format">ढाँचा</string>
     <string name="canvas_clock_format_24h">२४घ</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">वेबसाइट</string>
     <string name="obs_mode_canvas">क्यानभास</string>
     <string name="obs_mode_qa">प्रश्नोत्तर</string>
-    <string name="obs_mode_stt">लिप्यन्तरण</string>
     <string name="obs_mode_none">पर्दा खाली गर्नुहोस्</string>
     <string name="konami_dialog_title">तपाईंले भेट्नुभयो!</string>
     <string name="konami_dialog_headline">गोप्य कोड सक्रिय भयो</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">सेरिफ</string>
     <string name="font_category_mono">मोनो</string>
     <string name="font_category_display">डिस्प्ले</string>
-    <string name="font_preview">पूर्वदृश्य</string>
     <string name="font_preview_sample">छानिएको फन्टमा नमुना पाठ</string>
     <string name="font_warning_no_cyrillic">%1$s मा सिरिलिक अक्षर छैनन् — सिरिलिक पदहरू पर्दामा अर्कै फन्टमा देखिनेछन्।</string>
     <string name="font_warning_no_hebrew">%1$s मा हिब्रू अक्षर छैनन् — हिब्रू पाठ पर्दामा अर्कै फन्टमा देखिनेछ।</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">पृष्ठभूमिहरू</string>
     <string name="background_group_defaults">पूर्वनिर्धारित</string>
-    <string name="background_scope_default">पूर्वनिर्धारित</string>
     <string name="background_scope_default_lower_third">पूर्वनिर्धारित तल्लो पट्टी</string>
     <string name="background_scope_default_meta">बाइबल वा गीत पूर्वनिर्धारितमा हुँदा</string>
     <string name="background_scope_default_lower_third_meta">तल्लो पट्टी पूर्वनिर्धारितमा हुँदा</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">भर्ने रङ</string>
     <string name="background_above_band_opacity">भर्ने गाढापन</string>
     <string name="quick_background_reset">सामान्यमा फर्कनुहोस्</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · सेटिङमा व्यवस्थापन</string>
     <string name="quick_backgrounds">द्रुत पृष्ठभूमि</string>
     <string name="quick_backgrounds_help">पूर्वावलोकन प्यानलले एक क्लिक टाढा राख्ने पृष्ठभूमिहरू। के देखाउने भन्ने छान्न टाइलमा क्लिक गर्नुहोस्, कुन कुञ्जीले पुग्ने भन्ने बदल्न तान्नुहोस्। सेवाको बेला एउटा छानेमा सामान्यमा नफर्कुन्जेल हरेक पर्दा बदलिन्छ — यहाँ केही बदलिँदैन।</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">तस्बिर</string>
     <string name="customize_type_video">भिडियो</string>
     <string name="customize_type_transparent">पारदर्शी</string>
-    <string name="customize_type_default">पूर्वनिर्धारित</string>
     <string name="customize_type_gradient">ग्रेडियन्ट</string>
     <string name="customize_show_abbreviation">संक्षिप्त रूप</string>
     <string name="customize_background_opacity">गाढापन</string>

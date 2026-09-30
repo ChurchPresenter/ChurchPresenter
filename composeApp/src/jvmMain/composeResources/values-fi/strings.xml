@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Jakeen tyyli</string>
     <string name="canvas_reference_style">Viitteen tyyli</string>
     <string name="canvas_text_color">Tekstin väri</string>
-    <string name="canvas_text_bg_color">Taustaväri</string>
     <string name="canvas_clock_mode">Tila</string>
     <string name="canvas_clock_format">Muoto</string>
     <string name="canvas_clock_format_24h">24 h</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Verkkosivu</string>
     <string name="obs_mode_canvas">Kanvas</string>
     <string name="obs_mode_qa">Kysymykset</string>
-    <string name="obs_mode_stt">Tekstitys</string>
     <string name="obs_mode_none">Tyhjennä näyttö</string>
     <string name="konami_dialog_title">Löysit sen!</string>
     <string name="konami_dialog_headline">Huijauskoodi aktivoitu</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Antiikva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Esikatselu</string>
     <string name="font_preview_sample">Esimerkkitekstiä valitulla fontilla</string>
     <string name="font_warning_no_cyrillic">%1$s ei sisällä kyrillisiä merkkejä – kyrilliset jakeet näkyvät ruudulla toisella fontilla.</string>
     <string name="font_warning_no_hebrew">%1$s ei sisällä heprealaisia merkkejä – heprealainen teksti näkyy ruudulla toisella fontilla.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Taustat</string>
     <string name="background_group_defaults">Oletukset</string>
-    <string name="background_scope_default">Oletus</string>
     <string name="background_scope_default_lower_third">Oletusalapalkki</string>
     <string name="background_scope_default_meta">Kun Raamattu tai Laulut on asetettu Oletukseen</string>
     <string name="background_scope_default_lower_third_meta">Kun alapalkki on asetettu Oletukseen</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Täyttöväri</string>
     <string name="background_above_band_opacity">Täytön peittävyys</string>
     <string name="quick_background_reset">Takaisin normaaliin</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hallinta asetuksissa</string>
     <string name="quick_backgrounds">Pikataustat</string>
     <string name="quick_backgrounds_help">Taustat, jotka esikatselupaneeli pitää yhden napsautuksen päässä. Napsauta ruutua valitaksesi mitä se näyttää, vedä sitä vaihtaaksesi mikä näppäin sen tavoittaa. Yhden valitseminen jumalanpalveluksen aikana ohittaa jokaisen näytön kunnes palaat normaaliin — täällä se ei muuta mitään.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Kuva</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Läpinäkyvä</string>
-    <string name="customize_type_default">Oletus</string>
     <string name="customize_type_gradient">Liukuväri</string>
     <string name="customize_show_abbreviation">Lyhenne</string>
     <string name="customize_background_opacity">Peittävyys</string>

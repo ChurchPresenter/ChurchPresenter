@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">سبک آیه</string>
     <string name="canvas_reference_style">سبک آدرس</string>
     <string name="canvas_text_color">رنگ متن</string>
-    <string name="canvas_text_bg_color">رنگ پس‌زمینه</string>
     <string name="canvas_clock_mode">حالت</string>
     <string name="canvas_clock_format">قالب</string>
     <string name="canvas_clock_format_24h">24 ساعته</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">وب‌گاه</string>
     <string name="obs_mode_canvas">بوم</string>
     <string name="obs_mode_qa">پرسش و پاسخ</string>
-    <string name="obs_mode_stt">پیاده‌سازی گفتار</string>
     <string name="obs_mode_none">پاک کردن نمایش</string>
     <string name="konami_dialog_title">پیدایش کردید!</string>
     <string name="konami_dialog_headline">رمز ویژه فعال شد</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">سریف</string>
     <string name="font_category_mono">تک‌عرض</string>
     <string name="font_category_display">نمایشی</string>
-    <string name="font_preview">پیش‌نمایش</string>
     <string name="font_preview_sample">نمونهٔ متن با قلم انتخاب‌شده</string>
     <string name="font_warning_no_cyrillic">%1$s حروف سیریلیک ندارد — آیات سیریلیک روی صفحه با قلم دیگری نمایش داده می‌شوند.</string>
     <string name="font_warning_no_hebrew">%1$s حروف عبری ندارد — متن عبری روی صفحه با قلم دیگری نمایش داده می‌شود.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">پس‌زمینه‌ها</string>
     <string name="background_group_defaults">پیش‌فرض‌ها</string>
-    <string name="background_scope_default">پیش‌فرض</string>
     <string name="background_scope_default_lower_third">نوار پایین پیش‌فرض</string>
     <string name="background_scope_default_meta">وقتی کتاب‌مقدس یا سرودها روی پیش‌فرض باشد</string>
     <string name="background_scope_default_lower_third_meta">وقتی نوار پایین روی پیش‌فرض باشد</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">رنگ پرکننده</string>
     <string name="background_above_band_opacity">کدری پرکننده</string>
     <string name="quick_background_reset">بازگشت به حالت عادی</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · مدیریت در تنظیمات</string>
     <string name="quick_backgrounds">پس‌زمینه‌های سریع</string>
     <string name="quick_backgrounds_help">پس‌زمینه‌هایی که پنل پیش‌نمایش یک کلیک دورتر نگه می‌دارد. روی یک کاشی کلیک کنید تا انتخاب کنید چه چیزی نشان دهد و آن را بکشید تا کلید مربوطه عوض شود. انتخاب یکی در حین برنامه، همهٔ صفحه‌ها را تا بازگشت به حالت عادی بازنویسی می‌کند و اینجا چیزی را تغییر نمی‌دهد.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">تصویر</string>
     <string name="customize_type_video">ویدیو</string>
     <string name="customize_type_transparent">شفاف</string>
-    <string name="customize_type_default">پیش‌فرض</string>
     <string name="customize_type_gradient">طیف رنگ</string>
     <string name="customize_show_abbreviation">مخفف</string>
     <string name="customize_background_opacity">کدری</string>

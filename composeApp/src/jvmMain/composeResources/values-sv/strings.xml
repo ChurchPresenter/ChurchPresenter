@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Versstil</string>
     <string name="canvas_reference_style">Stil på hänvisning</string>
     <string name="canvas_text_color">Textfärg</string>
-    <string name="canvas_text_bg_color">Bakgrundsfärg</string>
     <string name="canvas_clock_mode">Läge</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24 tim</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Webbplats</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">Frågor</string>
-    <string name="obs_mode_stt">Transkribering</string>
     <string name="obs_mode_none">Rensa skärmen</string>
     <string name="konami_dialog_title">Du hittade den!</string>
     <string name="konami_dialog_headline">Fuskkod aktiverad</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Förhandsvisning</string>
     <string name="font_preview_sample">Exempeltext i det valda teckensnittet</string>
     <string name="font_warning_no_cyrillic">%1$s saknar kyrilliska tecken – kyrilliska verser visas på skärmen med ett annat teckensnitt.</string>
     <string name="font_warning_no_hebrew">%1$s saknar hebreiska tecken – hebreisk text visas på skärmen med ett annat teckensnitt.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Bakgrunder</string>
     <string name="background_group_defaults">Standard</string>
-    <string name="background_scope_default">Standard</string>
     <string name="background_scope_default_lower_third">Standard nedre tredjedel</string>
     <string name="background_scope_default_meta">När Bibel eller Sånger står på Standard</string>
     <string name="background_scope_default_lower_third_meta">När nedre tredjedelen står på Standard</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Fyllningsfärg</string>
     <string name="background_above_band_opacity">Fyllningens opacitet</string>
     <string name="quick_background_reset">Tillbaka till normalt</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hanteras i inställningarna</string>
     <string name="quick_backgrounds">Snabbbakgrunder</string>
     <string name="quick_backgrounds_help">Bakgrunder som förhandsvisningspanelen håller ett klick bort. Klicka på en ruta för att välja vad den visar, dra den för att ändra vilken tangent som når den. Att välja en under gudstjänsten åsidosätter varje skärm tills du går tillbaka till normalt — här ändrar det ingenting.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Bild</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparent</string>
-    <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Förkortning</string>
     <string name="customize_background_opacity">Opacitet</string>

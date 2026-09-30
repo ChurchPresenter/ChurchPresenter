@@ -32,7 +32,7 @@ import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_bg_row
 import churchpresenter.composeapp.generated.resources.profile_content_align
 import churchpresenter.composeapp.generated.resources.profile_content_width
-import churchpresenter.composeapp.generated.resources.profile_context_open_general
+import churchpresenter.composeapp.generated.resources.general
 import churchpresenter.composeapp.generated.resources.profile_context_standalone
 import churchpresenter.composeapp.generated.resources.profile_crossfade
 import churchpresenter.composeapp.generated.resources.profile_display_mode
@@ -40,7 +40,7 @@ import churchpresenter.composeapp.generated.resources.profile_duration
 import churchpresenter.composeapp.generated.resources.profile_end_marker
 import churchpresenter.composeapp.generated.resources.profile_fade_in
 import churchpresenter.composeapp.generated.resources.profile_fade_out
-import churchpresenter.composeapp.generated.resources.profile_group_look
+import churchpresenter.composeapp.generated.resources.song_background_look
 import churchpresenter.composeapp.generated.resources.profile_group_placement
 import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_margins
@@ -134,7 +134,7 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
             Res.string.customize_background_opacity, Res.string.song_background_blur,
             Res.string.background_above_band_caption,
         )
-        else -> listOf(Res.string.profile_group_look)
+        else -> listOf(Res.string.song_background_look)
     }
 }
 
@@ -156,7 +156,7 @@ internal fun StandaloneContextCard(onOpenGeneral: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
-            LinkText(stringResource(Res.string.profile_context_open_general), onOpenGeneral)
+            LinkText(stringResource(Res.string.general), onOpenGeneral)
         }
     }
 }

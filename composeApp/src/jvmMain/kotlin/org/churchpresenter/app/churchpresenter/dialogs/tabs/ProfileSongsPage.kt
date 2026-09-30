@@ -34,7 +34,7 @@ import churchpresenter.composeapp.generated.resources.profile_position_below_lyr
 import churchpresenter.composeapp.generated.resources.profile_position_bottom
 import churchpresenter.composeapp.generated.resources.profile_position_top
 import churchpresenter.composeapp.generated.resources.profile_slide_element
-import churchpresenter.composeapp.generated.resources.profile_song_position
+import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.profile_title_slide
 import churchpresenter.composeapp.generated.resources.profile_title_slide_sub
 import churchpresenter.composeapp.generated.resources.profile_title_slide_valign
@@ -482,7 +482,7 @@ private fun SectionLabelSwitch(enabled: Boolean, updateSong: ((SongSettings) -> 
 /** POSITION: the content area's top edge, held above or below the lyrics, or the bottom edge. */
 @Composable
 private fun SongPositionRow(selected: String, onSelect: (String) -> Unit) {
-    SettingsRow(stringResource(Res.string.profile_song_position)) {
+    SettingsRow(stringResource(Res.string.position)) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.ABOVE_VERSE, stringResource(Res.string.profile_position_top)),

@@ -34,7 +34,7 @@ import churchpresenter.composeapp.generated.resources.profile_adjust_guide_band
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_blocks
 import churchpresenter.composeapp.generated.resources.profile_adjust_guide_boxes
 import churchpresenter.composeapp.generated.resources.profile_adjust_no_boxes
-import churchpresenter.composeapp.generated.resources.profile_page_title
+import churchpresenter.composeapp.generated.resources.background_scope_title
 import churchpresenter.composeapp.generated.resources.profile_preview_larger
 import churchpresenter.composeapp.generated.resources.profile_reset_positions
 import churchpresenter.composeapp.generated.resources.profile_reset_positions_sub
@@ -174,7 +174,7 @@ internal fun EditorPreview(
     if (large && pane != null) {
         LargePreview(
             pane = pane,
-            title = stringResource(Res.string.profile_page_title, profile.displayName(), pageLabel),
+            title = stringResource(Res.string.background_scope_title, profile.displayName(), pageLabel),
             element = element,
             draft = draft,
             profile = profile,

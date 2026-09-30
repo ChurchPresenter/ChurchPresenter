@@ -21,7 +21,7 @@ import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.profile_nav_appearance
 import churchpresenter.composeapp.generated.resources.profile_nav_content
-import churchpresenter.composeapp.generated.resources.profile_nav_general
+import churchpresenter.composeapp.generated.resources.general
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
 import churchpresenter.composeapp.generated.resources.profile_nav_outputs
 import churchpresenter.composeapp.generated.resources.profile_nav_profile
@@ -77,7 +77,7 @@ internal fun profileNavSections(profile: OutputProfile): List<ProfileNavSection>
 /** What the section list calls [this]. */
 @Composable
 internal fun ProfilePage.label(): String = when (this) {
-    ProfilePage.General -> stringResource(Res.string.profile_nav_general)
+    ProfilePage.General -> stringResource(Res.string.general)
     ProfilePage.Outputs -> stringResource(Res.string.profile_nav_outputs)
     ProfilePage.Content -> stringResource(Res.string.profile_nav_content)
     is ProfilePage.Appearance -> pane.navLabel()

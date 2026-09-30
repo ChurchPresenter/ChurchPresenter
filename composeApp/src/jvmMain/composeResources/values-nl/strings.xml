@@ -809,7 +809,6 @@
     <string name="canvas_bible_ref_font_size">Verwijzing lettergrootte</string>
     <string name="canvas_bible_ref_color">Verwijzingskleur</string>
     <string name="canvas_text_color">Tekstkleur</string>
-    <string name="canvas_text_bg_color">Achtergrondkleur</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Formaat</string>
     <string name="canvas_clock_format_24h">24u</string>
@@ -1369,7 +1368,6 @@
     <string name="obs_mode_website">Website</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">V&amp;A</string>
-    <string name="obs_mode_stt">Transcriptie</string>
     <string name="obs_mode_none">Scherm wissen</string>
     <string name="konami_dialog_title">U heeft het gevonden!</string>
     <string name="konami_dialog_headline">Cheatcode geactiveerd</string>
@@ -1952,7 +1950,6 @@
     <string name="font_category_serif">Schreef</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Voorbeeld</string>
     <string name="font_preview_sample">Voorbeeldtekst in het gekozen lettertype</string>
     <string name="font_warning_no_cyrillic">%1$s heeft geen Cyrillische tekens – Cyrillische verzen verschijnen op het scherm in een ander lettertype.</string>
     <string name="font_warning_no_hebrew">%1$s heeft geen Hebreeuwse tekens – Hebreeuwse tekst verschijnt op het scherm in een ander lettertype.</string>
@@ -2032,7 +2029,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Achtergronden</string>
     <string name="background_group_defaults">Standaard</string>
-    <string name="background_scope_default">Standaard</string>
     <string name="background_scope_default_lower_third">Standaard Lower Third</string>
     <string name="background_scope_default_meta">Wanneer Bijbel of Liederen op Standaard staan</string>
     <string name="background_scope_default_lower_third_meta">Wanneer de lower third op Standaard staat</string>
@@ -2050,7 +2046,6 @@
     <string name="background_above_band_fill">Vulkleur</string>
     <string name="background_above_band_opacity">Dekking van vulling</string>
     <string name="quick_background_reset">Terug naar normaal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · beheer in Instellingen</string>
     <string name="quick_backgrounds">Snelle achtergronden</string>
     <string name="quick_backgrounds_help">Achtergronden die het voorbeeldpaneel op één klik afstand houdt. Klik op een tegel om te kiezen wat die toont, sleep hem om te wijzigen welke toets hem oproept. Eén kiezen tijdens een dienst overschrijft elk scherm tot je terug naar normaal gaat — hier verandert het niets.</string>
@@ -2085,7 +2080,6 @@
     <string name="customize_type_image">Afbeelding</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparant</string>
-    <string name="customize_type_default">Standaard</string>
     <string name="customize_type_gradient">Verloop</string>
     <string name="customize_show_abbreviation">Afkorting</string>
     <string name="customize_background_opacity">Dekking</string>

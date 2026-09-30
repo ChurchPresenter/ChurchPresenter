@@ -1026,7 +1026,6 @@
     <string name="canvas_verse_style">வசனப் பாணி</string>
     <string name="canvas_reference_style">குறிப்புப் பாணி</string>
     <string name="canvas_text_color">உரை நிறம்</string>
-    <string name="canvas_text_bg_color">பின்னணி நிறம்</string>
     <string name="canvas_clock_mode">பயன்முறை</string>
     <string name="canvas_clock_format">வடிவம்</string>
     <string name="canvas_clock_format_24h">24ம</string>
@@ -1632,7 +1631,6 @@
     <string name="obs_mode_website">இணையதளம்</string>
     <string name="obs_mode_canvas">கித்தான்</string>
     <string name="obs_mode_qa">கே&amp;ப</string>
-    <string name="obs_mode_stt">படியெடுத்தல்</string>
     <string name="obs_mode_none">காட்சியை அழி</string>
     <string name="konami_dialog_title">நீங்கள் கண்டுபிடித்துவிட்டீர்கள்!</string>
     <string name="konami_dialog_headline">ரகசியக் குறியீடு செயல்படுத்தப்பட்டது</string>
@@ -1974,7 +1972,6 @@
     <string name="font_category_serif">செரிஃப்</string>
     <string name="font_category_mono">மோனோ</string>
     <string name="font_category_display">டிஸ்பிளே</string>
-    <string name="font_preview">முன்னோட்டம்</string>
     <string name="font_preview_sample">தேர்ந்தெடுத்த எழுத்துருவில் மாதிரி உரை</string>
     <string name="font_warning_no_cyrillic">%1$s இல் சிரிலிக் எழுத்துகள் இல்லை — சிரிலிக் வசனங்கள் திரையில் வேறு எழுத்துருவில் தோன்றும்.</string>
     <string name="font_warning_no_hebrew">%1$s இல் ஹீப்ரு எழுத்துகள் இல்லை — ஹீப்ரு உரை திரையில் வேறு எழுத்துருவில் தோன்றும்.</string>
@@ -2054,7 +2051,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">பின்னணிகள்</string>
     <string name="background_group_defaults">இயல்பு</string>
-    <string name="background_scope_default">இயல்பு</string>
     <string name="background_scope_default_lower_third">இயல்பு கீழ்ப்பட்டை</string>
     <string name="background_scope_default_meta">வேதாகமம் அல்லது பாடல்கள் இயல்பாக அமைந்திருக்கும்போது</string>
     <string name="background_scope_default_lower_third_meta">கீழ்ப்பட்டை இயல்பாக அமைந்திருக்கும்போது</string>
@@ -2072,7 +2068,6 @@
     <string name="background_above_band_fill">நிரப்பு நிறம்</string>
     <string name="background_above_band_opacity">நிரப்பு ஒளிபுகாநிலை</string>
     <string name="quick_background_reset">வழக்கத்திற்குத் திரும்பு</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · அமைப்புகளில் நிர்வகிக்கவும்</string>
     <string name="quick_backgrounds">விரைவுப் பின்னணிகள்</string>
     <string name="quick_backgrounds_help">முன்னோட்டப் பலகை ஒரு சொடுக்கு தொலைவில் வைத்திருக்கும் பின்னணிகள். ஒரு கட்டம் எதைக் காட்ட வேண்டும் என்பதைத் தேர்வுசெய்ய அதைச் சொடுக்கவும்; எந்த விசை அதை அடையும் என மாற்ற இழுக்கவும். ஆராதனையின்போது ஒன்றைத் தேர்ந்தெடுத்தால், வழக்கத்திற்குத் திரும்பும் வரை எல்லாத் திரைகளையும் மேலெழுதும் — இங்கே எதையும் மாற்றாது.</string>
@@ -2107,7 +2102,6 @@
     <string name="customize_type_image">படம்</string>
     <string name="customize_type_video">காணொளி</string>
     <string name="customize_type_transparent">ஒளிபுகும்</string>
-    <string name="customize_type_default">இயல்பு</string>
     <string name="customize_type_gradient">படிநிறம்</string>
     <string name="customize_show_abbreviation">சுருக்கம்</string>
     <string name="customize_background_opacity">ஒளிபுகாநிலை</string>

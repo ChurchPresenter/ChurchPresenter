@@ -892,7 +892,6 @@
     <string name="canvas_verse_style">Salmi stiil</string>
     <string name="canvas_reference_style">Viite stiil</string>
     <string name="canvas_text_color">Teksti värv</string>
-    <string name="canvas_text_bg_color">Taustavärv</string>
     <string name="canvas_clock_mode">Režiim</string>
     <string name="canvas_clock_format">Vorming</string>
     <string name="canvas_clock_format_24h">24h</string>
@@ -1459,7 +1458,6 @@
     <string name="obs_mode_website">Veebisait</string>
     <string name="obs_mode_canvas">Lõuend</string>
     <string name="obs_mode_qa">K&amp;V</string>
-    <string name="obs_mode_stt">Transkriptsioon</string>
     <string name="obs_mode_none">Tühjenda kuva</string>
     <string name="konami_dialog_title">Sa leidsid selle!</string>
     <string name="konami_dialog_headline">Petukood aktiveeritud</string>
@@ -1957,7 +1955,6 @@
     <string name="font_category_serif">Antiikva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Eelvaade</string>
     <string name="font_preview_sample">Näidistekst valitud fondiga</string>
     <string name="font_warning_no_cyrillic">%1$s ei sisalda kirillitsa märke – kirillitsas salmid kuvatakse ekraanil teise fondiga.</string>
     <string name="font_warning_no_hebrew">%1$s ei sisalda heebrea märke – heebrea tekst kuvatakse ekraanil teise fondiga.</string>
@@ -2037,7 +2034,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Taustad</string>
     <string name="background_group_defaults">Vaikeväärtused</string>
-    <string name="background_scope_default">Vaikimisi</string>
     <string name="background_scope_default_lower_third">Vaikimisi alumine kolmandik</string>
     <string name="background_scope_default_meta">Kui Piibel või Laulud on seatud valikule Vaikimisi</string>
     <string name="background_scope_default_lower_third_meta">Kui alumine kolmandik on seatud valikule Vaikimisi</string>
@@ -2055,7 +2051,6 @@
     <string name="background_above_band_fill">Täitevärv</string>
     <string name="background_above_band_opacity">Täite läbipaistmatus</string>
     <string name="quick_background_reset">Tagasi tavaolekusse</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hallatakse seadetes</string>
     <string name="quick_backgrounds">Kiirtaustad</string>
     <string name="quick_backgrounds_help">Taustad, mida eelvaatepaneel hoiab ühe klõpsu kaugusel. Klõpsa paanil, et valida, mida see näitab, lohista seda, et muuta, milline klahv selleni jõuab. Ühe valimine jumalateenistuse ajal alistab kõik ekraanid, kuni lähed tagasi tavaolekusse — siin ei muuda see midagi.</string>
@@ -2090,7 +2085,6 @@
     <string name="customize_type_image">Pilt</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Läbipaistev</string>
-    <string name="customize_type_default">Vaikimisi</string>
     <string name="customize_type_gradient">Üleminek</string>
     <string name="customize_show_abbreviation">Lühend</string>
     <string name="customize_background_opacity">Läbipaistmatus</string>

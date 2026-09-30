@@ -979,7 +979,6 @@
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захоплення екрана</string>
     <string name="canvas_text_color">Колір тексту</string>
-    <string name="canvas_text_bg_color">Колір фону</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
     <string name="canvas_clock_show_hours">Показувати години</string>
@@ -1313,7 +1312,6 @@
     <string name="obs_mode_website">Веб-сторінка</string>
     <string name="obs_mode_canvas">Полотно</string>
     <string name="obs_mode_qa">Питання та відповіді</string>
-    <string name="obs_mode_stt">Транскрипція</string>
     <string name="obs_mode_none">Очистити екран</string>
     <string name="konami_dialog_title">Ви знайшли це!</string>
     <string name="konami_dialog_headline">Чіт-код активовано</string>
@@ -1924,7 +1922,6 @@
     <string name="font_category_serif">Із засічками</string>
     <string name="font_category_mono">Моноширинний</string>
     <string name="font_category_display">Акцидентний</string>
-    <string name="font_preview">Попередній перегляд</string>
     <string name="font_preview_sample">Зразок тексту вибраним шрифтом</string>
     <string name="font_warning_no_cyrillic">%1$s не має кириличних гліфів — вірші кирилицею на екрані буде показано іншим шрифтом.</string>
     <string name="font_warning_no_hebrew">%1$s не має єврейських гліфів — єврейський текст на екрані буде показано іншим шрифтом.</string>
@@ -2004,7 +2001,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Фони</string>
     <string name="background_group_defaults">За замовчуванням</string>
-    <string name="background_scope_default">За замовчуванням</string>
     <string name="background_scope_default_lower_third">Нижня третина за замовчуванням</string>
     <string name="background_scope_default_meta">Коли для Біблії чи Пісень вибрано «За замовчуванням»</string>
     <string name="background_scope_default_lower_third_meta">Коли для нижньої третини вибрано «За замовчуванням»</string>
@@ -2022,7 +2018,6 @@
     <string name="background_above_band_fill">Колір заливки</string>
     <string name="background_above_band_opacity">Прозорість заливки</string>
     <string name="quick_background_reset">Повернути як було</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · налаштування в параметрах</string>
     <string name="quick_backgrounds">Швидкі фони</string>
     <string name="quick_backgrounds_help">Фони, які панель попереднього перегляду тримає в одному кліку. Натисніть плитку, щоб вибрати її вміст, перетягніть — щоб змінити клавішу. Вибраний під час служіння фон перекриває всі екрани, доки ви не повернете як було, і нічого тут не змінює.</string>
@@ -2057,7 +2052,6 @@
     <string name="customize_type_image">Зображення</string>
     <string name="customize_type_video">Відео</string>
     <string name="customize_type_transparent">Прозорий</string>
-    <string name="customize_type_default">За замовчуванням</string>
     <string name="customize_type_gradient">Градієнт</string>
     <string name="customize_show_abbreviation">Скорочення</string>
     <string name="customize_background_opacity">Прозорість</string>

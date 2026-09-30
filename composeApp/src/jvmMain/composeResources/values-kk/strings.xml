@@ -979,7 +979,6 @@
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Экранды жазу</string>
     <string name="canvas_text_color">Мәтін түсі</string>
-    <string name="canvas_text_bg_color">Фон түсі</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
     <string name="canvas_clock_show_hours">Сағатты көрсету</string>
@@ -1313,7 +1312,6 @@
     <string name="obs_mode_website">Веб-сайт</string>
     <string name="obs_mode_canvas">Кенеп</string>
     <string name="obs_mode_qa">Сұрақтар мен жауаптар</string>
-    <string name="obs_mode_stt">Транскрипция</string>
     <string name="obs_mode_none">Экранды тазалау</string>
     <string name="konami_dialog_title">Сіз тауып алдыңыз!</string>
     <string name="konami_dialog_headline">Читкод іске қосылды</string>
@@ -1925,7 +1923,6 @@
     <string name="font_category_serif">Серифті</string>
     <string name="font_category_mono">Моно</string>
     <string name="font_category_display">Дисплей</string>
-    <string name="font_preview">Алдын ала қарау</string>
     <string name="font_preview_sample">Таңдалған қаріппен мәтін үлгісі</string>
     <string name="font_warning_no_cyrillic">%1$s кирилл таңбаларын қамтымайды — кириллицадағы аяттар экранда басқа қаріппен көрсетіледі.</string>
     <string name="font_warning_no_hebrew">%1$s иврит таңбаларын қамтымайды — иврит мәтіні экранда басқа қаріппен көрсетіледі.</string>
@@ -2005,7 +2002,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Фондар</string>
     <string name="background_group_defaults">Әдепкі</string>
-    <string name="background_scope_default">Әдепкі</string>
     <string name="background_scope_default_lower_third">Әдепкі төменгі үштен бір</string>
     <string name="background_scope_default_meta">Киелі Кітап немесе Әнұрандар «Әдепкі» болғанда</string>
     <string name="background_scope_default_lower_third_meta">Төменгі үштен бір «Әдепкі» болғанда</string>
@@ -2023,7 +2019,6 @@
     <string name="background_above_band_fill">Толтыру түсі</string>
     <string name="background_above_band_opacity">Толтыру мөлдірлігі</string>
     <string name="quick_background_reset">Қалыпқа қайту</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · параметрлерде басқарылады</string>
     <string name="quick_backgrounds">Жылдам фондар</string>
     <string name="quick_backgrounds_help">Алдын ала қарау панелі бір басу қашықтықта ұстайтын фондар. Не көрсететінін таңдау үшін тақтайшаны басыңыз, оған қай перне жететінін өзгерту үшін сүйреңіз. Қызмет кезінде біреуін таңдау қалыпқа қайтқанша барлық экранды басып тастайды — мұнда ештеңе өзгертпейді.</string>
@@ -2058,7 +2053,6 @@
     <string name="customize_type_image">Сурет</string>
     <string name="customize_type_video">Бейне</string>
     <string name="customize_type_transparent">Мөлдір</string>
-    <string name="customize_type_default">Әдепкі</string>
     <string name="customize_type_gradient">Градиент</string>
     <string name="customize_show_abbreviation">Қысқартуы</string>
     <string name="customize_background_opacity">Мөлдірлігі</string>

@@ -37,7 +37,7 @@ import churchpresenter.composeapp.generated.resources.bible_no_primary_title
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.canvas_clock_font_size
-import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
+import churchpresenter.composeapp.generated.resources.background_color_label
 import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
 import churchpresenter.composeapp.generated.resources.canvas_text_curve
 import churchpresenter.composeapp.generated.resources.canvas_font
@@ -289,7 +289,7 @@ internal fun BibleProperties(
             color = source.backgroundColor,
             onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
             modifier = Modifier.weight(1f),
-            label = stringResource(Res.string.canvas_text_bg_color)
+            label = stringResource(Res.string.background_color_label)
         )
     }
     // The same four faces the Bible settings tab offers, and no shadow button: a canvas source

@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Mtindo wa Mstari</string>
     <string name="canvas_reference_style">Mtindo wa Rejeleo</string>
     <string name="canvas_text_color">Rangi ya Maandishi</string>
-    <string name="canvas_text_bg_color">Rangi ya Usuli</string>
     <string name="canvas_clock_mode">Hali</string>
     <string name="canvas_clock_format">Muundo</string>
     <string name="canvas_clock_format_24h">Saa 24</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Tovuti</string>
     <string name="obs_mode_canvas">Turubai</string>
     <string name="obs_mode_qa">Maswali</string>
-    <string name="obs_mode_stt">Manukuu</string>
     <string name="obs_mode_none">Safisha skrini</string>
     <string name="konami_dialog_title">Umeipata!</string>
     <string name="konami_dialog_headline">Msimbo wa siri umewashwa</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Onyesho la awali</string>
     <string name="font_preview_sample">Maandishi ya mfano kwa fonti iliyochaguliwa</string>
     <string name="font_warning_no_cyrillic">%1$s haina herufi za Kikrili — mistari ya Kikrili itaonekana skrini kwa fonti nyingine.</string>
     <string name="font_warning_no_hebrew">%1$s haina herufi za Kiebrania — maandishi ya Kiebrania yataonekana skrini kwa fonti nyingine.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Usuli</string>
     <string name="background_group_defaults">Chaguo-msingi</string>
-    <string name="background_scope_default">Chaguo-msingi</string>
     <string name="background_scope_default_lower_third">Lower Third ya chaguo-msingi</string>
     <string name="background_scope_default_meta">Biblia au Nyimbo zinapowekwa kwenye Chaguo-msingi</string>
     <string name="background_scope_default_lower_third_meta">Lower third inapowekwa kwenye Chaguo-msingi</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Rangi ya Kujaza</string>
     <string name="background_above_band_opacity">Ukolezi wa Kujaza</string>
     <string name="quick_background_reset">Rudi kawaida</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · dhibiti katika Mipangilio</string>
     <string name="quick_backgrounds">Usuli wa haraka</string>
     <string name="quick_backgrounds_help">Usuli ambao paneli ya onyesho la awali huuweka mbali kwa mbofyo mmoja. Bofya kigae ili kuchagua kinachoonyesha, kikokote ili kubadilisha kitufe kinachokifikia. Kuchagua kimoja wakati wa ibada hubatilisha kila skrini hadi urudi kawaida — hapa hakibadilishi chochote.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Picha</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Wazi</string>
-    <string name="customize_type_default">Chaguo-msingi</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Kifupi</string>
     <string name="customize_background_opacity">Ukolezi</string>

@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Panta stils</string>
     <string name="canvas_reference_style">Norādes stils</string>
     <string name="canvas_text_color">Teksta krāsa</string>
-    <string name="canvas_text_bg_color">Fona krāsa</string>
     <string name="canvas_clock_mode">Režīms</string>
     <string name="canvas_clock_format">Formāts</string>
     <string name="canvas_clock_format_24h">24 h</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Tīmekļa vietne</string>
     <string name="obs_mode_canvas">Audekls</string>
     <string name="obs_mode_qa">Jautājumi</string>
-    <string name="obs_mode_stt">Atšifrējums</string>
     <string name="obs_mode_none">Notīrīt ekrānu</string>
     <string name="konami_dialog_title">Jūs to atradāt!</string>
     <string name="konami_dialog_headline">Slepenais kods aktivizēts</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Antīkva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Priekšskatījums</string>
     <string name="font_preview_sample">Parauga teksts izvēlētajā fontā</string>
     <string name="font_warning_no_cyrillic">%1$s nav kirilicas zīmju – kirilicas panti ekrānā tiks rādīti citā fontā.</string>
     <string name="font_warning_no_hebrew">%1$s nav ebreju zīmju – ebreju teksts ekrānā tiks rādīts citā fontā.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Foni</string>
     <string name="background_group_defaults">Noklusējumi</string>
-    <string name="background_scope_default">Noklusējums</string>
     <string name="background_scope_default_lower_third">Noklusējuma apakšjosla</string>
     <string name="background_scope_default_meta">Kad Bībelei vai Dziesmām iestatīts Noklusējums</string>
     <string name="background_scope_default_lower_third_meta">Kad apakšjoslai iestatīts Noklusējums</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Aizpildījuma krāsa</string>
     <string name="background_above_band_opacity">Aizpildījuma necaurredzamība</string>
     <string name="quick_background_reset">Atpakaļ uz parasto</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · pārvalda iestatījumos</string>
     <string name="quick_backgrounds">Ātrie foni</string>
     <string name="quick_backgrounds_help">Foni, ko priekšskatījuma panelis tur viena klikšķa attālumā. Noklikšķiniet uz elementa, lai izvēlētos, ko tas rāda, velciet to, lai mainītu, kurš taustiņš to sasniedz. Izvēloties vienu dievkalpojuma laikā, tas pārraksta katru ekrānu, līdz atgriežaties pie parastā — šeit tas neko nemaina.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Attēls</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Caurspīdīgs</string>
-    <string name="customize_type_default">Noklusējums</string>
     <string name="customize_type_gradient">Gradients</string>
     <string name="customize_show_abbreviation">Saīsinājums</string>
     <string name="customize_background_opacity">Necaurredzamība</string>

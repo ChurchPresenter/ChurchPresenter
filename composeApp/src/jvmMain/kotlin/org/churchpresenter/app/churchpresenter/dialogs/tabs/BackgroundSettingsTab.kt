@@ -86,7 +86,6 @@ import churchpresenter.composeapp.generated.resources.background_follows_default
 import churchpresenter.composeapp.generated.resources.background_following_default
 import churchpresenter.composeapp.generated.resources.background_group_defaults
 import churchpresenter.composeapp.generated.resources.background_image_option
-import churchpresenter.composeapp.generated.resources.background_scope_default
 import churchpresenter.composeapp.generated.resources.background_scope_default_lower_third
 import churchpresenter.composeapp.generated.resources.background_scope_default_lower_third_meta
 import churchpresenter.composeapp.generated.resources.background_scope_default_meta
@@ -637,7 +636,7 @@ internal fun backgroundGroupLabel(group: BackgroundScopeGroup): StringResource =
 }
 
 internal fun backgroundScopeName(scope: BackgroundScope): StringResource = when (scope) {
-    BackgroundScope.DEFAULT -> Res.string.background_scope_default
+    BackgroundScope.DEFAULT -> Res.string.background_default
     BackgroundScope.DEFAULT_LOWER_THIRD -> Res.string.background_scope_default_lower_third
     else -> if (scope.lowerThird) Res.string.display_lower_third else Res.string.full_screen
 }

@@ -63,7 +63,7 @@ import churchpresenter.composeapp.generated.resources.customize_theme_selection
 import churchpresenter.composeapp.generated.resources.customize_theme_success
 import churchpresenter.composeapp.generated.resources.customize_theme_text
 import churchpresenter.composeapp.generated.resources.customize_theme_text_size
-import churchpresenter.composeapp.generated.resources.customize_theme_text_size_default
+import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.customize_theme_text_size_extra_large
 import churchpresenter.composeapp.generated.resources.customize_theme_text_size_hint
 import churchpresenter.composeapp.generated.resources.customize_theme_text_size_large
@@ -111,7 +111,7 @@ private const val DISABLED_ALPHA = 0.45f
 /** The labels of [UI_FONT_SCALES], in the same order. */
 private val FONT_SCALE_LABELS: List<StringResource> = listOf(
     Res.string.customize_theme_text_size_small,
-    Res.string.customize_theme_text_size_default,
+    Res.string.background_default,
     Res.string.customize_theme_text_size_large,
     Res.string.customize_theme_text_size_extra_large,
 )

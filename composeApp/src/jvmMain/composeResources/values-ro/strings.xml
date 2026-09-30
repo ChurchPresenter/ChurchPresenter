@@ -848,7 +848,6 @@
     <string name="canvas_bible_ref_font_size">Dimensiunea Fontului Referinței</string>
     <string name="canvas_bible_ref_color">Culoarea Referinței</string>
     <string name="canvas_text_color">Culoare Text</string>
-    <string name="canvas_text_bg_color">Culoare Fundal</string>
     <string name="canvas_clock_mode">Mod</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24h</string>
@@ -1414,7 +1413,6 @@
     <string name="obs_mode_website">Website</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">Î&amp;R</string>
-    <string name="obs_mode_stt">Transcriere</string>
     <string name="obs_mode_none">Golește Ecranul</string>
     <string name="konami_dialog_title">L-ai găsit!</string>
     <string name="konami_dialog_headline">Cod de Cheat Activat</string>
@@ -1954,7 +1952,6 @@
     <string name="font_category_serif">Cu serife</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Decorativ</string>
-    <string name="font_preview">Previzualizare</string>
     <string name="font_preview_sample">Text de exemplu cu fontul ales</string>
     <string name="font_warning_no_cyrillic">%1$s nu are glife chirilice – versetele în chirilic vor apărea pe ecran cu alt font.</string>
     <string name="font_warning_no_hebrew">%1$s nu are glife ebraice – textul ebraic va apărea pe ecran cu alt font.</string>
@@ -2034,7 +2031,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Fundaluri</string>
     <string name="background_group_defaults">Implicite</string>
-    <string name="background_scope_default">Implicit</string>
     <string name="background_scope_default_lower_third">Lower Third implicit</string>
     <string name="background_scope_default_meta">Când Biblia sau Cântările sunt pe Implicit</string>
     <string name="background_scope_default_lower_third_meta">Când lower third este pe Implicit</string>
@@ -2052,7 +2048,6 @@
     <string name="background_above_band_fill">Culoare de umplere</string>
     <string name="background_above_band_opacity">Opacitate umplere</string>
     <string name="quick_background_reset">Înapoi la normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · se administrează în Setări</string>
     <string name="quick_backgrounds">Fundaluri rapide</string>
     <string name="quick_backgrounds_help">Fundaluri pe care panoul de previzualizare le ține la un clic distanță. Apasă pe o plăcuță ca să alegi ce arată, trage-o ca să schimbi tasta care o cheamă. Alegerea unuia în timpul slujbei suprascrie fiecare ecran până revii la normal — aici nu schimbă nimic.</string>
@@ -2087,7 +2082,6 @@
     <string name="customize_type_image">Imagine</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparent</string>
-    <string name="customize_type_default">Implicit</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Abreviere</string>
     <string name="customize_background_opacity">Opacitate</string>

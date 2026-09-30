@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">نمط الآية</string>
     <string name="canvas_reference_style">نمط المرجع</string>
     <string name="canvas_text_color">لون النص</string>
-    <string name="canvas_text_bg_color">لون الخلفية</string>
     <string name="canvas_clock_mode">الوضع</string>
     <string name="canvas_clock_format">التنسيق</string>
     <string name="canvas_clock_format_24h">24 ساعة</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">موقع الويب</string>
     <string name="obs_mode_canvas">اللوحة</string>
     <string name="obs_mode_qa">الأسئلة والأجوبة</string>
-    <string name="obs_mode_stt">النص المنطوق</string>
     <string name="obs_mode_none">مسح الشاشة</string>
     <string name="konami_dialog_title">لقد وجدتها!</string>
     <string name="konami_dialog_headline">تم تفعيل رمز الغش</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">بزوائد</string>
     <string name="font_category_mono">أحادي</string>
     <string name="font_category_display">زخرفي</string>
-    <string name="font_preview">معاينة</string>
     <string name="font_preview_sample">نص تجريبي بالخط المختار</string>
     <string name="font_warning_no_cyrillic">%1$s لا يحتوي على حروف سيريلية — ستظهر الآيات السيريلية على الشاشة بخط آخر.</string>
     <string name="font_warning_no_hebrew">%1$s لا يحتوي على حروف عبرية — سيظهر النص العبري على الشاشة بخط آخر.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">الخلفيات</string>
     <string name="background_group_defaults">الافتراضية</string>
-    <string name="background_scope_default">افتراضية</string>
     <string name="background_scope_default_lower_third">الثلث السفلي الافتراضي</string>
     <string name="background_scope_default_meta">عندما يكون الكتاب المقدس أو الترانيم على الافتراضية</string>
     <string name="background_scope_default_lower_third_meta">عندما يكون الثلث السفلي على الافتراضية</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">لون التعبئة</string>
     <string name="background_above_band_opacity">عتامة التعبئة</string>
     <string name="quick_background_reset">العودة إلى الوضع الطبيعي</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · تُدار في الإعدادات</string>
     <string name="quick_backgrounds">خلفيات سريعة</string>
     <string name="quick_backgrounds_help">خلفيات تبقيها لوحة المعاينة على بعد نقرة واحدة. انقر على مربّع لتختار ما يعرضه، واسحبه لتغيير المفتاح الذي يصل إليه. اختيار واحدة أثناء الخدمة يتجاوز كل الشاشات حتى تعود إلى الوضع الطبيعي، ولا يغيّر شيئًا هنا.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">صورة</string>
     <string name="customize_type_video">فيديو</string>
     <string name="customize_type_transparent">شفافة</string>
-    <string name="customize_type_default">افتراضية</string>
     <string name="customize_type_gradient">تدرّج لوني</string>
     <string name="customize_show_abbreviation">الاختصار</string>
     <string name="customize_background_opacity">العتامة</string>

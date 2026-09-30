@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Estilo ng Talata</string>
     <string name="canvas_reference_style">Estilo ng Reperensya</string>
     <string name="canvas_text_color">Kulay ng Teksto</string>
-    <string name="canvas_text_bg_color">Kulay ng Background</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24h</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Website</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">Mga tanong</string>
-    <string name="obs_mode_stt">Transkripsyon</string>
     <string name="obs_mode_none">Linisin ang display</string>
     <string name="konami_dialog_title">Nakita mo!</string>
     <string name="konami_dialog_headline">Aktibo na ang cheat code</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Preview</string>
     <string name="font_preview_sample">Halimbawang teksto sa piniling font</string>
     <string name="font_warning_no_cyrillic">%1$s ay walang mga titik na Cyrillic — ang mga talatang Cyrillic ay lalabas sa screen sa ibang font.</string>
     <string name="font_warning_no_hebrew">%1$s ay walang mga titik na Hebreo — ang tekstong Hebreo ay lalabas sa screen sa ibang font.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Mga Background</string>
     <string name="background_group_defaults">Default</string>
-    <string name="background_scope_default">Default</string>
     <string name="background_scope_default_lower_third">Default na Lower Third</string>
     <string name="background_scope_default_meta">Kapag naka-Default ang Biblia o Mga Awit</string>
     <string name="background_scope_default_lower_third_meta">Kapag naka-Default ang lower third</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Kulay ng Fill</string>
     <string name="background_above_band_opacity">Opacity ng Fill</string>
     <string name="quick_background_reset">Balik sa normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · pamahalaan sa Mga Setting</string>
     <string name="quick_backgrounds">Mabilisang background</string>
     <string name="quick_backgrounds_help">Mga background na iniingatan ng preview panel nang isang click lang ang layo. I-click ang isang tile para piliin kung ano ang ipapakita nito, i-drag para baguhin kung aling key ang aabot dito. Ang pagpili sa gitna ng serbisyo ay nag-o-override sa bawat screen hanggang bumalik ka sa normal — walang binabago rito.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Larawan</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparent</string>
-    <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Daglat</string>
     <string name="customize_background_opacity">Opacity</string>

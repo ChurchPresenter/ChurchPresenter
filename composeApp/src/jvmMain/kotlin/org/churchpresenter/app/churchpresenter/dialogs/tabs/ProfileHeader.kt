@@ -40,7 +40,7 @@ import churchpresenter.composeapp.generated.resources.profile_detail_advanced
 import churchpresenter.composeapp.generated.resources.profile_detail_basic
 import churchpresenter.composeapp.generated.resources.profile_link_standalone
 import churchpresenter.composeapp.generated.resources.profile_not_in_use
-import churchpresenter.composeapp.generated.resources.profile_page_title
+import churchpresenter.composeapp.generated.resources.background_scope_title
 import churchpresenter.composeapp.generated.resources.profile_shown_on
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
@@ -78,7 +78,7 @@ internal fun ProfilePageHeader(
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = stringResource(Res.string.profile_page_title, profile.displayName(), page.label()),
+                    text = stringResource(Res.string.background_scope_title, profile.displayName(), page.label()),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,

@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Versstil</string>
     <string name="canvas_reference_style">Referansestil</string>
     <string name="canvas_text_color">Tekstfarge</string>
-    <string name="canvas_text_bg_color">Bakgrunnsfarge</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24 t</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Nettsted</string>
     <string name="obs_mode_canvas">Lerret</string>
     <string name="obs_mode_qa">Spørsmål</string>
-    <string name="obs_mode_stt">Transkripsjon</string>
     <string name="obs_mode_none">Tøm skjermen</string>
     <string name="konami_dialog_title">Du fant den!</string>
     <string name="konami_dialog_headline">Juksekode aktivert</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Antikva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Forhåndsvisning</string>
     <string name="font_preview_sample">Eksempeltekst i den valgte skrifttypen</string>
     <string name="font_warning_no_cyrillic">%1$s mangler kyrilliske tegn – kyrilliske vers vises på skjermen med en annen skrifttype.</string>
     <string name="font_warning_no_hebrew">%1$s mangler hebraiske tegn – hebraisk tekst vises på skjermen med en annen skrifttype.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Bakgrunner</string>
     <string name="background_group_defaults">Standard</string>
-    <string name="background_scope_default">Standard</string>
     <string name="background_scope_default_lower_third">Standard nedre tredjedel</string>
     <string name="background_scope_default_meta">Når Bibel eller Sanger står på Standard</string>
     <string name="background_scope_default_lower_third_meta">Når nedre tredjedel står på Standard</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Fyllfarge</string>
     <string name="background_above_band_opacity">Fyllets dekkevne</string>
     <string name="quick_background_reset">Tilbake til normalt</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · administreres i innstillingene</string>
     <string name="quick_backgrounds">Hurtigbakgrunner</string>
     <string name="quick_backgrounds_help">Bakgrunner som forhåndsvisningspanelet holder ett klikk unna. Klikk en flis for å velge hva den viser, dra den for å endre hvilken tast som når den. Å velge en under gudstjenesten overstyrer hver skjerm til du går tilbake til normalt — her endrer det ingenting.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Bilde</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Gjennomsiktig</string>
-    <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Forkortelse</string>
     <string name="customize_background_opacity">Dekkevne</string>

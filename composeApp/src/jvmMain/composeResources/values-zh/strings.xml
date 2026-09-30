@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">经文样式</string>
     <string name="canvas_reference_style">出处样式</string>
     <string name="canvas_text_color">文字颜色</string>
-    <string name="canvas_text_bg_color">背景颜色</string>
     <string name="canvas_clock_mode">模式</string>
     <string name="canvas_clock_format">格式</string>
     <string name="canvas_clock_format_24h">24 小时</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">网页</string>
     <string name="obs_mode_canvas">画布</string>
     <string name="obs_mode_qa">问答</string>
-    <string name="obs_mode_stt">转写</string>
     <string name="obs_mode_none">清除显示</string>
     <string name="konami_dialog_title">被你找到啦！</string>
     <string name="konami_dialog_headline">秘技已启动</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">衬线</string>
     <string name="font_category_mono">等宽</string>
     <string name="font_category_display">展示</string>
-    <string name="font_preview">预览</string>
     <string name="font_preview_sample">所选字体的示例文本</string>
     <string name="font_warning_no_cyrillic">%1$s 没有西里尔字形 — 西里尔文经文将在屏幕上以其他字体显示。</string>
     <string name="font_warning_no_hebrew">%1$s 没有希伯来字形 — 希伯来文将在屏幕上以其他字体显示。</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">背景</string>
     <string name="background_group_defaults">默认</string>
-    <string name="background_scope_default">默认</string>
     <string name="background_scope_default_lower_third">默认字幕条</string>
     <string name="background_scope_default_meta">当圣经或歌曲设为“默认”时</string>
     <string name="background_scope_default_lower_third_meta">当字幕条设为“默认”时</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">填充颜色</string>
     <string name="background_above_band_opacity">填充不透明度</string>
     <string name="quick_background_reset">恢复正常</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · 在设置中管理</string>
     <string name="quick_backgrounds">快捷背景</string>
     <string name="quick_backgrounds_help">预览面板随手可取的背景。点击方块选择它显示的内容，拖动可更改对应的快捷键。在聚会中选用会覆盖所有屏幕，直到你恢复正常；这里不会有任何改动。</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">图片</string>
     <string name="customize_type_video">视频</string>
     <string name="customize_type_transparent">透明</string>
-    <string name="customize_type_default">默认</string>
     <string name="customize_type_gradient">渐变</string>
     <string name="customize_show_abbreviation">缩写</string>
     <string name="customize_background_opacity">不透明度</string>

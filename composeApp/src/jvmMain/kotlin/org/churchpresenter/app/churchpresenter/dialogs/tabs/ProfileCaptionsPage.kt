@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.profile_box_item_transcript
-import churchpresenter.composeapp.generated.resources.profile_box_item_translation
+import churchpresenter.composeapp.generated.resources.stt_translation_label
 import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
@@ -17,8 +17,7 @@ import churchpresenter.composeapp.generated.resources.profile_caption_layout_sta
 import churchpresenter.composeapp.generated.resources.profile_caption_lines
 import churchpresenter.composeapp.generated.resources.profile_caption_mode
 import churchpresenter.composeapp.generated.resources.profile_caption_segments
-import churchpresenter.composeapp.generated.resources.profile_caption_transcription
-import churchpresenter.composeapp.generated.resources.profile_caption_translation
+import churchpresenter.composeapp.generated.resources.stt_transcription_label
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_color
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_type_out
@@ -138,7 +137,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
             ),
             BoxItem(
                 CAPTION_TRANSLATION_BOX,
-                stringResource(Res.string.profile_box_item_translation),
+                stringResource(Res.string.stt_translation_label),
                 TextBox(xPercent = 5f, yPercent = 77f, widthPercent = 90f, heightPercent = 20f),
             ),
         ),
@@ -157,8 +156,8 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
         SettingsRow(stringResource(Res.string.profile_caption_mode), paths = listOf("$STT.displayMode")) {
             RowSegmented(
                 options = listOf(
-                    RowOption(MODE_TRANSCRIBE, stringResource(Res.string.profile_caption_transcription)),
-                    RowOption(MODE_TRANSLATE, stringResource(Res.string.profile_caption_translation)),
+                    RowOption(MODE_TRANSCRIBE, stringResource(Res.string.stt_transcription_label)),
+                    RowOption(MODE_TRANSLATE, stringResource(Res.string.stt_translation_label)),
                     RowOption(MODE_BOTH, stringResource(Res.string.profile_caption_both)),
                 ),
                 selected = stt.displayMode,

@@ -978,7 +978,6 @@
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Przechwytywanie ekranu</string>
     <string name="canvas_text_color">Kolor tekstu</string>
-    <string name="canvas_text_bg_color">Kolor tła</string>
     <string name="canvas_clock_mode">Tryb</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_show_hours">Pokaż godziny</string>
@@ -1312,7 +1311,6 @@
     <string name="obs_mode_website">Strona WWW</string>
     <string name="obs_mode_canvas">Płótno</string>
     <string name="obs_mode_qa">Pytania i odpowiedzi</string>
-    <string name="obs_mode_stt">Transkrypcja</string>
     <string name="obs_mode_none">Wyczyść wyświetlanie</string>
     <string name="konami_dialog_title">Znalazłeś to!</string>
     <string name="konami_dialog_headline">Kod cheat aktywowany</string>
@@ -1924,7 +1922,6 @@
     <string name="font_category_serif">Szeryfowa</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Ozdobna</string>
-    <string name="font_preview">Podgląd</string>
     <string name="font_preview_sample">Przykładowy tekst wybraną czcionką</string>
     <string name="font_warning_no_cyrillic">%1$s nie ma znaków cyrylicy – wersety cyrylicą pojawią się na ekranie w innej czcionce.</string>
     <string name="font_warning_no_hebrew">%1$s nie ma znaków hebrajskich – tekst hebrajski pojawi się na ekranie w innej czcionce.</string>
@@ -2004,7 +2001,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Tła</string>
     <string name="background_group_defaults">Domyślne</string>
-    <string name="background_scope_default">Domyślne</string>
     <string name="background_scope_default_lower_third">Domyślna dolna trzecia</string>
     <string name="background_scope_default_meta">Gdy Biblia lub Pieśni są ustawione na Domyślne</string>
     <string name="background_scope_default_lower_third_meta">Gdy dolna trzecia jest ustawiona na Domyślne</string>
@@ -2022,7 +2018,6 @@
     <string name="background_above_band_fill">Kolor wypełnienia</string>
     <string name="background_above_band_opacity">Przezroczystość wypełnienia</string>
     <string name="quick_background_reset">Powrót do normalnego</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · zarządzanie w ustawieniach</string>
     <string name="quick_backgrounds">Szybkie tła</string>
     <string name="quick_backgrounds_help">Tła, które panel podglądu trzyma o jedno kliknięcie od Ciebie. Kliknij kafelek, aby wybrać, co pokazuje, przeciągnij, aby zmienić przypisany klawisz. Wybranie tła podczas nabożeństwa nadpisuje wszystkie ekrany, dopóki nie wrócisz do normalnego — tutaj nic nie zmienia.</string>
@@ -2057,7 +2052,6 @@
     <string name="customize_type_image">Obraz</string>
     <string name="customize_type_video">Wideo</string>
     <string name="customize_type_transparent">Przezroczyste</string>
-    <string name="customize_type_default">Domyślne</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Skrót</string>
     <string name="customize_background_opacity">Przezroczystość</string>

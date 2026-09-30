@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">รูปแบบข้อพระคัมภีร์</string>
     <string name="canvas_reference_style">รูปแบบข้ออ้างอิง</string>
     <string name="canvas_text_color">สีข้อความ</string>
-    <string name="canvas_text_bg_color">สีพื้นหลัง</string>
     <string name="canvas_clock_mode">โหมด</string>
     <string name="canvas_clock_format">รูปแบบ</string>
     <string name="canvas_clock_format_24h">24 ชม.</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">เว็บไซต์</string>
     <string name="obs_mode_canvas">ผืนผ้าใบ</string>
     <string name="obs_mode_qa">ถาม-ตอบ</string>
-    <string name="obs_mode_stt">การถอดความ</string>
     <string name="obs_mode_none">ล้างจอ</string>
     <string name="konami_dialog_title">คุณเจอแล้ว!</string>
     <string name="konami_dialog_headline">เปิดใช้โค้ดลับแล้ว</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">มีเชิง</string>
     <string name="font_category_mono">โมโน</string>
     <string name="font_category_display">ตกแต่ง</string>
-    <string name="font_preview">ดูตัวอย่าง</string>
     <string name="font_preview_sample">ข้อความตัวอย่างด้วยแบบอักษรที่เลือก</string>
     <string name="font_warning_no_cyrillic">%1$s ไม่มีอักขระซีริลลิก — ข้อพระคัมภีร์ซีริลลิกจะแสดงบนจอด้วยแบบอักษรอื่น</string>
     <string name="font_warning_no_hebrew">%1$s ไม่มีอักขระฮีบรู — ข้อความฮีบรูจะแสดงบนจอด้วยแบบอักษรอื่น</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">พื้นหลัง</string>
     <string name="background_group_defaults">ค่าเริ่มต้น</string>
-    <string name="background_scope_default">ค่าเริ่มต้น</string>
     <string name="background_scope_default_lower_third">แถบล่างค่าเริ่มต้น</string>
     <string name="background_scope_default_meta">เมื่อพระคัมภีร์หรือเพลงตั้งเป็นค่าเริ่มต้น</string>
     <string name="background_scope_default_lower_third_meta">เมื่อแถบล่างตั้งเป็นค่าเริ่มต้น</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">สีเติม</string>
     <string name="background_above_band_opacity">ความทึบของสีเติม</string>
     <string name="quick_background_reset">กลับสู่ปกติ</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · จัดการในการตั้งค่า</string>
     <string name="quick_backgrounds">พื้นหลังด่วน</string>
     <string name="quick_backgrounds_help">พื้นหลังที่แผงตัวอย่างเก็บไว้ห่างเพียงคลิกเดียว คลิกที่ช่องเพื่อเลือกว่าจะให้แสดงอะไร ลากเพื่อเปลี่ยนว่าปุ่มใดเรียกใช้ การเลือกระหว่างการนมัสการจะแทนที่ทุกจอจนกว่าคุณจะกลับสู่ปกติ และไม่เปลี่ยนอะไรที่นี่</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">ภาพ</string>
     <string name="customize_type_video">วิดีโอ</string>
     <string name="customize_type_transparent">โปร่งใส</string>
-    <string name="customize_type_default">ค่าเริ่มต้น</string>
     <string name="customize_type_gradient">ไล่ระดับสี</string>
     <string name="customize_show_abbreviation">ตัวย่อ</string>
     <string name="customize_background_opacity">ความทึบ</string>

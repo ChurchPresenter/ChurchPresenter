@@ -1019,7 +1019,6 @@
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захват экрана</string>
     <string name="canvas_text_color">Цвет текста</string>
-    <string name="canvas_text_bg_color">Цвет фона</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
     <string name="canvas_clock_show_hours">Показывать часы</string>
@@ -1357,7 +1356,6 @@
     <string name="obs_mode_website">Веб-страница</string>
     <string name="obs_mode_canvas">Холст</string>
     <string name="obs_mode_qa">Вопросы и ответы</string>
-    <string name="obs_mode_stt">Транскрипция</string>
     <string name="obs_mode_none">Очистить экран</string>
     <string name="konami_dialog_title">Вы нашли это!</string>
     <string name="konami_dialog_headline">Чит-код активирован</string>
@@ -1927,7 +1925,6 @@
     <string name="font_category_serif">С засечками</string>
     <string name="font_category_mono">Моноширинный</string>
     <string name="font_category_display">Акцидентный</string>
-    <string name="font_preview">Предпросмотр</string>
     <string name="font_preview_sample">Образец текста выбранным шрифтом</string>
     <string name="font_warning_no_cyrillic">%1$s не содержит кириллических глифов — стихи на кириллице на экране будут показаны другим шрифтом.</string>
     <string name="font_warning_no_hebrew">%1$s не содержит еврейских глифов — еврейский текст на экране будет показан другим шрифтом.</string>
@@ -2007,7 +2004,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Фоны</string>
     <string name="background_group_defaults">По умолчанию</string>
-    <string name="background_scope_default">По умолчанию</string>
     <string name="background_scope_default_lower_third">Нижняя треть по умолчанию</string>
     <string name="background_scope_default_meta">Когда у Библии или Песен выбрано «По умолчанию»</string>
     <string name="background_scope_default_lower_third_meta">Когда у нижней трети выбрано «По умолчанию»</string>
@@ -2025,7 +2021,6 @@
     <string name="background_above_band_fill">Цвет заливки</string>
     <string name="background_above_band_opacity">Непрозрачность заливки</string>
     <string name="quick_background_reset">Вернуть как было</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · настройка в параметрах</string>
     <string name="quick_backgrounds">Быстрые фоны</string>
     <string name="quick_backgrounds_help">Фоны, которые панель предпросмотра держит в одном клике. Нажмите плитку, чтобы выбрать её содержимое, перетащите — чтобы сменить клавишу. Выбранный во время служения фон перекрывает все экраны, пока вы не вернёте как было, и ничего здесь не меняет.</string>
@@ -2060,7 +2055,6 @@
     <string name="customize_type_image">Изображение</string>
     <string name="customize_type_video">Видео</string>
     <string name="customize_type_transparent">Прозрачный</string>
-    <string name="customize_type_default">По умолчанию</string>
     <string name="customize_type_gradient">Градиент</string>
     <string name="customize_show_abbreviation">Сокращение</string>
     <string name="customize_background_opacity">Непрозрачность</string>

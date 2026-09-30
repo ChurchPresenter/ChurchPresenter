@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">वचन की शैली</string>
     <string name="canvas_reference_style">संदर्भ की शैली</string>
     <string name="canvas_text_color">पाठ का रंग</string>
-    <string name="canvas_text_bg_color">बैकग्राउंड रंग</string>
     <string name="canvas_clock_mode">मोड</string>
     <string name="canvas_clock_format">प्रारूप</string>
     <string name="canvas_clock_format_24h">24 घं</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">वेबसाइट</string>
     <string name="obs_mode_canvas">कैनवास</string>
     <string name="obs_mode_qa">प्रश्नोत्तर</string>
-    <string name="obs_mode_stt">लिप्यंतरण</string>
     <string name="obs_mode_none">स्क्रीन साफ़ करें</string>
     <string name="konami_dialog_title">आपने इसे ढूँढ लिया!</string>
     <string name="konami_dialog_headline">चीट कोड चालू हुआ</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">सेरिफ़</string>
     <string name="font_category_mono">मोनो</string>
     <string name="font_category_display">डिस्प्ले</string>
-    <string name="font_preview">झलक</string>
     <string name="font_preview_sample">चुने गए फ़ॉन्ट में नमूना पाठ</string>
     <string name="font_warning_no_cyrillic">%1$s में सिरिलिक अक्षर नहीं हैं — सिरिलिक पद स्क्रीन पर किसी दूसरे फ़ॉन्ट में दिखेंगे।</string>
     <string name="font_warning_no_hebrew">%1$s में हिब्रू अक्षर नहीं हैं — हिब्रू पाठ स्क्रीन पर किसी दूसरे फ़ॉन्ट में दिखेगा।</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">बैकग्राउंड</string>
     <string name="background_group_defaults">डिफ़ॉल्ट</string>
-    <string name="background_scope_default">डिफ़ॉल्ट</string>
     <string name="background_scope_default_lower_third">डिफ़ॉल्ट लोअर थर्ड</string>
     <string name="background_scope_default_meta">जब बाइबल या गीत डिफ़ॉल्ट पर हों</string>
     <string name="background_scope_default_lower_third_meta">जब लोअर थर्ड डिफ़ॉल्ट पर हो</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">भरण रंग</string>
     <string name="background_above_band_opacity">भरण अपारदर्शिता</string>
     <string name="quick_background_reset">सामान्य पर वापस</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · सेटिंग्स में प्रबंधित करें</string>
     <string name="quick_backgrounds">त्वरित बैकग्राउंड</string>
     <string name="quick_backgrounds_help">वे बैकग्राउंड जिन्हें प्रीव्यू पैनल एक क्लिक की दूरी पर रखता है। यह चुनने के लिए टाइल पर क्लिक करें कि वह क्या दिखाए, और कौन-सी कुंजी उस तक पहुँचे यह बदलने के लिए उसे खींचें। सेवा के दौरान कोई एक चुनने पर हर स्क्रीन तब तक बदल जाती है जब तक आप सामान्य पर वापस न जाएँ — यहाँ कुछ नहीं बदलता।</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">चित्र</string>
     <string name="customize_type_video">वीडियो</string>
     <string name="customize_type_transparent">पारदर्शी</string>
-    <string name="customize_type_default">डिफ़ॉल्ट</string>
     <string name="customize_type_gradient">ग्रेडिएंट</string>
     <string name="customize_show_abbreviation">संक्षिप्त रूप</string>
     <string name="customize_background_opacity">अपारदर्शिता</string>

@@ -809,7 +809,6 @@
     <string name="canvas_bible_ref_font_size">Veľkosť písma odkazu</string>
     <string name="canvas_bible_ref_color">Farba odkazu</string>
     <string name="canvas_text_color">Farba textu</string>
-    <string name="canvas_text_bg_color">Farba pozadia</string>
     <string name="canvas_clock_mode">Režim</string>
     <string name="canvas_clock_format">Formát</string>
     <string name="canvas_clock_format_24h">24h</string>
@@ -1369,7 +1368,6 @@
     <string name="obs_mode_website">Webstránka</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">Q&amp;A</string>
-    <string name="obs_mode_stt">Prepis</string>
     <string name="obs_mode_none">Vymazať displej</string>
     <string name="konami_dialog_title">Našli ste to!</string>
     <string name="konami_dialog_headline">Cheat kód aktivovaný</string>
@@ -1954,7 +1952,6 @@
     <string name="font_category_serif">Pätkové</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Ozdobné</string>
-    <string name="font_preview">Náhľad</string>
     <string name="font_preview_sample">Ukážkový text vybraným písmom</string>
     <string name="font_warning_no_cyrillic">%1$s nemá znaky cyriliky – verše v cyrilike sa na obrazovke zobrazia iným písmom.</string>
     <string name="font_warning_no_hebrew">%1$s nemá hebrejské znaky – hebrejský text sa na obrazovke zobrazí iným písmom.</string>
@@ -2034,7 +2031,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Pozadia</string>
     <string name="background_group_defaults">Predvolené</string>
-    <string name="background_scope_default">Predvolené</string>
     <string name="background_scope_default_lower_third">Predvolený Lower Third</string>
     <string name="background_scope_default_meta">Keď je pri Biblii alebo Piesňach nastavené Predvolené</string>
     <string name="background_scope_default_lower_third_meta">Keď je pri Lower Third nastavené Predvolené</string>
@@ -2052,7 +2048,6 @@
     <string name="background_above_band_fill">Farba výplne</string>
     <string name="background_above_band_opacity">Nepriehľadnosť výplne</string>
     <string name="quick_background_reset">Späť do normálu</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · správa v nastaveniach</string>
     <string name="quick_backgrounds">Rýchle pozadia</string>
     <string name="quick_backgrounds_help">Pozadia, ktoré má panel náhľadu na jedno kliknutie. Kliknutím na dlaždicu zvolíte, čo ukazuje, potiahnutím zmeníte, ktorý kláves ju vyvolá. Výber počas bohoslužby prekryje všetky obrazovky, kým sa nevrátite do normálu — tu nič nemení.</string>
@@ -2087,7 +2082,6 @@
     <string name="customize_type_image">Obrázok</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Priehľadné</string>
-    <string name="customize_type_default">Predvolené</string>
     <string name="customize_type_gradient">Prechod</string>
     <string name="customize_show_abbreviation">Skratka</string>
     <string name="customize_background_opacity">Nepriehľadnosť</string>

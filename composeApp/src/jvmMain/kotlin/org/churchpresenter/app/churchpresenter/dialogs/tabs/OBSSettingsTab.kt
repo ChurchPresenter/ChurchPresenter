@@ -51,7 +51,7 @@ import churchpresenter.composeapp.generated.resources.obs_mode_pictures
 import churchpresenter.composeapp.generated.resources.obs_mode_presentation
 import churchpresenter.composeapp.generated.resources.obs_mode_qa
 import churchpresenter.composeapp.generated.resources.obs_mode_songs
-import churchpresenter.composeapp.generated.resources.obs_mode_stt
+import churchpresenter.composeapp.generated.resources.stt_transcription_label
 import churchpresenter.composeapp.generated.resources.obs_mode_website
 import churchpresenter.composeapp.generated.resources.obs_password
 import churchpresenter.composeapp.generated.resources.obs_password_hint
@@ -261,7 +261,7 @@ fun OBSSettingsTab(
                         Presenting.WEBSITE to stringResource(Res.string.obs_mode_website),
                         Presenting.CANVAS to stringResource(Res.string.obs_mode_canvas),
                         Presenting.QA to stringResource(Res.string.obs_mode_qa),
-                        Presenting.STT to stringResource(Res.string.obs_mode_stt),
+                        Presenting.STT to stringResource(Res.string.stt_transcription_label),
                         Presenting.NONE to stringResource(Res.string.obs_mode_none),
                     )
                     modes.chunked(2).forEach { pair ->

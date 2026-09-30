@@ -384,7 +384,6 @@
     <string name="customize_theme_use_default_font">Use default</string>
     <string name="customize_theme_text_size">Text size</string>
     <string name="customize_theme_text_size_small">Small</string>
-    <string name="customize_theme_text_size_default">Default</string>
     <string name="customize_theme_text_size_large">Large</string>
     <string name="customize_theme_text_size_extra_large">Extra large</string>
     <string name="customize_theme_margin">Margin</string>
@@ -895,7 +894,6 @@
 
     <!-- Projection Settings Tab -->
     <string name="window_position">Window Position</string>
-    <string name="element_offset_enabled">Position</string>
     <string name="element_offset_x">X %</string>
     <string name="element_offset_y">Y %</string>
     <string name="auto_fit_scope">Auto fits</string>
@@ -997,7 +995,6 @@
     <string name="customize_type_image">Image</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparent</string>
-    <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="percent_suffix">%</string>
@@ -1096,7 +1093,6 @@
     <!-- Background Settings Tab: the surface rail and the editor beside it -->
     <string name="background_surfaces">Backgrounds</string>
     <string name="background_group_defaults">Defaults</string>
-    <string name="background_scope_default">Default</string>
     <string name="background_scope_default_lower_third">Default Lower Third</string>
     <string name="background_scope_default_meta">Bible or Songs set to Default</string>
     <string name="background_scope_default_lower_third_meta">Lower third set to Default</string>
@@ -1461,7 +1457,6 @@
     <string name="canvas_verse_style">Verse Style</string>
     <string name="canvas_reference_style">Reference Style</string>
     <string name="canvas_text_color">Text Color</string>
-    <string name="canvas_text_bg_color">Background Color</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24h</string>
@@ -2165,7 +2160,6 @@
     <string name="obs_mode_website">Website</string>
     <string name="obs_mode_canvas">Canvas</string>
     <string name="obs_mode_qa">Q&amp;A</string>
-    <string name="obs_mode_stt">Transcription</string>
     <string name="obs_mode_none">Clear Display</string>
     <string name="konami_dialog_title">You found it!</string>
     <string name="konami_dialog_headline">Cheat Code Activated</string>
@@ -2514,7 +2508,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Preview</string>
     <string name="font_preview_sample">Amazing grace, how sweet the sound</string>
     <string name="font_warning_no_cyrillic">%1$s has no Cyrillic glyphs — Cyrillic verses fall back to another font on screen.</string>
     <string name="font_warning_no_hebrew">%1$s has no Hebrew glyphs — Hebrew text falls back to another font on screen.</string>
@@ -2562,7 +2555,6 @@
     <string name="unit_px">px</string>
     <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
     <string name="quick_background_reset">Back to normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · manage in Settings</string>
     <string name="quick_backgrounds">Quick backgrounds</string>
     <string name="quick_backgrounds_help">Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, drag it to change which key reaches it. Picking one during a service overrides every screen until you go back to normal — it changes nothing here.</string>
@@ -2666,7 +2658,6 @@
     <string name="profile_nav_profile">Profile</string>
     <string name="profile_nav_appearance">Appearance</string>
     <string name="profile_nav_stage_monitor">Stage monitor</string>
-    <string name="profile_nav_general">General</string>
     <string name="profile_nav_outputs">Outputs</string>
     <string name="profile_nav_content">Content &amp; sources</string>
     <string name="profile_nav_stage_layout">Stage layout</string>
@@ -2674,7 +2665,6 @@
     <string name="profile_search_settings">Search settings</string>
     <string name="profile_nav_no_matches">No settings match.</string>
     <string name="profile_page_not_shown">%1$s is not shown on this profile, so these settings change nothing yet. Turn it on in Content &amp; sources.</string>
-    <string name="profile_page_title">%1$s · %2$s</string>
     <string name="profile_detail_basic">Basic</string>
     <string name="profile_detail_advanced">Advanced</string>
     <string name="profile_shown_on">Shown on</string>
@@ -2687,7 +2677,6 @@
     <string name="profile_name">Name</string>
     <string name="profile_display_mode">Display mode</string>
     <string name="profile_mode_full">Full screen</string>
-    <string name="profile_mode_lower_third">Lower third</string>
     <string name="profile_mode_stage">Stage monitor</string>
     <string name="profile_actions">Actions</string>
     <string name="profile_duplicate_sub">Makes a standalone copy with the current values.</string>
@@ -2789,7 +2778,6 @@
     <string name="profile_box_item_qr_code">QR code</string>
     <string name="profile_box_item_qr_message">QR message</string>
     <string name="profile_box_item_transcript">Transcript</string>
-    <string name="profile_box_item_translation">Translation</string>
     <string name="profile_box_sub">Place this item in a box of its own, drawn and resized on the preview. Its text fits inside the box.</string>
     <string name="profile_box_vertical">Vertical</string>
     <string name="profile_box_pick_translation">Each translation has its own box. Pick a translation above to place it, or set Languages to Share one box under Advanced.</string>
@@ -2842,17 +2830,14 @@
     <string name="profile_section_label">Section label</string>
     <string name="profile_section_label_sub">Shows Verse 1, Chorus and so on with the lyrics.</string>
     <string name="profile_slide_element">Element</string>
-    <string name="profile_song_position">Position</string>
     <string name="profile_position_top">Top</string>
     <string name="profile_position_above_lyrics">Above lyrics</string>
     <string name="profile_position_below_lyrics">Below lyrics</string>
     <string name="profile_position_bottom">Bottom</string>
-    <string name="profile_group_look">Look</string>
     <string name="profile_live_on">Live on %1$s. Changes show there right away.</string>
     <string name="profile_live_none">Not shown on any output yet.</string>
     <string name="profile_live_outputs">Outputs</string>
     <string name="profile_context_standalone">Standalone. Link it to a master in General.</string>
-    <string name="profile_context_open_general">General</string>
     <string name="profile_song_look_ahead">Song look-ahead</string>
     <string name="profile_text_autofit_scope">Fit across</string>
     <string name="profile_menu_rename">Rename</string>
@@ -2871,13 +2856,10 @@
     <string name="profile_banner_unlinked_rest">All values were kept. Changes to %1$s no longer apply.</string>
     <string name="profile_undo">Undo</string>
     <string name="profile_inherited_tooltip">From %1$s. Change it to set it for %2$s only.</string>
-    <string name="profile_master_value">%1$s: %2$s</string>
     <string name="profile_defaults">defaults</string>
-    <string name="profile_default_value">Default</string>
     <string name="profile_revert">Revert</string>
     <string name="profile_revert_to">Revert to %1$s</string>
     <string name="profile_different_from">Different from %1$s</string>
-    <string name="profile_show_more">Show %1$d more</string>
     <string name="profile_unlink">Unlink</string>
     <string name="profile_linked_profiles">Linked profiles</string>
     <string name="profile_mode_locked_sub">Set by %1$s. Unlink to change it.</string>
@@ -2928,8 +2910,6 @@
     <string name="profile_box_opacity">Opacity</string>
     <string name="profile_place_on_screen">Place on screen</string>
     <string name="profile_caption_mode">Captions show</string>
-    <string name="profile_caption_transcription">Transcription</string>
-    <string name="profile_caption_translation">Translation</string>
     <string name="profile_caption_both">Both</string>
     <string name="profile_caption_layout">Layout</string>
     <string name="profile_caption_layout_stacked">Stacked</string>

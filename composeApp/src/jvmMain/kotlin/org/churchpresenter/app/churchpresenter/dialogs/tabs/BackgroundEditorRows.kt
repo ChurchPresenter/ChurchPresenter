@@ -22,7 +22,7 @@ import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.customize_background_opacity
 import churchpresenter.composeapp.generated.resources.customize_background_type
 import churchpresenter.composeapp.generated.resources.customize_type_color
-import churchpresenter.composeapp.generated.resources.customize_type_default
+import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.customize_type_gradient
 import churchpresenter.composeapp.generated.resources.customize_type_image
 import churchpresenter.composeapp.generated.resources.customize_type_lottie
@@ -324,7 +324,7 @@ internal fun backgroundTypeWord(type: String): StringResource = when (type) {
     Constants.BACKGROUND_LOTTIE -> Res.string.customize_type_lottie
     Constants.BACKGROUND_COLOR -> Res.string.customize_type_color
     Constants.BACKGROUND_CAMERA -> Res.string.background_camera_option
-    else -> Res.string.customize_type_default
+    else -> Res.string.background_default
 }
 
 /** Test handle for one background type segment. */

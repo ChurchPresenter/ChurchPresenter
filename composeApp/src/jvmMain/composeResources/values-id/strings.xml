@@ -1022,7 +1022,6 @@
     <string name="canvas_verse_style">Gaya Ayat</string>
     <string name="canvas_reference_style">Gaya Referensi</string>
     <string name="canvas_text_color">Warna Teks</string>
-    <string name="canvas_text_bg_color">Warna Latar Belakang</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_format_24h">24j</string>
@@ -1627,7 +1626,6 @@
     <string name="obs_mode_website">Situs web</string>
     <string name="obs_mode_canvas">Kanvas</string>
     <string name="obs_mode_qa">Tanya Jawab</string>
-    <string name="obs_mode_stt">Transkripsi</string>
     <string name="obs_mode_none">Bersihkan layar</string>
     <string name="konami_dialog_title">Anda menemukannya!</string>
     <string name="konami_dialog_headline">Kode rahasia aktif</string>
@@ -1969,7 +1967,6 @@
     <string name="font_category_serif">Berkait</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Pratinjau</string>
     <string name="font_preview_sample">Teks contoh dengan font yang dipilih</string>
     <string name="font_warning_no_cyrillic">%1$s tidak memiliki glif Kiril — ayat berhuruf Kiril akan tampil di layar dengan font lain.</string>
     <string name="font_warning_no_hebrew">%1$s tidak memiliki glif Ibrani — teks Ibrani akan tampil di layar dengan font lain.</string>
@@ -2049,7 +2046,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Latar Belakang</string>
     <string name="background_group_defaults">Bawaan</string>
-    <string name="background_scope_default">Bawaan</string>
     <string name="background_scope_default_lower_third">Lower Third bawaan</string>
     <string name="background_scope_default_meta">Saat Alkitab atau Lagu diatur ke Bawaan</string>
     <string name="background_scope_default_lower_third_meta">Saat lower third diatur ke Bawaan</string>
@@ -2067,7 +2063,6 @@
     <string name="background_above_band_fill">Warna Isian</string>
     <string name="background_above_band_opacity">Opasitas Isian</string>
     <string name="quick_background_reset">Kembali normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · dikelola di Pengaturan</string>
     <string name="quick_backgrounds">Latar cepat</string>
     <string name="quick_backgrounds_help">Latar belakang yang disimpan panel pratinjau dalam satu klik. Klik ubin untuk memilih apa yang ditampilkannya, seret untuk mengubah tombol yang menjangkaunya. Memilih satu saat ibadah menimpa semua layar sampai Anda kembali normal — di sini tidak mengubah apa pun.</string>
@@ -2102,7 +2097,6 @@
     <string name="customize_type_image">Gambar</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparan</string>
-    <string name="customize_type_default">Bawaan</string>
     <string name="customize_type_gradient">Gradien</string>
     <string name="customize_show_abbreviation">Singkatan</string>
     <string name="customize_background_opacity">Opasitas</string>

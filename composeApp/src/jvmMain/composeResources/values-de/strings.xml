@@ -979,7 +979,6 @@
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Bildschirmaufnahme</string>
     <string name="canvas_text_color">Textfarbe</string>
-    <string name="canvas_text_bg_color">Hintergrundfarbe</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Format</string>
     <string name="canvas_clock_show_hours">Stunden anzeigen</string>
@@ -1313,7 +1312,6 @@
     <string name="obs_mode_website">Website</string>
     <string name="obs_mode_canvas">Leinwand</string>
     <string name="obs_mode_qa">Fragen &amp; Antworten</string>
-    <string name="obs_mode_stt">Transkription</string>
     <string name="obs_mode_none">Anzeige löschen</string>
     <string name="konami_dialog_title">Du hast es gefunden!</string>
     <string name="konami_dialog_headline">Cheat-Code aktiviert</string>
@@ -1925,7 +1923,6 @@
     <string name="font_category_serif">Antiqua</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Vorschau</string>
     <string name="font_preview_sample">Beispieltext in der gewählten Schrift</string>
     <string name="font_warning_no_cyrillic">%1$s hat keine kyrillischen Glyphen – kyrillische Verse erscheinen am Bildschirm in einer anderen Schrift.</string>
     <string name="font_warning_no_hebrew">%1$s hat keine hebräischen Glyphen – hebräischer Text erscheint am Bildschirm in einer anderen Schrift.</string>
@@ -2005,7 +2002,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Hintergründe</string>
     <string name="background_group_defaults">Standard</string>
-    <string name="background_scope_default">Standard</string>
     <string name="background_scope_default_lower_third">Standard unteres Drittel</string>
     <string name="background_scope_default_meta">Wenn Bibel oder Lieder auf Standard stehen</string>
     <string name="background_scope_default_lower_third_meta">Wenn das untere Drittel auf Standard steht</string>
@@ -2023,7 +2019,6 @@
     <string name="background_above_band_fill">Füllfarbe</string>
     <string name="background_above_band_opacity">Deckkraft der Füllung</string>
     <string name="quick_background_reset">Zurück zum Normalzustand</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · Verwaltung in den Einstellungen</string>
     <string name="quick_backgrounds">Schnellhintergründe</string>
     <string name="quick_backgrounds_help">Hintergründe, die die Vorschauleiste einen Klick entfernt bereithält. Klicken Sie eine Kachel an, um festzulegen, was sie zeigt, ziehen Sie sie, um die zugehörige Taste zu ändern. Eine Auswahl im Gottesdienst überschreibt jeden Bildschirm, bis Sie zum Normalzustand zurückkehren — hier ändert sie nichts.</string>
@@ -2058,7 +2053,6 @@
     <string name="customize_type_image">Bild</string>
     <string name="customize_type_video">Video</string>
     <string name="customize_type_transparent">Transparent</string>
-    <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Verlauf</string>
     <string name="customize_show_abbreviation">Abkürzung</string>
     <string name="customize_background_opacity">Deckkraft</string>
