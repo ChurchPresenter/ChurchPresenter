@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.presenter.liveMerges
+import org.churchpresenter.app.churchpresenter.presenter.mergeHostIndex
 import org.churchpresenter.app.churchpresenter.dialogs.text
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.Window
@@ -764,6 +766,10 @@ private fun ApplicationScope.ChurchPresenterApp(
     val presentingModeValue = presenterManager.presentingMode.value
     LiveStatusWiring(appSettings, companionServer, presentingModeValue)
     val browserSourceServerUrlState = companionServer.serverUrl.collectAsState()
+    // Profiles merging their outputs into one picture: each merged output follows its first.
+    val outputMergesState = rememberUpdatedState(
+        remember(appSettings.projectionSettings) { appSettings.projectionSettings.liveMerges() },
+    )
     appSettings.projectionSettings.browserSourceOutputs.indices.forEach { i ->
         composeKey(i) {
             val appSettingsState = rememberUpdatedState(effectiveAppSettings)
@@ -773,7 +779,10 @@ private fun ApplicationScope.ChurchPresenterApp(
             val effectiveModeState = remember {
                 derivedStateOf {
                     effectiveOutputMode(
-                        presenterManager.browserSourceLocks.value, i, presenterManager.presentingMode.value,
+                        presenterManager.browserSourceLocks.value,
+                        // A merged output shows what its picture's first output shows.
+                        mergeHostIndex(outputMergesState.value, Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i),
+                        presenterManager.presentingMode.value,
                     )
                 }
             }
@@ -828,7 +837,10 @@ private fun ApplicationScope.ChurchPresenterApp(
             val effectiveModeState = remember {
                 derivedStateOf {
                     effectiveOutputMode(
-                        presenterManager.ndiLocks.value, i, presenterManager.presentingMode.value,
+                        presenterManager.ndiLocks.value,
+                        // A merged output shows what its picture's first output shows.
+                        mergeHostIndex(outputMergesState.value, Constants.PREVIEW_OUTPUT_NDI, i),
+                        presenterManager.presentingMode.value,
                     )
                 }
             }
@@ -900,7 +912,10 @@ private fun ApplicationScope.ChurchPresenterApp(
             val effectiveModeState = remember {
                 derivedStateOf {
                     effectiveOutputMode(
-                        presenterManager.omtLocks.value, i, presenterManager.presentingMode.value,
+                        presenterManager.omtLocks.value,
+                        // A merged output shows what its picture's first output shows.
+                        mergeHostIndex(outputMergesState.value, Constants.PREVIEW_OUTPUT_OMT, i),
+                        presenterManager.presentingMode.value,
                     )
                 }
             }

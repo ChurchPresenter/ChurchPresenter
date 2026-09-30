@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.presenter.MergedTile
+import org.churchpresenter.app.churchpresenter.presenter.liveMerges
+import org.churchpresenter.app.churchpresenter.presenter.mergeHostIndex
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -129,6 +132,8 @@ internal fun PresenterWindows(
     }
 
     val availableScreens = nonPrimaryIndices(screens.toList(), defaultScreenDevice())
+    // Profiles that merge their outputs into one picture -- see OutputMerge.kt.
+    val merges = remember(proj) { proj.liveMerges() }
 
     val deckLinkDeviceCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
     val windowCount = presenterWindowCount(availableScreens.size, deckLinkDeviceCount)
@@ -144,7 +149,14 @@ internal fun PresenterWindows(
         // shows, used below wherever this file itself (not `PresenterOutputContent`, which
         // resolves its own) needs to know the output's display mode or background switches.
         val profile = proj.profileFor(screenAssignment) ?: OutputProfile()
-        val effectiveMode = effectiveOutputMode(screenLocks, slotIndex, presentingMode)
+        val outputKey = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, slotIndex)
+        val merge = merges[outputKey]
+        // Every tile of one picture shows what its first output shows, lock and all.
+        val effectiveMode = effectiveOutputMode(
+            screenLocks,
+            mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex),
+            presentingMode,
+        )
 
         when {
             isFallback -> {
@@ -173,7 +185,13 @@ internal fun PresenterWindows(
                     resizable = true,
                     alwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
                 ) {
-                    presenterOutputContent(screenAssignment, effectiveMode, fallbackIndex + 1)
+                    // A merged dev window shows its own tile of the picture; its number is drawn
+                    // over the tile rather than inside the picture, where it would land on one tile.
+                    MergedTile(merge, outputKey) {
+                        val number = (fallbackIndex + 1).takeIf { merge == null }
+                        presenterOutputContent(screenAssignment, effectiveMode, number)
+                    }
+                    if (merge != null && identifyingScreen) IdentifyScreenOverlay(fallbackIndex + 1)
                 }
             }
 
@@ -186,6 +204,8 @@ internal fun PresenterWindows(
                         appSettings = appSettings,
                         mediaViewModel = mediaViewModel,
                         isLowerThird = profile.isLowerThird,
+                        merge = merge,
+                        mergeOutput = outputKey,
                     ) {
                         var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                         val screenCrossfadeActive = isScreenCrossfadeActive(
@@ -338,14 +358,17 @@ internal fun PresenterWindows(
                 positionalFallback = availableScreens.getOrNull(i),
                 )
 
-            if (targetScreenIndex == null || !isScreenIndexValid(targetScreenIndex, screens.size)) continue
+            // A merge of real displays opens one window, on its first display, across them all.
+            val attached = screens.map { it.defaultConfiguration.bounds.asDisplayRect() }
+            val b = screenWindowRect(merge, outputKey, attached) {
+                targetScreenIndex?.takeIf { isScreenIndexValid(it, screens.size) }?.let { attached[it] }
+            } ?: continue
 
             val showBg = showsOutputBackground(profile)
 
             val primaryRole = screenAssignment.primaryOutputRole
 
             val windowState = remember(i) {
-                val b = screens[targetScreenIndex].defaultConfiguration.bounds
                 WindowState(
                     placement = WindowPlacement.Floating,
                     position = WindowPosition(b.x.dp, b.y.dp),
@@ -354,8 +377,9 @@ internal fun PresenterWindows(
                 )
             }
 
-            LaunchedEffect(targetScreenIndex) {
-                val b = screens[targetScreenIndex].defaultConfiguration.bounds
+            // Keyed on the rectangle, not the display's index: a merge, an unmerge or a display
+            // moving all change where the window belongs without changing which slot it is.
+            LaunchedEffect(b) {
                 windowState.position = WindowPosition(b.x.dp, b.y.dp)
                 windowState.size = DpSize(b.width.dp, b.height.dp)
             }

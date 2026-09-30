@@ -153,6 +153,12 @@ data class OutputProfile(
      * that follows nothing.
      */
     val overrides: Set<String> = emptySet(),
+    /**
+     * This profile's outputs merged into one picture, or null when each draws on its own -- see
+     * `OutputMerge.kt`. Never followed from a master: its members are the outputs following *this*
+     * profile, which a linked profile does not share. See `LinkedProfilePaths.IDENTITY_KEYS`.
+     */
+    val merge: OutputMerge? = null,
 ) {
     /** Where [content] sits on this profile — always [LowerThirdPlacement.FULL_SCREEN] off a lower third. */
     fun placementFor(content: PlaceableContent): LowerThirdPlacement =

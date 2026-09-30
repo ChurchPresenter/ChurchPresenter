@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.app.churchpresenter.presenter.liveMerges
+import org.churchpresenter.app.churchpresenter.presenter.sizedAs
+import churchpresenter.composeapp.generated.resources.preview_merged_label
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -297,6 +300,19 @@ private fun previewEntries(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ): List<PreviewEntry> {
     val context = PreviewContext(presenterManager, appSettings, serverUrl, qaDisplayUrl, sttManager, onSettingsChange)
+    // A merged picture is previewed once, at its own shape, under its first output; the rest of
+    // its outputs are that same picture and are left out.
+    val merges = remember(proj) { proj.liveMerges() }
+    val mergedLabel = stringResource(Res.string.preview_merged_label)
+    fun PreviewEntry.merged(kind: String, index: Int): PreviewEntry? {
+        val key = Constants.previewOutputKey(kind, index)
+        val merge = merges[key] ?: return this
+        return if (merge.host != key) null else this
+    }
+    fun ScreenAssignment.forPreview(kind: String, index: Int): ScreenAssignment =
+        merges[Constants.previewOutputKey(kind, index)]?.let { sizedAs(it) } ?: this
+    fun String.forPreview(kind: String, index: Int): String =
+        if (merges.containsKey(Constants.previewOutputKey(kind, index))) "$this $mergedLabel" else this
     return buildList {
         for (i in 0 until displayCount) {
             val screenAssignment = proj.getAssignment(i)
@@ -311,14 +327,18 @@ private fun previewEntries(
             // panel is the one place they watch all service long, so a booth driving "Foyer TV"
             // and "Balcony" should not have to remember which of those is Screen 2.
             val label = proj.screenLabelOr(screenAssignment, stringResource(Res.string.screen_number, i + 1))
-            add(context.entry(OutputKind.SCREEN, i, screenAssignment, label))
+            val screen = Constants.PREVIEW_OUTPUT_SCREEN
+            context.entry(OutputKind.SCREEN, i, screenAssignment.forPreview(screen, i), label.forPreview(screen, i))
+                .merged(screen, i)?.let(::add)
         }
 
         // Browser Source outputs — virtual, no physical hardware, so they get their own
         // loop over ProjectionSettings.browserSourceOutputs and their own lock index space.
         proj.browserSourceOutputs.forEachIndexed { i, output ->
             val label = output.browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1))
-            add(context.entry(OutputKind.BROWSER_SOURCE, i, output, label))
+            val bs = Constants.PREVIEW_OUTPUT_BROWSER_SOURCE
+            context.entry(OutputKind.BROWSER_SOURCE, i, output.forPreview(bs, i), label.forPreview(bs, i))
+                .merged(bs, i)?.let(::add)
         }
 
         // NDI outputs — virtual in exactly the same way as the Browser Source ones above, so they
@@ -328,7 +348,9 @@ private fun previewEntries(
         proj.ndiOutputs.forEachIndexed { i, output ->
             if (!output.ndiEnabled) return@forEachIndexed
             val label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1))
-            add(context.entry(OutputKind.NDI, i, output, label))
+            val ndi = Constants.PREVIEW_OUTPUT_NDI
+            context.entry(OutputKind.NDI, i, output.forPreview(ndi, i), label.forPreview(ndi, i))
+                .merged(ndi, i)?.let(::add)
         }
 
         // OMT outputs, in their own loop and lock index space for the reasons NDI's are, and
@@ -336,7 +358,9 @@ private fun previewEntries(
         proj.omtOutputs.forEachIndexed { i, output ->
             if (!output.omtEnabled) return@forEachIndexed
             val label = output.omtLabelOr(stringResource(Res.string.omt_output_numbered, i + 1))
-            add(context.entry(OutputKind.OMT, i, output, label))
+            val omt = Constants.PREVIEW_OUTPUT_OMT
+            context.entry(OutputKind.OMT, i, output.forPreview(omt, i), label.forPreview(omt, i))
+                .merged(omt, i)?.let(::add)
         }
     }
 }

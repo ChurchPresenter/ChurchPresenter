@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.DisplayRect
+import org.churchpresenter.settings.ResolvedMerge
+import java.awt.Rectangle
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings
@@ -804,6 +807,37 @@ internal fun primaryOutputScreenIndex(
 ): Int? = matchedByBounds
     ?: savedDisplay.takeIf { isScreenIndexValid(it, screenCount) }
     ?: positionalFallback
+
+/**
+ * Where a merge of real displays opens its one window: across the whole picture -- or nowhere
+ * while any of its displays is missing from [attached], since half a video wall is not a picture
+ * anyone wants and the window would land across whatever took that display's place. It opens again
+ * by itself when the display comes back, exactly as a single-display output does.
+ */
+internal fun mergedWindowBounds(merge: ResolvedMerge, attached: List<DisplayRect>): DisplayRect? {
+    val desktop = merge.desktop ?: return null
+    val members = merge.tiles.values.map { DisplayRect(desktop.x + it.x, desktop.y + it.y, it.width, it.height) }
+    return desktop.takeIf { attached.containsAll(members) }
+}
+
+/**
+ * Where a screen output's window goes: its own display ([single]) when it is merged with nothing;
+ * nowhere for a merged display that is not the first of its merge, whose window covers it; and
+ * across the whole picture for that first one -- see [mergedWindowBounds].
+ */
+internal fun screenWindowRect(
+    merge: ResolvedMerge?,
+    output: String,
+    attached: List<DisplayRect>,
+    single: () -> DisplayRect?,
+): DisplayRect? = when {
+    merge == null -> single()
+    merge.host != output -> null
+    else -> mergedWindowBounds(merge, attached)
+}
+
+/** A monitor's AWT bounds as the settings module's rectangle. */
+internal fun Rectangle.asDisplayRect(): DisplayRect = DisplayRect(x, y, width, height)
 
 /** The smallest the main window may open at, whatever was saved. */
 internal const val MIN_MAIN_WINDOW_WIDTH = 800

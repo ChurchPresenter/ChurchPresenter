@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import org.churchpresenter.settings.ResolvedMerge
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -64,10 +65,14 @@ fun DeckLinkComposeOutput(
     appSettings: AppSettings,
     mediaViewModel: MediaViewModel,
     isLowerThird: Boolean = false,
+    /** The merged picture this device shows a tile of, and its output key in it -- see [mergeTile]. */
+    merge: ResolvedMerge? = null,
+    mergeOutput: String = "",
     content: @Composable BoxScope.() -> Unit
 ) {
     val currentAppSettings by rememberUpdatedState(appSettings)
     val currentIsLowerThird by rememberUpdatedState(isLowerThird)
+    val currentMerge by rememberUpdatedState(merge)
 
     val appIconImage = rememberAppIconImage()
     val frameTitle = stringResource(Res.string.decklink_output_title, deviceIndex)
@@ -97,13 +102,16 @@ fun DeckLinkComposeOutput(
 
         composePanel.setContent {
             CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                PresenterScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    appSettings = currentAppSettings,
-                    outputRole = renderRole,
-                    isLowerThird = currentIsLowerThird
-                ) {
-                    content()
+                // The background too is part of the picture, so the whole screen is the tile.
+                MergedTile(currentMerge, mergeOutput) {
+                    PresenterScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        appSettings = currentAppSettings,
+                        outputRole = renderRole,
+                        isLowerThird = currentIsLowerThird
+                    ) {
+                        content()
+                    }
                 }
             }
         }

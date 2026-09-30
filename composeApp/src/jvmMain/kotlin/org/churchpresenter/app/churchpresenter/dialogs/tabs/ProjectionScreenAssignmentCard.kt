@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.settings.mergingProfileOf
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.text.KeyboardOptions
@@ -538,6 +539,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             OutputProfilePicker(
                 profiles = proj.outputProfiles,
                 activeProfileId = assignment.activeProfileId,
+                mergedBy = proj.outputProfiles.mergingProfileOf(
+                    Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, i),
+                    assignment.activeProfileId,
+                ),
                 modifier = Modifier.width(langDropdownWidth),
                 onPick = { pickedId ->
                     onSettingsChange { s ->

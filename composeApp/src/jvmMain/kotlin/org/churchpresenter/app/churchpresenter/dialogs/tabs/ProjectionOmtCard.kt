@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.settings.mergingProfileOf
+import org.churchpresenter.settings.utils.Constants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -561,6 +563,10 @@ private fun OmtOutputRow(
                     OutputProfilePicker(
                         profiles = outputProfiles,
                         activeProfileId = output.activeProfileId,
+                        mergedBy = outputProfiles.mergingProfileOf(
+                            Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_OMT, index),
+                            output.activeProfileId,
+                        ),
                         onPick = { pickedId -> update(output.copy(activeProfileId = pickedId)) },
                     )
                 }

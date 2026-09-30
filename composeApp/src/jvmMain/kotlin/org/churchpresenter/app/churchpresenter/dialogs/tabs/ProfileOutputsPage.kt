@@ -198,6 +198,17 @@ internal fun ProfileOutputsPage(
             }
         }
     }
+    ProfileMergeCard(
+        profile = profile,
+        proj = proj,
+        tiles = tiles,
+        onMergeChange = { merge ->
+            onProjectionChange { p ->
+                val profiles = p.outputProfiles.map { if (it.id == profile.id) it.copy(merge = merge) else it }
+                p.copy(outputProfiles = profiles)
+            }
+        },
+    )
 }
 
 @Composable

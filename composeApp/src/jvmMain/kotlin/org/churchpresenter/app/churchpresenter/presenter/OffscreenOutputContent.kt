@@ -116,6 +116,12 @@ internal fun OffscreenOutputContent(
             // (main.kt). showBibleBackground/showSongsBackground below are an additional
             // layer on top of this, not a replacement for it.
             val showBg = if (isLowerThird) profile.showLowerThirdBackground else profile.showFullscreenBackground
+            // One tile of a merged picture shows only its own part of it -- see MergeTile.kt. The
+            // identify card below is left out of that, so it names this output, not the picture.
+            val mergeOutput = Constants.previewOutputKey(context.kind.previewKind, outputIndex)
+            val merge = remember(globalSettings.projectionSettings) {
+                globalSettings.projectionSettings.liveMerges()[mergeOutput]
+            }
 
             if (isIdentifying) {
                 Box(
@@ -142,7 +148,7 @@ internal fun OffscreenOutputContent(
                         )
                     )
                 }
-            } else if (isStageMonitor) {
+            } else MergedTile(merge, mergeOutput) { if (isStageMonitor) {
                 StageMonitorScreen(
                     sm = appSettings.stageMonitorSettings,
                     presentingMode = effectiveMode,
@@ -343,6 +349,7 @@ internal fun OffscreenOutputContent(
                         }
                     }
                 }
+            }
             }
         }
 }
