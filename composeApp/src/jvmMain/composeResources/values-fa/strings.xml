@@ -166,11 +166,9 @@
     <string name="report_bug">گزارش اشکال</string>
     <string name="submit_feature_request">درخواست ویژگی</string>
     <string name="action_ok">تأیید</string>
-    <string name="menu_help_item">راهنما</string>
     <string name="menu_how_to_blog">وبلاگ آموزشی</string>
     <string name="menu_check_for_updates">بررسی به‌روزرسانی…</string>
     <string name="menu_keyboard_shortcuts">میان‌برهای صفحه‌کلید</string>
-    <string name="keyboard_shortcuts_title">میان‌برهای صفحه‌کلید</string>
     <string name="shortcut_category_global">همگانی</string>
     <string name="shortcut_category_bible">زبانه کتاب‌مقدس</string>
     <string name="shortcut_category_songs">زبانه سرودها</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">افزودن فایل‌ها به برنامه</string>
     <string name="tooltip_toggle_displays">روشن/خاموش کردن نمایشگرهای خروجی</string>
     <string name="tooltip_settings">تنظیمات</string>
-    <string name="tooltip_theme_light">پوسته روشن</string>
     <string name="tooltip_theme_dark">پوسته تیره</string>
     <string name="tooltip_theme_system">پوسته سیستم</string>
     <string name="tooltip_remove">حذف</string>
@@ -1913,7 +1910,6 @@
     <string name="planning_center_disconnect">قطع اتصال</string>
     <string name="planning_center_status_connected">متصل با نام %1$s</string>
     <string name="planning_center_status_connecting">در حال اتصال…</string>
-    <string name="planning_center_status_error">خطا: %1$s</string>
     <string name="planning_center_import_title">درون‌بری از Planning Center</string>
     <string name="planning_center_import_service_type">گونهٔ مراسم</string>
     <string name="planning_center_import_select_plan">برنامه‌ای برگزینید</string>
@@ -1991,8 +1987,6 @@
     <string name="bible_preview_sample_verse">زیرا خدا جهان را چنان محبت کرد که پسر یگانه خود را داد.</string>
     <string name="bible_preview_sample_book">یوحنا</string>
     <string name="bible_preview_no_translations">برای دیدن آن در اینجا، یک ترجمه اضافه کنید</string>
-    <string name="song_preview_full_screen">پیش‌نمایش تمام‌صفحه</string>
-    <string name="song_preview_lower_third">پیش‌نمایش نوار پایین</string>
     <string name="song_element_number">شماره</string>
     <string name="song_element_title">عنوان</string>
     <string name="song_element_lyrics">متن سرود</string>
@@ -2249,7 +2243,6 @@
     <string name="ffmpeg_missing_help">دوربین‌ها و کارت‌های ضبط با ffmpeg باز می‌شوند. این نسخه باید یکی داشته باشد — یک ffmpeg در زیر انتخاب کنید یا ffmpeg را نصب کنید و دوباره بررسی کنید.</string>
     <string name="ffmpeg_path_hint">یک برنامهٔ ffmpeg انتخاب کنید</string>
     <string name="ffmpeg_browse">انتخاب ffmpeg</string>
-    <string name="ffmpeg_check_again">بررسی دوباره</string>
     <string name="ffmpeg_clear">استفاده از نسخهٔ همراه</string>
     <string name="ffmpeg_download_link">دریافت ffmpeg</string>
     <string name="ffmpeg_path_help">برای استفاده از ffmpeg همراه ChurchPresenter خالی بگذارید.</string>
@@ -2350,8 +2343,6 @@
     <string name="preview_settings_show_modes">نمایش نوع نمایش</string>
     <string name="song_add_translation">افزودن یک زبان</string>
     <string name="song_fourth_language">زبان 4</string>
-    <string name="song_language_fourth">زبان 4</string>
-    <string name="song_language_third">زبان 3</string>
     <string name="song_pane_translation">زبان %1$d</string>
     <string name="song_third_language">زبان 3</string>
     <string name="song_translation_label">نام زبان</string>

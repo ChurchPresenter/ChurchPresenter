@@ -82,7 +82,6 @@
     <string name="report_bug">Fehler melden</string>
     <string name="submit_feature_request">Funktionswunsch einreichen</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Hilfe</string>
     <string name="menu_how_to_blog">Anleitungs-Blog</string>
     <string name="menu_check_for_updates">Nach Updates suchen…</string>
 
@@ -468,7 +467,6 @@
     <string name="lottie_select_preset">Vorlage zur Vorschau auswählen</string>
     <string name="delete_saved_string">Löschen</string>
     <string name="menu_keyboard_shortcuts">Tastenkürzel</string>
-    <string name="keyboard_shortcuts_title">Tastenkürzel</string>
     <string name="shortcut_category_global">Global</string>
     <string name="shortcut_category_bible">Bibel-Reiter</string>
     <string name="shortcut_category_songs">Lieder-Reiter</string>
@@ -713,7 +711,6 @@
     <string name="tooltip_collapse_schedule">Programm einklappen</string>
     <string name="tooltip_expand_schedule">Programm ausklappen</string>
     <string name="tooltip_theme_dark">Dunkles Design</string>
-    <string name="tooltip_theme_light">Helles Design</string>
     <string name="tooltip_theme_system">Systemdesign</string>
     <string name="transparent_default">Transparent (Standard)</string>
     <string name="web_add_to_schedule">Zum Programm hinzufügen</string>
@@ -1769,7 +1766,6 @@
     <string name="planning_center_disconnect">Trennen</string>
     <string name="planning_center_status_connected">Verbunden als %1$s</string>
     <string name="planning_center_status_connecting">Verbinde…</string>
-    <string name="planning_center_status_error">Fehler: %1$s</string>
     <string name="planning_center_import_title">Import aus Planning Center</string>
     <string name="planning_center_import_service_type">Service-Typ</string>
     <string name="planning_center_import_select_plan">Plan auswählen</string>
@@ -1947,8 +1943,6 @@
     <string name="bible_preview_sample_verse">Denn so hat Gott die Welt geliebt, dass er seinen eingeborenen Sohn gab.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Fügen Sie eine Übersetzung hinzu, um sie hier zu sehen</string>
-    <string name="song_preview_full_screen">Vollbild-Vorschau</string>
-    <string name="song_preview_lower_third">Vorschau Bauchbinde</string>
     <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Text</string>
@@ -2205,7 +2199,6 @@
     <string name="ffmpeg_missing_help">Kameras und Capture-Karten werden mit ffmpeg geöffnet. Dieser Build sollte eines enthalten — wähle unten ein ffmpeg oder installiere ffmpeg und prüfe erneut.</string>
     <string name="ffmpeg_path_hint">Ein ffmpeg-Programm wählen</string>
     <string name="ffmpeg_browse">ffmpeg wählen</string>
-    <string name="ffmpeg_check_again">Erneut prüfen</string>
     <string name="ffmpeg_clear">Mitgeliefertes verwenden</string>
     <string name="ffmpeg_download_link">ffmpeg herunterladen</string>
     <string name="ffmpeg_path_help">Leer lassen, um das in ChurchPresenter enthaltene ffmpeg zu verwenden.</string>
@@ -2306,8 +2299,6 @@
     <string name="preview_settings_show_modes">Anzeigetyp anzeigen</string>
     <string name="song_add_translation">Sprache hinzufügen</string>
     <string name="song_fourth_language">Sprache 4</string>
-    <string name="song_language_fourth">Sprache 4</string>
-    <string name="song_language_third">Sprache 3</string>
     <string name="song_pane_translation">Sprache %1$d</string>
     <string name="song_third_language">Sprache 3</string>
     <string name="song_translation_label">Sprachname</string>

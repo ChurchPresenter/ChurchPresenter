@@ -166,11 +166,9 @@
     <string name="report_bug">Xato haqida xabar berish</string>
     <string name="submit_feature_request">Taklif yuborish</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Yordam</string>
     <string name="menu_how_to_blog">Qoʻllanma blogi</string>
     <string name="menu_check_for_updates">Yangilanishlarni tekshirish…</string>
     <string name="menu_keyboard_shortcuts">Tezkor tugmalar</string>
-    <string name="keyboard_shortcuts_title">Tezkor tugmalar</string>
     <string name="shortcut_category_global">Umumiy</string>
     <string name="shortcut_category_bible">Muqaddas Kitob boʻlimi</string>
     <string name="shortcut_category_songs">Qoʻshiqlar boʻlimi</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Jadvalga fayllar qoʻshish</string>
     <string name="tooltip_toggle_displays">Koʻrsatuv ekranlarini yoqish/oʻchirish</string>
     <string name="tooltip_settings">Sozlamalar</string>
-    <string name="tooltip_theme_light">Yorugʻ mavzu</string>
     <string name="tooltip_theme_dark">Toʻq mavzu</string>
     <string name="tooltip_theme_system">Tizim mavzusi</string>
     <string name="tooltip_remove">Olib tashlash</string>
@@ -1913,7 +1910,6 @@
     <string name="planning_center_disconnect">Uzish</string>
     <string name="planning_center_status_connected">%1$s sifatida ulangan</string>
     <string name="planning_center_status_connecting">Ulanmoqda…</string>
-    <string name="planning_center_status_error">Xato: %1$s</string>
     <string name="planning_center_import_title">Planning Center dan import qilish</string>
     <string name="planning_center_import_service_type">Ibodat turi</string>
     <string name="planning_center_import_select_plan">Rejani tanlang</string>
@@ -1991,8 +1987,6 @@
     <string name="bible_preview_sample_verse">Zero Xudo dunyoni shunchalik sevdiki, O'zining yagona O'g'lini berdi.</string>
     <string name="bible_preview_sample_book">Yuhanno</string>
     <string name="bible_preview_no_translations">Bu yerda ko'rish uchun tarjima qo'shing</string>
-    <string name="song_preview_full_screen">To'liq ekran ko'rinishi</string>
-    <string name="song_preview_lower_third">Pastki uchlik ko'rinishi</string>
     <string name="song_element_number">Raqam</string>
     <string name="song_element_title">Sarlavha</string>
     <string name="song_element_lyrics">Qoʻshiq matni</string>
@@ -2249,7 +2243,6 @@
     <string name="ffmpeg_missing_help">Kameralar va yozib olish kartalari ffmpeg orqali ochiladi. Bu nusxada u bo‘lishi kerak — quyidan ffmpeg ni tanlang yoki ffmpeg ni o‘rnatib, qayta tekshiring.</string>
     <string name="ffmpeg_path_hint">ffmpeg dasturini tanlang</string>
     <string name="ffmpeg_browse">ffmpeg ni tanlash</string>
-    <string name="ffmpeg_check_again">Qayta tekshirish</string>
     <string name="ffmpeg_clear">O‘rnatilganini ishlatish</string>
     <string name="ffmpeg_download_link">ffmpeg ni yuklab olish</string>
     <string name="ffmpeg_path_help">ChurchPresenter bilan birga kelgan ffmpeg ni ishlatish uchun bo‘sh qoldiring.</string>
@@ -2350,8 +2343,6 @@
     <string name="preview_settings_show_modes">Ko'rsatish turini ko'rsatish</string>
     <string name="song_add_translation">Til qo'shish</string>
     <string name="song_fourth_language">4-til</string>
-    <string name="song_language_fourth">4-til</string>
-    <string name="song_language_third">3-til</string>
     <string name="song_pane_translation">%1$d-til</string>
     <string name="song_third_language">3-til</string>
     <string name="song_translation_label">Til nomi</string>

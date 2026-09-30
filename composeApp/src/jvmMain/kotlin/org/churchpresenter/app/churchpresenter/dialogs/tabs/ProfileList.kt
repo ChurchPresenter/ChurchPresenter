@@ -75,8 +75,8 @@ import churchpresenter.composeapp.generated.resources.output_profiles_tab
 import churchpresenter.composeapp.generated.resources.profile_list_hint
 import churchpresenter.composeapp.generated.resources.profile_list_new
 import churchpresenter.composeapp.generated.resources.profile_menu_create_linked
-import churchpresenter.composeapp.generated.resources.profile_menu_move_down
-import churchpresenter.composeapp.generated.resources.profile_menu_move_up
+import churchpresenter.composeapp.generated.resources.output_profile_move_down
+import churchpresenter.composeapp.generated.resources.output_profile_move_up
 import churchpresenter.composeapp.generated.resources.profile_menu_rename
 import kotlin.math.roundToInt
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
@@ -287,8 +287,8 @@ private fun profileMenu(
     val rename = stringResource(Res.string.profile_menu_rename)
     val duplicate = stringResource(Res.string.output_profile_duplicate)
     val createLinked = stringResource(Res.string.profile_menu_create_linked)
-    val up = stringResource(Res.string.profile_menu_move_up)
-    val down = stringResource(Res.string.profile_menu_move_down)
+    val up = stringResource(Res.string.output_profile_move_up)
+    val down = stringResource(Res.string.output_profile_move_down)
     val delete = stringResource(Res.string.output_profile_delete)
     return buildList {
         add(ContextMenuItem(rename, onRename))

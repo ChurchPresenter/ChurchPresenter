@@ -18,8 +18,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.song_preview_full_screen
-import churchpresenter.composeapp.generated.resources.song_preview_lower_third
+import churchpresenter.composeapp.generated.resources.bible_preview_full_screen
+import churchpresenter.composeapp.generated.resources.bible_preview_lower_third
 import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import churchpresenter.composeapp.generated.resources.song_preview_title_slide
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -153,8 +153,8 @@ internal fun SongPreviewPanel(
             label = stringResource(
                 when {
                     titleSlide -> Res.string.song_preview_title_slide
-                    target.isLowerThird -> Res.string.song_preview_lower_third
-                    else -> Res.string.song_preview_full_screen
+                    target.isLowerThird -> Res.string.bible_preview_lower_third
+                    else -> Res.string.bible_preview_full_screen
                 },
             ),
             modifier = Modifier.align(Alignment.TopStart).padding(6.dp),

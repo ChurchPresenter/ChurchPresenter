@@ -171,11 +171,9 @@
     <string name="report_bug">பிழையைத் தெரிவி</string>
     <string name="submit_feature_request">அம்ச வேண்டுகோள்</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">உதவி</string>
     <string name="menu_how_to_blog">வழிகாட்டி வலைப்பதிவு</string>
     <string name="menu_check_for_updates">புதுப்பிப்புகளைச் சரிபார்…</string>
     <string name="menu_keyboard_shortcuts">விசைப்பலகை குறுக்குவழிகள்</string>
-    <string name="keyboard_shortcuts_title">விசைப்பலகை குறுக்குவழிகள்</string>
     <string name="shortcut_category_global">பொதுவானது</string>
     <string name="shortcut_category_bible">வேதாகமத் தாவல்</string>
     <string name="shortcut_category_songs">பாடல்கள் தாவல்</string>
@@ -569,7 +567,6 @@
     <string name="schedule_add_files_title">அட்டவணையில் கோப்புகளைச் சேர்</string>
     <string name="tooltip_toggle_displays">வழங்குநர் காட்சிகளை மாற்று</string>
     <string name="tooltip_settings">அமைப்புகள்</string>
-    <string name="tooltip_theme_light">வெளிர் தோற்றம்</string>
     <string name="tooltip_theme_dark">இருண்ட தோற்றம்</string>
     <string name="tooltip_theme_system">கணினித் தோற்றம்</string>
     <string name="tooltip_remove">நீக்கு</string>
@@ -1917,7 +1914,6 @@
     <string name="planning_center_disconnect">துண்டி</string>
     <string name="planning_center_status_connected">%1$s ஆக இணைக்கப்பட்டது</string>
     <string name="planning_center_status_connecting">இணைக்கிறது…</string>
-    <string name="planning_center_status_error">பிழை: %1$s</string>
     <string name="planning_center_import_title">Planning Center இலிருந்து இறக்குமதி</string>
     <string name="planning_center_import_service_type">ஆராதனை வகை</string>
     <string name="planning_center_import_select_plan">ஒரு திட்டத்தைத் தேர்ந்தெடு</string>
@@ -1996,8 +1992,6 @@
     <string name="bible_preview_sample_verse">தேவன் தம்முடைய ஒரேபேறான குமாரனைத் தந்தருளும் அளவுக்கு உலகத்தில் அன்பு கூர்ந்தார்.</string>
     <string name="bible_preview_sample_book">யோவான்</string>
     <string name="bible_preview_no_translations">இங்கே காண ஒரு மொழிபெயர்ப்பைச் சேர்க்கவும்</string>
-    <string name="song_preview_full_screen">முழுத்திரை முன்னோட்டம்</string>
-    <string name="song_preview_lower_third">கீழ்ப்பகுதி முன்னோட்டம்</string>
     <string name="song_element_number">எண்</string>
     <string name="song_element_title">தலைப்பு</string>
     <string name="song_element_lyrics">பாடல் வரிகள்</string>
@@ -2254,7 +2248,6 @@
     <string name="ffmpeg_missing_help">கேமராக்களும் பிடிப்பு அட்டைகளும் ffmpeg மூலம் திறக்கப்படுகின்றன. இந்தப் பதிப்பில் ஒன்று இருக்க வேண்டும் — கீழே ஒரு ffmpeg ஐத் தேர்ந்தெடுக்கவும், அல்லது ffmpeg ஐ நிறுவி மீண்டும் சரிபார்க்கவும்.</string>
     <string name="ffmpeg_path_hint">ffmpeg நிரலைத் தேர்ந்தெடு</string>
     <string name="ffmpeg_browse">ffmpeg ஐத் தேர்ந்தெடு</string>
-    <string name="ffmpeg_check_again">மீண்டும் சரிபார்</string>
     <string name="ffmpeg_clear">உடன் வந்ததைப் பயன்படுத்து</string>
     <string name="ffmpeg_download_link">ffmpeg ஐப் பெறு</string>
     <string name="ffmpeg_path_help">ChurchPresenter உடன் வந்த ffmpeg ஐப் பயன்படுத்த காலியாக விடவும்.</string>
@@ -2356,8 +2349,6 @@
     <string name="preview_settings_show_modes">காட்சி வகையைக் காட்டு</string>
     <string name="song_add_translation">ஒரு மொழியைச் சேர்க்கவும்</string>
     <string name="song_fourth_language">மொழி 4</string>
-    <string name="song_language_fourth">மொழி 4</string>
-    <string name="song_language_third">மொழி 3</string>
     <string name="song_pane_translation">மொழி %1$d</string>
     <string name="song_third_language">மொழி 3</string>
     <string name="song_translation_label">மொழியின் பெயர்</string>

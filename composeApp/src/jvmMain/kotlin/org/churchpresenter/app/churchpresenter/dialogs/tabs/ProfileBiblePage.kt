@@ -22,7 +22,7 @@ import churchpresenter.composeapp.generated.resources.profile_shift
 import churchpresenter.composeapp.generated.resources.profile_shift_element_sub
 import churchpresenter.composeapp.generated.resources.profile_shift_sub
 import churchpresenter.composeapp.generated.resources.profile_space_between_translations
-import churchpresenter.composeapp.generated.resources.profile_split_long_verses
+import churchpresenter.composeapp.generated.resources.bible_split_long_verses
 import churchpresenter.composeapp.generated.resources.profile_split_words
 import churchpresenter.composeapp.generated.resources.profile_translation_divider
 import churchpresenter.composeapp.generated.resources.words_suffix
@@ -562,7 +562,7 @@ private fun TranslationsGroup(
             )
         }
         SettingsSwitchRow(
-            stringResource(Res.string.profile_split_long_verses),
+            stringResource(Res.string.bible_split_long_verses),
             bs.splitLongVerses,
             { v -> updateBible { it.copy(splitLongVerses = v) } },
             sub = if (bs.splitLongVerses) stringResource(Res.string.profile_split_words) else null,

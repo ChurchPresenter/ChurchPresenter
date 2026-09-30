@@ -103,7 +103,6 @@
     <string name="report_bug">Nahlásit chybu</string>
     <string name="submit_feature_request">Navrhnout funkci</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Nápověda</string>
     <string name="menu_how_to_blog">Blog s návody</string>
     <string name="menu_check_for_updates">Zkontrolovat aktualizace…</string>
 
@@ -509,7 +508,6 @@
     <string name="lottie_select_preset">Vyberte předvolbu k náhledu</string>
     <string name="delete_saved_string">Smazat</string>
     <string name="menu_keyboard_shortcuts">Klávesové zkratky</string>
-    <string name="keyboard_shortcuts_title">Klávesové zkratky</string>
     <string name="shortcut_category_global">Globální</string>
     <string name="shortcut_category_bible">Záložka Bible</string>
     <string name="shortcut_category_songs">Záložka Písně</string>
@@ -762,7 +760,6 @@
     <string name="tooltip_collapse_schedule">Sbalit program</string>
     <string name="tooltip_expand_schedule">Rozbalit program</string>
     <string name="tooltip_theme_dark">Tmavý motiv</string>
-    <string name="tooltip_theme_light">Světlý motiv</string>
     <string name="tooltip_theme_system">Systémový motiv</string>
     <string name="transparent_default">Průhledné (Výchozí)</string>
     <string name="web_add_to_schedule">Přidat do programu</string>
@@ -1778,7 +1775,6 @@
     <string name="planning_center_disconnect">Odpojit</string>
     <string name="planning_center_status_connected">Připojeno jako %1$s</string>
     <string name="planning_center_status_connecting">Připojování…</string>
-    <string name="planning_center_status_error">Chyba: %1$s</string>
     <string name="planning_center_import_title">Import z Planning Center</string>
     <string name="planning_center_import_service_type">Typ bohoslužby</string>
     <string name="planning_center_import_select_plan">Vyberte plán</string>
@@ -1956,8 +1952,6 @@
     <string name="bible_preview_sample_verse">Neboť tak Bůh miloval svět, že dal svého jednorozeného Syna.</string>
     <string name="bible_preview_sample_book">Jan</string>
     <string name="bible_preview_no_translations">Přidejte překlad, abyste jej zde viděli</string>
-    <string name="song_preview_full_screen">Náhled celé obrazovky</string>
-    <string name="song_preview_lower_third">Náhled dolní třetiny</string>
     <string name="song_element_number">Číslo</string>
     <string name="song_element_title">Název</string>
     <string name="song_element_lyrics">Text</string>
@@ -2214,7 +2208,6 @@
     <string name="ffmpeg_missing_help">Kamery a záznamové karty se otevírají pomocí ffmpeg. Toto sestavení by jej mělo obsahovat — vyberte ffmpeg níže, nebo nainstalujte ffmpeg a zkontrolujte znovu.</string>
     <string name="ffmpeg_path_hint">Vyberte program ffmpeg</string>
     <string name="ffmpeg_browse">Vybrat ffmpeg</string>
-    <string name="ffmpeg_check_again">Zkontrolovat znovu</string>
     <string name="ffmpeg_clear">Použít přibalený</string>
     <string name="ffmpeg_download_link">Stáhnout ffmpeg</string>
     <string name="ffmpeg_path_help">Ponechte prázdné, aby se použil ffmpeg dodaný s ChurchPresenter.</string>
@@ -2315,8 +2308,6 @@
     <string name="preview_settings_show_modes">Zobrazit typ zobrazení</string>
     <string name="song_add_translation">Přidat jazyk</string>
     <string name="song_fourth_language">Jazyk 4</string>
-    <string name="song_language_fourth">Jazyk 4</string>
-    <string name="song_language_third">Jazyk 3</string>
     <string name="song_pane_translation">Jazyk %1$d</string>
     <string name="song_third_language">Jazyk 3</string>
     <string name="song_translation_label">Název jazyka</string>

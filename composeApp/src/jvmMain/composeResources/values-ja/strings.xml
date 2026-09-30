@@ -166,11 +166,9 @@
     <string name="report_bug">不具合を報告</string>
     <string name="submit_feature_request">機能のご要望</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">ヘルプ</string>
     <string name="menu_how_to_blog">使い方ブログ</string>
     <string name="menu_check_for_updates">更新を確認…</string>
     <string name="menu_keyboard_shortcuts">キーボードショートカット</string>
-    <string name="keyboard_shortcuts_title">キーボードショートカット</string>
     <string name="shortcut_category_global">全体</string>
     <string name="shortcut_category_bible">聖書タブ</string>
     <string name="shortcut_category_songs">賛美歌タブ</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">進行表にファイルを追加</string>
     <string name="tooltip_toggle_displays">プレゼンター画面の表示を切り替え</string>
     <string name="tooltip_settings">設定</string>
-    <string name="tooltip_theme_light">ライトテーマ</string>
     <string name="tooltip_theme_dark">ダークテーマ</string>
     <string name="tooltip_theme_system">システムテーマ</string>
     <string name="tooltip_remove">削除</string>
@@ -1913,7 +1910,6 @@
     <string name="planning_center_disconnect">切断</string>
     <string name="planning_center_status_connected">%1$s として接続中</string>
     <string name="planning_center_status_connecting">接続中…</string>
-    <string name="planning_center_status_error">エラー: %1$s</string>
     <string name="planning_center_import_title">Planning Center から取り込む</string>
     <string name="planning_center_import_service_type">礼拝の種類</string>
     <string name="planning_center_import_select_plan">プランを選択</string>
@@ -1991,8 +1987,6 @@
     <string name="bible_preview_sample_verse">神は、実に、そのひとり子をお与えになったほどに、世を愛された。</string>
     <string name="bible_preview_sample_book">ヨハネ</string>
     <string name="bible_preview_no_translations">翻訳を追加するとここに表示されます</string>
-    <string name="song_preview_full_screen">全画面プレビュー</string>
-    <string name="song_preview_lower_third">ローワーサードのプレビュー</string>
     <string name="song_element_number">番号</string>
     <string name="song_element_title">タイトル</string>
     <string name="song_element_lyrics">歌詞</string>
@@ -2249,7 +2243,6 @@
     <string name="ffmpeg_missing_help">カメラやキャプチャカードは ffmpeg で開きます。このビルドには同梱されているはずです。下で ffmpeg を選ぶか、ffmpeg をインストールしてからもう一度確認してください。</string>
     <string name="ffmpeg_path_hint">ffmpeg プログラムを選択</string>
     <string name="ffmpeg_browse">ffmpeg を選択</string>
-    <string name="ffmpeg_check_again">もう一度確認</string>
     <string name="ffmpeg_clear">同梱版を使用</string>
     <string name="ffmpeg_download_link">ffmpeg を入手</string>
     <string name="ffmpeg_path_help">空のままにすると ChurchPresenter に同梱の ffmpeg を使用します。</string>
@@ -2350,8 +2343,6 @@
     <string name="preview_settings_show_modes">表示タイプを表示</string>
     <string name="song_add_translation">言語を追加</string>
     <string name="song_fourth_language">言語4</string>
-    <string name="song_language_fourth">言語4</string>
-    <string name="song_language_third">言語3</string>
     <string name="song_pane_translation">言語%1$d</string>
     <string name="song_third_language">言語3</string>
     <string name="song_translation_label">言語名</string>

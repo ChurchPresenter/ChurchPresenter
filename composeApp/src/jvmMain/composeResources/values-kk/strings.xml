@@ -82,7 +82,6 @@
     <string name="report_bug">Қате туралы хабарлау</string>
     <string name="submit_feature_request">Мүмкіндік сұрауын жіберу</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Анықтама</string>
     <string name="menu_how_to_blog">Нұсқаулық блог</string>
     <string name="menu_check_for_updates">Жаңартуларды тексеру…</string>
 
@@ -468,7 +467,6 @@
     <string name="lottie_select_preset">Алдын ала қарау үшін таңдаңыз</string>
     <string name="delete_saved_string">Жою</string>
     <string name="menu_keyboard_shortcuts">Пернелер тіркесімдері</string>
-    <string name="keyboard_shortcuts_title">Пернелер тіркесімдері</string>
     <string name="shortcut_category_global">Жаһандық</string>
     <string name="shortcut_category_bible">Киелі кітап қойындысы</string>
     <string name="shortcut_category_songs">Әндер қойындысы</string>
@@ -713,7 +711,6 @@
     <string name="tooltip_collapse_schedule">Бағдарламаны жию</string>
     <string name="tooltip_expand_schedule">Бағдарламаны жаю</string>
     <string name="tooltip_theme_dark">Қараңғы тақырып</string>
-    <string name="tooltip_theme_light">Ашық тақырып</string>
     <string name="tooltip_theme_system">Жүйелік тақырып</string>
     <string name="transparent_default">Мөлдір (Әдепкі)</string>
     <string name="web_add_to_schedule">Бағдарламаға қосу</string>
@@ -1769,7 +1766,6 @@
     <string name="planning_center_disconnect">Ажырату</string>
     <string name="planning_center_status_connected">%1$s ретінде қосылды</string>
     <string name="planning_center_status_connecting">Қосылуда…</string>
-    <string name="planning_center_status_error">Қате: %1$s</string>
     <string name="planning_center_import_title">Planning Center-ден импорттау</string>
     <string name="planning_center_import_service_type">Қызмет түрі</string>
     <string name="planning_center_import_select_plan">Жоспарды таңдау</string>
@@ -1947,8 +1943,6 @@
     <string name="bible_preview_sample_verse">Себебі Құдай дүниені қатты сүйгендіктен, Өзінің жалғыз Ұлын берді.</string>
     <string name="bible_preview_sample_book">Жохан</string>
     <string name="bible_preview_no_translations">Мұнда көру үшін аударма қосыңыз</string>
-    <string name="song_preview_full_screen">Толық экранды алдын ала қарау</string>
-    <string name="song_preview_lower_third">Төменгі үштікті алдын ала қарау</string>
     <string name="song_element_number">Нөмір</string>
     <string name="song_element_title">Атауы</string>
     <string name="song_element_lyrics">Мәтін</string>
@@ -2205,7 +2199,6 @@
     <string name="ffmpeg_missing_help">Камералар мен түсіру карталары ffmpeg арқылы ашылады. Бұл жинақта ол болуы керек — төменнен ffmpeg таңдаңыз немесе ffmpeg орнатып, қайта тексеріңіз.</string>
     <string name="ffmpeg_path_hint">ffmpeg бағдарламасын таңдаңыз</string>
     <string name="ffmpeg_browse">ffmpeg таңдау</string>
-    <string name="ffmpeg_check_again">Қайта тексеру</string>
     <string name="ffmpeg_clear">Кірістірілгенді қолдану</string>
     <string name="ffmpeg_download_link">ffmpeg жүктеп алу</string>
     <string name="ffmpeg_path_help">ChurchPresenter құрамындағы ffmpeg-ті қолдану үшін бос қалдырыңыз.</string>
@@ -2306,8 +2299,6 @@
     <string name="preview_settings_show_modes">Дисплей түрін көрсету</string>
     <string name="song_add_translation">Тіл қосу</string>
     <string name="song_fourth_language">4-тіл</string>
-    <string name="song_language_fourth">4-тіл</string>
-    <string name="song_language_third">3-тіл</string>
     <string name="song_pane_translation">%1$d-тіл</string>
     <string name="song_third_language">3-тіл</string>
     <string name="song_translation_label">Тіл атауы</string>

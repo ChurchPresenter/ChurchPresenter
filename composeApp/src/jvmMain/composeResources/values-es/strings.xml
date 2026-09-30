@@ -87,11 +87,9 @@
     <string name="report_bug">Reportar un error</string>
     <string name="submit_feature_request">Enviar solicitud de función</string>
     <string name="action_ok">Aceptar</string>
-    <string name="menu_help_item">Ayuda</string>
     <string name="menu_how_to_blog">Blog de tutoriales</string>
     <string name="menu_check_for_updates">Buscar actualizaciones…</string>
     <string name="menu_keyboard_shortcuts">Atajos de teclado</string>
-    <string name="keyboard_shortcuts_title">Atajos de teclado</string>
     <string name="shortcut_category_global">Global</string>
     <string name="shortcut_category_bible">Pestaña Biblia</string>
     <string name="shortcut_category_songs">Pestaña Cantos</string>
@@ -398,7 +396,6 @@
     <string name="schedule_add_files_title">Añadir archivos al programa</string>
     <string name="tooltip_toggle_displays">Alternar pantallas del presentador</string>
     <string name="tooltip_settings">Configuración</string>
-    <string name="tooltip_theme_light">Tema claro</string>
     <string name="tooltip_theme_dark">Tema oscuro</string>
     <string name="tooltip_theme_system">Tema del sistema</string>
     <string name="tooltip_remove">Eliminar</string>
@@ -1796,7 +1793,6 @@
     <string name="planning_center_disconnect">Desconectar</string>
     <string name="planning_center_status_connected">Conectado como %1$s</string>
     <string name="planning_center_status_connecting">Conectando…</string>
-    <string name="planning_center_status_error">Error: %1$s</string>
     <string name="planning_center_import_title">Importar desde Planning Center</string>
     <string name="planning_center_import_service_type">Tipo de servicio</string>
     <string name="planning_center_import_select_plan">Seleccionar un plan</string>
@@ -1974,8 +1970,6 @@
     <string name="bible_preview_sample_verse">Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito.</string>
     <string name="bible_preview_sample_book">Juan</string>
     <string name="bible_preview_no_translations">Añada una traducción para verla aquí</string>
-    <string name="song_preview_full_screen">Vista previa de pantalla completa</string>
-    <string name="song_preview_lower_third">Vista previa del tercio inferior</string>
     <string name="song_element_number">Número</string>
     <string name="song_element_title">Título</string>
     <string name="song_element_lyrics">Letra</string>
@@ -2232,7 +2226,6 @@
     <string name="ffmpeg_missing_help">Las cámaras y capturadoras se abren con ffmpeg. Esta versión debería incluir uno — elige un ffmpeg abajo, o instala ffmpeg y vuelve a comprobar.</string>
     <string name="ffmpeg_path_hint">Elige un programa ffmpeg</string>
     <string name="ffmpeg_browse">Elegir ffmpeg</string>
-    <string name="ffmpeg_check_again">Comprobar de nuevo</string>
     <string name="ffmpeg_clear">Usar el incluido</string>
     <string name="ffmpeg_download_link">Obtener ffmpeg</string>
     <string name="ffmpeg_path_help">Déjalo vacío para usar el ffmpeg incluido con ChurchPresenter.</string>
@@ -2333,8 +2326,6 @@
     <string name="preview_settings_show_modes">Mostrar tipo de pantalla</string>
     <string name="song_add_translation">Añadir un idioma</string>
     <string name="song_fourth_language">Idioma 4</string>
-    <string name="song_language_fourth">Idioma 4</string>
-    <string name="song_language_third">Idioma 3</string>
     <string name="song_pane_translation">Idioma %1$d</string>
     <string name="song_third_language">Idioma 3</string>
     <string name="song_translation_label">Nombre del idioma</string>
