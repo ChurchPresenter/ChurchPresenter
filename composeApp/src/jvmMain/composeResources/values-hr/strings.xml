@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Naziv</string>
     <string name="canvas_rotation">Rotacija</string>
     <string name="canvas_file_path">Putanja datoteke</string>
-    <string name="canvas_browse">Pregledaj</string>
     <string name="canvas_scale">Skaliranje</string>
     <string name="canvas_scale_fit">Uklopi</string>
     <string name="canvas_scale_fill">Ispuni</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Način snimanja</string>
     <string name="canvas_capture_mode_region">Dio zaslona</string>
     <string name="canvas_capture_mode_window">Prozor</string>
-    <string name="canvas_capture_window">Prozor</string>
     <string name="canvas_capture_refresh_windows">Osvježi popis prozora</string>
     <string name="canvas_capture_interval">Interval snimanja</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Broj</string>
     <string name="song_element_title">Naslov</string>
     <string name="song_element_lyrics">Tekst pjesme</string>
-    <string name="song_element_next_section">Sljedeći dio</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Skladatelj</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Boja</string>
     <string name="customize_type_image">Slika</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Prozirno</string>
     <string name="customize_type_default">Zadano</string>
     <string name="customize_type_gradient">Gradijent</string>
     <string name="customize_show_abbreviation">Kratica</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Idite na karticu Biblija i odaberite prijevode — prvi je glavni.</string>
     <string name="setup_songs_format_note">Mapa knjižnice pjesama čita datoteke .song. Pjesme spremljene u drugom formatu treba najprije pretvoriti.</string>
     <string name="setup_songs_converter_body">Prelazite sa SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ili SoftProjector? Ugrađeni pretvarač pjesama i Biblije čita sve njih — i tekstove iz PDF-a, Worda, PowerPointa i Keynotea — te zapisuje .song datoteke koje ova mapa očekuje.</string>
-    <string name="setup_songs_converter_button">Otvori pretvarač pjesama i Biblije</string>
     <string name="setup_songs_samples_note">Još nemate pjesama? Gumb „Dodaj primjere pjesama” na kartici Sustav napunit će mapu radnim skupom.</string>
     <string name="setup_proj_rows_note">Svaki povezani zaslon dobiva vlastiti redak ispod. Broj prozora prikaza proizlazi iz onoga što ondje dodijelite, pa ga ne treba postavljati ručno.</string>
     <string name="setup_proj_assign_note">Za svaki zaslon odaberite prikaz i način prikaza, a zatim u „Izlazima sadržaja” odredite što će se na njemu pojaviti. „Zamijeni stilove” daje tom zaslonu vlastiti izgled.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Generator donjih trećina</string>
     <string name="song_lottie_unsupported_note">Predložak određuje raspored i mjesto naslova. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje, razmak riječi, pregled sljedećeg i akordi se ne primjenjuju.</string>
     <string name="bible_lottie_unsupported_note">Predložak određuje raspored, mjesto reference i kako dva jezika dijele traku. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje i razmak riječi se ne primjenjuju.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Obrub</string>
     <string name="tooltip_outline_options">Opcije obruba</string>

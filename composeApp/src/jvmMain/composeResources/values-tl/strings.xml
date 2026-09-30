@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Pangalan</string>
     <string name="canvas_rotation">Rotation</string>
     <string name="canvas_file_path">Path ng file</string>
-    <string name="canvas_browse">Mag-browse</string>
     <string name="canvas_scale">Scale</string>
     <string name="canvas_scale_fit">Fit</string>
     <string name="canvas_scale_fill">Fill</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Capture Mode</string>
     <string name="canvas_capture_mode_region">Bahagi ng Screen</string>
     <string name="canvas_capture_mode_window">Window</string>
-    <string name="canvas_capture_window">Window</string>
     <string name="canvas_capture_refresh_windows">I-refresh ang Listahan ng Window</string>
     <string name="canvas_capture_interval">Interval ng Capture</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Numero</string>
     <string name="song_element_title">Pamagat</string>
     <string name="song_element_lyrics">Lyrics</string>
-    <string name="song_element_next_section">Susunod na Seksyon</string>
     <string name="song_element_author">May-akda</string>
     <string name="song_element_composer">Kompositor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Kulay</string>
     <string name="customize_type_image">Larawan</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Daglat</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Pumunta sa tab na Bibliya at piliin ang inyong mga salin — ang una ang pangunahin.</string>
     <string name="setup_songs_format_note">Binabasa ng folder ng aklatan ng awit ang mga file na .song. Ang mga awit na nakaimbak sa ibang format ay kailangang i-convert muna.</string>
     <string name="setup_songs_converter_body">Galing sa SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? Nababasa ng nakapaloob na Converter ng Awit at Bibliya ang lahat ng ito — pati ang liriko mula sa PDF, Word, PowerPoint at Keynote — at isinusulat nito ang mga file na .song na hinihingi ng folder na ito.</string>
-    <string name="setup_songs_converter_button">Buksan ang Converter ng Awit at Bibliya</string>
     <string name="setup_songs_samples_note">Wala pang awit? Pinupuno ng «Magdagdag ng halimbawang awit» sa tab na Sistema ang folder ng isang gumaganang set.</string>
     <string name="setup_proj_rows_note">Bawat nakakabit na tabing ay may sariling hilera sa ibaba. Ang bilang ng bintana ng pagtatanghal ay nagmumula sa inyong itinakda roon, kaya walang kailangang itakda nang manu-mano.</string>
     <string name="setup_proj_assign_note">Para sa bawat tabing, pumili ng display at mode ng pagpapakita, at gamitin ang «Mga labasan ng nilalaman» upang piliin kung ano ang lilitaw doon. Ang «I-overwrite ang mga estilo» ay nagbibigay sa tabing na iyon ng sariling anyo.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Lower Third Generator</string>
     <string name="song_lottie_unsupported_note">Ang template ang nagpapasya sa layout at kung saan ilalagay ang pamagat. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough, pagitan ng mga salita, look-ahead at mga chord.</string>
     <string name="bible_lottie_unsupported_note">Ang template ang nagpapasya sa layout, sa posisyon ng reference at kung paano paghahatian ng dalawang wika ang banda. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough at pagitan ng mga salita.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Balangkas</string>
     <string name="tooltip_outline_options">Mga opsyon sa balangkas</string>

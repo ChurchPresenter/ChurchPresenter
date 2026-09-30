@@ -36,7 +36,6 @@ import churchpresenter.composeapp.generated.resources.canvas_capture_height
 import churchpresenter.composeapp.generated.resources.canvas_capture_mode
 import churchpresenter.composeapp.generated.resources.canvas_capture_mode_region
 import churchpresenter.composeapp.generated.resources.canvas_capture_mode_window
-import churchpresenter.composeapp.generated.resources.canvas_capture_window
 import churchpresenter.composeapp.generated.resources.canvas_capture_refresh_windows
 import churchpresenter.composeapp.generated.resources.canvas_capture_interval
 import churchpresenter.composeapp.generated.resources.canvas_decklink_io_warning
@@ -482,7 +481,7 @@ internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, on
 
         if (windowTitles.isNotEmpty()) {
             DropdownSelector(
-                label = stringResource(Res.string.canvas_capture_window),
+                label = stringResource(Res.string.canvas_capture_mode_window),
                 items = windowTitles,
                 selected = if (source.windowTitle in windowTitles) source.windowTitle else windowTitles.first(),
                 onSelectedChange = { selected ->

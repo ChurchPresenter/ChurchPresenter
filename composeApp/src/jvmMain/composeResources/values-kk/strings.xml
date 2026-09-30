@@ -1007,7 +1007,6 @@
     <string name="canvas_capture_mode">Жазу режимі</string>
     <string name="canvas_capture_mode_region">Экран аймағы</string>
     <string name="canvas_capture_mode_window">Терезе</string>
-    <string name="canvas_capture_window">Терезе</string>
     <string name="canvas_capture_refresh_windows">Терезелер тізімін жаңарту</string>
     <string name="canvas_capture_interval">Жазу аралығы</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1028,7 +1027,6 @@
     <string name="canvas_source_name">Атауы</string>
     <string name="canvas_rotation">Айналу</string>
     <string name="canvas_file_path">Файл жолы</string>
-    <string name="canvas_browse">Шолу</string>
     <string name="canvas_scale">Масштаб</string>
     <string name="canvas_scale_fit">Сыйыстыру</string>
     <string name="canvas_scale_fill">Толтыру</string>
@@ -1948,7 +1946,6 @@
     <string name="song_element_number">Нөмір</string>
     <string name="song_element_title">Атауы</string>
     <string name="song_element_lyrics">Мәтін</string>
-    <string name="song_element_next_section">Келесі бөлім</string>
     <string name="song_element_author">Автор</string>
     <string name="song_element_composer">Композитор</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2051,7 +2048,6 @@
     <string name="customize_type_color">Түс</string>
     <string name="customize_type_image">Сурет</string>
     <string name="customize_type_video">Бейне</string>
-    <string name="customize_type_transparent">Мөлдір</string>
     <string name="customize_type_default">Әдепкі</string>
     <string name="customize_type_gradient">Градиент</string>
     <string name="customize_show_abbreviation">Қысқартуы</string>
@@ -2082,7 +2078,6 @@
     <string name="setup_bible_pick_translations">«Киелі кітап» қойындысына өтіп, аудармаларды таңдаңыз — біріншісі негізгі болып саналады.</string>
     <string name="setup_songs_format_note">Ән кітапханасының қалтасы .song файлдарын оқиды. Басқа пішімде сақталған әндерді алдымен түрлендіру керек.</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm немесе SoftProjector бағдарламасынан көшіп жатырсыз ба? Кірістірілген Әндер мен Киелі кітап түрлендіргіші олардың барлығын оқиды — сондай-ақ PDF, Word, PowerPoint және Keynote ішіндегі ән мәтіндерін — және осы қалта күтетін .song файлдарын жазады.</string>
-    <string name="setup_songs_converter_button">Әндер мен Киелі кітап түрлендіргішін ашу</string>
     <string name="setup_songs_samples_note">Әндер әлі жоқ па? «Жүйе» қойындысындағы «Ән үлгілерін қосу» түймесі қалтаны жұмыс жиынымен толтырады.</string>
     <string name="setup_proj_rows_note">Қосылған әр экран төменде өз жолын алады. Көрсету терезелерінің саны сол жерде тағайындағаныңыздан шығады, сондықтан қолмен орнатудың қажеті жоқ.</string>
     <string name="setup_proj_assign_note">Әр экран үшін дисплей мен көрсету режимін таңдап, содан кейін «Мазмұн шығысы» арқылы онда не көрсетілетінін белгілеңіз. «Стильдерді қайта анықтау» сол экранға өз көрінісін береді.</string>
@@ -2099,7 +2094,6 @@
     <string name="bible_lottie_gen_window_title">Төменгі титр генераторы</string>
     <string name="song_lottie_unsupported_note">Үлгі орналасуды және атаудың орнын анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау, сөз аралығы, келесіні алдын ала қарау және аккордтар қолданылмайды.</string>
     <string name="bible_lottie_unsupported_note">Үлгі орналасуды, сілтеменің орнын және екі тілдің жолақты қалай бөлісетінін анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау және сөз аралығы қолданылмайды.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Контур параметрлері</string>

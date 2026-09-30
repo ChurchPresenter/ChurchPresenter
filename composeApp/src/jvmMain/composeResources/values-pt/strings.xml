@@ -749,7 +749,6 @@
     <string name="canvas_source_name">Nome</string>
     <string name="canvas_rotation">Rotação</string>
     <string name="canvas_file_path">Caminho do arquivo</string>
-    <string name="canvas_browse">Procurar</string>
     <string name="canvas_scale">Escala</string>
     <string name="canvas_scale_fit">Ajustar</string>
     <string name="canvas_scale_fill">Preencher</string>
@@ -839,7 +838,6 @@
     <string name="canvas_capture_mode">Modo de Captura</string>
     <string name="canvas_capture_mode_region">Região da Tela</string>
     <string name="canvas_capture_mode_window">Janela</string>
-    <string name="canvas_capture_window">Janela</string>
     <string name="canvas_capture_refresh_windows">Atualizar Lista de Janelas</string>
     <string name="canvas_capture_interval">Intervalo de Captura</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1976,7 +1974,6 @@
     <string name="song_element_number">Número</string>
     <string name="song_element_title">Título</string>
     <string name="song_element_lyrics">Letra</string>
-    <string name="song_element_next_section">Próxima Seção</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Compositor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2079,7 +2076,6 @@
     <string name="customize_type_color">Cor</string>
     <string name="customize_type_image">Imagem</string>
     <string name="customize_type_video">Vídeo</string>
-    <string name="customize_type_transparent">Transparente</string>
     <string name="customize_type_default">Padrão</string>
     <string name="customize_type_gradient">Gradiente</string>
     <string name="customize_show_abbreviation">Abreviatura</string>
@@ -2110,7 +2106,6 @@
     <string name="setup_bible_pick_translations">Vá até a aba Bíblia e escolha suas traduções — a primeira é a principal.</string>
     <string name="setup_songs_format_note">A pasta da biblioteca de músicas lê arquivos .song. Músicas salvas em outro formato precisam ser convertidas primeiro.</string>
     <string name="setup_songs_converter_body">Vindo do SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ou SoftProjector? O Conversor de Músicas e Bíblias integrado lê todos eles — e também letras de PDF, Word, PowerPoint e Keynote — e grava os arquivos .song que esta pasta espera.</string>
-    <string name="setup_songs_converter_button">Abrir o Conversor de Músicas e Bíblias</string>
     <string name="setup_songs_samples_note">Ainda sem músicas? «Adicionar músicas de exemplo» na aba Sistema preenche a pasta com um conjunto funcional.</string>
     <string name="setup_proj_rows_note">Cada tela conectada ganha sua própria linha abaixo. O número de janelas de projeção decorre do que você atribuir ali, então não há nada para definir manualmente.</string>
     <string name="setup_proj_assign_note">Para cada tela escolha um monitor e um modo de exibição e depois use «Saídas de conteúdo» para definir o que aparece ali. «Substituir estilos» dá àquela tela uma aparência própria.</string>
@@ -2127,7 +2122,6 @@
     <string name="bible_lottie_gen_window_title">Gerador de terços inferiores</string>
     <string name="song_lottie_unsupported_note">O modelo decide o layout e onde fica o título. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado, espaçamento entre palavras, prévia da próxima parte e acordes não se aplicam.</string>
     <string name="bible_lottie_unsupported_note">O modelo decide o layout, a posição da referência e como dois idiomas dividem a faixa. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado e espaçamento entre palavras não se aplicam.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Contorno</string>
     <string name="tooltip_outline_options">Opções de contorno</string>

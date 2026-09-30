@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Navn</string>
     <string name="canvas_rotation">Rotasjon</string>
     <string name="canvas_file_path">Filbane</string>
-    <string name="canvas_browse">Bla gjennom</string>
     <string name="canvas_scale">Skalering</string>
     <string name="canvas_scale_fit">Tilpass</string>
     <string name="canvas_scale_fill">Fyll</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Opptaksmodus</string>
     <string name="canvas_capture_mode_region">Skjermområde</string>
     <string name="canvas_capture_mode_window">Vindu</string>
-    <string name="canvas_capture_window">Vindu</string>
     <string name="canvas_capture_refresh_windows">Oppdater vinduslisten</string>
     <string name="canvas_capture_interval">Opptaksintervall</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Tittel</string>
     <string name="song_element_lyrics">Sangtekst</string>
-    <string name="song_element_next_section">Neste avsnitt</string>
     <string name="song_element_author">Forfatter</string>
     <string name="song_element_composer">Komponist</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Farge</string>
     <string name="customize_type_image">Bilde</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Gjennomsiktig</string>
     <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Forkortelse</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Gå til fanen Bibel og velg oversettelsene dine — den første er hovedoversettelsen.</string>
     <string name="setup_songs_format_note">Sangbibliotekmappen leser .song-filer. Sanger lagret i et annet format må konverteres først.</string>
     <string name="setup_songs_converter_body">Kommer du fra SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm eller SoftProjector? Den innebygde sang- og bibelkonvertereren leser dem alle — og sangtekster fra PDF, Word, PowerPoint og Keynote — og skriver .song-filene denne mappen forventer.</string>
-    <string name="setup_songs_converter_button">Åpne sang- og bibelkonvertereren</string>
     <string name="setup_songs_samples_note">Ingen sanger ennå? «Legg til eksempelsanger» på fanen System fyller mappen med et fungerende sett.</string>
     <string name="setup_proj_rows_note">Hver tilkoblede skjerm får sin egen rad nedenfor. Antall presentasjonsvinduer følger av det du tildeler der, så det trenger ikke settes for hånd.</string>
     <string name="setup_proj_assign_note">Velg en skjerm og en visningsmodus for hver rad, og bruk deretter «Innholdsutganger» til å velge hva som vises. «Overstyr stiler» gir den skjermen sitt eget utseende.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Generator for nedre tredjedeler</string>
     <string name="song_lottie_unsupported_note">Malen bestemmer oppsettet og hvor tittelen står. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking, ordavstand, forhåndsvisning av neste og akkorder gjelder ikke.</string>
     <string name="bible_lottie_unsupported_note">Malen bestemmer oppsettet, plasseringen av referansen og hvordan to språk deler båndet. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking og ordavstand gjelder ikke.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Konturalternativer</string>

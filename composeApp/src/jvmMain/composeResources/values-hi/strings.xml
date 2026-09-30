@@ -960,7 +960,6 @@
     <string name="canvas_source_name">नाम</string>
     <string name="canvas_rotation">घुमाव</string>
     <string name="canvas_file_path">फ़ाइल पथ</string>
-    <string name="canvas_browse">ब्राउज़ करें</string>
     <string name="canvas_scale">स्केल</string>
     <string name="canvas_scale_fit">फ़िट</string>
     <string name="canvas_scale_fill">भरें</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">कैप्चर मोड</string>
     <string name="canvas_capture_mode_region">स्क्रीन का हिस्सा</string>
     <string name="canvas_capture_mode_window">विंडो</string>
-    <string name="canvas_capture_window">विंडो</string>
     <string name="canvas_capture_refresh_windows">विंडो सूची फिर से लें</string>
     <string name="canvas_capture_interval">कैप्चर अंतराल</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">नंबर</string>
     <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">बोल</string>
-    <string name="song_element_next_section">अगला भाग</string>
     <string name="song_element_author">रचनाकार</string>
     <string name="song_element_composer">संगीतकार</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">रंग</string>
     <string name="customize_type_image">चित्र</string>
     <string name="customize_type_video">वीडियो</string>
-    <string name="customize_type_transparent">पारदर्शी</string>
     <string name="customize_type_default">डिफ़ॉल्ट</string>
     <string name="customize_type_gradient">ग्रेडिएंट</string>
     <string name="customize_show_abbreviation">संक्षिप्त रूप</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">बाइबल टैब पर जाएँ और अपने अनुवाद चुनें — पहला मुख्य होता है।</string>
     <string name="setup_songs_format_note">गीत लाइब्रेरी फ़ोल्डर .song फ़ाइलें पढ़ता है। किसी अन्य प्रारूप में सहेजे गए गीतों को पहले बदलना होगा।</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm या SoftProjector से आ रहे हैं? अंतर्निहित गीत और बाइबल कन्वर्टर इन सभी को पढ़ता है — और PDF, Word, PowerPoint तथा Keynote से बोल भी — और वे .song फ़ाइलें लिखता है जिनकी इस फ़ोल्डर को अपेक्षा है।</string>
-    <string name="setup_songs_converter_button">गीत और बाइबल कन्वर्टर खोलें</string>
     <string name="setup_songs_samples_note">अभी कोई गीत नहीं? सिस्टम टैब का «नमूना गीत जोड़ें» फ़ोल्डर को एक कार्यशील संग्रह से भर देता है।</string>
     <string name="setup_proj_rows_note">हर जुड़े हुए पर्दे को नीचे अपनी पंक्ति मिलती है। प्रस्तुति विंडो की संख्या वहाँ के असाइनमेंट से तय होती है, इसलिए हाथ से कुछ सेट नहीं करना है।</string>
     <string name="setup_proj_assign_note">हर पर्दे के लिए एक डिस्प्ले और प्रदर्शन मोड चुनें, फिर «सामग्री आउटपुट» से तय करें कि वहाँ क्या दिखे। «शैलियाँ अधिलेखित करें» उस पर्दे को अपना रूप देता है।</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">निचला तिहाई जनरेटर</string>
     <string name="song_lottie_unsupported_note">टेम्पलेट लेआउट और शीर्षक की जगह तय करता है। निचले तिहाई की शैली फ़ॉन्ट, आकार, रंग, संरेखण, अक्षर अंतर, केस और छाया तय करती है; टेक्स्ट पृष्ठभूमि, रेखांकन, स्ट्राइकथ्रू, शब्द अंतर, अगले का पूर्वावलोकन और कॉर्ड लागू नहीं होते।</string>
     <string name="bible_lottie_unsupported_note">टेम्पलेट लेआउट, संदर्भ की जगह और दो भाषाओं के बैंड साझा करने का तरीका तय करता है। निचले तिहाई की शैली फ़ॉन्ट, आकार, रंग, संरेखण, अक्षर अंतर, केस और छाया तय करती है; टेक्स्ट पृष्ठभूमि, रेखांकन, स्ट्राइकथ्रू और शब्द अंतर लागू नहीं होते।</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">आउटलाइन</string>
     <string name="tooltip_outline_options">आउटलाइन विकल्प</string>

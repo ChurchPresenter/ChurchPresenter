@@ -42,7 +42,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_browser
 import churchpresenter.composeapp.generated.resources.canvas_clock_font_size
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.canvas_file_path
-import churchpresenter.composeapp.generated.resources.canvas_browse
+import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.canvas_scale
 import churchpresenter.composeapp.generated.resources.canvas_scale_fit
 import churchpresenter.composeapp.generated.resources.canvas_scale_fill
@@ -112,7 +112,7 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
     val strFilePath = stringResource(Res.string.canvas_file_path)
     val strSelectImage = stringResource(Res.string.canvas_select_image_title)
     val strImageFiles = stringResource(Res.string.canvas_image_files)
-    val strBrowse = stringResource(Res.string.canvas_browse)
+    val strBrowse = stringResource(Res.string.vlc_browse)
     val fitLabel = stringResource(Res.string.canvas_scale_fit)
     val fillLabel = stringResource(Res.string.canvas_scale_fill)
     val stretchLabel = stringResource(Res.string.canvas_scale_stretch)
@@ -377,7 +377,7 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
     val strFilePath = stringResource(Res.string.canvas_file_path)
     val strSelectVideo = stringResource(Res.string.canvas_select_video_title)
     val strVideoFiles = stringResource(Res.string.canvas_video_files)
-    val strBrowse = stringResource(Res.string.canvas_browse)
+    val strBrowse = stringResource(Res.string.vlc_browse)
 
     Text(stringResource(Res.string.canvas_source_video), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(

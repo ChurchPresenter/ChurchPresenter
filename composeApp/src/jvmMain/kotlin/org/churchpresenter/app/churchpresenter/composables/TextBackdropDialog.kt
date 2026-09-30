@@ -49,7 +49,6 @@ import churchpresenter.composeapp.generated.resources.backdrop_border_padding
 import churchpresenter.composeapp.generated.resources.backdrop_border_radius
 import churchpresenter.composeapp.generated.resources.backdrop_border_width
 import churchpresenter.composeapp.generated.resources.backdrop_fill_color
-import churchpresenter.composeapp.generated.resources.backdrop_fill_radius
 import churchpresenter.composeapp.generated.resources.backdrop_fill_uniform_width
 import churchpresenter.composeapp.generated.resources.backdrop_height_offset
 import churchpresenter.composeapp.generated.resources.backdrop_width_offset
@@ -367,7 +366,7 @@ private fun FillFields(backdrop: TextBackdrop, onChange: (TextBackdrop) -> Unit)
                 modifier = Modifier.weight(1f),
             ) { onChange(backdrop.copy(lineBackgroundOffset = it)) }
             BackdropNumberField(
-                label = stringResource(Res.string.backdrop_fill_radius),
+                label = stringResource(Res.string.backdrop_border_radius),
                 value = backdrop.lineBackgroundRadius,
                 range = TextBackdrop.RADIUS_RANGE,
                 modifier = Modifier.weight(1f),

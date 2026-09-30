@@ -45,8 +45,8 @@ import churchpresenter.composeapp.generated.resources.customize_theme_accent
 import churchpresenter.composeapp.generated.resources.customize_theme_auto
 import churchpresenter.composeapp.generated.resources.customize_theme_background
 import churchpresenter.composeapp.generated.resources.customize_theme_base
-import churchpresenter.composeapp.generated.resources.customize_theme_base_dark
-import churchpresenter.composeapp.generated.resources.customize_theme_base_light
+import churchpresenter.composeapp.generated.resources.setup_theme_section_dark
+import churchpresenter.composeapp.generated.resources.setup_theme_section_light
 import churchpresenter.composeapp.generated.resources.customize_theme_colors
 import churchpresenter.composeapp.generated.resources.customize_theme_error
 import churchpresenter.composeapp.generated.resources.customize_theme_font
@@ -306,8 +306,8 @@ private fun AccentAndBaseRow(
         Spacer(Modifier.weight(1f))
         FieldLabel(stringResource(Res.string.customize_theme_base))
         val options = listOf(
-            false to Res.string.customize_theme_base_light,
-            true to Res.string.customize_theme_base_dark,
+            false to Res.string.setup_theme_section_light,
+            true to Res.string.setup_theme_section_dark,
         )
         SegmentTrack(modifier = Modifier.width(BASE_TRACK_WIDTH).height(SEGMENT_TRACK_HEIGHT)) {
             options.forEach { (dark, label) ->

@@ -749,7 +749,6 @@
     <string name="canvas_source_name">Naam</string>
     <string name="canvas_rotation">Rotatie</string>
     <string name="canvas_file_path">Bestandspad</string>
-    <string name="canvas_browse">Bladeren</string>
     <string name="canvas_scale">Schaal</string>
     <string name="canvas_scale_fit">Passend</string>
     <string name="canvas_scale_fill">Vullen</string>
@@ -839,7 +838,6 @@
     <string name="canvas_capture_mode">Opnamemodus</string>
     <string name="canvas_capture_mode_region">Schermgebied</string>
     <string name="canvas_capture_mode_window">Venster</string>
-    <string name="canvas_capture_window">Venster</string>
     <string name="canvas_capture_refresh_windows">Vensterlijst vernieuwen</string>
     <string name="canvas_capture_interval">Opname-interval</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1975,7 +1973,6 @@
     <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Liedtekst</string>
-    <string name="song_element_next_section">Volgende sectie</string>
     <string name="song_element_author">Auteur</string>
     <string name="song_element_composer">Componist</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2078,7 +2075,6 @@
     <string name="customize_type_color">Kleur</string>
     <string name="customize_type_image">Afbeelding</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparant</string>
     <string name="customize_type_default">Standaard</string>
     <string name="customize_type_gradient">Verloop</string>
     <string name="customize_show_abbreviation">Afkorting</string>
@@ -2109,7 +2105,6 @@
     <string name="setup_bible_pick_translations">Ga naar het tabblad Bijbel en kies uw vertalingen — de eerste is de primaire.</string>
     <string name="setup_songs_format_note">De liedbibliotheekmap leest .song-bestanden. Liederen in een ander formaat moeten eerst worden omgezet.</string>
     <string name="setup_songs_converter_body">Komt u van SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm of SoftProjector? De ingebouwde Lied- en Bijbelconverter leest ze allemaal — en songteksten uit PDF, Word, PowerPoint en Keynote — en schrijft de .song-bestanden die deze map verwacht.</string>
-    <string name="setup_songs_converter_button">Lied- en Bijbelconverter openen</string>
     <string name="setup_songs_samples_note">Nog geen liederen? „Voorbeeldliederen toevoegen” op het tabblad Systeem vult de map met een werkende set.</string>
     <string name="setup_proj_rows_note">Elk aangesloten scherm krijgt hieronder een eigen rij. Het aantal presentatievensters volgt uit wat u daar toewijst, dus het hoeft niet handmatig te worden ingesteld.</string>
     <string name="setup_proj_assign_note">Kies per scherm een weergaveapparaat en een weergavemodus en bepaal daarna bij „Inhoudsuitvoer” wat er verschijnt. „Stijlen overschrijven” geeft dat scherm een eigen uiterlijk.</string>
@@ -2126,7 +2121,6 @@
     <string name="bible_lottie_gen_window_title">Generator voor onderste derden</string>
     <string name="song_lottie_unsupported_note">Het sjabloon bepaalt de indeling en waar de titel staat. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen, woordafstand, vooruitblik en akkoorden gelden niet.</string>
     <string name="bible_lottie_unsupported_note">Het sjabloon bepaalt de indeling, de plaats van de verwijzing en hoe twee talen de band delen. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen en woordafstand gelden niet.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Omtrek</string>
     <string name="tooltip_outline_options">Omtrekopties</string>

@@ -25,8 +25,8 @@ import churchpresenter.composeapp.generated.resources.customize_type_color
 import churchpresenter.composeapp.generated.resources.customize_type_default
 import churchpresenter.composeapp.generated.resources.customize_type_gradient
 import churchpresenter.composeapp.generated.resources.customize_type_image
-import churchpresenter.composeapp.generated.resources.customize_type_lottie
-import churchpresenter.composeapp.generated.resources.customize_type_transparent
+import churchpresenter.composeapp.generated.resources.background_lottie_option
+import churchpresenter.composeapp.generated.resources.background_transparent_option
 import churchpresenter.composeapp.generated.resources.customize_type_video
 import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity
@@ -319,9 +319,9 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
 internal fun backgroundTypeWord(type: String): StringResource = when (type) {
     Constants.BACKGROUND_IMAGE -> Res.string.customize_type_image
     Constants.BACKGROUND_VIDEO -> Res.string.customize_type_video
-    Constants.BACKGROUND_TRANSPARENT -> Res.string.customize_type_transparent
+    Constants.BACKGROUND_TRANSPARENT -> Res.string.background_transparent_option
     Constants.BACKGROUND_GRADIENT -> Res.string.customize_type_gradient
-    Constants.BACKGROUND_LOTTIE -> Res.string.customize_type_lottie
+    Constants.BACKGROUND_LOTTIE -> Res.string.background_lottie_option
     Constants.BACKGROUND_COLOR -> Res.string.customize_type_color
     Constants.BACKGROUND_CAMERA -> Res.string.background_camera_option
     else -> Res.string.customize_type_default
@@ -339,7 +339,7 @@ internal fun describeBackground(config: BackgroundConfig): String = when (config
     Constants.BACKGROUND_VIDEO -> config.backgroundVideo.substringAfterLast('/').substringAfterLast('\\')
         .ifBlank { stringResource(Res.string.customize_type_video) }
     Constants.BACKGROUND_LOTTIE -> config.backgroundLottie.substringAfterLast('/').substringBeforeLast('.')
-        .ifBlank { stringResource(Res.string.customize_type_lottie) }
+        .ifBlank { stringResource(Res.string.background_lottie_option) }
     else -> stringResource(backgroundTypeWord(config.backgroundType))
 }
 

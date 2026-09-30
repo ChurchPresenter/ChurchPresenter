@@ -6,7 +6,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.output_profile_add_language
-import churchpresenter.composeapp.generated.resources.output_profile_add_translation
+import churchpresenter.composeapp.generated.resources.add_bible_translation
 import churchpresenter.composeapp.generated.resources.output_profile_bible_count
 import churchpresenter.composeapp.generated.resources.output_profile_bible_none_loaded
 import churchpresenter.composeapp.generated.resources.output_profile_bible_off
@@ -40,7 +40,7 @@ internal fun BibleSourcePicker(
             countFormat = stringResource(Res.string.output_profile_bible_count, shown.size, stack.size),
             noneLoaded = stringResource(Res.string.output_profile_bible_none_loaded),
             orderHeader = stringResource(Res.string.output_profile_bible_order_header),
-            addHeader = stringResource(Res.string.output_profile_add_translation),
+            addHeader = stringResource(Res.string.add_bible_translation),
         ),
         tags = OrderedSourceTags(
             trigger = BIBLE_SOURCE_TRIGGER_TAG,

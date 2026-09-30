@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Nosaukums</string>
     <string name="canvas_rotation">Pagrieziens</string>
     <string name="canvas_file_path">Faila ceļš</string>
-    <string name="canvas_browse">Pārlūkot</string>
     <string name="canvas_scale">Mērogs</string>
     <string name="canvas_scale_fit">Ietilpināt</string>
     <string name="canvas_scale_fill">Aizpildīt</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Tveršanas režīms</string>
     <string name="canvas_capture_mode_region">Ekrāna apgabals</string>
     <string name="canvas_capture_mode_window">Logs</string>
-    <string name="canvas_capture_window">Logs</string>
     <string name="canvas_capture_refresh_windows">Atsvaidzināt logu sarakstu</string>
     <string name="canvas_capture_interval">Tveršanas intervāls</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Numurs</string>
     <string name="song_element_title">Nosaukums</string>
     <string name="song_element_lyrics">Dziesmas teksts</string>
-    <string name="song_element_next_section">Nākamā daļa</string>
     <string name="song_element_author">Autors</string>
     <string name="song_element_composer">Komponists</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Krāsa</string>
     <string name="customize_type_image">Attēls</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Caurspīdīgs</string>
     <string name="customize_type_default">Noklusējums</string>
     <string name="customize_type_gradient">Gradients</string>
     <string name="customize_show_abbreviation">Saīsinājums</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Atveriet cilni Bībele un izvēlieties tulkojumus — pirmais ir galvenais.</string>
     <string name="setup_songs_format_note">Dziesmu bibliotēkas mape lasa .song failus. Citā formātā saglabātas dziesmas vispirms jāpārveido.</string>
     <string name="setup_songs_converter_body">Pārejat no SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm vai SoftProjector? Iebūvētais dziesmu un Bībeles pārveidotājs lasa tos visus — un arī dziesmu vārdus no PDF, Word, PowerPoint un Keynote — un raksta .song failus, kurus šī mape sagaida.</string>
-    <string name="setup_songs_converter_button">Atvērt dziesmu un Bībeles pārveidotāju</string>
     <string name="setup_songs_samples_note">Vēl nav dziesmu? Cilnē Sistēma poga „Pievienot dziesmu paraugus” piepilda mapi ar strādājošu kopu.</string>
     <string name="setup_proj_rows_note">Katrs pievienotais ekrāns zemāk iegūst savu rindu. Projekcijas logu skaits izriet no tā, ko tur piešķirat, tāpēc manuāli nekas nav jāiestata.</string>
     <string name="setup_proj_assign_note">Katram ekrānam izvēlieties displeju un attēlošanas režīmu, pēc tam sadaļā „Satura izvadi” norādiet, kas tur parādīsies. „Pārrakstīt stilus” piešķir šim ekrānam savu izskatu.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Apakšējo trešdaļu ģenerators</string>
     <string name="song_lottie_unsupported_note">Veidne nosaka izkārtojumu un nosaukuma vietu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums, vārdu atstarpe, nākamās daļas priekšskatījums un akordi netiek piemēroti.</string>
     <string name="bible_lottie_unsupported_note">Veidne nosaka izkārtojumu, atsauces vietu un to, kā divas valodas dala joslu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums un vārdu atstarpe netiek piemēroti.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Kontūra</string>
     <string name="tooltip_outline_options">Kontūras opcijas</string>

@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Nomi</string>
     <string name="canvas_rotation">Burilish</string>
     <string name="canvas_file_path">Fayl yoʻli</string>
-    <string name="canvas_browse">Tanlash</string>
     <string name="canvas_scale">Masshtab</string>
     <string name="canvas_scale_fit">Sigʻdirish</string>
     <string name="canvas_scale_fill">Toʻldirish</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Tasvir rejimi</string>
     <string name="canvas_capture_mode_region">Ekran qismi</string>
     <string name="canvas_capture_mode_window">Oyna</string>
-    <string name="canvas_capture_window">Oyna</string>
     <string name="canvas_capture_refresh_windows">Oynalar roʻyxatini yangilash</string>
     <string name="canvas_capture_interval">Suratga olish oraligʻi</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Raqam</string>
     <string name="song_element_title">Sarlavha</string>
     <string name="song_element_lyrics">Qoʻshiq matni</string>
-    <string name="song_element_next_section">Keyingi qism</string>
     <string name="song_element_author">Muallif</string>
     <string name="song_element_composer">Bastakor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Rang</string>
     <string name="customize_type_image">Rasm</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Shaffof</string>
     <string name="customize_type_default">Standart</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Qisqartma</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">«Muqaddas Kitob» yorlig'iga o'ting va tarjimalarni tanlang — birinchisi asosiy hisoblanadi.</string>
     <string name="setup_songs_format_note">Qo'shiqlar kutubxonasi jildi .song fayllarini o'qiydi. Boshqa formatda saqlangan qo'shiqlarni avval o'girish kerak.</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm yoki SoftProjector dasturidan o'tyapsizmi? Oʻrnatilgan Qoʻshiq va Injil oʻgirgichi ularning barchasini o'qiydi — shuningdek PDF, Word, PowerPoint va Keynote ichidagi matnlarni ham — va bu jild kutayotgan .song fayllarini yozadi.</string>
-    <string name="setup_songs_converter_button">Qoʻshiq va Injil oʻgirgichini ochish</string>
     <string name="setup_songs_samples_note">Hali qo'shiqlar yo'qmi? «Tizim» yorlig'idagi «Namuna qo'shiqlar qo'shish» jildni ishlaydigan to'plam bilan to'ldiradi.</string>
     <string name="setup_proj_rows_note">Ulangan har bir ekran quyida o'z qatorini oladi. Namoyish oynalari soni u yerda belgilaganingizdan kelib chiqadi, shuning uchun qo'lda sozlash shart emas.</string>
     <string name="setup_proj_assign_note">Har bir ekran uchun displey va ko'rsatish rejimini tanlang, so'ng «Kontent chiqishlari» orqali u yerda nima ko'rinishini belgilang. «Uslublarni qayta belgilash» o'sha ekranga o'z ko'rinishini beradi.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Pastki titr generatori</string>
     <string name="song_lottie_unsupported_note">Shablon joylashuvni va sarlavha o‘rnini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish, so‘zlar oralig‘i, keyingisini oldindan ko‘rish va akkordlar qo‘llanilmaydi.</string>
     <string name="bible_lottie_unsupported_note">Shablon joylashuvni, havola o‘rnini va ikki til tasmani qanday bo‘lishishini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish va so‘zlar oralig‘i qo‘llanilmaydi.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Kontur sozlamalari</string>

@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Nama</string>
     <string name="canvas_rotation">Rotasi</string>
     <string name="canvas_file_path">Lokasi file</string>
-    <string name="canvas_browse">Telusuri</string>
     <string name="canvas_scale">Skala</string>
     <string name="canvas_scale_fit">Sesuaikan</string>
     <string name="canvas_scale_fill">Penuhi</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Mode Tangkapan</string>
     <string name="canvas_capture_mode_region">Area Layar</string>
     <string name="canvas_capture_mode_window">Jendela</string>
-    <string name="canvas_capture_window">Jendela</string>
     <string name="canvas_capture_refresh_windows">Muat Ulang Daftar Jendela</string>
     <string name="canvas_capture_interval">Jeda Tangkapan</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Nomor</string>
     <string name="song_element_title">Judul</string>
     <string name="song_element_lyrics">Lirik</string>
-    <string name="song_element_next_section">Bagian berikutnya</string>
     <string name="song_element_author">Penulis</string>
     <string name="song_element_composer">Komposer</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Warna</string>
     <string name="customize_type_image">Gambar</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparan</string>
     <string name="customize_type_default">Bawaan</string>
     <string name="customize_type_gradient">Gradien</string>
     <string name="customize_show_abbreviation">Singkatan</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Buka tab Alkitab dan pilih terjemahan Anda — yang pertama menjadi terjemahan utama.</string>
     <string name="setup_songs_format_note">Folder perpustakaan lagu membaca berkas .song. Lagu yang disimpan dalam format lain harus dikonversi terlebih dahulu.</string>
     <string name="setup_songs_converter_body">Beralih dari SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm, atau SoftProjector? Konverter Lagu dan Alkitab bawaan membaca semuanya — juga lirik dari PDF, Word, PowerPoint, dan Keynote — lalu menulis berkas .song yang diharapkan folder ini.</string>
-    <string name="setup_songs_converter_button">Buka Konverter Lagu dan Alkitab</string>
     <string name="setup_songs_samples_note">Belum punya lagu? «Tambahkan lagu contoh» di tab Sistem akan mengisi folder dengan satu set yang siap pakai.</string>
     <string name="setup_proj_rows_note">Setiap layar yang terhubung mendapat barisnya sendiri di bawah. Jumlah jendela presentasi mengikuti apa yang Anda tetapkan di sana, jadi tidak ada yang perlu diatur manual.</string>
     <string name="setup_proj_assign_note">Untuk tiap layar pilih perangkat tampilan dan mode tampilan, lalu gunakan «Keluaran konten» untuk menentukan apa yang muncul di sana. «Timpa gaya» memberi layar itu tampilannya sendiri.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Pembuat Sepertiga Bawah</string>
     <string name="song_lottie_unsupported_note">Templat menentukan tata letak dan posisi judul. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, jarak kata, pratinjau bagian berikutnya, dan kunci gitar tidak berlaku.</string>
     <string name="bible_lottie_unsupported_note">Templat menentukan tata letak, posisi referensi, dan cara dua bahasa berbagi pita. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, dan jarak kata tidak berlaku.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Garis luar</string>
     <string name="tooltip_outline_options">Opsi garis luar</string>
