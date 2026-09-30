@@ -50,7 +50,7 @@ import churchpresenter.composeapp.generated.resources.profile_place_freely
 import churchpresenter.composeapp.generated.resources.profile_place_freely_sub
 import churchpresenter.composeapp.generated.resources.profile_region_moves_background
 import churchpresenter.composeapp.generated.resources.profile_region_moves_background_sub
-import churchpresenter.composeapp.generated.resources.profile_reset_defaults
+import churchpresenter.composeapp.generated.resources.customize_theme_reset
 import churchpresenter.composeapp.generated.resources.profile_vertical_alignment
 import churchpresenter.composeapp.generated.resources.profile_x_offset
 import churchpresenter.composeapp.generated.resources.profile_y_offset
@@ -71,7 +71,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun ResetAction(changed: Boolean, onReset: () -> Unit): (@Composable RowScope.() -> Unit)? =
     if (!changed) null else {
-        { GroupCaptionAction(stringResource(Res.string.profile_reset_defaults), onReset) }
+        { GroupCaptionAction(stringResource(Res.string.customize_theme_reset), onReset) }
     }
 
 /** The four margins, the way a page's margin fields are read: top, bottom, left, right. */

@@ -61,7 +61,6 @@ import churchpresenter.composeapp.generated.resources.menu_edit
 import churchpresenter.composeapp.generated.resources.menu_exit
 import churchpresenter.composeapp.generated.resources.menu_file
 import churchpresenter.composeapp.generated.resources.menu_help
-import churchpresenter.composeapp.generated.resources.menu_help_item
 import churchpresenter.composeapp.generated.resources.menu_how_to_blog
 import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.open_calendar_manager
@@ -408,7 +407,7 @@ private fun MenuBarScope.HelpMenu(
             shortcut = accel(ShortcutAction.OPEN_CALENDAR_MANAGER),
         )
         Item(stringResource(Res.string.menu_about), onClick = onAbout)
-        Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
+        Item(stringResource(Res.string.menu_help), onClick = onHelp)
         Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)
         Item(stringResource(Res.string.menu_check_for_updates), onClick = onCheckForUpdates)
     }

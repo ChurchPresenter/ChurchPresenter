@@ -166,11 +166,9 @@
     <string name="report_bug">Meld en feil</string>
     <string name="submit_feature_request">Forslag til funksjon</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Hjelp</string>
     <string name="menu_how_to_blog">Bruksanvisninger (blogg)</string>
     <string name="menu_check_for_updates">Se etter oppdateringer…</string>
     <string name="menu_keyboard_shortcuts">Hurtigtaster</string>
-    <string name="keyboard_shortcuts_title">Hurtigtaster</string>
     <string name="shortcut_category_global">Globalt</string>
     <string name="shortcut_category_bible">Bibel-fanen</string>
     <string name="shortcut_category_songs">Sang-fanen</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Legg til filer i kjøreplanen</string>
     <string name="tooltip_toggle_displays">Slå presentasjonsskjermene av og på</string>
     <string name="tooltip_settings">Innstillinger</string>
-    <string name="tooltip_theme_light">Lyst tema</string>
     <string name="tooltip_theme_dark">Mørkt tema</string>
     <string name="tooltip_theme_system">Systemtema</string>
     <string name="tooltip_remove">Fjern</string>
@@ -1915,7 +1912,6 @@
     <string name="planning_center_disconnect">Koble fra</string>
     <string name="planning_center_status_connected">Tilkoblet som %1$s</string>
     <string name="planning_center_status_connecting">Kobler til …</string>
-    <string name="planning_center_status_error">Feil: %1$s</string>
     <string name="planning_center_import_title">Importer fra Planning Center</string>
     <string name="planning_center_import_service_type">Møtetype</string>
     <string name="planning_center_import_select_plan">Velg en plan</string>
@@ -1993,8 +1989,6 @@
     <string name="bible_preview_sample_verse">For så høyt har Gud elsket verden at han ga sin Sønn, den enbårne.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Legg til en oversettelse for å se den her</string>
-    <string name="song_preview_full_screen">Forhåndsvisning fullskjerm</string>
-    <string name="song_preview_lower_third">Forhåndsvisning nedre tredjedel</string>
     <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Tittel</string>
     <string name="song_element_lyrics">Sangtekst</string>
@@ -2255,7 +2249,6 @@
     <string name="ffmpeg_missing_help">Kameraer og opptakskort åpnes med ffmpeg. Denne versjonen skal inkludere ett — velg en ffmpeg nedenfor, eller installer ffmpeg og sjekk igjen.</string>
     <string name="ffmpeg_path_hint">Velg et ffmpeg-program</string>
     <string name="ffmpeg_browse">Velg ffmpeg</string>
-    <string name="ffmpeg_check_again">Sjekk igjen</string>
     <string name="ffmpeg_clear">Bruk medfølgende</string>
     <string name="ffmpeg_download_link">Hent ffmpeg</string>
     <string name="ffmpeg_path_help">La stå tomt for å bruke ffmpeg som følger med ChurchPresenter.</string>
@@ -2356,8 +2349,6 @@
     <string name="preview_settings_show_modes">Vis visningstype</string>
     <string name="song_add_translation">Legg til et språk</string>
     <string name="song_fourth_language">Språk 4</string>
-    <string name="song_language_fourth">Språk 4</string>
-    <string name="song_language_third">Språk 3</string>
     <string name="song_pane_translation">Språk %1$d</string>
     <string name="song_third_language">Språk 3</string>
     <string name="song_translation_label">Språknavn</string>

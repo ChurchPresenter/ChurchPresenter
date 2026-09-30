@@ -54,7 +54,7 @@ import churchpresenter.composeapp.generated.resources.profile_section_label
 import churchpresenter.composeapp.generated.resources.profile_source_bible
 import churchpresenter.composeapp.generated.resources.profile_source_songs
 import churchpresenter.composeapp.generated.resources.profile_space_between_translations
-import churchpresenter.composeapp.generated.resources.profile_split_long_verses
+import churchpresenter.composeapp.generated.resources.bible_split_long_verses
 import churchpresenter.composeapp.generated.resources.profile_text_alignment
 import churchpresenter.composeapp.generated.resources.profile_text_autofit
 import churchpresenter.composeapp.generated.resources.profile_text_color
@@ -123,7 +123,7 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
         CustomizePane.BIBLE -> TEXT_ROWS + PLACE_ROWS + listOf(
             Res.string.customize_show_abbreviation, Res.string.profile_reference,
             Res.string.profile_translation_divider, Res.string.profile_space_between_translations,
-            Res.string.profile_split_long_verses,
+            Res.string.bible_split_long_verses,
         )
         CustomizePane.SONGS -> TEXT_ROWS + PLACE_ROWS + listOf(
             Res.string.profile_text_autofit, Res.string.profile_title_slide, Res.string.profile_word_wrap,

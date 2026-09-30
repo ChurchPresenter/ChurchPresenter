@@ -166,11 +166,9 @@
     <string name="report_bug">ລາຍງານບັນຫາ</string>
     <string name="submit_feature_request">ຂໍຟັງຊັນໃໝ່</string>
     <string name="action_ok">ຕົກລົງ</string>
-    <string name="menu_help_item">ຊ່ວຍເຫຼືອ</string>
     <string name="menu_how_to_blog">ບົດແນະນຳການໃຊ້ງານ</string>
     <string name="menu_check_for_updates">ກວດຫາການອັບເດດ…</string>
     <string name="menu_keyboard_shortcuts">ປຸ່ມລັດ</string>
-    <string name="keyboard_shortcuts_title">ປຸ່ມລັດ</string>
     <string name="shortcut_category_global">ທົ່ວແອັບ</string>
     <string name="shortcut_category_bible">ແທັບພຣະຄຳພີ</string>
     <string name="shortcut_category_songs">ແທັບເພງ</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">ເພີ່ມໄຟລ໌ໃສ່ລາຍການ</string>
     <string name="tooltip_toggle_displays">ເປີດ/ປິດໜ້າຈໍສາຍພາບ</string>
     <string name="tooltip_settings">ການຕັ້ງຄ່າ</string>
-    <string name="tooltip_theme_light">ຮູບແບບແຈ້ງ</string>
     <string name="tooltip_theme_dark">ຮູບແບບມືດ</string>
     <string name="tooltip_theme_system">ຕາມລະບົບ</string>
     <string name="tooltip_remove">ລຶບ</string>
@@ -1915,7 +1912,6 @@
     <string name="planning_center_disconnect">ຕັດການເຊື່ອມຕໍ່</string>
     <string name="planning_center_status_connected">ເຊື່ອມຕໍ່ໃນນາມ %1$s</string>
     <string name="planning_center_status_connecting">ກຳລັງເຊື່ອມຕໍ່…</string>
-    <string name="planning_center_status_error">ຜິດພາດ: %1$s</string>
     <string name="planning_center_import_title">ນຳເຂົ້າຈາກ Planning Center</string>
     <string name="planning_center_import_service_type">ປະເພດພິທີ</string>
     <string name="planning_center_import_select_plan">ເລືອກແຜນ</string>
@@ -1993,8 +1989,6 @@
     <string name="bible_preview_sample_verse">ເພາະວ່າພຣະເຈົ້າຮັກໂລກຈົນໄດ້ປະທານພຣະບຸດອົງດຽວຂອງພຣະອົງ</string>
     <string name="bible_preview_sample_book">ໂຢຮັນ</string>
     <string name="bible_preview_no_translations">ເພີ່ມຄຳແປເພື່ອເບິ່ງຢູ່ນີ້</string>
-    <string name="song_preview_full_screen">ຕົວຢ່າງເຕັມຈໍ</string>
-    <string name="song_preview_lower_third">ຕົວຢ່າງແຖບລຸ່ມ</string>
     <string name="song_element_number">ໝາຍເລກ</string>
     <string name="song_element_title">ຫົວຂໍ້</string>
     <string name="song_element_lyrics">ເນື້ອເພງ</string>
@@ -2255,7 +2249,6 @@
     <string name="ffmpeg_missing_help">ກ້ອງ ແລະ ກາດບັນທຶກພາບຖືກເປີດດ້ວຍ ffmpeg. ສະບັບນີ້ຄວນຈະມີມາພ້ອມ — ເລືອກ ffmpeg ຢູ່ລຸ່ມນີ້ ຫລື ຕິດຕັ້ງ ffmpeg ແລ້ວກວດສອບອີກຄັ້ງ.</string>
     <string name="ffmpeg_path_hint">ເລືອກໂປຣແກຣມ ffmpeg</string>
     <string name="ffmpeg_browse">ເລືອກ ffmpeg</string>
-    <string name="ffmpeg_check_again">ກວດສອບອີກຄັ້ງ</string>
     <string name="ffmpeg_clear">ໃຊ້ສະບັບທີ່ມາພ້ອມ</string>
     <string name="ffmpeg_download_link">ດາວໂຫລດ ffmpeg</string>
     <string name="ffmpeg_path_help">ປະຫວ່າງໄວ້ເພື່ອໃຊ້ ffmpeg ທີ່ມາພ້ອມກັບ ChurchPresenter.</string>
@@ -2356,8 +2349,6 @@
     <string name="preview_settings_show_modes">ສະແດງປະເພດການສະແດງຜົນ</string>
     <string name="song_add_translation">ເພີ່ມພາສາ</string>
     <string name="song_fourth_language">ພາສາ 4</string>
-    <string name="song_language_fourth">ພາສາ 4</string>
-    <string name="song_language_third">ພາສາ 3</string>
     <string name="song_pane_translation">ພາສາ %1$d</string>
     <string name="song_third_language">ພາສາ 3</string>
     <string name="song_translation_label">ຊື່ພາສາ</string>

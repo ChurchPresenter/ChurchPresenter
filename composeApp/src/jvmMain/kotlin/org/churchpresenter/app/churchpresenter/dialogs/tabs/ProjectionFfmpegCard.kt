@@ -34,7 +34,7 @@ import org.churchpresenter.settings.AppSettings
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ffmpeg_browse
 import churchpresenter.composeapp.generated.resources.ffmpeg_bundled_ready
-import churchpresenter.composeapp.generated.resources.ffmpeg_check_again
+import churchpresenter.composeapp.generated.resources.ndi_runtime_check_again
 import churchpresenter.composeapp.generated.resources.ffmpeg_clear
 import churchpresenter.composeapp.generated.resources.ffmpeg_download_link
 import churchpresenter.composeapp.generated.resources.ffmpeg_missing_help
@@ -240,7 +240,7 @@ private fun FfmpegPathRow(
             onClick = { scope.launch { onStatus(withContext(Dispatchers.IO) { onApply(path) }) } },
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
         ) {
-            Text(stringResource(Res.string.ffmpeg_check_again), style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(Res.string.ndi_runtime_check_again), style = MaterialTheme.typography.labelSmall)
         }
         if (status?.available == false) {
             RaisedButton(

@@ -103,7 +103,6 @@
     <string name="report_bug">Сообщить об ошибке</string>
     <string name="submit_feature_request">Отправить запрос функции</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Справка</string>
     <string name="menu_how_to_blog">Обучающий блог</string>
     <string name="menu_check_for_updates">Проверить обновления…</string>
 
@@ -498,7 +497,6 @@
     <string name="lottie_select_preset">Выберите пресет для просмотра</string>
     <string name="delete_saved_string">Удалить</string>
     <string name="menu_keyboard_shortcuts">Сочетания клавиш</string>
-    <string name="keyboard_shortcuts_title">Сочетания клавиш</string>
     <string name="shortcut_category_global">Глобальные</string>
     <string name="shortcut_category_bible">Вкладка Библия</string>
     <string name="shortcut_category_songs">Вкладка Песни</string>
@@ -751,7 +749,6 @@
     <string name="tooltip_collapse_schedule">Свернуть программу</string>
     <string name="tooltip_expand_schedule">Развернуть программу</string>
     <string name="tooltip_theme_dark">Тёмная тема</string>
-    <string name="tooltip_theme_light">Светлая тема</string>
     <string name="tooltip_theme_system">Системная тема</string>
     <string name="transparent_default">Прозрачный (по умолчанию)</string>
     <string name="web_add_to_schedule">Добавить в программу</string>
@@ -1773,7 +1770,6 @@
     <string name="planning_center_disconnect">Отключиться</string>
     <string name="planning_center_status_connected">Подключено как %1$s</string>
     <string name="planning_center_status_connecting">Подключение…</string>
-    <string name="planning_center_status_error">Ошибка: %1$s</string>
     <string name="planning_center_import_title">Импорт из Planning Center</string>
     <string name="planning_center_import_service_type">Тип служения</string>
     <string name="planning_center_import_select_plan">Выбрать план</string>
@@ -1951,8 +1947,6 @@
     <string name="bible_preview_sample_verse">Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного.</string>
     <string name="bible_preview_sample_book">Иоанна</string>
     <string name="bible_preview_no_translations">Добавьте перевод, чтобы увидеть его здесь</string>
-    <string name="song_preview_full_screen">Предпросмотр полного экрана</string>
-    <string name="song_preview_lower_third">Предпросмотр нижней трети</string>
     <string name="song_element_number">Номер</string>
     <string name="song_element_title">Название</string>
     <string name="song_element_lyrics">Текст</string>
@@ -2213,7 +2207,6 @@
     <string name="ffmpeg_missing_help">Камеры и карты захвата открываются через ffmpeg. Эта сборка должна его содержать — выберите ffmpeg ниже или установите ffmpeg и проверьте снова.</string>
     <string name="ffmpeg_path_hint">Выберите программу ffmpeg</string>
     <string name="ffmpeg_browse">Выбрать ffmpeg</string>
-    <string name="ffmpeg_check_again">Проверить снова</string>
     <string name="ffmpeg_clear">Использовать встроенный</string>
     <string name="ffmpeg_download_link">Скачать ffmpeg</string>
     <string name="ffmpeg_path_help">Оставьте пустым, чтобы использовать ffmpeg, входящий в ChurchPresenter.</string>
@@ -2314,8 +2307,6 @@
     <string name="preview_settings_show_modes">Показывать тип отображения</string>
     <string name="song_add_translation">Добавить язык</string>
     <string name="song_fourth_language">Язык 4</string>
-    <string name="song_language_fourth">Язык 4</string>
-    <string name="song_language_third">Язык 3</string>
     <string name="song_pane_translation">Язык %1$d</string>
     <string name="song_third_language">Язык 3</string>
     <string name="song_translation_label">Название языка</string>

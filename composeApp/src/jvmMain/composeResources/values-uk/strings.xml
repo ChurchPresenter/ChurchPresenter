@@ -82,7 +82,6 @@
     <string name="report_bug">Повідомити про помилку</string>
     <string name="submit_feature_request">Надіслати запит на функцію</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Довідка</string>
     <string name="menu_how_to_blog">Навчальний блог</string>
     <string name="menu_check_for_updates">Перевірити оновлення…</string>
 
@@ -468,7 +467,6 @@
     <string name="lottie_select_preset">Виберіть пресет для перегляду</string>
     <string name="delete_saved_string">Видалити</string>
     <string name="menu_keyboard_shortcuts">Гарячі клавіші</string>
-    <string name="keyboard_shortcuts_title">Гарячі клавіші</string>
     <string name="shortcut_category_global">Глобальні</string>
     <string name="shortcut_category_bible">Вкладка Біблія</string>
     <string name="shortcut_category_songs">Вкладка Пісні</string>
@@ -713,7 +711,6 @@
     <string name="tooltip_collapse_schedule">Згорнути програму</string>
     <string name="tooltip_expand_schedule">Розгорнути програму</string>
     <string name="tooltip_theme_dark">Темна тема</string>
-    <string name="tooltip_theme_light">Світла тема</string>
     <string name="tooltip_theme_system">Системна тема</string>
     <string name="transparent_default">Прозорий (за замовчуванням)</string>
     <string name="web_add_to_schedule">Додати до програми</string>
@@ -1770,7 +1767,6 @@
     <string name="planning_center_disconnect">Відключитися</string>
     <string name="planning_center_status_connected">Підключено як %1$s</string>
     <string name="planning_center_status_connecting">Підключення…</string>
-    <string name="planning_center_status_error">Помилка: %1$s</string>
     <string name="planning_center_import_title">Імпорт з Planning Center</string>
     <string name="planning_center_import_service_type">Тип служіння</string>
     <string name="planning_center_import_select_plan">Оберіть план</string>
@@ -1948,8 +1944,6 @@
     <string name="bible_preview_sample_verse">Так бо Бог полюбив світ, що дав Сина Свого Однородженого.</string>
     <string name="bible_preview_sample_book">Івана</string>
     <string name="bible_preview_no_translations">Додайте переклад, щоб побачити його тут</string>
-    <string name="song_preview_full_screen">Перегляд повного екрана</string>
-    <string name="song_preview_lower_third">Перегляд нижньої третини</string>
     <string name="song_element_number">Номер</string>
     <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Текст</string>
@@ -2210,7 +2204,6 @@
     <string name="ffmpeg_missing_help">Камери та карти захоплення відкриваються через ffmpeg. Ця збірка має його містити — оберіть ffmpeg нижче або встановіть ffmpeg і перевірте знову.</string>
     <string name="ffmpeg_path_hint">Оберіть програму ffmpeg</string>
     <string name="ffmpeg_browse">Вибрати ffmpeg</string>
-    <string name="ffmpeg_check_again">Перевірити знову</string>
     <string name="ffmpeg_clear">Використовувати вбудований</string>
     <string name="ffmpeg_download_link">Завантажити ffmpeg</string>
     <string name="ffmpeg_path_help">Залиште порожнім, щоб використовувати ffmpeg, що входить до ChurchPresenter.</string>
@@ -2311,8 +2304,6 @@
     <string name="preview_settings_show_modes">Показувати тип відображення</string>
     <string name="song_add_translation">Додати мову</string>
     <string name="song_fourth_language">Мова 4</string>
-    <string name="song_language_fourth">Мова 4</string>
-    <string name="song_language_third">Мова 3</string>
     <string name="song_pane_translation">Мова %1$d</string>
     <string name="song_third_language">Мова 3</string>
     <string name="song_translation_label">Назва мови</string>

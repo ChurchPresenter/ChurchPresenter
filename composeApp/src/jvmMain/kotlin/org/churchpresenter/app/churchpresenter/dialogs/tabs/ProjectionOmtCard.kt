@@ -67,7 +67,7 @@ import churchpresenter.composeapp.generated.resources.omt_library_path
 import churchpresenter.composeapp.generated.resources.omt_library_path_help
 import churchpresenter.composeapp.generated.resources.omt_mode_alpha_help
 import churchpresenter.composeapp.generated.resources.omt_mode_fill_help
-import churchpresenter.composeapp.generated.resources.omt_name_tooltip
+import churchpresenter.composeapp.generated.resources.ndi_name_tooltip
 import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.omt_outputs
 import churchpresenter.composeapp.generated.resources.omt_outputs_help
@@ -426,7 +426,7 @@ private fun OmtOutputRow(
                 @OptIn(ExperimentalMaterial3Api::class)
                 TooltipBox(
                     positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = { PlainTooltip { Text(stringResource(Res.string.omt_name_tooltip)) } },
+                    tooltip = { PlainTooltip { Text(stringResource(Res.string.ndi_name_tooltip)) } },
                     state = rememberTooltipState(),
                 ) {
                     SettingsTextField(

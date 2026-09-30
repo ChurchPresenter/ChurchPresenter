@@ -3,13 +3,11 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.song_fourth_language
-import churchpresenter.composeapp.generated.resources.song_language_fourth
 import churchpresenter.composeapp.generated.resources.song_language_primary
 import churchpresenter.composeapp.generated.resources.song_language_secondary
-import churchpresenter.composeapp.generated.resources.song_language_third
+import churchpresenter.composeapp.generated.resources.song_third_language
 import churchpresenter.composeapp.generated.resources.song_primary_language
 import churchpresenter.composeapp.generated.resources.song_secondary_language
-import churchpresenter.composeapp.generated.resources.song_third_language
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageLabel
@@ -63,8 +61,8 @@ internal fun defaultSongLanguageName(slot: Int): String = stringResource(
     when (slot) {
         0 -> Res.string.song_language_primary
         1 -> Res.string.song_language_secondary
-        2 -> Res.string.song_language_third
-        else -> Res.string.song_language_fourth
+        2 -> Res.string.song_third_language
+        else -> Res.string.song_fourth_language
     },
 )
 
