@@ -96,4 +96,101 @@ class MainDesktopRemoteVerseFallbackTest {
         assertEquals("", verse.verseRange)
         assertEquals(16, verse.verseNumber)
     }
+
+    // ── A phone reading a Bible downloaded onto it ─────────────────────────────
+
+    private val fromPhone = request.copy(
+        verseText = "Бо так полюбив Бог світ",
+        bibleName = "Біблія (Огієнко)",
+        bibleAbbreviation = "UKR_OGI",
+        useClientText = true,
+        bookId = 43,
+    )
+
+    private fun callFromPhone(resolved: List<SelectedVerse>, sent: SelectBibleVerseRequest = fromPhone) =
+        remoteSelectedVerses(resolved, sent, "niv.spb", "NIV", "New International Version")
+
+    @Test
+    fun `the phone's own text is shown even where this machine resolves the reference`() {
+        val verse = callFromPhone(resolved(16, 17, 18)).single()
+
+        assertEquals("Бо так полюбив Бог світ", verse.verseText, "the screen shows what the phone shows")
+    }
+
+    @Test
+    fun `the phone's text is shown under the phone's translation`() {
+        val verse = callFromPhone(resolved(16)).single()
+
+        assertEquals("Біблія (Огієнко)", verse.bibleName)
+        assertEquals("UKR_OGI", verse.bibleAbbreviation)
+        assertEquals("niv.spb", verse.translationFileName, "the look is still keyed to this machine's profile")
+    }
+
+    @Test
+    fun `a phone that names no translation is shown under this machine's`() {
+        val verse = callFromPhone(emptyList(), fromPhone.copy(bibleName = "", bibleAbbreviation = "")).single()
+
+        assertEquals("New International Version", verse.bibleName)
+        assertEquals("NIV", verse.bibleAbbreviation)
+    }
+
+    @Test
+    fun `the book id comes from the local lookup when there was one`() {
+        val local = resolved(16).map { it.copy(bookId = 99) }
+        assertEquals(99, callFromPhone(local).single().bookId)
+    }
+
+    @Test
+    fun `the book id comes from the phone when nothing resolved here`() {
+        assertEquals(43, callFromPhone(emptyList()).single().bookId)
+    }
+
+    @Test
+    fun `asking for the phone's text with none sent shows this machine's instead`() {
+        val verses = callFromPhone(resolved(16, 17, 18), fromPhone.copy(verseText = " "))
+
+        assertEquals(3, verses.size)
+        assertEquals("verse 16 as this machine has it", verses.first().verseText)
+    }
+
+    // ── Which verses a remote request counts as shown ──────────────────────────
+
+    private fun numbers(range: String, verse: Int = 16) = remoteVerseNumbers(
+        SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = verse, verseRange = range),
+    )
+
+    @Test
+    fun `a single verse is one play`() {
+        assertEquals(listOf(16), numbers(""))
+    }
+
+    @Test
+    fun `a range counts every verse in it`() {
+        assertEquals(listOf(16, 17, 18), numbers("16-18"))
+    }
+
+    @Test
+    fun `a list counts each verse it names once`() {
+        assertEquals(listOf(2, 4, 5), numbers("2,4,5,4", verse = 2))
+    }
+
+    @Test
+    fun `ranges and single verses can be mixed`() {
+        assertEquals(listOf(1, 2, 3, 7), numbers("1-3, 7", verse = 1))
+    }
+
+    @Test
+    fun `a backwards range falls back to the single verse`() {
+        assertEquals(listOf(16), numbers("18-16"))
+    }
+
+    @Test
+    fun `an absurd range falls back rather than recording hundreds of plays`() {
+        assertEquals(listOf(1), numbers("1-5000", verse = 1))
+    }
+
+    @Test
+    fun `a range that is not numbers falls back to the single verse`() {
+        assertEquals(listOf(16), numbers("sixteen"))
+    }
 }

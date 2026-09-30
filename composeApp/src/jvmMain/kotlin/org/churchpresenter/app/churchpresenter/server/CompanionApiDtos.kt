@@ -400,7 +400,22 @@ data class SelectBibleVerseRequest(
     val chapter: Int,
     val verseNumber: Int,
     val verseText: String = "",
-    val verseRange: String = ""
+    val verseRange: String = "",
+    /**
+     * The mobile app's own translation, when the verse came from a Bible downloaded onto the
+     * phone. With [useClientText] set the verse is shown as sent, under this name, rather than
+     * looked up in this machine's primary Bible — so the screen shows the translation the
+     * operator is reading on the phone. Defaulted so every older client decodes as before.
+     */
+    val bibleName: String = "",
+    val bibleAbbreviation: String = "",
+    val useClientText: Boolean = false,
+    /**
+     * The canonical book number, 1–66. A client reading a Bible in another language names the
+     * book in that language ("سفر التكوين"), which this machine's book list cannot match; the
+     * number matches whatever the language. 0 from clients that predate it.
+     */
+    val bookId: Int = 0,
 )
 
 /**
@@ -491,6 +506,11 @@ data class RemoteItemDto(
     val verseText: String? = null,
     /** Optional multi-verse range, e.g. "1-3" or "2,4". When present the schedule item groups all those verses. */
     val verseRange: String? = null,
+    /**
+     * Canonical book number, 1–66. A phone reading a Russian Bible names the book "Второзаконие",
+     * which an English primary Bible cannot match by name; the number matches in any language.
+     */
+    val bookId: Int? = null,
     // picture (companion app uses folder-id/image-index; desktop uses folderPath)
     @kotlinx.serialization.SerialName("folder-id") val folderId: String? = null,
     @kotlinx.serialization.SerialName("image-index") val imageIndex: Int? = null,
