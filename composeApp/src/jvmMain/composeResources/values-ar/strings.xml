@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">الكتاب المقدس</string>
     <string name="obs_mode_songs">الترانيم</string>
     <string name="obs_mode_pictures">الصور</string>
-    <string name="obs_mode_presentation">العرض التقديمي</string>
     <string name="obs_mode_media">الوسائط</string>
     <string name="obs_mode_lower_third">الشريط السفلي</string>
     <string name="obs_mode_announcements">الإعلانات</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">أضف ترجمة لعرضها هنا</string>
     <string name="song_preview_full_screen">معاينة ملء الشاشة</string>
     <string name="song_preview_lower_third">معاينة الشريط السفلي</string>
-    <string name="song_element_number">الرقم</string>
     <string name="song_element_title">العنوان</string>
     <string name="song_element_lyrics">الكلمات</string>
     <string name="song_element_next_section">المقطع التالي</string>
     <string name="song_element_author">المؤلف</string>
-    <string name="song_element_composer">الملحّن</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">الإيقاع</string>
     <string name="song_target_title_slide">شريحة العنوان</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">يحدد القالب التخطيط وموضع المرجع وكيفية تقاسم لغتين للشريط. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">حد خارجي</string>
     <string name="tooltip_outline_options">خيارات الحد الخارجي</string>
     <string name="text_outline">حد خارجي</string>
     <string name="text_outline_width">العرض</string>

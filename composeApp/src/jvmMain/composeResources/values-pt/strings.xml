@@ -1362,7 +1362,6 @@
     <string name="obs_mode_bible">Bíblia</string>
     <string name="obs_mode_songs">Músicas</string>
     <string name="obs_mode_pictures">Imagens</string>
-    <string name="obs_mode_presentation">Apresentação</string>
     <string name="obs_mode_media">Mídia</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Anúncios</string>
@@ -1979,12 +1978,10 @@
     <string name="bible_preview_no_translations">Adicione uma tradução para a ver aqui</string>
     <string name="song_preview_full_screen">Pré-visualização de ecrã inteiro</string>
     <string name="song_preview_lower_third">Pré-visualização do terço inferior</string>
-    <string name="song_element_number">Número</string>
     <string name="song_element_title">Título</string>
     <string name="song_element_lyrics">Letra</string>
     <string name="song_element_next_section">Próxima Seção</string>
     <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Compositor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Andamento</string>
     <string name="song_target_title_slide">Diapositivo de título</string>
@@ -2135,7 +2132,6 @@
     <string name="bible_lottie_unsupported_note">O modelo decide o layout, a posição da referência e como dois idiomas dividem a faixa. O estilo do terço inferior define fonte, tamanho, cor, alinhamento, espaçamento entre letras, caixa e sombra; fundo do texto, sublinhado, tachado e espaçamento entre palavras não se aplicam.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Contorno</string>
     <string name="tooltip_outline_options">Opções de contorno</string>
     <string name="text_outline">Contorno</string>
     <string name="text_outline_width">Espessura</string>

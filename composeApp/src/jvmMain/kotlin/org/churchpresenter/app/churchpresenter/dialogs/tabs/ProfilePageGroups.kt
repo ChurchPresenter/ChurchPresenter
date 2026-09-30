@@ -45,7 +45,7 @@ import churchpresenter.composeapp.generated.resources.profile_group_transition
 import churchpresenter.composeapp.generated.resources.profile_layout_side_by_side
 import churchpresenter.composeapp.generated.resources.profile_layout_stacked
 import churchpresenter.composeapp.generated.resources.profile_margins
-import churchpresenter.composeapp.generated.resources.profile_ms
+import churchpresenter.composeapp.generated.resources.unit_ms
 import churchpresenter.composeapp.generated.resources.profile_place_freely
 import churchpresenter.composeapp.generated.resources.profile_place_freely_sub
 import churchpresenter.composeapp.generated.resources.profile_region_moves_background
@@ -293,7 +293,7 @@ internal fun TransitionGroup(
                 { onDuration(it.toFloat()) },
                 DURATION_RANGE_MS,
                 step = DURATION_STEP,
-                unit = stringResource(Res.string.profile_ms),
+                unit = stringResource(Res.string.unit_ms),
                 fieldWidth = 76.dp,
             )
         }

@@ -28,7 +28,7 @@ import churchpresenter.composeapp.generated.resources.profile_group_position
 import churchpresenter.composeapp.generated.resources.profile_group_show
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_line_spacing
-import churchpresenter.composeapp.generated.resources.profile_ms
+import churchpresenter.composeapp.generated.resources.unit_ms
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
@@ -215,7 +215,7 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
                         { v -> update { it.copy(dripFeedSpeed = v) } },
                         TYPE_SPEED_RANGE,
                         step = TYPE_SPEED_STEP,
-                        unit = stringResource(Res.string.profile_ms),
+                        unit = stringResource(Res.string.unit_ms),
                         fieldWidth = 76.dp,
                     )
                 }

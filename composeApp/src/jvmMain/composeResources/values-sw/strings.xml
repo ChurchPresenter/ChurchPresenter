@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Biblia</string>
     <string name="obs_mode_songs">Nyimbo</string>
     <string name="obs_mode_pictures">Picha</string>
-    <string name="obs_mode_presentation">Wasilisho</string>
     <string name="obs_mode_media">Midia</string>
     <string name="obs_mode_lower_third">Mstari wa chini</string>
     <string name="obs_mode_announcements">Matangazo</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Ongeza tafsiri ili kuiona hapa</string>
     <string name="song_preview_full_screen">Onyesho la skrini nzima</string>
     <string name="song_preview_lower_third">Onyesho la theluthi ya chini</string>
-    <string name="song_element_number">Nambari</string>
     <string name="song_element_title">Kichwa</string>
     <string name="song_element_lyrics">Maneno ya Wimbo</string>
     <string name="song_element_next_section">Sehemu Inayofuata</string>
     <string name="song_element_author">Mwandishi</string>
-    <string name="song_element_composer">Mtunzi</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Mwendo</string>
     <string name="song_target_title_slide">Slaidi ya kichwa</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Kiolezo huamua mpangilio, mahali pa rejeleo na jinsi lugha mbili zinavyogawana mkanda. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta na nafasi ya maneno hazitumiki.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Mstari wa nje</string>
     <string name="tooltip_outline_options">Chaguo za mstari wa nje</string>
     <string name="text_outline">Mstari wa nje</string>
     <string name="text_outline_width">Upana</string>

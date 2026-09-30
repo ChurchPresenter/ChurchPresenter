@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Bībele</string>
     <string name="obs_mode_songs">Dziesmas</string>
     <string name="obs_mode_pictures">Attēli</string>
-    <string name="obs_mode_presentation">Prezentācija</string>
     <string name="obs_mode_media">Mediji</string>
     <string name="obs_mode_lower_third">Apakšjosla</string>
     <string name="obs_mode_announcements">Paziņojumi</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Pievienojiet tulkojumu, lai to redzētu šeit</string>
     <string name="song_preview_full_screen">Pilnekrāna priekšskatījums</string>
     <string name="song_preview_lower_third">Apakšējās trešdaļas priekšskatījums</string>
-    <string name="song_element_number">Numurs</string>
     <string name="song_element_title">Nosaukums</string>
     <string name="song_element_lyrics">Dziesmas teksts</string>
     <string name="song_element_next_section">Nākamā daļa</string>
     <string name="song_element_author">Autors</string>
-    <string name="song_element_composer">Komponists</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Temps</string>
     <string name="song_target_title_slide">Nosaukuma slaids</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Veidne nosaka izkārtojumu, atsauces vietu un to, kā divas valodas dala joslu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums un vārdu atstarpe netiek piemēroti.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontūra</string>
     <string name="tooltip_outline_options">Kontūras opcijas</string>
     <string name="text_outline">Kontūra</string>
     <string name="text_outline_width">Platums</string>

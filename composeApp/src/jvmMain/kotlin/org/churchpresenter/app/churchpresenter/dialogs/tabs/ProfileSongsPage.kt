@@ -31,15 +31,13 @@ import churchpresenter.composeapp.generated.resources.profile_section_label
 import churchpresenter.composeapp.generated.resources.profile_section_label_sub
 import churchpresenter.composeapp.generated.resources.profile_position_above_lyrics
 import churchpresenter.composeapp.generated.resources.profile_position_below_lyrics
-import churchpresenter.composeapp.generated.resources.profile_position_bottom
-import churchpresenter.composeapp.generated.resources.profile_position_top
+import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.profile_slide_element
 import churchpresenter.composeapp.generated.resources.profile_song_position
 import churchpresenter.composeapp.generated.resources.profile_title_slide
 import churchpresenter.composeapp.generated.resources.profile_title_slide_sub
 import churchpresenter.composeapp.generated.resources.profile_title_slide_valign
 import churchpresenter.composeapp.generated.resources.profile_word_wrap
-import churchpresenter.composeapp.generated.resources.top
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -485,10 +483,10 @@ private fun SongPositionRow(selected: String, onSelect: (String) -> Unit) {
     SettingsRow(stringResource(Res.string.profile_song_position)) {
         RowSegmented(
             options = listOf(
-                RowOption(Constants.ABOVE_VERSE, stringResource(Res.string.profile_position_top)),
+                RowOption(Constants.ABOVE_VERSE, stringResource(Res.string.top)),
                 RowOption(Constants.ABOVE_LYRICS, stringResource(Res.string.profile_position_above_lyrics)),
                 RowOption(Constants.BELOW_LYRICS, stringResource(Res.string.profile_position_below_lyrics)),
-                RowOption(Constants.BELOW_VERSE, stringResource(Res.string.profile_position_bottom)),
+                RowOption(Constants.BELOW_VERSE, stringResource(Res.string.bottom)),
             ),
             selected = selected,
             onSelect = onSelect,

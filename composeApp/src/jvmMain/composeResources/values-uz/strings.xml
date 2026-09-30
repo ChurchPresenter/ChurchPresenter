@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Injil</string>
     <string name="obs_mode_songs">Qoʻshiqlar</string>
     <string name="obs_mode_pictures">Rasmlar</string>
-    <string name="obs_mode_presentation">Taqdimot</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Quyi lavha</string>
     <string name="obs_mode_announcements">Eʼlonlar</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Bu yerda ko'rish uchun tarjima qo'shing</string>
     <string name="song_preview_full_screen">To'liq ekran ko'rinishi</string>
     <string name="song_preview_lower_third">Pastki uchlik ko'rinishi</string>
-    <string name="song_element_number">Raqam</string>
     <string name="song_element_title">Sarlavha</string>
     <string name="song_element_lyrics">Qoʻshiq matni</string>
     <string name="song_element_next_section">Keyingi qism</string>
     <string name="song_element_author">Muallif</string>
-    <string name="song_element_composer">Bastakor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Temp</string>
     <string name="song_target_title_slide">Sarlavha slaydi</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Shablon joylashuvni, havola o‘rnini va ikki til tasmani qanday bo‘lishishini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish va so‘zlar oralig‘i qo‘llanilmaydi.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Kontur sozlamalari</string>
     <string name="text_outline">Kontur</string>
     <string name="text_outline_width">Qalinligi</string>

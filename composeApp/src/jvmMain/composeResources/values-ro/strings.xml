@@ -1407,7 +1407,6 @@
     <string name="obs_mode_bible">Biblie</string>
     <string name="obs_mode_songs">Cântări</string>
     <string name="obs_mode_pictures">Imagini</string>
-    <string name="obs_mode_presentation">Prezentare</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Anunțuri</string>
@@ -1980,12 +1979,10 @@
     <string name="bible_preview_no_translations">Adăugați o traducere pentru a o vedea aici</string>
     <string name="song_preview_full_screen">Previzualizare ecran complet</string>
     <string name="song_preview_lower_third">Previzualizare treime inferioară</string>
-    <string name="song_element_number">Număr</string>
     <string name="song_element_title">Titlu</string>
     <string name="song_element_lyrics">Versuri</string>
     <string name="song_element_next_section">Secțiunea Următoare</string>
     <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Compozitor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Diapozitiv de titlu</string>
@@ -2136,7 +2133,6 @@
     <string name="bible_lottie_unsupported_note">Șablonul decide aspectul, poziția referinței și felul în care două limbi împart banda. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea și spațierea cuvintelor nu se aplică.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Contur</string>
     <string name="tooltip_outline_options">Opțiuni contur</string>
     <string name="text_outline">Contur</string>
     <string name="text_outline_width">Lățime</string>

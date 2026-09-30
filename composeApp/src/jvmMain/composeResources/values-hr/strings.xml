@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Biblija</string>
     <string name="obs_mode_songs">Pjesme</string>
     <string name="obs_mode_pictures">Slike</string>
-    <string name="obs_mode_presentation">Prezentacija</string>
     <string name="obs_mode_media">Mediji</string>
     <string name="obs_mode_lower_third">Donja traka</string>
     <string name="obs_mode_announcements">Obavijesti</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Dodajte prijevod da biste ga vidjeli ovdje</string>
     <string name="song_preview_full_screen">Pregled cijelog zaslona</string>
     <string name="song_preview_lower_third">Pregled donje trećine</string>
-    <string name="song_element_number">Broj</string>
     <string name="song_element_title">Naslov</string>
     <string name="song_element_lyrics">Tekst pjesme</string>
     <string name="song_element_next_section">Sljedeći dio</string>
     <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Skladatelj</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Naslovni slajd</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Predložak određuje raspored, mjesto reference i kako dva jezika dijele traku. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje i razmak riječi se ne primjenjuju.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Obrub</string>
     <string name="tooltip_outline_options">Opcije obruba</string>
     <string name="text_outline">Obrub</string>
     <string name="text_outline_width">Širina</string>

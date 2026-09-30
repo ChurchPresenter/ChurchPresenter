@@ -1305,7 +1305,6 @@
     <string name="obs_mode_bible">Biblia</string>
     <string name="obs_mode_songs">Pieśni</string>
     <string name="obs_mode_pictures">Obrazy</string>
-    <string name="obs_mode_presentation">Prezentacja</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Pasek dolny</string>
     <string name="obs_mode_announcements">Ogłoszenia</string>
@@ -1950,12 +1949,10 @@
     <string name="bible_preview_no_translations">Dodaj przekład, aby zobaczyć go tutaj</string>
     <string name="song_preview_full_screen">Podgląd pełnego ekranu</string>
     <string name="song_preview_lower_third">Podgląd dolnej tercji</string>
-    <string name="song_element_number">Numer</string>
     <string name="song_element_title">Tytuł</string>
     <string name="song_element_lyrics">Tekst</string>
     <string name="song_element_next_section">Następna zwrotka</string>
     <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Kompozytor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Slajd tytułowy</string>
@@ -2106,7 +2103,6 @@
     <string name="bible_lottie_unsupported_note">Szablon decyduje o układzie, miejscu odnośnika i o tym, jak dwa języki dzielą pasek. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie i odstępy między wyrazami nie mają zastosowania.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Obrys</string>
     <string name="tooltip_outline_options">Opcje obrysu</string>
     <string name="text_outline">Obrys</string>
     <string name="text_outline_width">Szerokość</string>

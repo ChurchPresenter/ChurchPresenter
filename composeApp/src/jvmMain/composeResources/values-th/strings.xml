@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">พระคัมภีร์</string>
     <string name="obs_mode_songs">เพลง</string>
     <string name="obs_mode_pictures">ภาพ</string>
-    <string name="obs_mode_presentation">งานนำเสนอ</string>
     <string name="obs_mode_media">สื่อ</string>
     <string name="obs_mode_lower_third">แถบล่าง</string>
     <string name="obs_mode_announcements">ประกาศ</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">เพิ่มคำแปลเพื่อดูที่นี่</string>
     <string name="song_preview_full_screen">ตัวอย่างเต็มจอ</string>
     <string name="song_preview_lower_third">ตัวอย่างแถบล่าง</string>
-    <string name="song_element_number">หมายเลข</string>
     <string name="song_element_title">ชื่อ</string>
     <string name="song_element_lyrics">เนื้อเพลง</string>
     <string name="song_element_next_section">ท่อนถัดไป</string>
     <string name="song_element_author">ผู้ประพันธ์คำร้อง</string>
-    <string name="song_element_composer">ผู้ประพันธ์ทำนอง</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">จังหวะ</string>
     <string name="song_target_title_slide">สไลด์ชื่อเพลง</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">เทมเพลตกำหนดเลย์เอาต์ ตำแหน่งของข้ออ้างอิง และการแบ่งแถบระหว่างสองภาษา สไตล์แถบล่างกำหนดแบบอักษร ขนาด สี การจัดแนว ระยะห่างตัวอักษร ตัวพิมพ์ และเงา ส่วนพื้นหลังข้อความ ขีดเส้นใต้ ขีดฆ่า และระยะห่างคำจะไม่มีผล</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">เส้นขอบ</string>
     <string name="tooltip_outline_options">ตัวเลือกเส้นขอบ</string>
     <string name="text_outline">เส้นขอบ</string>
     <string name="text_outline_width">ความกว้าง</string>

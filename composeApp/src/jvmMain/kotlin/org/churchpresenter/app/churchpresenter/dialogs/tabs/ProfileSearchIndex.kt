@@ -61,7 +61,7 @@ import churchpresenter.composeapp.generated.resources.profile_text_color
 import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
 import churchpresenter.composeapp.generated.resources.profile_text_letter_case
-import churchpresenter.composeapp.generated.resources.profile_text_outline
+import churchpresenter.composeapp.generated.resources.text_outline
 import churchpresenter.composeapp.generated.resources.profile_text_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_style
@@ -85,7 +85,7 @@ import org.jetbrains.compose.resources.stringResource
 private val TEXT_ROWS = listOf(
     Res.string.profile_text_font, Res.string.profile_text_size, Res.string.profile_text_color,
     Res.string.profile_text_style, Res.string.profile_text_alignment, Res.string.profile_text_letter_case,
-    Res.string.bible_letter_spacing, Res.string.bible_word_spacing, Res.string.profile_text_outline,
+    Res.string.bible_letter_spacing, Res.string.bible_word_spacing, Res.string.text_outline,
     Res.string.profile_text_highlight, Res.string.profile_text_shadow,
 )
 

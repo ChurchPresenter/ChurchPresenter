@@ -25,7 +25,7 @@ import churchpresenter.composeapp.generated.resources.profile_text_alignment
 import churchpresenter.composeapp.generated.resources.profile_text_color
 import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
-import churchpresenter.composeapp.generated.resources.profile_text_outline
+import churchpresenter.composeapp.generated.resources.text_outline
 import churchpresenter.composeapp.generated.resources.profile_text_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
@@ -98,7 +98,7 @@ internal fun DisplayTextRows(
             buttonSize = DISPLAY_STYLE_BUTTON,
         )
     }
-    SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true, paths = path("outline")) {
+    SettingsRow(stringResource(Res.string.text_outline), advanced = true, paths = path("outline")) {
         TextOutlineButton(style.outline, { onChange(style.copy(outline = it)) }, DISPLAY_STYLE_BUTTON)
     }
     SettingsRow(stringResource(Res.string.profile_text_highlight), advanced = true, paths = path("backdrop")) {

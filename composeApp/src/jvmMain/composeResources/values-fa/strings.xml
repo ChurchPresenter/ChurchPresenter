@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">کتاب‌مقدس</string>
     <string name="obs_mode_songs">سرودها</string>
     <string name="obs_mode_pictures">تصاویر</string>
-    <string name="obs_mode_presentation">ارائه</string>
     <string name="obs_mode_media">رسانه</string>
     <string name="obs_mode_lower_third">نوار پایینی</string>
     <string name="obs_mode_announcements">اعلان‌ها</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">برای دیدن آن در اینجا، یک ترجمه اضافه کنید</string>
     <string name="song_preview_full_screen">پیش‌نمایش تمام‌صفحه</string>
     <string name="song_preview_lower_third">پیش‌نمایش نوار پایین</string>
-    <string name="song_element_number">شماره</string>
     <string name="song_element_title">عنوان</string>
     <string name="song_element_lyrics">متن سرود</string>
     <string name="song_element_next_section">بخش بعدی</string>
     <string name="song_element_author">سراینده</string>
-    <string name="song_element_composer">آهنگساز</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">تمپو</string>
     <string name="song_target_title_slide">اسلاید عنوان</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">الگو چیدمان، جای مرجع و نحوهٔ اشتراک نوار میان دو زبان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده و فاصلهٔ واژه‌ها اعمال نمی‌شوند.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">خط دور</string>
     <string name="tooltip_outline_options">تنظیمات خط دور</string>
     <string name="text_outline">خط دور</string>
     <string name="text_outline_width">ضخامت</string>

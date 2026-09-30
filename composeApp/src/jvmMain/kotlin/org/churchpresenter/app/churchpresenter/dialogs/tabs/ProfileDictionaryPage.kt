@@ -21,7 +21,7 @@ import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_text_color
 import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
-import churchpresenter.composeapp.generated.resources.profile_text_outline
+import churchpresenter.composeapp.generated.resources.text_outline
 import churchpresenter.composeapp.generated.resources.profile_text_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
@@ -175,7 +175,7 @@ private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) 
         }
     }
     look.outline?.let { outline ->
-        SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true, paths = p(look.names.outline)) {
+        SettingsRow(stringResource(Res.string.text_outline), advanced = true, paths = p(look.names.outline)) {
             TextOutlineButton(outline, { onChange(look.copy(outline = it)) }, DICT_STYLE_BUTTON)
         }
     }

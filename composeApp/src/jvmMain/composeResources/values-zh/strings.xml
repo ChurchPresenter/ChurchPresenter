@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">圣经</string>
     <string name="obs_mode_songs">诗歌</string>
     <string name="obs_mode_pictures">图片</string>
-    <string name="obs_mode_presentation">演示文稿</string>
     <string name="obs_mode_media">媒体</string>
     <string name="obs_mode_lower_third">下三分之一</string>
     <string name="obs_mode_announcements">通知</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">添加译本后即可在此查看</string>
     <string name="song_preview_full_screen">全屏预览</string>
     <string name="song_preview_lower_third">下三分之一预览</string>
-    <string name="song_element_number">编号</string>
     <string name="song_element_title">标题</string>
     <string name="song_element_lyrics">歌词</string>
     <string name="song_element_next_section">下一段</string>
     <string name="song_element_author">作词</string>
-    <string name="song_element_composer">作曲</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">速度</string>
     <string name="song_target_title_slide">标题幻灯片</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">模板决定版式、经文出处的位置以及两种语言如何共用字幕条。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线和词间距不适用。</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">描边</string>
     <string name="tooltip_outline_options">描边选项</string>
     <string name="text_outline">描边</string>
     <string name="text_outline_width">宽度</string>

@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">बाइबल</string>
     <string name="obs_mode_songs">गीत</string>
     <string name="obs_mode_pictures">तस्बिर</string>
-    <string name="obs_mode_presentation">प्रस्तुति</string>
     <string name="obs_mode_media">मिडिया</string>
     <string name="obs_mode_lower_third">तल्लो पट्टी</string>
     <string name="obs_mode_announcements">सूचना</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">यहाँ हेर्न एउटा अनुवाद थप्नुहोस्</string>
     <string name="song_preview_full_screen">पूर्ण स्क्रिन पूर्वावलोकन</string>
     <string name="song_preview_lower_third">तल्लो तिहाइ पूर्वावलोकन</string>
-    <string name="song_element_number">नम्बर</string>
     <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">गीतको बोल</string>
     <string name="song_element_next_section">अर्को खण्ड</string>
     <string name="song_element_author">रचनाकार</string>
-    <string name="song_element_composer">सङ्गीतकार</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">टेम्पो</string>
     <string name="song_target_title_slide">शीर्षक स्लाइड</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">टेम्प्लेटले लेआउट, सन्दर्भको स्थान र दुई भाषाले ब्यान्ड कसरी बाँड्ने भन्ने तय गर्छ। तल्लो तिहाइको शैलीले फन्ट, आकार, रङ, पङ्क्तिबद्धता, अक्षर अन्तर, केस र छाया तय गर्छ; पाठ पृष्ठभूमि, रेखाङ्कन, काटिएको रेखा र शब्द अन्तर लागू हुँदैनन्।</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">रूपरेखा</string>
     <string name="tooltip_outline_options">रूपरेखा विकल्पहरू</string>
     <string name="text_outline">रूपरेखा</string>
     <string name="text_outline_width">चौडाइ</string>

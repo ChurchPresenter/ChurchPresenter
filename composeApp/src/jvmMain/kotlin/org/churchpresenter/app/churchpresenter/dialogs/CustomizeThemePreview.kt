@@ -31,7 +31,7 @@ import churchpresenter.composeapp.generated.resources.customize_theme_preview_fi
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_heading
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_secondary
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_song
-import churchpresenter.composeapp.generated.resources.customize_theme_preview_song_selected
+import churchpresenter.composeapp.generated.resources.song_preview_sample_title
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_success
 import churchpresenter.composeapp.generated.resources.customize_theme_preview_warning
 import org.churchpresenter.app.churchpresenter.tabs.rowPad
@@ -72,7 +72,7 @@ internal fun ThemePreviewCard() {
                 style = MaterialTheme.typography.bodySmall,
                 color = scheme.onSurfaceVariant,
             )
-            PreviewRow(stringResource(Res.string.customize_theme_preview_song_selected), selected = true)
+            PreviewRow(stringResource(Res.string.song_preview_sample_title), selected = true)
             PreviewRow(stringResource(Res.string.customize_theme_preview_song), selected = false)
             SettingsTextField(
                 value = "",

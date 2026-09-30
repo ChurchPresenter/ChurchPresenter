@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Bibliya</string>
     <string name="obs_mode_songs">Mga awit</string>
     <string name="obs_mode_pictures">Mga larawan</string>
-    <string name="obs_mode_presentation">Presentasyon</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower third</string>
     <string name="obs_mode_announcements">Mga anunsyo</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Magdagdag ng salin upang makita ito rito</string>
     <string name="song_preview_full_screen">Preview ng buong screen</string>
     <string name="song_preview_lower_third">Preview ng lower third</string>
-    <string name="song_element_number">Numero</string>
     <string name="song_element_title">Pamagat</string>
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_next_section">Susunod na Seksyon</string>
     <string name="song_element_author">May-akda</string>
-    <string name="song_element_composer">Kompositor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Title slide</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Ang template ang nagpapasya sa layout, sa posisyon ng reference at kung paano paghahatian ng dalawang wika ang banda. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough at pagitan ng mga salita.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Balangkas</string>
     <string name="tooltip_outline_options">Mga opsyon sa balangkas</string>
     <string name="text_outline">Balangkas</string>
     <string name="text_outline_width">Lapad</string>

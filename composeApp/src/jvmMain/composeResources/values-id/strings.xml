@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Alkitab</string>
     <string name="obs_mode_songs">Lagu</string>
     <string name="obs_mode_pictures">Gambar</string>
-    <string name="obs_mode_presentation">Presentasi</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower third</string>
     <string name="obs_mode_announcements">Pengumuman</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Tambahkan terjemahan untuk melihatnya di sini</string>
     <string name="song_preview_full_screen">Pratinjau layar penuh</string>
     <string name="song_preview_lower_third">Pratinjau sepertiga bawah</string>
-    <string name="song_element_number">Nomor</string>
     <string name="song_element_title">Judul</string>
     <string name="song_element_lyrics">Lirik</string>
     <string name="song_element_next_section">Bagian berikutnya</string>
     <string name="song_element_author">Penulis</string>
-    <string name="song_element_composer">Komposer</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Slide judul</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Templat menentukan tata letak, posisi referensi, dan cara dua bahasa berbagi pita. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, dan jarak kata tidak berlaku.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Garis luar</string>
     <string name="tooltip_outline_options">Opsi garis luar</string>
     <string name="text_outline">Garis luar</string>
     <string name="text_outline_width">Lebar</string>

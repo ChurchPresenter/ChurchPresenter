@@ -1306,7 +1306,6 @@
     <string name="obs_mode_bible">Інжіл</string>
     <string name="obs_mode_songs">Әндер</string>
     <string name="obs_mode_pictures">Суреттер</string>
-    <string name="obs_mode_presentation">Презентация</string>
     <string name="obs_mode_media">Медиа</string>
     <string name="obs_mode_lower_third">Төменгі үштен бір</string>
     <string name="obs_mode_announcements">Хабарландырулар</string>
@@ -1951,12 +1950,10 @@
     <string name="bible_preview_no_translations">Мұнда көру үшін аударма қосыңыз</string>
     <string name="song_preview_full_screen">Толық экранды алдын ала қарау</string>
     <string name="song_preview_lower_third">Төменгі үштікті алдын ала қарау</string>
-    <string name="song_element_number">Нөмір</string>
     <string name="song_element_title">Атауы</string>
     <string name="song_element_lyrics">Мәтін</string>
     <string name="song_element_next_section">Келесі бөлім</string>
     <string name="song_element_author">Автор</string>
-    <string name="song_element_composer">Композитор</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Темп</string>
     <string name="song_target_title_slide">Атау слайды</string>
@@ -2107,7 +2104,6 @@
     <string name="bible_lottie_unsupported_note">Үлгі орналасуды, сілтеменің орнын және екі тілдің жолақты қалай бөлісетінін анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау және сөз аралығы қолданылмайды.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Контур параметрлері</string>
     <string name="text_outline">Контур</string>
     <string name="text_outline_width">Қалыңдығы</string>

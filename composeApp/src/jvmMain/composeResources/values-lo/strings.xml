@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">ພຣະຄຳພີ</string>
     <string name="obs_mode_songs">ເພງ</string>
     <string name="obs_mode_pictures">ຮູບ</string>
-    <string name="obs_mode_presentation">ການນຳສະເໜີ</string>
     <string name="obs_mode_media">ສື່</string>
     <string name="obs_mode_lower_third">ແຖບລຸ່ມ</string>
     <string name="obs_mode_announcements">ປະກາດ</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">ເພີ່ມຄຳແປເພື່ອເບິ່ງຢູ່ນີ້</string>
     <string name="song_preview_full_screen">ຕົວຢ່າງເຕັມຈໍ</string>
     <string name="song_preview_lower_third">ຕົວຢ່າງແຖບລຸ່ມ</string>
-    <string name="song_element_number">ໝາຍເລກ</string>
     <string name="song_element_title">ຫົວຂໍ້</string>
     <string name="song_element_lyrics">ເນື້ອເພງ</string>
     <string name="song_element_next_section">ທ່ອນຕໍ່ໄປ</string>
     <string name="song_element_author">ຜູ້ແຕ່ງຄຳຮ້ອງ</string>
-    <string name="song_element_composer">ຜູ້ແຕ່ງທຳນອງ</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">ຈັງຫວະ</string>
     <string name="song_target_title_slide">ສະໄລ້ຫົວຂໍ້</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ, ຕຳແໜ່ງຂອງຂໍ້ອ້າງອີງ ແລະ ວິທີທີ່ສອງພາສາແບ່ງແຖບ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ ແລະ ໄລຍະຫ່າງຄຳບໍ່ມີຜົນ.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">ເສັ້ນຂອບ</string>
     <string name="tooltip_outline_options">ຕົວເລືອກເສັ້ນຂອບ</string>
     <string name="text_outline">ເສັ້ນຂອບ</string>
     <string name="text_outline_width">ຄວາມກວ້າງ</string>

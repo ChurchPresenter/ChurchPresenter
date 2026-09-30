@@ -62,7 +62,7 @@ import churchpresenter.composeapp.generated.resources.obs_mode_lower_third
 import churchpresenter.composeapp.generated.resources.obs_mode_media
 import churchpresenter.composeapp.generated.resources.obs_mode_none
 import churchpresenter.composeapp.generated.resources.obs_mode_pictures
-import churchpresenter.composeapp.generated.resources.obs_mode_presentation
+import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.obs_mode_qa
 import churchpresenter.composeapp.generated.resources.obs_mode_songs
 import churchpresenter.composeapp.generated.resources.obs_mode_website
@@ -482,7 +482,7 @@ internal fun liveStateSummary(state: LiveStateDto): String = when (state.content
         ?: stringResource(Res.string.obs_mode_bible)
     "LYRICS" -> state.songTitle ?: stringResource(Res.string.obs_mode_songs)
     "PICTURES" -> stringResource(Res.string.obs_mode_pictures)
-    "PRESENTATION" -> stringResource(Res.string.obs_mode_presentation)
+    "PRESENTATION" -> stringResource(Res.string.presentation)
     "MEDIA" -> state.mediaUrl?.substringAfterLast('/') ?: stringResource(Res.string.obs_mode_media)
     "ANNOUNCEMENTS" -> state.announcementText?.take(SUMMARY_PREVIEW_CHARS) ?: stringResource(Res.string.obs_mode_announcements)
     "WEBSITE" -> state.websiteTitle ?: state.websiteUrl ?: stringResource(Res.string.obs_mode_website)

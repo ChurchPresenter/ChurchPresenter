@@ -77,9 +77,9 @@ import churchpresenter.composeapp.generated.resources.open_calendar_manager
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_item_count
-import churchpresenter.composeapp.generated.resources.schedule_icon_size_large
-import churchpresenter.composeapp.generated.resources.schedule_icon_size_medium
-import churchpresenter.composeapp.generated.resources.schedule_icon_size_small
+import churchpresenter.composeapp.generated.resources.tab_label_margin_large
+import churchpresenter.composeapp.generated.resources.preview_sample_medium
+import churchpresenter.composeapp.generated.resources.tab_label_margin_small
 import churchpresenter.composeapp.generated.resources.schedule_option_icon_size
 import churchpresenter.composeapp.generated.resources.schedule_option_item_count
 import churchpresenter.composeapp.generated.resources.schedule_option_zoom
@@ -288,9 +288,9 @@ private fun ScheduleOptionsButton(
 
 @Composable
 private fun scheduleToolbarIconSizeLabel(size: ScheduleToolbarIconSize): String = when (size) {
-    ScheduleToolbarIconSize.SMALL -> stringResource(Res.string.schedule_icon_size_small)
-    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.schedule_icon_size_medium)
-    ScheduleToolbarIconSize.LARGE -> stringResource(Res.string.schedule_icon_size_large)
+    ScheduleToolbarIconSize.SMALL -> stringResource(Res.string.tab_label_margin_small)
+    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.preview_sample_medium)
+    ScheduleToolbarIconSize.LARGE -> stringResource(Res.string.tab_label_margin_large)
 }
 
 /** The same icon the toolbar button itself draws, so the menu entry is recognisable as that button. */

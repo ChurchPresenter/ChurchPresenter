@@ -1352,7 +1352,6 @@
     <string name="obs_mode_bible">Bible</string>
     <string name="obs_mode_songs">Písně</string>
     <string name="obs_mode_pictures">Obrázky</string>
-    <string name="obs_mode_presentation">Prezentace</string>
     <string name="obs_mode_media">Média</string>
     <string name="obs_mode_lower_third">Dolní třetina</string>
     <string name="obs_mode_announcements">Oznámení</string>
@@ -1960,12 +1959,10 @@
     <string name="bible_preview_no_translations">Přidejte překlad, abyste jej zde viděli</string>
     <string name="song_preview_full_screen">Náhled celé obrazovky</string>
     <string name="song_preview_lower_third">Náhled dolní třetiny</string>
-    <string name="song_element_number">Číslo</string>
     <string name="song_element_title">Název</string>
     <string name="song_element_lyrics">Text</string>
     <string name="song_element_next_section">Další sloka</string>
     <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Skladatel</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Titulní snímek</string>
@@ -2116,7 +2113,6 @@
     <string name="bible_lottie_unsupported_note">Šablona určuje rozvržení, umístění odkazu a to, jak si dva jazyky pruh rozdělí. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí a mezery mezi slovy se nepoužijí.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Obrys</string>
     <string name="tooltip_outline_options">Možnosti obrysu</string>
     <string name="text_outline">Obrys</string>
     <string name="text_outline_width">Šířka</string>

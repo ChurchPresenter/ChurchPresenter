@@ -383,9 +383,7 @@
     <string name="customize_theme_font_default">System default</string>
     <string name="customize_theme_use_default_font">Use default</string>
     <string name="customize_theme_text_size">Text size</string>
-    <string name="customize_theme_text_size_small">Small</string>
     <string name="customize_theme_text_size_default">Default</string>
-    <string name="customize_theme_text_size_large">Large</string>
     <string name="customize_theme_text_size_extra_large">Extra large</string>
     <string name="customize_theme_margin">Margin</string>
     <string name="customize_theme_margin_normal">Normal</string>
@@ -408,7 +406,6 @@
     <string name="customize_theme_auto">Auto</string>
     <string name="customize_theme_reset_color">Reset to auto</string>
     <string name="customize_theme_more_colors_hint">Colors left on Auto are worked out from the accent.</string>
-    <string name="customize_theme_preview_song_selected">Amazing Grace</string>
     <string name="customize_theme_preview_song">How Great Thou Art</string>
     <string name="customize_theme_preview_chip">Chorus</string>
     <string name="customize_theme_preview_success">Connected</string>
@@ -725,9 +722,6 @@
     <string name="schedule_option_item_count">Item Count</string>
     <string name="schedule_option_zoom">Zoom Controls</string>
     <string name="schedule_option_icon_size">Toolbar icon size</string>
-    <string name="schedule_icon_size_small">Small</string>
-    <string name="schedule_icon_size_medium">Medium</string>
-    <string name="schedule_icon_size_large">Large</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>
@@ -849,7 +843,6 @@
     <string name="song_background_whole_song">Whole song</string>
     <string name="song_background_untitled_section">Untitled section</string>
     <string name="song_insert_slide_break">Slide Break</string>
-    <string name="song_element_number">Number</string>
     <string name="song_element_title">Title</string>
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
@@ -857,7 +850,6 @@
     <string name="song_element_section_label">Section Label</string>
     <string name="song_element_section_label_short">Label</string>
     <string name="song_element_author">Author</string>
-    <string name="song_element_composer">Composer</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Title Slide</string>
@@ -874,7 +866,6 @@
     <string name="text_outline">Outline</string>
     <string name="text_outline_width">Width</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Outline</string>
     <string name="tooltip_outline_options">Outline options</string>
     <string name="outline_show">Show outline</string>
     <string name="pixels_short">px</string>
@@ -1076,7 +1067,6 @@
     <string name="omt_quality">Quality</string>
     <string name="omt_quality_default">Automatic</string>
     <string name="omt_quality_low">Low</string>
-    <string name="omt_quality_medium">Medium</string>
     <string name="omt_quality_high">High</string>
     <string name="omt_quality_default_help">Each receiver asks for the quality it needs, and the highest request is used.</string>
     <string name="omt_quality_fixed_help">A fixed encoding quality for every receiver. Higher looks better and uses more of the network.</string>
@@ -2158,7 +2148,6 @@
     <string name="obs_mode_bible">Bible</string>
     <string name="obs_mode_songs">Songs</string>
     <string name="obs_mode_pictures">Pictures</string>
-    <string name="obs_mode_presentation">Presentation</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Announcements</string>
@@ -2712,7 +2701,6 @@
     <string name="profile_text_alignment">Alignment</string>
     <string name="profile_text_letter_case">Letter case</string>
     <string name="profile_text_as_typed">As typed</string>
-    <string name="profile_text_outline">Outline</string>
     <string name="profile_text_highlight">Highlight behind text</string>
     <string name="profile_text_shadow">Shadow</string>
     <string name="profile_group_background">Background</string>
@@ -2749,7 +2737,6 @@
     <string name="profile_fade_in">Fade in</string>
     <string name="profile_fade_out">Fade out</string>
     <string name="profile_duration">Duration</string>
-    <string name="profile_ms">ms</string>
     <string name="profile_crossfade">Crossfade between items</string>
     <string name="profile_group_band">Lower third band</string>
     <string name="profile_band_height">Band height</string>
@@ -2843,10 +2830,8 @@
     <string name="profile_section_label_sub">Shows Verse 1, Chorus and so on with the lyrics.</string>
     <string name="profile_slide_element">Element</string>
     <string name="profile_song_position">Position</string>
-    <string name="profile_position_top">Top</string>
     <string name="profile_position_above_lyrics">Above lyrics</string>
     <string name="profile_position_below_lyrics">Below lyrics</string>
-    <string name="profile_position_bottom">Bottom</string>
     <string name="profile_group_look">Look</string>
     <string name="profile_live_on">Live on %1$s. Changes show there right away.</string>
     <string name="profile_live_none">Not shown on any output yet.</string>

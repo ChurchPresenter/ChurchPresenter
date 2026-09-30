@@ -1362,7 +1362,6 @@
     <string name="obs_mode_bible">Bible</string>
     <string name="obs_mode_songs">Cantiques</string>
     <string name="obs_mode_pictures">Images</string>
-    <string name="obs_mode_presentation">Présentation</string>
     <string name="obs_mode_media">Médias</string>
     <string name="obs_mode_lower_third">Bandeau inférieur</string>
     <string name="obs_mode_announcements">Annonces</string>
@@ -1978,12 +1977,10 @@
     <string name="bible_preview_no_translations">Ajoutez une traduction pour la voir ici</string>
     <string name="song_preview_full_screen">Aperçu plein écran</string>
     <string name="song_preview_lower_third">Aperçu du tiers inférieur</string>
-    <string name="song_element_number">Numéro</string>
     <string name="song_element_title">Titre</string>
     <string name="song_element_lyrics">Paroles</string>
     <string name="song_element_next_section">Section suivante</string>
     <string name="song_element_author">Auteur</string>
-    <string name="song_element_composer">Compositeur</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Diapositive de titre</string>
@@ -2134,7 +2131,6 @@
     <string name="bible_lottie_unsupported_note">Le modèle décide de la mise en page, de la position de la référence et de la façon dont deux langues se partagent le bandeau. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré et l'espacement des mots ne s'appliquent pas.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Contour</string>
     <string name="tooltip_outline_options">Options de contour</string>
     <string name="text_outline">Contour</string>
     <string name="text_outline_width">Épaisseur</string>

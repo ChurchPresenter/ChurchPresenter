@@ -77,7 +77,7 @@ import churchpresenter.composeapp.generated.resources.omt_quality_default_help
 import churchpresenter.composeapp.generated.resources.omt_quality_fixed_help
 import churchpresenter.composeapp.generated.resources.omt_quality_high
 import churchpresenter.composeapp.generated.resources.omt_quality_low
-import churchpresenter.composeapp.generated.resources.omt_quality_medium
+import churchpresenter.composeapp.generated.resources.preview_sample_medium
 import churchpresenter.composeapp.generated.resources.output_profile_picker_tooltip
 import churchpresenter.composeapp.generated.resources.remove
 import kotlinx.coroutines.Dispatchers
@@ -619,6 +619,6 @@ private fun omtModeHelp(mode: OmtOutputMode): String = when (mode) {
 private fun omtQualityLabel(quality: OmtQuality): String = when (quality) {
     OmtQuality.DEFAULT -> stringResource(Res.string.omt_quality_default)
     OmtQuality.LOW -> stringResource(Res.string.omt_quality_low)
-    OmtQuality.MEDIUM -> stringResource(Res.string.omt_quality_medium)
+    OmtQuality.MEDIUM -> stringResource(Res.string.preview_sample_medium)
     OmtQuality.HIGH -> stringResource(Res.string.omt_quality_high)
 }

@@ -21,7 +21,7 @@ import churchpresenter.composeapp.generated.resources.profile_text_color
 import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
 import churchpresenter.composeapp.generated.resources.profile_text_letter_case
-import churchpresenter.composeapp.generated.resources.profile_text_outline
+import churchpresenter.composeapp.generated.resources.text_outline
 import churchpresenter.composeapp.generated.resources.profile_text_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
@@ -173,7 +173,7 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths
         RowStepper(look.wordSpacing, { onChange(look.copy(wordSpacing = it)) }, WORD_SPACING_RANGE, unit = px)
     }
     SettingsRow(
-        stringResource(Res.string.profile_text_outline),
+        stringResource(Res.string.text_outline),
         advanced = true,
         paths = paths[TextLookField.OUTLINE],
     ) {

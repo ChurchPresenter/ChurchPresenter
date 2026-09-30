@@ -1452,7 +1452,6 @@
     <string name="obs_mode_bible">Piibel</string>
     <string name="obs_mode_songs">Laulud</string>
     <string name="obs_mode_pictures">Pildid</string>
-    <string name="obs_mode_presentation">Esitlus</string>
     <string name="obs_mode_media">Meedia</string>
     <string name="obs_mode_lower_third">Alumine kolmandik</string>
     <string name="obs_mode_announcements">Teated</string>
@@ -1983,12 +1982,10 @@
     <string name="bible_preview_no_translations">Lisage tõlge, et seda siin näha</string>
     <string name="song_preview_full_screen">Täisekraani eelvaade</string>
     <string name="song_preview_lower_third">Alumise kolmandiku eelvaade</string>
-    <string name="song_element_number">Number</string>
     <string name="song_element_title">Pealkiri</string>
     <string name="song_element_lyrics">Sõnad</string>
     <string name="song_element_next_section">Järgmine osa</string>
     <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Helilooja</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Pealkirjaslaid</string>
@@ -2139,7 +2136,6 @@
     <string name="bible_lottie_unsupported_note">Mall määrab paigutuse, viite koha ja selle, kuidas kaks keelt riba jagavad. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus ja sõnavahe ei kehti.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontuur</string>
     <string name="tooltip_outline_options">Kontuuri suvandid</string>
     <string name="text_outline">Kontuur</string>
     <string name="text_outline_width">Laius</string>

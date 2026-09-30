@@ -15,7 +15,7 @@ import churchpresenter.composeapp.generated.resources.profile_text_chord_color
 import churchpresenter.composeapp.generated.resources.profile_text_color
 import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
-import churchpresenter.composeapp.generated.resources.profile_text_outline
+import churchpresenter.composeapp.generated.resources.text_outline
 import churchpresenter.composeapp.generated.resources.profile_text_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
@@ -154,7 +154,7 @@ private fun StageStyleRows(
             RowColor(style.chordColor, { v -> write { copy(chordColor = v) } })
         }
     }
-    SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true, paths = path("outline")) {
+    SettingsRow(stringResource(Res.string.text_outline), advanced = true, paths = path("outline")) {
         TextOutlineButton(style.outline, { v -> write { copy(outline = v) } }, STAGE_STYLE_BUTTON)
     }
     SettingsRow(stringResource(Res.string.profile_text_highlight), advanced = true, paths = path("backdrop")) {

@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Kutsal Kitap</string>
     <string name="obs_mode_songs">İlahiler</string>
     <string name="obs_mode_pictures">Resimler</string>
-    <string name="obs_mode_presentation">Sunum</string>
     <string name="obs_mode_media">Ortam</string>
     <string name="obs_mode_lower_third">Alt bant</string>
     <string name="obs_mode_announcements">Duyurular</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Burada görmek için bir çeviri ekleyin</string>
     <string name="song_preview_full_screen">Tam ekran önizleme</string>
     <string name="song_preview_lower_third">Alt şerit önizleme</string>
-    <string name="song_element_number">Numara</string>
     <string name="song_element_title">Başlık</string>
     <string name="song_element_lyrics">Sözler</string>
     <string name="song_element_next_section">Sonraki Kısım</string>
     <string name="song_element_author">Söz Yazarı</string>
-    <string name="song_element_composer">Besteci</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Başlık slaydı</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Şablon, yerleşimi, referansın konumunu ve iki dilin bandı nasıl paylaşacağını belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili ve kelime aralığı uygulanmaz.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Dış çizgi</string>
     <string name="tooltip_outline_options">Dış çizgi seçenekleri</string>
     <string name="text_outline">Dış çizgi</string>
     <string name="text_outline_width">Kalınlık</string>

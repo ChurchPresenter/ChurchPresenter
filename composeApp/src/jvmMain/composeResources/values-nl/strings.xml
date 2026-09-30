@@ -1362,7 +1362,6 @@
     <string name="obs_mode_bible">Bijbel</string>
     <string name="obs_mode_songs">Liederen</string>
     <string name="obs_mode_pictures">Afbeeldingen</string>
-    <string name="obs_mode_presentation">Presentatie</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Mededelingen</string>
@@ -1978,12 +1977,10 @@
     <string name="bible_preview_no_translations">Voeg een vertaling toe om deze hier te zien</string>
     <string name="song_preview_full_screen">Voorbeeld volledig scherm</string>
     <string name="song_preview_lower_third">Voorbeeld onderste derde</string>
-    <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Liedtekst</string>
     <string name="song_element_next_section">Volgende sectie</string>
     <string name="song_element_author">Auteur</string>
-    <string name="song_element_composer">Componist</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Titeldia</string>
@@ -2134,7 +2131,6 @@
     <string name="bible_lottie_unsupported_note">Het sjabloon bepaalt de indeling, de plaats van de verwijzing en hoe twee talen de band delen. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen en woordafstand gelden niet.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Omtrek</string>
     <string name="tooltip_outline_options">Omtrekopties</string>
     <string name="text_outline">Omtrek</string>
     <string name="text_outline_width">Breedte</string>

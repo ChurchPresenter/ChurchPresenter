@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">聖書</string>
     <string name="obs_mode_songs">曲</string>
     <string name="obs_mode_pictures">画像</string>
-    <string name="obs_mode_presentation">プレゼンテーション</string>
     <string name="obs_mode_media">メディア</string>
     <string name="obs_mode_lower_third">ローワーサード</string>
     <string name="obs_mode_announcements">お知らせ</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">翻訳を追加するとここに表示されます</string>
     <string name="song_preview_full_screen">全画面プレビュー</string>
     <string name="song_preview_lower_third">ローワーサードのプレビュー</string>
-    <string name="song_element_number">番号</string>
     <string name="song_element_title">タイトル</string>
     <string name="song_element_lyrics">歌詞</string>
     <string name="song_element_next_section">次のセクション</string>
     <string name="song_element_author">作詞者</string>
-    <string name="song_element_composer">作曲者</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">テンポ</string>
     <string name="song_target_title_slide">タイトルスライド</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">レイアウト、聖句参照の位置、2 言語のバンドの分け方はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔は適用されません。</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">縁取り</string>
     <string name="tooltip_outline_options">縁取りのオプション</string>
     <string name="text_outline">縁取り</string>
     <string name="text_outline_width">太さ</string>

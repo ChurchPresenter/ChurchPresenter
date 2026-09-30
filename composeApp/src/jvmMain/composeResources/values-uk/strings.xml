@@ -1306,7 +1306,6 @@
     <string name="obs_mode_bible">Біблія</string>
     <string name="obs_mode_songs">Пісні</string>
     <string name="obs_mode_pictures">Зображення</string>
-    <string name="obs_mode_presentation">Презентація</string>
     <string name="obs_mode_media">Медіа</string>
     <string name="obs_mode_lower_third">Нижня третина</string>
     <string name="obs_mode_announcements">Оголошення</string>
@@ -1950,12 +1949,10 @@
     <string name="bible_preview_no_translations">Додайте переклад, щоб побачити його тут</string>
     <string name="song_preview_full_screen">Перегляд повного екрана</string>
     <string name="song_preview_lower_third">Перегляд нижньої третини</string>
-    <string name="song_element_number">Номер</string>
     <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Текст</string>
     <string name="song_element_next_section">Наступний куплет</string>
     <string name="song_element_author">Автор</string>
-    <string name="song_element_composer">Композитор</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Темп</string>
     <string name="song_target_title_slide">Титульний слайд</string>
@@ -2106,7 +2103,6 @@
     <string name="bible_lottie_unsupported_note">Шаблон визначає макет, розташування посилання і те, як дві мови ділять смугу. Стиль нижньої третини задає шрифт, розмір, колір, вирівнювання, міжлітерний інтервал, регістр і тінь; підкладка, підкреслення, закреслення та міжслівний інтервал не застосовуються.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Параметри контуру</string>
     <string name="text_outline">Контур</string>
     <string name="text_outline_width">Товщина</string>

@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Bibel</string>
     <string name="obs_mode_songs">Sånger</string>
     <string name="obs_mode_pictures">Bilder</string>
-    <string name="obs_mode_presentation">Presentation</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Nedre tredjedel</string>
     <string name="obs_mode_announcements">Meddelanden</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Lägg till en översättning för att se den här</string>
     <string name="song_preview_full_screen">Förhandsvisning helskärm</string>
     <string name="song_preview_lower_third">Förhandsvisning nedre tredjedel</string>
-    <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Sångtext</string>
     <string name="song_element_next_section">Nästa avsnitt</string>
     <string name="song_element_author">Författare</string>
-    <string name="song_element_composer">Kompositör</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Titelbild</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Mallen bestämmer layouten, referensens placering och hur två språk delar bandet. Stilen för nedre tredjedel styr typsnitt, storlek, färg, justering, teckenavstånd, skiftläge och skugga; textbakgrund, understrykning, genomstrykning och ordavstånd gäller inte.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Konturalternativ</string>
     <string name="text_outline">Kontur</string>
     <string name="text_outline_width">Bredd</string>

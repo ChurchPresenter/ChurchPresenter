@@ -1620,7 +1620,6 @@
     <string name="obs_mode_bible">Raamattu</string>
     <string name="obs_mode_songs">Laulut</string>
     <string name="obs_mode_pictures">Kuvat</string>
-    <string name="obs_mode_presentation">Esitys</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Alapalkki</string>
     <string name="obs_mode_announcements">Ilmoitukset</string>
@@ -1995,12 +1994,10 @@
     <string name="bible_preview_no_translations">Lisää käännös nähdäksesi sen tässä</string>
     <string name="song_preview_full_screen">Koko näytön esikatselu</string>
     <string name="song_preview_lower_third">Alakolmanneksen esikatselu</string>
-    <string name="song_element_number">Numero</string>
     <string name="song_element_title">Otsikko</string>
     <string name="song_element_lyrics">Sanat</string>
     <string name="song_element_next_section">Seuraava osa</string>
     <string name="song_element_author">Sanoittaja</string>
-    <string name="song_element_composer">Säveltäjä</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Otsikkodia</string>
@@ -2151,7 +2148,6 @@
     <string name="bible_lottie_unsupported_note">Malli päättää asettelun, viitteen paikan ja sen, miten kaksi kieltä jakavat palkin. Alakolmanneksen tyyli määrää fontin, koon, värin, tasauksen, kirjainvälin, kirjainkoon ja varjon; tekstin tausta, alleviivaus, yliviivaus ja sanaväli eivät vaikuta.</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Ääriviiva</string>
     <string name="tooltip_outline_options">Ääriviivan asetukset</string>
     <string name="text_outline">Ääriviiva</string>
     <string name="text_outline_width">Leveys</string>
