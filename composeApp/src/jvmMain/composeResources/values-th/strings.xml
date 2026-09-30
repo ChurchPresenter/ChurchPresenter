@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">บันทึกรายการเป็น</string>
     <string name="file_chooser_open_schedule">เปิดรายการ</string>
     <string name="file_filter_schedule">รายการ Church Presenter (*.cps)</string>
-    <string name="menu_schedule">รายการ</string>
     <string name="menu_add_to_schedule">เพิ่มลงรายการ</string>
     <string name="menu_remove_from_schedule">นำออกจากรายการ</string>
     <string name="menu_clear_schedule">ล้างรายการ</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">เปิดเซิร์ฟเวอร์</string>
     <string name="server_running">กำลังทำงาน</string>
     <string name="server_stopped">หยุดแล้ว</string>
-    <string name="server_port">พอร์ต</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">เปลี่ยนพอร์ตก่อนเริ่มเซิร์ฟเวอร์</string>
     <string name="api_key_protection">การป้องกันด้วยคีย์ API</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">เครื่องหลัก — มีเครื่องตาม %1$d เครื่องเชื่อมต่ออยู่</string>
     <string name="client_label_placeholder">พิมพ์ชื่อที่จำง่าย…</string>
     <string name="client_label_edit_tooltip">ตั้งชื่อที่จำง่าย</string>
-    <string name="client_label_save">บันทึก</string>
     <string name="client_label_cancel">ยกเลิก</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">ตรวจจับข้อพระคัมภีร์</string>
     <string name="bible_engine_run_local">รันเอนจินบนเครื่องนี้</string>
     <string name="bible_engine_host">โฮสต์ของเอนจิน</string>
-    <string name="bible_engine_port">พอร์ต</string>
     <string name="stt_help_dev_mode">ช่วยนักพัฒนา — แสดงปุ่มส่งความเห็นสดบนแท็บพระคัมภีร์ (ตอนผิด / เร็วเกินไป / ตอนที่พลาดไป)</string>
     <string name="dictionary_back">ย้อนกลับ</string>
     <string name="dictionary_forward">ไปข้างหน้า</string>

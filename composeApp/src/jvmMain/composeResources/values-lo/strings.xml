@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">ບັນທຶກລາຍການເປັນ</string>
     <string name="file_chooser_open_schedule">ເປີດລາຍການ</string>
     <string name="file_filter_schedule">ລາຍການ Church Presenter (*.cps)</string>
-    <string name="menu_schedule">ລາຍການ</string>
     <string name="menu_add_to_schedule">ເພີ່ມໃສ່ລາຍການ</string>
     <string name="menu_remove_from_schedule">ເອົາອອກຈາກລາຍການ</string>
     <string name="menu_clear_schedule">ລ້າງລາຍການ</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">ເປີດເຊີບເວີ</string>
     <string name="server_running">ກຳລັງເຮັດວຽກ</string>
     <string name="server_stopped">ຢຸດແລ້ວ</string>
-    <string name="server_port">ພອດ</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">ປ່ຽນພອດກ່ອນເລີ່ມເຊີບເວີ.</string>
     <string name="api_key_protection">ການປ້ອງກັນດ້ວຍ API ຄີ</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">ເຄື່ອງຫຼັກ — ມີເຄື່ອງຕາມ %1$d ເຄື່ອງເຊື່ອມຕໍ່</string>
     <string name="client_label_placeholder">ພິມຊື່ທີ່ຈື່ງ່າຍ…</string>
     <string name="client_label_edit_tooltip">ຕັ້ງຊື່ທີ່ຈື່ງ່າຍ</string>
-    <string name="client_label_save">ບັນທຶກ</string>
     <string name="client_label_cancel">ຍົກເລີກ</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">ກວດຫາຂໍ້ພຣະຄຳພີ</string>
     <string name="bible_engine_run_local">ແລ່ນເອັນຈິນຢູ່ເຄື່ອງນີ້</string>
     <string name="bible_engine_host">ໂຮສຂອງເອັນຈິນ</string>
-    <string name="bible_engine_port">ພອດ</string>
     <string name="stt_help_dev_mode">ຊ່ວຍນັກພັດທະນາ — ສະແດງປຸ່ມສົ່ງຄຳຕິຊົມສົດໃນແຖບພຣະຄຳພີ (ຕອນຜິດ / ໄວເກີນໄປ / ຕອນທີ່ຫຼົງລືມ)</string>
     <string name="dictionary_back">ຍ້ອນກັບ</string>
     <string name="dictionary_forward">ໄປໜ້າ</string>

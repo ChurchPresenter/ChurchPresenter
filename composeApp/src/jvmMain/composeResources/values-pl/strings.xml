@@ -61,7 +61,6 @@
     <string name="menu_close_schedule">Zamknij program</string>
     <string name="menu_exit">Wyjście</string>
 
-    <string name="menu_schedule">Program</string>
     <string name="menu_add_to_schedule">Dodaj do programu</string>
     <string name="menu_remove_from_schedule">Usuń z programu</string>
     <string name="menu_clear_schedule">Wyczyść program</string>
@@ -673,7 +672,6 @@
     <string name="schedule_note_placeholder">Dodaj notatkę…</string>
     <string name="screen_number">Ekran %1$d</string>
     <string name="server_description">Umożliwia urządzeniom mobilnym i zdalnym klientom odbieranie danych pieśni i Biblii z tej aplikacji.</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Zmień port przed uruchomieniem serwera.</string>
     <string name="server_restart">Uruchom ponownie</string>
@@ -792,7 +790,6 @@
     <string name="blocked_clients_description">Żądania od tych klientów są automatycznie odrzucane bez wyświetlania dialogu.</string>
     <string name="client_label_placeholder">Wpisz przyjazną nazwę…</string>
     <string name="client_label_edit_tooltip">Ustaw przyjazną nazwę</string>
-    <string name="client_label_save">Zapisz</string>
     <string name="client_label_cancel">Anuluj</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1651,7 +1648,6 @@
     <string name="bible_engine_detect">Wykrywaj Pismo Święte</string>
     <string name="bible_engine_run_local">Uruchom silnik lokalnie</string>
     <string name="bible_engine_host">Host silnika</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Kontakt</string>
     <string name="contact_us_title">Kontakt</string>

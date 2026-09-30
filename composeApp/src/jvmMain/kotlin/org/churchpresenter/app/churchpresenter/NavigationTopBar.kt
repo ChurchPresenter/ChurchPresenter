@@ -76,7 +76,7 @@ import churchpresenter.composeapp.generated.resources.menu_open_schedule
 import churchpresenter.composeapp.generated.resources.menu_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.menu_save_schedule
 import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
-import churchpresenter.composeapp.generated.resources.menu_schedule
+import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
 import churchpresenter.composeapp.generated.resources.menu_statistics
 import org.churchpresenter.app.churchpresenter.data.Language
@@ -132,7 +132,7 @@ fun FrameWindowScope.NavigationTopBar(
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
 
-    val scheduleLabel = stringResource(Res.string.menu_schedule)
+    val scheduleLabel = stringResource(Res.string.schedule)
     val scheduleMnemonic = scheduleLabel.firstOrNull() ?: 'S'
 
     val editLabel = stringResource(Res.string.menu_edit)

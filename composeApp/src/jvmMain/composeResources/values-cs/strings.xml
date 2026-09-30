@@ -77,7 +77,6 @@
     <string name="menu_close_schedule">Zavřít program</string>
     <string name="menu_exit">Ukončit</string>
 
-    <string name="menu_schedule">Program</string>
     <string name="menu_add_to_schedule">Přidat do programu</string>
     <string name="menu_remove_from_schedule">Odebrat z programu</string>
     <string name="menu_clear_schedule">Vymazat program</string>
@@ -720,7 +719,6 @@
     <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
     <string name="server_description">Umožňuje mobilním zařízením a vzdáleným klientům přijímat data písní a Bible z této aplikace.</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Změňte port před spuštěním serveru.</string>
     <string name="server_restart">Restartovat</string>
@@ -842,7 +840,6 @@
     <string name="blocked_clients_description">Požadavky od těchto klientů jsou automaticky odmítnuty bez zobrazení dialogu.</string>
     <string name="client_label_placeholder">Zadejte popisné jméno…</string>
     <string name="client_label_edit_tooltip">Nastavit popisné jméno</string>
-    <string name="client_label_save">Uložit</string>
     <string name="client_label_cancel">Zrušit</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1661,7 +1658,6 @@
     <string name="bible_engine_detect">Detekovat Písmo</string>
     <string name="bible_engine_run_local">Spustit engine lokálně</string>
     <string name="bible_engine_host">Hostitel enginu</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Kontakt</string>
     <string name="contact_us_title">Kontaktujte nás</string>

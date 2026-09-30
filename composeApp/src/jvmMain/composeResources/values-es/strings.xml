@@ -64,7 +64,6 @@
     <string name="file_chooser_open_schedule">Abrir programa</string>
     <string name="file_filter_schedule">Programa de Church Presenter (*.cps)</string>
 
-    <string name="menu_schedule">Programa</string>
     <string name="menu_add_to_schedule">Añadir al programa</string>
     <string name="menu_remove_from_schedule">Eliminar del programa</string>
     <string name="menu_clear_schedule">Borrar programa</string>
@@ -863,7 +862,6 @@
     <string name="enable_server">Habilitar servidor</string>
     <string name="server_running">En ejecución</string>
     <string name="server_stopped">Detenido</string>
-    <string name="server_port">Puerto</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Cambie el puerto antes de iniciar el servidor.</string>
     <string name="api_key_protection">Protección con clave API</string>
@@ -998,7 +996,6 @@
     <string name="no_blocked_clients">No hay clientes bloqueados permanentemente.</string>
     <string name="client_label_placeholder">Introducir un nombre descriptivo…</string>
     <string name="client_label_edit_tooltip">Establecer nombre descriptivo</string>
-    <string name="client_label_save">Guardar</string>
     <string name="client_label_cancel">Cancelar</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1676,7 +1673,6 @@
     <string name="bible_engine_detect">Detectar Escrituras</string>
     <string name="bible_engine_run_local">Ejecutar motor localmente</string>
     <string name="bible_engine_host">Host del motor</string>
-    <string name="bible_engine_port">Puerto</string>
     <string name="qa_qr_message_label">Mensaje del código QR</string>
     <string name="qa_qr_message_reset">Restablecer por defecto</string>
     <string name="qa_admin_uses_api_key">El acceso de administrador utiliza la clave API de su servidor (Configuración del servidor).</string>

@@ -46,12 +46,12 @@ import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_margins
 import churchpresenter.composeapp.generated.resources.profile_name
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
-import churchpresenter.composeapp.generated.resources.profile_outputs_group
+import churchpresenter.composeapp.generated.resources.profile_nav_outputs
 import churchpresenter.composeapp.generated.resources.profile_place_freely
 import churchpresenter.composeapp.generated.resources.profile_reference
 import churchpresenter.composeapp.generated.resources.profile_repeat_chorus
 import churchpresenter.composeapp.generated.resources.profile_section_label
-import churchpresenter.composeapp.generated.resources.profile_source_bible
+import churchpresenter.composeapp.generated.resources.setup_summary_bible
 import churchpresenter.composeapp.generated.resources.profile_source_songs
 import churchpresenter.composeapp.generated.resources.profile_space_between_translations
 import churchpresenter.composeapp.generated.resources.profile_split_long_verses
@@ -110,10 +110,10 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
         Res.string.profile_name, Res.string.profile_display_mode,
         Res.string.output_profile_duplicate, Res.string.output_profile_delete,
     )
-    ProfilePage.Outputs -> listOf(Res.string.profile_outputs_group, Res.string.identify_screen)
+    ProfilePage.Outputs -> listOf(Res.string.profile_nav_outputs, Res.string.identify_screen)
     ProfilePage.Content -> listOf(
         Res.string.customize_bible, Res.string.customize_songs, Res.string.tab_dictionary,
-        Res.string.profile_source_bible, Res.string.profile_source_songs, Res.string.content_pictures,
+        Res.string.setup_summary_bible, Res.string.profile_source_songs, Res.string.content_pictures,
         Res.string.content_media, Res.string.media_subtitles, Res.string.projection_content_web,
         Res.string.tab_canvas, Res.string.content_streaming, Res.string.content_announcements,
         Res.string.tab_qa, Res.string.profile_nav_live_captions, Res.string.output_profile_scale,

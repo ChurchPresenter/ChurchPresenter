@@ -85,7 +85,6 @@
     <string name="file_chooser_open_schedule">Ava kava</string>
     <string name="file_filter_schedule">Church Presenter kava (*.cps)</string>
 
-    <string name="menu_schedule">Kava</string>
     <string name="menu_add_to_schedule">Lisa kavasse</string>
     <string name="menu_remove_from_schedule">Eemalda kavast</string>
     <string name="menu_clear_schedule">Tühjenda kava</string>
@@ -946,7 +945,6 @@
     <string name="enable_server">Luba server</string>
     <string name="server_running">Töötab</string>
     <string name="server_stopped">Peatatud</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Muuda porti enne serveri käivitamist.</string>
     <string name="api_key_protection">API-võtme kaitse</string>
@@ -1082,7 +1080,6 @@
     <string name="no_blocked_clients">Jäädavalt blokeeritud kliente pole.</string>
     <string name="client_label_placeholder">Sisesta sõbralik nimi…</string>
     <string name="client_label_edit_tooltip">Määra sõbralik nimi</string>
-    <string name="client_label_save">Salvesta</string>
     <string name="client_label_cancel">Tühista</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1687,7 +1684,6 @@
     <string name="bible_engine_detect">Tuvasta pühakiri</string>
     <string name="bible_engine_run_local">Käivita mootor kohapeal</string>
     <string name="bible_engine_host">Mootori host</string>
-    <string name="bible_engine_port">Port</string>
     <string name="dictionary_back">Tagasi</string>
     <string name="dictionary_forward">Edasi</string>
     <string name="dictionary_switch_language">Vaheta sõnastiku keelt</string>

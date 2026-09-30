@@ -37,7 +37,7 @@ import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.profile_outputs_empty
-import churchpresenter.composeapp.generated.resources.profile_outputs_group
+import churchpresenter.composeapp.generated.resources.profile_nav_outputs
 import churchpresenter.composeapp.generated.resources.profile_outputs_hint
 import churchpresenter.composeapp.generated.resources.profile_outputs_uses_other
 import churchpresenter.composeapp.generated.resources.profile_outputs_uses_this
@@ -150,7 +150,7 @@ internal fun ProfileOutputsPage(
 ) {
     val tiles = outputTiles(proj)
     SettingsGroup(
-        caption = stringResource(Res.string.profile_outputs_group),
+        caption = stringResource(Res.string.profile_nav_outputs),
         action = {
             KeyButton(
                 onClick = onIdentify,

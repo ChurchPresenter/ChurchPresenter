@@ -9,12 +9,12 @@ import churchpresenter.composeapp.generated.resources.profile_box_item_translati
 import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
-import churchpresenter.composeapp.generated.resources.profile_caption_layout
+import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_side
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_side_inverse
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_stacked
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_stacked_inverse
-import churchpresenter.composeapp.generated.resources.profile_caption_lines
+import churchpresenter.composeapp.generated.resources.profile_group_lines
 import churchpresenter.composeapp.generated.resources.profile_caption_mode
 import churchpresenter.composeapp.generated.resources.profile_caption_segments
 import churchpresenter.composeapp.generated.resources.profile_caption_transcription
@@ -23,7 +23,6 @@ import churchpresenter.composeapp.generated.resources.profile_caption_translatio
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_type_out
 import churchpresenter.composeapp.generated.resources.profile_caption_type_out_sub
-import churchpresenter.composeapp.generated.resources.profile_group_lines
 import churchpresenter.composeapp.generated.resources.profile_group_position
 import churchpresenter.composeapp.generated.resources.profile_group_show
 import churchpresenter.composeapp.generated.resources.profile_group_text
@@ -76,7 +75,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
         stringResource(Res.string.profile_group_lines),
         paths = listOf("$STT.maxSegments", "$STT.maxLines", "$STT.lineSpacing"),
     ) {
-        SettingsRow(stringResource(Res.string.profile_caption_lines), paths = listOf("$STT.maxLines")) {
+        SettingsRow(stringResource(Res.string.profile_group_lines), paths = listOf("$STT.maxLines")) {
             RowStepper(stt.maxLines, { v -> update { it.copy(maxLines = v) } }, LINES_RANGE)
         }
         SettingsRow(
@@ -166,7 +165,7 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
             )
         }
         if (stt.displayMode == MODE_BOTH) {
-            SettingsRow(stringResource(Res.string.profile_caption_layout), paths = listOf("$STT.layout")) {
+            SettingsRow(stringResource(Res.string.profile_layout), paths = listOf("$STT.layout")) {
                 RowSegmented(
                     options = listOf(
                         RowOption("stacked", stringResource(Res.string.profile_caption_layout_stacked)),

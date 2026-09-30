@@ -92,7 +92,6 @@
     <string name="file_chooser_open_schedule">அட்டவணையைத் திற</string>
     <string name="file_filter_schedule">Church Presenter அட்டவணை (*.cps)</string>
 
-    <string name="menu_schedule">அட்டவணை</string>
     <string name="menu_add_to_schedule">அட்டவணையில் சேர்</string>
     <string name="menu_remove_from_schedule">அட்டவணையிலிருந்து நீக்கு</string>
     <string name="menu_clear_schedule">அட்டவணையை அழி</string>
@@ -1080,7 +1079,6 @@
     <string name="enable_server">சேவையகத்தை இயக்கு</string>
     <string name="server_running">இயங்குகிறது</string>
     <string name="server_stopped">நிறுத்தப்பட்டது</string>
-    <string name="server_port">துறை</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">சேவையகத்தைத் தொடங்குவதற்கு முன் துறையை மாற்றவும்.</string>
     <string name="api_key_protection">API விசைப் பாதுகாப்பு</string>
@@ -1225,7 +1223,6 @@
     <string name="instance_link_primary_badge">முதன்மை — %1$d பின்தொடர்பவர்(கள்) இணைக்கப்பட்டுள்ளனர்</string>
     <string name="client_label_placeholder">எளிதில் அறியக்கூடிய பெயரை உள்ளிடவும்…</string>
     <string name="client_label_edit_tooltip">எளிதில் அறியக்கூடிய பெயரை அமை</string>
-    <string name="client_label_save">சேமி</string>
     <string name="client_label_cancel">ரத்து</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1883,7 +1880,6 @@
     <string name="bible_engine_detect">வேதவசனத்தைக் கண்டறி</string>
     <string name="bible_engine_run_local">இயந்திரத்தை உள்ளூரில் இயக்கு</string>
     <string name="bible_engine_host">இயந்திரப் புரவலன்</string>
-    <string name="bible_engine_port">துறை</string>
     <string name="stt_help_dev_mode">உருவாக்குநருக்கு உதவு — வேதாகமத் தாவலில் நேரலைக் கருத்துப் பொத்தான்களைக் காட்டு (தவறான பகுதி / முன்கூட்டியது / தவறவிட்ட பகுதி)</string>
     <string name="dictionary_back">பின்</string>
     <string name="dictionary_forward">முன்</string>

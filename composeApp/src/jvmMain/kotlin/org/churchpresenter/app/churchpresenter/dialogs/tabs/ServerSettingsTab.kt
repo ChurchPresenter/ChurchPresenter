@@ -106,7 +106,7 @@ import churchpresenter.composeapp.generated.resources.blocked_clients_descriptio
 import churchpresenter.composeapp.generated.resources.client_label_cancel
 import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
 import churchpresenter.composeapp.generated.resources.client_label_placeholder
-import churchpresenter.composeapp.generated.resources.client_label_save
+import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.copy_api_key
@@ -122,7 +122,7 @@ import churchpresenter.composeapp.generated.resources.remote_clients_description
 import churchpresenter.composeapp.generated.resources.remote_clients_title
 import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.server_description
-import churchpresenter.composeapp.generated.resources.server_port
+import churchpresenter.composeapp.generated.resources.instance_link_port
 import churchpresenter.composeapp.generated.resources.server_port_hint
 import churchpresenter.composeapp.generated.resources.server_port_note
 import churchpresenter.composeapp.generated.resources.server_restart
@@ -374,7 +374,7 @@ private fun ServerPortRow(
     onPortText: (String) -> Unit,
     onRestart: () -> Unit,
 ) {
-    SettingRow(label = stringResource(Res.string.server_port)) {
+    SettingRow(label = stringResource(Res.string.instance_link_port)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1060,7 +1060,7 @@ private fun ClientRow(
                 ) {
                     Icon(
                         Icons.Filled.Check,
-                        contentDescription = stringResource(Res.string.client_label_save),
+                        contentDescription = stringResource(Res.string.save),
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )

@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Simpan Jadual Sebagai</string>
     <string name="file_chooser_open_schedule">Buka Jadual</string>
     <string name="file_filter_schedule">Jadual Church Presenter (*.cps)</string>
-    <string name="menu_schedule">Jadual</string>
     <string name="menu_add_to_schedule">Tambah ke Jadual</string>
     <string name="menu_remove_from_schedule">Buang daripada Jadual</string>
     <string name="menu_clear_schedule">Kosongkan Jadual</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Aktifkan Pelayan</string>
     <string name="server_running">Berjalan</string>
     <string name="server_stopped">Berhenti</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Tukar port sebelum memulakan pelayan.</string>
     <string name="api_key_protection">Perlindungan Kunci API</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Utama — %1$d pengikut bersambung</string>
     <string name="client_label_placeholder">Masukkan nama mudah ingat…</string>
     <string name="client_label_edit_tooltip">Tetapkan nama mudah ingat</string>
-    <string name="client_label_save">Simpan</string>
     <string name="client_label_cancel">Batal</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Kesan kitab suci</string>
     <string name="bible_engine_run_local">Jalankan enjin secara setempat</string>
     <string name="bible_engine_host">Hos enjin</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Bantu Pembangun — tunjukkan butang maklum balas langsung pada tab Alkitab (petikan salah / terlalu awal / petikan terlepas)</string>
     <string name="dictionary_back">Kembali</string>
     <string name="dictionary_forward">Ke Hadapan</string>

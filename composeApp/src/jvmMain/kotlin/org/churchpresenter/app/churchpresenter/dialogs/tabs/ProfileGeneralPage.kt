@@ -22,10 +22,10 @@ import churchpresenter.composeapp.generated.resources.profile_actions
 import churchpresenter.composeapp.generated.resources.profile_delete_sub
 import churchpresenter.composeapp.generated.resources.profile_display_mode
 import churchpresenter.composeapp.generated.resources.profile_duplicate_sub
-import churchpresenter.composeapp.generated.resources.profile_group_profile
+import churchpresenter.composeapp.generated.resources.profile_nav_profile
 import churchpresenter.composeapp.generated.resources.profile_mode_full
 import churchpresenter.composeapp.generated.resources.profile_mode_lower_third
-import churchpresenter.composeapp.generated.resources.profile_mode_stage
+import churchpresenter.composeapp.generated.resources.profile_nav_stage_monitor
 import churchpresenter.composeapp.generated.resources.profile_name
 import org.churchpresenter.settings.DISPLAY_MODE_PATH
 import org.churchpresenter.settings.OutputProfile
@@ -57,7 +57,7 @@ internal fun ProfileGeneralPage(
     extraActions: @Composable () -> Unit = {},
     deleteBlockedNote: String? = null,
 ) {
-    SettingsGroup(stringResource(Res.string.profile_group_profile)) {
+    SettingsGroup(stringResource(Res.string.profile_nav_profile)) {
         SettingsRow(stringResource(Res.string.profile_name)) {
             SettingsTextField(
                 value = profile.name,
@@ -111,7 +111,7 @@ internal fun DisplayModeSegments(
                 Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
                 stringResource(Res.string.profile_mode_lower_third),
             ),
-            RowOption(Constants.DISPLAY_MODE_STAGE_MONITOR, stringResource(Res.string.profile_mode_stage)),
+            RowOption(Constants.DISPLAY_MODE_STAGE_MONITOR, stringResource(Res.string.profile_nav_stage_monitor)),
         ),
         selected = shownDisplayMode(profile.displayMode),
         onSelect = { picked ->

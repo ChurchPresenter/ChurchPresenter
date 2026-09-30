@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Simpan Jadwal Sebagai</string>
     <string name="file_chooser_open_schedule">Buka Jadwal</string>
     <string name="file_filter_schedule">Jadwal Church Presenter (*.cps)</string>
-    <string name="menu_schedule">Jadwal</string>
     <string name="menu_add_to_schedule">Tambahkan ke Jadwal</string>
     <string name="menu_remove_from_schedule">Hapus dari Jadwal</string>
     <string name="menu_clear_schedule">Bersihkan Jadwal</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Aktifkan Server</string>
     <string name="server_running">Berjalan</string>
     <string name="server_stopped">Berhenti</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Ubah port sebelum menjalankan server.</string>
     <string name="api_key_protection">Perlindungan Kunci API</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Utama — %1$d pengikut tersambung</string>
     <string name="client_label_placeholder">Masukkan nama yang mudah dikenali…</string>
     <string name="client_label_edit_tooltip">Beri nama yang mudah dikenali</string>
-    <string name="client_label_save">Simpan</string>
     <string name="client_label_cancel">Batal</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Deteksi ayat Alkitab</string>
     <string name="bible_engine_run_local">Jalankan mesin secara lokal</string>
     <string name="bible_engine_host">Host mesin</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Bantu pengembang — tampilkan tombol umpan balik langsung di tab Alkitab (perikop salah / terlalu dini / perikop terlewat)</string>
     <string name="dictionary_back">Kembali</string>
     <string name="dictionary_forward">Maju</string>

@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">حفظ البرنامج باسم</string>
     <string name="file_chooser_open_schedule">فتح برنامج</string>
     <string name="file_filter_schedule">برنامج Church Presenter (*.cps)</string>
-    <string name="menu_schedule">البرنامج</string>
     <string name="menu_add_to_schedule">إضافة إلى البرنامج</string>
     <string name="menu_remove_from_schedule">إزالة من البرنامج</string>
     <string name="menu_clear_schedule">إفراغ البرنامج</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">تمكين الخادم</string>
     <string name="server_running">مشغّل</string>
     <string name="server_stopped">متوقف</string>
-    <string name="server_port">المنفذ</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">غيّر المنفذ قبل بدء تشغيل الخادم.</string>
     <string name="api_key_protection">الحماية بمفتاح API</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">رئيسية — %1$d نسخة تابعة متصلة</string>
     <string name="client_label_placeholder">أدخل اسمًا مألوفًا…</string>
     <string name="client_label_edit_tooltip">تعيين اسم مألوف</string>
-    <string name="client_label_save">حفظ</string>
     <string name="client_label_cancel">إلغاء</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">اكتشاف الشواهد الكتابية</string>
     <string name="bible_engine_run_local">تشغيل المحرك محليًا</string>
     <string name="bible_engine_host">مضيف المحرك</string>
-    <string name="bible_engine_port">المنفذ</string>
     <string name="stt_help_dev_mode">ساعد المطوّر — أظهر أزرار الملاحظات المباشرة في تبويب الكتاب المقدس (مقطع خاطئ / سابق لأوانه / مقطع فائت)</string>
     <string name="dictionary_back">رجوع</string>
     <string name="dictionary_forward">تقدّم</string>

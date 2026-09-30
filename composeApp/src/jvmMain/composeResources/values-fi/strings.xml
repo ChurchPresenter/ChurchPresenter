@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Tallenna ohjelma nimellä</string>
     <string name="file_chooser_open_schedule">Avaa ohjelma</string>
     <string name="file_filter_schedule">Church Presenter -ohjelma (*.cps)</string>
-    <string name="menu_schedule">Ohjelma</string>
     <string name="menu_add_to_schedule">Lisää ohjelmaan</string>
     <string name="menu_remove_from_schedule">Poista ohjelmasta</string>
     <string name="menu_clear_schedule">Tyhjennä ohjelma</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Ota palvelin käyttöön</string>
     <string name="server_running">Käynnissä</string>
     <string name="server_stopped">Pysäytetty</string>
-    <string name="server_port">Portti</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Vaihda portti ennen palvelimen käynnistämistä.</string>
     <string name="api_key_protection">API-avaimen suojaus</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Ensisijainen — %1$d seuraajaa yhdistettynä</string>
     <string name="client_label_placeholder">Anna kuvaava nimi…</string>
     <string name="client_label_edit_tooltip">Aseta kuvaava nimi</string>
-    <string name="client_label_save">Tallenna</string>
     <string name="client_label_cancel">Peruuta</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Tunnista raamatunkohdat</string>
     <string name="bible_engine_run_local">Suorita moottori paikallisesti</string>
     <string name="bible_engine_host">Moottorin palvelin</string>
-    <string name="bible_engine_port">Portti</string>
     <string name="stt_help_dev_mode">Auta kehittäjää — näytä palautepainikkeet Raamattu-välilehdellä (väärä kohta / ennenaikainen / ohitettu kohta)</string>
     <string name="dictionary_back">Takaisin</string>
     <string name="dictionary_forward">Eteenpäin</string>

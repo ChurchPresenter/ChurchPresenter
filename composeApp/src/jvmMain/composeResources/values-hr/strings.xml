@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Spremi raspored kao</string>
     <string name="file_chooser_open_schedule">Otvori raspored</string>
     <string name="file_filter_schedule">Church Presenter raspored (*.cps)</string>
-    <string name="menu_schedule">Raspored</string>
     <string name="menu_add_to_schedule">Dodaj u raspored</string>
     <string name="menu_remove_from_schedule">Ukloni iz rasporeda</string>
     <string name="menu_clear_schedule">Očisti raspored</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Omogući poslužitelj</string>
     <string name="server_running">Pokrenut</string>
     <string name="server_stopped">Zaustavljen</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Promijenite port prije pokretanja poslužitelja.</string>
     <string name="api_key_protection">Zaštita API ključem</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Glavna — povezano %1$d podređenih</string>
     <string name="client_label_placeholder">Unesite prepoznatljiv naziv…</string>
     <string name="client_label_edit_tooltip">Postavi prepoznatljiv naziv</string>
-    <string name="client_label_save">Spremi</string>
     <string name="client_label_cancel">Odustani</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Prepoznaj Pismo</string>
     <string name="bible_engine_run_local">Pokreni mehanizam lokalno</string>
     <string name="bible_engine_host">Poslužitelj mehanizma</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Pomozite razvojnom timu — prikaži gumbe za povratne informacije na kartici Biblija (pogrešan odlomak / prerano / propušteni odlomak)</string>
     <string name="dictionary_back">Natrag</string>
     <string name="dictionary_forward">Naprijed</string>

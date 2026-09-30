@@ -18,7 +18,7 @@ import churchpresenter.composeapp.generated.resources.profile_box_band_screen
 import churchpresenter.composeapp.generated.resources.profile_box_height
 import churchpresenter.composeapp.generated.resources.profile_box_keep_clear
 import churchpresenter.composeapp.generated.resources.profile_box_keep_clear_sub
-import churchpresenter.composeapp.generated.resources.profile_box_languages
+import churchpresenter.composeapp.generated.resources.song_language_order_label
 import churchpresenter.composeapp.generated.resources.profile_box_languages_own
 import churchpresenter.composeapp.generated.resources.profile_box_languages_shared
 import churchpresenter.composeapp.generated.resources.profile_box_overflow
@@ -193,7 +193,7 @@ private fun TextBoxOptionRows(
         )
     }
     if (offers.perLanguage) {
-        SettingsRow(stringResource(Res.string.profile_box_languages), advanced = true, paths = paths) {
+        SettingsRow(stringResource(Res.string.song_language_order_label), advanced = true, paths = paths) {
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_box_languages_own)),

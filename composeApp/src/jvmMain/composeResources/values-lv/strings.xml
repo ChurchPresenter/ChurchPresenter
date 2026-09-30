@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Saglabāt programmu kā</string>
     <string name="file_chooser_open_schedule">Atvērt programmu</string>
     <string name="file_filter_schedule">Church Presenter programma (*.cps)</string>
-    <string name="menu_schedule">Programma</string>
     <string name="menu_add_to_schedule">Pievienot programmai</string>
     <string name="menu_remove_from_schedule">Noņemt no programmas</string>
     <string name="menu_clear_schedule">Notīrīt programmu</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Ieslēgt serveri</string>
     <string name="server_running">Darbojas</string>
     <string name="server_stopped">Apturēts</string>
-    <string name="server_port">Ports</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Mainiet portu pirms servera palaišanas.</string>
     <string name="api_key_protection">Aizsardzība ar API atslēgu</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Galvenā — savienoti %1$d sekotāji</string>
     <string name="client_label_placeholder">Ievadiet saprotamu nosaukumu…</string>
     <string name="client_label_edit_tooltip">Iestatīt saprotamu nosaukumu</string>
-    <string name="client_label_save">Saglabāt</string>
     <string name="client_label_cancel">Atcelt</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Atpazīt Rakstu vietas</string>
     <string name="bible_engine_run_local">Darbināt dzinēju uz šī datora</string>
     <string name="bible_engine_host">Dzinēja resursdators</string>
-    <string name="bible_engine_port">Ports</string>
     <string name="stt_help_dev_mode">Palīdzēt izstrādātājam — rādīt atsauksmju pogas Bībeles cilnē (nepareizs fragments / pāragrs / nepamanīts fragments)</string>
     <string name="dictionary_back">Atpakaļ</string>
     <string name="dictionary_forward">Uz priekšu</string>

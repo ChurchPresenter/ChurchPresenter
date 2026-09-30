@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">進行表を別名で保存</string>
     <string name="file_chooser_open_schedule">進行表を開く</string>
     <string name="file_filter_schedule">Church Presenter 進行表 (*.cps)</string>
-    <string name="menu_schedule">進行表</string>
     <string name="menu_add_to_schedule">進行表に追加</string>
     <string name="menu_remove_from_schedule">進行表から削除</string>
     <string name="menu_clear_schedule">進行表をクリア</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">サーバーを有効にする</string>
     <string name="server_running">稼働中</string>
     <string name="server_stopped">停止中</string>
-    <string name="server_port">ポート</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">ポートはサーバーを起動する前に変更してください。</string>
     <string name="api_key_protection">API キーによる保護</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">メイン機 — 従属機 %1$d 台が接続中</string>
     <string name="client_label_placeholder">わかりやすい名前を入力…</string>
     <string name="client_label_edit_tooltip">わかりやすい名前を設定</string>
-    <string name="client_label_save">保存</string>
     <string name="client_label_cancel">キャンセル</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">聖書箇所を検出する</string>
     <string name="bible_engine_run_local">エンジンをこのパソコンで動かす</string>
     <string name="bible_engine_host">エンジンのホスト</string>
-    <string name="bible_engine_port">ポート</string>
     <string name="stt_help_dev_mode">開発への協力 — 聖書タブにフィードバックのボタンを表示する（箇所が違う／早すぎる／見落とし）</string>
     <string name="dictionary_back">戻る</string>
     <string name="dictionary_forward">進む</string>

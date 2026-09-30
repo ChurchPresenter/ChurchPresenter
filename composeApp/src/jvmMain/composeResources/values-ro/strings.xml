@@ -80,7 +80,6 @@
     <string name="file_chooser_open_schedule">Deschide Program</string>
     <string name="file_filter_schedule">Program Church Presenter (*.cps)</string>
 
-    <string name="menu_schedule">Program</string>
     <string name="menu_add_to_schedule">Adaugă la Program</string>
     <string name="menu_remove_from_schedule">Elimină din Program</string>
     <string name="menu_clear_schedule">Golește Programul</string>
@@ -902,7 +901,6 @@
     <string name="enable_server">Activează Serverul</string>
     <string name="server_running">Rulează</string>
     <string name="server_stopped">Oprit</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Schimbați portul înainte de a porni serverul.</string>
     <string name="api_key_protection">Protecție prin Cheie API</string>
@@ -1037,7 +1035,6 @@
     <string name="no_blocked_clients">Niciun client permanent blocat.</string>
     <string name="client_label_placeholder">Introduceți un nume prietenos…</string>
     <string name="client_label_edit_tooltip">Setați numele prietenos</string>
-    <string name="client_label_save">Salvează</string>
     <string name="client_label_cancel">Anulează</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1681,7 +1678,6 @@
     <string name="bible_engine_detect">Detectați Scriptura</string>
     <string name="bible_engine_run_local">Rulați motorul local</string>
     <string name="bible_engine_host">Gazda motorului</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Contact</string>
     <string name="contact_us_title">Contactează-ne</string>

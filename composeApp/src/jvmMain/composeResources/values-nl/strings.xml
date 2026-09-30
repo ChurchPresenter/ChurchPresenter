@@ -64,7 +64,6 @@
     <string name="file_chooser_open_schedule">Programma openen</string>
     <string name="file_filter_schedule">Church Presenter programma (*.cps)</string>
 
-    <string name="menu_schedule">Programma</string>
     <string name="menu_add_to_schedule">Toevoegen aan programma</string>
     <string name="menu_remove_from_schedule">Verwijderen uit programma</string>
     <string name="menu_clear_schedule">Programma wissen</string>
@@ -863,7 +862,6 @@
     <string name="enable_server">Server inschakelen</string>
     <string name="server_running">Actief</string>
     <string name="server_stopped">Gestopt</string>
-    <string name="server_port">Poort</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Wijzig de poort voordat u de server start.</string>
     <string name="api_key_protection">API-sleutelbeveiliging</string>
@@ -998,7 +996,6 @@
     <string name="no_blocked_clients">Geen permanent geblokkeerde clients.</string>
     <string name="client_label_placeholder">Voer een vriendelijke naam in…</string>
     <string name="client_label_edit_tooltip">Vriendelijke naam instellen</string>
-    <string name="client_label_save">Opslaan</string>
     <string name="client_label_cancel">Annuleren</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1676,7 +1673,6 @@
     <string name="bible_engine_detect">Schrift detecteren</string>
     <string name="bible_engine_run_local">Engine lokaal uitvoeren</string>
     <string name="bible_engine_host">Engine-host</string>
-    <string name="bible_engine_port">Poort</string>
     <string name="qa_qr_message_label">QR-codebericht</string>
     <string name="qa_qr_message_reset">Terugzetten naar standaard</string>
     <string name="qa_admin_uses_api_key">Beheerderstoegang gebruikt de API-sleutel van uw server (Serverinstellingen).</string>

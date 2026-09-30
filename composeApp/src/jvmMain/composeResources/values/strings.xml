@@ -128,7 +128,6 @@
     <string name="file_chooser_open_schedule">Open Schedule</string>
     <string name="file_filter_schedule">Church Presenter Schedule (*.cps)</string>
 
-    <string name="menu_schedule">Schedule</string>
     <string name="menu_add_to_schedule">Add to Schedule</string>
     <string name="menu_remove_from_schedule">Remove from Schedule</string>
     <string name="menu_clear_schedule">Clear Schedule</string>
@@ -1557,7 +1556,6 @@
     <string name="enable_server">Enable Server</string>
     <string name="server_running">Running</string>
     <string name="server_stopped">Stopped</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Change port before starting the server.</string>
     <string name="api_key_protection">API Key Protection</string>
@@ -1716,7 +1714,6 @@
     <string name="instance_link_primary_badge">Primary — %1$d follower(s) connected</string>
     <string name="client_label_placeholder">Enter a friendly name…</string>
     <string name="client_label_edit_tooltip">Set friendly name</string>
-    <string name="client_label_save">Save</string>
     <string name="client_label_cancel">Cancel</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -2418,7 +2415,6 @@
     <string name="bible_engine_detect">Detect scripture</string>
     <string name="bible_engine_run_local">Run engine locally</string>
     <string name="bible_engine_host">Engine host</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Help Dev — show live feedback buttons on the Bible tab (wrong passage / premature / missed passage)</string>
     <string name="dictionary_back">Back</string>
     <string name="dictionary_forward">Forward</string>
@@ -2683,23 +2679,19 @@
     <string name="profile_list_new">New profile</string>
     <string name="profile_list_hint">Drag to reorder. Create linked profiles, duplicate or delete in General.</string>
     <string name="profile_not_in_use">Not in use</string>
-    <string name="profile_group_profile">Profile</string>
     <string name="profile_name">Name</string>
     <string name="profile_display_mode">Display mode</string>
     <string name="profile_mode_full">Full screen</string>
     <string name="profile_mode_lower_third">Lower third</string>
-    <string name="profile_mode_stage">Stage monitor</string>
     <string name="profile_actions">Actions</string>
     <string name="profile_duplicate_sub">Makes a standalone copy with the current values.</string>
     <string name="profile_delete_sub">Outputs using it have to be given another profile first.</string>
-    <string name="profile_outputs_group">Outputs</string>
     <string name="profile_outputs_hint">Click an output to show this profile on it. Click it again to hand it back to another profile.</string>
     <string name="profile_outputs_empty">No outputs are set up yet. Add them on the Projection tab.</string>
     <string name="profile_outputs_uses_this">Uses this profile</string>
     <string name="profile_outputs_uses_other">Uses %1$s</string>
     <string name="profile_content_scripture">Scripture</string>
     <string name="profile_group_placement">Placement on a lower third</string>
-    <string name="profile_source_bible">Bible translations</string>
     <string name="profile_source_songs">Song languages</string>
     <string name="profile_text_font">Font</string>
     <string name="profile_text_size">Size</string>
@@ -2760,7 +2752,6 @@
     <string name="profile_applies_to">Applies to</string>
     <string name="profile_group_text">Text</string>
     <string name="profile_group_translations">Translations</string>
-    <string name="profile_group_languages">Languages</string>
     <string name="profile_layout">Layout</string>
     <string name="profile_region_moves_background">Background follows Content Region</string>
     <string name="profile_region_moves_background_sub">On: the background shrinks and moves with the text. Off: the background fills the screen and only the text moves.</string>
@@ -2812,7 +2803,6 @@
     <string name="profile_box_band">On a lower third</string>
     <string name="profile_box_band_band">The band</string>
     <string name="profile_box_band_screen">Whole screen</string>
-    <string name="profile_box_languages">Languages</string>
     <string name="profile_box_languages_own">Own box each</string>
     <string name="profile_box_languages_shared">Share one box</string>
     <string name="profile_box_keep_clear">Keep clear of other boxes</string>
@@ -2850,7 +2840,6 @@
     <string name="profile_group_look">Look</string>
     <string name="profile_live_on">Live on %1$s. Changes show there right away.</string>
     <string name="profile_live_none">Not shown on any output yet.</string>
-    <string name="profile_live_outputs">Outputs</string>
     <string name="profile_context_standalone">Standalone. Link it to a master in General.</string>
     <string name="profile_context_open_general">General</string>
     <string name="profile_song_look_ahead">Song look-ahead</string>
@@ -2911,7 +2900,6 @@
     <string name="profile_adjust_width">W %1$d%</string>
     <string name="profile_preview_larger">Larger</string>
     <string name="profile_preview_done">Done</string>
-    <string name="profile_group_layout">Layout</string>
     <string name="profile_group_what_goes_where">What goes where</string>
     <string name="profile_stage_zones">Zones</string>
     <string name="profile_stage_arrangement">Arrangement</string>
@@ -2922,7 +2910,6 @@
     <string name="profile_group_show">Show</string>
     <string name="profile_group_lines">Lines</string>
     <string name="profile_group_box">Box</string>
-    <string name="profile_group_qr">QR code</string>
     <string name="profile_group_card">Card</string>
     <string name="profile_box_color">Background</string>
     <string name="profile_box_opacity">Opacity</string>
@@ -2931,7 +2918,6 @@
     <string name="profile_caption_transcription">Transcription</string>
     <string name="profile_caption_translation">Translation</string>
     <string name="profile_caption_both">Both</string>
-    <string name="profile_caption_layout">Layout</string>
     <string name="profile_caption_layout_stacked">Stacked</string>
     <string name="profile_caption_layout_stacked_inverse">Stacked, translation first</string>
     <string name="profile_caption_layout_side">Side by side</string>
@@ -2940,7 +2926,6 @@
     <string name="profile_caption_in_progress">Show words still being spoken</string>
     <string name="profile_caption_translation_in_progress">Show translation still being spoken</string>
     <string name="profile_caption_type_out">Type words out as they arrive</string>
-    <string name="profile_caption_lines">Lines</string>
     <string name="profile_caption_segments">Segments kept</string>
     <string name="profile_line_spacing">Line spacing</string>
     <string name="profile_caption_translation_color">Translation color</string>

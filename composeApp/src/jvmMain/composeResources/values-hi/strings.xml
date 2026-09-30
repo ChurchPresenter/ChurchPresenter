@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">कार्यक्रम इस रूप में सहेजें</string>
     <string name="file_chooser_open_schedule">कार्यक्रम खोलें</string>
     <string name="file_filter_schedule">Church Presenter कार्यक्रम (*.cps)</string>
-    <string name="menu_schedule">कार्यक्रम</string>
     <string name="menu_add_to_schedule">कार्यक्रम में जोड़ें</string>
     <string name="menu_remove_from_schedule">कार्यक्रम से हटाएँ</string>
     <string name="menu_clear_schedule">कार्यक्रम खाली करें</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">सर्वर चालू करें</string>
     <string name="server_running">चल रहा है</string>
     <string name="server_stopped">बंद है</string>
-    <string name="server_port">पोर्ट</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">सर्वर शुरू करने से पहले पोर्ट बदलें।</string>
     <string name="api_key_protection">API की से सुरक्षा</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">प्राथमिक — %1$d फ़ॉलोअर कनेक्ट हैं</string>
     <string name="client_label_placeholder">कोई पहचानने योग्य नाम लिखें…</string>
     <string name="client_label_edit_tooltip">पहचानने योग्य नाम सेट करें</string>
-    <string name="client_label_save">सहेजें</string>
     <string name="client_label_cancel">रद्द करें</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">पवित्रशास्त्र पहचानें</string>
     <string name="bible_engine_run_local">इंजन स्थानीय रूप से चलाएँ</string>
     <string name="bible_engine_host">इंजन होस्ट</string>
-    <string name="bible_engine_port">पोर्ट</string>
     <string name="stt_help_dev_mode">डेवलपर की मदद करें — बाइबल टैब पर लाइव प्रतिक्रिया बटन दिखाएँ (ग़लत अंश / समय से पहले / छूटा हुआ अंश)</string>
     <string name="dictionary_back">पीछे</string>
     <string name="dictionary_forward">आगे</string>

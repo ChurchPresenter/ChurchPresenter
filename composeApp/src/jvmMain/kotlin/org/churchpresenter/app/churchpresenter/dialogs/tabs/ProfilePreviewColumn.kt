@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.profile_live_none
 import churchpresenter.composeapp.generated.resources.profile_live_on
-import churchpresenter.composeapp.generated.resources.profile_live_outputs
+import churchpresenter.composeapp.generated.resources.profile_nav_outputs
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
@@ -183,7 +183,7 @@ private fun LiveOnCard(usedBy: List<String>, onOpenOutputs: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
-            LinkText(stringResource(Res.string.profile_live_outputs), onOpenOutputs)
+            LinkText(stringResource(Res.string.profile_nav_outputs), onOpenOutputs)
         }
     }
 }

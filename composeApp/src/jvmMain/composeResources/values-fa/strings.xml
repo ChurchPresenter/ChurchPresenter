@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">ذخیره برنامه با نام</string>
     <string name="file_chooser_open_schedule">باز کردن برنامه</string>
     <string name="file_filter_schedule">برنامه Church Presenter (*.cps)</string>
-    <string name="menu_schedule">برنامه</string>
     <string name="menu_add_to_schedule">افزودن به برنامه</string>
     <string name="menu_remove_from_schedule">حذف از برنامه</string>
     <string name="menu_clear_schedule">پاک کردن برنامه</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">فعال کردن سرور</string>
     <string name="server_running">در حال اجرا</string>
     <string name="server_stopped">متوقف</string>
-    <string name="server_port">درگاه</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">پیش از راه‌اندازی سرور، درگاه را تغییر دهید.</string>
     <string name="api_key_protection">محافظت با کلید API</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">اصلی — %1$d پیرو متصل است</string>
     <string name="client_label_placeholder">یک نام آشنا وارد کنید…</string>
     <string name="client_label_edit_tooltip">تعیین نام آشنا</string>
-    <string name="client_label_save">ذخیره</string>
     <string name="client_label_cancel">انصراف</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">شناسایی نشانی‌های کتاب‌مقدس</string>
     <string name="bible_engine_run_local">اجرای موتور روی این رایانه</string>
     <string name="bible_engine_host">میزبان موتور</string>
-    <string name="bible_engine_port">درگاه</string>
     <string name="stt_help_dev_mode">کمک به توسعه‌دهنده — دکمه‌های بازخورد زنده را در زبانهٔ کتاب‌مقدس نشان بده (بخش نادرست / زودهنگام / بخش جامانده)</string>
     <string name="dictionary_back">بازگشت</string>
     <string name="dictionary_forward">جلو</string>

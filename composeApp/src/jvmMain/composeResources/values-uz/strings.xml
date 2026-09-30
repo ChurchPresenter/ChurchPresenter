@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Jadvalni boshqa nom bilan saqlash</string>
     <string name="file_chooser_open_schedule">Jadvalni ochish</string>
     <string name="file_filter_schedule">Church Presenter jadvali (*.cps)</string>
-    <string name="menu_schedule">Jadval</string>
     <string name="menu_add_to_schedule">Jadvalga qoʻshish</string>
     <string name="menu_remove_from_schedule">Jadvaldan olib tashlash</string>
     <string name="menu_clear_schedule">Jadvalni tozalash</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Serverni yoqish</string>
     <string name="server_running">Ishlamoqda</string>
     <string name="server_stopped">Toʻxtatilgan</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Serverni ishga tushirishdan oldin portni oʻzgartiring.</string>
     <string name="api_key_protection">API kalit bilan himoya</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Asosiy — %1$d ta izdosh ulangan</string>
     <string name="client_label_placeholder">Tushunarli nom kiriting…</string>
     <string name="client_label_edit_tooltip">Tushunarli nom berish</string>
-    <string name="client_label_save">Saqlash</string>
     <string name="client_label_cancel">Bekor qilish</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Muqaddas Bitik havolalarini aniqlash</string>
     <string name="bible_engine_run_local">Dvigatelni shu kompyuterda ishga tushirish</string>
     <string name="bible_engine_host">Dvigatel xosti</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Dasturchiga yordam — Injil boʻlimida jonli fikr tugmalarini koʻrsatish (notoʻgʻri parcha / erta / oʻtkazib yuborilgan parcha)</string>
     <string name="dictionary_back">Orqaga</string>
     <string name="dictionary_forward">Oldinga</string>

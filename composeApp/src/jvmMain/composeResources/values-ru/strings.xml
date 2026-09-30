@@ -77,7 +77,6 @@
     <string name="menu_close_schedule">Закрыть программу</string>
     <string name="menu_exit">Выход</string>
 
-    <string name="menu_schedule">Программа</string>
     <string name="menu_add_to_schedule">Добавить в программу</string>
     <string name="menu_remove_from_schedule">Удалить из программы</string>
     <string name="menu_clear_schedule">Очистить программу</string>
@@ -709,7 +708,6 @@
     <string name="schedule_note_placeholder">Добавить заметку…</string>
     <string name="screen_number">Экран %1$d</string>
     <string name="server_description">Позволяет мобильным устройствам и удалённым клиентам получать данные песен и Библии из этого приложения.</string>
-    <string name="server_port">Порт</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Измените порт перед запуском сервера.</string>
     <string name="server_restart">Перезапустить</string>
@@ -831,7 +829,6 @@
     <string name="blocked_clients_description">Запросы от этих клиентов автоматически отклоняются без показа диалога.</string>
     <string name="client_label_placeholder">Введите понятное имя…</string>
     <string name="client_label_edit_tooltip">Задать понятное имя</string>
-    <string name="client_label_save">Сохранить</string>
     <string name="client_label_cancel">Отмена</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1620,7 +1617,6 @@
     <string name="bible_engine_detect">Распознавать ссылки</string>
     <string name="bible_engine_run_local">Запускать движок локально</string>
     <string name="bible_engine_host">Адрес движка</string>
-    <string name="bible_engine_port">Порт</string>
     <string name="dictionary_in_scripture_header">В Писании</string>
     <string name="dictionary_in_scripture_loading">Загрузка стихов…</string>
     <string name="dictionary_in_scripture_none">Теги для этой записи не найдены</string>

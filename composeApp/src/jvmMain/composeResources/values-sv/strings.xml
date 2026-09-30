@@ -91,7 +91,6 @@
     <string name="file_chooser_save_schedule">Spara program som</string>
     <string name="file_chooser_open_schedule">Öppna program</string>
     <string name="file_filter_schedule">Church Presenter-program (*.cps)</string>
-    <string name="menu_schedule">Program</string>
     <string name="menu_add_to_schedule">Lägg till i programmet</string>
     <string name="menu_remove_from_schedule">Ta bort från programmet</string>
     <string name="menu_clear_schedule">Rensa programmet</string>
@@ -1076,7 +1075,6 @@
     <string name="enable_server">Aktivera servern</string>
     <string name="server_running">Igång</string>
     <string name="server_stopped">Stoppad</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Ändra porten innan du startar servern.</string>
     <string name="api_key_protection">Skydd med API-nyckel</string>
@@ -1222,7 +1220,6 @@
     <string name="instance_link_primary_badge">Primär – %1$d följare anslutna</string>
     <string name="client_label_placeholder">Ange ett namn du känner igen…</string>
     <string name="client_label_edit_tooltip">Ange ett namn du känner igen</string>
-    <string name="client_label_save">Spara</string>
     <string name="client_label_cancel">Avbryt</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1879,7 +1876,6 @@
     <string name="bible_engine_detect">Identifiera bibelord</string>
     <string name="bible_engine_run_local">Kör motorn lokalt</string>
     <string name="bible_engine_host">Motorns värd</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Hjälp utvecklarna – visa knappar för direkt återkoppling på fliken Bibel (fel avsnitt/för tidigt/missat avsnitt)</string>
     <string name="dictionary_back">Bakåt</string>
     <string name="dictionary_forward">Framåt</string>

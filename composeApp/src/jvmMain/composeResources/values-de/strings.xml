@@ -61,7 +61,6 @@
     <string name="menu_close_schedule">Programm schließen</string>
     <string name="menu_exit">Beenden</string>
 
-    <string name="menu_schedule">Programm</string>
     <string name="menu_add_to_schedule">Zum Programm hinzufügen</string>
     <string name="menu_remove_from_schedule">Aus Programm entfernen</string>
     <string name="menu_clear_schedule">Programm löschen</string>
@@ -674,7 +673,6 @@
     <string name="schedule_note_placeholder">Notiz hinzufügen…</string>
     <string name="screen_number">Bildschirm %1$d</string>
     <string name="server_description">Ermöglicht Mobilgeräten und Remote-Clients, Lied- und Bibeldaten von dieser App zu empfangen.</string>
-    <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Ändern Sie den Port, bevor Sie den Server starten.</string>
     <string name="server_restart">Neustart</string>
@@ -793,7 +791,6 @@
     <string name="blocked_clients_description">Anfragen von diesen Clients werden automatisch abgelehnt, ohne einen Dialog anzuzeigen.</string>
     <string name="client_label_placeholder">Anzeigenamen eingeben…</string>
     <string name="client_label_edit_tooltip">Anzeigenamen festlegen</string>
-    <string name="client_label_save">Speichern</string>
     <string name="client_label_cancel">Abbrechen</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1651,7 +1648,6 @@
     <string name="bible_engine_detect">Schrift erkennen</string>
     <string name="bible_engine_run_local">Engine lokal ausführen</string>
     <string name="bible_engine_host">Engine-Host</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Kontakt</string>
     <string name="contact_us_title">Kontakt</string>

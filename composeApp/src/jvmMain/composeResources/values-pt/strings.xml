@@ -64,7 +64,6 @@
     <string name="file_chooser_open_schedule">Abrir Roteiro</string>
     <string name="file_filter_schedule">Roteiro Church Presenter (*.cps)</string>
 
-    <string name="menu_schedule">Roteiro</string>
     <string name="menu_add_to_schedule">Adicionar ao Roteiro</string>
     <string name="menu_remove_from_schedule">Remover do Roteiro</string>
     <string name="menu_clear_schedule">Limpar Roteiro</string>
@@ -863,7 +862,6 @@
     <string name="enable_server">Habilitar Servidor</string>
     <string name="server_running">Em execução</string>
     <string name="server_stopped">Parado</string>
-    <string name="server_port">Porta</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Altere a porta antes de iniciar o servidor.</string>
     <string name="api_key_protection">Proteção por Chave API</string>
@@ -998,7 +996,6 @@
     <string name="no_blocked_clients">Nenhum cliente permanentemente bloqueado.</string>
     <string name="client_label_placeholder">Digite um nome amigável…</string>
     <string name="client_label_edit_tooltip">Definir nome amigável</string>
-    <string name="client_label_save">Salvar</string>
     <string name="client_label_cancel">Cancelar</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1676,7 +1673,6 @@
     <string name="bible_engine_detect">Detectar Escrituras</string>
     <string name="bible_engine_run_local">Executar motor localmente</string>
     <string name="bible_engine_host">Host do motor</string>
-    <string name="bible_engine_port">Porta</string>
     <string name="qa_qr_message_label">Mensagem do código QR</string>
     <string name="qa_qr_message_reset">Redefinir para padrão</string>
     <string name="qa_admin_uses_api_key">O acesso de administrador usa a chave API do seu servidor (Configurações do Servidor).</string>

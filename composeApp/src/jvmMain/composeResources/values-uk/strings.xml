@@ -61,7 +61,6 @@
     <string name="menu_close_schedule">Закрити програму</string>
     <string name="menu_exit">Вихід</string>
 
-    <string name="menu_schedule">Програма</string>
     <string name="menu_add_to_schedule">Додати до програми</string>
     <string name="menu_remove_from_schedule">Видалити з програми</string>
     <string name="menu_clear_schedule">Очистити програму</string>
@@ -674,7 +673,6 @@
     <string name="schedule_note_placeholder">Додати нотатку…</string>
     <string name="screen_number">Екран %1$d</string>
     <string name="server_description">Дозволяє мобільним пристроям та віддаленим клієнтам отримувати дані пісень і Біблії з цієї програми.</string>
-    <string name="server_port">Порт</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Змініть порт перед запуском сервера.</string>
     <string name="server_restart">Перезапустити</string>
@@ -793,7 +791,6 @@
     <string name="blocked_clients_description">Запити від цих клієнтів автоматично відхиляються без показу діалогу.</string>
     <string name="client_label_placeholder">Введіть зрозуміле ім'я…</string>
     <string name="client_label_edit_tooltip">Задати зрозуміле ім'я</string>
-    <string name="client_label_save">Зберегти</string>
     <string name="client_label_cancel">Скасувати</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1651,7 +1648,6 @@
     <string name="bible_engine_detect">Визначати Святе Письмо</string>
     <string name="bible_engine_run_local">Запустити двигун локально</string>
     <string name="bible_engine_host">Хост двигуна</string>
-    <string name="bible_engine_port">Порт</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Контакти</string>
     <string name="contact_us_title">Зв'язатися з нами</string>

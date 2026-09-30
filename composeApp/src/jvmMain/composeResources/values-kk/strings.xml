@@ -61,7 +61,6 @@
     <string name="menu_close_schedule">Бағдарламаны жабу</string>
     <string name="menu_exit">Шығу</string>
 
-    <string name="menu_schedule">Бағдарлама</string>
     <string name="menu_add_to_schedule">Бағдарламаға қосу</string>
     <string name="menu_remove_from_schedule">Бағдарламадан жою</string>
     <string name="menu_clear_schedule">Бағдарламаны тазалау</string>
@@ -674,7 +673,6 @@
     <string name="schedule_note_placeholder">Ескертпе қосу…</string>
     <string name="screen_number">Экран %1$d</string>
     <string name="server_description">Мобильді құрылғылар мен қашықтағы клиенттерге осы қосымшадан ән мен Киелі Кітап деректерін алуға мүмкіндік береді.</string>
-    <string name="server_port">Порт</string>
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Серверді іске қоспас бұрын портты өзгертіңіз.</string>
     <string name="server_restart">Қайта іске қосу</string>
@@ -793,7 +791,6 @@
     <string name="blocked_clients_description">Осы клиенттерден келген сұраныстар диалогты көрсетпей автоматты түрде қабылданбайды.</string>
     <string name="client_label_placeholder">Атауды енгізіңіз…</string>
     <string name="client_label_edit_tooltip">Атауды орнату</string>
-    <string name="client_label_save">Сақтау</string>
     <string name="client_label_cancel">Бас тарту</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1651,7 +1648,6 @@
     <string name="bible_engine_detect">Жазбаларды анықтау</string>
     <string name="bible_engine_run_local">Движокты жергілікті іске қосу</string>
     <string name="bible_engine_host">Движок хосты</string>
-    <string name="bible_engine_port">Порт</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Байланыс</string>
     <string name="contact_us_title">Бізбен байланысу</string>

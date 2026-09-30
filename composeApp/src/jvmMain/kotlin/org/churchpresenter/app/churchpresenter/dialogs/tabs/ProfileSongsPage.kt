@@ -19,7 +19,7 @@ import churchpresenter.composeapp.generated.resources.profile_fit_languages
 import churchpresenter.composeapp.generated.resources.profile_fit_languages_each
 import churchpresenter.composeapp.generated.resources.profile_fit_languages_same
 import churchpresenter.composeapp.generated.resources.profile_fit_languages_sub
-import churchpresenter.composeapp.generated.resources.profile_group_languages
+import churchpresenter.composeapp.generated.resources.song_language_order_label
 import churchpresenter.composeapp.generated.resources.profile_group_slides
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_language_gap
@@ -100,7 +100,7 @@ internal fun ProfileSongsPage(
         targets,
     )
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
-        SettingsGroup(stringResource(Res.string.profile_group_languages), paths = SONG_LAYOUT_PATHS) {
+        SettingsGroup(stringResource(Res.string.song_language_order_label), paths = SONG_LAYOUT_PATHS) {
             SettingsRow(stringResource(Res.string.profile_layout), paths = SONG_LAYOUT_PATHS) {
                 RowSegmented(
                     options = bilingualLayoutRowOptions(),

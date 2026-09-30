@@ -36,7 +36,7 @@ import churchpresenter.composeapp.generated.resources.output_profile_sources
 import churchpresenter.composeapp.generated.resources.profile_content_scripture
 import churchpresenter.composeapp.generated.resources.profile_group_placement
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
-import churchpresenter.composeapp.generated.resources.profile_source_bible
+import churchpresenter.composeapp.generated.resources.setup_summary_bible
 import churchpresenter.composeapp.generated.resources.profile_source_songs
 import churchpresenter.composeapp.generated.resources.projection_content_background
 import churchpresenter.composeapp.generated.resources.projection_content_lt_background
@@ -185,7 +185,7 @@ internal fun ProfileContentPage(
     ContentSummary(profile, groups.all, onProfileChange)
     ContentGroup(groups.scripture, profile, onProfileChange)
     SettingsGroup(stringResource(Res.string.output_profile_sources), paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS) {
-        SettingsRow(stringResource(Res.string.profile_source_bible), paths = BIBLE_SOURCE_PATHS) {
+        SettingsRow(stringResource(Res.string.setup_summary_bible), paths = BIBLE_SOURCE_PATHS) {
             BibleSourcePicker(
                 profile = profile,
                 stack = bibleTranslationChoices(settings),

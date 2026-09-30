@@ -9,9 +9,8 @@ import churchpresenter.composeapp.generated.resources.profile_box_item_qr_messag
 import churchpresenter.composeapp.generated.resources.profile_box_item_question
 import churchpresenter.composeapp.generated.resources.profile_box_item_subtitle
 import churchpresenter.composeapp.generated.resources.profile_box_opacity
-import churchpresenter.composeapp.generated.resources.profile_caption_lines
+import churchpresenter.composeapp.generated.resources.profile_group_lines
 import churchpresenter.composeapp.generated.resources.profile_group_position
-import churchpresenter.composeapp.generated.resources.profile_group_qr
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_line_spacing
 import churchpresenter.composeapp.generated.resources.profile_qr_background
@@ -91,7 +90,7 @@ internal fun ProfileSubtitlesPage(draft: AppSettings, onSettingsChange: ((AppSet
         paths = listOf("$MEDIA.position", "$MEDIA.maxLines", "$MEDIA.lineSpacing"),
     ) {
         ScreenPlacementRow(media.position, { v -> update { it.copy(position = v) } }, MEDIA)
-        SettingsRow(stringResource(Res.string.profile_caption_lines), paths = listOf("$MEDIA.maxLines")) {
+        SettingsRow(stringResource(Res.string.profile_group_lines), paths = listOf("$MEDIA.maxLines")) {
             RowStepper(media.maxLines, { v -> update { it.copy(maxLines = v) } }, SUBTITLE_LINES_RANGE)
         }
         SettingsRow(
@@ -153,7 +152,7 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
         DisplayAlignmentRow(qa.horizontalAlignment, { v -> update { it.copy(horizontalAlignment = v) } }, QA)
     }
     SettingsGroup(
-        stringResource(Res.string.profile_group_qr),
+        stringResource(Res.string.profile_box_item_qr_code),
         paths = listOf("$QA.qrForegroundColor", "$QA.qrBackgroundColor", "$QA.qrBackgroundOpacity"),
     ) {
         SettingsRow(stringResource(Res.string.profile_qr_foreground), paths = listOf("$QA.qrForegroundColor")) {
