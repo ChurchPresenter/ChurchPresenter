@@ -1,0 +1,412 @@
+package org.churchpresenter.app.churchpresenter.tabs
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.bible_cross_references_count
+import churchpresenter.composeapp.generated.resources.bible_cross_references_popover_title
+import churchpresenter.composeapp.generated.resources.bible_no_primary_hint
+import churchpresenter.composeapp.generated.resources.bible_no_primary_step1
+import churchpresenter.composeapp.generated.resources.bible_no_primary_step2
+import churchpresenter.composeapp.generated.resources.bible_no_primary_title
+import churchpresenter.composeapp.generated.resources.bible_smart_search_hint
+import churchpresenter.composeapp.generated.resources.chapter
+import churchpresenter.composeapp.generated.resources.contains_phrase
+import churchpresenter.composeapp.generated.resources.current_book
+import churchpresenter.composeapp.generated.resources.entire_bible
+import churchpresenter.composeapp.generated.resources.exact_match
+import churchpresenter.composeapp.generated.resources.no_results_found
+import churchpresenter.composeapp.generated.resources.tab_focus_lost
+import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.moveBibleTranslation
+import org.churchpresenter.settings.swapBibleTranslations
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.viewmodel.bibleSttStatus
+import org.churchpresenter.app.churchpresenter.viewmodel.filteredSelectionIndices
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.viewmodel.applyDetectedReference
+import org.churchpresenter.app.churchpresenter.viewmodel.clearDetectedReferences
+import org.churchpresenter.app.churchpresenter.viewmodel.logOperatorFlag
+import org.churchpresenter.app.churchpresenter.viewmodel.onSmartQueryChanged
+import org.churchpresenter.app.churchpresenter.viewmodel.selectSearchResult
+import org.churchpresenter.app.churchpresenter.viewmodel.submitSmartQuery
+import org.churchpresenter.app.churchpresenter.viewmodel.liveVerseSplitMark
+import androidx.compose.foundation.layout.ColumnScope
+import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
+
+/** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
+@Composable
+internal fun ColumnScope.BibleTabContent(tab: BibleTabScope, focusRescue: FocusLostRescueState) {
+    with(tab) {
+        if (loadErrors.isNotEmpty()) {
+            BibleLoadErrorBanner(
+                errors = loadErrors,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp),
+            )
+        }
+
+        val scopeOptions = listOf(
+            stringResource(Res.string.entire_bible),
+            stringResource(Res.string.current_book),
+        )
+        val selectedScope = scopeOptions.getOrElse(selectedScopeIndex) { scopeOptions.first() }
+
+        val modeOptions = listOf(
+            stringResource(Res.string.contains_phrase),
+            stringResource(Res.string.exact_match),
+        )
+        val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
+
+        val searchPlaceholder = stringResource(Res.string.bible_smart_search_hint)
+        BibleSearchRow(
+            searchQuery = searchQuery,
+            searchPlaceholder = searchPlaceholder,
+            searchMode = searchMode,
+            scopeOptions = scopeOptions,
+            selectedScope = selectedScope,
+            modeOptions = modeOptions,
+            selectedMode = selectedMode,
+            onQueryChange = { viewModel.onSmartQueryChanged(it) },
+            onClear = { viewModel.clearSearch(); focusRequester.requestFocus() },
+            onSubmit = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
+            onFocusChanged = { searchFieldFocused = it },
+            onCycleSearchMode = { viewModel.cycleSearchMode(); focusRequester.requestFocus() },
+            onScopeSelected = viewModel::updateSelectedScopeIndex,
+            onModeSelected = viewModel::updateSelectedModeIndex,
+        )
+
+
+        if (engineSettings.enabled && sttConnected) {
+            sttManager?.let { BibleTabDetection(it) }
+        }
+
+        if (appSettings.bibleSettings.primaryBible.isBlank() && viewModel.primaryBible.value == null) {
+            BibleNoPrimaryHint(appSettings)
+        } else if (isSearchMode && searchResults.isNotEmpty()) {
+            BibleSearchResults(
+                results = searchResults,
+                query = searchQuery,
+                onResultChosen = { result ->
+                    viewModel.selectSearchResult(result)
+                    viewModel.clearSearch()
+                    focusRequester.requestFocus()
+                },
+            )
+        } else if (isSearchMode && searchQuery.isNotEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(Res.string.no_results_found, searchQuery),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            BibleBrowser(tab, focusRescue)
+        }
+    }
+}
+
+/** Nothing to show until a primary Bible is chosen: say so, and how. */
+@Composable
+private fun ColumnScope.BibleNoPrimaryHint(appSettings: AppSettings) {
+    Box(
+        modifier = Modifier.fillMaxWidth().weight(1f).padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier.widthIn(max = 360.dp),
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = 3.dp,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "📖",
+                    style = MaterialTheme.typography.displaySmall
+                )
+                Text(
+                    text = stringResource(Res.string.bible_no_primary_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                Text(
+                    text = stringResource(Res.string.bible_no_primary_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                if (appSettings.bibleSettings.storageDirectory.isBlank()) {
+                    Text(
+                        text = stringResource(Res.string.bible_no_primary_step1),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Text(
+                    text = stringResource(Res.string.bible_no_primary_step2),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BibleTabScope.BibleTabDetection(sttManager: STTManager) {
+    val engineStartFailed = bibleEngineClient?.startFailed?.value == true
+
+    val engineSttDown = bibleEngineClient?.engineSttConnected?.value == false
+    val sttConnectError = sttManager.connectError.value == true
+    val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
+        appSettings.bibleSettings.secondaryBible.isBlank() &&
+        viewModel.primaryBible.value == null
+    BibleDetectionPanel(
+        status = bibleSttStatus(
+            engineStartFailed = engineStartFailed,
+            noBibleSelected = noBibleSelected,
+            sttConnected = sttConnected,
+            engineConnected = bibleEngineClient?.connected?.value == true,
+            engineSttDown = engineSttDown,
+            sttReceiving = sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty(),
+            hasDetectedReferences = detectedReferences.isNotEmpty(),
+            sttReconnecting = sttManager.reconnecting.value == true,
+            sttConnectError = sttConnectError,
+            sttConnecting = sttManager.connecting.value == true,
+        ),
+        statusIsError = engineStartFailed || noBibleSelected || sttConnectError || engineSttDown,
+        autoFollowEnabled = autoFollowEnabled,
+        textMatchLevel = textMatchLevel,
+        continuationSpeed = continuationSpeed,
+        detections = detectedReferences,
+        selectedIndex = selectedDetectionIdx,
+        showFlagButtons = engineSettings.helpDevMode,
+        canFlagLive = displayedVerses.isNotEmpty(),
+        onAutoFollowChange = { next ->
+            viewModel.setAutoFollow(next)
+            onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(autoFollow = next)) }
+        },
+        onTextMatchLevelChange = { next ->
+            viewModel.setTextMatchLevel(next)
+            onSettingsChange { it.copy(
+                bibleEngineSettings = it.bibleEngineSettings.copy(textMatchLevel = next.name.lowercase()),
+            ) }
+        },
+        onContinuationSpeedChange = { next ->
+            viewModel.setContinuationSpeed(next)
+            onSettingsChange { it.copy(
+                bibleEngineSettings = it.bibleEngineSettings.copy(continuationSpeed = next.name.lowercase()),
+            ) }
+        },
+        onFlag = { kind ->
+            val live = displayedVerses
+            if (kind == "missed_passage") viewModel.logOperatorFlag(kind = kind)
+            else if (live.isNotEmpty()) viewModel.logOperatorFlag(
+                kind = kind,
+                bookName = live.first().bookName,
+                chapter = live.first().chapter,
+                verseStart = live.minOf { it.verseNumber },
+                verseEnd = live.maxOf { it.verseNumber }.takeIf { live.size > 1 },
+                matchType = viewModel.autoFollowLiveMatchType.value,
+            )
+        },
+        onClearDetections = { viewModel.clearDetectedReferences() },
+        onDetectionClick = { idx ->
+            selectedDetectionIdx = idx
+            detectedReferences.getOrNull(idx)?.let { viewModel.applyDetectedReference(it) }
+            focusRequester.requestFocus()
+        },
+        onDetectionDoubleClick = { idx ->
+            selectedDetectionIdx = idx
+            detectedReferences.getOrNull(idx)
+                ?.let { viewModel.applyDetectedReference(it, goLiveSource = "detection") }
+            focusRequester.requestFocus()
+        },
+        modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 8.dp).bibleListCard(),
+    )
+}
+
+/** The book, chapter and verse browser, with the history panel under it. */
+@Composable
+private fun ColumnScope.BibleBrowser(tab: BibleTabScope, focusRescue: FocusLostRescueState) {
+    with(tab) {
+        val crossRefCountStr = stringResource(Res.string.bible_cross_references_count)
+        val crossRefPopoverTitleStr = stringResource(Res.string.bible_cross_references_popover_title)
+
+        // No top gap of its own: the search card above already ends in an 8dp margin, which
+        // matches the banner's 8dp below.
+        FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost), topPadding = 0.dp)
+
+        // Provided rather than passed: the verse row that draws it is five levels down.
+        CompositionLocalProvider(
+            LocalVerseSplitMark provides viewModel.liveVerseSplitMark(displayedVerses.firstOrNull())
+        ) {
+            BibleBrowserPane(
+                books = books,
+                filteredBooks = filteredBooks,
+                filteredChapters = filteredChapters,
+                filteredVerses = filteredVerses,
+                selectedBookIndex = selectedBookIndex,
+                selectedChapter = selectedChapter,
+                selectedVerseIndices = filteredSelectionIndices(
+                    viewModel.selectedVerseIndices, verses, filteredVerses,
+                ),
+                selectedVerseInFiltered = if (filteredVerses.isEmpty()) -1 else
+                    filteredVerses.indexOf(verses.getOrNull(selectedVerseIndex)).coerceAtLeast(0),
+                bookWidthPx = colWBook,
+                chapterWidthPx = colWChapter,
+                crossRefWidthPx = colWCrossRef,
+                splitWidthPx = colWSplit,
+                onBookWidthChange = { update -> colWBook = update(colWBook) },
+                onChapterWidthChange = { update -> colWChapter = update(colWChapter) },
+                onCrossRefWidthChange = { update -> colWCrossRef = update(colWCrossRef) },
+                onSplitWidthChange = { update -> colWSplit = update(colWSplit) },
+                onSaveColumnWidths = ::saveColWidths,
+                onSaveCrossRefWidth = ::saveColWCrossRef,
+                onSaveSplitWidth = ::saveColWSplit,
+                crossRefs = crossRefs,
+                crossRefsDocked = crossRefsDocked,
+                crossRefCountLabel = { count -> crossRefCountStr.format(count) },
+                crossRefPopoverTitle = { label, size -> crossRefPopoverTitleStr.format(label, size) },
+                onOpenCrossRef = ::openCrossRef,
+                onGoLiveCrossRef = ::goLiveCrossRef,
+                onScheduleCrossRef = ::scheduleCrossRef,
+                onDockCrossRefs = {
+                    onSettingsChange { s -> withBibleCrossReferencePanel(s, true) }
+                    crossRefs.closePopover()
+                    focusRequester.requestFocus()
+                },
+                onUndockCrossRefs = {
+                    onSettingsChange { s -> withBibleCrossReferencePanel(s, false) }
+                    focusRequester.requestFocus()
+                },
+                onDismissPopover = { crossRefs.closePopover(); focusRequester.requestFocus() },
+                onRefsChipClicked = { index -> refsChipClicked(index) },
+                onBookSelected = { index -> selectFilteredBook(index) },
+                onChapterSelected = { index ->
+                    filteredChapters.getOrNull(index)?.toIntOrNull()?.let(viewModel::selectChapter)
+                },
+                onVerseSelected = { index -> clickFilteredVerse(index) },
+                onVerseCtrlClicked = { index ->
+                    filteredVerses.getOrNull(index)?.let {
+                        val realIndex = verses.indexOf(it)
+                        if (realIndex >= 0) viewModel.ctrlClickVerse(realIndex)
+                    }
+                },
+                onVerseShiftClicked = { index ->
+                    filteredVerses.getOrNull(index)?.let {
+                        val realIndex = verses.indexOf(it)
+                        if (realIndex >= 0) viewModel.shiftClickVerse(realIndex)
+                    }
+                },
+                onVerseRightClicked = { index ->
+                    filteredVerses.getOrNull(index)?.let {
+                        val realIndex = verses.indexOf(it)
+                        if (realIndex >= 0) viewModel.selectVerse(realIndex)
+                    }
+                },
+                onVerseDoubleClicked = { goLiveWithHistory(); focusRequester.requestFocus() },
+                onCopyVerse = { copySelectedVerse() },
+                onAddToSchedule = { scheduleCurrentVerse() },
+                isSplitActive = isSplitActive,
+                liveChapterVerses = liveChapterVerses,
+                liveVerseNumbers = liveVerseNumbers,
+                onLiveVerseClicked = { verseNum -> liveVerseClicked(verseNum) },
+                verseHeader = { showLabel -> BibleTabVerseHeader(showLabel) },
+            ) {
+                BibleTabHistory()
+            }
+        }
+    }
+}
+
+@Composable
+private fun BibleTabScope.BibleTabVerseHeader(showLabel: Boolean) {
+    BibleVerseHeader(
+        showLabel = showLabel,
+        crossRefsVisible = crossRefsAvailable,
+        crossRefsDocked = crossRefsDocked,
+        holdAvailable = presenterManager != null && !splitBrowseMode,
+        holdLive = presenterManager?.bibleHold?.value ?: false,
+        sttToggleVisible = appSettings.sttSettings.lastConnectedUrl.isNotBlank() &&
+            appSettings.sttSettings.lastConnectedUrl == appSettings.sttSettings.serverUrl &&
+            sttManager != null,
+        sttConnected = sttConnected,
+        translations = appSettings.bibleSettings.translationList(),
+        storageDirectory = appSettings.bibleSettings.storageDirectory,
+        translationSelectionKey = translationSelectionKey,
+        onCrossReferencesToggle = { toggleCrossReferences() },
+        onHoldLiveToggle = { toggleHoldLive() },
+        onSttToggle = { toggleStt() },
+        onSwapTranslations = {
+            onSettingsChange { s -> s.swapBibleTranslations() }
+            focusRequester.requestFocus()
+        },
+        onMoveTranslation = { index, offset ->
+            onSettingsChange { app -> app.moveBibleTranslation(index, offset) }
+            focusRequester.requestFocus()
+        },
+        onAddToSchedule = { scheduleCurrentVerse() },
+        onGoLive = { goLiveWithHistory(); focusRequester.requestFocus() },
+    )
+}
+
+@Composable
+private fun BibleTabScope.BibleTabHistory() {
+    BibleHistoryPanel(
+        entries = viewModel.history,
+        expanded = historyExpanded,
+        selectedIndex = selectedHistoryIdx,
+        onToggleExpanded = { historyExpanded = !historyExpanded },
+        onClear = { viewModel.clearHistory() },
+        onEntryClick = { idx ->
+            selectedHistoryIdx = idx
+            viewModel.history.getOrNull(idx)?.let {
+                viewModel.selectVerseByDetails(it.bookName, it.chapter, it.verseNumber, it.verseRange)
+            }
+            focusRequester.requestFocus()
+        },
+        onEntryDoubleClick = { idx ->
+            selectedHistoryIdx = idx
+            viewModel.history.getOrNull(idx)?.let {
+                viewModel.selectVerseByDetails(
+                    it.bookName, it.chapter, it.verseNumber, it.verseRange,
+                    goLiveSource = "history",
+                )
+            }
+            focusRequester.requestFocus()
+        },
+    )
+}
