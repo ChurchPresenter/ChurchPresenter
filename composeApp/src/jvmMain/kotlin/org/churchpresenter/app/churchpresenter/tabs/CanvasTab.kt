@@ -1,169 +1,51 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.presenter.liveMerges
-import churchpresenter.composeapp.generated.resources.preview_merged_label
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.app.churchpresenter.LocalWentLive
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.background
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.CameraHost
-import org.churchpresenter.app.churchpresenter.composables.CenteredGlyphLine
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.lazy.items
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import org.churchpresenter.theme.components.GhostButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.focusable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Warning
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_copy
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.save_preset
-import churchpresenter.composeapp.generated.resources.canvas_create_scene
-import churchpresenter.composeapp.generated.resources.canvas_new_scene
-import churchpresenter.composeapp.generated.resources.canvas_no_scene_selected
-import churchpresenter.composeapp.generated.resources.canvas_scenes
-import churchpresenter.composeapp.generated.resources.canvas_select_source
-import churchpresenter.composeapp.generated.resources.canvas_source_browser
-import churchpresenter.composeapp.generated.resources.canvas_source_color
-import churchpresenter.composeapp.generated.resources.canvas_source_image
-import churchpresenter.composeapp.generated.resources.canvas_source_text
-import churchpresenter.composeapp.generated.resources.canvas_source_video
-import churchpresenter.composeapp.generated.resources.canvas_sources
-import churchpresenter.composeapp.generated.resources.go_live
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
-import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
-import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
-import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.core.models.scene.SourceTransform
-import org.churchpresenter.core.models.scene.forArea
-import org.churchpresenter.core.models.scene.isLandscape
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.util.UUID
-import churchpresenter.composeapp.generated.resources.canvas_source_timer
-import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
-import churchpresenter.composeapp.generated.resources.canvas_source_camera
-import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
-import churchpresenter.composeapp.generated.resources.canvas_source_ndi
-import churchpresenter.composeapp.generated.resources.canvas_source_omt
-import churchpresenter.composeapp.generated.resources.canvas_source_bible
-import churchpresenter.composeapp.generated.resources.canvas_tool_select
-import churchpresenter.composeapp.generated.resources.canvas_tool_rectangle
-import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
-import churchpresenter.composeapp.generated.resources.canvas_tool_line
-import churchpresenter.composeapp.generated.resources.canvas_tool_arrow
-import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
-import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
-import churchpresenter.composeapp.generated.resources.canvas_rename_scene
-import churchpresenter.composeapp.generated.resources.canvas_remove_scene
-import churchpresenter.composeapp.generated.resources.canvas_size_screen
-import churchpresenter.composeapp.generated.resources.canvas_bring_into_view
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.canvas_dual_layout_off_confirm
 import churchpresenter.composeapp.generated.resources.canvas_layer_placement_in
-import churchpresenter.composeapp.generated.resources.canvas_layout_landscape
 import churchpresenter.composeapp.generated.resources.canvas_layout_landscape_short
-import churchpresenter.composeapp.generated.resources.canvas_layout_portrait
 import churchpresenter.composeapp.generated.resources.canvas_layout_portrait_short
 import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.canvas_layer_outside
 import churchpresenter.composeapp.generated.resources.canvas_layer_partly_outside
-import churchpresenter.composeapp.generated.resources.canvas_layers_outside
-import churchpresenter.composeapp.generated.resources.canvas_layers_outside_one
-import churchpresenter.composeapp.generated.resources.canvas_duplicate_scene
-import churchpresenter.composeapp.generated.resources.canvas_scene_copy_name
-import churchpresenter.composeapp.generated.resources.canvas_add_source
-import churchpresenter.composeapp.generated.resources.canvas_delete_source
-import churchpresenter.composeapp.generated.resources.canvas_source_move_forward
-import churchpresenter.composeapp.generated.resources.canvas_source_move_backward
-import churchpresenter.composeapp.generated.resources.canvas_toggle_visibility
-import churchpresenter.composeapp.generated.resources.canvas_toggle_lock
-import churchpresenter.composeapp.generated.resources.canvas_aspect_ratio_warning
-import churchpresenter.composeapp.generated.resources.canvas_fix_aspect_ratio
 
-private const val SCENE_LIST_WEIGHT = 0.4f
-private const val SOURCE_LIST_WEIGHT = 0.6f
-private const val HIDDEN_SOURCE_ALPHA = 0.5f
-private const val ASPECT_EPSILON = 0.01f
+internal const val CANVAS_SCENE_LIST_WEIGHT = 0.4f
+internal const val CANVAS_SOURCE_LIST_WEIGHT = 0.6f
+internal const val CANVAS_HIDDEN_SOURCE_ALPHA = 0.5f
+internal const val CANVAS_ASPECT_EPSILON = 0.01f
 
 /**
  * Where a left-panel drag's final width is written back — mirrors `MainDesktop.withScheduleWidth`,
@@ -198,1054 +80,79 @@ fun CanvasTab(
     val windowState = LocalMainWindowState.current
     val isMaximized = windowState?.placement != WindowPlacement.Floating
     val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
-
-    var leftPanelPx by remember(currentLayout.canvasLeftPanelWidthDp, isMaximized) {
-        mutableStateOf(with(density) { currentLayout.canvasLeftPanelWidthDp.dp.toPx() })
-    }
-    var rightPanelPx by remember(currentLayout.canvasRightPanelWidthDp, isMaximized) {
-        mutableStateOf(with(density) { currentLayout.canvasRightPanelWidthDp.dp.toPx() })
-    }
-
-    fun saveLeftPanel() {
-        val dp = with(density) { leftPanelPx.toDp().value.toInt() }
-        onSettingsChangeState.value { s -> withCanvasLeftPanelWidth(s, isMaximized, dp) }
-    }
-
-    fun saveRightPanel() {
-        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
-        onSettingsChangeState.value { s -> withCanvasRightPanelWidth(s, isMaximized, dp) }
-    }
-    var renamingSceneId by remember { mutableStateOf<String?>(null) }
-    // The scene whose second layout is about to be removed, while the confirmation is open.
-    var confirmSingleLayoutSceneId by remember { mutableStateOf<String?>(null) }
-    confirmSingleLayoutSceneId?.let { sceneId ->
-        SingleLayoutConfirmDialog(
-            onConfirm = {
-                sceneViewModel.setDualLayout(sceneId, false)
-                confirmSingleLayoutSceneId = null
-            },
-            onDismiss = { confirmSingleLayoutSceneId = null },
-        )
-    }
-    var renameText by remember { mutableStateOf("") }
-    val currentScene = sceneViewModel.currentScene
-    val selectedSourceId by sceneViewModel.selectedSourceId
-    val selectedSource = sceneViewModel.selectedSource
-
-    // Localised default source names (resolved in composable scope so they
-    // can be captured by non-composable onClick lambdas below)
-    val strImage         = stringResource(Res.string.canvas_source_image)
-    val strText          = stringResource(Res.string.canvas_source_text)
-    val strColor         = stringResource(Res.string.canvas_source_color)
-    val strVideo         = stringResource(Res.string.canvas_source_video)
-    val strTimer         = stringResource(Res.string.canvas_source_timer)
-    val strQrCode        = stringResource(Res.string.canvas_source_qrcode)
-    val strCamera        = stringResource(Res.string.canvas_source_camera)
-    val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
-    val strNdi           = stringResource(Res.string.canvas_source_ndi)
-    val strOmt           = stringResource(Res.string.canvas_source_omt)
-    val strBrowser       = stringResource(Res.string.canvas_source_browser)
-    val strBible         = stringResource(Res.string.canvas_source_bible)
-
-    // Drawing tool state
-    var activeTool by remember { mutableStateOf("select") }
-    var drawingStrokeColor by remember { mutableStateOf("#FFFFFF") }
-    var drawingFillColor by remember { mutableStateOf("#00000000") }
-    var drawingStrokeWidth by remember { mutableStateOf(3f) }
-
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(dialogDismissSignal) {
-        focusRequester.requestFocus()
-    }
-    // Re-grab focus whenever a source is selected so Delete key works right after clicking canvas items
-    LaunchedEffect(selectedSourceId) {
-        if (selectedSourceId != null) {
+    val scope = CanvasTabScope(
+        appSettings = appSettings,
+        presenterManager = presenterManager,
+        sceneViewModel = sceneViewModel,
+        onAddToSchedule = onAddToSchedule,
+        onSavePreset = onSavePreset,
+        cameraHost = cameraHost,
+        density = density,
+        onSettingsChangeState = onSettingsChangeState,
+        isMaximized = isMaximized,
+        sourceNames = rememberCanvasSourceNames(),
+        wentLive = LocalWentLive.current,
+        state = rememberCanvasTabState(currentLayout, isMaximized, density),
+    )
+    with(scope) {
+        confirmSingleLayoutSceneId?.let { sceneId ->
+            SingleLayoutConfirmDialog(
+                onConfirm = {
+                    sceneViewModel.setDualLayout(sceneId, false)
+                    confirmSingleLayoutSceneId = null
+                },
+                onDismiss = { confirmSingleLayoutSceneId = null },
+            )
+        }
+        // focusRequester is remembered with the rest of the tab's state.
+        LaunchedEffect(dialogDismissSignal) {
             focusRequester.requestFocus()
         }
-    }
+        // Re-grab focus whenever a source is selected so Delete key works right after clicking canvas items
+        LaunchedEffect(selectedSourceId) {
+            if (selectedSourceId != null) {
+                focusRequester.requestFocus()
+            }
+        }
 
-    val shortcuts = LocalShortcuts.current
-    val wentLive = LocalWentLive.current
+        val shortcuts = LocalShortcuts.current
 
-    Row(
-        modifier = modifier
-            .fillMaxSize()
-            .focusRequester(focusRequester)
-            .focusable()
-            .onKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown &&
-                    shortcuts.matches(ShortcutAction.CANVAS_DELETE_SOURCE, event) &&
-                    renamingSceneId == null
-                ) {
-                    val sourceId = selectedSourceId
-                    if (sourceId != null) {
-                        sceneViewModel.removeSource(sourceId)
-                        true
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .focusRequester(focusRequester)
+                .focusable()
+                .onKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyDown &&
+                        shortcuts.matches(ShortcutAction.CANVAS_DELETE_SOURCE, event) &&
+                        renamingSceneId == null
+                    ) {
+                        val sourceId = selectedSourceId
+                        if (sourceId != null) {
+                            sceneViewModel.removeSource(sourceId)
+                            true
+                        } else false
                     } else false
-                } else false
-            }
-    ) {
-        // Left panel: Scene selector + Source list
-        Column(
-            modifier = Modifier
-                .width(with(density) { leftPanelPx.toDp() })
-                .fillMaxHeight()
-                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
-                .bibleListCard()
-                .padding(8.dp)
+                }
         ) {
-            // Scene selector section
-            Text(
-                stringResource(Res.string.canvas_scenes),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(Modifier.height(4.dp))
+            // Left panel: Scene selector + Source list
+            CanvasLeftPanel()
 
-            // Resolve live presentation display for aspect ratio checks
-            val presentationAssignment0 = appSettings.projectionSettings.getAssignment(0)
-            val presentationBounds0 = remember(presentationAssignment0.targetDisplay, presentationAssignment0.targetBoundsX, presentationAssignment0.targetBoundsY) {
-                assignedDisplayBounds(presentationAssignment0)
-            }
-            val displayAr0 = if (presentationBounds0.height > 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f
-            // Every projection screen a scene can be sized to match, from its size menu. A screen
-            // switched off or not yet resolved has no size and is left out.
-            val assignments = appSettings.projectionSettings.screenAssignments
-            val assignmentBounds = remember(assignments) { assignments.map { assignedDisplayBounds(it) } }
-            // And every merged picture, at its whole size -- the size a scene for a video wall is built at.
-            val mergedLabel = stringResource(Res.string.preview_merged_label)
-            val mergedOutputs = remember(appSettings.projectionSettings) {
-                appSettings.projectionSettings.liveMerges().values.distinct()
-            }.map { merge ->
-                val name = appSettings.projectionSettings.outputProfiles
-                    .find { it.id == merge.profileId }?.name.orEmpty()
-                CanvasOutputSize(label = "$name $mergedLabel".trim(), width = merge.width, height = merge.height)
-            }
-            val canvasOutputs = mergedOutputs + assignments.zip(assignmentBounds).mapIndexedNotNull { index, (assignment, bounds) ->
-                if (assignment.targetDisplay == Constants.KEY_TARGET_NONE || bounds.width <= 0 || bounds.height <= 0) {
-                    null
-                } else {
-                    CanvasOutputSize(
-                        label = assignment.screenName.ifBlank {
-                            stringResource(Res.string.canvas_size_screen, index + 1)
-                        },
-                        width = bounds.width,
-                        height = bounds.height,
-                    )
-                }
+            // Draggable separator: left panel | center
+            DragHandle(onDragEnd = { saveLeftPanel() }) { delta ->
+                leftPanelPx = (leftPanelPx + delta).coerceAtLeast(with(density) { 120.dp.toPx() })
             }
 
-            @OptIn(ExperimentalFoundationApi::class)
-            LazyColumn(
-                modifier = Modifier.weight(SCENE_LIST_WEIGHT).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
-            ) {
-                items(sceneViewModel.scenes) { scene ->
-                    val isSelected = scene.id == sceneViewModel.currentSceneId.value
-                    val isRenaming = renamingSceneId == scene.id
-                    val usedLayout0 =
-                        scene.forArea(presentationBounds0.width.toFloat(), presentationBounds0.height.toFloat())
-                    val sceneAr0 = if (usedLayout0.canvasHeight > 0) {
-                        usedLayout0.canvasWidth.toFloat() / usedLayout0.canvasHeight
-                    } else {
-                        0f
-                    }
-                    val isMismatched = displayAr0 > 0f && kotlin.math.abs(displayAr0 - sceneAr0) > 0.01f
-                    val (sceneHover, sceneHovered) = rememberRowHover()
-                    val sceneColors = bibleRowColors(isSelected, sceneHovered)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(BibleListRowShape)
-                            .background(sceneColors.background)
-                            .hoverable(sceneHover)
-                            .padding(start = 10.dp, end = 8.dp, top = rowPad(4.dp), bottom = rowPad(4.dp)),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isRenaming) {
-                            BasicTextField(
-                                value = renameText,
-                                onValueChange = { renameText = it },
-                                singleLine = true,
-                                textStyle = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                ),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .border(1.dp, MaterialTheme.colorScheme.primary, AppShape(4.dp))
-                                    .padding(horizontal = 6.dp, vertical = 4.dp)
-                            )
-                            KeyIconButton(
-                                onClick = {
-                                    sceneViewModel.renameScene(scene.id, renameText)
-                                    renamingSceneId = null
-                                },
-                                modifier = Modifier.size(20.dp)
-                            ) {
-                                Icon(Icons.Filled.Check, contentDescription = stringResource(Res.string.canvas_rename_confirm), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
-                            }
-                        } else {
-                            Text(
-                                scene.name,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (isSelected) sceneColors.ink else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f)
-                                    .initialPassCombinedClickable(
-                                        onClick = { sceneViewModel.selectScene(scene.id) },
-                                        onDoubleClick = {
-                                            renamingSceneId = scene.id
-                                            renameText = scene.name
-                                        }
-                                    )
-                            )
-                            if (isMismatched) {
-                                Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
-                            }
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_rename_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                KeyIconButton(
-                                    onClick = {
-                                        renamingSceneId = scene.id
-                                        renameText = scene.name
-                                    },
-                                    modifier = Modifier.size(20.dp)
-                                ) {
-                                    Icon(
-                                        painterResource(Res.drawable.ic_edit),
-                                        contentDescription = stringResource(Res.string.canvas_rename_scene),
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            val copyName = stringResource(Res.string.canvas_scene_copy_name, scene.name)
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(
-                                            stringResource(Res.string.canvas_duplicate_scene),
-                                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                KeyIconButton(
-                                    onClick = { sceneViewModel.duplicateScene(scene.id, copyName) },
-                                    modifier = Modifier.size(20.dp)
-                                ) {
-                                    Icon(
-                                        painterResource(Res.drawable.ic_copy),
-                                        contentDescription = stringResource(Res.string.canvas_duplicate_scene),
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            CanvasSizeMenu(
-                                width = scene.canvasWidth,
-                                height = scene.canvasHeight,
-                                outputs = canvasOutputs,
-                                onSetSize = { w, h -> sceneViewModel.updateCanvasSize(w, h, scene.id) },
-                                dualLayout = scene.alternate != null,
-                                onDualLayoutChange = { on ->
-                                    if (on) {
-                                        sceneViewModel.setDualLayout(scene.id, true)
-                                    } else {
-                                        confirmSingleLayoutSceneId = scene.id
-                                    }
-                                },
-                            )
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_remove_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                KeyIconButton(
-                                    onClick = { sceneViewModel.removeScene(scene.id) },
-                                    modifier = Modifier.size(20.dp)
-                                ) {
-                                    Icon(
-                                        painterResource(Res.drawable.ic_close),
-                                        contentDescription = stringResource(Res.string.canvas_remove_scene),
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+            // Center panel: Toolbar + Canvas
+            CanvasCenterPanel(Modifier.weight(1f))
+
+            // Draggable separator: center | right panel
+            DragHandle(onDragEnd = { saveRightPanel() }) { delta ->
+                rightPanelPx = (rightPanelPx - delta).coerceAtLeast(with(density) { 120.dp.toPx() })
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                RaisedButton(
-                    onClick = { sceneViewModel.addScene() },
-                    modifier = Modifier.weight(1f),
-                    shape = AppShape(8.dp),
-                    contentPadding = ButtonDefaults.ContentPadding
-                ) {
-                    Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(Res.string.canvas_new_scene), style = MaterialTheme.typography.labelSmall)
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Source list section
-            Text(
-                stringResource(Res.string.canvas_sources),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(Modifier.height(4.dp))
-
-            if (currentScene != null) {
-                val sourceLayouts = remember(currentScene) { currentScene.editorLayouts() }
-                val placementTexts = placementTexts(dual = sourceLayouts.size > 1)
-                LazyColumn(
-                    modifier = Modifier.weight(SOURCE_LIST_WEIGHT).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
-                ) {
-                    // Render in reverse order so top item = front
-                    items(currentScene.sources.reversed()) { source ->
-                        val isSelected = source.id == selectedSourceId
-                        val (sourceHover, sourceHovered) = rememberRowHover()
-                        val sourceColors = bibleRowColors(isSelected, sourceHovered)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(BibleListRowShape)
-                                .background(sourceColors.background)
-                                .hoverable(sourceHover)
-                                .padding(start = 4.dp, end = 4.dp, top = rowPad(2.dp), bottom = rowPad(2.dp)),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Visibility toggle
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_toggle_visibility), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                KeyIconButton(
-                                    onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
-                                    modifier = Modifier.size(20.dp)
-                                ) {
-                                    Icon(
-                                        if (source.visible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                        contentDescription = stringResource(Res.string.canvas_toggle_visibility),
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-
-                            // Lock toggle
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_toggle_lock), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                KeyIconButton(
-                                    onClick = { sceneViewModel.toggleSourceLock(source.id) },
-                                    modifier = Modifier.size(20.dp)
-                                ) {
-                                    Icon(
-                                        if (source.locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                                        contentDescription = stringResource(Res.string.canvas_toggle_lock),
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-
-                            Text(
-                                source.name,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f).alpha(if (source.visible) 1f else HIDDEN_SOURCE_ALPHA)
-                                    .initialPassClickable { sceneViewModel.selectSource(source.id) }
-                            )
-                            // The canvas clips what it draws, so a layer past an edge is cut off or gone
-                            // with nothing else on screen saying it is still there.
-                            // With two layouts it is flagged if it is outside either, and the tooltip
-                            // says which.
-                            val misplaced = sourceLayouts.misplacements(source.id)
-                            if (misplaced.isNotEmpty()) {
-                                val placementText = misplaced.joinToString("\n") { (layout, placement) ->
-                                    placementTexts.getValue(layout.scene.isLandscape to placement)
-                                }
-                                TooltipArea(
-                                    tooltip = {
-                                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                            Text(
-                                                placementText,
-                                                color = MaterialTheme.colorScheme.inverseOnSurface,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                        }
-                                    },
-                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                                ) {
-                                    Icon(
-                                        Icons.Filled.Warning,
-                                        contentDescription = placementText,
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Source toolbar
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    var showAddMenu by remember { mutableStateOf(false) }
-
-                    Box {
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_add_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            KeyIconButton(
-                                onClick = { showAddMenu = true; activeTool = "select" },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    painterResource(Res.drawable.ic_add),
-                                    contentDescription = stringResource(Res.string.canvas_add_source),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-
-                        DropdownMenu(
-                            expanded = showAddMenu,
-                            onDismissRequest = { showAddMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_image)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.ImageSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strImage,
-                                            filePath = "",
-                                            transform = SourceTransform(width = 0.5f, height = 0.5f)
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_text)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.TextSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strText,
-                                            transform = SourceTransform(
-                                                x = 0.25f, y = 0.4f,
-                                                width = 0.5f, height = 0.2f
-                                            )
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_color)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.ColorSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strColor,
-                                            transform = SourceTransform()
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_video)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.VideoSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strVideo,
-                                            filePath = "",
-                                            transform = SourceTransform()
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_timer)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.ClockSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strTimer,
-                                            transform = SourceTransform(width = 0.4f, height = 0.15f)
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_qrcode)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.QRCodeSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strQrCode,
-                                            transform = SourceTransform(width = 0.2f, height = 0.2f)
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_camera)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.CameraSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strCamera,
-                                            transform = SourceTransform()
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_screen_capture)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.ScreenCaptureSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strScreenCapture,
-                                            transform = SourceTransform()
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_ndi)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.NdiSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strNdi,
-                                            transform = SourceTransform()
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_omt)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.OmtSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strOmt,
-                                            transform = SourceTransform()
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_browser)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.BrowserSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strBrowser,
-                                            url = "http://www.",
-                                            transform = SourceTransform(
-                                                x = 0.1f, y = 0.1f,
-                                                width = 0.8f, height = 0.8f
-                                            )
-                                        )
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_bible)) },
-                                onClick = {
-                                    showAddMenu = false
-                                    sceneViewModel.addSource(
-                                        SceneSource.BibleSource(
-                                            id = UUID.randomUUID().toString(),
-                                            name = strBible,
-                                            transform = SourceTransform(
-                                                x = 0.1f, y = 0.2f,
-                                                width = 0.8f, height = 0.6f
-                                            )
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    }
-
-                    val currentSelectedId = selectedSourceId
-                    if (currentSelectedId != null) {
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_delete_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            KeyIconButton(
-                                onClick = { sceneViewModel.removeSource(currentSelectedId) },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    painterResource(Res.drawable.ic_delete),
-                                    contentDescription = stringResource(Res.string.canvas_delete_source),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_source_move_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            KeyIconButton(
-                                onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    painterResource(Res.drawable.ic_arrow_up),
-                                    contentDescription = stringResource(Res.string.canvas_source_move_forward),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_source_move_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            KeyIconButton(
-                                onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    painterResource(Res.drawable.ic_arrow_down),
-                                    contentDescription = stringResource(Res.string.canvas_source_move_backward),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Draggable separator: left panel | center
-        DragHandle(onDragEnd = { saveLeftPanel() }) { delta ->
-            leftPanelPx = (leftPanelPx + delta).coerceAtLeast(with(density) { 120.dp.toPx() })
-        }
-
-        // Center panel: Toolbar + Canvas
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(vertical = 4.dp)
-                .bibleListCard()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (currentScene != null) {
-                // Top toolbar
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Drawing tools (left)
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        data class ToolDef(val id: String, val label: String)
-                        val tools = listOf(
-                            ToolDef("select", stringResource(Res.string.canvas_tool_select)),
-                            ToolDef("rectangle", stringResource(Res.string.canvas_tool_rectangle)),
-                            ToolDef("ellipse", stringResource(Res.string.canvas_tool_ellipse)),
-                            ToolDef("line", stringResource(Res.string.canvas_tool_line)),
-                            ToolDef("arrow", stringResource(Res.string.canvas_tool_arrow)),
-                            ToolDef("freehand", stringResource(Res.string.canvas_tool_freehand))
-                        )
-
-                        tools.forEach { tool ->
-                            val isActive = activeTool == tool.id
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(tool.label, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                KeyIconButton(
-                                    onClick = { activeTool = tool.id },
-                                    modifier = Modifier.size(32.dp),
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
-                                        else Color.Transparent,
-                                        contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
-                                        else MaterialTheme.colorScheme.onSurface
-                                    )
-                                ) {
-                                    // Geometric glyphs, not `painterResource` icons, and kept that
-                                    // way deliberately: AGENT.md's "no text as icons" rule is about
-                                    // letters and emoji standing in for artwork, and these are the
-                                    // shapes the tools draw. Their names live in the TooltipArea
-                                    // above — see CanvasTabToolTooltipTest, which addresses the
-                                    // buttons by these glyphs.
-                                    Text(
-                                        when (tool.id) {
-                                            "select" -> "\u25C6"
-                                            "rectangle" -> "\u25A1"
-                                            "ellipse" -> "\u25CB"
-                                            "line" -> "\u2215"
-                                            "arrow" -> "\u2192"
-                                            "freehand" -> "\u270E"
-                                            else -> "?"
-                                        },
-                                        // Trimmed to the glyph, so the shape itself is centred
-                                        // in the key rather than the font's line box around it.
-                                        style = MaterialTheme.typography.titleSmall.let {
-                                            it.copy(lineHeight = it.fontSize, lineHeightStyle = CenteredGlyphLine)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        // Drawing color/stroke controls when a drawing tool is active
-                        if (activeTool != "select") {
-                            VerticalDivider(
-                                modifier = Modifier.height(24.dp).padding(horizontal = 4.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant
-                            )
-                            ColorPickerField(
-                                color = drawingStrokeColor,
-                                onColorChange = { drawingStrokeColor = it }
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            ColorPickerField(
-                                color = drawingFillColor,
-                                onColorChange = { drawingFillColor = it }
-                            )
-                        }
-                    }
-
-                    // Action buttons (right)
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (onSavePreset != null) {
-                            SavePresetButton(
-                                onClick = { onSavePreset(currentScene.id, currentScene.name) },
-                                tooltipText = stringResource(Res.string.save_preset)
-                            )
-                        }
-                        // Add to Schedule
-                        AddToScheduleButton(
-                            onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
-                            tooltipText = stringResource(Res.string.add_to_schedule)
-                        )
-
-                        // Go Live
-                        GoLiveButton(
-                            onClick = {
-                                presenterManager.setActiveScene(currentScene)
-                                presenterManager.setPresentingMode(Presenting.CANVAS)
-                                presenterManager.setShowPresenterWindow(true)
-                                wentLive(
-                                    ScheduleItem.SceneItem(
-                                        id = UUID.randomUUID().toString(),
-                                        sceneId = currentScene.id,
-                                        sceneName = currentScene.name,
-                                    )
-                                )
-                            },
-                            tooltipText = stringResource(Res.string.go_live)
-                        )
-                    }
-                }
-
-                // Aspect ratio mismatch warning
-                val presentationAssignment = appSettings.projectionSettings.getAssignment(0)
-                val presentationBounds = remember(presentationAssignment.targetDisplay, presentationAssignment.targetBoundsX, presentationAssignment.targetBoundsY) {
-                    assignedDisplayBounds(presentationAssignment)
-                }
-                val displayW = presentationBounds.width
-                val displayH = presentationBounds.height
-                val displayAr = if (displayH > 0) displayW.toFloat() / displayH else 0f
-                // A scene with two layouts is compared by the one this output would draw.
-                val usedLayout = currentScene.forArea(displayW.toFloat(), displayH.toFloat())
-                val usesAlternate = usedLayout !== currentScene
-                val sceneAr =
-                    if (usedLayout.canvasHeight > 0) usedLayout.canvasWidth.toFloat() / usedLayout.canvasHeight else 0f
-                if (displayAr > 0f && kotlin.math.abs(displayAr - sceneAr) > ASPECT_EPSILON) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.errorContainer, AppShape(4.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            stringResource(
-                                Res.string.canvas_aspect_ratio_warning,
-                                formatAspectRatio(usedLayout.canvasWidth, usedLayout.canvasHeight),
-                                formatAspectRatio(displayW, displayH)
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                        RaisedButton(
-                            onClick = {
-                                // The second layout is the main canvas turned sideways, so matching
-                                // it means setting the main canvas to the output turned sideways.
-                                if (usesAlternate) {
-                                    sceneViewModel.updateCanvasSize(displayH, displayW)
-                                } else {
-                                    sceneViewModel.updateCanvasSize(displayW, displayH)
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            modifier = Modifier.height(28.dp),
-                            shape = AppShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-                        ) {
-                            Text(stringResource(Res.string.canvas_fix_aspect_ratio), style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-
-                // Layers the canvas is clipping away, with one click to put them back inside.
-                val canvasLayouts = remember(currentScene) { currentScene.editorLayouts() }
-                val outsideLayers = currentScene.sources.filter { canvasLayouts.misplacements(it.id).isNotEmpty() }
-                if (outsideLayers.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp)
-                            .background(MaterialTheme.colorScheme.errorContainer, AppShape(4.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            if (outsideLayers.size == 1) {
-                                stringResource(Res.string.canvas_layers_outside_one)
-                            } else {
-                                stringResource(Res.string.canvas_layers_outside, outsideLayers.size)
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                        RaisedButton(
-                            onClick = {
-                                outsideLayers.forEach { layer ->
-                                    canvasLayouts.misplacements(layer.id).forEach { (layout, _) ->
-                                        val transform = layout.scene.sources.first { it.id == layer.id }.transform
-                                        sceneViewModel.updateTransform(
-                                            layer.id,
-                                            transform.broughtIntoView(),
-                                            alternate = layout.isAlternate,
-                                        )
-                                    }
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            modifier = Modifier.height(28.dp).testTag(CANVAS_BRING_INTO_VIEW_TAG),
-                            shape = AppShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-                        ) {
-                            Text(
-                                stringResource(Res.string.canvas_bring_into_view),
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    }
-                }
-
-                // Canvas preview -- padded all round, so a canvas bound by the height (portrait) or
-                // the width (ultra-wide) does not run into the edges of the area it sits in.
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (canvasLayouts.size == 1) {
-                        EditorCanvas(
-                            modifier = Modifier.fillMaxSize(),
-                            layout = canvasLayouts.single(),
-                            selectedSourceId = selectedSourceId,
-                            sceneViewModel = sceneViewModel,
-                            activeTool = activeTool,
-                            drawingStrokeColor = drawingStrokeColor,
-                            drawingFillColor = drawingFillColor,
-                            drawingStrokeWidth = drawingStrokeWidth,
-                        )
-                    } else {
-                        // Weighted by shape, so the two stand at the same height and both fit.
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            canvasLayouts.forEach { layout ->
-                                val shape = layout.scene.canvasWidth.toFloat() / layout.scene.canvasHeight
-                                Column(
-                                    modifier = Modifier.weight(shape).fillMaxHeight(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    val size = "${layout.scene.canvasWidth}×${layout.scene.canvasHeight}"
-                                    Text(
-                                        stringResource(
-                                            if (layout.scene.isLandscape) Res.string.canvas_layout_landscape
-                                            else Res.string.canvas_layout_portrait,
-                                            size,
-                                        ),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(bottom = 4.dp),
-                                    )
-                                    val tag = CANVAS_LAYOUT_TAG_PREFIX + if (layout.isAlternate) "alternate" else "main"
-                                    EditorCanvas(
-                                        modifier = Modifier.weight(1f).fillMaxWidth().testTag(tag),
-                                        layout = layout,
-                                        selectedSourceId = selectedSourceId,
-                                        sceneViewModel = sceneViewModel,
-                                        activeTool = activeTool,
-                                        drawingStrokeColor = drawingStrokeColor,
-                                        drawingFillColor = drawingFillColor,
-                                        drawingStrokeWidth = drawingStrokeWidth,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            stringResource(Res.string.canvas_no_scene_selected),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        RaisedButton(onClick = { sceneViewModel.addScene() }, shape = AppShape(8.dp)) {
-                            Text(stringResource(Res.string.canvas_create_scene))
-                        }
-                    }
-                }
-            }
-        }
-
-        // Draggable separator: center | right panel
-        DragHandle(onDragEnd = { saveRightPanel() }) { delta ->
-            rightPanelPx = (rightPanelPx - delta).coerceAtLeast(with(density) { 120.dp.toPx() })
-        }
-
-        // Right panel: Properties
-        Column(
-            modifier = Modifier
-                .width(with(density) { rightPanelPx.toDp() })
-                .fillMaxHeight()
-                .padding(end = 4.dp, top = 4.dp, bottom = 4.dp)
-                .bibleListCard()
-        ) {
-            if (selectedSource != null) {
-                SourcePropertiesPanel(
-                    source = selectedSource,
-                    modifier = Modifier.fillMaxSize(),
-                    appSettings = appSettings,
-                    cameraHost = cameraHost,
-                    onSourceUpdate = { updatedSource ->
-                        sceneViewModel.updateSource(updatedSource.id) { updatedSource }
-                    }
-                )
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        stringResource(Res.string.canvas_select_source),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            // Right panel: Properties
+            CanvasPropertiesPanel()
         }
     }
 }
@@ -1264,7 +171,7 @@ internal const val CANVAS_LAYOUT_TAG_PREFIX = "canvas_layout_"
  * drawn on either is added to the scene, where it starts at the drawn place in both.
  */
 @Composable
-private fun EditorCanvas(
+internal fun EditorCanvas(
     modifier: Modifier,
     layout: EditorLayout,
     selectedSourceId: String?,
@@ -1297,7 +204,7 @@ private fun EditorCanvas(
  * not named; with two, each line says which it is about.
  */
 @Composable
-private fun placementTexts(dual: Boolean): Map<Pair<Boolean, CanvasPlacement>, String> {
+internal fun placementTexts(dual: Boolean): Map<Pair<Boolean, CanvasPlacement>, String> {
     val outside = stringResource(Res.string.canvas_layer_outside)
     val partly = stringResource(Res.string.canvas_layer_partly_outside)
     val landscape = stringResource(Res.string.canvas_layout_landscape_short)
@@ -1316,7 +223,7 @@ private fun placementTexts(dual: Boolean): Map<Pair<Boolean, CanvasPlacement>, S
 
 /** Asks before a scene's second layout, and every position in it, is thrown away. */
 @Composable
-private fun SingleLayoutConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun SingleLayoutConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         text = {
