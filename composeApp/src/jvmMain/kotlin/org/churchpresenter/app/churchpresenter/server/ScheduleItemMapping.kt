@@ -21,14 +21,7 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
             )
         // Bible verse — must have bookName + chapter + verseNumber
         bookName != null && chapter != null && verseNumber != null ->
-            ScheduleItem.BibleVerseItem(
-                id          = safeId,
-                bookName    = bookName,
-                chapter     = chapter,
-                verseNumber = verseNumber,
-                verseText   = verseText ?: "",
-                verseRange  = verseRange ?: ""
-            )
+            bibleVerseItem(safeId, bookName, chapter, verseNumber)
         // Picture folder — must have folderPath
         folderPath != null ->
             ScheduleItem.PictureItem(
@@ -168,3 +161,15 @@ internal fun ScheduleItem.toDto(): ScheduleItemDto = when (this) {
         id = id, type = "ministry", displayText = displayText, text = detail
     )
 }
+
+/** The verse branch of [toScheduleItem], apart so its optional fields' defaults are read in one place. */
+private fun RemoteItemDto.bibleVerseItem(id: String, bookName: String, chapter: Int, verseNumber: Int) =
+    ScheduleItem.BibleVerseItem(
+        id          = id,
+        bookName    = bookName,
+        chapter     = chapter,
+        verseNumber = verseNumber,
+        verseText   = verseText ?: "",
+        verseRange  = verseRange ?: "",
+        bookId      = bookId ?: 0,
+    )

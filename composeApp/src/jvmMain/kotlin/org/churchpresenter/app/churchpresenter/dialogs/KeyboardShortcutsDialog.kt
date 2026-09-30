@@ -51,7 +51,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.ic_warning
-import churchpresenter.composeapp.generated.resources.keyboard_shortcuts_title
+import churchpresenter.composeapp.generated.resources.menu_keyboard_shortcuts
 import churchpresenter.composeapp.generated.resources.no_results_found
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.shortcut_category_mouse
@@ -153,7 +153,7 @@ fun KeyboardShortcutsDialog(
             width = DIALOG_WIDTH,
             height = DIALOG_HEIGHT
         ),
-        title = stringResource(Res.string.keyboard_shortcuts_title),
+        title = stringResource(Res.string.menu_keyboard_shortcuts),
         resizable = true
     ) {
         ProvideUiFontScale {

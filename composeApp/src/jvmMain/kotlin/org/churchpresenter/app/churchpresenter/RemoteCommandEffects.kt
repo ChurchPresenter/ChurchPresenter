@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.Flow
 
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -63,6 +64,7 @@ internal fun RemoteCommandEffects(
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
     remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
     uploadPresentationFlow: Flow<File>? = null,
+    statisticsManager: StatisticsManager? = null,
 ) {
     RemotePresentationEffects(
         presentationViewModel = presentationViewModel,
@@ -91,6 +93,7 @@ internal fun RemoteCommandEffects(
         bibleViewModel = bibleViewModel,
         presenterManager = presenterManager,
         selectBibleVerseFlow = selectBibleVerseFlow,
+        statisticsManager = statisticsManager,
     )
     RemoteTabSelectionEffects(
         onSongItemSelected = onSongItemSelected,
@@ -260,22 +263,33 @@ private fun RemotePictureEffects(
     }
 }
 
-/** A verse put on screen by a remote, and the reference logged as having gone live. */
+/**
+ * A verse put on screen by a remote, and the reference logged as having gone live.
+ *
+ * Each verse shown is recorded for the usage statistics and CCLI report, exactly as the Bible
+ * tab records its own go-lives — a verse a phone projects is just as much in front of the
+ * congregation. It is recorded under the translation that was shown: the phone's own when it
+ * sent its text, this machine's otherwise.
+ */
 @Composable
 private fun RemoteBibleEffects(
     appSettings: AppSettings,
     bibleViewModel: BibleViewModel,
     presenterManager: PresenterManager,
     selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
+    statisticsManager: StatisticsManager? = null,
 ) {
     LaunchedEffect(selectBibleVerseFlow) {
         selectBibleVerseFlow?.collect { req ->
             val primaryBible = bibleViewModel.primaryBible.value
 
-            // Resolve bookId from book name using the primary Bible's book list
-            val bookIndex = primaryBible?.getBooks()?.let { resolveBookIndex(it, req.bookName) } ?: -1
+            // By the canonical book number where the client sends one, else by name: a phone reading
+            // an Arabic Bible names the book in Arabic, which this machine's list cannot match.
+            val bookIndex = bibleViewModel.resolveBookIndex(req.bookName, req.bookId)
+            // This machine's own name for the book, so the lookup below works in any language.
+            val localBookName = bibleViewModel.books.value.getOrNull(bookIndex) ?: req.bookName
 
-            val resolved = bibleViewModel.getVersesForDisplay(req.bookName, req.chapter, req.verseNumber)
+            val resolved = bibleViewModel.getVersesForDisplay(localBookName, req.chapter, req.verseNumber)
             val verses = remoteSelectedVerses(
                 resolved = resolved,
                 request = req,
@@ -287,6 +301,11 @@ private fun RemoteBibleEffects(
             presenterManager.setSelectedVerses(verses)
             presenterManager.setPresentingMode(Presenting.BIBLE)
             presenterManager.setShowPresenterWindow(true)
+            verses.firstOrNull()?.let { shown ->
+                for (number in remoteVerseNumbers(req)) {
+                    statisticsManager?.recordVerseDisplay(shown.bibleName, shown.bookName, shown.chapter, number)
+                }
+            }
             if (bookIndex >= 0) {
                 // Capture the full span the client asked for: parse req.verseRange ("1-3", "2,4,5")
                 // and take its max as the end, rather than hardcoding null (which dropped the range).

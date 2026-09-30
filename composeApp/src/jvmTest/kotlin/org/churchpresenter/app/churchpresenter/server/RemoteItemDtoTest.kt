@@ -74,6 +74,40 @@ class RemoteItemDtoTest {
     }
 
     @Test
+    fun `a verse keeps the canonical book number the phone sent`() {
+        val item = assertIs<ScheduleItem.BibleVerseItem>(
+            parse("""{"bookName":"Второзаконие","chapter":25,"verseNumber":3,"bookId":5}"""),
+        )
+
+        assertEquals(
+            5, item.bookId,
+            "a Russian book name cannot be matched against an English Bible; the number can",
+        )
+    }
+
+    @Test
+    fun `a verse from a phone that sends no book number reads as unknown`() {
+        val item = assertIs<ScheduleItem.BibleVerseItem>(
+            parse("""{"bookName":"John","chapter":3,"verseNumber":16}"""),
+        )
+
+        assertEquals(0, item.bookId, "0 is the id meaning \"match by name\"")
+    }
+
+    @Test
+    fun `the phone's translation fields on a verse do not stop it being read`() {
+        val item = assertIs<ScheduleItem.BibleVerseItem>(
+            parse(
+                """{"bookName":"Исход","chapter":10,"verseNumber":3,"verseText":"Моисей и Аарон",""" +
+                    """"bibleName":"Russian Bible 2004","bibleAbbreviation":"RB","useClientText":true,"bookId":2}""",
+            ),
+        )
+
+        assertEquals(2, item.bookId)
+        assertEquals("Исход 10:3", item.displayText)
+    }
+
+    @Test
     fun `a picture folder is recognised by its path`() {
         val item = assertIs<ScheduleItem.PictureItem>(
             parse("""{"folderPath":"/pics/baptism","folderName":"Baptism","imageCount":24}"""),

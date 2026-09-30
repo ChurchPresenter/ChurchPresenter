@@ -166,11 +166,9 @@
     <string name="report_bug">Ripoti Hitilafu</string>
     <string name="submit_feature_request">Omba Kipengele</string>
     <string name="action_ok">Sawa</string>
-    <string name="menu_help_item">Msaada</string>
     <string name="menu_how_to_blog">Blogu ya Maelekezo</string>
     <string name="menu_check_for_updates">Angalia Masasisho…</string>
     <string name="menu_keyboard_shortcuts">Njia za Mkato za Kibodi</string>
-    <string name="keyboard_shortcuts_title">Njia za Mkato za Kibodi</string>
     <string name="shortcut_category_global">Kwa Ujumla</string>
     <string name="shortcut_category_bible">Kichupo cha Biblia</string>
     <string name="shortcut_category_songs">Kichupo cha Nyimbo</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Ongeza Faili kwenye Ratiba</string>
     <string name="tooltip_toggle_displays">Washa au Zima Maonyesho ya Mwasilishaji</string>
     <string name="tooltip_settings">Mipangilio</string>
-    <string name="tooltip_theme_light">Mandhari Mepesi</string>
     <string name="tooltip_theme_dark">Mandhari Meusi</string>
     <string name="tooltip_theme_system">Mandhari ya Mfumo</string>
     <string name="tooltip_remove">Ondoa</string>
@@ -1915,7 +1912,6 @@
     <string name="planning_center_disconnect">Tenganisha</string>
     <string name="planning_center_status_connected">Imeunganishwa kama %1$s</string>
     <string name="planning_center_status_connecting">Inaunganisha…</string>
-    <string name="planning_center_status_error">Hitilafu: %1$s</string>
     <string name="planning_center_import_title">Ingiza kutoka Planning Center</string>
     <string name="planning_center_import_service_type">Aina ya ibada</string>
     <string name="planning_center_import_select_plan">Chagua mpango</string>
@@ -1993,8 +1989,6 @@
     <string name="bible_preview_sample_verse">Kwa maana jinsi hii Mungu aliupenda ulimwengu, hata akamtoa Mwanawe pekee.</string>
     <string name="bible_preview_sample_book">Yohana</string>
     <string name="bible_preview_no_translations">Ongeza tafsiri ili kuiona hapa</string>
-    <string name="song_preview_full_screen">Onyesho la skrini nzima</string>
-    <string name="song_preview_lower_third">Onyesho la theluthi ya chini</string>
     <string name="song_element_number">Nambari</string>
     <string name="song_element_title">Kichwa</string>
     <string name="song_element_lyrics">Maneno ya Wimbo</string>
@@ -2255,7 +2249,6 @@
     <string name="ffmpeg_missing_help">Kamera na kadi za kunasa hufunguliwa kwa ffmpeg. Toleo hili linapaswa kuwa nayo — chagua ffmpeg hapa chini, au sakinisha ffmpeg kisha uangalie tena.</string>
     <string name="ffmpeg_path_hint">Chagua programu ya ffmpeg</string>
     <string name="ffmpeg_browse">Chagua ffmpeg</string>
-    <string name="ffmpeg_check_again">Angalia tena</string>
     <string name="ffmpeg_clear">Tumia iliyojumuishwa</string>
     <string name="ffmpeg_download_link">Pata ffmpeg</string>
     <string name="ffmpeg_path_help">Acha tupu ili kutumia ffmpeg iliyojumuishwa na ChurchPresenter.</string>
@@ -2356,8 +2349,6 @@
     <string name="preview_settings_show_modes">Onyesha aina ya uonyeshaji</string>
     <string name="song_add_translation">Ongeza lugha</string>
     <string name="song_fourth_language">Lugha 4</string>
-    <string name="song_language_fourth">Lugha 4</string>
-    <string name="song_language_third">Lugha 3</string>
     <string name="song_pane_translation">Lugha %1$d</string>
     <string name="song_third_language">Lugha 3</string>
     <string name="song_translation_label">Jina la lugha</string>

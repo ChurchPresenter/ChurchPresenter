@@ -113,6 +113,7 @@ internal fun MainDesktopScope.TrailingEffects() {
         remoteSelectPresentationFlow = flows.remoteSelectPresentationFlow,
         remoteSelectMediaFlow = flows.remoteSelectMediaFlow,
         uploadPresentationFlow = flows.uploadPresentationFlow,
+        statisticsManager = statisticsManager,
     )
 
     LaunchedEffect(state.selectedTabIndex) {

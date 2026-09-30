@@ -89,7 +89,7 @@ import churchpresenter.composeapp.generated.resources.planning_center_import_ser
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.planning_center_status_connected
 import churchpresenter.composeapp.generated.resources.planning_center_status_connecting
-import churchpresenter.composeapp.generated.resources.planning_center_status_error
+import churchpresenter.composeapp.generated.resources.atem_status_error
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
@@ -309,7 +309,7 @@ internal fun PlanningCenterConnectDialogContent(
                 Spacer(Modifier.height(12.dp))
                 connectionError?.let {
                     Text(
-                        stringResource(Res.string.planning_center_status_error, it),
+                        stringResource(Res.string.atem_status_error, it),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
