@@ -19,17 +19,23 @@ import org.churchpresenter.presentationengine.SlideRenderDegradation
 fun reportDegradedSlide(degradation: SlideRenderDegradation) {
     CrashReporter.reportWarning(
         "Presentation: a slide rendered with shapes left out",
-        tags = mapOf(
-            "subsystem" to "presentation",
-            "degraded.cause" to degradation.cause,
-            "degraded.origin" to degradation.failureOrigin,
-            "degraded.shapes" to degradation.skippedShapes.distinct().sorted().joinToString(","),
-        ),
-        extras = mapOf(
-            "slide.index" to degradation.slideIndex.toString(),
-            "shapes.total" to degradation.shapesTotal.toString(),
-            "shapes.skipped" to degradation.shapesSkipped.toString(),
-            "record.limit" to degradation.recordLimit,
-        ),
+        tags = degradedSlideTags(degradation),
+        extras = degradedSlideExtras(degradation),
     )
 }
+
+/** What the report is grouped by: which cap refused which kind of shape. */
+internal fun degradedSlideTags(degradation: SlideRenderDegradation): Map<String, String> = mapOf(
+    "subsystem" to "presentation",
+    "degraded.cause" to degradation.cause,
+    "degraded.origin" to degradation.failureOrigin,
+    "degraded.shapes" to degradation.skippedShapes.distinct().sorted().joinToString(","),
+)
+
+/** What varies per occurrence, and so is not a tag. */
+internal fun degradedSlideExtras(degradation: SlideRenderDegradation): Map<String, String> = mapOf(
+    "slide.index" to degradation.slideIndex.toString(),
+    "shapes.total" to degradation.shapesTotal.toString(),
+    "shapes.skipped" to degradation.shapesSkipped.toString(),
+    "record.limit" to degradation.recordLimit,
+)

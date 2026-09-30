@@ -5,8 +5,10 @@ import io.sentry.NoOpTransportFactory
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
+import io.sentry.protocol.Feedback
 import io.sentry.protocol.Message
 import io.sentry.protocol.SentryException
+import io.sentry.protocol.SentryId
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -80,6 +82,28 @@ class CrashReporterSentryTest {
         CrashReporter.sendUserFeedback("the lower third did not clear", name = "Sam", email = "sam@example.org")
 
         assertTrue(CrashReporter.isEnabled())
+    }
+
+    @Test
+    fun `feedback reaches Sentry with the comment, who sent it and the event it belongs to`() {
+        // Re-initialised with a hook that sees the feedback before the (no-op) transport does:
+        // sendUserFeedback swallows every exception, so only this proves the call still works.
+        val sent = mutableListOf<Feedback>()
+        Sentry.init { options ->
+            options.dsn = "https://key@localhost/1"
+            options.setTransportFactory(NoOpTransportFactory.getInstance())
+            options.isEnableUncaughtExceptionHandler = false
+            options.isEnableAutoSessionTracking = false
+            options.setBeforeSendFeedback { event, _ -> event.also { it.contexts.feedback?.let(sent::add) } }
+        }
+
+        CrashReporter.sendUserFeedback("the lower third did not clear", name = "Sam", email = "sam@example.org")
+
+        val feedback = sent.single()
+        assertEquals("the lower third did not clear", feedback.message)
+        assertEquals("Sam", feedback.name)
+        assertEquals("sam@example.org", feedback.contactEmail)
+        assertNotEquals(SentryId.EMPTY_ID, feedback.associatedEventId, "it must point at the event it explains")
     }
 
     @Test

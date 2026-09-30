@@ -89,7 +89,7 @@ private fun MatrixCellView(cell: MatrixCell, progress: Float, aspect: Float, mod
                 .border(1.dp, CellBorderColor, AppShape(4.dp))
                 .background(CellBackgroundColor)
         ) {
-            val composition by rememberLottieComposition(key = cell.json) {
+            val composition by rememberLottieComposition(cell.json) {
                 LottieCompositionSpec.JsonString(cell.json)
             }
             composition?.let {

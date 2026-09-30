@@ -59,7 +59,7 @@ under `band/` below.
 
 **The band template contract.** A band file is an ordinary Lottie plus what the player relies
 on: `markers` named `bg_in`, `text_in`, `hold`, `text_out`, `bg_out`; text layers named `Text1`,
-`Reference1`, `Text2`, `Reference2` with a wrap box (`sz`/`ps`) in their document; a hidden
+`Reference1`, `Text2`, `Reference2` with a wrap box (`sz`/`ps`) in their document — `ps.y` is the top of the text block, and the player applies the ascent the font list declares (`fonts.list[].ascent`) above the first baseline, as Compottie 2.3 does; a hidden
 `<Slot>Shadow` twin under each; `<Slot>Matte` and `Band*` shape layers; and a top-level `cp`
 object carrying `textAnimation` and `tickerPxPerSecond`. Fonts, sizes, colours, tracking and the
 strings themselves are replaced by the player from the Bible settings, so the `preview*` fields of

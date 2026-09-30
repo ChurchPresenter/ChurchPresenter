@@ -4,7 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.readBytes
+import io.ktor.client.statement.readRawBytes
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -223,7 +223,7 @@ class CompanionServerPresentationRenderTest {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        val bytes = runBlocking { response.readBytes() }
+        val bytes = runBlocking { response.readRawBytes() }
         assertTrue(bytes.size > 1_000, "a slide of ${bytes.size} bytes is not a rendered page")
         assertEquals(0xFF.toByte(), bytes[0], "JPEG magic byte 0")
         assertEquals(0xD8.toByte(), bytes[1], "JPEG magic byte 1")

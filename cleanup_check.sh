@@ -27,10 +27,9 @@ else
     echo "   ✅ PASS"
 fi
 
-# Count debug prints (word-boundaried so e.g. "getCaCertFingerprint(" doesn't match "print(" as a
-# substring; System.err.println is excluded — DEVELOPMENT_GUIDE.md's Decision Log keeps those
-# intentionally for VLC/JCEF/WebView/CompanionServer error diagnostics, they're not debug spam)
-PRINTS=$(grep -rE '\b(println|print)\(' --include='*.kt' composeApp/src/jvmMain/kotlin/ 2>/dev/null | grep -v 'System\.err\.println' | wc -l | tr -d ' ')
+# Count prints, System.err included: the app's diagnostics go through org.churchpresenter.diagnostics.Log.
+# Word-boundaried so e.g. "getCaCertFingerprint(" doesn't match "print(" as a substring.
+PRINTS=$(grep -rE '\b(println|print)\(' --include='*.kt' composeApp/src/jvmMain/kotlin/ 2>/dev/null | wc -l | tr -d ' ')
 echo "🐛 Debug print statements: $PRINTS"
 if [ "$PRINTS" -gt 0 ]; then
     echo "   ⚠️  WARN - Should be 0"

@@ -81,7 +81,7 @@ fun EditorPreview(
                 contentAlignment = Alignment.Center
             ) {
                 if (jsonString != null) {
-                    val composition by rememberLottieComposition(key = jsonString) {
+                    val composition by rememberLottieComposition(jsonString) {
                         LottieCompositionSpec.JsonString(jsonString)
                     }
                     val progress by animateLottieCompositionAsState(

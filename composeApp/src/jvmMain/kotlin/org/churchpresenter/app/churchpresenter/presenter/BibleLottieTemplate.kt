@@ -71,7 +71,13 @@ internal class BibleLottieTemplate(
     val slots: Map<String, LottieSlotBox>,
     val layerNames: Set<String>,
     val meta: BandTemplateMeta = BandTemplateMeta(),
+    /**
+     * Each text layer's declared font ascent, as a fraction of the em — see [readTextAscents]. A
+     * layer missing from it declares none, and is placed as if its ascent were 0.
+     */
+    val textAscents: Map<String, Float> = emptyMap(),
 ) {
+
     val frameRate: Float get() = size.frameRate
     val width: Float get() = size.width
     val height: Float get() = size.height
@@ -238,6 +244,7 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
             segments = readSegments(obj["markers"] as? JsonArray, size.totalFrames),
             slots = readSlots(meta, layers),
             layerNames = layers.mapNotNull { it["nm"]?.jsonPrimitive?.contentOrNull }.toSet(),
+            textAscents = readTextAscents(obj["fonts"] as? JsonObject, layers),
             meta = BandTemplateMeta(
                 textMotion = readTextMotion(meta),
                 tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,
