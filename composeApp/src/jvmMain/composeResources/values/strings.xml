@@ -2962,4 +2962,20 @@
     <string name="profile_pos_bottom_left">Bottom left</string>
     <string name="profile_pos_bottom_center">Bottom center</string>
     <string name="profile_pos_bottom_right">Bottom right</string>
+    <!-- Merged outputs (#721) -->
+    <string name="profile_merge_caption">Merged picture</string>
+    <string name="profile_merge_switch">Merge this profile's outputs into one picture</string>
+    <string name="profile_merge_sub">Outputs of one kind, such as two TVs of a video wall or two NDI feeds, show one picture between them</string>
+    <string name="profile_merge_unavailable">Needs two or more outputs of one kind following this profile</string>
+    <string name="profile_merge_result">One picture of %1$d × %2$d</string>
+    <string name="profile_merge_too_few">Pick at least two outputs.</string>
+    <string name="profile_merge_mixed">Only outputs of one kind can be merged.</string>
+    <string name="profile_merge_not_following">An output in the merge no longer follows this profile.</string>
+    <string name="profile_merge_not_rectangle">These displays don't form one rectangle. Arrange them edge to edge in your system's display settings, with no gap.</string>
+    <string name="profile_merge_mac_note">On macOS, turn off “Displays have separate Spaces” in System Settings → Desktop &amp; Dock, or a window cannot cover more than one display.</string>
+    <string name="profile_merge_tiled_note">Drag a tile, or type where it goes. Each output draws the whole picture and shows its own part; a website shows its latest snapshot.</string>
+    <string name="profile_merge_other_kind">Not in the merge: a different kind of output</string>
+    <string name="profile_merge_snap">Snap side by side</string>
+    <string name="preview_merged_label">(merged)</string>
+    <string name="projection_merged_by_profile">Overridden by %1$s profile</string>
 </resources>

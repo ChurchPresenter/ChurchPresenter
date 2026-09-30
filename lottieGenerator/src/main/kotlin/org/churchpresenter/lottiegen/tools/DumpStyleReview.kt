@@ -1,29 +1,13 @@
 package org.churchpresenter.lottiegen.tools
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.Density
-import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.rememberLottieComposition
-import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.churchpresenter.lottiegen.lottie.LottieGenerator
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import org.churchpresenter.lottiegen.model.StyleCatalog
+import org.churchpresenter.lottiegen.render.StillFrame
+import org.churchpresenter.lottiegen.render.StillFrame.CropRegion
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -42,9 +26,6 @@ object DumpStyleReview {
     private const val CANVAS_W = 1920
     private const val CANVAS_H = 1080
     private const val HOLD_PROGRESS = 0.6f
-    private const val COMPOSITION_LOAD_TIMEOUT_MS = 10_000L
-    private const val FRAME_INTERVAL_MS = 16L
-    private const val FRAME_NANOS = 16_666_667L
     private const val SAMPLE_DETAIL_TEXT = "First Baptist Church"
     private const val DEFAULT_OUT_DIR = "build/style-review"
     private val ALIGNS = listOf("left", "center", "right")
@@ -59,13 +40,8 @@ object DumpStyleReview {
     /** Gap between grid cells, and between the grid and the image edge. */
     private const val CELL_GAP_PX = 24
 
-    /** Where ARGB packs the alpha channel: `(argb ushr ALPHA_SHIFT_BITS) and ALPHA_MASK`. */
-    private const val ALPHA_SHIFT_BITS = 24
-    private const val ALPHA_MASK = 0xFF
 
-    private const val WHITE_ARGB = 0xFFFFFFFF.toInt()
 
-    internal data class CropRegion(val x0: Int, val y0: Int, val width: Int, val height: Int)
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -132,131 +108,25 @@ object DumpStyleReview {
         }
         val cellW = perAlignRegions.maxOf { it.width }
         val cellH = perAlignRegions.maxOf { it.height }
-        val regions = perAlignRegions.map { centeredRegion(it, cellW, cellH) }
+        val regions = perAlignRegions.map { StillFrame.centeredRegion(it, cellW, cellH) }
 
-        val croppedBefore = ALIGNS.indices.map { i -> cropRegion(beforePixels[i], CANVAS_W, CANVAS_H, regions[i]) }
-        val croppedAfter = ALIGNS.indices.map { i -> cropRegion(afterPixels[i], CANVAS_W, CANVAS_H, regions[i]) }
+        val croppedBefore = ALIGNS.indices.map { i ->
+            StillFrame.cropRegion(beforePixels[i], CANVAS_W, CANVAS_H, regions[i])
+        }
+        val croppedAfter = ALIGNS.indices.map { i ->
+            StillFrame.cropRegion(afterPixels[i], CANVAS_W, CANVAS_H, regions[i])
+        }
 
         return buildGrid(listOf(croppedBefore, croppedAfter), cellW, cellH)
     }
 
     private fun toJsonString(json: JsonObject): String = Json.encodeToString(JsonObject.serializer(), json)
 
-    /**
-     * Renders a single hold-frame still of [lottieJson] to ARGB pixels, using the same
-     * windowless-scene recipe as `LowerThirdOffscreenRenderer` in the main app: an
-     * `ImageComposeScene` pumped until the async Lottie parse completes, then one render
-     * at [HOLD_PROGRESS] so a settled frame (not the entrance animation) is what gets reviewed.
-     */
-    @OptIn(ExperimentalComposeUiApi::class)
-    private suspend fun renderStill(lottieJson: String): IntArray = withContext(Dispatchers.Default) {
-        var compositionLoaded by mutableStateOf(false)
+    private suspend fun renderStill(lottieJson: String): IntArray =
+        StillFrame.render(lottieJson, CANVAS_W, CANVAS_H, HOLD_PROGRESS)
 
-        val scene = ImageComposeScene(CANVAS_W, CANVAS_H, Density(1f)) {
-            val composition by rememberLottieComposition {
-                LottieCompositionSpec.JsonString(lottieJson.ifBlank { "{}" })
-            }
-            val loaded = composition != null
-            SideEffect { if (loaded) compositionLoaded = true }
-            Image(
-                painter = rememberLottiePainter(composition = composition, progress = { HOLD_PROGRESS }),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
-        try {
-            var timeNanos = 0L
-            val deadline = System.currentTimeMillis() + COMPOSITION_LOAD_TIMEOUT_MS
-            while (!compositionLoaded && System.currentTimeMillis() < deadline) {
-                timeNanos += FRAME_NANOS
-                scene.render(timeNanos).close()
-                delay(FRAME_INTERVAL_MS)
-            }
-            check(compositionLoaded) { "Lottie composition failed to load for off-screen rendering" }
-
-            timeNanos += FRAME_NANOS
-            val img = scene.render(timeNanos)
-            val pixels = IntArray(CANVAS_W * CANVAS_H)
-            try {
-                img.toComposeImageBitmap().readPixels(pixels)
-            } finally {
-                img.close()
-            }
-            pixels
-        } finally {
-            scene.close()
-        }
-    }
-
-    internal data class Bounds(val minX: Int, val minY: Int, val maxX: Int, val maxY: Int)
-
-    /** One frame's non-transparent bounds, or null when the frame is fully transparent. */
-    internal fun frameBounds(pixels: IntArray, width: Int, height: Int): Bounds? {
-        var minX = width
-        var minY = height
-        var maxX = -1
-        var maxY = -1
-        for (y in 0 until height) {
-            val rowBase = y * width
-            for (x in 0 until width) {
-                if ((pixels[rowBase + x] ushr ALPHA_SHIFT_BITS) and ALPHA_MASK == 0) continue
-                if (x < minX) minX = x
-                if (x > maxX) maxX = x
-                if (y < minY) minY = y
-                if (y > maxY) maxY = y
-            }
-        }
-        return if (maxX < minX || maxY < minY) null else Bounds(minX, minY, maxX, maxY)
-    }
-
-    /**
-     * The union of every frame's non-transparent bounds, padded — deliberately NOT clamped to
-     * the canvas. A left- or right-aligned badge sits flush against its margin, i.e. near the
-     * canvas edge, so clamping here made its crop touch the cell edge with no framing margin on
-     * that side while a center-aligned badge (nowhere near an edge) kept its full margin — the
-     * two looked inconsistent even though the actual padding inside each badge was the same.
-     * [cropRegion] fills whatever falls outside the real canvas with white, so every column gets
-     * the same visual frame regardless of alignment.
-     */
-    internal fun contentCropRegion(frames: List<IntArray>, width: Int, height: Int): CropRegion {
-        val bounds = frames.mapNotNull { frameBounds(it, width, height) }
-        if (bounds.isEmpty()) return CropRegion(0, 0, width, height)
-        val minX = bounds.minOf { it.minX }
-        val minY = bounds.minOf { it.minY }
-        val maxX = bounds.maxOf { it.maxX }
-        val maxY = bounds.maxOf { it.maxY }
-        val x0 = minX - CROP_PADDING_PX
-        val y0 = minY - CROP_PADDING_PX
-        val x1 = maxX + CROP_PADDING_PX
-        val y1 = maxY + CROP_PADDING_PX
-        return CropRegion(x0, y0, x1 - x0 + 1, y1 - y0 + 1)
-    }
-
-    /** Expands/repositions [base] to [targetW] x [targetH], centered on its own center. */
-    internal fun centeredRegion(base: CropRegion, targetW: Int, targetH: Int): CropRegion {
-        val centerX = base.x0 + base.width / 2
-        val centerY = base.y0 + base.height / 2
-        return CropRegion(centerX - targetW / 2, centerY - targetH / 2, targetW, targetH)
-    }
-
-    /** Copies [region] out of [pixels], filling anything outside the real canvas with white. */
-    internal fun cropRegion(pixels: IntArray, fullWidth: Int, fullHeight: Int, region: CropRegion): IntArray {
-        val out = IntArray(region.width * region.height) { WHITE_ARGB }
-        val srcXStart = region.x0.coerceAtLeast(0)
-        val srcXEnd = (region.x0 + region.width).coerceAtMost(fullWidth)
-        val srcYStart = region.y0.coerceAtLeast(0)
-        val srcYEnd = (region.y0 + region.height).coerceAtMost(fullHeight)
-        if (srcXStart >= srcXEnd || srcYStart >= srcYEnd) return out
-        val copyWidth = srcXEnd - srcXStart
-        val destXOffset = srcXStart - region.x0
-        for (srcY in srcYStart until srcYEnd) {
-            val destY = srcY - region.y0
-            System.arraycopy(pixels, srcY * fullWidth + srcXStart, out, destY * region.width + destXOffset, copyWidth)
-        }
-        return out
-    }
+    private fun contentCropRegion(frames: List<IntArray>, width: Int, height: Int): CropRegion =
+        StillFrame.contentCropRegion(frames, width, height, CROP_PADDING_PX)
 
     /** Arranges [rows] of same-size ARGB frames (each [cellW] x [cellH]) into a labeled grid. */
     /**

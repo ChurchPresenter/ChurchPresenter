@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.output_profile_blank
+import churchpresenter.composeapp.generated.resources.projection_merged_by_profile
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
@@ -37,7 +38,24 @@ internal fun OutputProfilePicker(
     activeProfileId: String?,
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier,
+    /** The profile merging this output into its picture, which then decides it -- see OutputMerge.kt. */
+    mergedBy: OutputProfile? = null,
 ) {
+    if (mergedBy != null) {
+        val note = stringResource(Res.string.projection_merged_by_profile, mergedBy.name.ifBlank { mergedBy.id })
+        HintTooltip(note) {
+            KeyButton(
+                shape = AppShape(6.dp),
+                onClick = {},
+                enabled = false,
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                modifier = modifier,
+            ) {
+                Text(note, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        return
+    }
     val active = profiles.find { it.id == activeProfileId }
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {

@@ -187,6 +187,10 @@ class LowerThirdSequencerKeyTest {
                     name = "AutoEnd", json = "{}", durationMs = 0L, pauseAtFrame = false, pauseDurationMs = 0L,
                     mixEffect = 1, keyer = 2, atem = atem(fake.port), autoEnd = true,
                 )
+                // `run` starts by stopping whatever came before, and that stop sends an onClear of
+                // its own -- so the first clear is not this sequence ending. Its end is the status
+                // going back to idle, which the sequencer sets before it sends the closing clear.
+                withTimeout(5_000) { LowerThirdSequencer.status.first { it == "idle" } }
                 withTimeout(5_000) { cleared.receive() }
                 collector.cancel()
             }

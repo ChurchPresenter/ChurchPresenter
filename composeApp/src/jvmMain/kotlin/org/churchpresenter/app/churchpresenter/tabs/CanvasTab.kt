@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.presenter.liveMerges
+import churchpresenter.composeapp.generated.resources.preview_merged_label
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
@@ -310,7 +312,16 @@ fun CanvasTab(
             // switched off or not yet resolved has no size and is left out.
             val assignments = appSettings.projectionSettings.screenAssignments
             val assignmentBounds = remember(assignments) { assignments.map { assignedDisplayBounds(it) } }
-            val canvasOutputs = assignments.zip(assignmentBounds).mapIndexedNotNull { index, (assignment, bounds) ->
+            // And every merged picture, at its whole size -- the size a scene for a video wall is built at.
+            val mergedLabel = stringResource(Res.string.preview_merged_label)
+            val mergedOutputs = remember(appSettings.projectionSettings) {
+                appSettings.projectionSettings.liveMerges().values.distinct()
+            }.map { merge ->
+                val name = appSettings.projectionSettings.outputProfiles
+                    .find { it.id == merge.profileId }?.name.orEmpty()
+                CanvasOutputSize(label = "$name $mergedLabel".trim(), width = merge.width, height = merge.height)
+            }
+            val canvasOutputs = mergedOutputs + assignments.zip(assignmentBounds).mapIndexedNotNull { index, (assignment, bounds) ->
                 if (assignment.targetDisplay == Constants.KEY_TARGET_NONE || bounds.width <= 0 || bounds.height <= 0) {
                     null
                 } else {

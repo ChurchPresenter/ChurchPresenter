@@ -50,6 +50,7 @@ fun materialize(master: OutputProfile, child: OutputProfile): OutputProfile {
         overrides = child.overrides,
         previewWidth = child.previewWidth,
         previewHeight = child.previewHeight,
+        merge = child.merge,
     )
 }
 

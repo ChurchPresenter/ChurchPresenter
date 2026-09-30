@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen
 
+import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.lottiegen.model.ColorTheme
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import org.churchpresenter.lottiegen.model.Preset
@@ -9,6 +10,12 @@ import java.io.File
 interface ConfigState {
     val config: LottieGenConfig
     val colorThemes: List<ColorTheme>
+
+    /** A picture of each style, by id, drawn with [config] -- the Style menu's thumbnails. */
+    val styleThumbnails: Map<String, ImageBitmap>
+
+    /** Draws [styleThumbnails] for the current [config], unless they already are. */
+    fun ensureStyleThumbnails()
 
     fun updateConfig(transform: (LottieGenConfig) -> LottieGenConfig)
     fun saveColorTheme()

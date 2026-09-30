@@ -68,8 +68,10 @@ fun ProjectionSettings.duplicateOutputProfile(id: String, newName: String): Proj
     val source = outputProfiles.find { it.id == id } ?: return this
     val fresh = newOutputProfile(outputProfiles, newName)
     // A standalone copy with the values the source draws with: a duplicate of a linked profile does
-    // not follow its master too.
-    return addOutputProfile(source.copy(id = fresh.id, name = newName, parentId = null, overrides = emptySet()))
+    // not follow its master too. No merge either: no output follows the copy yet.
+    return addOutputProfile(
+        source.copy(id = fresh.id, name = newName, parentId = null, overrides = emptySet(), merge = null),
+    )
 }
 
 /** How many outputs, across all four output lists, currently follow the profile at [id]. */

@@ -1,5 +1,17 @@
 package org.churchpresenter.lottiegen.ui
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -95,6 +107,41 @@ internal fun CanvasSection(viewModel: LottieGenState) {
 }
 
 
+private val MENU_THUMB_WIDTH = 104.dp
+private val MENU_THUMB_HEIGHT = 36.dp
+private val FIELD_THUMB_WIDTH = 56.dp
+private val FIELD_THUMB_HEIGHT = 20.dp
+private val THUMB_SHAPE = RoundedCornerShape(4.dp)
+private val STYLE_MENU_WIDTH = 340.dp
+
+/** On every drawn style thumbnail; a test waits for it. */
+const val LOWER_THIRD_STYLE_THUMBNAIL_TAG = "lowerThirdStyleThumbnail"
+
+/**
+ * One style's picture in the Style menu, fitted inside a fixed box on the preview's checkerboard
+ * colour so a white lower third still shows; an empty box until the picture has been drawn.
+ */
+@Composable
+private fun StyleThumbnail(picture: ImageBitmap?, width: Dp, height: Dp) {
+    Box(
+        Modifier
+            .size(width, height)
+            .clip(THUMB_SHAPE)
+            .background(Tokens.CanvasBg)
+            .border(1.dp, Tokens.FieldBorder, THUMB_SHAPE),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (picture != null) {
+            Image(
+                bitmap = picture,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize().padding(2.dp).testTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG),
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StyleLayoutSection(viewModel: LottieGenState) {
@@ -104,17 +151,32 @@ internal fun StyleLayoutSection(viewModel: LottieGenState) {
         FieldRow {
             var styleExpanded by remember { mutableStateOf(false) }
             ExposedDropdownMenuBox(styleExpanded, { styleExpanded = it }, Modifier.weight(1f)) {
+                // Built as soon as the section shows rather than when the menu opens, so the
+                // pictures are there by the time anyone looks; the key makes a repeat a no-op.
+                LaunchedEffect(cfg) { viewModel.ensureStyleThumbnails() }
+                val thumbnails = viewModel.styleThumbnails
                 LottieDropdown(
                     label = Strings.style,
                     value = StyleCatalog.labelFor(cfg.style),
                     expanded = styleExpanded,
                     modifier = Modifier.fillMaxWidth()
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                    leading = { StyleThumbnail(thumbnails[cfg.style], FIELD_THUMB_WIDTH, FIELD_THUMB_HEIGHT) },
                 )
-                ExposedDropdownMenu(styleExpanded, { styleExpanded = false }) {
+                // Wider than its field, which shares the row with Alignment: a thumbnail and the
+                // style's name side by side do not fit in half the panel.
+                ExposedDropdownMenu(
+                    expanded = styleExpanded,
+                    onDismissRequest = { styleExpanded = false },
+                    matchAnchorWidth = false,
+                    modifier = Modifier.width(STYLE_MENU_WIDTH),
+                ) {
                     ScrollingMenuItems(StyleCatalog.entries.size) {
                         StyleCatalog.entries.forEach { style ->
                             DropdownMenuItem(
+                                leadingIcon = {
+                                    StyleThumbnail(thumbnails[style.id], MENU_THUMB_WIDTH, MENU_THUMB_HEIGHT)
+                                },
                                 text = { Text(style.label) },
                                 onClick = {
                                     viewModel.updateConfig { it.copy(style = style.id) }

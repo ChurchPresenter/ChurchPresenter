@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
@@ -42,6 +43,8 @@ fun LottieDropdown(
     value: String,
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
+    /** Drawn before the label -- the Style field's thumbnail of the current style. */
+    leading: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -51,6 +54,10 @@ fun LottieDropdown(
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (leading != null) {
+            leading()
+            Spacer(Modifier.width(8.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = label.uppercase(),

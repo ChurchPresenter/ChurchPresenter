@@ -174,24 +174,28 @@ internal fun PresenterOutputContent(
                             }
                         }
 
-                        if (screenNumber != null && identifyingScreen) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.75f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.screen_number, screenNumber),
-                                    color = Color.White,
-                                    fontSize = 96.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
+                        if (screenNumber != null && identifyingScreen) IdentifyScreenOverlay(screenNumber)
                     }
                 }
             }
         }
+}
+
+/** The Identify button's "Screen N", over the whole of one output. */
+@Composable
+internal fun IdentifyScreenOverlay(screenNumber: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.75f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(Res.string.screen_number, screenNumber),
+            color = Color.White,
+            fontSize = 96.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+    }
 }

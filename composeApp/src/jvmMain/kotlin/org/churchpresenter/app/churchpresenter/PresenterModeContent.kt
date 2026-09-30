@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.presenter.LocalInMergedTile
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -214,7 +217,16 @@ internal fun PresenterModeContent(
                 )
 
         Presenting.WEBSITE ->
-            if (profile.showWebsite) WebsitePresenter(
+            if (profile.showWebsite && LocalInMergedTile.current) {
+                presenterManager.webSnapshot.value?.let { snapshot ->
+                    Image(
+                        bitmap = snapshot,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            } else if (profile.showWebsite) WebsitePresenter(
                 url = websiteUrl,
                 modifier = Modifier.fillMaxSize(),
                 onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },

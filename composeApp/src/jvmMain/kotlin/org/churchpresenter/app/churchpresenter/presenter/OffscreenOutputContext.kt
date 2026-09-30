@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.settings.utils.Constants
 import androidx.compose.runtime.State
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -41,8 +42,11 @@ data class OffscreenOutputContext(
 )
 
 /** The kinds of virtual output that render through [OffscreenOutputContent]. */
-enum class OffscreenOutputKind {
-    BROWSER_SOURCE,
-    NDI,
-    OMT,
+enum class OffscreenOutputKind(
+    /** The list this kind's outputs are stored in, as an output key names it -- `ndi:0`. */
+    val previewKind: String,
+) {
+    BROWSER_SOURCE(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE),
+    NDI(Constants.PREVIEW_OUTPUT_NDI),
+    OMT(Constants.PREVIEW_OUTPUT_OMT),
 }

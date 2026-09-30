@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.tools
 
+import org.churchpresenter.lottiegen.render.StillFrame
 import java.awt.Color
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,6 +18,7 @@ class DumpStyleReviewTest {
     private companion object {
         const val TRANSPARENT = 0
         const val OPAQUE_BLACK = -0x1000000 // 0xFF000000
+        const val CROP_PADDING = 40
     }
 
     // ------------------------------------------------------- safeLabel
@@ -33,7 +35,7 @@ class DumpStyleReviewTest {
     @Test
     fun frameBoundsIsNullForAFullyTransparentFrame() {
         val pixels = IntArray(10 * 10) { TRANSPARENT }
-        assertNull(DumpStyleReview.frameBounds(pixels, 10, 10))
+        assertNull(StillFrame.frameBounds(pixels, 10, 10))
     }
 
     @Test
@@ -42,8 +44,8 @@ class DumpStyleReviewTest {
         val height = 10
         val pixels = IntArray(width * height) { TRANSPARENT }
         pixels[3 * width + 7] = OPAQUE_BLACK
-        val bounds = DumpStyleReview.frameBounds(pixels, width, height)
-        assertEquals(DumpStyleReview.Bounds(7, 3, 7, 3), bounds)
+        val bounds = StillFrame.frameBounds(pixels, width, height)
+        assertEquals(StillFrame.Bounds(7, 3, 7, 3), bounds)
     }
 
     @Test
@@ -56,8 +58,8 @@ class DumpStyleReviewTest {
                 pixels[y * width + x] = OPAQUE_BLACK
             }
         }
-        val bounds = DumpStyleReview.frameBounds(pixels, width, height)
-        assertEquals(DumpStyleReview.Bounds(2, 4, 6, 8), bounds)
+        val bounds = StillFrame.frameBounds(pixels, width, height)
+        assertEquals(StillFrame.Bounds(2, 4, 6, 8), bounds)
     }
 
     // ------------------------------------------------------- contentCropRegion
@@ -65,8 +67,8 @@ class DumpStyleReviewTest {
     @Test
     fun contentCropRegionFallsBackToTheFullCanvasWhenEveryFrameIsBlank() {
         val blank = IntArray(10 * 10) { TRANSPARENT }
-        val region = DumpStyleReview.contentCropRegion(listOf(blank), 10, 10)
-        assertEquals(DumpStyleReview.CropRegion(0, 0, 10, 10), region)
+        val region = StillFrame.contentCropRegion(listOf(blank), 10, 10, CROP_PADDING)
+        assertEquals(StillFrame.CropRegion(0, 0, 10, 10), region)
     }
 
     @Test
@@ -76,7 +78,7 @@ class DumpStyleReviewTest {
         val frameA = IntArray(width * height) { TRANSPARENT }.also { it[10 * width + 10] = OPAQUE_BLACK }
         val frameB = IntArray(width * height) { TRANSPARENT }.also { it[20 * width + 30] = OPAQUE_BLACK }
 
-        val region = DumpStyleReview.contentCropRegion(listOf(frameA, frameB), width, height)
+        val region = StillFrame.contentCropRegion(listOf(frameA, frameB), width, height, CROP_PADDING)
 
         // Union bbox is x:[10,30] y:[10,20]; the crop pads by a fixed margin on every side and,
         // per the regression this session found, must NOT clamp that padding to the canvas edges.
@@ -92,10 +94,10 @@ class DumpStyleReviewTest {
 
     @Test
     fun centeredRegionExpandsSymmetricallyAroundTheBasesOwnCenter() {
-        val base = DumpStyleReview.CropRegion(x0 = 10, y0 = 20, width = 10, height = 10)
+        val base = StillFrame.CropRegion(x0 = 10, y0 = 20, width = 10, height = 10)
         // base center is (15, 25)
-        val expanded = DumpStyleReview.centeredRegion(base, targetW = 20, targetH = 20)
-        assertEquals(DumpStyleReview.CropRegion(5, 15, 20, 20), expanded)
+        val expanded = StillFrame.centeredRegion(base, targetW = 20, targetH = 20)
+        assertEquals(StillFrame.CropRegion(5, 15, 20, 20), expanded)
     }
 
     // ------------------------------------------------------- cropRegion
@@ -105,9 +107,9 @@ class DumpStyleReviewTest {
         val width = 5
         val height = 5
         val pixels = IntArray(width * height) { i -> i } // distinct marker values
-        val region = DumpStyleReview.CropRegion(1, 1, 2, 2)
+        val region = StillFrame.CropRegion(1, 1, 2, 2)
 
-        val out = DumpStyleReview.cropRegion(pixels, width, height, region)
+        val out = StillFrame.cropRegion(pixels, width, height, region)
 
         assertEquals(pixels[1 * width + 1], out[0])
         assertEquals(pixels[1 * width + 2], out[1])
@@ -121,9 +123,9 @@ class DumpStyleReviewTest {
         val height = 4
         val pixels = IntArray(width * height) { OPAQUE_BLACK }
         // Region starts one pixel left of the canvas and extends past its right/bottom edge.
-        val region = DumpStyleReview.CropRegion(-1, -1, 6, 6)
+        val region = StillFrame.CropRegion(-1, -1, 6, 6)
 
-        val out = DumpStyleReview.cropRegion(pixels, width, height, region)
+        val out = StillFrame.cropRegion(pixels, width, height, region)
 
         val white = 0xFFFFFFFF.toInt()
         // Top-left corner of the output is off-canvas -> white.

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.settings.mergingProfileOf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -273,6 +274,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         OutputProfilePicker(
                             profiles = proj.outputProfiles,
                             activeProfileId = output.activeProfileId,
+                            mergedBy = proj.outputProfiles.mergingProfileOf(
+                                Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i),
+                                output.activeProfileId,
+                            ),
                             onPick = { pickedId ->
                                 onSettingsChange { s ->
                                     s.copy(
