@@ -4,6 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -18,7 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The low-level `Modifier.pointerInput`-based click handlers that stand in for
+ * The low-level pointer-input click handlers that stand in for
  * `Modifier.clickable`/`combinedClickable` where a specific [androidx.compose.ui.input.pointer.PointerEventPass]
  * is required: [initialPassClickable]/[initialPassCombinedClickable] fire before a child's Main-pass
  * gesture can consume the event; [finalPassClickable]/[finalPassCombinedClickable] fire only when no
@@ -253,5 +256,56 @@ class ClickModifiersTest {
         onNodeWithTag("box").performClick()
         onNodeWithTag("box").performClick()
         assertEquals(2, clickCount, "without a double-click handler, every click must still invoke onClick")
+    }
+
+    // ── A caller's new lambdas ─────────────────────────────────────────────────────────────────
+
+    /**
+     * The first click recomposes the caller, which hands the modifier new lambdas before the second
+     * click lands -- what a row does when selecting it changes the screen around it. The pending
+     * first click must survive that, or the double-click reads as two singles.
+     */
+    @Test
+    fun `finalPassCombinedClickable keeps a double-click across new lambdas`() = runComposeUiTest {
+        var clicks by mutableStateOf(0)
+        var doubleCount = 0
+        setContent {
+            MaterialTheme {
+                val seen = clicks
+                Box(
+                    Modifier.testTag("box").size(50.dp).finalPassCombinedClickable(
+                        onClick = { clicks = seen + 1 },
+                        onDoubleClick = { doubleCount++ },
+                    )
+                )
+            }
+        }
+        onNodeWithTag("box").performClick()
+        waitForIdle()
+        onNodeWithTag("box").performClick()
+        assertEquals(1, clicks, "only the first click is a plain click")
+        assertEquals(1, doubleCount, "the second click must still complete the double-click")
+    }
+
+    @Test
+    fun `initialPassCombinedClickable keeps a double-click across new lambdas`() = runComposeUiTest {
+        var clicks by mutableStateOf(0)
+        var doubleCount = 0
+        setContent {
+            MaterialTheme {
+                val seen = clicks
+                Box(
+                    Modifier.testTag("box").size(50.dp).initialPassCombinedClickable(
+                        onClick = { clicks = seen + 1 },
+                        onDoubleClick = { doubleCount++ },
+                    )
+                )
+            }
+        }
+        onNodeWithTag("box").performClick()
+        waitForIdle()
+        onNodeWithTag("box").performClick()
+        assertEquals(1, clicks, "only the first click is a plain click")
+        assertEquals(1, doubleCount, "the second click must still complete the double-click")
     }
 }
