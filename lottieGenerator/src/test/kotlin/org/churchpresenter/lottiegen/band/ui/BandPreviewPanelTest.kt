@@ -37,6 +37,11 @@ class BandPreviewPanelTest {
     @Test
     fun `the band preview draws the playing band`() {
         val vm = BibleLottieGenViewModel(scope, null, null, BibleLottieGenConfig(bgColor = "#FF0000", bgAlpha = 100))
+        val deadline = System.currentTimeMillis() + 5_000
+        while (vm.generatedJson == null) {
+            check(System.currentTimeMillis() < deadline) { "timed out waiting for the band's JSON: ${vm.statusText}" }
+            Thread.onSpinWait()
+        }
         LottiePreviewProbe.run({ BandPreviewPanel(vm) }) {
             assertTrue(redPixels() < LottiePreviewProbe.DRAWN, "red before the composition loaded")
             pumpUntil("the band drawn") { it >= LottiePreviewProbe.DRAWN }
