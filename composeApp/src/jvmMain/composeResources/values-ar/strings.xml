@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">لون المرجع</string>
     <string name="canvas_verse_style">نمط الآية</string>
     <string name="canvas_reference_style">نمط المرجع</string>
-    <string name="canvas_text_color">لون النص</string>
     <string name="canvas_text_bg_color">لون الخلفية</string>
     <string name="canvas_clock_mode">الوضع</string>
     <string name="canvas_clock_format">التنسيق</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">أين يبحث Church Presenter عن المحتوى الخاص بك</string>
     <string name="system_storage_linked_count">%1$d مرتبط</string>
     <string name="system_storage_needs_attention_count">%1$d يحتاج إلى انتباه</string>
-    <string name="system_storage_status_not_set">غير محدد</string>
     <string name="system_storage_status_not_found">لم يتم العثور على المجلد</string>
     <string name="system_storage_status_read_only">للقراءة فقط</string>
     <string name="system_storage_status_linked">مرتبط</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">شفافة</string>
     <string name="customize_type_default">افتراضية</string>
     <string name="customize_type_gradient">تدرّج لوني</string>
-    <string name="customize_show_abbreviation">الاختصار</string>
     <string name="customize_background_opacity">العتامة</string>
     <string name="slate_theme">سمة الأردواز</string>
     <string name="sand_theme">سمة الرمل</string>

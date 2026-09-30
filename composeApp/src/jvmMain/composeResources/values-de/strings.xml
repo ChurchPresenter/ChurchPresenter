@@ -889,7 +889,6 @@
     <string name="system_storage_subtitle">Wo Church Presenter nach Ihren Inhalten sucht</string>
     <string name="system_storage_linked_count">%1$d verknüpft</string>
     <string name="system_storage_needs_attention_count">%1$d benötigen Aufmerksamkeit</string>
-    <string name="system_storage_status_not_set">Nicht festgelegt</string>
     <string name="system_storage_status_not_found">Ordner nicht gefunden</string>
     <string name="system_storage_status_read_only">Schreibgeschützt</string>
     <string name="system_storage_status_linked">Verknüpft</string>
@@ -978,7 +977,6 @@
     <string name="canvas_source_qrcode">QR-Code</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Bildschirmaufnahme</string>
-    <string name="canvas_text_color">Textfarbe</string>
     <string name="canvas_text_bg_color">Hintergrundfarbe</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Format</string>
@@ -2060,7 +2058,6 @@
     <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Verlauf</string>
-    <string name="customize_show_abbreviation">Abkürzung</string>
     <string name="customize_background_opacity">Deckkraft</string>
     <string name="slate_theme">Schiefer-Design</string>
     <string name="sand_theme">Sand-Design</string>

@@ -145,7 +145,7 @@ import org.churchpresenter.theme.raisedHover
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import churchpresenter.composeapp.generated.resources.song_search_match_lyrics
-import churchpresenter.composeapp.generated.resources.song_search_match_translation
+import churchpresenter.composeapp.generated.resources.bible_translation
 import org.churchpresenter.app.churchpresenter.utils.highlightedText
 import org.churchpresenter.app.churchpresenter.viewmodel.SongMatchKind
 import org.churchpresenter.app.churchpresenter.viewmodel.SongSearchMatch
@@ -1135,7 +1135,7 @@ private fun SongMatchLine(match: SongSearchMatch, query: String, indent: Dp) {
     val language = when {
         match.languageIndex == 0 -> null
         match.languageLabel.isNotBlank() -> match.languageLabel
-        else -> stringResource(Res.string.song_search_match_translation, match.languageIndex + 1)
+        else -> stringResource(Res.string.bible_translation, match.languageIndex + 1)
     }
     Row(
         modifier = Modifier.padding(start = indent + 8.dp, end = 8.dp, top = 3.dp),

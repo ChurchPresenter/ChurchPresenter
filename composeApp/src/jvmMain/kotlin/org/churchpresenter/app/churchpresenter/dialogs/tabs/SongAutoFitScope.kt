@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.auto_fit_scope
 import churchpresenter.composeapp.generated.resources.auto_fit_scope_slide
-import churchpresenter.composeapp.generated.resources.auto_fit_scope_song
+import churchpresenter.composeapp.generated.resources.song_background_whole_song
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.SongSettings
@@ -40,7 +40,7 @@ internal fun AutoFitScopeControl(eachSlide: Boolean, onEachSlideChange: (Boolean
     ControlColumn(stringResource(Res.string.auto_fit_scope), labelInsideControl = true) {
         SegmentedButton(
             items = listOf(
-                SegmentedButtonItem(false, stringResource(Res.string.auto_fit_scope_song)),
+                SegmentedButtonItem(false, stringResource(Res.string.song_background_whole_song)),
                 SegmentedButtonItem(true, stringResource(Res.string.auto_fit_scope_slide)),
             ),
             selectedValue = eachSlide,

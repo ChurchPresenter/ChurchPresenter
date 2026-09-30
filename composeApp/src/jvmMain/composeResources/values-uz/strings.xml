@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">Havola rangi</string>
     <string name="canvas_verse_style">Oyat uslubi</string>
     <string name="canvas_reference_style">Havola uslubi</string>
-    <string name="canvas_text_color">Matn rangi</string>
     <string name="canvas_text_bg_color">Fon rangi</string>
     <string name="canvas_clock_mode">Rejim</string>
     <string name="canvas_clock_format">Format</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter kontentingizni qayerdan qidiradi</string>
     <string name="system_storage_linked_count">%1$d ulangan</string>
     <string name="system_storage_needs_attention_count">%1$d e'tibor talab qiladi</string>
-    <string name="system_storage_status_not_set">Belgilanmagan</string>
     <string name="system_storage_status_not_found">Papka topilmadi</string>
     <string name="system_storage_status_read_only">Faqat o'qish</string>
     <string name="system_storage_status_linked">Ulangan</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">Shaffof</string>
     <string name="customize_type_default">Standart</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_show_abbreviation">Qisqartma</string>
     <string name="customize_background_opacity">Shaffofligi</string>
     <string name="slate_theme">«Slanets» mavzusi</string>
     <string name="sand_theme">«Qum» mavzusi</string>

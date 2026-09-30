@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">Warna Referensi</string>
     <string name="canvas_verse_style">Gaya Ayat</string>
     <string name="canvas_reference_style">Gaya Referensi</string>
-    <string name="canvas_text_color">Warna Teks</string>
     <string name="canvas_text_bg_color">Warna Latar Belakang</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Tempat Church Presenter mencari konten Anda</string>
     <string name="system_storage_linked_count">%1$d tertaut</string>
     <string name="system_storage_needs_attention_count">%1$d perlu perhatian</string>
-    <string name="system_storage_status_not_set">Belum diatur</string>
     <string name="system_storage_status_not_found">Folder tidak ditemukan</string>
     <string name="system_storage_status_read_only">Hanya baca</string>
     <string name="system_storage_status_linked">Tertaut</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">Transparan</string>
     <string name="customize_type_default">Bawaan</string>
     <string name="customize_type_gradient">Gradien</string>
-    <string name="customize_show_abbreviation">Singkatan</string>
     <string name="customize_background_opacity">Opasitas</string>
     <string name="slate_theme">Tema Batu Tulis</string>
     <string name="sand_theme">Tema Pasir</string>

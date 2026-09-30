@@ -149,7 +149,7 @@ import churchpresenter.composeapp.generated.resources.canvas_layer_outside
 import churchpresenter.composeapp.generated.resources.canvas_layer_partly_outside
 import churchpresenter.composeapp.generated.resources.canvas_layers_outside
 import churchpresenter.composeapp.generated.resources.canvas_layers_outside_one
-import churchpresenter.composeapp.generated.resources.canvas_duplicate_scene
+import churchpresenter.composeapp.generated.resources.output_profile_duplicate
 import churchpresenter.composeapp.generated.resources.canvas_scene_copy_name
 import churchpresenter.composeapp.generated.resources.canvas_add_source
 import churchpresenter.composeapp.generated.resources.canvas_delete_source
@@ -429,7 +429,7 @@ fun CanvasTab(
                                 tooltip = {
                                     Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                                         Text(
-                                            stringResource(Res.string.canvas_duplicate_scene),
+                                            stringResource(Res.string.output_profile_duplicate),
                                             color = MaterialTheme.colorScheme.inverseOnSurface,
                                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                             style = MaterialTheme.typography.bodySmall
@@ -444,7 +444,7 @@ fun CanvasTab(
                                 ) {
                                     Icon(
                                         painterResource(Res.drawable.ic_copy),
-                                        contentDescription = stringResource(Res.string.canvas_duplicate_scene),
+                                        contentDescription = stringResource(Res.string.output_profile_duplicate),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

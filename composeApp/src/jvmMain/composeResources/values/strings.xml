@@ -372,7 +372,6 @@
     <string name="custom_theme">Custom Theme</string>
     <string name="menu_customize_theme">Customize Theme…</string>
     <string name="customize_theme_title">Customize Theme</string>
-    <string name="customize_theme_colors">Colors</string>
     <string name="customize_theme_use_custom_colors">Use custom colors</string>
     <string name="customize_theme_use_custom_colors_hint">Off keeps the current theme's colors and applies only the font and text size.</string>
     <string name="customize_theme_accent">Accent color</string>
@@ -404,7 +403,6 @@
     <string name="customize_theme_selection">Selection</string>
     <string name="customize_theme_success">Success</string>
     <string name="customize_theme_warning">Warning</string>
-    <string name="customize_theme_error">Error</string>
     <string name="customize_theme_auto">Auto</string>
     <string name="customize_theme_reset_color">Reset to auto</string>
     <string name="customize_theme_more_colors_hint">Colors left on Auto are worked out from the accent.</string>
@@ -899,7 +897,6 @@
     <string name="element_offset_x">X %</string>
     <string name="element_offset_y">Y %</string>
     <string name="auto_fit_scope">Auto fits</string>
-    <string name="auto_fit_scope_song">Whole song</string>
     <string name="auto_fit_scope_slide">Each slide</string>
     <string name="screen">Screen</string>
     <string name="projection_position_help">Position values represent pixel offsets from screen edges. Use these to adjust projection window placement on secondary displays.</string>
@@ -1001,7 +998,6 @@
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_type_lottie">Lottie</string>
     <string name="percent_suffix">%</string>
-    <string name="customize_show_abbreviation">Abbreviation</string>
     <string name="customize_background_opacity">Opacity</string>
     <string name="content_bible_translations_all">All</string>
 
@@ -1367,7 +1363,6 @@
     <string name="canvas_shape_fill_color">Fill</string>
     <string name="canvas_shape_stroke_width">Stroke Width</string>
     <string name="canvas_rename_scene">Rename</string>
-    <string name="canvas_duplicate_scene">Duplicate</string>
     <string name="canvas_scene_copy_name">%1$s (copy)</string>
     <string name="canvas_size">Canvas size</string>
     <string name="canvas_size_tooltip">Canvas size (%1$s)</string>
@@ -1460,7 +1455,6 @@
     <string name="canvas_bible_ref_color">Reference Color</string>
     <string name="canvas_verse_style">Verse Style</string>
     <string name="canvas_reference_style">Reference Style</string>
-    <string name="canvas_text_color">Text Color</string>
     <string name="canvas_text_bg_color">Background Color</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
@@ -1871,7 +1865,6 @@
     <string name="system_storage_subtitle">Where Church Presenter looks for your content</string>
     <string name="system_storage_linked_count">%1$d linked</string>
     <string name="system_storage_needs_attention_count">%1$d need attention</string>
-    <string name="system_storage_status_not_set">Not set</string>
     <string name="system_storage_status_not_found">Folder not found</string>
     <string name="system_storage_status_read_only">Read only</string>
     <string name="system_storage_status_linked">Linked</string>
@@ -2558,7 +2551,6 @@
     <string name="song_background_video_loop">video loop</string>
     <string name="song_background_camera_live">live camera</string>
     <string name="song_search_match_lyrics">Lyrics</string>
-    <string name="song_search_match_translation">Translation %1$d</string>
     <string name="unit_px">px</string>
     <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
     <string name="quick_background_reset">Back to normal</string>
@@ -2708,13 +2700,11 @@
     <string name="profile_text_autofit_sub">Shrinks long text to fit. Size becomes the maximum.</string>
     <string name="profile_text_color">Color</string>
     <string name="profile_text_chord_color">Chord color</string>
-    <string name="profile_text_style">Style</string>
     <string name="profile_text_alignment">Alignment</string>
     <string name="profile_text_letter_case">Letter case</string>
     <string name="profile_text_as_typed">As typed</string>
     <string name="profile_text_outline">Outline</string>
     <string name="profile_text_highlight">Highlight behind text</string>
-    <string name="profile_text_shadow">Shadow</string>
     <string name="profile_group_background">Background</string>
     <string name="profile_bg_row">Background</string>
     <string name="profile_bg_profile_default">Profile default</string>
@@ -2757,9 +2747,7 @@
     <string name="profile_band_source">Uses</string>
     <string name="profile_layout_side_by_side">Side by side</string>
     <string name="profile_layout_stacked">Stacked</string>
-    <string name="profile_applies_to">Applies to</string>
     <string name="profile_group_text">Text</string>
-    <string name="profile_group_translations">Translations</string>
     <string name="profile_group_languages">Languages</string>
     <string name="profile_layout">Layout</string>
     <string name="profile_region_moves_background">Background follows Content Region</string>
@@ -2803,7 +2791,6 @@
     <string name="profile_box_y">Y</string>
     <string name="profile_box_width">Width</string>
     <string name="profile_box_height">Height</string>
-    <string name="profile_box_size">Text size</string>
     <string name="profile_box_size_up_to">Up to Size</string>
     <string name="profile_box_size_fill">Fill the box</string>
     <string name="profile_box_area">Boxes placed on</string>
@@ -2869,7 +2856,6 @@
     <string name="profile_banner_master_rest">Changes here apply to them too, unless they have changed that setting.</string>
     <string name="profile_banner_unlinked_lead">Unlinked from %1$s.</string>
     <string name="profile_banner_unlinked_rest">All values were kept. Changes to %1$s no longer apply.</string>
-    <string name="profile_undo">Undo</string>
     <string name="profile_inherited_tooltip">From %1$s. Change it to set it for %2$s only.</string>
     <string name="profile_master_value">%1$s: %2$s</string>
     <string name="profile_defaults">defaults</string>
@@ -2930,7 +2916,6 @@
     <string name="profile_caption_mode">Captions show</string>
     <string name="profile_caption_transcription">Transcription</string>
     <string name="profile_caption_translation">Translation</string>
-    <string name="profile_caption_both">Both</string>
     <string name="profile_caption_layout">Layout</string>
     <string name="profile_caption_layout_stacked">Stacked</string>
     <string name="profile_caption_layout_stacked_inverse">Stacked, translation first</string>

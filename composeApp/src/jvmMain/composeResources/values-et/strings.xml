@@ -891,7 +891,6 @@
     <string name="canvas_bible_ref_color">Viite värv</string>
     <string name="canvas_verse_style">Salmi stiil</string>
     <string name="canvas_reference_style">Viite stiil</string>
-    <string name="canvas_text_color">Teksti värv</string>
     <string name="canvas_text_bg_color">Taustavärv</string>
     <string name="canvas_clock_mode">Režiim</string>
     <string name="canvas_clock_format">Vorming</string>
@@ -1178,7 +1177,6 @@
     <string name="system_storage_subtitle">Kust Church Presenter sinu sisu otsib</string>
     <string name="system_storage_linked_count">%1$d ühendatud</string>
     <string name="system_storage_needs_attention_count">%1$d vajab tähelepanu</string>
-    <string name="system_storage_status_not_set">Määramata</string>
     <string name="system_storage_status_not_found">Kausta ei leitud</string>
     <string name="system_storage_status_read_only">Ainult lugemiseks</string>
     <string name="system_storage_status_linked">Ühendatud</string>
@@ -2092,7 +2090,6 @@
     <string name="customize_type_transparent">Läbipaistev</string>
     <string name="customize_type_default">Vaikimisi</string>
     <string name="customize_type_gradient">Üleminek</string>
-    <string name="customize_show_abbreviation">Lühend</string>
     <string name="customize_background_opacity">Läbipaistmatus</string>
     <string name="slate_theme">Kiltkivi teema</string>
     <string name="sand_theme">Liiva teema</string>

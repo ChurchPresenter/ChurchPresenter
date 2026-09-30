@@ -808,7 +808,6 @@
     <string name="canvas_bible_end_verse">Verset de fin</string>
     <string name="canvas_bible_ref_font_size">Taille de police de la référence</string>
     <string name="canvas_bible_ref_color">Couleur de la référence</string>
-    <string name="canvas_text_color">Couleur du texte</string>
     <string name="canvas_text_bg_color">Couleur d'arrière-plan</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
@@ -1094,7 +1093,6 @@
     <string name="system_storage_subtitle">Où Church Presenter cherche votre contenu</string>
     <string name="system_storage_linked_count">%1$d liés</string>
     <string name="system_storage_needs_attention_count">%1$d à vérifier</string>
-    <string name="system_storage_status_not_set">Non défini</string>
     <string name="system_storage_status_not_found">Dossier introuvable</string>
     <string name="system_storage_status_read_only">Lecture seule</string>
     <string name="system_storage_status_linked">Lié</string>
@@ -2087,7 +2085,6 @@
     <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Par défaut</string>
     <string name="customize_type_gradient">Dégradé</string>
-    <string name="customize_show_abbreviation">Abréviation</string>
     <string name="customize_background_opacity">Opacité</string>
     <string name="slate_theme">Thème Ardoise</string>
     <string name="sand_theme">Thème Sable</string>

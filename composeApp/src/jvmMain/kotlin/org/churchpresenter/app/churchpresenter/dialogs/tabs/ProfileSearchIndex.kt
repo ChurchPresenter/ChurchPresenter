@@ -21,7 +21,7 @@ import churchpresenter.composeapp.generated.resources.content_streaming
 import churchpresenter.composeapp.generated.resources.customize_background_opacity
 import churchpresenter.composeapp.generated.resources.customize_background_type
 import churchpresenter.composeapp.generated.resources.customize_bible
-import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
+import churchpresenter.composeapp.generated.resources.bible_custom_abbreviation
 import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.media_subtitles
@@ -62,9 +62,9 @@ import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
 import churchpresenter.composeapp.generated.resources.profile_text_letter_case
 import churchpresenter.composeapp.generated.resources.profile_text_outline
-import churchpresenter.composeapp.generated.resources.profile_text_shadow
+import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
-import churchpresenter.composeapp.generated.resources.profile_text_style
+import churchpresenter.composeapp.generated.resources.backdrop_style
 import churchpresenter.composeapp.generated.resources.profile_title_slide
 import churchpresenter.composeapp.generated.resources.profile_translation_divider
 import churchpresenter.composeapp.generated.resources.profile_vertical_alignment
@@ -84,9 +84,9 @@ import org.jetbrains.compose.resources.stringResource
 /** The rows every text page has. */
 private val TEXT_ROWS = listOf(
     Res.string.profile_text_font, Res.string.profile_text_size, Res.string.profile_text_color,
-    Res.string.profile_text_style, Res.string.profile_text_alignment, Res.string.profile_text_letter_case,
+    Res.string.backdrop_style, Res.string.profile_text_alignment, Res.string.profile_text_letter_case,
     Res.string.bible_letter_spacing, Res.string.bible_word_spacing, Res.string.profile_text_outline,
-    Res.string.profile_text_highlight, Res.string.profile_text_shadow,
+    Res.string.profile_text_highlight, Res.string.tooltip_shadow,
 )
 
 /** The rows the Bible and Songs pages share beyond their text. */
@@ -121,7 +121,7 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
     )
     is ProfilePage.Appearance -> when (pane) {
         CustomizePane.BIBLE -> TEXT_ROWS + PLACE_ROWS + listOf(
-            Res.string.customize_show_abbreviation, Res.string.profile_reference,
+            Res.string.bible_custom_abbreviation, Res.string.profile_reference,
             Res.string.profile_translation_divider, Res.string.profile_space_between_translations,
             Res.string.profile_split_long_verses,
         )

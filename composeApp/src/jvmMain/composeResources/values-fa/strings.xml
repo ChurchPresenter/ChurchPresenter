@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">رنگ آدرس</string>
     <string name="canvas_verse_style">سبک آیه</string>
     <string name="canvas_reference_style">سبک آدرس</string>
-    <string name="canvas_text_color">رنگ متن</string>
     <string name="canvas_text_bg_color">رنگ پس‌زمینه</string>
     <string name="canvas_clock_mode">حالت</string>
     <string name="canvas_clock_format">قالب</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter محتوای شما را کجا جست‌وجو می‌کند</string>
     <string name="system_storage_linked_count">%1$d متصل</string>
     <string name="system_storage_needs_attention_count">%1$d نیاز به توجه دارد</string>
-    <string name="system_storage_status_not_set">تعیین نشده</string>
     <string name="system_storage_status_not_found">پوشه پیدا نشد</string>
     <string name="system_storage_status_read_only">فقط خواندنی</string>
     <string name="system_storage_status_linked">متصل</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">شفاف</string>
     <string name="customize_type_default">پیش‌فرض</string>
     <string name="customize_type_gradient">طیف رنگ</string>
-    <string name="customize_show_abbreviation">مخفف</string>
     <string name="customize_background_opacity">کدری</string>
     <string name="slate_theme">پوستهٔ سنگ لوح</string>
     <string name="sand_theme">پوستهٔ شنی</string>

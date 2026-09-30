@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">出处颜色</string>
     <string name="canvas_verse_style">经文样式</string>
     <string name="canvas_reference_style">出处样式</string>
-    <string name="canvas_text_color">文字颜色</string>
     <string name="canvas_text_bg_color">背景颜色</string>
     <string name="canvas_clock_mode">模式</string>
     <string name="canvas_clock_format">格式</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter 在哪里查找您的内容</string>
     <string name="system_storage_linked_count">已链接 %1$d 个</string>
     <string name="system_storage_needs_attention_count">%1$d 个需要处理</string>
-    <string name="system_storage_status_not_set">未设置</string>
     <string name="system_storage_status_not_found">未找到文件夹</string>
     <string name="system_storage_status_read_only">只读</string>
     <string name="system_storage_status_linked">已链接</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">透明</string>
     <string name="customize_type_default">默认</string>
     <string name="customize_type_gradient">渐变</string>
-    <string name="customize_show_abbreviation">缩写</string>
     <string name="customize_background_opacity">不透明度</string>
     <string name="slate_theme">石板主题</string>
     <string name="sand_theme">沙色主题</string>

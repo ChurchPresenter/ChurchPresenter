@@ -6,7 +6,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.profile_box_item_transcript
 import churchpresenter.composeapp.generated.resources.profile_box_item_translation
-import churchpresenter.composeapp.generated.resources.profile_caption_both
+import churchpresenter.composeapp.generated.resources.backdrop_mode_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_layout
@@ -159,7 +159,7 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
                 options = listOf(
                     RowOption(MODE_TRANSCRIBE, stringResource(Res.string.profile_caption_transcription)),
                     RowOption(MODE_TRANSLATE, stringResource(Res.string.profile_caption_translation)),
-                    RowOption(MODE_BOTH, stringResource(Res.string.profile_caption_both)),
+                    RowOption(MODE_BOTH, stringResource(Res.string.backdrop_mode_both)),
                 ),
                 selected = stt.displayMode,
                 onSelect = { v -> update { it.copy(displayMode = v) } },

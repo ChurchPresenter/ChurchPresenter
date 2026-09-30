@@ -808,7 +808,6 @@
     <string name="canvas_bible_end_verse">Koncový verš</string>
     <string name="canvas_bible_ref_font_size">Veľkosť písma odkazu</string>
     <string name="canvas_bible_ref_color">Farba odkazu</string>
-    <string name="canvas_text_color">Farba textu</string>
     <string name="canvas_text_bg_color">Farba pozadia</string>
     <string name="canvas_clock_mode">Režim</string>
     <string name="canvas_clock_format">Formát</string>
@@ -1094,7 +1093,6 @@
     <string name="system_storage_subtitle">Kde Church Presenter hľadá váš obsah</string>
     <string name="system_storage_linked_count">%1$d prepojených</string>
     <string name="system_storage_needs_attention_count">%1$d vyžaduje pozornosť</string>
-    <string name="system_storage_status_not_set">Nenastavené</string>
     <string name="system_storage_status_not_found">Priečinok sa nenašiel</string>
     <string name="system_storage_status_read_only">Iba na čítanie</string>
     <string name="system_storage_status_linked">Prepojené</string>
@@ -2089,7 +2087,6 @@
     <string name="customize_type_transparent">Priehľadné</string>
     <string name="customize_type_default">Predvolené</string>
     <string name="customize_type_gradient">Prechod</string>
-    <string name="customize_show_abbreviation">Skratka</string>
     <string name="customize_background_opacity">Nepriehľadnosť</string>
     <string name="slate_theme">Motív Bridlica</string>
     <string name="sand_theme">Motív Piesok</string>

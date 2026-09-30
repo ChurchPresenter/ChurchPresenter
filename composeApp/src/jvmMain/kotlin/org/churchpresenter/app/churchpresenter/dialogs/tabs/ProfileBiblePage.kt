@@ -10,10 +10,10 @@ import churchpresenter.composeapp.generated.resources.content_bible_translations
 import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_group_reference
 import churchpresenter.composeapp.generated.resources.customize_group_verse_text
-import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
+import churchpresenter.composeapp.generated.resources.bible_custom_abbreviation
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.profile_group_text
-import churchpresenter.composeapp.generated.resources.profile_group_translations
+import churchpresenter.composeapp.generated.resources.bible_translations
 import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_ref_above
 import churchpresenter.composeapp.generated.resources.profile_ref_after
@@ -256,7 +256,7 @@ private fun BibleTextGroup(
                 extraBasic = {
                     if (edit.styleElement == BibleStyleElement.REFERENCE) {
                         SettingsSwitchRow(
-                            stringResource(Res.string.customize_show_abbreviation),
+                            stringResource(Res.string.bible_custom_abbreviation),
                             edit.shown.showAbbreviation,
                             { v -> edit.updateEntry { it.copy(showAbbreviation = v) } },
                         )
@@ -491,7 +491,7 @@ private fun TranslationsGroup(
         stack.size > 1
     val d = BibleSettings()
     SettingsGroup(
-        caption = stringResource(Res.string.profile_group_translations),
+        caption = stringResource(Res.string.bible_translations),
         paths = TRANSLATIONS_PATHS,
         action = ResetAction(
             bs.bilingualLayout != d.bilingualLayout || bs.bilingualLayoutLowerThird != d.bilingualLayoutLowerThird ||

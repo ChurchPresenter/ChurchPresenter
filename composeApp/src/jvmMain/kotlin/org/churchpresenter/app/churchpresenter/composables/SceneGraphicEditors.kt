@@ -46,7 +46,7 @@ import churchpresenter.composeapp.generated.resources.timer_minutes
 import churchpresenter.composeapp.generated.resources.timer_seconds
 import churchpresenter.composeapp.generated.resources.timer_target_time
 import churchpresenter.composeapp.generated.resources.timer_expired_text_label
-import churchpresenter.composeapp.generated.resources.canvas_text_color
+import churchpresenter.composeapp.generated.resources.text_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
 import churchpresenter.composeapp.generated.resources.canvas_text_curve
@@ -270,7 +270,7 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
             color = source.fontColor,
             onColorChange = { onUpdate(source.copy(fontColor = it)) },
             modifier = Modifier.weight(1f),
-            label = stringResource(Res.string.canvas_text_color)
+            label = stringResource(Res.string.text_color)
         )
         ColorPickerField(
             color = source.backgroundColor,

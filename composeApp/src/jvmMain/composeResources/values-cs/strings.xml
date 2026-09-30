@@ -938,7 +938,6 @@
     <string name="system_storage_subtitle">Kde Church Presenter hledá váš obsah</string>
     <string name="system_storage_linked_count">%1$d propojeno</string>
     <string name="system_storage_needs_attention_count">%1$d vyžaduje pozornost</string>
-    <string name="system_storage_status_not_set">Nenastaveno</string>
     <string name="system_storage_status_not_found">Složka nenalezena</string>
     <string name="system_storage_status_read_only">Jen pro čtení</string>
     <string name="system_storage_status_linked">Propojeno</string>
@@ -1021,7 +1020,6 @@
     <string name="canvas_source_qrcode">QR kód</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Záznam obrazovky</string>
-    <string name="canvas_text_color">Barva textu</string>
     <string name="canvas_text_bg_color">Barva pozadí</string>
     <string name="canvas_clock_mode">Režim</string>
     <string name="canvas_clock_format">Formát</string>
@@ -2069,7 +2067,6 @@
     <string name="customize_type_transparent">Průhledné</string>
     <string name="customize_type_default">Výchozí</string>
     <string name="customize_type_gradient">Přechod</string>
-    <string name="customize_show_abbreviation">Zkratka</string>
     <string name="customize_background_opacity">Neprůhlednost</string>
     <string name="slate_theme">Motiv Břidlice</string>
     <string name="sand_theme">Motiv Písek</string>

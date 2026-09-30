@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">Norādes krāsa</string>
     <string name="canvas_verse_style">Panta stils</string>
     <string name="canvas_reference_style">Norādes stils</string>
-    <string name="canvas_text_color">Teksta krāsa</string>
     <string name="canvas_text_bg_color">Fona krāsa</string>
     <string name="canvas_clock_mode">Režīms</string>
     <string name="canvas_clock_format">Formāts</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Kur Church Presenter meklē jūsu saturu</string>
     <string name="system_storage_linked_count">%1$d saistītas</string>
     <string name="system_storage_needs_attention_count">%1$d nepieciešama uzmanība</string>
-    <string name="system_storage_status_not_set">Nav iestatīts</string>
     <string name="system_storage_status_not_found">Mape nav atrasta</string>
     <string name="system_storage_status_read_only">Tikai lasāms</string>
     <string name="system_storage_status_linked">Saistīta</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">Caurspīdīgs</string>
     <string name="customize_type_default">Noklusējums</string>
     <string name="customize_type_gradient">Gradients</string>
-    <string name="customize_show_abbreviation">Saīsinājums</string>
     <string name="customize_background_opacity">Necaurredzamība</string>
     <string name="slate_theme">Slānekļa tēma</string>
     <string name="sand_theme">Smilšu tēma</string>

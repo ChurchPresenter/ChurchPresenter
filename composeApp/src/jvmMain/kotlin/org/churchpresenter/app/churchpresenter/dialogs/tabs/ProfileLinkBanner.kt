@@ -38,7 +38,7 @@ import churchpresenter.composeapp.generated.resources.profile_link_linked
 import churchpresenter.composeapp.generated.resources.profile_link_master
 import churchpresenter.composeapp.generated.resources.profile_names_and
 import churchpresenter.composeapp.generated.resources.profile_only_changes
-import churchpresenter.composeapp.generated.resources.profile_undo
+import churchpresenter.composeapp.generated.resources.tooltip_undo_unbound
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.overrideCount
 import org.churchpresenter.theme.AppShape
@@ -135,7 +135,7 @@ internal fun LinkBanner(
                 lead = stringResource(Res.string.profile_banner_unlinked_lead, unlinkedFrom),
                 rest = stringResource(Res.string.profile_banner_unlinked_rest, unlinkedFrom),
             )
-            LinkText(stringResource(Res.string.profile_undo), actions.onUndoUnlink)
+            LinkText(stringResource(Res.string.tooltip_undo_unbound), actions.onUndoUnlink)
         }
         link.followers.isNotEmpty() -> BannerBox(modifier) {
             BannerText(

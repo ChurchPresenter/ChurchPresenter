@@ -47,8 +47,8 @@ import churchpresenter.composeapp.generated.resources.customize_theme_background
 import churchpresenter.composeapp.generated.resources.customize_theme_base
 import churchpresenter.composeapp.generated.resources.customize_theme_base_dark
 import churchpresenter.composeapp.generated.resources.customize_theme_base_light
-import churchpresenter.composeapp.generated.resources.customize_theme_colors
-import churchpresenter.composeapp.generated.resources.customize_theme_error
+import churchpresenter.composeapp.generated.resources.song_background_category_colors
+import churchpresenter.composeapp.generated.resources.obs_status_error
 import churchpresenter.composeapp.generated.resources.customize_theme_font
 import churchpresenter.composeapp.generated.resources.customize_theme_font_default
 import churchpresenter.composeapp.generated.resources.customize_theme_margin
@@ -253,7 +253,7 @@ private fun DialogButtons(onReset: () -> Unit, onCancel: () -> Unit, onApply: ()
 @Composable
 private fun ColorsSection(draft: ThemeCustomizationChoice, onChange: (ThemeCustomizationChoice) -> Unit) {
     val enabled = draft.useCustomColors
-    SettingsSection(title = stringResource(Res.string.customize_theme_colors)) {
+    SettingsSection(title = stringResource(Res.string.song_background_category_colors)) {
         Column(modifier = Modifier.padding(SECTION_PADDING), verticalArrangement = Arrangement.spacedBy(ROW_GAP)) {
             val setUseCustomColors: (Boolean) -> Unit = { onChange(draft.copy(useCustomColors = it)) }
             val interaction = remember { MutableInteractionSource() }
@@ -361,7 +361,7 @@ private fun MoreColorsGrid(
         OptionalColor(Res.string.customize_theme_warning, colors.warning, status.warning) { c, v ->
             c.copy(warning = v)
         },
-        OptionalColor(Res.string.customize_theme_error, colors.error, scheme.error) { c, v -> c.copy(error = v) },
+        OptionalColor(Res.string.obs_status_error, colors.error, scheme.error) { c, v -> c.copy(error = v) },
     )
     Column(verticalArrangement = Arrangement.spacedBy(ROW_GAP)) {
         entries.chunked(COLOR_GRID_COLUMNS).forEach { row ->

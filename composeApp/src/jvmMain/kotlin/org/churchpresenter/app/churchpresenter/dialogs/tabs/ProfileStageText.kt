@@ -16,10 +16,10 @@ import churchpresenter.composeapp.generated.resources.profile_text_color
 import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
 import churchpresenter.composeapp.generated.resources.profile_text_outline
-import churchpresenter.composeapp.generated.resources.profile_text_shadow
+import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
-import churchpresenter.composeapp.generated.resources.profile_text_style
+import churchpresenter.composeapp.generated.resources.backdrop_style
 import churchpresenter.composeapp.generated.resources.profile_vertical_alignment
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.top
@@ -106,7 +106,7 @@ private fun StageStyleRows(
     write: (StageMonitorZoneStyle.() -> StageMonitorZoneStyle) -> Unit,
 ) {
     SettingsRow(
-        stringResource(Res.string.profile_text_style),
+        stringResource(Res.string.backdrop_style),
         paths = path("bold") + path("italic") + path("underline"),
     ) {
         TextStyleButtons(
@@ -161,14 +161,14 @@ private fun StageStyleRows(
         TextBackdropButton(style.backdrop, { v -> write { copy(backdrop = v) } }, STAGE_STYLE_BUTTON)
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_text_shadow),
+        stringResource(Res.string.tooltip_shadow),
         style.shadow,
         { v -> write { copy(shadow = v) } },
         advanced = true,
         paths = path("shadow"),
     )
     if (style.shadow) {
-        SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.profile_text_shadow)) {
+        SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.tooltip_shadow)) {
             ShadowDetailRow(
                 shadowColor = style.shadowColor,
                 shadowSize = style.shadowSize,

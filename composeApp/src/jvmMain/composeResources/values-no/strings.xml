@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">Farge på referanse</string>
     <string name="canvas_verse_style">Versstil</string>
     <string name="canvas_reference_style">Referansestil</string>
-    <string name="canvas_text_color">Tekstfarge</string>
     <string name="canvas_text_bg_color">Bakgrunnsfarge</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Format</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Hvor Church Presenter leter etter innholdet ditt</string>
     <string name="system_storage_linked_count">%1$d koblet</string>
     <string name="system_storage_needs_attention_count">%1$d trenger tilsyn</string>
-    <string name="system_storage_status_not_set">Ikke angitt</string>
     <string name="system_storage_status_not_found">Fant ikke mappen</string>
     <string name="system_storage_status_read_only">Skrivebeskyttet</string>
     <string name="system_storage_status_linked">Koblet</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">Gjennomsiktig</string>
     <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_show_abbreviation">Forkortelse</string>
     <string name="customize_background_opacity">Dekkevne</string>
     <string name="slate_theme">Skifer-tema</string>
     <string name="sand_theme">Sand-tema</string>

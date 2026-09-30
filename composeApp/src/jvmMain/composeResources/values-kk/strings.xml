@@ -889,7 +889,6 @@
     <string name="system_storage_subtitle">Church Presenter мазмұныңызды қайдан іздейді</string>
     <string name="system_storage_linked_count">%1$d байланысқан</string>
     <string name="system_storage_needs_attention_count">%1$d назар аударуды қажет етеді</string>
-    <string name="system_storage_status_not_set">Орнатылмаған</string>
     <string name="system_storage_status_not_found">Қалта табылмады</string>
     <string name="system_storage_status_read_only">Тек оқуға</string>
     <string name="system_storage_status_linked">Байланысқан</string>
@@ -978,7 +977,6 @@
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Экранды жазу</string>
-    <string name="canvas_text_color">Мәтін түсі</string>
     <string name="canvas_text_bg_color">Фон түсі</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
@@ -2060,7 +2058,6 @@
     <string name="customize_type_transparent">Мөлдір</string>
     <string name="customize_type_default">Әдепкі</string>
     <string name="customize_type_gradient">Градиент</string>
-    <string name="customize_show_abbreviation">Қысқартуы</string>
     <string name="customize_background_opacity">Мөлдірлігі</string>
     <string name="slate_theme">«Тақтатас» тақырыбы</string>
     <string name="sand_theme">«Құм» тақырыбы</string>

@@ -26,7 +26,7 @@ import churchpresenter.composeapp.generated.resources.profile_box_overflow_cut
 import churchpresenter.composeapp.generated.resources.profile_box_overflow_shrink
 import churchpresenter.composeapp.generated.resources.profile_box_overflow_spill
 import churchpresenter.composeapp.generated.resources.profile_box_place
-import churchpresenter.composeapp.generated.resources.profile_box_size
+import churchpresenter.composeapp.generated.resources.customize_theme_text_size
 import churchpresenter.composeapp.generated.resources.profile_box_size_fill
 import churchpresenter.composeapp.generated.resources.profile_box_size_up_to
 import churchpresenter.composeapp.generated.resources.profile_box_snap
@@ -105,7 +105,7 @@ internal fun TextBoxRows(
         BoxRectFields(box, onBox)
     }
     if (box.overflow == TextBoxOverflow.SHRINK) {
-        SettingsRow(stringResource(Res.string.profile_box_size), advanced = true, paths = boxPaths) {
+        SettingsRow(stringResource(Res.string.customize_theme_text_size), advanced = true, paths = boxPaths) {
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_box_size_up_to)),

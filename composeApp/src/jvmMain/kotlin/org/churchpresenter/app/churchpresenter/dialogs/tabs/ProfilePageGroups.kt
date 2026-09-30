@@ -27,7 +27,7 @@ import churchpresenter.composeapp.generated.resources.center
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.middle
 import churchpresenter.composeapp.generated.resources.percent_suffix
-import churchpresenter.composeapp.generated.resources.profile_applies_to
+import churchpresenter.composeapp.generated.resources.song_background_applies_to
 import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_band_height_sub
 import churchpresenter.composeapp.generated.resources.profile_band_source
@@ -444,7 +444,7 @@ internal fun <A, E> AppliesToStrip(
     ) {
         if (targets.size > 1) {
             Text(
-                stringResource(Res.string.profile_applies_to),
+                stringResource(Res.string.song_background_applies_to),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">箇所の色</string>
     <string name="canvas_verse_style">節のスタイル</string>
     <string name="canvas_reference_style">箇所のスタイル</string>
-    <string name="canvas_text_color">文字色</string>
     <string name="canvas_text_bg_color">背景色</string>
     <string name="canvas_clock_mode">モード</string>
     <string name="canvas_clock_format">形式</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter がコンテンツを探す場所</string>
     <string name="system_storage_linked_count">%1$d 件リンク済み</string>
     <string name="system_storage_needs_attention_count">%1$d 件が要確認</string>
-    <string name="system_storage_status_not_set">未設定</string>
     <string name="system_storage_status_not_found">フォルダーが見つかりません</string>
     <string name="system_storage_status_read_only">読み取り専用</string>
     <string name="system_storage_status_linked">リンク済み</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">透過</string>
     <string name="customize_type_default">既定</string>
     <string name="customize_type_gradient">グラデーション</string>
-    <string name="customize_show_abbreviation">略称</string>
     <string name="customize_background_opacity">不透明度</string>
     <string name="slate_theme">スレートテーマ</string>
     <string name="sand_theme">サンドテーマ</string>

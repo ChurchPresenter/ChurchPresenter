@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">Rangi ya Rejeleo</string>
     <string name="canvas_verse_style">Mtindo wa Mstari</string>
     <string name="canvas_reference_style">Mtindo wa Rejeleo</string>
-    <string name="canvas_text_color">Rangi ya Maandishi</string>
     <string name="canvas_text_bg_color">Rangi ya Usuli</string>
     <string name="canvas_clock_mode">Hali</string>
     <string name="canvas_clock_format">Muundo</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Mahali Church Presenter hutafuta maudhui yako</string>
     <string name="system_storage_linked_count">%1$d zimeunganishwa</string>
     <string name="system_storage_needs_attention_count">%1$d zinahitaji uangalizi</string>
-    <string name="system_storage_status_not_set">Haijawekwa</string>
     <string name="system_storage_status_not_found">Folda haikupatikana</string>
     <string name="system_storage_status_read_only">Kusoma tu</string>
     <string name="system_storage_status_linked">Imeunganishwa</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">Wazi</string>
     <string name="customize_type_default">Chaguo-msingi</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_show_abbreviation">Kifupi</string>
     <string name="customize_background_opacity">Ukolezi</string>
     <string name="slate_theme">Mandhari ya Jiwe</string>
     <string name="sand_theme">Mandhari ya Mchanga</string>

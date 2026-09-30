@@ -22,10 +22,10 @@ import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.profile_text_highlight
 import churchpresenter.composeapp.generated.resources.profile_text_letter_case
 import churchpresenter.composeapp.generated.resources.profile_text_outline
-import churchpresenter.composeapp.generated.resources.profile_text_shadow
+import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.profile_text_size
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
-import churchpresenter.composeapp.generated.resources.profile_text_style
+import churchpresenter.composeapp.generated.resources.backdrop_style
 import churchpresenter.composeapp.generated.resources.right
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextBackdropButton
@@ -88,7 +88,7 @@ internal fun TextLookRows(
     SettingsRow(stringResource(Res.string.profile_text_color), paths = paths[TextLookField.COLOR]) {
         RowColor(look.color, { onChange(look.copy(color = it)) })
     }
-    SettingsRow(stringResource(Res.string.profile_text_style), paths = paths[TextLookField.STYLE]) {
+    SettingsRow(stringResource(Res.string.backdrop_style), paths = paths[TextLookField.STYLE]) {
         TextStyleButtons(
             bold = look.bold,
             italic = look.italic,
@@ -187,14 +187,14 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths
         TextBackdropButton(look.backdrop, { onChange(look.copy(backdrop = it)) }, STYLE_BUTTON)
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_text_shadow),
+        stringResource(Res.string.tooltip_shadow),
         look.shadow,
         { onChange(look.copy(shadow = it)) },
         advanced = true,
         paths = paths[TextLookField.SHADOW] + paths[TextLookField.SHADOW_DETAIL],
     )
     if (look.shadow) {
-        SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.profile_text_shadow)) {
+        SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.tooltip_shadow)) {
             ShadowDetailRow(
                 shadowColor = look.shadowColor,
                 shadowSize = look.shadowSize,

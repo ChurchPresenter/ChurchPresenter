@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">संदर्भ का रंग</string>
     <string name="canvas_verse_style">वचन की शैली</string>
     <string name="canvas_reference_style">संदर्भ की शैली</string>
-    <string name="canvas_text_color">पाठ का रंग</string>
     <string name="canvas_text_bg_color">बैकग्राउंड रंग</string>
     <string name="canvas_clock_mode">मोड</string>
     <string name="canvas_clock_format">प्रारूप</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter आपकी सामग्री कहाँ खोजता है</string>
     <string name="system_storage_linked_count">%1$d जुड़े</string>
     <string name="system_storage_needs_attention_count">%1$d पर ध्यान चाहिए</string>
-    <string name="system_storage_status_not_set">सेट नहीं</string>
     <string name="system_storage_status_not_found">फ़ोल्डर नहीं मिला</string>
     <string name="system_storage_status_read_only">केवल पढ़ने योग्य</string>
     <string name="system_storage_status_linked">जुड़ा हुआ</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">पारदर्शी</string>
     <string name="customize_type_default">डिफ़ॉल्ट</string>
     <string name="customize_type_gradient">ग्रेडिएंट</string>
-    <string name="customize_show_abbreviation">संक्षिप्त रूप</string>
     <string name="customize_background_opacity">अपारदर्शिता</string>
     <string name="slate_theme">स्लेट थीम</string>
     <string name="sand_theme">रेत थीम</string>

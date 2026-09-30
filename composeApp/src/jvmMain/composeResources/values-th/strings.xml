@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">สีข้ออ้างอิง</string>
     <string name="canvas_verse_style">รูปแบบข้อพระคัมภีร์</string>
     <string name="canvas_reference_style">รูปแบบข้ออ้างอิง</string>
-    <string name="canvas_text_color">สีข้อความ</string>
     <string name="canvas_text_bg_color">สีพื้นหลัง</string>
     <string name="canvas_clock_mode">โหมด</string>
     <string name="canvas_clock_format">รูปแบบ</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter ค้นหาเนื้อหาของคุณจากที่ใด</string>
     <string name="system_storage_linked_count">เชื่อมโยงแล้ว %1$d</string>
     <string name="system_storage_needs_attention_count">ต้องตรวจสอบ %1$d</string>
-    <string name="system_storage_status_not_set">ยังไม่ได้กำหนด</string>
     <string name="system_storage_status_not_found">ไม่พบโฟลเดอร์</string>
     <string name="system_storage_status_read_only">อ่านอย่างเดียว</string>
     <string name="system_storage_status_linked">เชื่อมโยงแล้ว</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">โปร่งใส</string>
     <string name="customize_type_default">ค่าเริ่มต้น</string>
     <string name="customize_type_gradient">ไล่ระดับสี</string>
-    <string name="customize_show_abbreviation">ตัวย่อ</string>
     <string name="customize_background_opacity">ความทึบ</string>
     <string name="slate_theme">ธีมหินชนวน</string>
     <string name="sand_theme">ธีมทราย</string>

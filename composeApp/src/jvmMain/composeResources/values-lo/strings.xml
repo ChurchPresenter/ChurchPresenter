@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">ສີບ່ອນອ້າງອີງ</string>
     <string name="canvas_verse_style">ຮູບແບບຂໍ້ພຣະຄຳ</string>
     <string name="canvas_reference_style">ຮູບແບບບ່ອນອ້າງອີງ</string>
-    <string name="canvas_text_color">ສີຂໍ້ຄວາມ</string>
     <string name="canvas_text_bg_color">ສີພື້ນຫຼັງ</string>
     <string name="canvas_clock_mode">ຮູບແບບ</string>
     <string name="canvas_clock_format">ຮູບແບບເວລາ</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Church Presenter ຄົ້ນຫາເນື້ອຫາຂອງທ່ານຢູ່ໃສ</string>
     <string name="system_storage_linked_count">ເຊື່ອມຕໍ່ແລ້ວ %1$d</string>
     <string name="system_storage_needs_attention_count">ຕ້ອງກວດສອບ %1$d</string>
-    <string name="system_storage_status_not_set">ຍັງບໍ່ໄດ້ຕັ້ງ</string>
     <string name="system_storage_status_not_found">ບໍ່ພົບໂຟນເດີ</string>
     <string name="system_storage_status_read_only">ອ່ານໄດ້ຢ່າງດຽວ</string>
     <string name="system_storage_status_linked">ເຊື່ອມຕໍ່ແລ້ວ</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">ໂປ່ງໃສ</string>
     <string name="customize_type_default">ຄ່າເລີ່ມຕົ້ນ</string>
     <string name="customize_type_gradient">ໄລ່ສີ</string>
-    <string name="customize_show_abbreviation">ຕົວຫຍໍ້</string>
     <string name="customize_background_opacity">ຄວາມທຶບ</string>
     <string name="slate_theme">ຮູບແບບຫີນດິນດານ</string>
     <string name="sand_theme">ຮູບແບບຊາຍ</string>

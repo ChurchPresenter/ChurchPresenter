@@ -888,7 +888,6 @@
     <string name="system_storage_subtitle">Gdzie Church Presenter szuka Twoich treści</string>
     <string name="system_storage_linked_count">%1$d powiązanych</string>
     <string name="system_storage_needs_attention_count">%1$d wymaga uwagi</string>
-    <string name="system_storage_status_not_set">Nie ustawiono</string>
     <string name="system_storage_status_not_found">Nie znaleziono folderu</string>
     <string name="system_storage_status_read_only">Tylko do odczytu</string>
     <string name="system_storage_status_linked">Powiązany</string>
@@ -977,7 +976,6 @@
     <string name="canvas_source_qrcode">Kod QR</string>
     <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Przechwytywanie ekranu</string>
-    <string name="canvas_text_color">Kolor tekstu</string>
     <string name="canvas_text_bg_color">Kolor tła</string>
     <string name="canvas_clock_mode">Tryb</string>
     <string name="canvas_clock_format">Format</string>
@@ -2059,7 +2057,6 @@
     <string name="customize_type_transparent">Przezroczyste</string>
     <string name="customize_type_default">Domyślne</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_show_abbreviation">Skrót</string>
     <string name="customize_background_opacity">Przezroczystość</string>
     <string name="slate_theme">Motyw Łupek</string>
     <string name="sand_theme">Motyw Piasek</string>

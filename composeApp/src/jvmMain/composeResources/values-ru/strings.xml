@@ -927,7 +927,6 @@
     <string name="system_storage_subtitle">Где Church Presenter ищет ваш контент</string>
     <string name="system_storage_linked_count">%1$d подключено</string>
     <string name="system_storage_needs_attention_count">%1$d требует внимания</string>
-    <string name="system_storage_status_not_set">Не задано</string>
     <string name="system_storage_status_not_found">Папка не найдена</string>
     <string name="system_storage_status_read_only">Только чтение</string>
     <string name="system_storage_status_linked">Подключено</string>
@@ -1018,7 +1017,6 @@
     <string name="canvas_source_qrcode">QR-код</string>
     <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захват экрана</string>
-    <string name="canvas_text_color">Цвет текста</string>
     <string name="canvas_text_bg_color">Цвет фона</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
@@ -2062,7 +2060,6 @@
     <string name="customize_type_transparent">Прозрачный</string>
     <string name="customize_type_default">По умолчанию</string>
     <string name="customize_type_gradient">Градиент</string>
-    <string name="customize_show_abbreviation">Сокращение</string>
     <string name="customize_background_opacity">Непрозрачность</string>
     <string name="slate_theme">Тема «Сланец»</string>
     <string name="sand_theme">Тема «Песок»</string>

@@ -808,7 +808,6 @@
     <string name="canvas_bible_end_verse">Versículo Final</string>
     <string name="canvas_bible_ref_font_size">Tamanho da Fonte da Referência</string>
     <string name="canvas_bible_ref_color">Cor da Referência</string>
-    <string name="canvas_text_color">Cor do Texto</string>
     <string name="canvas_text_bg_color">Cor de Fundo</string>
     <string name="canvas_clock_mode">Modo</string>
     <string name="canvas_clock_format">Formato</string>
@@ -1094,7 +1093,6 @@
     <string name="system_storage_subtitle">Onde o Church Presenter procura o seu conteúdo</string>
     <string name="system_storage_linked_count">%1$d vinculadas</string>
     <string name="system_storage_needs_attention_count">%1$d precisam de atenção</string>
-    <string name="system_storage_status_not_set">Não definido</string>
     <string name="system_storage_status_not_found">Pasta não encontrada</string>
     <string name="system_storage_status_read_only">Somente leitura</string>
     <string name="system_storage_status_linked">Vinculada</string>
@@ -2088,7 +2086,6 @@
     <string name="customize_type_transparent">Transparente</string>
     <string name="customize_type_default">Padrão</string>
     <string name="customize_type_gradient">Gradiente</string>
-    <string name="customize_show_abbreviation">Abreviatura</string>
     <string name="customize_background_opacity">Opacidade</string>
     <string name="slate_theme">Tema Ardósia</string>
     <string name="sand_theme">Tema Areia</string>

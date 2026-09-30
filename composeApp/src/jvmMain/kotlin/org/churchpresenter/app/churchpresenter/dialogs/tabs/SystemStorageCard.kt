@@ -67,7 +67,7 @@ import churchpresenter.composeapp.generated.resources.system_storage_status_file
 import churchpresenter.composeapp.generated.resources.system_storage_status_linked
 import churchpresenter.composeapp.generated.resources.system_storage_status_needs_converting
 import churchpresenter.composeapp.generated.resources.system_storage_status_not_found
-import churchpresenter.composeapp.generated.resources.system_storage_status_not_set
+import churchpresenter.composeapp.generated.resources.shortcut_unbound
 import churchpresenter.composeapp.generated.resources.system_storage_status_read_only
 import churchpresenter.composeapp.generated.resources.system_storage_subtitle
 import churchpresenter.composeapp.generated.resources.tooltip_directory_not_found
@@ -358,7 +358,7 @@ private val CONTROL_HEIGHT = 34.dp
 @Composable
 private fun statusLineFor(status: DirStatus, healthy: StorageStatusLine?): StorageStatusLine = when (status) {
     DirStatus.NOT_SET -> StorageStatusLine(
-        stringResource(Res.string.system_storage_status_not_set),
+        stringResource(Res.string.shortcut_unbound),
         MaterialTheme.colorScheme.onSurfaceVariant,
     )
     DirStatus.CHECKING -> StorageStatusLine("…", MaterialTheme.colorScheme.onSurfaceVariant)

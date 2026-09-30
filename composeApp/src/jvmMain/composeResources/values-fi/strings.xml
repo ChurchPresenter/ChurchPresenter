@@ -1021,7 +1021,6 @@
     <string name="canvas_bible_ref_color">Viitteen väri</string>
     <string name="canvas_verse_style">Jakeen tyyli</string>
     <string name="canvas_reference_style">Viitteen tyyli</string>
-    <string name="canvas_text_color">Tekstin väri</string>
     <string name="canvas_text_bg_color">Taustaväri</string>
     <string name="canvas_clock_mode">Tila</string>
     <string name="canvas_clock_format">Muoto</string>
@@ -1343,7 +1342,6 @@
     <string name="system_storage_subtitle">Mistä Church Presenter etsii sisältösi</string>
     <string name="system_storage_linked_count">%1$d linkitetty</string>
     <string name="system_storage_needs_attention_count">%1$d vaatii huomiota</string>
-    <string name="system_storage_status_not_set">Ei asetettu</string>
     <string name="system_storage_status_not_found">Kansiota ei löydy</string>
     <string name="system_storage_status_read_only">Vain luku</string>
     <string name="system_storage_status_linked">Linkitetty</string>
@@ -2104,7 +2102,6 @@
     <string name="customize_type_transparent">Läpinäkyvä</string>
     <string name="customize_type_default">Oletus</string>
     <string name="customize_type_gradient">Liukuväri</string>
-    <string name="customize_show_abbreviation">Lyhenne</string>
     <string name="customize_background_opacity">Peittävyys</string>
     <string name="slate_theme">Liuske-teema</string>
     <string name="sand_theme">Hiekka-teema</string>
