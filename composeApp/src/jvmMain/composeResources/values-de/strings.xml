@@ -1007,7 +1007,6 @@
     <string name="canvas_capture_mode">Aufnahmemodus</string>
     <string name="canvas_capture_mode_region">Bildschirmbereich</string>
     <string name="canvas_capture_mode_window">Fenster</string>
-    <string name="canvas_capture_window">Fenster</string>
     <string name="canvas_capture_refresh_windows">Fensterliste aktualisieren</string>
     <string name="canvas_capture_interval">Aufnahmeintervall</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1028,7 +1027,6 @@
     <string name="canvas_source_name">Name</string>
     <string name="canvas_rotation">Drehung</string>
     <string name="canvas_file_path">Dateipfad</string>
-    <string name="canvas_browse">Durchsuchen</string>
     <string name="canvas_scale">Skalierung</string>
     <string name="canvas_scale_fit">Anpassen</string>
     <string name="canvas_scale_fill">Füllen</string>
@@ -1948,7 +1946,6 @@
     <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Text</string>
-    <string name="song_element_next_section">Nächster Abschnitt</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Komponist</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2051,7 +2048,6 @@
     <string name="customize_type_color">Farbe</string>
     <string name="customize_type_image">Bild</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Standard</string>
     <string name="customize_type_gradient">Verlauf</string>
     <string name="customize_show_abbreviation">Abkürzung</string>
@@ -2082,7 +2078,6 @@
     <string name="setup_bible_pick_translations">Wechseln Sie zum Reiter Bibel und wählen Sie Ihre Übersetzungen — die erste ist die primäre.</string>
     <string name="setup_songs_format_note">Der Liedbibliotheks-Ordner liest .song-Dateien. Lieder in einem anderen Format müssen zuerst umgewandelt werden.</string>
     <string name="setup_songs_converter_body">Sie wechseln von SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm oder SoftProjector? Der eingebaute Lieder- und Bibelkonverter liest sie alle — und Liedtexte aus PDF, Word, PowerPoint und Keynote — und schreibt die .song-Dateien, die dieser Ordner erwartet.</string>
-    <string name="setup_songs_converter_button">Lieder- und Bibelkonverter öffnen</string>
     <string name="setup_songs_samples_note">Noch keine Lieder? „Beispiellieder hinzufügen“ im Reiter System füllt den Ordner mit einem funktionierenden Satz.</string>
     <string name="setup_proj_rows_note">Jeder angeschlossene Bildschirm erhält unten eine eigene Zeile. Die Zahl der Ausgabefenster ergibt sich aus Ihren Zuweisungen und muss nicht von Hand eingestellt werden.</string>
     <string name="setup_proj_assign_note">Wählen Sie je Bildschirm ein Anzeigegerät und einen Anzeigemodus und legen Sie dann unter „Inhaltsausgaben“ fest, was dort erscheint. „Stile überschreiben“ gibt diesem Bildschirm ein eigenes Aussehen.</string>
@@ -2099,7 +2094,6 @@
     <string name="bible_lottie_gen_window_title">Generator für untere Drittel</string>
     <string name="song_lottie_unsupported_note">Die Vorlage bestimmt das Layout und die Position des Titels. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung, Wortabstand, Vorschau und Akkorde gelten nicht.</string>
     <string name="bible_lottie_unsupported_note">Die Vorlage bestimmt das Layout, die Position der Bibelstelle und wie zwei Sprachen das Band teilen. Der Stil des unteren Drittels legt Schrift, Größe, Farbe, Ausrichtung, Zeichenabstand, Groß-/Kleinschreibung und Schatten fest; Hintergrundfläche, Unterstreichung, Durchstreichung und Wortabstand gelten nicht.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Konturoptionen</string>

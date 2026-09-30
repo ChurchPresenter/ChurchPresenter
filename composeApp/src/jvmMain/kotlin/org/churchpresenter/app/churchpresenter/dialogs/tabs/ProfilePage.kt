@@ -19,7 +19,7 @@ import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.customize_bible
 import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.media_subtitles
-import churchpresenter.composeapp.generated.resources.profile_nav_appearance
+import churchpresenter.composeapp.generated.resources.setup_rail_appearance
 import churchpresenter.composeapp.generated.resources.profile_nav_content
 import churchpresenter.composeapp.generated.resources.profile_nav_general
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
@@ -68,7 +68,7 @@ internal fun profileNavSections(profile: OutputProfile): List<ProfileNavSection>
             listOf(ProfilePage.General, ProfilePage.Outputs, ProfilePage.Content),
         ),
         ProfileNavSection(
-            stringResource(if (stage) Res.string.profile_nav_stage_monitor else Res.string.profile_nav_appearance),
+            stringResource(if (stage) Res.string.profile_nav_stage_monitor else Res.string.setup_rail_appearance),
             customizePanes(profile.displayMode).map { ProfilePage.Appearance(it) },
         ),
     )

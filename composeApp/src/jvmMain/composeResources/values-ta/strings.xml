@@ -964,7 +964,6 @@
     <string name="canvas_source_name">பெயர்</string>
     <string name="canvas_rotation">சுழற்சி</string>
     <string name="canvas_file_path">கோப்புப் பாதை</string>
-    <string name="canvas_browse">உலாவு</string>
     <string name="canvas_scale">அளவீடு</string>
     <string name="canvas_scale_fit">பொருத்து</string>
     <string name="canvas_scale_fill">நிரப்பு</string>
@@ -1056,7 +1055,6 @@
     <string name="canvas_capture_mode">பிடிப்புப் பயன்முறை</string>
     <string name="canvas_capture_mode_region">திரைப் பகுதி</string>
     <string name="canvas_capture_mode_window">சாளரம்</string>
-    <string name="canvas_capture_window">சாளரம்</string>
     <string name="canvas_capture_refresh_windows">சாளரப் பட்டியலைப் புதுப்பி</string>
     <string name="canvas_capture_interval">பிடிப்பு இடைவெளி</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1997,7 +1995,6 @@
     <string name="song_element_number">எண்</string>
     <string name="song_element_title">தலைப்பு</string>
     <string name="song_element_lyrics">பாடல் வரிகள்</string>
-    <string name="song_element_next_section">அடுத்த பகுதி</string>
     <string name="song_element_author">ஆசிரியர்</string>
     <string name="song_element_composer">இசையமைப்பாளர்</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2100,7 +2097,6 @@
     <string name="customize_type_color">நிறம்</string>
     <string name="customize_type_image">படம்</string>
     <string name="customize_type_video">காணொளி</string>
-    <string name="customize_type_transparent">ஒளிபுகும்</string>
     <string name="customize_type_default">இயல்பு</string>
     <string name="customize_type_gradient">படிநிறம்</string>
     <string name="customize_show_abbreviation">சுருக்கம்</string>
@@ -2131,7 +2127,6 @@
     <string name="setup_bible_pick_translations">பைபிள் தாவலுக்குச் சென்று மொழிபெயர்ப்புகளைத் தேர்ந்தெடுக்கவும் — முதலாவது முதன்மையானது.</string>
     <string name="setup_songs_format_note">பாடல் நூலகக் கோப்புறை .song கோப்புகளைப் படிக்கிறது. வேறு வடிவத்தில் சேமித்த பாடல்களை முதலில் மாற்ற வேண்டும்.</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm அல்லது SoftProjector இலிருந்து வருகிறீர்களா? உள்ளமைந்த பாடல் மற்றும் வேதாகம மாற்றி அவை அனைத்தையும் படிக்கும் — PDF, Word, PowerPoint, Keynote இலிருந்து வரிகளையும் — பிறகு இந்தக் கோப்புறை எதிர்பார்க்கும் .song கோப்புகளை எழுதும்.</string>
-    <string name="setup_songs_converter_button">பாடல் மற்றும் வேதாகம மாற்றியைத் திற</string>
     <string name="setup_songs_samples_note">இன்னும் பாடல்கள் இல்லையா? கணினி தாவலில் உள்ள «மாதிரிப் பாடல்களைச் சேர்» கோப்புறையை செயற்படும் தொகுப்பால் நிரப்பும்.</string>
     <string name="setup_proj_rows_note">இணைக்கப்பட்ட ஒவ்வொரு திரையும் கீழே தனி வரிசையைப் பெறும். காட்சி சாளரங்களின் எண்ணிக்கை அங்கு நீங்கள் ஒதுக்குவதிலிருந்து வருகிறது, எனவே கையால் அமைக்க எதுவும் இல்லை.</string>
     <string name="setup_proj_assign_note">ஒவ்வொரு திரைக்கும் ஒரு காட்சியையும் காட்சி முறையையும் தேர்ந்தெடுத்து, பிறகு «உள்ளடக்க வெளியீடுகள்» மூலம் அங்கு என்ன தோன்றும் என்பதைத் தீர்மானிக்கவும். «பாணிகளை மேலெழுது» அந்தத் திரைக்குத் தனித் தோற்றத்தைத் தரும்.</string>
@@ -2148,7 +2143,6 @@
     <string name="bible_lottie_gen_window_title">கீழ் மூன்றில் ஒரு பகுதி உருவாக்கி</string>
     <string name="song_lottie_unsupported_note">வார்ப்புரு தளவமைப்பையும் தலைப்பின் இடத்தையும் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல், சொல் இடைவெளி, அடுத்ததின் முன்னோட்டம் மற்றும் கார்டுகள் பொருந்தாது.</string>
     <string name="bible_lottie_unsupported_note">வார்ப்புரு தளவமைப்பு, குறிப்பின் இடம் மற்றும் இரு மொழிகள் பட்டையை எப்படிப் பகிர்வது என்பதைத் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல் மற்றும் சொல் இடைவெளி பொருந்தாது.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">வெளிக்கோடு</string>
     <string name="tooltip_outline_options">வெளிக்கோடு விருப்பங்கள்</string>

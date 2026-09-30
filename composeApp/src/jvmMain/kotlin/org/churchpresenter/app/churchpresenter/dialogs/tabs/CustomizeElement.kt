@@ -6,7 +6,7 @@ import churchpresenter.composeapp.generated.resources.customize_group_reference
 import churchpresenter.composeapp.generated.resources.customize_group_verse_text
 import churchpresenter.composeapp.generated.resources.song_element_look_ahead
 import churchpresenter.composeapp.generated.resources.song_element_lyrics
-import churchpresenter.composeapp.generated.resources.song_element_next_section
+import churchpresenter.composeapp.generated.resources.shortcut_description_next_section
 import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.song_element_section_label_short
 import churchpresenter.composeapp.generated.resources.song_element_title
@@ -87,7 +87,7 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.SONG_TITLE -> stringResource(Res.string.song_element_title)
     CustomizeElement.SONG_NUMBER -> stringResource(Res.string.song_element_number)
     CustomizeElement.SONG_LOOK_AHEAD -> stringResource(Res.string.song_element_look_ahead)
-    CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.song_element_next_section)
+    CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.shortcut_description_next_section)
     // Short, beside Next Section: the Songs strip keeps its six elements on one line.
     CustomizeElement.SONG_SECTION_LABEL -> stringResource(Res.string.song_element_section_label_short)
     CustomizeElement.SONG_TITLE_SLIDE -> stringResource(Res.string.song_target_title_slide)

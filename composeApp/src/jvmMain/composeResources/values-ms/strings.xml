@@ -960,7 +960,6 @@
     <string name="canvas_source_name">Nama</string>
     <string name="canvas_rotation">Putaran</string>
     <string name="canvas_file_path">Laluan fail</string>
-    <string name="canvas_browse">Semak Lalu</string>
     <string name="canvas_scale">Skala</string>
     <string name="canvas_scale_fit">Muat</string>
     <string name="canvas_scale_fill">Penuh</string>
@@ -1052,7 +1051,6 @@
     <string name="canvas_capture_mode">Mod Tangkapan</string>
     <string name="canvas_capture_mode_region">Kawasan Skrin</string>
     <string name="canvas_capture_mode_window">Tetingkap</string>
-    <string name="canvas_capture_window">Tetingkap</string>
     <string name="canvas_capture_refresh_windows">Muat Semula Senarai Tetingkap</string>
     <string name="canvas_capture_interval">Selang Tangkapan</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1992,7 +1990,6 @@
     <string name="song_element_number">Nombor</string>
     <string name="song_element_title">Tajuk</string>
     <string name="song_element_lyrics">Lirik</string>
-    <string name="song_element_next_section">Bahagian Seterusnya</string>
     <string name="song_element_author">Penulis</string>
     <string name="song_element_composer">Komposer</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2095,7 +2092,6 @@
     <string name="customize_type_color">Warna</string>
     <string name="customize_type_image">Imej</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Lutsinar</string>
     <string name="customize_type_default">Lalai</string>
     <string name="customize_type_gradient">Gradien</string>
     <string name="customize_show_abbreviation">Singkatan</string>
@@ -2126,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Pergi ke tab Alkitab dan pilih terjemahan anda — yang pertama ialah yang utama.</string>
     <string name="setup_songs_format_note">Folder pustaka lagu membaca fail .song. Lagu yang disimpan dalam format lain perlu ditukar terlebih dahulu.</string>
     <string name="setup_songs_converter_body">Berpindah daripada SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm atau SoftProjector? Penukar Lagu dan Alkitab terbina dalam membaca kesemuanya — juga lirik daripada PDF, Word, PowerPoint dan Keynote — lalu menulis fail .song yang diperlukan folder ini.</string>
-    <string name="setup_songs_converter_button">Buka Penukar Lagu dan Alkitab</string>
     <string name="setup_songs_samples_note">Belum ada lagu? «Tambah lagu contoh» pada tab Sistem akan mengisi folder dengan satu set yang boleh digunakan.</string>
     <string name="setup_proj_rows_note">Setiap skrin yang disambungkan mendapat barisnya sendiri di bawah. Bilangan tetingkap persembahan berpunca daripada apa yang anda tetapkan di situ, jadi tiada apa yang perlu ditetapkan secara manual.</string>
     <string name="setup_proj_assign_note">Bagi setiap skrin pilih paparan dan mod paparan, kemudian gunakan «Output kandungan» untuk menentukan apa yang muncul di situ. «Tulis ganti gaya» memberikan skrin itu penampilannya sendiri.</string>
@@ -2143,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Penjana Sepertiga Bawah</string>
     <string name="song_lottie_unsupported_note">Templat menentukan susun atur dan kedudukan tajuk. Gaya sepertiga bawah menetapkan fon, saiz, warna, jajaran, jarak huruf, huruf besar/kecil dan bayang; latar teks, garis bawah, garis lorek, jarak perkataan, pratonton seterusnya dan kord tidak terpakai.</string>
     <string name="bible_lottie_unsupported_note">Templat menentukan susun atur, kedudukan rujukan dan cara dua bahasa berkongsi jalur. Gaya sepertiga bawah menetapkan fon, saiz, warna, jajaran, jarak huruf, huruf besar/kecil dan bayang; latar teks, garis bawah, garis lorek dan jarak perkataan tidak terpakai.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Garis luar</string>
     <string name="tooltip_outline_options">Pilihan garis luar</string>

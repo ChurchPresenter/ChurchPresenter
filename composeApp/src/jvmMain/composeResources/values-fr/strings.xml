@@ -749,7 +749,6 @@
     <string name="canvas_source_name">Nom</string>
     <string name="canvas_rotation">Rotation</string>
     <string name="canvas_file_path">Chemin du fichier</string>
-    <string name="canvas_browse">Parcourir</string>
     <string name="canvas_scale">Échelle</string>
     <string name="canvas_scale_fit">Ajuster</string>
     <string name="canvas_scale_fill">Remplir</string>
@@ -839,7 +838,6 @@
     <string name="canvas_capture_mode">Mode de capture</string>
     <string name="canvas_capture_mode_region">Région d'écran</string>
     <string name="canvas_capture_mode_window">Fenêtre</string>
-    <string name="canvas_capture_window">Fenêtre</string>
     <string name="canvas_capture_refresh_windows">Actualiser la liste des fenêtres</string>
     <string name="canvas_capture_interval">Intervalle de capture</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1975,7 +1973,6 @@
     <string name="song_element_number">Numéro</string>
     <string name="song_element_title">Titre</string>
     <string name="song_element_lyrics">Paroles</string>
-    <string name="song_element_next_section">Section suivante</string>
     <string name="song_element_author">Auteur</string>
     <string name="song_element_composer">Compositeur</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2078,7 +2075,6 @@
     <string name="customize_type_color">Couleur</string>
     <string name="customize_type_image">Image</string>
     <string name="customize_type_video">Vidéo</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Par défaut</string>
     <string name="customize_type_gradient">Dégradé</string>
     <string name="customize_show_abbreviation">Abréviation</string>
@@ -2109,7 +2105,6 @@
     <string name="setup_bible_pick_translations">Ouvrez l'onglet Bible et choisissez vos traductions — la première est la principale.</string>
     <string name="setup_songs_format_note">Le dossier de la bibliothèque de chants lit les fichiers .song. Les chants enregistrés dans un autre format doivent d'abord être convertis.</string>
     <string name="setup_songs_converter_body">Vous venez de SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ou SoftProjector ? Le convertisseur de cantiques et de Bibles intégré les lit tous — ainsi que les paroles issues de PDF, Word, PowerPoint et Keynote — et écrit les fichiers .song attendus par ce dossier.</string>
-    <string name="setup_songs_converter_button">Ouvrir le convertisseur de cantiques et de Bibles</string>
     <string name="setup_songs_samples_note">Pas encore de chants ? « Ajouter des exemples de chants » dans l'onglet Système remplit le dossier avec un jeu prêt à l'emploi.</string>
     <string name="setup_proj_rows_note">Chaque écran connecté obtient sa propre ligne ci-dessous. Le nombre de fenêtres de projection découle de vos affectations : rien à régler à la main.</string>
     <string name="setup_proj_assign_note">Pour chaque écran, choisissez un affichage et un mode d'affichage, puis utilisez « Sorties de contenu » pour définir ce qui y apparaît. « Remplacer les styles » donne à cet écran son propre aspect.</string>
@@ -2126,7 +2121,6 @@
     <string name="bible_lottie_gen_window_title">Générateur de tiers inférieurs</string>
     <string name="song_lottie_unsupported_note">Le modèle décide de la mise en page et de la place du titre. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré, l'espacement des mots, l'aperçu de la suite et les accords ne s'appliquent pas.</string>
     <string name="bible_lottie_unsupported_note">Le modèle décide de la mise en page, de la position de la référence et de la façon dont deux langues se partagent le bandeau. Le style du tiers inférieur fixe la police, la taille, la couleur, l'alignement, l'espacement des lettres, la casse et l'ombre ; le fond du texte, le soulignement, le barré et l'espacement des mots ne s'appliquent pas.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Contour</string>
     <string name="tooltip_outline_options">Options de contour</string>
