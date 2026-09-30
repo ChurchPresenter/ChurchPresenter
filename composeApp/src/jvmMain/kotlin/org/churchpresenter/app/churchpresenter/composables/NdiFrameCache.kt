@@ -22,7 +22,7 @@ open class NdiFrameCache(
         openReceiver(NdiSourceInfo(source.sourceName, source.sourceAddress), NdiBandwidth.of(source.lowBandwidth))
             ?.let(::NdiPictureReceiver)
     },
-    logTag = "[NDI Input]",
+    logTag = "NDI Input",
 ) {
     override val resource: SharedResource get() = SharedResource.NDI_RECEIVER
 

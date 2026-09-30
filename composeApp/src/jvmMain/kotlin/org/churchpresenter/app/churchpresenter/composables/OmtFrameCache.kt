@@ -15,7 +15,7 @@ open class OmtFrameCache(
     openReceiver: (address: String, preview: Boolean) -> OmtReceiver?,
 ) : ReceivedFrameCache<SceneSource.OmtSource>(
     openReceiver = { source -> openReceiver(source.sourceAddress, source.preview)?.let(::OmtPictureReceiver) },
-    logTag = "[OMT Input]",
+    logTag = "OMT Input",
 ) {
     override val resource: SharedResource get() = SharedResource.OMT_RECEIVER
 

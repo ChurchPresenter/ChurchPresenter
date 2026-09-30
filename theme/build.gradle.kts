@@ -20,8 +20,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(compose.desktop.currentOs)
-    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-    testImplementation(compose.uiTest)
+    testImplementation(libs.compose.uiTest)
 }
 
 detekt {

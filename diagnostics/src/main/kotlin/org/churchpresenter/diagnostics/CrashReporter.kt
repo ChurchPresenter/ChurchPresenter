@@ -7,7 +7,7 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.SpanStatus
-import io.sentry.UserFeedback
+import io.sentry.protocol.Feedback
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
 import java.io.File
@@ -508,10 +508,10 @@ object CrashReporter {
                 message = Message().apply { message = "User feedback" }
             }
             val eventId = Sentry.captureEvent(event)
-            Sentry.captureUserFeedback(UserFeedback(eventId).apply {
-                comments = comment
+            Sentry.feedback().capture(Feedback(comment).apply {
+                setAssociatedEventId(eventId)
                 if (name.isNotBlank()) this.name = name
-                if (email.isNotBlank()) this.email = email
+                if (email.isNotBlank()) contactEmail = email
             })
             Sentry.flush(FLUSH_TIMEOUT_MS)
         } catch (_: Exception) {}
@@ -561,13 +561,14 @@ object CrashReporter {
         try { event.breadcrumbs?.forEach { it.message = scrubPii(it.message) } } catch (_: Exception) {}
         try {
             val contexts = event.contexts
-            for (key in contexts.keys.toList()) {
-                val value = contexts[key]
+            // Sentry 8's Contexts is no longer a Map: keys() is an Enumeration and put() replaces.
+            for (key in contexts.keys().toList()) {
+                val value = contexts.get(key)
                 if (value is Map<*, *>) {
                     val scrubbed = value.entries.associate { (k, v) ->
                         k to (if (v is String) scrubPii(v) else v)
                     }
-                    contexts[key] = scrubbed
+                    contexts.put(key, scrubbed)
                 }
             }
         } catch (_: Exception) {}

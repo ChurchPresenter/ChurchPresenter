@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.diagnostics.CrashReporter
@@ -318,7 +319,7 @@ object LottieRenderCache {
                     }
                 }
             } catch (e: Exception) {
-                System.err.println("[LottieRenderCache] Failed to prepare ${file.name}: ${e.message}")
+                Log.warn("LottieRenderCache", "Failed to prepare ${file.name}: ${e.message}")
                 CrashReporter.reportWarning(
                     "Failed to prepare lottie render cache for ${file.name}",
                     throwable = e,
@@ -449,7 +450,7 @@ object LottieRenderCache {
                 // A fully uniform frame RLE-encodes to a single 8-byte record — if every
                 // frame did, the off-screen capture almost certainly produced blanks
                 if (maxEncodedSize <= UNIFORM_FRAME_MAX_BYTES) {
-                    System.err.println("[LottieRenderCache] WARNING: all frames of $key are uniform — captures may be blank")
+                    Log.warn("LottieRenderCache", "all frames of $key are uniform — captures may be blank")
                 }
             }
             dest.delete()

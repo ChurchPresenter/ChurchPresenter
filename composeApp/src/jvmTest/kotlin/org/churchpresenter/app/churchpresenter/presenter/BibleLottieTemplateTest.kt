@@ -77,6 +77,28 @@ class BibleLottieTemplateTest {
     }
 
     @Test
+    fun `each text slot carries the ascent its font declares, which the player places glyphs by`() {
+        // The generator writes one synthetic font with a 72.6% ascent for every text layer.
+        assertEquals(template.slots.keys, template.slots.keys.intersect(template.textAscents.keys))
+        assertEquals(0.726f, template.textAscents.getValue("Text1"), 0.0001f)
+    }
+
+    @Test
+    fun `an ascent is read per font, and a font that declares none leaves its layer out`() {
+        val fonts = Json.parseToJsonElement(
+            """{"list":[{"fName":"Tall","ascent":90},{"fName":"Plain"}]}""",
+        ).jsonObject
+        fun textLayer(name: String, font: String) = Json.parseToJsonElement(
+            """{"ty":5,"nm":"$name","t":{"d":{"k":[{"s":{"f":"$font","t":"x"}}]}}}""",
+        ).jsonObject
+        val shape = Json.parseToJsonElement("""{"ty":4,"nm":"Band"}""").jsonObject
+
+        val ascents = readTextAscents(fonts, listOf(textLayer("A", "Tall"), textLayer("B", "Plain"), shape))
+
+        assertEquals(mapOf("A" to 0.9f), ascents)
+    }
+
+    @Test
     fun `a plain Lottie with no markers is played in fifths and its documents give the boxes`() {
         val plain = """{"fr":30,"ip":0,"op":100,"w":200,"h":50,"layers":[
             {"ty":5,"nm":"Text1","t":{"d":{"k":[{"s":{"sz":[100,20],"ps":[5,7]}}]}}},

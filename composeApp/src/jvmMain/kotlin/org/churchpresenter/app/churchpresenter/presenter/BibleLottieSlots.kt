@@ -71,6 +71,29 @@ private fun readDocumentSlots(layers: List<JsonObject>): Map<String, LottieSlotB
     }
 }
 
+/**
+ * Each text layer's font ascent, from the file's font list (`fonts.list[].ascent`, a percentage of
+ * the em) matched by the layer's font name (`f`). A layer whose font declares none is left out.
+ */
+internal fun readTextAscents(fonts: JsonObject?, layers: List<JsonObject>): Map<String, Float> {
+    val byName = (fonts?.get("list") as? JsonArray).orEmpty().mapNotNull { it as? JsonObject }.mapNotNull { f ->
+        val name = f["fName"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+        val ascent = f["ascent"]?.jsonPrimitive?.floatOrNull ?: return@mapNotNull null
+        name to ascent / PERCENT_OF_EM
+    }.toMap()
+    return buildMap {
+        layers.forEach { layer ->
+            if (layer["ty"]?.jsonPrimitive?.intOrNull != TEXT_LAYER_TYPE) return@forEach
+            val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@forEach
+            val font = firstTextDocument(layer)?.get("f")?.jsonPrimitive?.contentOrNull ?: return@forEach
+            byName[font]?.let { put(name, it) }
+        }
+    }
+}
+
+/** `fonts.list[].ascent` is a percentage of the em. */
+private const val PERCENT_OF_EM = 100f
+
 private fun firstTextDocument(layer: JsonObject): JsonObject? =
     ((layer["t"] as? JsonObject)?.get("d") as? JsonObject)
         ?.get("k")?.jsonArray?.firstOrNull()?.jsonObject

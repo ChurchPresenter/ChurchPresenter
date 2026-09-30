@@ -36,19 +36,22 @@ internal object ComposeResourceEnvironmentTestSupport {
 
     private val fixedEnglishEnvironment: Any by lazy {
         val languageQualifier = Class.forName("org.jetbrains.compose.resources.LanguageQualifier")
+        val scriptQualifier = Class.forName("org.jetbrains.compose.resources.ScriptQualifier")
         val regionQualifier = Class.forName("org.jetbrains.compose.resources.RegionQualifier")
         val themeQualifier = Class.forName("org.jetbrains.compose.resources.ThemeQualifier")
         val densityQualifier = Class.forName("org.jetbrains.compose.resources.DensityQualifier")
         val resourceEnvironment = Class.forName("org.jetbrains.compose.resources.ResourceEnvironment")
 
         val language = languageQualifier.getConstructor(String::class.java).newInstance("en")
+        // Compose 1.12 added the script ("Latn", "Cyrl", …) between language and region; blank is none.
+        val script = scriptQualifier.getConstructor(String::class.java).newInstance("")
         val region = regionQualifier.getConstructor(String::class.java).newInstance("")
         val theme = themeQualifier.getField("LIGHT").get(null)
         val density = densityQualifier.getField("MDPI").get(null)
 
         resourceEnvironment
-            .getConstructor(languageQualifier, regionQualifier, themeQualifier, densityQualifier)
-            .newInstance(language, region, theme, density)
+            .getConstructor(languageQualifier, scriptQualifier, regionQualifier, themeQualifier, densityQualifier)
+            .newInstance(language, script, region, theme, density)
     }
 
     /** A `KFunction0`-shaped object standing in for `::getSystemEnvironment`. */

@@ -124,7 +124,7 @@ private fun Stage(
             Text(Strings.generating, fontSize = 13.sp, color = Tokens.UnitText)
             return@Box
         }
-        val composition by rememberLottieComposition(key = jsonString) { LottieCompositionSpec.JsonString(jsonString) }
+        val composition by rememberLottieComposition(jsonString) { LottieCompositionSpec.JsonString(jsonString) }
         // The typewriter and the ticker are the player's to drive; the preview drives them the same way.
         val textMotion = rememberPreviewTextMotion(viewModel.config, viewModel.timeline, jsonString)
         val progress by animateLottieCompositionAsState(

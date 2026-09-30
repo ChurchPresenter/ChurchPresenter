@@ -242,7 +242,8 @@ private fun BandLayer(
                 null -> style
                 else -> style.copy(justify = pinned.toJustify())
             }
-            val geometry = SlotGeometry(box, pxPerPoint, singleLine, template.meta.textMotion)
+            val ascent = template.textAscents[name] ?: 0f
+            val geometry = SlotGeometry(box, pxPerPoint, singleLine, template.meta.textMotion, ascent)
             val render = remember(effectiveStyle, text, geometry, measurer) {
                 layoutSlot(BandSlotText(text, effectiveStyle), geometry, measurer)
             }
@@ -308,6 +309,8 @@ private data class SlotGeometry(
     val pxPerPoint: Float,
     val singleLine: Boolean,
     val motion: BandTextMotion,
+    /** The ascent the layer's font declares, as a fraction of the em — 0 when it declares none. */
+    val ascent: Float,
 )
 
 /** The fitted, centred layout of one slot, from its text and style alone. */
@@ -342,7 +345,8 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
     val fitted = fitLottieSlot(SlotFitRequest(text, fitBox, baseSize, trackingPx, singleLine && !isTicker), charWidth)
     val lineHeight = fitted.fontSize * LINE_HEIGHT_FACTOR
     val blockHeight = fitted.lines.size * lineHeight
-    // The player draws the first line's top at `ps.y - fontSize` when it resolves a real face.
+    // The player draws the first line's top at `ps.y - fontSize * (1 - ascent)`, the ascent being
+    // what the file's font list declares for the layer's font (Compottie 2.3 honours it; 2.0 did not).
     val top = box.y + ((box.h - blockHeight) / 2f).coerceAtLeast(0f)
     val shadowScale = style.shadowSizePercent / PERCENT
     val shadowPx = SHADOW_OFFSET_PX * pxPerPoint * shadowScale
@@ -354,7 +358,7 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
         justify = if (isTicker) TextJustify.Left else style.justify,
         box = if (isTicker) box.copy(w = fitted.lineWidthPx + box.w) else box,
         slot = box,
-        position = Offset(box.x, top + fitted.fontSize),
+        position = Offset(box.x, top + fitted.fontSize * (1f - geometry.ascent)),
         lineWidth = fitted.lineWidthPx,
         ticker = isTicker,
         visible = text.isNotEmpty(),
@@ -401,4 +405,5 @@ private fun tickerPosition(template: BibleLottieTemplate, r: SlotRender, seconds
     val offset = (seconds * template.meta.tickerPxPerSecond) % travel
     return Offset(slot.x + slot.w - offset, r.position.y)
 }
+
 
