@@ -110,6 +110,10 @@ internal fun LowerThirdTabScope.LowerThirdBody(modifier: Modifier) {
 
 @Composable
 private fun LowerThirdTabScope.LowerThirdFileList() {
+    // Read once here, in composition, and handed to the list as a fixed copy: read inside the list
+    // builder, a rescan landing mid-measure gave the item count and the items different lists.
+    val lottieFiles = lottieFiles
+    val lottieFilesOrNull = lottieFilesOrNull
     Column(
         modifier = Modifier
             .width(listWidthDp)

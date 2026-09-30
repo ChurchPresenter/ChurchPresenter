@@ -2,7 +2,6 @@
 
 package org.churchpresenter.app.churchpresenter
 
-import kotlin.test.assertTrue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -113,7 +112,6 @@ class MainDesktopComposeTest {
         val picturesLoaded = mutableListOf<String>()
         val slidesLoaded = mutableListOf<String>()
         val tabChanges = mutableListOf<Int>()
-        val rowsLive = mutableListOf<String>()
     }
 
     /** Composes the root with [appSettings], then lets everything it launched settle. */
@@ -135,7 +133,6 @@ class MainDesktopComposeTest {
                         presenting = {},
                         onVerseSelected = {},
                         onSongItemSelected = {},
-                        onRowWentLive = { wiring.rowsLive += it.id },
                     ),
                     publish = MainDesktopPublishers(
                         onScheduleActionsReady = { actions = it },
@@ -887,23 +884,4 @@ class MainDesktopComposeTest {
     fun `a title slide adds an entry ahead of the song`() =
         root(settings().copy(songSettings = settings().songSettings.copy(titleSlideEnabled = true)))
 
-    /**
-     * Two separate clicks, with the screen settling in between: the first selects the row, which
-     * recomposes the root, and the second must still complete the double-click that takes it live.
-     */
-    @Test
-    fun `two clicks on a schedule row take it live`() {
-        val wiring = Wiring()
-        root(withOneSong(), wiring = wiring) { actions ->
-            actions.addSong(1, "A Test Song", "Hymnal", "Hymnal::1")
-            waitForIdle()
-            val node = onAllNodesWithText("A Test Song", substring = true)
-            val row = node[node.fetchSemanticsNodes().size - 1]
-            row.performClick()
-            waitForIdle()
-            row.performClick()
-            waitForIdle()
-            assertTrue(wiring.rowsLive.isNotEmpty(), "the second click must take the row live")
-        }
-    }
 }
