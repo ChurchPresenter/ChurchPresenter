@@ -128,31 +128,37 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = appSettings,
                     presenterManager = presenterManager,
-                    onScheduleActionsReady = { actions = it },
-                    presenting = {},
-                    onVerseSelected = {},
-                    onSongItemSelected = {},
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    onSongsLoaded = { wiring.songsLoaded += it.size },
-                    onScenesChanged = { wiring.scenesChanged += it.size },
-                    onScheduleChanged = { wiring.scheduleChanged += it.size },
-                    onPicturesLoaded = { id, _, _, _ -> wiring.picturesLoaded += id },
-                    onPresentationSlidesLoaded = { id, _, _, _, _, _ -> wiring.slidesLoaded += id },
-                    onTabChange = { wiring.tabChanges += it },
-                    selectPictureImageFlow = flows.selectPicture,
-                    selectSlideFlow = flows.selectSlide,
-                    nextPictureFlow = flows.nextPicture,
-                    previousPictureFlow = flows.previousPicture,
-                    nextSlideFlow = flows.nextSlide,
-                    previousSlideFlow = flows.previousSlide,
-                    remotePresentationPlayPauseFlow = flows.playPause,
-                    remotePresentationLoopToggleFlow = flows.loopToggle,
-                    remotePresentationGotoFlow = flows.goto,
-                    selectBibleVerseFlow = flows.selectBibleVerse,
-                    remoteSelectSongFlow = flows.remoteSelectSong,
-                    remoteSelectPictureFlow = flows.remoteSelectPicture,
-                    remoteSelectPresentationFlow = flows.remoteSelectPresentation,
-                    uploadPresentationFlow = flows.uploadPresentation,
+                    live = LiveOutputCallbacks(
+                        presenting = {},
+                        onVerseSelected = {},
+                        onSongItemSelected = {},
+                    ),
+                    publish = MainDesktopPublishers(
+                        onScheduleActionsReady = { actions = it },
+                        onSongsLoaded = { wiring.songsLoaded += it.size },
+                        onScenesChanged = { wiring.scenesChanged += it.size },
+                        onScheduleChanged = { wiring.scheduleChanged += it.size },
+                        onPicturesLoaded = { id, _, _, _ -> wiring.picturesLoaded += id },
+                        onPresentationSlidesLoaded = { id, _, _, _, _, _ -> wiring.slidesLoaded += id },
+                        onTabChange = { wiring.tabChanges += it },
+                    ),
+                    flows = RemoteControlFlows(
+                        selectPictureImageFlow = flows.selectPicture,
+                        selectSlideFlow = flows.selectSlide,
+                        nextPictureFlow = flows.nextPicture,
+                        previousPictureFlow = flows.previousPicture,
+                        nextSlideFlow = flows.nextSlide,
+                        previousSlideFlow = flows.previousSlide,
+                        remotePresentationPlayPauseFlow = flows.playPause,
+                        remotePresentationLoopToggleFlow = flows.loopToggle,
+                        remotePresentationGotoFlow = flows.goto,
+                        selectBibleVerseFlow = flows.selectBibleVerse,
+                        remoteSelectSongFlow = flows.remoteSelectSong,
+                        remoteSelectPictureFlow = flows.remoteSelectPicture,
+                        remoteSelectPresentationFlow = flows.remoteSelectPresentation,
+                        uploadPresentationFlow = flows.uploadPresentation,
+                    ),
                 )
             }
         }
@@ -427,10 +433,12 @@ class MainDesktopComposeTest {
                     MainDesktop(
                         appSettings = current,
                         presenterManager = PresenterManager(),
-                        presenting = {},
-                        onVerseSelected = {},
-                        onSongItemSelected = {},
                         companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                        live = LiveOutputCallbacks(
+                            presenting = {},
+                            onVerseSelected = {},
+                            onSongItemSelected = {},
+                        ),
                     )
                 }
             }
@@ -459,15 +467,19 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = withOneSong(),
                     presenterManager = PresenterManager(),
-                    presenting = {},
-                    onVerseSelected = {},
-                    onSongItemSelected = {},
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    instanceLinkConnectionStatus = InstanceLinkStatus.CONNECTED,
-                    instanceLinkRole = InstanceLinkRole.CONTROLLED,
-                    instanceLinkFollowingHost = "10.0.0.9",
-                    instanceLinkBibleUpdatedSignal = 1,
-                    instanceLinkSecondaryBibleUpdatedSignal = 1,
+                    live = LiveOutputCallbacks(
+                        presenting = {},
+                        onVerseSelected = {},
+                        onSongItemSelected = {},
+                    ),
+                    link = InstanceLinkBridge(
+                        connectionStatus = InstanceLinkStatus.CONNECTED,
+                        role = InstanceLinkRole.CONTROLLED,
+                        followingHost = "10.0.0.9",
+                        bibleUpdatedSignal = 1,
+                        secondaryBibleUpdatedSignal = 1,
+                    ),
                 )
             }
         }
@@ -481,19 +493,23 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = withOneSong(),
                     presenterManager = PresenterManager(),
-                    presenting = {},
-                    onVerseSelected = {},
-                    onSongItemSelected = {},
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    instanceLinkConnectionStatus = InstanceLinkStatus.CONNECTED,
-                    instanceLinkRole = InstanceLinkRole.CONTROLLER,
-                    instanceLinkFollowingHost = "10.0.0.9",
-                    instanceLinkSendClear = {},
-                    instanceLinkSendProject = {},
-                    instanceLinkSendNextPicture = {},
-                    instanceLinkSendPreviousPicture = {},
-                    instanceLinkSendNextSlide = {},
-                    instanceLinkSendPreviousSlide = {},
+                    live = LiveOutputCallbacks(
+                        presenting = {},
+                        onVerseSelected = {},
+                        onSongItemSelected = {},
+                    ),
+                    link = InstanceLinkBridge(
+                        connectionStatus = InstanceLinkStatus.CONNECTED,
+                        role = InstanceLinkRole.CONTROLLER,
+                        followingHost = "10.0.0.9",
+                        sendClear = {},
+                        sendProject = {},
+                        sendNextPicture = {},
+                        sendPreviousPicture = {},
+                        sendNextSlide = {},
+                        sendPreviousSlide = {},
+                    ),
                 )
             }
         }
@@ -507,13 +523,17 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = withOneSong(),
                     presenterManager = PresenterManager(),
-                    presenting = {},
-                    onVerseSelected = {},
-                    onSongItemSelected = {},
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    instanceLinkConnectionStatus = InstanceLinkStatus.ERROR,
-                    instanceLinkFollowingHost = "10.0.0.9",
-                    instanceLinkNextRetryAtMs = System.currentTimeMillis() + 5_000,
+                    live = LiveOutputCallbacks(
+                        presenting = {},
+                        onVerseSelected = {},
+                        onSongItemSelected = {},
+                    ),
+                    link = InstanceLinkBridge(
+                        connectionStatus = InstanceLinkStatus.ERROR,
+                        followingHost = "10.0.0.9",
+                        nextRetryAtMs = System.currentTimeMillis() + 5_000,
+                    ),
                 )
             }
         }
@@ -603,13 +623,19 @@ class MainDesktopComposeTest {
                     MainDesktop(
                         appSettings = withOneSong(),
                         presenterManager = PresenterManager(),
-                        presenting = {},
-                        onVerseSelected = {},
-                        onSongItemSelected = {},
                         companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                        selectPictureImageFlow = flows.selectPicture,
-                        resolveImageFile = { _, index -> images.getOrNull(index) },
-                        onSlideChanged = { _, _, _, _ -> },
+                        live = LiveOutputCallbacks(
+                            presenting = {},
+                            onVerseSelected = {},
+                            onSongItemSelected = {},
+                        ),
+                        publish = MainDesktopPublishers(
+                            onSlideChanged = { _, _, _, _ -> },
+                        ),
+                        flows = RemoteControlFlows(
+                            selectPictureImageFlow = flows.selectPicture,
+                            resolveImageFile = { _, index -> images.getOrNull(index) },
+                        ),
                     )
                 }
             }
@@ -647,20 +673,26 @@ class MainDesktopComposeTest {
                     MainDesktop(
                         appSettings = appSettings,
                         presenterManager = PresenterManager(),
-                        presenting = {},
-                        onVerseSelected = {},
-                        onSongItemSelected = {},
                         companionSatelliteViewModel = CompanionSatelliteViewModel(),
                         theme = theme,
-                        serverUrl = serverUrl,
-                        qaDisplayUrl = qaDisplayUrl,
-                        tunnelUrl = tunnelUrl,
-                        presentationDisplayUrl = presentationDisplayUrl,
-                        presentationFrozen = presentationFrozen,
-                        connectedInstanceLinkFollowerCount = followers,
                         dialogDismissSignal = dismissSignal,
-                        instanceLinkFollowingHost = followingHost,
-                        instanceLinkBibleUpdatedSignal = bibleSignal,
+                        live = LiveOutputCallbacks(
+                            presenting = {},
+                            onVerseSelected = {},
+                            onSongItemSelected = {},
+                        ),
+                        link = InstanceLinkBridge(
+                            followerCount = followers,
+                            followingHost = followingHost,
+                            bibleUpdatedSignal = bibleSignal,
+                        ),
+                        web = WebAccessState(
+                            serverUrl = serverUrl,
+                            qaDisplayUrl = qaDisplayUrl,
+                            tunnelUrl = tunnelUrl,
+                            presentationDisplayUrl = presentationDisplayUrl,
+                            presentationFrozen = presentationFrozen,
+                        ),
                     )
                 }
             }
@@ -745,13 +777,15 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = withOneSong().copy(hiddenTabs = emptySet()),
                     presenterManager = PresenterManager(),
-                    presenting = {},
-                    onVerseSelected = {},
-                    onSongItemSelected = {},
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                     qaManager = QAManager(),
                     sttManager = STTManager(),
                     statisticsManager = StatisticsManager(),
+                    live = LiveOutputCallbacks(
+                        presenting = {},
+                        onVerseSelected = {},
+                        onSongItemSelected = {},
+                    ),
                 )
             }
         }
@@ -767,33 +801,37 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = withOneSong(),
                     presenterManager = PresenterManager(),
-                    presenting = {},
-                    onVerseSelected = {},
-                    onSongItemSelected = {},
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    instanceLinkConnectionStatus = InstanceLinkStatus.CONNECTED,
-                    instanceLinkRole = InstanceLinkRole.CONTROLLED,
-                    instanceLinkFollowingHost = "10.0.0.9",
-                    instanceLinkRemoteSchedule = listOf(
-                        ScheduleItemDto(
-                            id = "1",
-                            type = "song",
-                            displayText = "A Test Song",
-                            songNumber = 1,
-                            title = "A Test Song",
-                            songbook = "Hymnal",
-                        ),
-                        ScheduleItemDto(
-                            id = "2",
-                            type = "bible",
-                            displayText = "John 3:16",
-                            bookName = "John",
-                            chapter = 3,
-                            verseNumber = 16,
-                        ),
+                    live = LiveOutputCallbacks(
+                        presenting = {},
+                        onVerseSelected = {},
+                        onSongItemSelected = {},
                     ),
-                    instanceLinkFetchSongDetail = { _, _ -> null },
-                    instanceLinkFetchBibleFile = { null },
+                    link = InstanceLinkBridge(
+                        connectionStatus = InstanceLinkStatus.CONNECTED,
+                        role = InstanceLinkRole.CONTROLLED,
+                        followingHost = "10.0.0.9",
+                        remoteSchedule = listOf(
+                            ScheduleItemDto(
+                                id = "1",
+                                type = "song",
+                                displayText = "A Test Song",
+                                songNumber = 1,
+                                title = "A Test Song",
+                                songbook = "Hymnal",
+                            ),
+                            ScheduleItemDto(
+                                id = "2",
+                                type = "bible",
+                                displayText = "John 3:16",
+                                bookName = "John",
+                                chapter = 3,
+                                verseNumber = 16,
+                            ),
+                        ),
+                        fetchSongDetail = { _, _ -> null },
+                        fetchBibleFile = { null },
+                    ),
                 )
             }
         }
@@ -845,4 +883,5 @@ class MainDesktopComposeTest {
     @Test
     fun `a title slide adds an entry ahead of the song`() =
         root(settings().copy(songSettings = settings().songSettings.copy(titleSlideEnabled = true)))
+
 }

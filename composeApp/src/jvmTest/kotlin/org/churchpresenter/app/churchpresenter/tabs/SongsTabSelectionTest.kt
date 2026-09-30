@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -297,4 +298,18 @@ class SongsTabSelectionTest {
             goLive()
             assertNotNull(reports.selectedSection, "choosing the row is what arms it")
         }
+
+    /**
+     * Two separate clicks on the song's row: the first selects it, which recomposes the tab, and the
+     * second must still complete the double-click that sends it live.
+     */
+    @Test
+    fun `two clicks on a song in the list send it live`() = songsTab { _, reports ->
+        val row = onAllNodes(hasText("Amazing Grace"))[0]
+        row.performClick()
+        waitForIdle()
+        row.performClick()
+        waitForIdle()
+        assertEquals(listOf(Presenting.LYRICS), reports.presenting)
+    }
 }

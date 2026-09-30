@@ -26,10 +26,10 @@
 - `tabs/SongsTab.kt` — main UI
 - `viewmodel/SongsViewModel.kt`, `viewmodel/SongSettingsViewModel.kt`, `viewmodel/SongFolderWatcher.kt`
 - `data/Songs.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
-- `viewmodel/SongSearchMatch.kt`, `tabs/SongListPane.kt` — where each search hit matched, and the list that draws it
+- `viewmodel/SongSearchMatch.kt`, `tabs/SongListPane.kt` (with `SongListScope.kt`, `SongTableHeader.kt`, `SongListRows.kt`) — where each search hit matched, and the list that draws it
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
-- `presenter/SongPresenter.kt`
+- `presenter/SongPresenter.kt`, with `SongLook.kt`, `SongFrame.kt`, `SongFitFrame.kt` and `SongSlide*.kt` beside it
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
 - `composables/SongChordPreview.kt` — the editor's chord preview: Transpose, the key's palette and the chord picker
 - `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
@@ -53,7 +53,7 @@
 - **Follow along automatically** — connect a live speech-to-text feed and the app listens for spoken Bible references — stated outright or simply the next verse in a passage being read — and stages or goes live with the matching verse on its own, tiered by confidence so only clear matches jump straight to the screen.
 
 **Source locations:**
-- `tabs/BibleTab.kt` — main UI
+- `tabs/BibleTab.kt` — main UI; its pieces in `tabs/BibleTab*.kt`
 - `tabs/DictionaryTab.kt` — Strong's dictionary UI
 - `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `viewmodel/BibleViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
@@ -69,7 +69,7 @@
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
 - `bible-formats/src/main/kotlin/.../UsfxToSpbConverter.kt`, `XmlToSpbConverter.kt` — the conversions
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
-- `presenter/BiblePresenter.kt`
+- `presenter/BiblePresenter.kt`, with `BibleLook.kt`, `BibleFrame.kt`, `BibleSlide.kt`, `BibleLayouts.kt` and `PresenterBackdrop.kt` beside it
 - `dialogs/tabs/BibleSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/bible/SelectedVerse.kt` (the `:core-models` module)
 - `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
@@ -81,7 +81,7 @@
 - **Presenter notes** — speaker notes from PowerPoint and Keynote flow straight to your stage monitor.
 
 **Source locations:**
-- `tabs/PresentationTab.kt` — main UI
+- `tabs/PresentationTab.kt` — main UI; its pieces in `tabs/PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
 - `viewmodel/PresentationViewModel.kt`
 - `presenter/PresentationPlayer.kt`, `presenter/PresentationPresenter.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
@@ -98,8 +98,8 @@
 - **Subtitles styled per screen** — SRT/WebVTT subtitles take their colour, font, size and position from each output's profile.
 
 **Source locations:**
-- `tabs/PicturesTab.kt` — image slideshow UI
-- `tabs/MediaTab.kt` — audio/video UI
+- `tabs/PicturesTab.kt` — image slideshow UI; its pieces in `tabs/PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
+- `tabs/MediaTab.kt` — audio/video UI; its pieces in `tabs/MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
 - `viewmodel/PicturesViewModel.kt`, `viewmodel/MediaViewModel.kt`, `viewmodel/LocalMediaViewModel.kt`
 - `data/HiddenItemsStore.kt`, `composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
@@ -117,7 +117,7 @@
 - **Animated Bible lower third** — opt in to a Lottie band for scripture: the band slides, wipes, unrolls or fades in on Go Live, each verse types, scrolls like a ticker, fades or slides in as you step through a passage, and everything animates out on Escape. Design it in the built-in Bible band generator, with your Bible fonts, sizes and colors filled in live, for one or two languages.
 
 **Source locations:**
-- `tabs/LowerThird.kt` — main UI
+- `tabs/LowerThird.kt` — main UI; its pieces in `tabs/LowerThird*.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
 - `server/LowerThirdSequencer.kt`
 - `presenter/BibleLottieBand.kt`, `presenter/BibleLottieTemplate.kt`, `presenter/BibleLottieTextFit.kt`, `presenter/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
@@ -129,7 +129,7 @@
 - **Countdown timers** — count down to a duration or to a specific clock time, with custom colors and an end-of-countdown message — perfect for "service starts in…".
 
 **Source locations:**
-- `tabs/AnnouncementsTab.kt` — main UI
+- `tabs/AnnouncementsTab.kt` — main UI; its pieces in `tabs/Announcements*.kt`
 - `viewmodel/AnnouncementsViewModel.kt`
 - `data/settings/AnnouncementsSettings.kt`
 - `presenter/AnnouncementsPresenter.kt`
@@ -145,8 +145,8 @@
 - **NDI sources on the canvas** — receive any NDI source on your network as a layer: a camera from another machine, a graphics feed, an overflow room's output. Pick it from a list of what is sending, or drop to the sender's low-bandwidth proxy for a small layer on a busy network. Needs the same free NDI Runtime as NDI output.
 
 **Source locations:**
-- `tabs/WebTab.kt` — web browser UI
-- `tabs/CanvasTab.kt` — scene compositor UI
+- `tabs/WebTab.kt` — web browser UI; its pieces in `tabs/WebTabScope.kt`, `WebToolbar.kt`, `WebPreview.kt`
+- `tabs/CanvasTab.kt` — scene compositor UI; its pieces in `tabs/CanvasTabScope.kt`, `CanvasLeftPanel.kt`, `CanvasAddSourceMenu.kt`, `CanvasCenterPanel.kt`
 - `viewmodel/SceneViewModel.kt`
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module) — including a scene's second layout and which one an output draws
 - `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`

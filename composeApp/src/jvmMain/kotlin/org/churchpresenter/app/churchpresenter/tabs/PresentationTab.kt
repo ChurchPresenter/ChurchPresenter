@@ -1,57 +1,30 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.PresentationSlidesLoaded
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.draw.alpha
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.items as lazyItems
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Text
-import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,144 +33,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.save_preset
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.ic_stop
-import churchpresenter.composeapp.generated.resources.tooltip_presentation_remote
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
-import churchpresenter.composeapp.generated.resources.auto_scroll_interval
-import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.clear_recents
-import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_skip_next
-import churchpresenter.composeapp.generated.resources.ic_skip_previous
-import churchpresenter.composeapp.generated.resources.loading_slides
-import churchpresenter.composeapp.generated.resources.loop_off
-import churchpresenter.composeapp.generated.resources.loop_on
-import churchpresenter.composeapp.generated.resources.next_image
-import churchpresenter.composeapp.generated.resources.no_file_selected_presentation
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.presentation_arrow_key_hint
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.presentation_clear
-import churchpresenter.composeapp.generated.resources.presentation_freeze_output
-import churchpresenter.composeapp.generated.resources.presentation_unfreeze_output
-import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.select_presentation_file
-import churchpresenter.composeapp.generated.resources.select_presentation_file_button
-import churchpresenter.composeapp.generated.resources.loading_slides_progress
-import churchpresenter.composeapp.generated.resources.presentation_builds_counter
-import churchpresenter.composeapp.generated.resources.presentation_focus_lost
 import churchpresenter.composeapp.generated.resources.media_vlc_required
-import churchpresenter.composeapp.generated.resources.media_vlc_install
-import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
-import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
-import churchpresenter.composeapp.generated.resources.slide_counter
-import churchpresenter.composeapp.generated.resources.slide_counter_with_hidden
 import churchpresenter.composeapp.generated.resources.slide_number
-import churchpresenter.composeapp.generated.resources.presentation_static_note
-import churchpresenter.composeapp.generated.resources.presentation_error_password_protected
-import churchpresenter.composeapp.generated.resources.presentation_error_empty_document
-import churchpresenter.composeapp.generated.resources.presentation_error_library_missing
-import churchpresenter.composeapp.generated.resources.presentation_error_render_failed
-import churchpresenter.composeapp.generated.resources.supported_formats
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.unit_ms
-import churchpresenter.composeapp.generated.resources.unit_s
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SettingsRemote
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.LocalWentLive
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.HIDDEN_TILE_ALPHA
 import org.churchpresenter.app.churchpresenter.composables.HiddenBadge
 import org.churchpresenter.app.churchpresenter.composables.SlideshowHideToggle
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
-import org.churchpresenter.presentationengine.model.LayerSpec
-import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialog
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.core.models.presentation.AnimationType
-import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
-import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window as AwtWindow
 import java.io.File
-import javax.swing.filechooser.FileNameExtensionFilter
-import kotlin.io.path.Path
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.sunken
-import org.churchpresenter.app.churchpresenter.composables.RecentChip
-import org.churchpresenter.theme.raisedHover
 
-private const val MILLIS_PER_SECOND = 1000
-private const val MAX_AUTO_SCROLL_SECONDS = 30
-private const val MIN_TRANSITION_MS = 100
-private const val MAX_TRANSITION_MS = 2000
+internal const val PRESENTATION_MILLIS_PER_SECOND = 1000
+internal const val PRESENTATION_MAX_AUTO_SCROLL_SECONDS = 30
+internal const val PRESENTATION_MIN_TRANSITION_MS = 100
+internal const val PRESENTATION_MAX_TRANSITION_MS = 2000
 
 /**
  * Whether [event] means "go back a slide" in this tab.
@@ -206,12 +88,12 @@ private const val MAX_TRANSITION_MS = 2000
  * `MainDesktop` also claims while a presentation is live, but only then — with the tab focused and
  * nothing presenting, this handler is the one that has to answer it.
  */
-private fun goesBack(shortcuts: ShortcutMap, event: KeyEvent): Boolean =
+internal fun goesBack(shortcuts: ShortcutMap, event: KeyEvent): Boolean =
     shortcuts.matches(ShortcutAction.PRESENTATION_PREVIOUS, event) ||
         shortcuts.matches(ShortcutAction.CLICKER_PREVIOUS, event)
 
 /** The forward counterpart of [goesBack]. */
-private fun goesForward(shortcuts: ShortcutMap, event: KeyEvent): Boolean =
+internal fun goesForward(shortcuts: ShortcutMap, event: KeyEvent): Boolean =
     shortcuts.matches(ShortcutAction.PRESENTATION_NEXT, event) ||
         shortcuts.matches(ShortcutAction.CLICKER_NEXT, event)
 
@@ -248,7 +130,7 @@ fun PresentationTab(
      */
     selectedPresentationItemVersion: Int = 0,
     presenterManager: PresenterManager? = null,
-    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
+    onSlidesLoaded: PresentationSlidesLoaded? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     viewModel: PresentationViewModel = remember { PresentationViewModel(appSettings) },
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
@@ -284,7 +166,7 @@ fun PresentationTab(
     vlcLoadFailed: Boolean = isVlcLoadFailed,
 ) {
     val scope = rememberCoroutineScope()
-    var showRemoteDialog by remember { mutableStateOf(false) }
+    val showRemoteDialogState = remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     // Focus-lost rescue (banner + window-focus watch + AWT heal) — the full, hands-on
     // verified machinery lives in composables/FocusLostRescue.kt; shared with Bible/Songs.
@@ -295,970 +177,87 @@ fun PresentationTab(
     )
     val shortcuts = LocalShortcuts.current
     val wentLive = LocalWentLive.current
-
-    LaunchedEffect(selectedPresentationItem, selectedPresentationItemVersion) {
-        selectedPresentationItem?.let { item ->
-            val file = File(item.filePath)
-            if (file.exists()) {
-                viewModel.loadPresentationByPath(item.filePath)
-                focusRequester.requestFocus()
-            } else if (instanceLinkFetchPresentationSlideBytes != null) {
-                // A mirrored schedule item's local path only exists on the primary's disk (e.g. a
-                // network drive mounted differently, or not mounted at all, here) — fetch bytes over
-                // Instance Link instead, same reasoning as MediaTab's instanceLinkMediaStreamUrl.
-                // item.id is the schedule UUID the primary already maps to its own file-hash id
-                // (CompanionServer._scheduleItemToPresentationId), populated when this exact item was
-                // added to the primary's schedule — which is how it got mirrored to us in the first place.
-                viewModel.loadPresentationFromRemote(
-                    scheduleItemId = item.id,
-                    filePath = item.filePath,
-                    slideCount = item.slideCount,
-                    fetchBytes = { index -> instanceLinkFetchPresentationSlideBytes(item.id, index) }
-                )
-                focusRequester.requestFocus()
-            }
-        }
-    }
-
     val presentationFileDialogTitle = stringResource(Res.string.select_presentation_file)
-
-    // Startup: remove slide caches for presentations not in recents or pinned
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val keepPaths = (RecentPresentationFiles.files + RecentPresentationFiles.pinned).toSet()
-            PresentationViewModel.cleanupOrphanedCaches(keepPaths)
-        }
-    }
-
-    // Fires on every load completion (fresh render or cache hit) — never fires O(N) times per slide
-    LaunchedEffect(viewModel.loadGeneration) {
-        if (viewModel.loadGeneration > 0) {
-            val f = viewModel.selectedPresentation
-            if (f != null && viewModel.slideFiles.isNotEmpty()) {
-                val id = f.absolutePath.hashCode().toUInt().toString(16)
-                onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.slideFiles.toList(), viewModel.slideNotes.toList())
-            }
-            // Arrow-key navigation needs the tab to hold keyboard focus. Previously only the
-            // schedule-item path requested it, so decks opened via the file dialog or the
-            // recents bar had dead arrow keys until the user clicked into a focusable control.
-            focusRequester.requestFocus()
-        }
-    }
-
-    LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {
-        if (viewModel.isPlaying && viewModel.slideFiles.isNotEmpty()) {
-            delay((viewModel.autoScrollInterval * MILLIS_PER_SECOND).toLong())
-            // Auto-play steps through builds too: only when the live slide has no build step
-            // left does the interval move to the next slide (same identity guard as goNext).
-            val deck = viewModel.deck
-            val liveStepAdvanced = deck != null && presenterManager
-                ?.advancePresentationStep(deck, viewModel.selectedSlideIndex) == true
-            if (!liveStepAdvanced) viewModel.nextSlide()
-        }
-    }
-
-    LaunchedEffect(viewModel.selectedSlideIndex, viewModel.slideFiles.size) {
-        val mode = presenterManager?.presentingMode?.value
-        val idx = viewModel.selectedSlideIndex
-        val enterAtLastStep = viewModel.consumeEnteredViaPreviousSlide()
-        val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
-            presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
-        if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
-            val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
-                withContext(Dispatchers.IO) {
-                    try {
-                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-            }
-            val nextFile = viewModel.nextShownSlideIndex(idx)?.let { viewModel.slideFiles.getOrNull(it) }
-            val nextBitmap = nextFile?.let { f ->
-                withContext(Dispatchers.IO) {
-                    try {
-                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-            }
-            presenterManager.setSelectedSlide(bitmap)
-            presenterManager.setNextSlide(nextBitmap)
-            presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
-            // Animated playback: point the player at the new slide (no-op → static path
-            // when the slide has no timeline or the deck is remote/unparsed).
-            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx, enterAtLastStep) }
-                ?: presenterManager.clearPresentationPlayback()
-        }
-    }
-
-    // Hiding or showing a slide can change which one comes next, so the stage monitor's "next"
-    // is refreshed -- and only that. Re-pushing the live slide here restarted its animation.
-    LaunchedEffect(viewModel.hiddenSlides) {
-        val onPresentation = presenterManager?.presentingMode?.value == Presenting.PRESENTATION ||
-            presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
-        if (!onPresentation) return@LaunchedEffect
-        val nextFile = viewModel.nextShownSlideIndex()?.let { viewModel.slideFiles.getOrNull(it) }
-        val nextBitmap = nextFile?.let { f ->
-            withContext(Dispatchers.IO) {
-                try {
-                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                } catch (_: Exception) {
-                    null
-                }
-            }
-        }
-        presenterManager.setNextSlide(nextBitmap)
-    }
-
-    LaunchedEffect(viewModel.animationType, viewModel.transitionDuration) {
-        presenterManager?.setAnimationType(viewModel.animationType)
-        presenterManager?.setTransitionDuration(viewModel.transitionDuration.toInt())
-    }
-
-    // Step-aware navigation: while the live output is showing exactly the selected slide of the
-    // selected deck, next/prev first advances/rewinds its build steps (PowerPoint click
-    // semantics). The identity/visibility guard lives in PresenterManager — in every other
-    // situation (not live, cleared display, different deck/slide) arrows change slides.
-    val goNext: () -> Unit = {
-        val deck = viewModel.deck
-        val stepped = deck != null && presenterManager
-            ?.advancePresentationStep(deck, viewModel.selectedSlideIndex) == true
-        if (!stepped) viewModel.nextSlide(onInstanceLinkSendNextSlide)
-    }
-    val goPrevious: () -> Unit = {
-        val deck = viewModel.deck
-        val stepped = deck != null && presenterManager
-            ?.rewindPresentationStep(deck, viewModel.selectedSlideIndex) == true
-        if (!stepped) viewModel.previousSlide(onInstanceLinkSendPreviousSlide)
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .testTag("presentation_root")
-            .focusRequester(focusRequester)
-            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
-            .focusRescuePressHook(focusRescue)
-            .focusable()
-            .onKeyEvent { keyEvent ->
-                if (keyEvent.type != KeyEventType.KeyDown) return@onKeyEvent false
-                if (viewModel.slideFiles.isEmpty()) {
-                    // Instance Link Controller mode: next/prev must still reach the primary's own
-                    // live presentation even though this Controller's own slide list is empty — the
-                    // normal case, since Controller mode doesn't mirror the primary's content.
-                    val hasInstanceLinkNav = onInstanceLinkSendNextSlide != null || onInstanceLinkSendPreviousSlide != null
-                    return@onKeyEvent if (hasInstanceLinkNav) {
-                        when {
-                            goesBack(shortcuts, keyEvent) -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
-                            goesForward(shortcuts, keyEvent) -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
-                            else -> false
-                        }
-                    } else false
-                }
-                when {
-                    goesBack(shortcuts, keyEvent) -> { goPrevious(); true }
-                    goesForward(shortcuts, keyEvent) -> { goNext(); true }
-                    shortcuts.matches(ShortcutAction.PRESENTATION_PLAY_PAUSE, keyEvent) -> { viewModel.togglePlayPause(); true }
-                    // Clicker blank-screen button ('b' or '.' depending on model): toggle the
-                    // same Blank Output state as the eye button — a truly blank output
-                    // (PowerPoint's own 'B'), NOT Clear Display, which shows the configured
-                    // background instead.
-                    shortcuts.matches(ShortcutAction.PRESENTATION_BLANK, keyEvent) -> {
-                        if (presenterManager?.presentingMode?.value == Presenting.PRESENTATION) {
-                            onFreezeToggle()
-                            true
-                        } else false
-                    }
-                    else -> false
-                }
-            }
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val tab = remember(
+        hostWindow, appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextSlide,
+        onInstanceLinkSendPreviousSlide, instanceLinkFetchPresentationSlideBytes, selectedPresentationItem,
+        selectedPresentationItemVersion, presenterManager, onSlidesLoaded, onSettingsChange, viewModel, tunnelStatus,
+        tunnelUrl, serverUrl, presentationDisplayUrl, onPresentationDisplayUrlChanged, onStartTunnel, onStopTunnel,
+        presentationFrozen, onFreezeToggle, onClearPresentation, vlcAvailable, vlcArchMismatch, vlcLoadFailed, scope,
+        focusRequester, focusRescue, shortcuts, wentLive, presentationFileDialogTitle, showRemoteDialogState
     ) {
-        Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
-            // ── File bar ──────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                RaisedButton(
-                    onClick = {
-                        scope.launch {
-                            val allFilter =
-                                FileNameExtensionFilter("All Presentation Files", "ppt", "pptx", "key", "pdf")
-                            val pptFilter = FileNameExtensionFilter("PowerPoint Files (*.ppt, *.pptx)", "ppt", "pptx")
-                            val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
-                            val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
-                            val files = FileChooser.platformInstance.chooseMultiple(
-                                path = Path(appSettings.presentationStorageDirectory),
-                                filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
-                                title = presentationFileDialogTitle,
-                                selectDirectory = false
-                            )
-                            files?.forEach { file ->
-                                viewModel.addPresentation(file.toFile())
-                                RecentPresentationFiles.add(file.toFile().absolutePath)
-                            }
-                        }
-                    },
-                    modifier = Modifier.height(32.dp),
-                    shape = AppShape(7.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-                ) {
-                    Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
-                    Spacer(Modifier.width(7.dp))
-                    Text(
-                        stringResource(Res.string.select_presentation_file_button),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
-                Text(
-                    text = viewModel.selectedPresentationDisplayName
-                        ?: stringResource(Res.string.no_file_selected_presentation),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (viewModel.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                }
-                if (viewModel.isLoading && viewModel.totalSlides > 0) {
-                    Text(
-                        text = stringResource(Res.string.loading_slides_progress, viewModel.slideFiles.size, viewModel.totalSlides),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                ActionIconButton(
-                    onClick = { showRemoteDialog = true },
-                    tooltipText = stringResource(Res.string.tooltip_presentation_remote),
-                    icon = Icons.Default.SettingsRemote,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                if (presenterManager != null) {
-                    ActionIconButton(
-                        onClick = onFreezeToggle,
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        tooltipText = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
-                        icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = if (presentationFrozen) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
-                ActionIconButton(
-                    onClick = { viewModel.clearPresentations(); onClearPresentation() },
-                    enabled = viewModel.slideFiles.isNotEmpty(),
-                    tooltipText = stringResource(Res.string.presentation_clear),
-                    painter = painterResource(Res.drawable.ic_stop),
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                )
-                if (onSavePreset != null) {
-                    SavePresetButton(
-                        onClick = {
-                            val f = viewModel.selectedPresentation ?: return@SavePresetButton
-                            onSavePreset(
-                                f.absolutePath,
-                                f.nameWithoutExtension,
-                                viewModel.slideFiles.size,
-                                f.extension.lowercase(),
-                            )
-                        },
-                        enabled = viewModel.selectedPresentation != null,
-                        tooltipText = stringResource(Res.string.save_preset)
-                    )
-                }
-                if (onAddToSchedule != null) {
-                    AddToScheduleButton(
-                        onClick = {
-                            val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
-                            onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
-                        },
-                        enabled = viewModel.selectedPresentation != null,
-                        tooltipText = stringResource(Res.string.add_to_schedule)
-                    )
-                }
-                if (presenterManager != null) {
-                    GoLiveButton(
-                        onClick = {
-                            val idx = viewModel.selectedSlideIndex
-                            scope.launch {
-                                val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
-                                    withContext(Dispatchers.IO) {
-                                        try {
-                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                        } catch (_: Exception) {
-                                            null
-                                        }
-                                    }
-                                }
-                                val nextFile = viewModel.nextShownSlideIndex(idx)
-                                    ?.let { viewModel.slideFiles.getOrNull(it) }
-                                val nextBitmap = nextFile?.let { f ->
-                                    withContext(Dispatchers.IO) {
-                                        try {
-                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                        } catch (_: Exception) {
-                                            null
-                                        }
-                                    }
-                                }
-                                presenterManager.setSelectedSlide(bitmap)
-                                presenterManager.setNextSlide(nextBitmap)
-                                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
-                            }
-                            presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
-                            presenterManager.setShowPresenterWindow(true)
-                            viewModel.selectedPresentation?.let { f ->
-                                wentLive(presentationRow(f, viewModel.slideFiles.size))
-                            }
-                            viewModel.selectedPresentation?.let { f ->
-                                onInstanceLinkSendProject?.invoke(
-                                    ScheduleItem.PresentationItem(
-                                        id = java.util.UUID.randomUUID().toString(),
-                                        filePath = f.absolutePath,
-                                        fileName = f.nameWithoutExtension,
-                                        slideCount = viewModel.slideFiles.size,
-                                        fileType = f.extension.lowercase()
-                                    )
-                                )
-                            }
-                        },
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        tooltipText = stringResource(Res.string.go_live)
-                    )
-                }
-            }
-
-            // ── Recent files bar ──────────────────────────────────────────
-            val recentOrdered = RecentPresentationFiles.pinned + RecentPresentationFiles.files.filter { it !in RecentPresentationFiles.pinned }
-            if (recentOrdered.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.recent),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        KeyIconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                            Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                        }
-                    }
-                    LazyRow(
-                        modifier = Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        lazyItems(recentOrdered) { path ->
-                            val isPinned = path in RecentPresentationFiles.pinned
-                            val isActive = viewModel.selectedPresentationDisplayPath == path
-                            RecentChip(
-                                name = File(path).name,
-                                isActive = isActive,
-                                isPinned = isPinned,
-                                onOpen = {
-                                    val f = File(path)
-                                    if (f.exists()) {
-                                        viewModel.addPresentation(f)
-                                        RecentPresentationFiles.add(path)
-                                    }
-                                },
-                                onTogglePin = { RecentPresentationFiles.togglePin(path) },
-                            )
-                        }
-                    }
-                }
-            }
-
-            // ── Playback controls bar ─────────────────────────────────────
-            // Adaptive shortcut hint: inline at the end of the controls bar when it fits on one
-            // line there, otherwise on its own full-width row below the bar — never ellipsized.
-            // Built from the live bindings so a rebind is reflected here. Empty when the user has
-            // unbound all three, which both render sites below treat as "draw no hint at all" —
-            // a hint whose keys do nothing is worse than none.
-            val slideLabel = shortcuts.pairLabel(ShortcutAction.PRESENTATION_PREVIOUS, ShortcutAction.PRESENTATION_NEXT)
-            val playLabel = shortcuts.label(ShortcutAction.PRESENTATION_PLAY_PAUSE)
-            val blankLabel = shortcuts.label(ShortcutAction.PRESENTATION_BLANK)
-            val hintText = if (slideLabel.isEmpty() && playLabel.isEmpty() && blankLabel.isEmpty()) {
-                ""
-            } else {
-                stringResource(Res.string.presentation_arrow_key_hint, slideLabel, playLabel, blankLabel)
-            }
-            val hintStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp)
-            val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            var hintOnOwnRow by remember { mutableStateOf(false) }
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 52.dp)
-                    .padding(horizontal = 16.dp, vertical = 5.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                // Transport (inner gap: 4dp)
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        KeyIconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
-                            Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        }
-                    }
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        RaisedIconButton(
-                            onClick = { viewModel.togglePlayPause() },
-                            enabled = viewModel.slideFiles.isNotEmpty(),
-                            modifier = Modifier.size(38.dp),
-                            shape = CircleShape,
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Icon(painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), modifier = Modifier.size(15.dp))
-                        }
-                    }
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        KeyIconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
-                            Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        }
-                    }
-                }
-
-                if (viewModel.slideFiles.isNotEmpty()) {
-                    val hiddenCount = viewModel.hiddenSlides.count { it in viewModel.slideFiles.indices }
-                    Text(
-                        text = if (hiddenCount == 0) {
-                            stringResource(
-                                Res.string.slide_counter,
-                                viewModel.selectedSlideIndex + 1,
-                                viewModel.slideFiles.size,
-                            )
-                        } else {
-                            stringResource(
-                                Res.string.slide_counter_with_hidden,
-                                viewModel.selectedSlideIndex + 1,
-                                viewModel.slideFiles.size,
-                                hiddenCount,
-                            )
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        modifier = Modifier.widthIn(min = 60.dp)
-                    )
-                    // Build progress of the live animated slide (only shown when it has builds).
-                    val liveFrame = presenterManager?.presentationFrame?.value
-                    if (liveFrame != null && liveFrame.stepCount > 0 && liveFrame.slideIndex == viewModel.selectedSlideIndex) {
-                        Text(
-                            text = stringResource(Res.string.presentation_builds_counter, liveFrame.completedSteps, liveFrame.stepCount),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                            modifier = Modifier.widthIn(min = 60.dp)
-                        )
-                    }
-                }
-
-                // Loop button
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    KeyIconButton(
-                        onClick = {
-                            viewModel.isLooping = !viewModel.isLooping
-                            onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping)) }
-                        },
-                        modifier = Modifier.size(28.dp),
-                        colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ) else IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                        )
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.ic_refresh),
-                            contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                }
-
-                // Divider
-                Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-                // Clickable display boxes + animation dropdown
-                var editingInterval by remember { mutableStateOf(false) }
-                var editingTransition by remember { mutableStateOf(false) }
-                var intervalInput by remember(appSettings.presentationSettings.autoScrollInterval) {
-                    mutableStateOf(appSettings.presentationSettings.autoScrollInterval.toInt().toString())
-                }
-                var transitionInput by remember(appSettings.presentationSettings.transitionDuration) {
-                    mutableStateOf(appSettings.presentationSettings.transitionDuration.toInt().toString())
-                }
-
-                Column(
-                    modifier = Modifier
-                        .height(42.dp)
-                        .width(170.dp)
-                        .sunken(AppShape(8.dp), elevationPalette())
-                        .clickable { editingInterval = true }
-                        .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        stringResource(Res.string.auto_scroll_interval).uppercase(),
-                        fontSize = 10.sp,
-                        lineHeight = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(1.dp))
-                    Text(
-                        "${appSettings.presentationSettings.autoScrollInterval.toInt()} " +
-                            stringResource(Res.string.unit_s),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-                if (editingInterval) {
-                    AlertDialog(
-                        onDismissRequest = { editingInterval = false },
-                        title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                        text = {
-                            SunkenOutlinedTextField(
-                                value = intervalInput,
-                                onValueChange = { intervalInput = it },
-                                suffix = { Text(stringResource(Res.string.unit_s)) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                        },
-                        confirmButton = {
-                            GhostButton(shape = AppShape(6.dp), onClick = {
-                                intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
-                                    viewModel.autoScrollInterval = v.toFloat()
-                                    onSettingsChange { s ->
-                                        s.copy(
-                                            presentationSettings = s.presentationSettings.copy(
-                                                autoScrollInterval = v.toFloat()
-                                            )
-                                        )
-                                    }
-                                }
-                                editingInterval = false
-                            }) { Text(stringResource(Res.string.ok)) }
-                        },
-                        dismissButton = {
-                            GhostButton(shape = AppShape(6.dp), onClick = { editingInterval = false }) {
-                                Text(stringResource(Res.string.cancel))
-                            }
-                        }
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .height(42.dp)
-                        .width(170.dp)
-                        .sunken(AppShape(8.dp), elevationPalette())
-                        .clickable { editingTransition = true }
-                        .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        stringResource(Res.string.transition_duration).uppercase(),
-                        fontSize = 10.sp,
-                        lineHeight = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(1.dp))
-                    Text(
-                        "${appSettings.presentationSettings.transitionDuration.toInt()} " +
-                            stringResource(Res.string.unit_ms),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-                if (editingTransition) {
-                    AlertDialog(
-                        onDismissRequest = { editingTransition = false },
-                        title = { Text(stringResource(Res.string.transition_duration)) },
-                        text = {
-                            SunkenOutlinedTextField(
-                                value = transitionInput,
-                                onValueChange = { transitionInput = it },
-                                suffix = { Text(stringResource(Res.string.unit_ms)) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-                        },
-                        confirmButton = {
-                            GhostButton(shape = AppShape(6.dp), onClick = {
-                                transitionInput.toIntOrNull()
-                                    ?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)
-                                    ?.let { v ->
-                                    viewModel.transitionDuration = v.toFloat()
-                                    onSettingsChange { s ->
-                                        s.copy(
-                                            presentationSettings = s.presentationSettings.copy(
-                                                transitionDuration = v.toFloat()
-                                            )
-                                        )
-                                    }
-                                }
-                                editingTransition = false
-                            }) { Text(stringResource(Res.string.ok)) }
-                        },
-                        dismissButton = {
-                            GhostButton(shape = AppShape(6.dp), onClick = { editingTransition = false }) {
-                                Text(stringResource(Res.string.cancel))
-                            }
-                        }
-                    )
-                }
-
-                val crossfadeText = stringResource(Res.string.animation_crossfade)
-                val fadeText = stringResource(Res.string.animation_fade)
-                val slideLeftText = stringResource(Res.string.animation_slide_left)
-                val slideRightText = stringResource(Res.string.animation_slide_right)
-                val noneText = stringResource(Res.string.animation_none)
-                val currentAnimationLabel = when (appSettings.presentationSettings.animationType) {
-                    Constants.ANIMATION_FADE -> fadeText
-                    Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
-                    Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
-                    Constants.ANIMATION_NONE -> noneText
-                    else -> crossfadeText
-                }
-                DropdownSelector(
-                    label = stringResource(Res.string.animation_type),
-                    items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
-                    selected = currentAnimationLabel,
-                    onSelectedChange = { selected ->
-                        viewModel.animationType = when (selected) {
-                            fadeText -> AnimationType.FADE
-                            slideLeftText -> AnimationType.SLIDE_LEFT
-                            slideRightText -> AnimationType.SLIDE_RIGHT
-                            noneText -> AnimationType.NONE
-                            else -> AnimationType.CROSSFADE
-                        }
-                        onSettingsChange { s ->
-                            s.copy(presentationSettings = s.presentationSettings.copy(animationType = when (selected) {
-                                fadeText -> Constants.ANIMATION_FADE
-                                slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
-                                slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
-                                noneText -> Constants.ANIMATION_NONE
-                                else -> Constants.ANIMATION_CROSSFADE
-                            }))
-                        }
-                    }
-                )
-
-                // Measuring slot: takes the leftover width of the bar's last flow line and only
-                // renders the hint here when the whole text fits it on a single line. The Box
-                // stays in the flow either way, so the width measurement can't oscillate.
-                // (Deliberately NOT BoxWithConstraints — FlowRow needs children's intrinsic
-                // widths for line breaking, which SubcomposeLayout-based components can't give.)
-                val textMeasurer = rememberTextMeasurer()
-                var hintSlotWidthPx by remember { mutableStateOf(-1) }
-                val fitsInline = remember(hintText, hintStyle, hintSlotWidthPx) {
-                    hintSlotWidthPx >= 0 && !textMeasurer.measure(
-                        text = hintText,
-                        style = hintStyle,
-                        softWrap = false,
-                        maxLines = 1,
-                        constraints = Constraints(maxWidth = hintSlotWidthPx)
-                    ).didOverflowWidth
-                }
-                LaunchedEffect(fitsInline, hintSlotWidthPx) {
-                    if (hintSlotWidthPx >= 0) hintOnOwnRow = !fitsInline
-                }
-                Box(modifier = Modifier.weight(1f).onSizeChanged { hintSlotWidthPx = it.width }) {
-                    if (fitsInline && hintText.isNotEmpty()) {
-                        Text(text = hintText, style = hintStyle, color = hintColor, maxLines = 1)
-                    }
-                }
-
-            }
-            if (hintOnOwnRow && hintText.isNotEmpty()) {
-                Text(
-                    text = hintText,
-                    style = hintStyle,
-                    color = hintColor,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 6.dp)
-                )
-            }
-        }
-        // ── Slide content + right sidebar ────────────────────────────
-        Row(modifier = Modifier.fillMaxSize()) {
-            // ── Left: slide grid / states ────────────────────────────
-            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                if (viewModel.slideFiles.isNotEmpty()) {
-                    // Embedded video degrades gracefully with no VLC (the slide just shows its
-                    // static poster forever, see EmbeddedVideoDecoder.start()) — this banner only
-                    // tells the operator why, so it's not a silent surprise during a live service.
-                    val deckHasVideo = viewModel.deck?.slides
-                        ?.any { slide -> slide.layers.any { it is LayerSpec.Media } } == true
-                    var vlcBannerDismissed by remember(viewModel.loadGeneration) { mutableStateOf(false) }
-                    if (deckHasVideo && !vlcAvailable && !vlcBannerDismissed) {
-                        VlcMissingBanner(
-                            detail = when {
-                                vlcArchMismatch -> stringResource(Res.string.media_vlc_arch_mismatch)
-                                vlcLoadFailed -> stringResource(Res.string.media_vlc_load_failed)
-                                else -> stringResource(Res.string.media_vlc_install)
-                            },
-                            onDismiss = { vlcBannerDismissed = true }
-                        )
-                    }
-                    // Focus-lost rescue: arrow keys and clicker keys only reach this tab's
-                    // key handler while something inside the tab holds keyboard focus AND the
-                    // window itself is focused. One click on the banner brings both back.
-                    FocusLostBanner(focusRescue, stringResource(Res.string.presentation_focus_lost))
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 200.dp),
-                        modifier = Modifier.weight(1f).fillMaxWidth()
-                            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-                            .bibleListCard()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp),
-                        contentPadding = PaddingValues(vertical = 18.dp)
-                    ) {
-                        itemsIndexed(viewModel.slideFiles) { index, slideFile ->
-                            // Decode off the composition thread — big decks scrolled fast used
-                            // to jank the whole UI decoding full-res JPEGs during layout.
-                            // slideFile can be deleted out from under this (removePresentation
-                            // invalidates the shared disk cache synchronously, before slideFiles
-                            // is cleared), so a missing/corrupt file just stays a blank thumbnail
-                            // instead of crashing the grid.
-                            val bitmap by produceState<ImageBitmap?>(initialValue = null, slideFile) {
-                                value = withContext(Dispatchers.IO) {
-                                    try {
-                                        org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
-                                    } catch (_: Exception) {
-                                        null
-                                    }
-                                }
-                            }
-                            SlideThumbnail(
-                                slide = bitmap,
-                                slideNumber = index + 1,
-                                buildCount = viewModel.deck?.slides?.getOrNull(index)?.timeline?.stepCount ?: 0,
-                                isSelected = viewModel.selectedSlideIndex == index,
-                                isHidden = index in viewModel.hiddenSlides,
-                                onToggleHidden = { viewModel.toggleSlideHidden(index) },
-                                onClick = {
-                                    viewModel.selectSlide(index)
-                                    // Keep arrow keys working after a mouse selection.
-                                    focusRequester.requestFocus()
-                                },
-                                onDoubleClick = {
-                                    viewModel.selectSlide(index)
-                                    if (presenterManager != null) {
-                                        scope.launch {
-                                            val cur = viewModel.slideFiles.getOrNull(index)?.let { f ->
-                                                withContext(Dispatchers.IO) {
-                                                    try {
-                                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                                    } catch (_: Exception) {
-                                                        null
-                                                    }
-                                                }
-                                            }
-                                            val nextFile = viewModel.nextShownSlideIndex(index)
-                                                ?.let { viewModel.slideFiles.getOrNull(it) }
-                                            val next = nextFile?.let { f ->
-                                                withContext(Dispatchers.IO) {
-                                                    try {
-                                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                                    } catch (_: Exception) {
-                                                        null
-                                                    }
-                                                }
-                                            }
-                                            presenterManager.setSelectedSlide(cur)
-                                            presenterManager.setNextSlide(next)
-                                            presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
-                                        }
-                                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                                        viewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
-                                        presenterManager.setShowPresenterWindow(true)
-                                        viewModel.selectedPresentation?.let { f ->
-                                            wentLive(presentationRow(f, viewModel.slideFiles.size))
-                                        }
-                                        viewModel.selectedPresentation?.let { f ->
-                                            onInstanceLinkSendProject?.invoke(
-                                                ScheduleItem.PresentationItem(
-                                                    id = java.util.UUID.randomUUID().toString(),
-                                                    filePath = f.absolutePath,
-                                                    fileName = f.nameWithoutExtension,
-                                                    slideCount = viewModel.slideFiles.size,
-                                                    fileType = f.extension.lowercase()
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    }
-                } else if (viewModel.selectedPresentation != null) {
-                    val currentLoadError = viewModel.loadError
-                    Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        if (!viewModel.isLoading && currentLoadError != null) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(
-                                    text = stringResource(
-                                        when (currentLoadError) {
-                                            PresentationLoadError.PASSWORD_PROTECTED -> Res.string.presentation_error_password_protected
-                                            PresentationLoadError.EMPTY_DOCUMENT -> Res.string.presentation_error_empty_document
-                                            PresentationLoadError.LIBRARY_MISSING -> Res.string.presentation_error_library_missing
-                                            PresentationLoadError.RENDER_FAILED -> Res.string.presentation_error_render_failed
-                                        }
-                                    ),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.error,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 32.dp)
-                                )
-                            }
-                        } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                                Text(stringResource(Res.string.loading_slides), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                            }
-                        }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier.weight(1f).fillMaxWidth()
-                            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-                            .bibleListCard(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(stringResource(Res.string.select_presentation_file), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                            Text(stringResource(Res.string.supported_formats), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
-                            Text(
-                                stringResource(Res.string.presentation_static_note),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 32.dp)
-                            )
-                        }
-                    }
-                }
-
-                // Multi-file chip row
-                if (viewModel.presentations.size > 1) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        viewModel.presentations.forEach { f ->
-                            val palette = elevationPalette()
-                            val openFill = if (viewModel.selectedPresentation == f) palette.selected else palette.key
-                            Row(
-                                modifier = Modifier
-                                    .raisedHover(AppShape(8.dp), openFill, palette, lift = 2.dp)
-                                    .clickable { viewModel.selectPresentation(f) }
-                                    .padding(horizontal = 10.dp, vertical = 5.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Text(
-                                    f.nameWithoutExtension,
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                    color = openFill.ink,
-                                    maxLines = 1
-                                )
-                                KeyIconButton(onClick = {
-                                    val inRecents = f.absolutePath in RecentPresentationFiles.files
-                                    val inPinned = f.absolutePath in RecentPresentationFiles.pinned
-                                    viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
-                                }, modifier = Modifier.size(16.dp)) {
-                                    Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.remove), modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showRemoteDialog) {
-        PresentationRemoteDialog(
-            settings = appSettings,
+        PresentationTabScope(
+            hostWindow = hostWindow,
+            appSettings = appSettings,
+            onAddToSchedule = onAddToSchedule,
+            onSavePreset = onSavePreset,
+            onInstanceLinkSendProject = onInstanceLinkSendProject,
+            onInstanceLinkSendNextSlide = onInstanceLinkSendNextSlide,
+            onInstanceLinkSendPreviousSlide = onInstanceLinkSendPreviousSlide,
+            instanceLinkFetchPresentationSlideBytes = instanceLinkFetchPresentationSlideBytes,
+            selectedPresentationItem = selectedPresentationItem,
+            selectedPresentationItemVersion = selectedPresentationItemVersion,
+            presenterManager = presenterManager,
+            onSlidesLoaded = onSlidesLoaded,
             onSettingsChange = onSettingsChange,
-            serverUrl = serverUrl,
-            apiKeyEnabled = appSettings.serverSettings.apiKeyEnabled,
-            apiKey = appSettings.serverSettings.apiKey,
+            viewModel = viewModel,
             tunnelStatus = tunnelStatus,
             tunnelUrl = tunnelUrl,
+            serverUrl = serverUrl,
             presentationDisplayUrl = presentationDisplayUrl,
             onPresentationDisplayUrlChanged = onPresentationDisplayUrlChanged,
             onStartTunnel = onStartTunnel,
             onStopTunnel = onStopTunnel,
-            onDismiss = { showRemoteDialog = false }
+            presentationFrozen = presentationFrozen,
+            onFreezeToggle = onFreezeToggle,
+            onClearPresentation = onClearPresentation,
+            vlcAvailable = vlcAvailable,
+            vlcArchMismatch = vlcArchMismatch,
+            vlcLoadFailed = vlcLoadFailed,
+            scope = scope,
+            focusRequester = focusRequester,
+            focusRescue = focusRescue,
+            shortcuts = shortcuts,
+            wentLive = wentLive,
+            presentationFileDialogTitle = presentationFileDialogTitle,
+            showRemoteDialogState = showRemoteDialogState,
         )
+    }
+    with(tab) {
+        PresentationLoadEffects()
+        PresentationLiveEffects()
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .testTag("presentation_root")
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+                .focusRescuePressHook(focusRescue)
+                .focusable()
+                .onKeyEvent { keyEvent -> handleKey(keyEvent) }
+        ) {
+            PresentationTopBar()
+            PresentationBody()
+        }
+
+        if (showRemoteDialog) {
+            PresentationRemoteDialog(
+                settings = appSettings,
+                onSettingsChange = onSettingsChange,
+                serverUrl = serverUrl,
+                apiKeyEnabled = appSettings.serverSettings.apiKeyEnabled,
+                apiKey = appSettings.serverSettings.apiKey,
+                tunnelStatus = tunnelStatus,
+                tunnelUrl = tunnelUrl,
+                presentationDisplayUrl = presentationDisplayUrl,
+                onPresentationDisplayUrlChanged = onPresentationDisplayUrlChanged,
+                onStartTunnel = onStartTunnel,
+                onStopTunnel = onStopTunnel,
+                onDismiss = { showRemoteDialog = false }
+            )
+        }
     }
 }
 
@@ -1266,7 +265,7 @@ fun PresentationTab(
  *  the slide itself already degrades gracefully to a static poster (see EmbeddedVideoDecoder),
  *  this only explains why to the operator. Resets per deck load via the caller's `remember` key. */
 @Composable
-private fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+internal fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         color = MaterialTheme.colorScheme.tertiaryContainer,
@@ -1292,7 +291,7 @@ private fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: Mo
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SlideThumbnail(
+internal fun SlideThumbnail(
     slide: ImageBitmap?,
     slideNumber: Int,
     buildCount: Int = 0,
@@ -1352,7 +351,11 @@ private fun SlideThumbnail(
                     fontSize = 11.5.sp,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
                 ),
-                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f)
+                },
                 maxLines = 1
             )
             SlideshowHideToggle(hidden = isHidden, position = slideNumber - 1, onToggle = onToggleHidden)
@@ -1361,7 +364,7 @@ private fun SlideThumbnail(
 }
 
 /** The open deck as the schedule row that identifies it -- the same shape Add to Schedule and Save Preset build. */
-private fun presentationRow(file: File, slideCount: Int): ScheduleItem.PresentationItem =
+internal fun presentationRow(file: File, slideCount: Int): ScheduleItem.PresentationItem =
     ScheduleItem.PresentationItem(
         id = java.util.UUID.randomUUID().toString(),
         filePath = file.absolutePath,

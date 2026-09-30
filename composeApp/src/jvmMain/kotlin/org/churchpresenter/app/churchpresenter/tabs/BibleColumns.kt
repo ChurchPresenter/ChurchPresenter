@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -452,6 +453,9 @@ private fun VerseRow(
     val (hover, hovered) = rememberRowHover()
     val colors = bibleRowColors(isSelected, hovered)
     val numberInk = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    // Read through state, not keyed on: a new callback must not restart the gesture between the two
+    // clicks of a double-click.
+    val currentOnPointerAction by rememberUpdatedState(onPointerAction)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -468,14 +472,14 @@ private fun VerseRow(
             color = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .weight(1f)
-                .pointerInput(onPointerAction) {
+                .pointerInput(Unit) {
                     var lastClickTime = 0L
                     awaitPointerEventScope {
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Main)
                             if (event.type != PointerEventType.Press) continue
                             val mods = event.keyboardModifiers
-                            onPointerAction(
+                            currentOnPointerAction(
                                 when {
                                     event.button?.isSecondary == true -> VerseRowAction.RIGHT
                                     mods.isCtrlPressed || mods.isMetaPressed -> VerseRowAction.CTRL

@@ -1,0 +1,231 @@
+package org.churchpresenter.app.churchpresenter
+
+import org.churchpresenter.app.churchpresenter.dialogs.text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.key.type
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.remote_action_clear_display
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
+import org.churchpresenter.calendar.CalendarFileWatcher
+import org.churchpresenter.calendar.seedCalendarFolder
+import org.churchpresenter.calendar.CueRunner
+import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.settings.utils.AppDataDir
+import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.jetbrains.compose.resources.stringResource
+
+/** The cue engine and the service auto-loader, running for the whole session. */
+@Composable
+internal fun MainWindowScope.CalendarAutomationWiring() {
+    with(root) {
+        // The automation engine, up for the whole session: it watches the live
+        // Schedule and fires its cue rows at their time. See CueRunner.
+        val cueRunner = remember {
+            CueRunner(
+                items = { currentScheduleItems },
+                timing = { currentScheduleActions.currentTiming() },
+                armed = { automationArmed },
+                host = cueHost.copy(
+                    projectItem = { item, plays ->
+                        UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_CUE_FIRED)
+                        cueHost.projectItem(item, plays)
+                    },
+                    blankOutputs = {
+                        UsageEvents.recordOncePerRun(UsageEvent.CALENDAR_CUE_FIRED)
+                        cueHost.blankOutputs()
+                    },
+                ),
+                operatorLive = {
+                    presenterManager.presentingMode.value != Presenting.NONE &&
+                        engineLiveItem?.let { liveDurationLog.showing(it) } != true
+                },
+            )
+        }
+        LaunchedEffect(Unit) { cueRunner.run() }
+
+        // Nothing is on screen any more, so whatever was is no longer being
+        // timed -- see LiveDurationLog.
+        val liveMode = presenterManager.presentingMode.value
+        LaunchedEffect(liveMode) {
+            if (liveMode == Presenting.NONE) {
+                liveDurationLog.wentBlank()
+                engineLiveItem = null
+            }
+        }
+
+        // A row set to run for its *own* length has no number for the engine to
+        // count -- the video itself decides when it is over. MediaViewModel
+        // already reports that (it is what clears the output), so the row's
+        // "at end" action hangs off the same signal.
+        LaunchedEffect(mediaViewModel.mediaFinished) {
+            if (mediaViewModel.mediaFinished) cueRunner.liveItemFinished()
+        }
+        // A row added, removed or cleared changes what the notice and the save
+        // button say at once, not at the loader's next minute.
+        LaunchedEffect(serviceAutoLoader, currentScheduleItems) { serviceAutoLoader.refresh() }
+        // And a service added or edited in the Calendar Manager -- or synced
+        // from a phone -- changes them as soon as it is saved.
+        LaunchedEffect(serviceAutoLoader, calendarFolder) {
+            CalendarFileWatcher(calendarFolder).run(
+                onChanged = { serviceAutoLoader.refresh(reread = true) },
+            )
+        }
+        var calendarSyncWasOn by remember { mutableStateOf(appSettings.calendarSync.enabled) }
+        LaunchedEffect(appSettings.calendarSync.enabled) {
+            val on = appSettings.calendarSync.enabled
+            if (on && !calendarSyncWasOn) UsageEvents.record(UsageEvent.CALENDAR_SYNC_ENABLED)
+            calendarSyncWasOn = on
+        }
+        LaunchedEffect(calendarFolder, appSettings.calendarSync.enabled) {
+            // A folder chosen in Settings starts from what the app data folder
+            // holds, once, so the calendar does not vanish on the switch.
+            withContext(Dispatchers.IO) { seedCalendarFolder(AppDataDir.resolve(), calendarFolder) }
+            // Phones plan all week; their edits are pulled and merged before the
+            // auto-loader looks, so it loads this week's plan.
+            calendarSync.syncOnStartup()
+            launch { calendarSync.run() }
+            serviceAutoLoader.run()
+        }
+    }
+}
+
+/** Commands from the Companion server and the lower-third sequencer, applied to the outputs. */
+@Composable
+internal fun MainWindowScope.ServerCommandWiring() {
+    with(root) {
+        LaunchedEffect(Unit) {
+            companionServer.onSelectSongSection.collect { req ->
+                val sections = presenterManager.allLyricSections.value
+                val section = sections.getOrNull(req.section) ?: return@collect
+                presenterManager.setLyricSection(section)
+                presenterManager.setSongDisplaySectionIndex(req.section)
+                presenterManager.setSongDisplayLineIndex(remoteSongLineIndex(req.lineIndex))
+                if (shouldSwitchToLyrics(presenterManager.presentingMode.value)) {
+                    presenterManager.setPresentingMode(Presenting.LYRICS)
+                    presenterManager.setShowPresenterWindow(true)
+                }
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            companionServer.onClear.collect {
+                mediaViewModel.pause()
+                presenterManager.requestClearDisplay()
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            LowerThirdSequencer.onShow.collect { req ->
+                presenterManager.setLottieContent(
+                    req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs, req.name
+                )
+                presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
+                presenterManager.setShowPresenterWindow(true)
+            }
+        }
+        LaunchedEffect(Unit) {
+            LowerThirdSequencer.onClear.collect {
+                if (shouldClearAfterLowerThird(presenterManager.presentingMode.value)) {
+                    presenterManager.requestClearDisplay()
+                }
+            }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onQADisplay.collect { question ->
+                if (question != null) {
+                    presenterManager.setDisplayedQuestion(question)
+                    presenterManager.setShowQRCodeOnDisplay(false)
+                    presenterManager.setPresentingMode(Presenting.QA)
+                } else {
+                    presenterManager.setDisplayedQuestion(null)
+                    presenterManager.setPresentingMode(Presenting.NONE)
+                }
+            }
+        }
+    }
+}
+
+/** Transpose, Bible hold and what the outputs show, sent back out to remote clients. */
+@Composable
+internal fun MainWindowScope.ServerBroadcastWiring() {
+    with(root) {
+        // A musician view's transpose presses, and the state they produce sent
+        // back to every musician view: the app is the one owner of the offset,
+        // so a press on the desktop tile reaches the tablets the same way.
+        LaunchedEffect(Unit) {
+            companionServer.onBrowserSourceTranspose.collect { command ->
+                if (command.reset) {
+                    presenterManager.setBrowserSourceTranspose(command.index, 0)
+                } else {
+                    presenterManager.stepBrowserSourceTranspose(command.index, command.delta)
+                }
+            }
+        }
+        LaunchedEffect(Unit) {
+            presenterManager.browserSourceTranspose.collect { transposes ->
+                companionServer.updateBrowserSourceTranspose(transposes)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            companionServer.onBibleHold.collect { hold ->
+                presenterManager.setBibleHold(hold)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { presenterManager.presentingMode.value }
+                .collect { mode ->
+                    if (shouldBroadcastDisplayCleared(mode)) {
+                        companionServer.broadcastDisplayCleared()
+                    }
+                }
+        }
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { presenterManager.songDisplaySectionIndex.value }
+                .collect { index ->
+                    if (shouldBroadcastSongSection(presenterManager.presentingMode.value)) {
+                        companionServer.broadcastSongSectionSelected(index)
+                    }
+                }
+        }
+
+        val clearDisplayTitle by rememberUpdatedState(
+            stringResource(Res.string.remote_action_clear_display)
+        )
+        LaunchedEffect(Unit) {
+            companionServer.onInstantAction.collect { action ->
+                val type = remoteActionType(action.actionType)
+                remoteActivityNotifications.add(
+                    RemoteActivityNotification(
+                        type = type,
+                        title = if (type == RemoteEventType.CLEAR) {
+                            clearDisplayTitle
+                        } else {
+                            action.title.text()
+                        },
+                        detail = action.detail.text(),
+                        clientId = action.clientId,
+                        clientLabel = remoteClientManager.getLabel(action.clientId)
+                    )
+                )
+            }
+        }
+    }
+}
+
