@@ -271,7 +271,10 @@ jobs:
         # TEMPORARY DIAGNOSTIC (#729): log memory every 20s and tighten the hang watchdog, to tell a
         # runner killed for memory from a hung test. Revert before merge.
         run: |
-          ( while true; do echo "[mem] $(date -u +%T) $(free -m | awk '/Mem:/{print "used="$3"M avail="$7"M"}') $(free -m | awk '/Swap:/{print "swap="$3"M"}') jvms=$(pgrep -c java)"; sleep 20; done ) &
+          ( while true; do echo "[mem] $(date -u +%T) $(free -m | awk '/Mem:/{print "used="$3"M avail="$7"M"}') $(free -m | awk '/Swap:/{print "swap="$3"M"}') $(ps -C java -o rss=,args= | awk '{n=($0~/KotlinCompileDaemon/)?"kotlind":($0~/GradleDaemon/)?"gradled":($0~/GradleWorkerMain/)?"worker":"other"; printf "%s=%dM ", n, $1/1024}')"; sleep 20; done ) &
+          ./gradlew :composeApp:jvmTestClasses
+          # The Kotlin compile daemon is idle from here on; free its memory for the test forks.
+          pkill -f KotlinCompileDaemon || true
           ./gradlew :composeApp:jvmTest -PhangThresholdMs=60000
 
       # So an outlier explains itself instead of needing a guess: the one killed run above was
