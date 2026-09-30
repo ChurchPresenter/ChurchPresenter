@@ -1184,7 +1184,6 @@
     <string name="remote_activity_presentation_connect">Ansluten till presentationsfjärrkontroll</string>
     <string name="remote_activity_presentation_connect_detail">Nu ansluten</string>
     <string name="remote_activity_qa_admin_connect">Ansluten till frågeadministrationen</string>
-    <string name="remote_activity_qa_admin_connect_detail">Nu ansluten</string>
     <string name="remote_activity_presented">Visas</string>
     <string name="remote_activity_uploaded">Uppladdad</string>
     <string name="remote_activity_cleared">Rensade skärmen</string>
@@ -1387,7 +1386,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Scenmonitor</string>
     <string name="general">Allmänt</string>
-    <string name="display_stage_monitor">Scenmonitor</string>
     <string name="stage_monitor_quadrant_next">Nästa</string>
     <string name="stage_monitor_quadrant_clock">Klocka</string>
     <string name="stage_monitor_quadrant_notes">Presentatörens anteckningar</string>

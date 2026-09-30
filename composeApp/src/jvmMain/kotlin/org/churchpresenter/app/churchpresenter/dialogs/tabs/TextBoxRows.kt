@@ -31,10 +31,10 @@ import churchpresenter.composeapp.generated.resources.profile_box_size_fill
 import churchpresenter.composeapp.generated.resources.profile_box_size_up_to
 import churchpresenter.composeapp.generated.resources.profile_box_snap
 import churchpresenter.composeapp.generated.resources.profile_box_sub
-import churchpresenter.composeapp.generated.resources.profile_box_vertical
+import churchpresenter.composeapp.generated.resources.canvas_align_vertical
 import churchpresenter.composeapp.generated.resources.profile_box_width
-import churchpresenter.composeapp.generated.resources.profile_box_x
-import churchpresenter.composeapp.generated.resources.profile_box_y
+import churchpresenter.composeapp.generated.resources.canvas_transform_x
+import churchpresenter.composeapp.generated.resources.canvas_transform_y
 import churchpresenter.composeapp.generated.resources.top
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.TextBoxOptions
@@ -79,7 +79,7 @@ internal fun TextBoxRows(
         paths = boxPaths,
     )
     if (!box.enabled) return
-    SettingsRow(stringResource(Res.string.profile_box_vertical), paths = boxPaths) {
+    SettingsRow(stringResource(Res.string.canvas_align_vertical), paths = boxPaths) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.TOP, stringResource(Res.string.top)),
@@ -132,7 +132,7 @@ private fun BoxRectFields(box: TextBox, onBox: (TextBox) -> Unit) {
             { onBox(box.copy(xPercent = it.toFloat())) },
             BOX_PERCENT_RANGE,
             unit = percent,
-            caption = stringResource(Res.string.profile_box_x),
+            caption = stringResource(Res.string.canvas_transform_x),
             width = BOX_FIELD,
         )
         RowNumberField(
@@ -140,7 +140,7 @@ private fun BoxRectFields(box: TextBox, onBox: (TextBox) -> Unit) {
             { onBox(box.copy(yPercent = it.toFloat())) },
             BOX_PERCENT_RANGE,
             unit = percent,
-            caption = stringResource(Res.string.profile_box_y),
+            caption = stringResource(Res.string.canvas_transform_y),
             width = BOX_FIELD,
         )
         RowNumberField(

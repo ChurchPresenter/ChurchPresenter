@@ -26,13 +26,13 @@ import churchpresenter.composeapp.generated.resources.customize_songs
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.output_profile_content_all_shown
 import churchpresenter.composeapp.generated.resources.output_profile_content_some_shown
-import churchpresenter.composeapp.generated.resources.output_profile_group_backgrounds
+import churchpresenter.composeapp.generated.resources.background_surfaces
 import churchpresenter.composeapp.generated.resources.output_profile_group_media
 import churchpresenter.composeapp.generated.resources.output_profile_group_overlays
 import churchpresenter.composeapp.generated.resources.output_profile_hide_all
-import churchpresenter.composeapp.generated.resources.output_profile_scale
+import churchpresenter.composeapp.generated.resources.canvas_scale
 import churchpresenter.composeapp.generated.resources.output_profile_show_all
-import churchpresenter.composeapp.generated.resources.output_profile_sources
+import churchpresenter.composeapp.generated.resources.canvas_sources
 import churchpresenter.composeapp.generated.resources.profile_content_scripture
 import churchpresenter.composeapp.generated.resources.profile_group_placement
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
@@ -163,7 +163,7 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
         scripture = stringResource(Res.string.profile_content_scripture) to scripture,
         media = stringResource(Res.string.output_profile_group_media) to media,
         overlays = stringResource(Res.string.output_profile_group_overlays) to overlays,
-        backgrounds = stringResource(Res.string.output_profile_group_backgrounds) to backgrounds,
+        backgrounds = stringResource(Res.string.background_surfaces) to backgrounds,
     )
 }
 
@@ -184,7 +184,7 @@ internal fun ProfileContentPage(
     val groups = contentSwitches(profile)
     ContentSummary(profile, groups.all, onProfileChange)
     ContentGroup(groups.scripture, profile, onProfileChange)
-    SettingsGroup(stringResource(Res.string.output_profile_sources), paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS) {
+    SettingsGroup(stringResource(Res.string.canvas_sources), paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS) {
         SettingsRow(stringResource(Res.string.profile_source_bible), paths = BIBLE_SOURCE_PATHS) {
             BibleSourcePicker(
                 profile = profile,
@@ -207,7 +207,7 @@ internal fun ProfileContentPage(
     // Only for what this profile shows: a screen that never draws a picture has nothing to fit.
     // Nor on a stage monitor, which always fits its slide and video into their zone.
     if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR) {
-        SettingsGroup(stringResource(Res.string.output_profile_scale), paths = SCALE_PATHS) {
+        SettingsGroup(stringResource(Res.string.canvas_scale), paths = SCALE_PATHS) {
             ScaleRows(profile, onProfileChange)
         }
     }

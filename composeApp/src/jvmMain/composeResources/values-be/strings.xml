@@ -1099,7 +1099,6 @@
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Манітор сцэны</string>
-    <string name="display_stage_monitor">Манітор сцэны</string>
     <string name="general">Агульныя</string>
     <string name="stage_monitor_quadrant_next">Ніз-злева: наступны слайд</string>
     <string name="stage_monitor_quadrant_clock">Ніз-цэнтр: гадзіннік</string>
@@ -1365,7 +1364,6 @@
     <string name="remote_activity_presentation_connect">Падключана да дыстанцыйнага кіравання прэзентацыяй</string>
     <string name="remote_activity_presentation_connect_detail">Цяпер падключана</string>
     <string name="remote_activity_qa_admin_connect">Падключана да панэлі адміністратара Q&amp;A</string>
-    <string name="remote_activity_qa_admin_connect_detail">Цяпер падключана</string>
     <string name="remote_activity_presented">Паказваецца</string>
     <string name="remote_activity_uploaded">Загружана</string>
     <string name="remote_activity_cleared">Экран ачышчаны</string>

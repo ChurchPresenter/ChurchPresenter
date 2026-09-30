@@ -958,8 +958,6 @@
     <string name="output_profile_hide_all">Hide all</string>
     <string name="output_profile_group_media">Media</string>
     <string name="output_profile_group_overlays">Overlays</string>
-    <string name="output_profile_group_backgrounds">Backgrounds</string>
-    <string name="output_profile_sources">Sources</string>
     <string name="output_profile_bible_order_header">Translations · shown in this order</string>
     <string name="output_profile_bible_count">%1$d of %2$d translations</string>
     <string name="output_profile_bible_off">Bible off</string>
@@ -967,13 +965,10 @@
     <string name="output_profile_bible_none_loaded">No Bibles loaded — add them on the Bible tab</string>
     <string name="output_profile_add_translation">Add translation</string>
     <string name="output_profile_song_order_header">Languages · shown in this order</string>
-    <string name="output_profile_song_count">%1$d of %2$d languages</string>
     <string name="output_profile_add_language">Add language</string>
     <string name="output_profile_remove_translation">Remove translation</string>
     <string name="output_profile_move_up">Move up</string>
     <string name="output_profile_move_down">Move down</string>
-    <string name="output_profile_scale">Scale</string>
-    <string name="lower_third_placement_full_screen">Full screen</string>
     <string name="lower_third_placement_in_band">In band</string>
     <string name="output_profile_sample_caption_earlier">and the light shines in the darkness,</string>
     <string name="output_profile_sample_caption">and the darkness has not overcome it.</string>
@@ -982,7 +977,6 @@
     <string name="output_profile_sample_question">How can we pray for the mission team this week?</string>
     <string name="output_profile_sample_dictionary_definition">word, speech, a saying; the Word as the title of Christ</string>
     <string name="output_profile_sample_dictionary_usage">word (218x), saying (50x), account (8x), speech (8x)</string>
-    <string name="output_profile_shape_custom">Custom</string>
     <string name="output_profile_shape_ratio">Ratio</string>
     <string name="output_profile_shape_resolution">Resolution</string>
     <string name="output_profile_shape_width">Width</string>
@@ -1373,7 +1367,6 @@
     <string name="canvas_size_tooltip">Canvas size (%1$s)</string>
     <string name="canvas_size_match_output">Match %1$s</string>
     <string name="canvas_size_screen">Screen %1$d</string>
-    <string name="canvas_size_custom">Custom</string>
     <string name="canvas_size_set">Set</string>
     <string name="canvas_layer_partly_outside">Partly outside the canvas</string>
     <string name="canvas_layer_outside">Outside the canvas — not visible</string>
@@ -1677,7 +1670,6 @@
     <string name="remote_activity_calendar_enroll">Enrolled to plan the calendar</string>
     <string name="remote_activity_presentation_connect_detail">Now connected</string>
     <string name="remote_activity_qa_admin_connect">Connected to Q&amp;A Admin</string>
-    <string name="remote_activity_qa_admin_connect_detail">Now connected</string>
     <string name="remote_activity_musician_connect">Transpose control connected</string>
     <string name="remote_activity_presented">Presenting</string>
     <string name="remote_activity_uploaded">Uploaded</string>
@@ -1925,7 +1917,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Stage Monitor</string>
     <string name="general">General</string>
-    <string name="display_stage_monitor">Stage Monitor</string>
     <string name="stage_monitor_quadrant_next">Next</string>
     <string name="stage_monitor_quadrant_clock">Clock</string>
     <string name="stage_monitor_quadrant_notes">Presenter Notes</string>
@@ -2686,7 +2677,6 @@
     <string name="profile_group_profile">Profile</string>
     <string name="profile_name">Name</string>
     <string name="profile_display_mode">Display mode</string>
-    <string name="profile_mode_full">Full screen</string>
     <string name="profile_mode_lower_third">Lower third</string>
     <string name="profile_mode_stage">Stage monitor</string>
     <string name="profile_actions">Actions</string>
@@ -2748,7 +2738,6 @@
     <string name="profile_group_transition">Transition</string>
     <string name="profile_fade_in">Fade in</string>
     <string name="profile_fade_out">Fade out</string>
-    <string name="profile_duration">Duration</string>
     <string name="profile_ms">ms</string>
     <string name="profile_crossfade">Crossfade between items</string>
     <string name="profile_group_band">Lower third band</string>
@@ -2791,7 +2780,6 @@
     <string name="profile_box_item_transcript">Transcript</string>
     <string name="profile_box_item_translation">Translation</string>
     <string name="profile_box_sub">Place this item in a box of its own, drawn and resized on the preview. Its text fits inside the box.</string>
-    <string name="profile_box_vertical">Vertical</string>
     <string name="profile_box_pick_translation">Each translation has its own box. Pick a translation above to place it, or set Languages to Share one box under Advanced.</string>
     <string name="profile_box_pick_language">Each language has its own box. Pick a language above to place it, or set Languages to Share one box under Advanced.</string>
     <string name="profile_box_overflow">If text is too big</string>
@@ -2799,8 +2787,6 @@
     <string name="profile_box_overflow_cut">Cut off</string>
     <string name="profile_box_overflow_spill">Spill over</string>
     <string name="profile_box_place">Box position</string>
-    <string name="profile_box_x">X</string>
-    <string name="profile_box_y">Y</string>
     <string name="profile_box_width">Width</string>
     <string name="profile_box_height">Height</string>
     <string name="profile_box_size">Text size</string>
@@ -2855,7 +2841,6 @@
     <string name="profile_context_open_general">General</string>
     <string name="profile_song_look_ahead">Song look-ahead</string>
     <string name="profile_text_autofit_scope">Fit across</string>
-    <string name="profile_menu_rename">Rename</string>
     <string name="profile_menu_move_up">Move up</string>
     <string name="profile_menu_move_down">Move down</string>
     <string name="profile_link_linked">Linked to %1$s</string>

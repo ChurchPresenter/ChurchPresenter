@@ -1098,7 +1098,6 @@
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor sceny</string>
-    <string name="display_stage_monitor">Monitor sceny</string>
     <string name="general">Ogólne</string>
     <string name="stage_monitor_quadrant_next">Lewy dolny: następny slajd</string>
     <string name="stage_monitor_quadrant_clock">Dolny środkowy: zegar</string>
@@ -1365,7 +1364,6 @@
     <string name="remote_activity_presentation_connect">Połączono ze zdalnym sterowaniem prezentacji</string>
     <string name="remote_activity_presentation_connect_detail">Teraz połączono</string>
     <string name="remote_activity_qa_admin_connect">Połączono z panelem administratora P&amp;O</string>
-    <string name="remote_activity_qa_admin_connect_detail">Teraz połączono</string>
     <string name="remote_activity_presented">Prezentowane</string>
     <string name="remote_activity_uploaded">Przesłano</string>
     <string name="remote_activity_cleared">Wyświetlacz wyczyszczony</string>

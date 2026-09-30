@@ -77,7 +77,7 @@ import churchpresenter.composeapp.generated.resources.profile_list_new
 import churchpresenter.composeapp.generated.resources.profile_menu_create_linked
 import churchpresenter.composeapp.generated.resources.profile_menu_move_down
 import churchpresenter.composeapp.generated.resources.profile_menu_move_up
-import churchpresenter.composeapp.generated.resources.profile_menu_rename
+import churchpresenter.composeapp.generated.resources.canvas_rename_scene
 import kotlin.math.roundToInt
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.settings.OutputProfile
@@ -284,7 +284,7 @@ private fun profileMenu(
     onMoveDown: () -> Unit,
     onDelete: () -> Unit,
 ): List<ContextMenuItem> {
-    val rename = stringResource(Res.string.profile_menu_rename)
+    val rename = stringResource(Res.string.canvas_rename_scene)
     val duplicate = stringResource(Res.string.output_profile_duplicate)
     val createLinked = stringResource(Res.string.profile_menu_create_linked)
     val up = stringResource(Res.string.profile_menu_move_up)

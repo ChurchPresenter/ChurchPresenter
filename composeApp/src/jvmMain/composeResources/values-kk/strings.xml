@@ -1099,7 +1099,6 @@
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Сахна мониторы</string>
-    <string name="display_stage_monitor">Сахна мониторы</string>
     <string name="general">Жалпы</string>
     <string name="stage_monitor_quadrant_next">Төменгі-сол: келесі слайд</string>
     <string name="stage_monitor_quadrant_clock">Төменгі-орта: сағат</string>
@@ -1365,7 +1364,6 @@
     <string name="remote_activity_presentation_connect">Презентацияны қашықтан басқаруға қосылды</string>
     <string name="remote_activity_presentation_connect_detail">Қазір қосылды</string>
     <string name="remote_activity_qa_admin_connect">С&amp;Ж әкімші панеліне қосылды</string>
-    <string name="remote_activity_qa_admin_connect_detail">Қазір қосылды</string>
     <string name="remote_activity_presented">Көрсетілуде</string>
     <string name="remote_activity_uploaded">Жүктелді</string>
     <string name="remote_activity_cleared">Экран тазаланды</string>

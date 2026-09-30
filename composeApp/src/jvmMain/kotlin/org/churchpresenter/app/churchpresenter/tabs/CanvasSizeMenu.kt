@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_dual_layout
 import churchpresenter.composeapp.generated.resources.canvas_size
-import churchpresenter.composeapp.generated.resources.canvas_size_custom
+import churchpresenter.composeapp.generated.resources.song_background_own
 import churchpresenter.composeapp.generated.resources.canvas_size_match_output
 import churchpresenter.composeapp.generated.resources.canvas_size_set
 import churchpresenter.composeapp.generated.resources.canvas_size_tooltip
@@ -206,7 +206,7 @@ private fun CustomSizeRow(currentWidth: Int, currentHeight: Int, onChoose: (Int,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(stringResource(Res.string.canvas_size_custom), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(Res.string.song_background_own), style = MaterialTheme.typography.bodySmall)
         NumberSettingsTextField(
             modifier = Modifier.width(CUSTOM_FIELD_WIDTH).testTag(CANVAS_SIZE_WIDTH_TAG),
             initialText = customWidth,

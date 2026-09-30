@@ -23,7 +23,7 @@ import churchpresenter.composeapp.generated.resources.profile_delete_sub
 import churchpresenter.composeapp.generated.resources.profile_display_mode
 import churchpresenter.composeapp.generated.resources.profile_duplicate_sub
 import churchpresenter.composeapp.generated.resources.profile_group_profile
-import churchpresenter.composeapp.generated.resources.profile_mode_full
+import churchpresenter.composeapp.generated.resources.song_background_full_screen
 import churchpresenter.composeapp.generated.resources.profile_mode_lower_third
 import churchpresenter.composeapp.generated.resources.profile_mode_stage
 import churchpresenter.composeapp.generated.resources.profile_name
@@ -106,7 +106,7 @@ internal fun DisplayModeSegments(
 ) {
     RowSegmented(
         options = listOf(
-            RowOption(Constants.DISPLAY_MODE_FULLSCREEN, stringResource(Res.string.profile_mode_full)),
+            RowOption(Constants.DISPLAY_MODE_FULLSCREEN, stringResource(Res.string.song_background_full_screen)),
             RowOption(
                 Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
                 stringResource(Res.string.profile_mode_lower_third),

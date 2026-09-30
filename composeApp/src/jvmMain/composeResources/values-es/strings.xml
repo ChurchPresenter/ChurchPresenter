@@ -965,7 +965,6 @@
     <string name="remote_activity_presentation_connect">Conectado al control remoto de presentación</string>
     <string name="remote_activity_presentation_connect_detail">Ahora conectado</string>
     <string name="remote_activity_qa_admin_connect">Conectado al Admin de P&amp;R</string>
-    <string name="remote_activity_qa_admin_connect_detail">Ahora conectado</string>
     <string name="remote_activity_presented">Presentando</string>
     <string name="remote_activity_uploaded">Cargado</string>
     <string name="remote_activity_cleared">Pantalla limpiada</string>
@@ -1138,7 +1137,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor de escenario</string>
     <string name="general">General</string>
-    <string name="display_stage_monitor">Monitor de escenario</string>
     <string name="stage_monitor_quadrant_next">Abajo izquierda: siguiente diapositiva</string>
     <string name="stage_monitor_quadrant_clock">Abajo centro: reloj</string>
     <string name="stage_monitor_quadrant_notes">Abajo derecha: notas del presentador</string>

@@ -1187,7 +1187,6 @@
     <string name="remote_activity_presentation_connect">விளக்கக்காட்சித் தொலைக் கட்டுப்பாட்டுடன் இணைக்கப்பட்டது</string>
     <string name="remote_activity_presentation_connect_detail">இப்போது இணைக்கப்பட்டது</string>
     <string name="remote_activity_qa_admin_connect">கே&amp;ப நிர்வாகத்துடன் இணைக்கப்பட்டது</string>
-    <string name="remote_activity_qa_admin_connect_detail">இப்போது இணைக்கப்பட்டது</string>
     <string name="remote_activity_presented">காட்டப்படுகிறது</string>
     <string name="remote_activity_uploaded">பதிவேற்றப்பட்டது</string>
     <string name="remote_activity_cleared">காட்சி அழிக்கப்பட்டது</string>
@@ -1392,7 +1391,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">மேடைத் திரை</string>
     <string name="general">பொது</string>
-    <string name="display_stage_monitor">மேடைத் திரை</string>
     <string name="stage_monitor_quadrant_next">அடுத்தது</string>
     <string name="stage_monitor_quadrant_clock">கடிகாரம்</string>
     <string name="stage_monitor_quadrant_notes">வழங்குநர் குறிப்புகள்</string>

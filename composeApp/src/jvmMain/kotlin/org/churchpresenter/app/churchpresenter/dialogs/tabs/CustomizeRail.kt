@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import churchpresenter.composeapp.generated.resources.stage_monitor
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -25,7 +25,7 @@ private val CAPTION_TRACKING = 0.9.sp
 
 @Composable
 internal fun displayModeLabel(mode: String): String = when (shownDisplayMode(mode)) {
-    Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
+    Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.stage_monitor)
     Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL -> stringResource(Res.string.display_lower_third)
     else -> stringResource(Res.string.display_fullscreen)
 }

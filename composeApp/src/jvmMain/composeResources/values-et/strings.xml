@@ -1049,7 +1049,6 @@
     <string name="remote_activity_presentation_connect">Ühendatud esitluse kaugjuhtimisega</string>
     <string name="remote_activity_presentation_connect_detail">Nüüd ühendatud</string>
     <string name="remote_activity_qa_admin_connect">Ühendatud K&amp;V administraatoriga</string>
-    <string name="remote_activity_qa_admin_connect_detail">Nüüd ühendatud</string>
     <string name="remote_activity_presented">Esitamisel</string>
     <string name="remote_activity_uploaded">Üles laaditud</string>
     <string name="remote_activity_cleared">Kuva tühjendatud</string>
@@ -1222,7 +1221,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Lavamonitor</string>
     <string name="general">Üldine</string>
-    <string name="display_stage_monitor">Lavamonitor</string>
     <string name="stage_monitor_quadrant_next">Järgmine</string>
     <string name="stage_monitor_quadrant_clock">Kell</string>
     <string name="stage_monitor_quadrant_notes">Esineja märkmed</string>

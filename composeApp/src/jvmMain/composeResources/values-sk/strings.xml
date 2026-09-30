@@ -965,7 +965,6 @@
     <string name="remote_activity_presentation_connect">Pripojené k diaľkovému ovládaniu prezentácie</string>
     <string name="remote_activity_presentation_connect_detail">Teraz pripojené</string>
     <string name="remote_activity_qa_admin_connect">Pripojené k správe Q&amp;A</string>
-    <string name="remote_activity_qa_admin_connect_detail">Teraz pripojené</string>
     <string name="remote_activity_presented">Prezentuje sa</string>
     <string name="remote_activity_uploaded">Nahrané</string>
     <string name="remote_activity_cleared">Displej vymazaný</string>
@@ -1138,7 +1137,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Stage monitor</string>
     <string name="general">Všeobecné</string>
-    <string name="display_stage_monitor">Stage monitor</string>
     <string name="stage_monitor_quadrant_next">Vľavo dole: Nasledujúci snímok</string>
     <string name="stage_monitor_quadrant_clock">Dole v strede: Hodiny</string>
     <string name="stage_monitor_quadrant_notes">Vpravo dole: Poznámky prezentátora</string>

@@ -1184,7 +1184,6 @@
     <string name="remote_activity_presentation_connect">เชื่อมต่อกับรีโมตงานนำเสนอแล้ว</string>
     <string name="remote_activity_presentation_connect_detail">เชื่อมต่อแล้ว</string>
     <string name="remote_activity_qa_admin_connect">เชื่อมต่อกับผู้ดูแลคำถามแล้ว</string>
-    <string name="remote_activity_qa_admin_connect_detail">เชื่อมต่อแล้ว</string>
     <string name="remote_activity_presented">กำลังแสดง</string>
     <string name="remote_activity_uploaded">อัปโหลดแล้ว</string>
     <string name="remote_activity_cleared">ล้างจอแล้ว</string>
@@ -1387,7 +1386,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">จอบนเวที</string>
     <string name="general">ทั่วไป</string>
-    <string name="display_stage_monitor">จอบนเวที</string>
     <string name="stage_monitor_quadrant_next">ถัดไป</string>
     <string name="stage_monitor_quadrant_clock">นาฬิกา</string>
     <string name="stage_monitor_quadrant_notes">บันทึกผู้พูด</string>

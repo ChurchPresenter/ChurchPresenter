@@ -36,7 +36,7 @@ import churchpresenter.composeapp.generated.resources.profile_bg_own
 import churchpresenter.composeapp.generated.resources.profile_content_align
 import churchpresenter.composeapp.generated.resources.profile_content_width
 import churchpresenter.composeapp.generated.resources.profile_crossfade
-import churchpresenter.composeapp.generated.resources.profile_duration
+import churchpresenter.composeapp.generated.resources.timer_mode_duration
 import churchpresenter.composeapp.generated.resources.profile_fade_in
 import churchpresenter.composeapp.generated.resources.profile_fade_out
 import churchpresenter.composeapp.generated.resources.profile_group_band
@@ -287,7 +287,7 @@ internal fun TransitionGroup(
     ) {
         SettingsSwitchRow(stringResource(Res.string.profile_fade_in), fadeIn, onFadeIn, paths = path("fadeIn"))
         SettingsSwitchRow(stringResource(Res.string.profile_fade_out), fadeOut, onFadeOut, paths = path("fadeOut"))
-        SettingsRow(stringResource(Res.string.profile_duration), paths = path("transitionDuration")) {
+        SettingsRow(stringResource(Res.string.timer_mode_duration), paths = path("transitionDuration")) {
             RowStepper(
                 durationMs.toInt(),
                 { onDuration(it.toFloat()) },

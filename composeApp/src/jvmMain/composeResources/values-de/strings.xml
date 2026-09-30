@@ -1099,7 +1099,6 @@
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Bühnenmonitor</string>
-    <string name="display_stage_monitor">Bühnenmonitor</string>
     <string name="general">Allgemein</string>
     <string name="stage_monitor_quadrant_next">Unten-links: Nächste Folie</string>
     <string name="stage_monitor_quadrant_clock">Unten-Mitte: Uhr</string>
@@ -1365,7 +1364,6 @@
     <string name="remote_activity_presentation_connect">Mit Präsentationsfernsteuerung verbunden</string>
     <string name="remote_activity_presentation_connect_detail">Jetzt verbunden</string>
     <string name="remote_activity_qa_admin_connect">Mit F&amp;A-Admin verbunden</string>
-    <string name="remote_activity_qa_admin_connect_detail">Jetzt verbunden</string>
     <string name="remote_activity_presented">Wird präsentiert</string>
     <string name="remote_activity_uploaded">Hochgeladen</string>
     <string name="remote_activity_cleared">Anzeige gelöscht</string>

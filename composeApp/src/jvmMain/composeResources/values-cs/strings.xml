@@ -1142,7 +1142,6 @@
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor scény</string>
-    <string name="display_stage_monitor">Monitor scény</string>
     <string name="general">Obecné</string>
     <string name="stage_monitor_quadrant_next">Vlevo dole: další snímek</string>
     <string name="stage_monitor_quadrant_clock">Dole uprostřed: hodiny</string>
@@ -1416,7 +1415,6 @@
     <string name="remote_activity_presentation_connect">Připojeno k dálkovému ovládání prezentace</string>
     <string name="remote_activity_presentation_connect_detail">Nyní připojeno</string>
     <string name="remote_activity_qa_admin_connect">Připojeno k administraci Q&amp;A</string>
-    <string name="remote_activity_qa_admin_connect_detail">Nyní připojeno</string>
     <string name="remote_activity_presented">Prezentuje se</string>
     <string name="remote_activity_uploaded">Nahráno</string>
     <string name="remote_activity_cleared">Obrazovka vymazána</string>

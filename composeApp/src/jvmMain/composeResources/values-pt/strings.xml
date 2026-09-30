@@ -965,7 +965,6 @@
     <string name="remote_activity_presentation_connect">Conectado ao Controle Remoto da Apresentação</string>
     <string name="remote_activity_presentation_connect_detail">Agora conectado</string>
     <string name="remote_activity_qa_admin_connect">Conectado ao Admin de P&amp;R</string>
-    <string name="remote_activity_qa_admin_connect_detail">Agora conectado</string>
     <string name="remote_activity_presented">Apresentando</string>
     <string name="remote_activity_uploaded">Enviado</string>
     <string name="remote_activity_cleared">Tela Limpa</string>
@@ -1138,7 +1137,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor de Palco</string>
     <string name="general">Geral</string>
-    <string name="display_stage_monitor">Monitor de Palco</string>
     <string name="stage_monitor_quadrant_next">Canto Inferior Esquerdo: Próximo Slide</string>
     <string name="stage_monitor_quadrant_clock">Centro Inferior: Relógio</string>
     <string name="stage_monitor_quadrant_notes">Canto Inferior Direito: Notas do Apresentador</string>

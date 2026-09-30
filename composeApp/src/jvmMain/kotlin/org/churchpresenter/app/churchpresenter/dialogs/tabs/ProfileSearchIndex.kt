@@ -27,7 +27,7 @@ import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.output_profile_delete
 import churchpresenter.composeapp.generated.resources.output_profile_duplicate
-import churchpresenter.composeapp.generated.resources.output_profile_scale
+import churchpresenter.composeapp.generated.resources.canvas_scale
 import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_bg_row
 import churchpresenter.composeapp.generated.resources.profile_content_align
@@ -36,7 +36,7 @@ import churchpresenter.composeapp.generated.resources.profile_context_open_gener
 import churchpresenter.composeapp.generated.resources.profile_context_standalone
 import churchpresenter.composeapp.generated.resources.profile_crossfade
 import churchpresenter.composeapp.generated.resources.profile_display_mode
-import churchpresenter.composeapp.generated.resources.profile_duration
+import churchpresenter.composeapp.generated.resources.timer_mode_duration
 import churchpresenter.composeapp.generated.resources.profile_end_marker
 import churchpresenter.composeapp.generated.resources.profile_fade_in
 import churchpresenter.composeapp.generated.resources.profile_fade_out
@@ -95,7 +95,7 @@ private val PLACE_ROWS = listOf(
     Res.string.profile_content_width, Res.string.profile_content_align, Res.string.profile_x_offset,
     Res.string.profile_y_offset, Res.string.profile_place_freely, Res.string.profile_band_height,
     Res.string.profile_fade_in, Res.string.profile_fade_out,
-    Res.string.profile_duration, Res.string.profile_crossfade, Res.string.profile_layout,
+    Res.string.timer_mode_duration, Res.string.profile_crossfade, Res.string.profile_layout,
 )
 
 /**
@@ -116,7 +116,7 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
         Res.string.profile_source_bible, Res.string.profile_source_songs, Res.string.content_pictures,
         Res.string.content_media, Res.string.media_subtitles, Res.string.projection_content_web,
         Res.string.tab_canvas, Res.string.content_streaming, Res.string.content_announcements,
-        Res.string.tab_qa, Res.string.profile_nav_live_captions, Res.string.output_profile_scale,
+        Res.string.tab_qa, Res.string.profile_nav_live_captions, Res.string.canvas_scale,
         Res.string.profile_group_placement,
     )
     is ProfilePage.Appearance -> when (pane) {

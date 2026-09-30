@@ -83,7 +83,7 @@ import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.ndi_output_numbered
 import churchpresenter.composeapp.generated.resources.omt_output_numbered
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.collapse_preview
 import churchpresenter.composeapp.generated.resources.expand_preview
 import churchpresenter.composeapp.generated.resources.display_fullscreen
@@ -576,7 +576,7 @@ private fun SingleDisplayPreview(
 
     val isStageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
     val displayModeChipLabel = when (profile.displayMode) {
-        Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
+        Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.stage_monitor)
         // One label for both stored modes. Vertical is an orientation the app works out from the
         // output's own shape, not a mode the operator picks -- the Display Mode dropdown offers a
         // single "Lower Third" entry -- so naming it here invented a distinction the rest of the UI

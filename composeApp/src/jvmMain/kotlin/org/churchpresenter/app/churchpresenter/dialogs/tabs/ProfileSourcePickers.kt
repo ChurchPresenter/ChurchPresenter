@@ -11,7 +11,7 @@ import churchpresenter.composeapp.generated.resources.output_profile_bible_count
 import churchpresenter.composeapp.generated.resources.output_profile_bible_none_loaded
 import churchpresenter.composeapp.generated.resources.output_profile_bible_off
 import churchpresenter.composeapp.generated.resources.output_profile_bible_order_header
-import churchpresenter.composeapp.generated.resources.output_profile_song_count
+import churchpresenter.composeapp.generated.resources.setup_language_count
 import churchpresenter.composeapp.generated.resources.output_profile_song_order_header
 import churchpresenter.composeapp.generated.resources.output_profile_songs_off
 import org.churchpresenter.settings.OutputProfile
@@ -74,7 +74,7 @@ internal fun SongSourcePicker(
         strings = OrderedSourceStrings(
             label = stringResource(Res.string.customize_songs),
             offLabel = stringResource(Res.string.output_profile_songs_off),
-            countFormat = stringResource(Res.string.output_profile_song_count, shown.size, languages.size),
+            countFormat = stringResource(Res.string.setup_language_count, shown.size, languages.size),
             noneLoaded = stringResource(Res.string.output_profile_bible_none_loaded),
             orderHeader = stringResource(Res.string.output_profile_song_order_header),
             addHeader = stringResource(Res.string.output_profile_add_language),

@@ -1004,7 +1004,6 @@
     <string name="remote_activity_presentation_connect">Conectat la Telecomanda Prezentării</string>
     <string name="remote_activity_presentation_connect_detail">Acum conectat</string>
     <string name="remote_activity_qa_admin_connect">Conectat la Admin Î&amp;R</string>
-    <string name="remote_activity_qa_admin_connect_detail">Acum conectat</string>
     <string name="remote_activity_presented">Se Prezintă</string>
     <string name="remote_activity_uploaded">Încărcat</string>
     <string name="remote_activity_cleared">Ecran Golit</string>
@@ -1177,7 +1176,6 @@
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor Scenă</string>
     <string name="general">General</string>
-    <string name="display_stage_monitor">Monitor Scenă</string>
     <string name="stage_monitor_quadrant_next">Stânga Jos: Slide Următor</string>
     <string name="stage_monitor_quadrant_clock">Centru Jos: Ceas</string>
     <string name="stage_monitor_quadrant_notes">Dreapta Jos: Notele Prezentatorului</string>
