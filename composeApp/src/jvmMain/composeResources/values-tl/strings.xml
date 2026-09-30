@@ -166,11 +166,9 @@
     <string name="report_bug">Mag-report ng Bug</string>
     <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Tulong</string>
     <string name="menu_how_to_blog">How To Blog</string>
     <string name="menu_check_for_updates">Mag-check ng Update…</string>
     <string name="menu_keyboard_shortcuts">Mga Keyboard Shortcut</string>
-    <string name="keyboard_shortcuts_title">Mga Keyboard Shortcut</string>
     <string name="shortcut_category_global">Global</string>
     <string name="shortcut_category_bible">Tab ng Biblia</string>
     <string name="shortcut_category_songs">Tab ng mga Awit</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Magdagdag ng mga File sa Schedule</string>
     <string name="tooltip_toggle_displays">I-toggle ang mga Presenter Display</string>
     <string name="tooltip_settings">Mga Setting</string>
-    <string name="tooltip_theme_light">Maliwanag na Tema</string>
     <string name="tooltip_theme_dark">Madilim na Tema</string>
     <string name="tooltip_theme_system">Tema ng System</string>
     <string name="tooltip_remove">Alisin</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">Pangalan</string>
     <string name="canvas_rotation">Rotation</string>
     <string name="canvas_file_path">Path ng file</string>
-    <string name="canvas_browse">Mag-browse</string>
     <string name="canvas_scale">Scale</string>
     <string name="canvas_scale_fit">Fit</string>
     <string name="canvas_scale_fill">Fill</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">Capture Mode</string>
     <string name="canvas_capture_mode_region">Bahagi ng Screen</string>
     <string name="canvas_capture_mode_window">Window</string>
-    <string name="canvas_capture_window">Window</string>
     <string name="canvas_capture_refresh_windows">I-refresh ang Listahan ng Window</string>
     <string name="canvas_capture_interval">Interval ng Capture</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">Idiskonekta</string>
     <string name="planning_center_status_connected">Nakakonekta bilang %1$s</string>
     <string name="planning_center_status_connecting">Kumokonekta…</string>
-    <string name="planning_center_status_error">May mali: %1$s</string>
     <string name="planning_center_import_title">Mag-import mula sa Planning Center</string>
     <string name="planning_center_import_service_type">Uri ng serbisyo</string>
     <string name="planning_center_import_select_plan">Pumili ng plano</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">Sapagkat gayon na lamang ang pag-ibig ng Diyos sa sanlibutan, kaya ibinigay niya ang kanyang bugtong na Anak.</string>
     <string name="bible_preview_sample_book">Juan</string>
     <string name="bible_preview_no_translations">Magdagdag ng salin upang makita ito rito</string>
-    <string name="song_preview_full_screen">Preview ng buong screen</string>
-    <string name="song_preview_lower_third">Preview ng lower third</string>
     <string name="song_element_number">Numero</string>
     <string name="song_element_title">Pamagat</string>
     <string name="song_element_lyrics">Lyrics</string>
-    <string name="song_element_next_section">Susunod na Seksyon</string>
     <string name="song_element_author">May-akda</string>
     <string name="song_element_composer">Kompositor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">Kulay</string>
     <string name="customize_type_image">Larawan</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Daglat</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Pumunta sa tab na Bibliya at piliin ang inyong mga salin — ang una ang pangunahin.</string>
     <string name="setup_songs_format_note">Binabasa ng folder ng aklatan ng awit ang mga file na .song. Ang mga awit na nakaimbak sa ibang format ay kailangang i-convert muna.</string>
     <string name="setup_songs_converter_body">Galing sa SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? Nababasa ng nakapaloob na Converter ng Awit at Bibliya ang lahat ng ito — pati ang liriko mula sa PDF, Word, PowerPoint at Keynote — at isinusulat nito ang mga file na .song na hinihingi ng folder na ito.</string>
-    <string name="setup_songs_converter_button">Buksan ang Converter ng Awit at Bibliya</string>
     <string name="setup_songs_samples_note">Wala pang awit? Pinupuno ng «Magdagdag ng halimbawang awit» sa tab na Sistema ang folder ng isang gumaganang set.</string>
     <string name="setup_proj_rows_note">Bawat nakakabit na tabing ay may sariling hilera sa ibaba. Ang bilang ng bintana ng pagtatanghal ay nagmumula sa inyong itinakda roon, kaya walang kailangang itakda nang manu-mano.</string>
     <string name="setup_proj_assign_note">Para sa bawat tabing, pumili ng display at mode ng pagpapakita, at gamitin ang «Mga labasan ng nilalaman» upang piliin kung ano ang lilitaw doon. Ang «I-overwrite ang mga estilo» ay nagbibigay sa tabing na iyon ng sariling anyo.</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Lower Third Generator</string>
     <string name="song_lottie_unsupported_note">Ang template ang nagpapasya sa layout at kung saan ilalagay ang pamagat. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough, pagitan ng mga salita, look-ahead at mga chord.</string>
     <string name="bible_lottie_unsupported_note">Ang template ang nagpapasya sa layout, sa posisyon ng reference at kung paano paghahatian ng dalawang wika ang banda. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough at pagitan ng mga salita.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Balangkas</string>
     <string name="tooltip_outline_options">Mga opsyon sa balangkas</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">Binubuksan ang mga camera at capture card gamit ang ffmpeg. Dapat may kasama nito ang build na ito — pumili ng ffmpeg sa ibaba, o mag-install ng ffmpeg at suriin muli.</string>
     <string name="ffmpeg_path_hint">Pumili ng ffmpeg program</string>
     <string name="ffmpeg_browse">Pumili ng ffmpeg</string>
-    <string name="ffmpeg_check_again">Suriin muli</string>
     <string name="ffmpeg_clear">Gamitin ang kasama</string>
     <string name="ffmpeg_download_link">Kunin ang ffmpeg</string>
     <string name="ffmpeg_path_help">Iwanang blangko para gamitin ang ffmpeg na kasama ng ChurchPresenter.</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">Ipakita ang uri ng display</string>
     <string name="song_add_translation">Magdagdag ng wika</string>
     <string name="song_fourth_language">Wika 4</string>
-    <string name="song_language_fourth">Wika 4</string>
-    <string name="song_language_third">Wika 3</string>
     <string name="song_pane_translation">Wika %1$d</string>
     <string name="song_third_language">Wika 3</string>
     <string name="song_translation_label">Pangalan ng wika</string>

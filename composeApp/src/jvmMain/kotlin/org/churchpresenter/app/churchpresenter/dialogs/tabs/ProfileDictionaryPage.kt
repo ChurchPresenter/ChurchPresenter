@@ -11,7 +11,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.profile_card_color
 import churchpresenter.composeapp.generated.resources.profile_card_opacity
-import churchpresenter.composeapp.generated.resources.profile_dict_definition
+import churchpresenter.composeapp.generated.resources.dictionary_definition
 import churchpresenter.composeapp.generated.resources.profile_dict_kjv
 import churchpresenter.composeapp.generated.resources.profile_dict_reference
 import churchpresenter.composeapp.generated.resources.profile_dict_word
@@ -217,7 +217,7 @@ private fun DictionaryPart.label(): String = stringResource(
     when (this) {
         DictionaryPart.WORD -> Res.string.profile_dict_word
         DictionaryPart.REFERENCE -> Res.string.profile_dict_reference
-        DictionaryPart.DEFINITION -> Res.string.profile_dict_definition
+        DictionaryPart.DEFINITION -> Res.string.dictionary_definition
         DictionaryPart.KJV_USAGE -> Res.string.profile_dict_kjv
     },
 )

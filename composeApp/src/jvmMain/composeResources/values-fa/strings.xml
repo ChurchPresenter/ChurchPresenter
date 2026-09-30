@@ -166,11 +166,9 @@
     <string name="report_bug">گزارش اشکال</string>
     <string name="submit_feature_request">درخواست ویژگی</string>
     <string name="action_ok">تأیید</string>
-    <string name="menu_help_item">راهنما</string>
     <string name="menu_how_to_blog">وبلاگ آموزشی</string>
     <string name="menu_check_for_updates">بررسی به‌روزرسانی…</string>
     <string name="menu_keyboard_shortcuts">میان‌برهای صفحه‌کلید</string>
-    <string name="keyboard_shortcuts_title">میان‌برهای صفحه‌کلید</string>
     <string name="shortcut_category_global">همگانی</string>
     <string name="shortcut_category_bible">زبانه کتاب‌مقدس</string>
     <string name="shortcut_category_songs">زبانه سرودها</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">افزودن فایل‌ها به برنامه</string>
     <string name="tooltip_toggle_displays">روشن/خاموش کردن نمایشگرهای خروجی</string>
     <string name="tooltip_settings">تنظیمات</string>
-    <string name="tooltip_theme_light">پوسته روشن</string>
     <string name="tooltip_theme_dark">پوسته تیره</string>
     <string name="tooltip_theme_system">پوسته سیستم</string>
     <string name="tooltip_remove">حذف</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">نام</string>
     <string name="canvas_rotation">چرخش</string>
     <string name="canvas_file_path">مسیر فایل</string>
-    <string name="canvas_browse">مرور</string>
     <string name="canvas_scale">مقیاس</string>
     <string name="canvas_scale_fit">جا شدن</string>
     <string name="canvas_scale_fill">پر کردن</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">حالت ضبط</string>
     <string name="canvas_capture_mode_region">ناحیه صفحه</string>
     <string name="canvas_capture_mode_window">پنجره</string>
-    <string name="canvas_capture_window">پنجره</string>
     <string name="canvas_capture_refresh_windows">تازه‌سازی فهرست پنجره‌ها</string>
     <string name="canvas_capture_interval">فاصلهٔ ضبط</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">قطع اتصال</string>
     <string name="planning_center_status_connected">متصل با نام %1$s</string>
     <string name="planning_center_status_connecting">در حال اتصال…</string>
-    <string name="planning_center_status_error">خطا: %1$s</string>
     <string name="planning_center_import_title">درون‌بری از Planning Center</string>
     <string name="planning_center_import_service_type">گونهٔ مراسم</string>
     <string name="planning_center_import_select_plan">برنامه‌ای برگزینید</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">زیرا خدا جهان را چنان محبت کرد که پسر یگانه خود را داد.</string>
     <string name="bible_preview_sample_book">یوحنا</string>
     <string name="bible_preview_no_translations">برای دیدن آن در اینجا، یک ترجمه اضافه کنید</string>
-    <string name="song_preview_full_screen">پیش‌نمایش تمام‌صفحه</string>
-    <string name="song_preview_lower_third">پیش‌نمایش نوار پایین</string>
     <string name="song_element_number">شماره</string>
     <string name="song_element_title">عنوان</string>
     <string name="song_element_lyrics">متن سرود</string>
-    <string name="song_element_next_section">بخش بعدی</string>
     <string name="song_element_author">سراینده</string>
     <string name="song_element_composer">آهنگساز</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">رنگ</string>
     <string name="customize_type_image">تصویر</string>
     <string name="customize_type_video">ویدیو</string>
-    <string name="customize_type_transparent">شفاف</string>
     <string name="customize_type_default">پیش‌فرض</string>
     <string name="customize_type_gradient">طیف رنگ</string>
     <string name="customize_show_abbreviation">مخفف</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">به زبانهٔ کتاب‌مقدس بروید و ترجمه‌ها را انتخاب کنید — اولی ترجمهٔ اصلی است.</string>
     <string name="setup_songs_format_note">پوشهٔ کتابخانهٔ سرودها فایل‌های ‎.song‎ را می‌خواند. سرودهای ذخیره‌شده در قالبی دیگر نخست باید تبدیل شوند.</string>
     <string name="setup_songs_converter_body">از SongBeamer، OpenLP، OpenSong، FreeShow، Free Worship، EasySlides، Quelea، VideoPsalm یا SoftProjector می‌آیید؟ مبدل سرود و کتاب‌مقدس داخلی همهٔ آن‌ها را می‌خواند — و نیز متن‌ها را از PDF، Word، PowerPoint و Keynote — و فایل‌های ‎.song‎ مورد انتظار این پوشه را می‌نویسد.</string>
-    <string name="setup_songs_converter_button">باز کردن مبدل سرود و کتاب‌مقدس</string>
     <string name="setup_songs_samples_note">هنوز سرودی ندارید؟ دکمهٔ «افزودن سرودهای نمونه» در زبانهٔ سیستم پوشه را با مجموعه‌ای آماده پر می‌کند.</string>
     <string name="setup_proj_rows_note">هر نمایشگر متصل در پایین ردیف خود را می‌گیرد. شمار پنجره‌های نمایش از آنچه آنجا تعیین می‌کنید به دست می‌آید، پس چیزی برای تنظیم دستی نیست.</string>
     <string name="setup_proj_assign_note">برای هر پرده یک نمایشگر و یک حالت نمایش برگزینید، سپس با «خروجی‌های محتوا» تعیین کنید چه چیزی آنجا دیده شود. «بازنویسی سبک‌ها» به آن پرده ظاهر ویژهٔ خودش را می‌دهد.</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">سازندهٔ یک‌سوم پایین</string>
     <string name="song_lottie_unsupported_note">الگو چیدمان و جای عنوان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده، فاصلهٔ واژه‌ها، پیش‌نمایش بعدی و آکوردها اعمال نمی‌شوند.</string>
     <string name="bible_lottie_unsupported_note">الگو چیدمان، جای مرجع و نحوهٔ اشتراک نوار میان دو زبان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده و فاصلهٔ واژه‌ها اعمال نمی‌شوند.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">خط دور</string>
     <string name="tooltip_outline_options">تنظیمات خط دور</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">دوربین‌ها و کارت‌های ضبط با ffmpeg باز می‌شوند. این نسخه باید یکی داشته باشد — یک ffmpeg در زیر انتخاب کنید یا ffmpeg را نصب کنید و دوباره بررسی کنید.</string>
     <string name="ffmpeg_path_hint">یک برنامهٔ ffmpeg انتخاب کنید</string>
     <string name="ffmpeg_browse">انتخاب ffmpeg</string>
-    <string name="ffmpeg_check_again">بررسی دوباره</string>
     <string name="ffmpeg_clear">استفاده از نسخهٔ همراه</string>
     <string name="ffmpeg_download_link">دریافت ffmpeg</string>
     <string name="ffmpeg_path_help">برای استفاده از ffmpeg همراه ChurchPresenter خالی بگذارید.</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">نمایش نوع نمایش</string>
     <string name="song_add_translation">افزودن یک زبان</string>
     <string name="song_fourth_language">زبان 4</string>
-    <string name="song_language_fourth">زبان 4</string>
-    <string name="song_language_third">زبان 3</string>
     <string name="song_pane_translation">زبان %1$d</string>
     <string name="song_third_language">زبان 3</string>
     <string name="song_translation_label">نام زبان</string>

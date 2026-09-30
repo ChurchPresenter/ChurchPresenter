@@ -166,11 +166,9 @@
     <string name="report_bug">反馈问题</string>
     <string name="submit_feature_request">功能建议</string>
     <string name="action_ok">确定</string>
-    <string name="menu_help_item">帮助</string>
     <string name="menu_how_to_blog">使用教程博客</string>
     <string name="menu_check_for_updates">检查更新…</string>
     <string name="menu_keyboard_shortcuts">键盘快捷键</string>
-    <string name="keyboard_shortcuts_title">键盘快捷键</string>
     <string name="shortcut_category_global">全局</string>
     <string name="shortcut_category_bible">圣经标签页</string>
     <string name="shortcut_category_songs">歌曲标签页</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">向程序单添加文件</string>
     <string name="tooltip_toggle_displays">切换投放窗口</string>
     <string name="tooltip_settings">设置</string>
-    <string name="tooltip_theme_light">浅色主题</string>
     <string name="tooltip_theme_dark">深色主题</string>
     <string name="tooltip_theme_system">跟随系统主题</string>
     <string name="tooltip_remove">移除</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">名称</string>
     <string name="canvas_rotation">旋转</string>
     <string name="canvas_file_path">文件路径</string>
-    <string name="canvas_browse">浏览</string>
     <string name="canvas_scale">缩放</string>
     <string name="canvas_scale_fit">适应</string>
     <string name="canvas_scale_fill">填充</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">捕捉方式</string>
     <string name="canvas_capture_mode_region">屏幕区域</string>
     <string name="canvas_capture_mode_window">窗口</string>
-    <string name="canvas_capture_window">窗口</string>
     <string name="canvas_capture_refresh_windows">刷新窗口列表</string>
     <string name="canvas_capture_interval">捕捉间隔</string>
     <string name="canvas_placeholder_qr">二维码</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">断开连接</string>
     <string name="planning_center_status_connected">已以 %1$s 的身份连接</string>
     <string name="planning_center_status_connecting">正在连接…</string>
-    <string name="planning_center_status_error">错误：%1$s</string>
     <string name="planning_center_import_title">从 Planning Center 导入</string>
     <string name="planning_center_import_service_type">聚会类型</string>
     <string name="planning_center_import_select_plan">选择一个计划</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">神爱世人，甚至将他的独生子赐给他们。</string>
     <string name="bible_preview_sample_book">约翰福音</string>
     <string name="bible_preview_no_translations">添加译本后即可在此查看</string>
-    <string name="song_preview_full_screen">全屏预览</string>
-    <string name="song_preview_lower_third">下三分之一预览</string>
     <string name="song_element_number">编号</string>
     <string name="song_element_title">标题</string>
     <string name="song_element_lyrics">歌词</string>
-    <string name="song_element_next_section">下一段</string>
     <string name="song_element_author">作词</string>
     <string name="song_element_composer">作曲</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">颜色</string>
     <string name="customize_type_image">图片</string>
     <string name="customize_type_video">视频</string>
-    <string name="customize_type_transparent">透明</string>
     <string name="customize_type_default">默认</string>
     <string name="customize_type_gradient">渐变</string>
     <string name="customize_show_abbreviation">缩写</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">转到“圣经”选项卡并选择译本——第一个即为主译本。</string>
     <string name="setup_songs_format_note">诗歌库文件夹读取 .song 文件。以其他格式保存的诗歌需要先转换。</string>
     <string name="setup_songs_converter_body">从 SongBeamer、OpenLP、OpenSong、FreeShow、Free Worship、EasySlides、Quelea、VideoPsalm 或 SoftProjector 迁移过来？内置的歌曲与圣经转换器全部都能读取——还包括从 PDF、Word、PowerPoint 和 Keynote 中提取歌词——并写出此文件夹所需的 .song 文件。</string>
-    <string name="setup_songs_converter_button">打开歌曲与圣经转换器</string>
     <string name="setup_songs_samples_note">还没有诗歌？“系统”选项卡中的“添加示例诗歌”会为文件夹填入一套可用的诗歌。</string>
     <string name="setup_proj_rows_note">每块已连接的屏幕都会在下方获得自己的一行。演示窗口数量由您在那里的分配决定，无需手动设置。</string>
     <string name="setup_proj_assign_note">为每块屏幕选择显示设备和显示模式，然后用“内容输出”决定在其上显示什么。“覆盖样式”可让该屏幕拥有独立的外观。</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">下三分之一生成器</string>
     <string name="song_lottie_unsupported_note">模板决定版式和标题的位置。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线、词间距、下一段预览和和弦不适用。</string>
     <string name="bible_lottie_unsupported_note">模板决定版式、经文出处的位置以及两种语言如何共用字幕条。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线和词间距不适用。</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">描边</string>
     <string name="tooltip_outline_options">描边选项</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">摄像头和采集卡通过 ffmpeg 打开。此版本本应自带一个 — 请在下方选择一个 ffmpeg，或安装 ffmpeg 后再次检查。</string>
     <string name="ffmpeg_path_hint">选择 ffmpeg 程序</string>
     <string name="ffmpeg_browse">选择 ffmpeg</string>
-    <string name="ffmpeg_check_again">再次检查</string>
     <string name="ffmpeg_clear">使用自带版本</string>
     <string name="ffmpeg_download_link">获取 ffmpeg</string>
     <string name="ffmpeg_path_help">留空则使用 ChurchPresenter 自带的 ffmpeg。</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">显示显示类型</string>
     <string name="song_add_translation">添加语言</string>
     <string name="song_fourth_language">语言 4</string>
-    <string name="song_language_fourth">语言 4</string>
-    <string name="song_language_third">语言 3</string>
     <string name="song_pane_translation">语言 %1$d</string>
     <string name="song_third_language">语言 3</string>
     <string name="song_translation_label">语言名称</string>

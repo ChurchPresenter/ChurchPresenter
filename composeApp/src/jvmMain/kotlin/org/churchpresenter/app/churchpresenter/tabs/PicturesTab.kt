@@ -1,184 +1,66 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
-import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
-import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
-import org.churchpresenter.app.churchpresenter.utils.withPictureScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.isShiftPressed
-import org.churchpresenter.app.churchpresenter.composables.HIDDEN_TILE_ALPHA
-import org.churchpresenter.app.churchpresenter.composables.HiddenBadge
-import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.SlideshowHideToggle
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.LocalWentLive
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.CircleShape
-import org.churchpresenter.theme.AppShape
-import androidx.compose.foundation.text.KeyboardOptions
-import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.AlertDialog
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.SunkenOutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.zIndex
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.save_preset
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
-import churchpresenter.composeapp.generated.resources.auto_scroll_interval
-import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.ok
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoLibrary
-import churchpresenter.composeapp.generated.resources.clear_recents
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.recent
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_skip_next
-import churchpresenter.composeapp.generated.resources.ic_skip_previous
-import churchpresenter.composeapp.generated.resources.image_counter
-import churchpresenter.composeapp.generated.resources.image_counter_with_hidden
-import churchpresenter.composeapp.generated.resources.loading
-import churchpresenter.composeapp.generated.resources.picture_thumbnail_unreadable
-import churchpresenter.composeapp.generated.resources.loop_off
-import churchpresenter.composeapp.generated.resources.loop_on
-import churchpresenter.composeapp.generated.resources.next_image
-import churchpresenter.composeapp.generated.resources.no_folder_selected
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.unit_s
-import churchpresenter.composeapp.generated.resources.unit_ms
-import churchpresenter.composeapp.generated.resources.pictures_arrow_key_hint
-import churchpresenter.composeapp.generated.resources.pictures_reorder_hint
-import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.settings.OutputScaleMode
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.icon
-import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window as AwtWindow
 import java.io.File
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items as lazyItems
-import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.sunken
-import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
-private const val MILLIS_PER_SECOND = 1000
-private const val CAPTION_FONT_SP = 12.5f
-private const val SMALL_LABEL_FONT_SP = 11.5f
-private const val MAX_AUTO_SCROLL_SECONDS = 30
-private val RECENT_BAR_HEIGHT = 40.dp
-private val TRANSPORT_KEY_SIZE = 30.dp
-private val PLAY_KEY_SIZE = 38.dp
-private val LOOP_KEY_SIZE = 28.dp
-private val SETTING_BOX_WIDTH = 150.dp
-private const val MIN_TRANSITION_MS = 100
-private const val MAX_TRANSITION_MS = 2000
-private const val DRAGGED_ITEM_ALPHA = 0.35f
-private const val DRAGGED_ITEM_Z_INDEX = 10f
-private const val DRAGGED_ITEM_SCALE = 1.08f
-private const val DRAGGED_ITEM_ELEVATION = 16f
+internal const val PICTURES_MILLIS_PER_SECOND = 1000
+internal const val PICTURES_CAPTION_FONT_SP = 12.5f
+internal const val PICTURES_SMALL_LABEL_FONT_SP = 11.5f
+internal const val PICTURES_MAX_AUTO_SCROLL_SECONDS = 30
+internal val PICTURES_RECENT_BAR_HEIGHT = 40.dp
+internal val PICTURES_TRANSPORT_KEY_SIZE = 30.dp
+internal val PICTURES_PLAY_KEY_SIZE = 38.dp
+internal val PICTURES_LOOP_KEY_SIZE = 28.dp
+internal val PICTURES_SETTING_BOX_WIDTH = 150.dp
+internal const val PICTURES_MIN_TRANSITION_MS = 100
+internal const val PICTURES_MAX_TRANSITION_MS = 2000
+internal const val PICTURES_DRAGGED_ITEM_ALPHA = 0.35f
+internal const val PICTURES_DRAGGED_ITEM_Z_INDEX = 10f
+internal const val PICTURES_DRAGGED_ITEM_SCALE = 1.08f
+internal const val PICTURES_DRAGGED_ITEM_ELEVATION = 16f
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -214,16 +96,86 @@ fun PicturesTab(
     viewModel: PicturesViewModel = remember { PicturesViewModel(appSettings) }
 ) {
     val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
+    val focusRequester = remember { FocusRequester() }
+    PicturesEffects(
+        viewModel = viewModel,
+        focusRequester = focusRequester,
+        selectedPictureItem = selectedPictureItem,
+        selectedPictureItemVersion = selectedPictureItemVersion,
+        instanceLinkFetchPictureImageBytes = instanceLinkFetchPictureImageBytes,
+        presenterManager = presenterManager,
+    )
 
+    // Hoisted so onPreviewKeyEvent can read column count for row-based Up/Down navigation
+    val gridState = rememberLazyGridState()
+
+    // Focus-lost rescue: arrow-key image navigation only works while the tab holds keyboard
+    // focus AND the window is focused — full machinery in composables/FocusLostRescue.kt
+    // (shared with Presentation/Bible/Songs).
+    val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
+    val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val tabScope = remember(
+        appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextPicture,
+        onInstanceLinkSendPreviousPicture, presenterManager, onSettingsChange, viewModel, folderDialogTitle, gridState,
+        shortcuts, wentLive
+    ) {
+        PicturesTabScope(
+            appSettings = appSettings,
+            onAddToSchedule = onAddToSchedule,
+            onSavePreset = onSavePreset,
+            onInstanceLinkSendProject = onInstanceLinkSendProject,
+            onInstanceLinkSendNextPicture = onInstanceLinkSendNextPicture,
+            onInstanceLinkSendPreviousPicture = onInstanceLinkSendPreviousPicture,
+            presenterManager = presenterManager,
+            onSettingsChange = onSettingsChange,
+            viewModel = viewModel,
+            folderDialogTitle = folderDialogTitle,
+            gridState = gridState,
+            shortcuts = shortcuts,
+            wentLive = wentLive,
+        )
+    }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .focusRequester(focusRequester)
+            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .focusRescuePressHook(focusRescue)
+            .focusable()
+            .onPreviewKeyEvent { keyEvent -> tabScope.handleKey(keyEvent) }
+    ) {
+        tabScope.PicturesHeader()
+        FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
+
+        // ── Thumbnail grid ────────────────────────────────────────────
+        if (viewModel.images.isNotEmpty()) {
+            tabScope.PicturesGrid()
+        } else {
+            PicturesEmptyState()
+        }
+    }
+}
+
+/** Auto-scroll, loading a scheduled folder, and keeping the presenter in step. */
+@Composable
+private fun PicturesEffects(
+    viewModel: PicturesViewModel,
+    focusRequester: FocusRequester,
+    selectedPictureItem: ScheduleItem.PictureItem?,
+    selectedPictureItemVersion: Int,
+    instanceLinkFetchPictureImageBytes: (suspend (folderId: String, index: Int) -> ByteArray?)?,
+    presenterManager: PresenterManager?,
+) {
     // Auto-scroll effect
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedImageIndex, viewModel.autoScrollInterval) {
         if (viewModel.isPlaying && viewModel.images.isNotEmpty()) {
-            delay((viewModel.autoScrollInterval * MILLIS_PER_SECOND).toLong())
+            delay((viewModel.autoScrollInterval * PICTURES_MILLIS_PER_SECOND).toLong())
             viewModel.nextImage()
         }
     }
-
-    val focusRequester = remember { FocusRequester() }
 
     // Load folder when a picture schedule item is selected
     LaunchedEffect(selectedPictureItem, selectedPictureItemVersion) {
@@ -261,839 +213,31 @@ fun PicturesTab(
         presenterManager?.setAnimationType(viewModel.animationType)
         presenterManager?.setTransitionDuration(viewModel.transitionDuration.toInt())
     }
+}
 
-    // Hoisted so onPreviewKeyEvent can read column count for row-based Up/Down navigation
-    val gridState = rememberLazyGridState()
-
-    // Focus-lost rescue: arrow-key image navigation only works while the tab holds keyboard
-    // focus AND the window is focused — full machinery in composables/FocusLostRescue.kt
-    // (shared with Presentation/Bible/Songs).
-    val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
-    val shortcuts = LocalShortcuts.current
-    val wentLive = LocalWentLive.current
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .focusRequester(focusRequester)
-            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
-            .focusRescuePressHook(focusRescue)
-            .focusable()
-            .onPreviewKeyEvent { keyEvent ->
-                if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                if (viewModel.images.isEmpty()) {
-                    // Instance Link Controller mode: next/prev must still reach the primary's own
-                    // live folder even though this Controller's own list is empty — the normal case,
-                    // since Controller mode doesn't mirror the primary's content.
-                    val hasInstanceLinkNav = onInstanceLinkSendNextPicture != null || onInstanceLinkSendPreviousPicture != null
-                    return@onPreviewKeyEvent if (hasInstanceLinkNav) {
-                        when {
-                            shortcuts.matches(ShortcutAction.PICTURES_PREVIOUS, keyEvent) -> { viewModel.previousImage(onInstanceLinkSendPreviousPicture); true }
-                            shortcuts.matches(ShortcutAction.PICTURES_NEXT, keyEvent) -> { viewModel.nextImage(onInstanceLinkSendNextPicture); true }
-                            else -> false
-                        }
-                    } else false
-                }
-                val columnCount = (gridState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.column } ?: 0) + 1
-                when {
-                    shortcuts.matches(ShortcutAction.PICTURES_PREVIOUS, keyEvent) -> { viewModel.previousImage(onInstanceLinkSendPreviousPicture); true }
-                    shortcuts.matches(ShortcutAction.PICTURES_NEXT, keyEvent) -> { viewModel.nextImage(onInstanceLinkSendNextPicture); true }
-                    shortcuts.matches(ShortcutAction.PICTURES_ROW_UP, keyEvent) -> {
-                        val target = viewModel.selectedImageIndex - columnCount
-                        if (target >= 0) viewModel.selectImage(target)
-                        true
-                    }
-                    shortcuts.matches(ShortcutAction.PICTURES_ROW_DOWN, keyEvent) -> {
-                        val target = viewModel.selectedImageIndex + columnCount
-                        if (target < viewModel.images.size) viewModel.selectImage(target)
-                        true
-                    }
-                    shortcuts.matches(ShortcutAction.PICTURES_PLAY_PAUSE, keyEvent) -> { viewModel.togglePlayPause(); true }
-                    else -> false
-                }
-            }
+@Composable
+private fun PicturesEmptyState() {
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+            .bibleListCard(),
+        contentAlignment = Alignment.Center
     ) {
-        Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
-            // ── Folder bar ────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                RaisedButton(
-                    onClick = {
-                        viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
-                            onSettingsChange { s ->
-                                s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
-                            }
-                            RecentPictureFolders.add(folderPath)
-                        }
-                    },
-                    modifier = Modifier.height(32.dp),
-                    shape = AppShape(7.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-                ) {
-                    Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
-                    Spacer(Modifier.width(7.dp))
-                    Text(
-                        stringResource(Res.string.select_folder),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = TextUnit(CAPTION_FONT_SP, TextUnitType.Sp),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
-                Text(
-                    text = viewModel.selectedFolderDisplayPath ?: stringResource(Res.string.no_folder_selected),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (onSavePreset != null) {
-                    SavePresetButton(
-                        onClick = {
-                            viewModel.getScheduleData()?.let { (path, name, count) ->
-                                onSavePreset(path, name, count)
-                            }
-                        },
-                        enabled = viewModel.images.isNotEmpty(),
-                        tooltipText = stringResource(Res.string.save_preset)
-                    )
-                }
-                if (onAddToSchedule != null) {
-                    AddToScheduleButton(
-                        onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) } },
-                        enabled = viewModel.images.isNotEmpty(),
-                        tooltipText = stringResource(Res.string.add_to_schedule)
-                    )
-                }
-                if (presenterManager != null) {
-                    GoLiveButton(
-                        onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive) },
-                        enabled = viewModel.images.isNotEmpty(),
-                        tooltipText = stringResource(Res.string.go_live)
-                    )
-                }
-            }
-
-            // ── Recent folders bar ────────────────────────────────────────
-            val recentOrdered = RecentPictureFolders.pinned + RecentPictureFolders.folders.filter { it !in RecentPictureFolders.pinned }
-            if (recentOrdered.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(RECENT_BAR_HEIGHT)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.recent),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        KeyIconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_close),
-                                contentDescription = stringResource(Res.string.clear),
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                    LazyRow(
-                        modifier = Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        contentPadding = PaddingValues(vertical = 5.dp, horizontal = 4.dp)
-                    ) {
-                        lazyItems(recentOrdered) { path ->
-                            val isPinned = path in RecentPictureFolders.pinned
-                            val isActive = viewModel.selectedFolderDisplayPath == path
-                            RecentChip(
-                                name = File(path).name,
-                                isActive = isActive,
-                                isPinned = isPinned,
-                                onOpen = {
-                                    val folder = File(path)
-                                    if (folder.exists() && folder.isDirectory) {
-                                        viewModel.selectFolder(folder)
-                                        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = path)) }
-                                        RecentPictureFolders.add(path)
-                                    }
-                                },
-                                onTogglePin = { RecentPictureFolders.togglePin(path) },
-                            )
-                        }
-                    }
-                }
-            }
-
-            // ── Playback controls bar ─────────────────────────────────────
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 52.dp)
-                    .padding(horizontal = 16.dp, vertical = 5.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                val neutralKeyColors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                )
-                val accentKeyColors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
-                // Transport controls: raised keys either side of the biggest one, Play
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        RaisedIconButton(
-                            onClick = { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
-                            enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendPreviousPicture != null,
-                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                            colors = neutralKeyColors
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_skip_previous),
-                                contentDescription = stringResource(Res.string.previous_image),
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        RaisedIconButton(
-                            onClick = { viewModel.togglePlayPause() },
-                            enabled = viewModel.images.isNotEmpty(),
-                            modifier = Modifier.size(PLAY_KEY_SIZE),
-                            shape = CircleShape,
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Icon(
-                                painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                                modifier = Modifier.size(15.dp)
-                            )
-                        }
-                    }
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        RaisedIconButton(
-                            onClick = { viewModel.nextImage(onInstanceLinkSendNextPicture) },
-                            enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendNextPicture != null,
-                            modifier = Modifier.size(TRANSPORT_KEY_SIZE),
-                            colors = neutralKeyColors
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_skip_next),
-                                contentDescription = stringResource(Res.string.next_image),
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
-
-                // Image counter
-                if (viewModel.images.isNotEmpty()) {
-                    val hiddenCount = viewModel.imagesSnapshot().count { viewModel.isHidden(it) }
-                    Text(
-                        text = if (hiddenCount == 0) {
-                            stringResource(
-                                Res.string.image_counter,
-                                viewModel.selectedImageIndex + 1,
-                                viewModel.images.size,
-                            )
-                        } else {
-                            stringResource(
-                                Res.string.image_counter_with_hidden,
-                                viewModel.selectedImageIndex + 1,
-                                viewModel.images.size,
-                                hiddenCount,
-                            )
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        modifier = Modifier.widthIn(min = 60.dp)
-                    )
-                }
-
-                // Loop button
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = {
-                            viewModel.isLooping = !viewModel.isLooping
-                            onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping)) }
-                        },
-                        modifier = Modifier.size(LOOP_KEY_SIZE),
-                        shape = CircleShape,
-                        colors = if (viewModel.isLooping) accentKeyColors else neutralKeyColors
-                    ) {
-                        // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
-                        // semantics, so without this the button has no name at all.
-                        Icon(painterResource(Res.drawable.ic_refresh), contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), modifier = Modifier.size(16.dp))
-                    }
-                }
-
-                // Scale button: each click moves Fit → Fill → Stretch on every profile at once -- the
-                // scaling is per profile, and this is the shortcut over all of them. Lit whenever it is
-                // not Fit, or while the profiles disagree, which it says rather than naming one of them.
-                val shared = appSettings?.let { s ->
-                    sharedScaleMode(s.projectionSettings.outputProfiles) { it.pictureScaleMode }
-                }
-                val scaleMode = shared ?: OutputScaleMode.FIT
-                val scaled = shared != OutputScaleMode.FIT
-                val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.PICTURES)
-                TooltipArea(
-                    tooltip = {
-                        Surface(
-                            color = MaterialTheme.colorScheme.inverseSurface,
-                            shape = MaterialTheme.shapes.extraSmall,
-                            tonalElevation = 4.dp
-                        ) {
-                            Text(
-                                scaleLabel,
-                                color = MaterialTheme.colorScheme.inverseOnSurface,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    RaisedIconButton(
-                        onClick = {
-                            val next = if (shared == null) scaleMode else scaleMode.next()
-                            onSettingsChange { s -> s.withPictureScaleEverywhere(next) }
-                        },
-                        modifier = Modifier.size(LOOP_KEY_SIZE),
-                        colors = if (scaled) accentKeyColors else neutralKeyColors
-                    ) {
-                        Icon(
-                            scaleMode.icon,
-                            contentDescription = scaleLabel,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-
-                // Divider
-                Box(modifier = Modifier.width(1.dp).height(30.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-                // Settings display boxes
-                if (appSettings != null) {
-                    var editingInterval by remember { mutableStateOf(false) }
-                    var editingTransition by remember { mutableStateOf(false) }
-                    var intervalInput by remember(appSettings.pictureSettings.autoScrollInterval) {
-                        mutableStateOf(appSettings.pictureSettings.autoScrollInterval.toInt().toString())
-                    }
-                    var transitionInput by remember(appSettings.pictureSettings.transitionDuration) {
-                        mutableStateOf(appSettings.pictureSettings.transitionDuration.toInt().toString())
-                    }
-
-                    // Auto-scroll interval
-                    Column(
-                        modifier = Modifier
-                            .height(42.dp)
-                            .width(SETTING_BOX_WIDTH)
-                            .sunken(AppShape(8.dp), elevationPalette())
-                            .clickable { editingInterval = true }
-                            .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.auto_scroll_interval).removeSuffix(":").uppercase(),
-                            fontSize = 10.sp,
-                            lineHeight = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(Modifier.height(1.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "${appSettings.pictureSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 13.sp,
-                                    lineHeight = 14.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
-                        }
-                    }
-
-                    if (editingInterval) {
-                        AlertDialog(
-                            onDismissRequest = { editingInterval = false },
-                            title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                            text = {
-                                SunkenOutlinedTextField(
-                                    value = intervalInput,
-                                    onValueChange = { intervalInput = it },
-                                    suffix = { Text(stringResource(Res.string.unit_s)) },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                                )
-                            },
-                            confirmButton = {
-                                GhostButton(
-                                    shape = AppShape(6.dp),
-                                    onClick = {
-                                    intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v ->
-                                        viewModel.autoScrollInterval = v.toFloat()
-                                        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat())) }
-                                    }
-                                    editingInterval = false
-                                }) { Text(stringResource(Res.string.ok)) }
-                            },
-                            dismissButton = {
-                                GhostButton(shape = AppShape(6.dp), onClick = { editingInterval = false }) {
-                                    Text(stringResource(Res.string.cancel))
-                                }
-                            }
-                        )
-                    }
-
-                    // Transition duration
-                    Column(
-                        modifier = Modifier
-                            .height(42.dp)
-                            .width(SETTING_BOX_WIDTH)
-                            .sunken(AppShape(8.dp), elevationPalette())
-                            .clickable { editingTransition = true }
-                            .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.transition_duration).removeSuffix(":").uppercase(),
-                            fontSize = 10.sp,
-                            lineHeight = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(Modifier.height(1.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "${appSettings.pictureSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 13.sp,
-                                    lineHeight = 14.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
-                        }
-                    }
-
-                    if (editingTransition) {
-                        AlertDialog(
-                            onDismissRequest = { editingTransition = false },
-                            title = { Text(stringResource(Res.string.transition_duration)) },
-                            text = {
-                                SunkenOutlinedTextField(
-                                    value = transitionInput,
-                                    onValueChange = { transitionInput = it },
-                                    suffix = { Text(stringResource(Res.string.unit_ms)) },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                                )
-                            },
-                            confirmButton = {
-                                GhostButton(
-                                    shape = AppShape(6.dp),
-                                    onClick = {
-                                    transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v ->
-                                        viewModel.transitionDuration = v.toFloat()
-                                        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat())) }
-                                    }
-                                    editingTransition = false
-                                }) { Text(stringResource(Res.string.ok)) }
-                            },
-                            dismissButton = {
-                                GhostButton(shape = AppShape(6.dp), onClick = { editingTransition = false }) {
-                                    Text(stringResource(Res.string.cancel))
-                                }
-                            }
-                        )
-                    }
-
-                    // Animation type dropdown
-                    val crossfadeText = stringResource(Res.string.animation_crossfade)
-                    val fadeText = stringResource(Res.string.animation_fade)
-                    val slideLeftText = stringResource(Res.string.animation_slide_left)
-                    val slideRightText = stringResource(Res.string.animation_slide_right)
-                    val noneText = stringResource(Res.string.animation_none)
-                    val currentAnimationLabel = when (appSettings.pictureSettings.animationType) {
-                        Constants.ANIMATION_FADE -> fadeText
-                        Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
-                        Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
-                        Constants.ANIMATION_NONE -> noneText
-                        else -> crossfadeText
-                    }
-                    DropdownSelector(
-                        label = stringResource(Res.string.animation_type),
-                        items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
-                        selected = currentAnimationLabel,
-                        onSelectedChange = { selected ->
-                            viewModel.animationType = when (selected) {
-                                fadeText -> AnimationType.FADE
-                                slideLeftText -> AnimationType.SLIDE_LEFT
-                                slideRightText -> AnimationType.SLIDE_RIGHT
-                                noneText -> AnimationType.NONE
-                                else -> AnimationType.CROSSFADE
-                            }
-                            onSettingsChange { s ->
-                                val newType = when (selected) {
-                                    fadeText -> Constants.ANIMATION_FADE
-                                    slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
-                                    slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
-                                    noneText -> Constants.ANIMATION_NONE
-                                    else -> Constants.ANIMATION_CROSSFADE
-                                }
-                                s.copy(pictureSettings = s.pictureSettings.copy(animationType = newType))
-                            }
-                        }
-                    )
-                }
-            }
-            @OptIn(ExperimentalLayoutApi::class)
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                // Drawn from the live bindings, so a rebind is reflected here rather than the hint
-                // going on describing the arrow keys. Hidden entirely when the user has unbound
-                // both pairs — an empty "  next/prev image" would be worse than no hint.
-                val navLabel = shortcuts.pairLabel(ShortcutAction.PICTURES_PREVIOUS, ShortcutAction.PICTURES_NEXT)
-                val rowLabel = shortcuts.pairLabel(ShortcutAction.PICTURES_ROW_UP, ShortcutAction.PICTURES_ROW_DOWN)
-                if (navLabel.isNotEmpty() || rowLabel.isNotEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.pictures_arrow_key_hint, navLabel, rowLabel),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp)
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = "·",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.pictures_reorder_hint),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp)
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-        FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
-
-        // ── Thumbnail grid ────────────────────────────────────────────
-        if (viewModel.images.isNotEmpty()) {
-            // Drag-to-reorder state: shift+click+drag, ghost approach (no real-time swaps)
-            var draggingFile by remember { mutableStateOf<File?>(null) }
-            var draggingFromIndex by remember { mutableStateOf(-1) }
-            var dropTargetIndex by remember { mutableStateOf<Int?>(null) }
-            var isDragActive by remember { mutableStateOf(false) }
-            var dragCursorInGrid by remember { mutableStateOf(Offset.Zero) }
-
-            // The grid is given an immutable copy, never the view model's live SnapshotStateList.
-            // `items(list)` captures the list by reference and indexes into it from the item
-            // provider on a later measure pass, so a folder watcher removing a file between the
-            // count being read and `contentType` being asked for indexes past the end — an
-            // IndexOutOfBoundsException raised inside Compose's measure, where the tab cannot catch
-            // it. Copying here makes the count and the indexing come from the same list.
-            val shownImages = viewModel.images.toList()
-
-            Box(
-                modifier = Modifier.fillMaxSize()
-                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-                    .bibleListCard()
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(200.dp),
-                    state = gridState,
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                    contentPadding = PaddingValues(vertical = 18.dp)
-                ) {
-                    items(shownImages, key = { it.absolutePath }) { imageFile ->
-                        val index = shownImages.indexOf(imageFile)
-                        val isSelected = index == viewModel.selectedImageIndex
-                        val isHidden = viewModel.isHidden(imageFile)
-                        val isDraggingThis = draggingFile == imageFile
-                        val isDropTarget = isDragActive && dropTargetIndex == index && !isDraggingThis
-
-                        val borderColor = when {
-                            isDropTarget -> MaterialTheme.colorScheme.tertiary
-                            isSelected -> MaterialTheme.colorScheme.secondary
-                            else -> MaterialTheme.colorScheme.outlineVariant
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .animateItem()
-                                .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
-                                .hoverLift(AppShape(8.dp))
-                                .border(2.dp, borderColor, AppShape(8.dp))
-                                .clip(AppShape(8.dp))
-                                .pointerInput(imageFile) {
-                                    awaitPointerEventScope {
-                                        while (true) {
-                                            val pressEvent = awaitPointerEvent(PointerEventPass.Initial)
-                                            if (pressEvent.type != PointerEventType.Press ||
-                                                !pressEvent.keyboardModifiers.isShiftPressed
-                                            ) continue
-
-                                            pressEvent.changes.forEach { it.consume() }
-                                            val startPos = pressEvent.changes.first().position
-
-                                            val idx = viewModel.images.indexOf(imageFile)
-                                            val itemInfo = gridState.layoutInfo.visibleItemsInfo
-                                                .firstOrNull { it.index == idx }
-                                            draggingFile = imageFile
-                                            draggingFromIndex = idx
-                                            isDragActive = true
-                                            dropTargetIndex = idx
-                                            dragCursorInGrid = if (itemInfo != null) {
-                                                Offset(
-                                                    itemInfo.offset.x + startPos.x,
-                                                    itemInfo.offset.y + startPos.y
-                                                )
-                                            } else startPos
-
-                                            var lastPos = startPos
-                                            var dragging = true
-                                            while (dragging) {
-                                                val event = awaitPointerEvent(PointerEventPass.Initial)
-                                                event.changes.forEach { it.consume() }
-                                                when (event.type) {
-                                                    PointerEventType.Move -> {
-                                                        val pos = event.changes.firstOrNull()?.position ?: continue
-                                                        dragCursorInGrid += pos - lastPos
-                                                        lastPos = pos
-                                                        val target = gridState.layoutInfo.visibleItemsInfo
-                                                            .firstOrNull { info ->
-                                                                dragCursorInGrid.x >= info.offset.x &&
-                                                                dragCursorInGrid.x <= info.offset.x + info.size.width &&
-                                                                dragCursorInGrid.y >= info.offset.y &&
-                                                                dragCursorInGrid.y <= info.offset.y + info.size.height
-                                                            }
-                                                        if (target != null) dropTargetIndex = target.index
-                                                    }
-                                                    PointerEventType.Release -> {
-                                                        val from = draggingFromIndex
-                                                        val to = dropTargetIndex ?: from
-                                                        if (from >= 0 && from != to) viewModel.moveImage(from, to)
-                                                        draggingFile = null
-                                                        draggingFromIndex = -1
-                                                        dropTargetIndex = null
-                                                        isDragActive = false
-                                                        dragCursorInGrid = Offset.Zero
-                                                        dragging = false
-                                                    }
-                                                    else -> {}
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                // Final pass, so the hide eye in the nameplate gets its own click
-                                // first: taken in the initial pass, a click on the eye selected the
-                                // picture instead, and put it on screen when live.
-                                .finalPassCombinedClickable(
-                                    onClick = {
-                                        if (!isDragActive) viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                                    },
-                                    onDoubleClick = {
-                                        if (!isDragActive) {
-                                            viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                                            if (presenterManager != null) {
-                                                viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive)
-                                            }
-                                        }
-                                    }
-                                )
-                        ) {
-                            // Thumbnail image area
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(148.dp)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val thumbnail = viewModel.thumbnails[imageFile]
-                                when {
-                                    thumbnail != null -> Image(
-                                        bitmap = thumbnail,
-                                        contentDescription = imageFile.name,
-                                        modifier = Modifier.fillMaxSize()
-                                            .alpha(if (isHidden) HIDDEN_TILE_ALPHA else 1f),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                    // A decode that failed used to leave "Loading..." on the tile for
-                                    // the rest of the session, so a corrupt file looked like a slow
-                                    // one for ever. Say so instead.
-                                    imageFile in viewModel.thumbnailFailures -> Text(
-                                        text = stringResource(Res.string.picture_thumbnail_unreadable),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                    else -> Text(
-                                        text = stringResource(Res.string.loading),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                if (isHidden) HiddenBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
-                            }
-                            // Nameplate below image
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    modifier = Modifier.weight(1f),
-                                    text = imageFile.nameWithoutExtension,
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = TextUnit(SMALL_LABEL_FONT_SP, TextUnitType.Sp),
-                                        fontWeight = if (isSelected) FontWeight.SemiBold
-                                                     else FontWeight.Medium
-                                    ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface
-                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                SlideshowHideToggle(
-                                    hidden = isHidden,
-                                    position = index,
-                                    onToggle = { viewModel.toggleHidden(imageFile) },
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Floating drag preview — follows cursor, rendered above the grid
-                if (isDragActive) {
-                    draggingFile?.let { file ->
-                        viewModel.thumbnails[file]?.let { bitmap ->
-                            Box(
-                                modifier = Modifier
-                                    .size(150.dp)
-                                    .zIndex(DRAGGED_ITEM_Z_INDEX)
-                                    .graphicsLayer {
-                                        translationX = dragCursorInGrid.x - 75.dp.toPx()
-                                        translationY = dragCursorInGrid.y - 75.dp.toPx()
-                                        scaleX = DRAGGED_ITEM_SCALE
-                                        scaleY = DRAGGED_ITEM_SCALE
-                                        shadowElevation = DRAGGED_ITEM_ELEVATION
-                                    }
-                                    .background(MaterialTheme.colorScheme.surface, AppShape(8.dp))
-                                    .border(2.dp, MaterialTheme.colorScheme.primary, AppShape(8.dp))
-                            ) {
-                                Image(
-                                    bitmap = bitmap,
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                        }
-                    }
-                }
-                VerticalScrollbar(
-                    adapter = rememberScrollbarAdapter(gridState),
-                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(vertical = 8.dp),
-                )
-            }
-
-            // Auto-scroll to selected item in grid
-            LaunchedEffect(viewModel.selectedImageIndex) {
-                if (viewModel.selectedImageIndex in viewModel.images.indices) {
-                    gridState.animateScrollToItem(viewModel.selectedImageIndex)
-                }
-            }
-        } else {
-            // Empty state
-            Box(
-                modifier = Modifier.fillMaxSize()
-                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-                    .bibleListCard(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoLibrary,
-                        contentDescription = null,
-                        modifier = Modifier.size(72.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                    Text(
-                        text = stringResource(Res.string.select_folder_to_view),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.PhotoLibrary,
+                contentDescription = null,
+                modifier = Modifier.size(72.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Text(
+                text = stringResource(Res.string.select_folder_to_view),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
         }
     }
 }
-

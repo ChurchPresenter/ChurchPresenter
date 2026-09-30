@@ -171,11 +171,9 @@
     <string name="report_bug">பிழையைத் தெரிவி</string>
     <string name="submit_feature_request">அம்ச வேண்டுகோள்</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">உதவி</string>
     <string name="menu_how_to_blog">வழிகாட்டி வலைப்பதிவு</string>
     <string name="menu_check_for_updates">புதுப்பிப்புகளைச் சரிபார்…</string>
     <string name="menu_keyboard_shortcuts">விசைப்பலகை குறுக்குவழிகள்</string>
-    <string name="keyboard_shortcuts_title">விசைப்பலகை குறுக்குவழிகள்</string>
     <string name="shortcut_category_global">பொதுவானது</string>
     <string name="shortcut_category_bible">வேதாகமத் தாவல்</string>
     <string name="shortcut_category_songs">பாடல்கள் தாவல்</string>
@@ -569,7 +567,6 @@
     <string name="schedule_add_files_title">அட்டவணையில் கோப்புகளைச் சேர்</string>
     <string name="tooltip_toggle_displays">வழங்குநர் காட்சிகளை மாற்று</string>
     <string name="tooltip_settings">அமைப்புகள்</string>
-    <string name="tooltip_theme_light">வெளிர் தோற்றம்</string>
     <string name="tooltip_theme_dark">இருண்ட தோற்றம்</string>
     <string name="tooltip_theme_system">கணினித் தோற்றம்</string>
     <string name="tooltip_remove">நீக்கு</string>
@@ -967,7 +964,6 @@
     <string name="canvas_source_name">பெயர்</string>
     <string name="canvas_rotation">சுழற்சி</string>
     <string name="canvas_file_path">கோப்புப் பாதை</string>
-    <string name="canvas_browse">உலாவு</string>
     <string name="canvas_scale">அளவீடு</string>
     <string name="canvas_scale_fit">பொருத்து</string>
     <string name="canvas_scale_fill">நிரப்பு</string>
@@ -1059,7 +1055,6 @@
     <string name="canvas_capture_mode">பிடிப்புப் பயன்முறை</string>
     <string name="canvas_capture_mode_region">திரைப் பகுதி</string>
     <string name="canvas_capture_mode_window">சாளரம்</string>
-    <string name="canvas_capture_window">சாளரம்</string>
     <string name="canvas_capture_refresh_windows">சாளரப் பட்டியலைப் புதுப்பி</string>
     <string name="canvas_capture_interval">பிடிப்பு இடைவெளி</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1919,7 +1914,6 @@
     <string name="planning_center_disconnect">துண்டி</string>
     <string name="planning_center_status_connected">%1$s ஆக இணைக்கப்பட்டது</string>
     <string name="planning_center_status_connecting">இணைக்கிறது…</string>
-    <string name="planning_center_status_error">பிழை: %1$s</string>
     <string name="planning_center_import_title">Planning Center இலிருந்து இறக்குமதி</string>
     <string name="planning_center_import_service_type">ஆராதனை வகை</string>
     <string name="planning_center_import_select_plan">ஒரு திட்டத்தைத் தேர்ந்தெடு</string>
@@ -1998,12 +1992,9 @@
     <string name="bible_preview_sample_verse">தேவன் தம்முடைய ஒரேபேறான குமாரனைத் தந்தருளும் அளவுக்கு உலகத்தில் அன்பு கூர்ந்தார்.</string>
     <string name="bible_preview_sample_book">யோவான்</string>
     <string name="bible_preview_no_translations">இங்கே காண ஒரு மொழிபெயர்ப்பைச் சேர்க்கவும்</string>
-    <string name="song_preview_full_screen">முழுத்திரை முன்னோட்டம்</string>
-    <string name="song_preview_lower_third">கீழ்ப்பகுதி முன்னோட்டம்</string>
     <string name="song_element_number">எண்</string>
     <string name="song_element_title">தலைப்பு</string>
     <string name="song_element_lyrics">பாடல் வரிகள்</string>
-    <string name="song_element_next_section">அடுத்த பகுதி</string>
     <string name="song_element_author">ஆசிரியர்</string>
     <string name="song_element_composer">இசையமைப்பாளர்</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2106,7 +2097,6 @@
     <string name="customize_type_color">நிறம்</string>
     <string name="customize_type_image">படம்</string>
     <string name="customize_type_video">காணொளி</string>
-    <string name="customize_type_transparent">ஒளிபுகும்</string>
     <string name="customize_type_default">இயல்பு</string>
     <string name="customize_type_gradient">படிநிறம்</string>
     <string name="customize_show_abbreviation">சுருக்கம்</string>
@@ -2137,7 +2127,6 @@
     <string name="setup_bible_pick_translations">பைபிள் தாவலுக்குச் சென்று மொழிபெயர்ப்புகளைத் தேர்ந்தெடுக்கவும் — முதலாவது முதன்மையானது.</string>
     <string name="setup_songs_format_note">பாடல் நூலகக் கோப்புறை .song கோப்புகளைப் படிக்கிறது. வேறு வடிவத்தில் சேமித்த பாடல்களை முதலில் மாற்ற வேண்டும்.</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm அல்லது SoftProjector இலிருந்து வருகிறீர்களா? உள்ளமைந்த பாடல் மற்றும் வேதாகம மாற்றி அவை அனைத்தையும் படிக்கும் — PDF, Word, PowerPoint, Keynote இலிருந்து வரிகளையும் — பிறகு இந்தக் கோப்புறை எதிர்பார்க்கும் .song கோப்புகளை எழுதும்.</string>
-    <string name="setup_songs_converter_button">பாடல் மற்றும் வேதாகம மாற்றியைத் திற</string>
     <string name="setup_songs_samples_note">இன்னும் பாடல்கள் இல்லையா? கணினி தாவலில் உள்ள «மாதிரிப் பாடல்களைச் சேர்» கோப்புறையை செயற்படும் தொகுப்பால் நிரப்பும்.</string>
     <string name="setup_proj_rows_note">இணைக்கப்பட்ட ஒவ்வொரு திரையும் கீழே தனி வரிசையைப் பெறும். காட்சி சாளரங்களின் எண்ணிக்கை அங்கு நீங்கள் ஒதுக்குவதிலிருந்து வருகிறது, எனவே கையால் அமைக்க எதுவும் இல்லை.</string>
     <string name="setup_proj_assign_note">ஒவ்வொரு திரைக்கும் ஒரு காட்சியையும் காட்சி முறையையும் தேர்ந்தெடுத்து, பிறகு «உள்ளடக்க வெளியீடுகள்» மூலம் அங்கு என்ன தோன்றும் என்பதைத் தீர்மானிக்கவும். «பாணிகளை மேலெழுது» அந்தத் திரைக்குத் தனித் தோற்றத்தைத் தரும்.</string>
@@ -2154,7 +2143,6 @@
     <string name="bible_lottie_gen_window_title">கீழ் மூன்றில் ஒரு பகுதி உருவாக்கி</string>
     <string name="song_lottie_unsupported_note">வார்ப்புரு தளவமைப்பையும் தலைப்பின் இடத்தையும் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல், சொல் இடைவெளி, அடுத்ததின் முன்னோட்டம் மற்றும் கார்டுகள் பொருந்தாது.</string>
     <string name="bible_lottie_unsupported_note">வார்ப்புரு தளவமைப்பு, குறிப்பின் இடம் மற்றும் இரு மொழிகள் பட்டையை எப்படிப் பகிர்வது என்பதைத் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல் மற்றும் சொல் இடைவெளி பொருந்தாது.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">வெளிக்கோடு</string>
     <string name="tooltip_outline_options">வெளிக்கோடு விருப்பங்கள்</string>
@@ -2260,7 +2248,6 @@
     <string name="ffmpeg_missing_help">கேமராக்களும் பிடிப்பு அட்டைகளும் ffmpeg மூலம் திறக்கப்படுகின்றன. இந்தப் பதிப்பில் ஒன்று இருக்க வேண்டும் — கீழே ஒரு ffmpeg ஐத் தேர்ந்தெடுக்கவும், அல்லது ffmpeg ஐ நிறுவி மீண்டும் சரிபார்க்கவும்.</string>
     <string name="ffmpeg_path_hint">ffmpeg நிரலைத் தேர்ந்தெடு</string>
     <string name="ffmpeg_browse">ffmpeg ஐத் தேர்ந்தெடு</string>
-    <string name="ffmpeg_check_again">மீண்டும் சரிபார்</string>
     <string name="ffmpeg_clear">உடன் வந்ததைப் பயன்படுத்து</string>
     <string name="ffmpeg_download_link">ffmpeg ஐப் பெறு</string>
     <string name="ffmpeg_path_help">ChurchPresenter உடன் வந்த ffmpeg ஐப் பயன்படுத்த காலியாக விடவும்.</string>
@@ -2362,8 +2349,6 @@
     <string name="preview_settings_show_modes">காட்சி வகையைக் காட்டு</string>
     <string name="song_add_translation">ஒரு மொழியைச் சேர்க்கவும்</string>
     <string name="song_fourth_language">மொழி 4</string>
-    <string name="song_language_fourth">மொழி 4</string>
-    <string name="song_language_third">மொழி 3</string>
     <string name="song_pane_translation">மொழி %1$d</string>
     <string name="song_third_language">மொழி 3</string>
     <string name="song_translation_label">மொழியின் பெயர்</string>

@@ -166,11 +166,9 @@
     <string name="report_bug">Laporkan Bug</string>
     <string name="submit_feature_request">Permintaan Fitur</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Bantuan</string>
     <string name="menu_how_to_blog">Blog Panduan</string>
     <string name="menu_check_for_updates">Periksa Pembaruan…</string>
     <string name="menu_keyboard_shortcuts">Pintasan Keyboard</string>
-    <string name="keyboard_shortcuts_title">Pintasan Keyboard</string>
     <string name="shortcut_category_global">Global</string>
     <string name="shortcut_category_bible">Tab Alkitab</string>
     <string name="shortcut_category_songs">Tab Lagu</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Tambahkan Berkas ke Jadwal</string>
     <string name="tooltip_toggle_displays">Alihkan Layar Presenter</string>
     <string name="tooltip_settings">Pengaturan</string>
-    <string name="tooltip_theme_light">Tema Terang</string>
     <string name="tooltip_theme_dark">Tema Gelap</string>
     <string name="tooltip_theme_system">Tema Sistem</string>
     <string name="tooltip_remove">Hapus</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">Nama</string>
     <string name="canvas_rotation">Rotasi</string>
     <string name="canvas_file_path">Lokasi file</string>
-    <string name="canvas_browse">Telusuri</string>
     <string name="canvas_scale">Skala</string>
     <string name="canvas_scale_fit">Sesuaikan</string>
     <string name="canvas_scale_fill">Penuhi</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">Mode Tangkapan</string>
     <string name="canvas_capture_mode_region">Area Layar</string>
     <string name="canvas_capture_mode_window">Jendela</string>
-    <string name="canvas_capture_window">Jendela</string>
     <string name="canvas_capture_refresh_windows">Muat Ulang Daftar Jendela</string>
     <string name="canvas_capture_interval">Jeda Tangkapan</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">Putuskan</string>
     <string name="planning_center_status_connected">Tersambung sebagai %1$s</string>
     <string name="planning_center_status_connecting">Menyambung…</string>
-    <string name="planning_center_status_error">Kesalahan: %1$s</string>
     <string name="planning_center_import_title">Impor dari Planning Center</string>
     <string name="planning_center_import_service_type">Jenis ibadah</string>
     <string name="planning_center_import_select_plan">Pilih rencana</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">Karena begitu besar kasih Allah akan dunia ini, sehingga Ia mengaruniakan Anak-Nya yang tunggal.</string>
     <string name="bible_preview_sample_book">Yohanes</string>
     <string name="bible_preview_no_translations">Tambahkan terjemahan untuk melihatnya di sini</string>
-    <string name="song_preview_full_screen">Pratinjau layar penuh</string>
-    <string name="song_preview_lower_third">Pratinjau sepertiga bawah</string>
     <string name="song_element_number">Nomor</string>
     <string name="song_element_title">Judul</string>
     <string name="song_element_lyrics">Lirik</string>
-    <string name="song_element_next_section">Bagian berikutnya</string>
     <string name="song_element_author">Penulis</string>
     <string name="song_element_composer">Komposer</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">Warna</string>
     <string name="customize_type_image">Gambar</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparan</string>
     <string name="customize_type_default">Bawaan</string>
     <string name="customize_type_gradient">Gradien</string>
     <string name="customize_show_abbreviation">Singkatan</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Buka tab Alkitab dan pilih terjemahan Anda — yang pertama menjadi terjemahan utama.</string>
     <string name="setup_songs_format_note">Folder perpustakaan lagu membaca berkas .song. Lagu yang disimpan dalam format lain harus dikonversi terlebih dahulu.</string>
     <string name="setup_songs_converter_body">Beralih dari SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm, atau SoftProjector? Konverter Lagu dan Alkitab bawaan membaca semuanya — juga lirik dari PDF, Word, PowerPoint, dan Keynote — lalu menulis berkas .song yang diharapkan folder ini.</string>
-    <string name="setup_songs_converter_button">Buka Konverter Lagu dan Alkitab</string>
     <string name="setup_songs_samples_note">Belum punya lagu? «Tambahkan lagu contoh» di tab Sistem akan mengisi folder dengan satu set yang siap pakai.</string>
     <string name="setup_proj_rows_note">Setiap layar yang terhubung mendapat barisnya sendiri di bawah. Jumlah jendela presentasi mengikuti apa yang Anda tetapkan di sana, jadi tidak ada yang perlu diatur manual.</string>
     <string name="setup_proj_assign_note">Untuk tiap layar pilih perangkat tampilan dan mode tampilan, lalu gunakan «Keluaran konten» untuk menentukan apa yang muncul di sana. «Timpa gaya» memberi layar itu tampilannya sendiri.</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Pembuat Sepertiga Bawah</string>
     <string name="song_lottie_unsupported_note">Templat menentukan tata letak dan posisi judul. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, jarak kata, pratinjau bagian berikutnya, dan kunci gitar tidak berlaku.</string>
     <string name="bible_lottie_unsupported_note">Templat menentukan tata letak, posisi referensi, dan cara dua bahasa berbagi pita. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, dan jarak kata tidak berlaku.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Garis luar</string>
     <string name="tooltip_outline_options">Opsi garis luar</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">Kamera dan kartu tangkap dibuka dengan ffmpeg. Build ini seharusnya menyertakannya — pilih ffmpeg di bawah, atau pasang ffmpeg lalu periksa lagi.</string>
     <string name="ffmpeg_path_hint">Pilih program ffmpeg</string>
     <string name="ffmpeg_browse">Pilih ffmpeg</string>
-    <string name="ffmpeg_check_again">Periksa lagi</string>
     <string name="ffmpeg_clear">Gunakan bawaan</string>
     <string name="ffmpeg_download_link">Unduh ffmpeg</string>
     <string name="ffmpeg_path_help">Biarkan kosong untuk menggunakan ffmpeg bawaan ChurchPresenter.</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">Tampilkan jenis tampilan</string>
     <string name="song_add_translation">Tambah bahasa</string>
     <string name="song_fourth_language">Bahasa 4</string>
-    <string name="song_language_fourth">Bahasa 4</string>
-    <string name="song_language_third">Bahasa 3</string>
     <string name="song_pane_translation">Bahasa %1$d</string>
     <string name="song_third_language">Bahasa 3</string>
     <string name="song_translation_label">Nama bahasa</string>

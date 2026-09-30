@@ -166,11 +166,9 @@
     <string name="report_bug">แจ้งข้อบกพร่อง</string>
     <string name="submit_feature_request">ขอฟีเจอร์ใหม่</string>
     <string name="action_ok">ตกลง</string>
-    <string name="menu_help_item">ช่วยเหลือ</string>
     <string name="menu_how_to_blog">บล็อกวิธีใช้</string>
     <string name="menu_check_for_updates">ตรวจหาการอัปเดต…</string>
     <string name="menu_keyboard_shortcuts">แป้นลัด</string>
-    <string name="keyboard_shortcuts_title">แป้นลัด</string>
     <string name="shortcut_category_global">ทั่วทั้งโปรแกรม</string>
     <string name="shortcut_category_bible">แท็บพระคัมภีร์</string>
     <string name="shortcut_category_songs">แท็บเพลง</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">เพิ่มไฟล์ลงรายการ</string>
     <string name="tooltip_toggle_displays">เปิด/ปิดจอแสดงผล</string>
     <string name="tooltip_settings">การตั้งค่า</string>
-    <string name="tooltip_theme_light">ธีมสว่าง</string>
     <string name="tooltip_theme_dark">ธีมมืด</string>
     <string name="tooltip_theme_system">ธีมตามระบบ</string>
     <string name="tooltip_remove">นำออก</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">ชื่อ</string>
     <string name="canvas_rotation">การหมุน</string>
     <string name="canvas_file_path">พาธไฟล์</string>
-    <string name="canvas_browse">เรียกดู</string>
     <string name="canvas_scale">ขนาด</string>
     <string name="canvas_scale_fit">พอดี</string>
     <string name="canvas_scale_fill">เต็ม</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">โหมดการจับภาพ</string>
     <string name="canvas_capture_mode_region">พื้นที่หน้าจอ</string>
     <string name="canvas_capture_mode_window">หน้าต่าง</string>
-    <string name="canvas_capture_window">หน้าต่าง</string>
     <string name="canvas_capture_refresh_windows">โหลดรายการหน้าต่างใหม่</string>
     <string name="canvas_capture_interval">ช่วงเวลาจับภาพ</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">ตัดการเชื่อมต่อ</string>
     <string name="planning_center_status_connected">เชื่อมต่อในชื่อ %1$s</string>
     <string name="planning_center_status_connecting">กำลังเชื่อมต่อ…</string>
-    <string name="planning_center_status_error">ข้อผิดพลาด: %1$s</string>
     <string name="planning_center_import_title">นำเข้าจาก Planning Center</string>
     <string name="planning_center_import_service_type">ประเภทการนมัสการ</string>
     <string name="planning_center_import_select_plan">เลือกแผน</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">เพราะว่าพระเจ้าทรงรักโลกจนได้ประทานพระบุตรองค์เดียวของพระองค์</string>
     <string name="bible_preview_sample_book">ยอห์น</string>
     <string name="bible_preview_no_translations">เพิ่มคำแปลเพื่อดูที่นี่</string>
-    <string name="song_preview_full_screen">ตัวอย่างเต็มจอ</string>
-    <string name="song_preview_lower_third">ตัวอย่างแถบล่าง</string>
     <string name="song_element_number">หมายเลข</string>
     <string name="song_element_title">ชื่อ</string>
     <string name="song_element_lyrics">เนื้อเพลง</string>
-    <string name="song_element_next_section">ท่อนถัดไป</string>
     <string name="song_element_author">ผู้ประพันธ์คำร้อง</string>
     <string name="song_element_composer">ผู้ประพันธ์ทำนอง</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">สี</string>
     <string name="customize_type_image">ภาพ</string>
     <string name="customize_type_video">วิดีโอ</string>
-    <string name="customize_type_transparent">โปร่งใส</string>
     <string name="customize_type_default">ค่าเริ่มต้น</string>
     <string name="customize_type_gradient">ไล่ระดับสี</string>
     <string name="customize_show_abbreviation">ตัวย่อ</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">ไปที่แท็บพระคัมภีร์แล้วเลือกฉบับแปล — ฉบับแรกคือฉบับหลัก</string>
     <string name="setup_songs_format_note">โฟลเดอร์คลังเพลงอ่านไฟล์ .song เพลงที่บันทึกในรูปแบบอื่นต้องแปลงก่อน</string>
     <string name="setup_songs_converter_body">ย้ายมาจาก SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm หรือ SoftProjector ใช่ไหม ตัวแปลงเพลงและพระคัมภีร์ในตัวอ่านได้ทั้งหมด — รวมถึงเนื้อร้องจาก PDF, Word, PowerPoint และ Keynote — แล้วเขียนไฟล์ .song ที่โฟลเดอร์นี้ต้องการ</string>
-    <string name="setup_songs_converter_button">เปิดตัวแปลงเพลงและพระคัมภีร์</string>
     <string name="setup_songs_samples_note">ยังไม่มีเพลงใช่ไหม ปุ่ม «เพิ่มเพลงตัวอย่าง» ในแท็บระบบจะเติมโฟลเดอร์ด้วยชุดที่ใช้งานได้</string>
     <string name="setup_proj_rows_note">จอที่เชื่อมต่อแต่ละจอจะได้แถวของตัวเองด้านล่าง จำนวนหน้าต่างนำเสนอเป็นผลจากสิ่งที่คุณกำหนดไว้ตรงนั้น จึงไม่ต้องตั้งค่าเอง</string>
     <string name="setup_proj_assign_note">สำหรับแต่ละจอ ให้เลือกจอแสดงผลและโหมดการแสดงผล แล้วใช้ «เอาต์พุตเนื้อหา» เพื่อกำหนดว่าจะแสดงอะไร «เขียนทับสไตล์» จะให้จอนั้นมีรูปลักษณ์ของตัวเอง</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">ตัวสร้างแถบล่าง</string>
     <string name="song_lottie_unsupported_note">เทมเพลตกำหนดเลย์เอาต์และตำแหน่งของชื่อเพลง สไตล์แถบล่างกำหนดแบบอักษร ขนาด สี การจัดแนว ระยะห่างตัวอักษร ตัวพิมพ์ และเงา ส่วนพื้นหลังข้อความ ขีดเส้นใต้ ขีดฆ่า ระยะห่างคำ การดูท่อนถัดไป และคอร์ดจะไม่มีผล</string>
     <string name="bible_lottie_unsupported_note">เทมเพลตกำหนดเลย์เอาต์ ตำแหน่งของข้ออ้างอิง และการแบ่งแถบระหว่างสองภาษา สไตล์แถบล่างกำหนดแบบอักษร ขนาด สี การจัดแนว ระยะห่างตัวอักษร ตัวพิมพ์ และเงา ส่วนพื้นหลังข้อความ ขีดเส้นใต้ ขีดฆ่า และระยะห่างคำจะไม่มีผล</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">เส้นขอบ</string>
     <string name="tooltip_outline_options">ตัวเลือกเส้นขอบ</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">กล้องและการ์ดจับภาพเปิดด้วย ffmpeg ซึ่งบิลด์นี้ควรมีมาให้ — เลือก ffmpeg ด้านล่าง หรือติดตั้ง ffmpeg แล้วตรวจสอบอีกครั้ง</string>
     <string name="ffmpeg_path_hint">เลือกโปรแกรม ffmpeg</string>
     <string name="ffmpeg_browse">เลือก ffmpeg</string>
-    <string name="ffmpeg_check_again">ตรวจสอบอีกครั้ง</string>
     <string name="ffmpeg_clear">ใช้ตัวที่มาพร้อมแอป</string>
     <string name="ffmpeg_download_link">ดาวน์โหลด ffmpeg</string>
     <string name="ffmpeg_path_help">เว้นว่างไว้เพื่อใช้ ffmpeg ที่มาพร้อมกับ ChurchPresenter</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">แสดงประเภทการแสดงผล</string>
     <string name="song_add_translation">เพิ่มภาษา</string>
     <string name="song_fourth_language">ภาษา 4</string>
-    <string name="song_language_fourth">ภาษา 4</string>
-    <string name="song_language_third">ภาษา 3</string>
     <string name="song_pane_translation">ภาษา %1$d</string>
     <string name="song_third_language">ภาษา 3</string>
     <string name="song_translation_label">ชื่อภาษา</string>

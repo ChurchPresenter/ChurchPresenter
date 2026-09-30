@@ -71,12 +71,12 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.output_profile_delete
 import churchpresenter.composeapp.generated.resources.output_profile_duplicate
-import churchpresenter.composeapp.generated.resources.output_profile_list_header
+import churchpresenter.composeapp.generated.resources.output_profiles_tab
 import churchpresenter.composeapp.generated.resources.profile_list_hint
 import churchpresenter.composeapp.generated.resources.profile_list_new
 import churchpresenter.composeapp.generated.resources.profile_menu_create_linked
-import churchpresenter.composeapp.generated.resources.profile_menu_move_down
-import churchpresenter.composeapp.generated.resources.profile_menu_move_up
+import churchpresenter.composeapp.generated.resources.output_profile_move_down
+import churchpresenter.composeapp.generated.resources.output_profile_move_up
 import churchpresenter.composeapp.generated.resources.profile_menu_rename
 import kotlin.math.roundToInt
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
@@ -248,7 +248,7 @@ private fun ProfileListHeader(onNew: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 10.dp, top = 12.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        GroupCaption(stringResource(Res.string.output_profile_list_header), Modifier.weight(1f))
+        GroupCaption(stringResource(Res.string.output_profiles_tab), Modifier.weight(1f))
         KeyIconButton(onClick = onNew, modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG)) {
             Icon(
                 Icons.Filled.Add,
@@ -287,8 +287,8 @@ private fun profileMenu(
     val rename = stringResource(Res.string.profile_menu_rename)
     val duplicate = stringResource(Res.string.output_profile_duplicate)
     val createLinked = stringResource(Res.string.profile_menu_create_linked)
-    val up = stringResource(Res.string.profile_menu_move_up)
-    val down = stringResource(Res.string.profile_menu_move_down)
+    val up = stringResource(Res.string.output_profile_move_up)
+    val down = stringResource(Res.string.output_profile_move_down)
     val delete = stringResource(Res.string.output_profile_delete)
     return buildList {
         add(ContextMenuItem(rename, onRename))

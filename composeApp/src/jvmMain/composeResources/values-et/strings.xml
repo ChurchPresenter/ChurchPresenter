@@ -113,11 +113,9 @@
     <string name="report_bug">Teata veast</string>
     <string name="submit_feature_request">Funktsioonisoov</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Abi</string>
     <string name="menu_how_to_blog">Juhendite blogi</string>
     <string name="menu_check_for_updates">Kontrolli uuendusi…</string>
     <string name="menu_keyboard_shortcuts">Kiirklahvid</string>
-    <string name="keyboard_shortcuts_title">Kiirklahvid</string>
     <string name="shortcut_category_global">Globaalne</string>
     <string name="shortcut_category_bible">Piibli vahekaart</string>
     <string name="shortcut_category_songs">Laulude vahekaart</string>
@@ -460,7 +458,6 @@
     <string name="schedule_add_files_title">Lisa failid kavasse</string>
     <string name="tooltip_toggle_displays">Lülita esitluskuvad</string>
     <string name="tooltip_settings">Seaded</string>
-    <string name="tooltip_theme_light">Hele teema</string>
     <string name="tooltip_theme_dark">Tume teema</string>
     <string name="tooltip_theme_system">Süsteemi teema</string>
     <string name="tooltip_remove">Eemalda</string>
@@ -833,7 +830,6 @@
     <string name="canvas_source_name">Nimi</string>
     <string name="canvas_rotation">Pööramine</string>
     <string name="canvas_file_path">Faili asukoht</string>
-    <string name="canvas_browse">Sirvi</string>
     <string name="canvas_scale">Skaala</string>
     <string name="canvas_scale_fit">Sobita</string>
     <string name="canvas_scale_fill">Täida</string>
@@ -925,7 +921,6 @@
     <string name="canvas_capture_mode">Hõive režiim</string>
     <string name="canvas_capture_mode_region">Ekraani ala</string>
     <string name="canvas_capture_mode_window">Aken</string>
-    <string name="canvas_capture_window">Aken</string>
     <string name="canvas_capture_refresh_windows">Värskenda akende loendit</string>
     <string name="canvas_capture_interval">Hõive intervall</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1803,7 +1798,6 @@
     <string name="planning_center_disconnect">Katkesta ühendus</string>
     <string name="planning_center_status_connected">Ühendatud kasutajana %1$s</string>
     <string name="planning_center_status_connecting">Ühendamine…</string>
-    <string name="planning_center_status_error">Viga: %1$s</string>
     <string name="planning_center_import_title">Impordi Planning Centerist</string>
     <string name="planning_center_import_service_type">Teenistuse tüüp</string>
     <string name="planning_center_import_select_plan">Vali plaan</string>
@@ -1981,12 +1975,9 @@
     <string name="bible_preview_sample_verse">Sest nõnda on Jumal maailma armastanud, et ta oma ainusündinud Poja on andnud.</string>
     <string name="bible_preview_sample_book">Johannese</string>
     <string name="bible_preview_no_translations">Lisage tõlge, et seda siin näha</string>
-    <string name="song_preview_full_screen">Täisekraani eelvaade</string>
-    <string name="song_preview_lower_third">Alumise kolmandiku eelvaade</string>
     <string name="song_element_number">Number</string>
     <string name="song_element_title">Pealkiri</string>
     <string name="song_element_lyrics">Sõnad</string>
-    <string name="song_element_next_section">Järgmine osa</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Helilooja</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2089,7 +2080,6 @@
     <string name="customize_type_color">Värv</string>
     <string name="customize_type_image">Pilt</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Läbipaistev</string>
     <string name="customize_type_default">Vaikimisi</string>
     <string name="customize_type_gradient">Üleminek</string>
     <string name="customize_show_abbreviation">Lühend</string>
@@ -2120,7 +2110,6 @@
     <string name="setup_bible_pick_translations">Avage vahekaart Piibel ja valige tõlked — esimene on põhitõlge.</string>
     <string name="setup_songs_format_note">Lauluraamatukogu kaust loeb .song-faile. Muus vormingus salvestatud laulud tuleb esmalt teisendada.</string>
     <string name="setup_songs_converter_body">Tulete programmist SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm või SoftProjector? Sisseehitatud laulude ja Piibli teisendaja loeb neid kõiki — ja ka laulusõnu PDF-, Word-, PowerPointi- ja Keynote-failidest — ning kirjutab .song-failid, mida see kaust ootab.</string>
-    <string name="setup_songs_converter_button">Ava laulude ja Piibli teisendaja</string>
     <string name="setup_songs_samples_note">Laule veel pole? Vahekaardil Süsteem täidab „Lisa näidislaulud” kausta töötava valikuga.</string>
     <string name="setup_proj_rows_note">Iga ühendatud ekraan saab allpool oma rea. Esitlusakende arv tuleneb sellest, mida te seal määrate, nii et käsitsi pole midagi seada.</string>
     <string name="setup_proj_assign_note">Valige iga ekraani jaoks kuvar ja kuvarežiim ning määrake seejärel jaotises „Sisu väljundid”, mis seal ilmub. „Kirjuta stiilid üle” annab sellele ekraanile oma välimuse.</string>
@@ -2137,7 +2126,6 @@
     <string name="bible_lottie_gen_window_title">Alumise kolmandiku generaator</string>
     <string name="song_lottie_unsupported_note">Mall määrab paigutuse ja pealkirja koha. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus, sõnavahe, järgmise eelvaade ja akordid ei kehti.</string>
     <string name="bible_lottie_unsupported_note">Mall määrab paigutuse, viite koha ja selle, kuidas kaks keelt riba jagavad. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus ja sõnavahe ei kehti.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Kontuur</string>
     <string name="tooltip_outline_options">Kontuuri suvandid</string>
@@ -2243,7 +2231,6 @@
     <string name="ffmpeg_missing_help">Kaamerad ja salvestuskaardid avatakse ffmpeg-iga. See versioon peaks seda sisaldama — vali allpool ffmpeg või paigalda ffmpeg ja kontrolli uuesti.</string>
     <string name="ffmpeg_path_hint">Vali ffmpeg-i programm</string>
     <string name="ffmpeg_browse">Vali ffmpeg</string>
-    <string name="ffmpeg_check_again">Kontrolli uuesti</string>
     <string name="ffmpeg_clear">Kasuta kaasasolevat</string>
     <string name="ffmpeg_download_link">Hangi ffmpeg</string>
     <string name="ffmpeg_path_help">Jäta tühjaks, et kasutada ChurchPresenteriga kaasas olevat ffmpeg-i.</string>
@@ -2344,8 +2331,6 @@
     <string name="preview_settings_show_modes">Näita kuvatüüpi</string>
     <string name="song_add_translation">Lisa keel</string>
     <string name="song_fourth_language">Keel 4</string>
-    <string name="song_language_fourth">Keel 4</string>
-    <string name="song_language_third">Keel 3</string>
     <string name="song_pane_translation">Keel %1$d</string>
     <string name="song_third_language">Keel 3</string>
     <string name="song_translation_label">Keele nimi</string>

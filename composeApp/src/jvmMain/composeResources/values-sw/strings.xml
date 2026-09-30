@@ -166,11 +166,9 @@
     <string name="report_bug">Ripoti Hitilafu</string>
     <string name="submit_feature_request">Omba Kipengele</string>
     <string name="action_ok">Sawa</string>
-    <string name="menu_help_item">Msaada</string>
     <string name="menu_how_to_blog">Blogu ya Maelekezo</string>
     <string name="menu_check_for_updates">Angalia Masasisho…</string>
     <string name="menu_keyboard_shortcuts">Njia za Mkato za Kibodi</string>
-    <string name="keyboard_shortcuts_title">Njia za Mkato za Kibodi</string>
     <string name="shortcut_category_global">Kwa Ujumla</string>
     <string name="shortcut_category_bible">Kichupo cha Biblia</string>
     <string name="shortcut_category_songs">Kichupo cha Nyimbo</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Ongeza Faili kwenye Ratiba</string>
     <string name="tooltip_toggle_displays">Washa au Zima Maonyesho ya Mwasilishaji</string>
     <string name="tooltip_settings">Mipangilio</string>
-    <string name="tooltip_theme_light">Mandhari Mepesi</string>
     <string name="tooltip_theme_dark">Mandhari Meusi</string>
     <string name="tooltip_theme_system">Mandhari ya Mfumo</string>
     <string name="tooltip_remove">Ondoa</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">Jina</string>
     <string name="canvas_rotation">Mzunguko</string>
     <string name="canvas_file_path">Njia ya faili</string>
-    <string name="canvas_browse">Vinjari</string>
     <string name="canvas_scale">Ukubwa</string>
     <string name="canvas_scale_fit">Toshea</string>
     <string name="canvas_scale_fill">Jaza</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">Hali ya Kunasa</string>
     <string name="canvas_capture_mode_region">Sehemu ya Skrini</string>
     <string name="canvas_capture_mode_window">Dirisha</string>
-    <string name="canvas_capture_window">Dirisha</string>
     <string name="canvas_capture_refresh_windows">Onyesha upya orodha ya madirisha</string>
     <string name="canvas_capture_interval">Muda kati ya kunasa</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">Tenganisha</string>
     <string name="planning_center_status_connected">Imeunganishwa kama %1$s</string>
     <string name="planning_center_status_connecting">Inaunganisha…</string>
-    <string name="planning_center_status_error">Hitilafu: %1$s</string>
     <string name="planning_center_import_title">Ingiza kutoka Planning Center</string>
     <string name="planning_center_import_service_type">Aina ya ibada</string>
     <string name="planning_center_import_select_plan">Chagua mpango</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">Kwa maana jinsi hii Mungu aliupenda ulimwengu, hata akamtoa Mwanawe pekee.</string>
     <string name="bible_preview_sample_book">Yohana</string>
     <string name="bible_preview_no_translations">Ongeza tafsiri ili kuiona hapa</string>
-    <string name="song_preview_full_screen">Onyesho la skrini nzima</string>
-    <string name="song_preview_lower_third">Onyesho la theluthi ya chini</string>
     <string name="song_element_number">Nambari</string>
     <string name="song_element_title">Kichwa</string>
     <string name="song_element_lyrics">Maneno ya Wimbo</string>
-    <string name="song_element_next_section">Sehemu Inayofuata</string>
     <string name="song_element_author">Mwandishi</string>
     <string name="song_element_composer">Mtunzi</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">Rangi</string>
     <string name="customize_type_image">Picha</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Wazi</string>
     <string name="customize_type_default">Chaguo-msingi</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Kifupi</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Nenda kwenye kichupo cha Biblia na uchague tafsiri zako — ya kwanza ndiyo kuu.</string>
     <string name="setup_songs_format_note">Folda ya maktaba ya nyimbo husoma faili za .song. Nyimbo zilizohifadhiwa katika muundo mwingine lazima zibadilishwe kwanza.</string>
     <string name="setup_songs_converter_body">Unatoka SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm au SoftProjector? Kibadilishaji cha Nyimbo na Biblia kilichojengwa ndani husoma vyote — pia maneno kutoka PDF, Word, PowerPoint na Keynote — na kuandika faili za .song ambazo folda hii inahitaji.</string>
-    <string name="setup_songs_converter_button">Fungua Kibadilishaji cha Nyimbo na Biblia</string>
     <string name="setup_songs_samples_note">Bado huna nyimbo? «Ongeza nyimbo za mfano» kwenye kichupo cha Mfumo hujaza folda kwa seti inayofanya kazi.</string>
     <string name="setup_proj_rows_note">Kila skrini iliyounganishwa hupata safu yake hapa chini. Idadi ya madirisha ya uwasilishaji hutokana na unachopanga hapo, hivyo hakuna cha kuweka kwa mkono.</string>
     <string name="setup_proj_assign_note">Kwa kila skrini chagua kifaa cha kuonyesha na hali ya kuonyesha, kisha tumia «Matokeo ya maudhui» kuamua kitakachoonekana hapo. «Andika juu ya mitindo» huipa skrini hiyo mwonekano wake.</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Kitengeneza Theluthi ya Chini</string>
     <string name="song_lottie_unsupported_note">Kiolezo huamua mpangilio na mahali pa kichwa. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta, nafasi ya maneno, hakikisho la sehemu inayofuata na kodi hazitumiki.</string>
     <string name="bible_lottie_unsupported_note">Kiolezo huamua mpangilio, mahali pa rejeleo na jinsi lugha mbili zinavyogawana mkanda. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta na nafasi ya maneno hazitumiki.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Mstari wa nje</string>
     <string name="tooltip_outline_options">Chaguo za mstari wa nje</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">Kamera na kadi za kunasa hufunguliwa kwa ffmpeg. Toleo hili linapaswa kuwa nayo — chagua ffmpeg hapa chini, au sakinisha ffmpeg kisha uangalie tena.</string>
     <string name="ffmpeg_path_hint">Chagua programu ya ffmpeg</string>
     <string name="ffmpeg_browse">Chagua ffmpeg</string>
-    <string name="ffmpeg_check_again">Angalia tena</string>
     <string name="ffmpeg_clear">Tumia iliyojumuishwa</string>
     <string name="ffmpeg_download_link">Pata ffmpeg</string>
     <string name="ffmpeg_path_help">Acha tupu ili kutumia ffmpeg iliyojumuishwa na ChurchPresenter.</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">Onyesha aina ya uonyeshaji</string>
     <string name="song_add_translation">Ongeza lugha</string>
     <string name="song_fourth_language">Lugha 4</string>
-    <string name="song_language_fourth">Lugha 4</string>
-    <string name="song_language_third">Lugha 3</string>
     <string name="song_pane_translation">Lugha %1$d</string>
     <string name="song_third_language">Lugha 3</string>
     <string name="song_translation_label">Jina la lugha</string>

@@ -166,11 +166,9 @@
     <string name="report_bug">त्रुटि जनाउनुहोस्</string>
     <string name="submit_feature_request">सुविधाको अनुरोध</string>
     <string name="action_ok">ठीक छ</string>
-    <string name="menu_help_item">मद्दत</string>
     <string name="menu_how_to_blog">कसरी गर्ने ब्लग</string>
     <string name="menu_check_for_updates">अद्यावधिक जाँच्नुहोस्…</string>
     <string name="menu_keyboard_shortcuts">किबोर्ड सर्टकट</string>
-    <string name="keyboard_shortcuts_title">किबोर्ड सर्टकट</string>
     <string name="shortcut_category_global">विश्वव्यापी</string>
     <string name="shortcut_category_bible">बाइबल ट्याब</string>
     <string name="shortcut_category_songs">गीत ट्याब</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">तालिकामा फाइलहरू थप्नुहोस्</string>
     <string name="tooltip_toggle_displays">प्रस्तुति पर्दा खोल्ने/बन्द गर्ने</string>
     <string name="tooltip_settings">सेटिङ</string>
-    <string name="tooltip_theme_light">उज्यालो थिम</string>
     <string name="tooltip_theme_dark">अँध्यारो थिम</string>
     <string name="tooltip_theme_system">प्रणाली थिम</string>
     <string name="tooltip_remove">हटाउनुहोस्</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">नाम</string>
     <string name="canvas_rotation">घुमाइ</string>
     <string name="canvas_file_path">फाइलको path</string>
-    <string name="canvas_browse">ब्राउज गर्नुहोस्</string>
     <string name="canvas_scale">आकार</string>
     <string name="canvas_scale_fit">अटाउने</string>
     <string name="canvas_scale_fill">भर्ने</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">क्याप्चर मोड</string>
     <string name="canvas_capture_mode_region">पर्दाको क्षेत्र</string>
     <string name="canvas_capture_mode_window">विन्डो</string>
-    <string name="canvas_capture_window">विन्डो</string>
     <string name="canvas_capture_refresh_windows">विन्डो सूची ताजा गर्नुहोस्</string>
     <string name="canvas_capture_interval">क्याप्चर अन्तराल</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">विच्छेद गर्नुहोस्</string>
     <string name="planning_center_status_connected">%1$s का रूपमा जोडिएको</string>
     <string name="planning_center_status_connecting">जोडिँदै…</string>
-    <string name="planning_center_status_error">त्रुटि: %1$s</string>
     <string name="planning_center_import_title">Planning Center बाट आयात गर्नुहोस्</string>
     <string name="planning_center_import_service_type">आराधनाको किसिम</string>
     <string name="planning_center_import_select_plan">योजना छान्नुहोस्</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">किनभने परमेश्वरले संसारलाई यस्तो प्रेम गर्नुभयो, कि उहाँले आफ्नो एकमात्र पुत्र दिनुभयो।</string>
     <string name="bible_preview_sample_book">यूहन्ना</string>
     <string name="bible_preview_no_translations">यहाँ हेर्न एउटा अनुवाद थप्नुहोस्</string>
-    <string name="song_preview_full_screen">पूर्ण स्क्रिन पूर्वावलोकन</string>
-    <string name="song_preview_lower_third">तल्लो तिहाइ पूर्वावलोकन</string>
     <string name="song_element_number">नम्बर</string>
     <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">गीतको बोल</string>
-    <string name="song_element_next_section">अर्को खण्ड</string>
     <string name="song_element_author">रचनाकार</string>
     <string name="song_element_composer">सङ्गीतकार</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">रङ</string>
     <string name="customize_type_image">तस्बिर</string>
     <string name="customize_type_video">भिडियो</string>
-    <string name="customize_type_transparent">पारदर्शी</string>
     <string name="customize_type_default">पूर्वनिर्धारित</string>
     <string name="customize_type_gradient">ग्रेडियन्ट</string>
     <string name="customize_show_abbreviation">संक्षिप्त रूप</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">बाइबल ट्याबमा जानुहोस् र अनुवादहरू छान्नुहोस् — पहिलो मुख्य हुन्छ।</string>
     <string name="setup_songs_format_note">गीत पुस्तकालय फोल्डरले .song फाइलहरू पढ्छ। अर्को ढाँचामा सुरक्षित गीतहरू पहिले रूपान्तरण गर्नुपर्छ।</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm वा SoftProjector बाट आउँदै हुनुहुन्छ? अन्तर्निहित गीत र बाइबल रूपान्तरकले ती सबै पढ्छ — र PDF, Word, PowerPoint तथा Keynote बाट शब्दहरू पनि — अनि यो फोल्डरले अपेक्षा गरेका .song फाइलहरू लेख्छ।</string>
-    <string name="setup_songs_converter_button">गीत र बाइबल रूपान्तरक खोल्नुहोस्</string>
     <string name="setup_songs_samples_note">अझै गीत छैन? प्रणाली ट्याबको «नमुना गीत थप्नुहोस्» ले फोल्डरलाई काम लाग्ने संग्रहले भर्छ।</string>
     <string name="setup_proj_rows_note">जोडिएको हरेक पर्दाले तल आफ्नै पङ्क्ति पाउँछ। प्रस्तुति सञ्झ्यालको सङ्ख्या त्यहाँ तोकिएको आधारमा निस्कन्छ, त्यसैले हातले केही मिलाउनु पर्दैन।</string>
     <string name="setup_proj_assign_note">हरेक पर्दाका लागि डिस्प्ले र प्रदर्शन मोड छान्नुहोस्, अनि «सामग्री आउटपुट» बाट त्यहाँ के देखिने हो तोक्नुहोस्। «शैलीहरू अधिलेखन गर्नुहोस्» ले त्यो पर्दालाई आफ्नै रूप दिन्छ।</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">तल्लो तिहाइ जेनेरेटर</string>
     <string name="song_lottie_unsupported_note">टेम्प्लेटले लेआउट र शीर्षकको स्थान तय गर्छ। तल्लो तिहाइको शैलीले फन्ट, आकार, रङ, पङ्क्तिबद्धता, अक्षर अन्तर, केस र छाया तय गर्छ; पाठ पृष्ठभूमि, रेखाङ्कन, काटिएको रेखा, शब्द अन्तर, अर्कोको पूर्वावलोकन र कर्डहरू लागू हुँदैनन्।</string>
     <string name="bible_lottie_unsupported_note">टेम्प्लेटले लेआउट, सन्दर्भको स्थान र दुई भाषाले ब्यान्ड कसरी बाँड्ने भन्ने तय गर्छ। तल्लो तिहाइको शैलीले फन्ट, आकार, रङ, पङ्क्तिबद्धता, अक्षर अन्तर, केस र छाया तय गर्छ; पाठ पृष्ठभूमि, रेखाङ्कन, काटिएको रेखा र शब्द अन्तर लागू हुँदैनन्।</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">रूपरेखा</string>
     <string name="tooltip_outline_options">रूपरेखा विकल्पहरू</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">क्यामेरा र क्याप्चर कार्डहरू ffmpeg ले खोल्छ। यो बिल्डमा एउटा समावेश हुनुपर्ने हो — तल कुनै ffmpeg रोज्नुहोस्, वा ffmpeg इन्स्टल गरेर फेरि जाँच्नुहोस्।</string>
     <string name="ffmpeg_path_hint">ffmpeg प्रोग्राम रोज्नुहोस्</string>
     <string name="ffmpeg_browse">ffmpeg रोज्नुहोस्</string>
-    <string name="ffmpeg_check_again">फेरि जाँच्नुहोस्</string>
     <string name="ffmpeg_clear">सँगै आएको प्रयोग गर्नुहोस्</string>
     <string name="ffmpeg_download_link">ffmpeg प्राप्त गर्नुहोस्</string>
     <string name="ffmpeg_path_help">ChurchPresenter सँग आएको ffmpeg प्रयोग गर्न खाली छोड्नुहोस्।</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">प्रदर्शन प्रकार देखाउनुहोस्</string>
     <string name="song_add_translation">भाषा थप्नुहोस्</string>
     <string name="song_fourth_language">भाषा ४</string>
-    <string name="song_language_fourth">भाषा ४</string>
-    <string name="song_language_third">भाषा ३</string>
     <string name="song_pane_translation">भाषा %1$d</string>
     <string name="song_third_language">भाषा ३</string>
     <string name="song_translation_label">भाषाको नाम</string>

@@ -91,7 +91,6 @@
     <string name="backdrop_opacity">Opacity %</string>
     <string name="backdrop_height_offset">Height offset</string>
     <string name="backdrop_width_offset">Width offset</string>
-    <string name="backdrop_fill_radius">Corner radius</string>
     <string name="backdrop_fill_uniform_width">Same width for every line</string>
     <string name="backdrop_vertical_offset">Vertical offset</string>
     <string name="backdrop_border_color">Border color</string>
@@ -212,11 +211,9 @@
     <string name="report_bug">Report a Bug</string>
     <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Help</string>
     <string name="menu_how_to_blog">How To Blog</string>
     <string name="menu_check_for_updates">Check for Updates…</string>
     <string name="menu_keyboard_shortcuts">Keyboard Shortcuts</string>
-    <string name="keyboard_shortcuts_title">Keyboard Shortcuts</string>
     <string name="shortcut_category_global">Global</string>
     <string name="shortcut_category_bible">Bible Tab</string>
     <string name="shortcut_category_songs">Songs Tab</string>
@@ -377,8 +374,6 @@
     <string name="customize_theme_use_custom_colors_hint">Off keeps the current theme's colors and applies only the font and text size.</string>
     <string name="customize_theme_accent">Accent color</string>
     <string name="customize_theme_base">Base</string>
-    <string name="customize_theme_base_light">Light</string>
-    <string name="customize_theme_base_dark">Dark</string>
     <string name="customize_theme_font">Font</string>
     <string name="customize_theme_font_default">System default</string>
     <string name="customize_theme_use_default_font">Use default</string>
@@ -674,7 +669,6 @@
     <string name="preview_settings_show_labels">Show output labels</string>
     <string name="preview_settings_show_modes">Show display type</string>
     <string name="tooltip_settings">Settings</string>
-    <string name="tooltip_theme_light">Light Theme</string>
     <string name="tooltip_theme_dark">Dark Theme</string>
     <string name="tooltip_theme_system">System Theme</string>
     <string name="tooltip_remove">Remove</string>
@@ -842,8 +836,6 @@
     <string name="profile_preview_note_camera">Cameras preview as one snapshot, taken when the preview first shows them.</string>
     <string name="profile_preview_note_above_band">Above the band is transparent on the output.</string>
     <string name="profile_preview_note_matches">Matches the output at %1$s.</string>
-    <string name="song_preview_full_screen">Full screen preview</string>
-    <string name="song_preview_lower_third">Lower third preview</string>
     <string name="song_preview_sample_title">Amazing Grace</string>
     <string name="song_background_applies_to">Applies to</string>
     <string name="song_background_whole_song">Whole song</string>
@@ -853,7 +845,6 @@
     <string name="song_element_title">Title</string>
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
-    <string name="song_element_next_section">Next Section</string>
     <string name="song_element_section_label">Section Label</string>
     <string name="song_element_section_label_short">Label</string>
     <string name="song_element_author">Author</string>
@@ -948,7 +939,6 @@
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
     <string name="output_profile_empty_state">Create a profile to start styling it</string>
-    <string name="output_profile_list_header">Profiles</string>
     <string name="output_profile_badge_full">Full</string>
     <string name="output_profile_badge_lower_third">Lower 3rd</string>
     <string name="output_profile_badge_stage">Stage</string>
@@ -965,7 +955,6 @@
     <string name="output_profile_bible_off">Bible off</string>
     <string name="output_profile_songs_off">Songs off</string>
     <string name="output_profile_bible_none_loaded">No Bibles loaded — add them on the Bible tab</string>
-    <string name="output_profile_add_translation">Add translation</string>
     <string name="output_profile_song_order_header">Languages · shown in this order</string>
     <string name="output_profile_song_count">%1$d of %2$d languages</string>
     <string name="output_profile_add_language">Add language</string>
@@ -996,10 +985,8 @@
     <string name="customize_type_color">Color</string>
     <string name="customize_type_image">Image</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="percent_suffix">%</string>
     <string name="customize_show_abbreviation">Abbreviation</string>
     <string name="customize_background_opacity">Opacity</string>
@@ -1060,7 +1047,6 @@
     <string name="ffmpeg_missing_help">Cameras and capture cards are opened with ffmpeg. This build should include one — choose an ffmpeg below, or install ffmpeg and check again.</string>
     <string name="ffmpeg_path_hint">Choose an ffmpeg program</string>
     <string name="ffmpeg_browse">Choose ffmpeg</string>
-    <string name="ffmpeg_check_again">Check again</string>
     <string name="ffmpeg_clear">Use bundled</string>
     <string name="ffmpeg_download_link">Get ffmpeg</string>
     <string name="ffmpeg_path_help">Leave empty to use the ffmpeg included with ChurchPresenter.</string>
@@ -1069,7 +1055,6 @@
     <string name="omt_outputs_help">Virtual outputs sent over the network as Open Media Transport (OMT) sources — the open-source alternative to NDI, received by vMix, OBS with the OMT plugin and other OMT software. Alpha mode carries real transparency, so a lower third arrives already keyed.</string>
     <string name="add_omt_output">Add Output</string>
     <string name="omt_output_numbered">OMT Output %1$d</string>
-    <string name="omt_name_tooltip">The name receivers see on the network — Lyrics, Lower Third, Stage…</string>
     <string name="omt_address">Receivers list this output as %1$s</string>
     <string name="omt_mode_alpha_help">Real per-pixel transparency in the one source. The one to use for lower thirds — the receiver keys it directly.</string>
     <string name="omt_mode_fill_help">An opaque picture with the configured background drawn.</string>
@@ -1400,7 +1385,6 @@
     <string name="canvas_source_name">Name</string>
     <string name="canvas_rotation">Rotation</string>
     <string name="canvas_file_path">File path</string>
-    <string name="canvas_browse">Browse</string>
     <string name="canvas_scale">Scale</string>
     <string name="canvas_scale_fit">Fit</string>
     <string name="canvas_scale_fill">Fill</string>
@@ -1517,7 +1501,6 @@
     <string name="canvas_capture_mode">Capture Mode</string>
     <string name="canvas_capture_mode_region">Screen Region</string>
     <string name="canvas_capture_mode_window">Window</string>
-    <string name="canvas_capture_window">Window</string>
     <string name="canvas_capture_refresh_windows">Refresh Window List</string>
     <string name="canvas_capture_interval">Capture Interval</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1906,8 +1889,6 @@
     <string name="song_language_both">All</string>
     <string name="song_language_primary">Language 1</string>
     <string name="song_language_secondary">Language 2</string>
-    <string name="song_language_third">Language 3</string>
-    <string name="song_language_fourth">Language 4</string>
     <string name="bilingual_grid_1x3">1x3</string>
     <string name="bilingual_grid_3x1">3x1</string>
     <string name="bilingual_grid_1x4">1x4</string>
@@ -2454,7 +2435,6 @@
     <string name="planning_center_disconnect">Disconnect</string>
     <string name="planning_center_status_connected">Connected as %1$s</string>
     <string name="planning_center_status_connecting">Connecting…</string>
-    <string name="planning_center_status_error">Error: %1$s</string>
     <string name="planning_center_import_title">Import from Planning Center</string>
     <string name="planning_center_import_service_type">Service Type</string>
     <string name="planning_center_import_select_plan">Select a Plan</string>
@@ -2619,7 +2599,6 @@
          SongPro; it reads .song only, and the other formats go through the Converter. -->
     <string name="setup_songs_format_note">The song library folder reads .song files. Songs saved in another format need converting first.</string>
     <string name="setup_songs_converter_body">Coming from SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm or SoftProjector? The built-in Song and Bible Converter reads all of them — and lyrics out of PDF, Word, PowerPoint and Keynote — and writes the .song files this folder expects.</string>
-    <string name="setup_songs_converter_button">Open Song and Bible Converter</string>
     <string name="setup_songs_samples_note">No songs yet? "Add Song Samples" on the System tab fills the folder with a working set to try.</string>
 
     <!-- Step 6: projection. setup_proj_step3 told the user to set a window count; there is no
@@ -2664,7 +2643,6 @@
     <string name="calendar_sync_instance">Instance</string>
     <!-- Settings → Profiles: the four-column layout -->
     <string name="profile_nav_profile">Profile</string>
-    <string name="profile_nav_appearance">Appearance</string>
     <string name="profile_nav_stage_monitor">Stage monitor</string>
     <string name="profile_nav_general">General</string>
     <string name="profile_nav_outputs">Outputs</string>
@@ -2735,7 +2713,6 @@
     <string name="profile_bg_used_by">Used by</string>
     <string name="profile_bg_uses_default">Uses this default</string>
     <string name="profile_bg_open">Open</string>
-    <string name="profile_reset_defaults">Reset to defaults</string>
     <string name="profile_group_position">Position on screen</string>
     <string name="profile_vertical_alignment">Vertical alignment</string>
     <string name="profile_margins">Margins</string>
@@ -2811,7 +2788,6 @@
     <string name="profile_box_area_margins">Inside margins</string>
     <string name="profile_box_band">On a lower third</string>
     <string name="profile_box_band_band">The band</string>
-    <string name="profile_box_band_screen">Whole screen</string>
     <string name="profile_box_languages">Languages</string>
     <string name="profile_box_languages_own">Own box each</string>
     <string name="profile_box_languages_shared">Share one box</string>
@@ -2829,7 +2805,6 @@
     <string name="profile_ref_above">Above verse</string>
     <string name="profile_translation_divider">Divider between translations</string>
     <string name="profile_space_between_translations">Space between translations</string>
-    <string name="profile_split_long_verses">Split long verses across two slides</string>
     <string name="profile_split_words">Split verses longer than this many words.</string>
     <string name="profile_group_slides">Slides</string>
     <string name="profile_title_slide">Title slide</string>
@@ -2856,8 +2831,6 @@
     <string name="profile_song_look_ahead">Song look-ahead</string>
     <string name="profile_text_autofit_scope">Fit across</string>
     <string name="profile_menu_rename">Rename</string>
-    <string name="profile_menu_move_up">Move up</string>
-    <string name="profile_menu_move_down">Move down</string>
     <string name="profile_link_linked">Linked to %1$s</string>
     <string name="profile_link_master">Master of %1$d linked profiles</string>
     <string name="profile_changes_chip">%1$d changes</string>
@@ -2932,9 +2905,7 @@
     <string name="profile_caption_translation">Translation</string>
     <string name="profile_caption_both">Both</string>
     <string name="profile_caption_layout">Layout</string>
-    <string name="profile_caption_layout_stacked">Stacked</string>
     <string name="profile_caption_layout_stacked_inverse">Stacked, translation first</string>
-    <string name="profile_caption_layout_side">Side by side</string>
     <string name="profile_caption_layout_side_inverse">Side by side, translation first</string>
     <string name="profile_caption_highlight">Highlight the word being spoken</string>
     <string name="profile_caption_in_progress">Show words still being spoken</string>
@@ -2948,7 +2919,6 @@
     <string name="profile_qr_background">QR code background</string>
     <string name="profile_dict_word">Word</string>
     <string name="profile_dict_reference">Reference</string>
-    <string name="profile_dict_definition">Definition</string>
     <string name="profile_dict_kjv">KJV usage</string>
     <string name="profile_card_color">Card color</string>
     <string name="profile_card_opacity">Card opacity</string>

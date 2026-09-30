@@ -87,11 +87,9 @@
     <string name="report_bug">Bug melden</string>
     <string name="submit_feature_request">Functie aanvragen</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Help</string>
     <string name="menu_how_to_blog">Instructieblog</string>
     <string name="menu_check_for_updates">Controleer op updates…</string>
     <string name="menu_keyboard_shortcuts">Sneltoetsen</string>
-    <string name="keyboard_shortcuts_title">Sneltoetsen</string>
     <string name="shortcut_category_global">Globaal</string>
     <string name="shortcut_category_bible">Bijbel-tabblad</string>
     <string name="shortcut_category_songs">Liederen-tabblad</string>
@@ -398,7 +396,6 @@
     <string name="schedule_add_files_title">Bestanden toevoegen aan programma</string>
     <string name="tooltip_toggle_displays">Presentatieschermen in-/uitschakelen</string>
     <string name="tooltip_settings">Instellingen</string>
-    <string name="tooltip_theme_light">Licht thema</string>
     <string name="tooltip_theme_dark">Donker thema</string>
     <string name="tooltip_theme_system">Systeemthema</string>
     <string name="tooltip_remove">Verwijderen</string>
@@ -752,7 +749,6 @@
     <string name="canvas_source_name">Naam</string>
     <string name="canvas_rotation">Rotatie</string>
     <string name="canvas_file_path">Bestandspad</string>
-    <string name="canvas_browse">Bladeren</string>
     <string name="canvas_scale">Schaal</string>
     <string name="canvas_scale_fit">Passend</string>
     <string name="canvas_scale_fill">Vullen</string>
@@ -842,7 +838,6 @@
     <string name="canvas_capture_mode">Opnamemodus</string>
     <string name="canvas_capture_mode_region">Schermgebied</string>
     <string name="canvas_capture_mode_window">Venster</string>
-    <string name="canvas_capture_window">Venster</string>
     <string name="canvas_capture_refresh_windows">Vensterlijst vernieuwen</string>
     <string name="canvas_capture_interval">Opname-interval</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1798,7 +1793,6 @@
     <string name="planning_center_disconnect">Verbreken</string>
     <string name="planning_center_status_connected">Verbonden als %1$s</string>
     <string name="planning_center_status_connecting">Verbinden…</string>
-    <string name="planning_center_status_error">Fout: %1$s</string>
     <string name="planning_center_import_title">Importeren vanuit Planning Center</string>
     <string name="planning_center_import_service_type">Diensttype</string>
     <string name="planning_center_import_select_plan">Selecteer een plan</string>
@@ -1976,12 +1970,9 @@
     <string name="bible_preview_sample_verse">Want zo lief heeft God de wereld gehad, dat Hij Zijn eniggeboren Zoon gegeven heeft.</string>
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Voeg een vertaling toe om deze hier te zien</string>
-    <string name="song_preview_full_screen">Voorbeeld volledig scherm</string>
-    <string name="song_preview_lower_third">Voorbeeld onderste derde</string>
     <string name="song_element_number">Nummer</string>
     <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Liedtekst</string>
-    <string name="song_element_next_section">Volgende sectie</string>
     <string name="song_element_author">Auteur</string>
     <string name="song_element_composer">Componist</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2084,7 +2075,6 @@
     <string name="customize_type_color">Kleur</string>
     <string name="customize_type_image">Afbeelding</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparant</string>
     <string name="customize_type_default">Standaard</string>
     <string name="customize_type_gradient">Verloop</string>
     <string name="customize_show_abbreviation">Afkorting</string>
@@ -2115,7 +2105,6 @@
     <string name="setup_bible_pick_translations">Ga naar het tabblad Bijbel en kies uw vertalingen — de eerste is de primaire.</string>
     <string name="setup_songs_format_note">De liedbibliotheekmap leest .song-bestanden. Liederen in een ander formaat moeten eerst worden omgezet.</string>
     <string name="setup_songs_converter_body">Komt u van SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm of SoftProjector? De ingebouwde Lied- en Bijbelconverter leest ze allemaal — en songteksten uit PDF, Word, PowerPoint en Keynote — en schrijft de .song-bestanden die deze map verwacht.</string>
-    <string name="setup_songs_converter_button">Lied- en Bijbelconverter openen</string>
     <string name="setup_songs_samples_note">Nog geen liederen? „Voorbeeldliederen toevoegen” op het tabblad Systeem vult de map met een werkende set.</string>
     <string name="setup_proj_rows_note">Elk aangesloten scherm krijgt hieronder een eigen rij. Het aantal presentatievensters volgt uit wat u daar toewijst, dus het hoeft niet handmatig te worden ingesteld.</string>
     <string name="setup_proj_assign_note">Kies per scherm een weergaveapparaat en een weergavemodus en bepaal daarna bij „Inhoudsuitvoer” wat er verschijnt. „Stijlen overschrijven” geeft dat scherm een eigen uiterlijk.</string>
@@ -2132,7 +2121,6 @@
     <string name="bible_lottie_gen_window_title">Generator voor onderste derden</string>
     <string name="song_lottie_unsupported_note">Het sjabloon bepaalt de indeling en waar de titel staat. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen, woordafstand, vooruitblik en akkoorden gelden niet.</string>
     <string name="bible_lottie_unsupported_note">Het sjabloon bepaalt de indeling, de plaats van de verwijzing en hoe twee talen de band delen. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen en woordafstand gelden niet.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Omtrek</string>
     <string name="tooltip_outline_options">Omtrekopties</string>
@@ -2238,7 +2226,6 @@
     <string name="ffmpeg_missing_help">Camera's en capturekaarten worden met ffmpeg geopend. Deze build zou er een moeten bevatten — kies hieronder een ffmpeg, of installeer ffmpeg en controleer opnieuw.</string>
     <string name="ffmpeg_path_hint">Kies een ffmpeg-programma</string>
     <string name="ffmpeg_browse">ffmpeg kiezen</string>
-    <string name="ffmpeg_check_again">Opnieuw controleren</string>
     <string name="ffmpeg_clear">Meegeleverde gebruiken</string>
     <string name="ffmpeg_download_link">ffmpeg downloaden</string>
     <string name="ffmpeg_path_help">Laat leeg om de ffmpeg te gebruiken die bij ChurchPresenter zit.</string>
@@ -2339,8 +2326,6 @@
     <string name="preview_settings_show_modes">Weergavetype tonen</string>
     <string name="song_add_translation">Taal toevoegen</string>
     <string name="song_fourth_language">Taal 4</string>
-    <string name="song_language_fourth">Taal 4</string>
-    <string name="song_language_third">Taal 3</string>
     <string name="song_pane_translation">Taal %1$d</string>
     <string name="song_third_language">Taal 3</string>
     <string name="song_translation_label">Taalnaam</string>

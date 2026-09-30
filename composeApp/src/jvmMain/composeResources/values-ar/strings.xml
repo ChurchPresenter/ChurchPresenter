@@ -166,11 +166,9 @@
     <string name="report_bug">الإبلاغ عن خطأ</string>
     <string name="submit_feature_request">طلب ميزة</string>
     <string name="action_ok">موافق</string>
-    <string name="menu_help_item">مساعدة</string>
     <string name="menu_how_to_blog">مدوّنة الإرشادات</string>
     <string name="menu_check_for_updates">التحقق من التحديثات…</string>
     <string name="menu_keyboard_shortcuts">اختصارات لوحة المفاتيح</string>
-    <string name="keyboard_shortcuts_title">اختصارات لوحة المفاتيح</string>
     <string name="shortcut_category_global">عام</string>
     <string name="shortcut_category_bible">تبويب الكتاب المقدس</string>
     <string name="shortcut_category_songs">تبويب الترانيم</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">إضافة ملفات إلى البرنامج</string>
     <string name="tooltip_toggle_displays">تبديل شاشات العرض</string>
     <string name="tooltip_settings">الإعدادات</string>
-    <string name="tooltip_theme_light">المظهر الفاتح</string>
     <string name="tooltip_theme_dark">المظهر الداكن</string>
     <string name="tooltip_theme_system">مظهر النظام</string>
     <string name="tooltip_remove">إزالة</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">الاسم</string>
     <string name="canvas_rotation">الدوران</string>
     <string name="canvas_file_path">مسار الملف</string>
-    <string name="canvas_browse">استعراض</string>
     <string name="canvas_scale">القياس</string>
     <string name="canvas_scale_fit">ملاءمة</string>
     <string name="canvas_scale_fill">تعبئة</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">وضع التصوير</string>
     <string name="canvas_capture_mode_region">منطقة من الشاشة</string>
     <string name="canvas_capture_mode_window">نافذة</string>
-    <string name="canvas_capture_window">نافذة</string>
     <string name="canvas_capture_refresh_windows">تحديث قائمة النوافذ</string>
     <string name="canvas_capture_interval">فاصل التصوير</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">قطع الاتصال</string>
     <string name="planning_center_status_connected">متصل باسم %1$s</string>
     <string name="planning_center_status_connecting">جارٍ الاتصال…</string>
-    <string name="planning_center_status_error">خطأ: %1$s</string>
     <string name="planning_center_import_title">الاستيراد من Planning Center</string>
     <string name="planning_center_import_service_type">نوع الخدمة</string>
     <string name="planning_center_import_select_plan">اختر خطة</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">لأنه هكذا أحب الله العالم حتى بذل ابنه الوحيد.</string>
     <string name="bible_preview_sample_book">يوحنا</string>
     <string name="bible_preview_no_translations">أضف ترجمة لعرضها هنا</string>
-    <string name="song_preview_full_screen">معاينة ملء الشاشة</string>
-    <string name="song_preview_lower_third">معاينة الشريط السفلي</string>
     <string name="song_element_number">الرقم</string>
     <string name="song_element_title">العنوان</string>
     <string name="song_element_lyrics">الكلمات</string>
-    <string name="song_element_next_section">المقطع التالي</string>
     <string name="song_element_author">المؤلف</string>
     <string name="song_element_composer">الملحّن</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">لون</string>
     <string name="customize_type_image">صورة</string>
     <string name="customize_type_video">فيديو</string>
-    <string name="customize_type_transparent">شفافة</string>
     <string name="customize_type_default">افتراضية</string>
     <string name="customize_type_gradient">تدرّج لوني</string>
     <string name="customize_show_abbreviation">الاختصار</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">انتقل إلى تبويب الكتاب المقدس واختر ترجماتك — الأولى هي الأساسية.</string>
     <string name="setup_songs_format_note">مجلد مكتبة الترانيم يقرأ ملفات ‎.song‎. الترانيم المحفوظة بتنسيق آخر تحتاج إلى تحويل أولًا.</string>
     <string name="setup_songs_converter_body">هل تنتقل من SongBeamer أو OpenLP أو OpenSong أو FreeShow أو Free Worship أو EasySlides أو Quelea أو VideoPsalm أو SoftProjector؟ محوّل الترانيم والكتاب المقدس المدمج يقرأها جميعًا — وكذلك الكلمات من PDF وWord وPowerPoint وKeynote — ويكتب ملفات ‎.song‎ التي يتوقعها هذا المجلد.</string>
-    <string name="setup_songs_converter_button">فتح محوّل الترانيم والكتاب المقدس</string>
     <string name="setup_songs_samples_note">لا توجد ترانيم بعد؟ زر «إضافة ترانيم نموذجية» في تبويب النظام يملأ المجلد بمجموعة جاهزة.</string>
     <string name="setup_proj_rows_note">كل شاشة متصلة تحصل على صف خاص بها أدناه. عدد نوافذ العرض ينتج عمّا تسنده هناك، فلا شيء يُضبط يدويًا.</string>
     <string name="setup_proj_assign_note">لكل شاشة اختر جهاز عرض ووضع عرض، ثم استخدم «مخارج المحتوى» لتحديد ما يظهر عليها. «تجاوز الأنماط» يمنح تلك الشاشة مظهرًا خاصًا بها.</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">مولّد الثلث السفلي</string>
     <string name="song_lottie_unsupported_note">يحدد القالب التخطيط وموضع العنوان. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات ومعاينة التالي والأوتار.</string>
     <string name="bible_lottie_unsupported_note">يحدد القالب التخطيط وموضع المرجع وكيفية تقاسم لغتين للشريط. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">حد خارجي</string>
     <string name="tooltip_outline_options">خيارات الحد الخارجي</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">تُفتح الكاميرات وبطاقات الالتقاط باستخدام ffmpeg. ينبغي أن يتضمن هذا الإصدار نسخة — اختر ffmpeg أدناه، أو ثبّت ffmpeg وتحقق مجددًا.</string>
     <string name="ffmpeg_path_hint">اختر برنامج ffmpeg</string>
     <string name="ffmpeg_browse">اختيار ffmpeg</string>
-    <string name="ffmpeg_check_again">التحقق مجددًا</string>
     <string name="ffmpeg_clear">استخدام المضمّن</string>
     <string name="ffmpeg_download_link">الحصول على ffmpeg</string>
     <string name="ffmpeg_path_help">اتركه فارغًا لاستخدام ffmpeg المضمّن مع ChurchPresenter.</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">إظهار نوع العرض</string>
     <string name="song_add_translation">إضافة لغة</string>
     <string name="song_fourth_language">اللغة 4</string>
-    <string name="song_language_fourth">اللغة 4</string>
-    <string name="song_language_third">اللغة 3</string>
     <string name="song_pane_translation">اللغة %1$d</string>
     <string name="song_third_language">اللغة 3</string>
     <string name="song_translation_label">اسم اللغة</string>

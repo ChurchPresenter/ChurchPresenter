@@ -37,7 +37,7 @@ does not live here.
 |---|---|
 | `converter/song/` | One converter per source format, plus the shared lyric/section machinery (`LyricBlocks`, `SectionLabel`, `SongOutput`, the `SongFormatConverter` registry) and format helpers (`ParadoxTable`, `ProtoMessage`, `LooseJson`, `XmlRepair`, `XmlSupport`, `ChordLines`, `DocumentTextExtractor`) |
 | `converter/library/` | Library-wide passes: `DuplicateFinder`, `RtfText`, `TextUtils` |
-| `ui/` | The Compose Desktop GUI (`App`, theme, widgets, `Strings`) |
+| `ui/` | The Compose Desktop GUI: `App` and the shared helpers, one file per tab (`SongsTab`, `BibleConverterTab`, `DuplicateFinder*`, `BulkRenameTab`), theme, widgets, `Strings` |
 | `Main.kt` | `mainClass = "MainKt"` — the standalone app's entry point |
 
 Source formats currently handled: SongBeamer `.sng`, OpenLP (`songs.sqlite` and OpenLyrics),

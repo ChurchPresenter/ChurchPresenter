@@ -166,11 +166,9 @@
     <string name="report_bug">Ziņot par kļūdu</string>
     <string name="submit_feature_request">Ieteikt uzlabojumu</string>
     <string name="action_ok">Labi</string>
-    <string name="menu_help_item">Palīdzība</string>
     <string name="menu_how_to_blog">Pamācību blogs</string>
     <string name="menu_check_for_updates">Meklēt atjauninājumus…</string>
     <string name="menu_keyboard_shortcuts">Īsinājumtaustiņi</string>
-    <string name="keyboard_shortcuts_title">Īsinājumtaustiņi</string>
     <string name="shortcut_category_global">Vispārējie</string>
     <string name="shortcut_category_bible">Bībeles cilne</string>
     <string name="shortcut_category_songs">Dziesmu cilne</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">Pievienot failus programmai</string>
     <string name="tooltip_toggle_displays">Ieslēgt vai izslēgt projekcijas logus</string>
     <string name="tooltip_settings">Iestatījumi</string>
-    <string name="tooltip_theme_light">Gaišā tēma</string>
     <string name="tooltip_theme_dark">Tumšā tēma</string>
     <string name="tooltip_theme_system">Sistēmas tēma</string>
     <string name="tooltip_remove">Noņemt</string>
@@ -963,7 +960,6 @@
     <string name="canvas_source_name">Nosaukums</string>
     <string name="canvas_rotation">Pagrieziens</string>
     <string name="canvas_file_path">Faila ceļš</string>
-    <string name="canvas_browse">Pārlūkot</string>
     <string name="canvas_scale">Mērogs</string>
     <string name="canvas_scale_fit">Ietilpināt</string>
     <string name="canvas_scale_fill">Aizpildīt</string>
@@ -1055,7 +1051,6 @@
     <string name="canvas_capture_mode">Tveršanas režīms</string>
     <string name="canvas_capture_mode_region">Ekrāna apgabals</string>
     <string name="canvas_capture_mode_window">Logs</string>
-    <string name="canvas_capture_window">Logs</string>
     <string name="canvas_capture_refresh_windows">Atsvaidzināt logu sarakstu</string>
     <string name="canvas_capture_interval">Tveršanas intervāls</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1915,7 +1910,6 @@
     <string name="planning_center_disconnect">Atvienot</string>
     <string name="planning_center_status_connected">Savienots kā %1$s</string>
     <string name="planning_center_status_connecting">Savienojas…</string>
-    <string name="planning_center_status_error">Kļūda: %1$s</string>
     <string name="planning_center_import_title">Importēt no Planning Center</string>
     <string name="planning_center_import_service_type">Dievkalpojuma veids</string>
     <string name="planning_center_import_select_plan">Izvēlieties plānu</string>
@@ -1993,12 +1987,9 @@
     <string name="bible_preview_sample_verse">Jo tik ļoti Dievs pasauli mīlēja, ka deva savu vienpiedzimušo Dēlu.</string>
     <string name="bible_preview_sample_book">Jāņa</string>
     <string name="bible_preview_no_translations">Pievienojiet tulkojumu, lai to redzētu šeit</string>
-    <string name="song_preview_full_screen">Pilnekrāna priekšskatījums</string>
-    <string name="song_preview_lower_third">Apakšējās trešdaļas priekšskatījums</string>
     <string name="song_element_number">Numurs</string>
     <string name="song_element_title">Nosaukums</string>
     <string name="song_element_lyrics">Dziesmas teksts</string>
-    <string name="song_element_next_section">Nākamā daļa</string>
     <string name="song_element_author">Autors</string>
     <string name="song_element_composer">Komponists</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2092,6 @@
     <string name="customize_type_color">Krāsa</string>
     <string name="customize_type_image">Attēls</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Caurspīdīgs</string>
     <string name="customize_type_default">Noklusējums</string>
     <string name="customize_type_gradient">Gradients</string>
     <string name="customize_show_abbreviation">Saīsinājums</string>
@@ -2132,7 +2122,6 @@
     <string name="setup_bible_pick_translations">Atveriet cilni Bībele un izvēlieties tulkojumus — pirmais ir galvenais.</string>
     <string name="setup_songs_format_note">Dziesmu bibliotēkas mape lasa .song failus. Citā formātā saglabātas dziesmas vispirms jāpārveido.</string>
     <string name="setup_songs_converter_body">Pārejat no SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm vai SoftProjector? Iebūvētais dziesmu un Bībeles pārveidotājs lasa tos visus — un arī dziesmu vārdus no PDF, Word, PowerPoint un Keynote — un raksta .song failus, kurus šī mape sagaida.</string>
-    <string name="setup_songs_converter_button">Atvērt dziesmu un Bībeles pārveidotāju</string>
     <string name="setup_songs_samples_note">Vēl nav dziesmu? Cilnē Sistēma poga „Pievienot dziesmu paraugus” piepilda mapi ar strādājošu kopu.</string>
     <string name="setup_proj_rows_note">Katrs pievienotais ekrāns zemāk iegūst savu rindu. Projekcijas logu skaits izriet no tā, ko tur piešķirat, tāpēc manuāli nekas nav jāiestata.</string>
     <string name="setup_proj_assign_note">Katram ekrānam izvēlieties displeju un attēlošanas režīmu, pēc tam sadaļā „Satura izvadi” norādiet, kas tur parādīsies. „Pārrakstīt stilus” piešķir šim ekrānam savu izskatu.</string>
@@ -2149,7 +2138,6 @@
     <string name="bible_lottie_gen_window_title">Apakšējo trešdaļu ģenerators</string>
     <string name="song_lottie_unsupported_note">Veidne nosaka izkārtojumu un nosaukuma vietu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums, vārdu atstarpe, nākamās daļas priekšskatījums un akordi netiek piemēroti.</string>
     <string name="bible_lottie_unsupported_note">Veidne nosaka izkārtojumu, atsauces vietu un to, kā divas valodas dala joslu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums un vārdu atstarpe netiek piemēroti.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Kontūra</string>
     <string name="tooltip_outline_options">Kontūras opcijas</string>
@@ -2255,7 +2243,6 @@
     <string name="ffmpeg_missing_help">Kameras un tveršanas kartes tiek atvērtas ar ffmpeg. Šai versijai tas būtu jāietver — izvēlieties ffmpeg zemāk vai instalējiet ffmpeg un pārbaudiet vēlreiz.</string>
     <string name="ffmpeg_path_hint">Izvēlieties ffmpeg programmu</string>
     <string name="ffmpeg_browse">Izvēlēties ffmpeg</string>
-    <string name="ffmpeg_check_again">Pārbaudīt vēlreiz</string>
     <string name="ffmpeg_clear">Izmantot iekļauto</string>
     <string name="ffmpeg_download_link">Iegūt ffmpeg</string>
     <string name="ffmpeg_path_help">Atstājiet tukšu, lai izmantotu ChurchPresenter komplektā iekļauto ffmpeg.</string>
@@ -2356,8 +2343,6 @@
     <string name="preview_settings_show_modes">Rādīt attēlošanas veidu</string>
     <string name="song_add_translation">Pievienot valodu</string>
     <string name="song_fourth_language">4. valoda</string>
-    <string name="song_language_fourth">4. valoda</string>
-    <string name="song_language_third">3. valoda</string>
     <string name="song_pane_translation">%1$d. valoda</string>
     <string name="song_third_language">3. valoda</string>
     <string name="song_translation_label">Valodas nosaukums</string>
