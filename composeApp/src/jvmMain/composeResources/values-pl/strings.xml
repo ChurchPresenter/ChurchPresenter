@@ -1009,7 +1009,6 @@
     <string name="canvas_capture_mode">Tryb przechwytywania</string>
     <string name="canvas_capture_mode_region">Region ekranu</string>
     <string name="canvas_capture_mode_window">Okno</string>
-    <string name="canvas_capture_window">Okno</string>
     <string name="canvas_capture_refresh_windows">Odśwież listę okien</string>
     <string name="canvas_capture_interval">Interwał przechwytywania</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1030,7 +1029,6 @@
     <string name="canvas_source_name">Nazwa</string>
     <string name="canvas_rotation">Obrót</string>
     <string name="canvas_file_path">Ścieżka pliku</string>
-    <string name="canvas_browse">Przeglądaj</string>
     <string name="canvas_scale">Skalowanie</string>
     <string name="canvas_scale_fit">Dopasuj</string>
     <string name="canvas_scale_fill">Wypełnij</string>
@@ -1953,7 +1951,6 @@
     <string name="song_element_number">Numer</string>
     <string name="song_element_title">Tytuł</string>
     <string name="song_element_lyrics">Tekst</string>
-    <string name="song_element_next_section">Następna zwrotka</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Kompozytor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2056,7 +2053,6 @@
     <string name="customize_type_color">Kolor</string>
     <string name="customize_type_image">Obraz</string>
     <string name="customize_type_video">Wideo</string>
-    <string name="customize_type_transparent">Przezroczyste</string>
     <string name="customize_type_default">Domyślne</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Skrót</string>
@@ -2087,7 +2083,6 @@
     <string name="setup_bible_pick_translations">Przejdź do karty Biblia i wybierz przekłady — pierwszy jest głównym.</string>
     <string name="setup_songs_format_note">Folder biblioteki pieśni czyta pliki .song. Pieśni zapisane w innym formacie trzeba najpierw przekonwertować.</string>
     <string name="setup_songs_converter_body">Przechodzisz z SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm lub SoftProjector? Wbudowany konwerter pieśni i Biblii czyta je wszystkie — oraz teksty z PDF, Word, PowerPoint i Keynote — i zapisuje pliki .song, których oczekuje ten folder.</string>
-    <string name="setup_songs_converter_button">Otwórz konwerter pieśni i Biblii</string>
     <string name="setup_songs_samples_note">Nie masz jeszcze pieśni? Przycisk „Dodaj przykładowe pieśni” na karcie System wypełni folder gotowym zestawem.</string>
     <string name="setup_proj_rows_note">Każdy podłączony ekran otrzymuje poniżej własny wiersz. Liczba okien prezentacji wynika z tego, co tam przypiszesz, więc nie trzeba jej ustawiać ręcznie.</string>
     <string name="setup_proj_assign_note">Dla każdego ekranu wybierz wyświetlacz i tryb wyświetlania, a następnie w „Wyjściach treści” określ, co ma się na nim pojawiać. „Nadpisz style” nadaje temu ekranowi własny wygląd.</string>
@@ -2104,7 +2099,6 @@
     <string name="bible_lottie_gen_window_title">Generator dolnych pasków</string>
     <string name="song_lottie_unsupported_note">Szablon decyduje o układzie i miejscu tytułu. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie, odstępy między wyrazami, podgląd następnej części i akordy nie mają zastosowania.</string>
     <string name="bible_lottie_unsupported_note">Szablon decyduje o układzie, miejscu odnośnika i o tym, jak dwa języki dzielą pasek. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie i odstępy między wyrazami nie mają zastosowania.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Obrys</string>
     <string name="tooltip_outline_options">Opcje obrysu</string>

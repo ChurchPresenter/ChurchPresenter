@@ -963,7 +963,6 @@
     <string name="canvas_source_name">Ad</string>
     <string name="canvas_rotation">Döndürme</string>
     <string name="canvas_file_path">Dosya yolu</string>
-    <string name="canvas_browse">Gözat</string>
     <string name="canvas_scale">Ölçek</string>
     <string name="canvas_scale_fit">Sığdır</string>
     <string name="canvas_scale_fill">Doldur</string>
@@ -1055,7 +1054,6 @@
     <string name="canvas_capture_mode">Yakalama Modu</string>
     <string name="canvas_capture_mode_region">Ekran Bölgesi</string>
     <string name="canvas_capture_mode_window">Pencere</string>
-    <string name="canvas_capture_window">Pencere</string>
     <string name="canvas_capture_refresh_windows">Pencere Listesini Yenile</string>
     <string name="canvas_capture_interval">Yakalama Aralığı</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1998,7 +1996,6 @@
     <string name="song_element_number">Numara</string>
     <string name="song_element_title">Başlık</string>
     <string name="song_element_lyrics">Sözler</string>
-    <string name="song_element_next_section">Sonraki Kısım</string>
     <string name="song_element_author">Söz Yazarı</string>
     <string name="song_element_composer">Besteci</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2098,6 @@
     <string name="customize_type_color">Renk</string>
     <string name="customize_type_image">Resim</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Saydam</string>
     <string name="customize_type_default">Varsayılan</string>
     <string name="customize_type_gradient">Renk Geçişi</string>
     <string name="customize_show_abbreviation">Kısaltma</string>
@@ -2132,7 +2128,6 @@
     <string name="setup_bible_pick_translations">Kutsal Kitap sekmesine gidin ve çevirilerinizi seçin — ilki birincil olandır.</string>
     <string name="setup_songs_format_note">İlahi kitaplığı klasörü .song dosyalarını okur. Başka bir biçimde kaydedilmiş ilahilerin önce dönüştürülmesi gerekir.</string>
     <string name="setup_songs_converter_body">SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm veya SoftProjector'dan mı geçiyorsunuz? Yerleşik İlahi ve Kutsal Kitap Dönüştürücü hepsini okur — ayrıca PDF, Word, PowerPoint ve Keynote içindeki sözleri de — ve bu klasörün beklediği .song dosyalarını yazar.</string>
-    <string name="setup_songs_converter_button">İlahi ve Kutsal Kitap Dönüştürücüyü Aç</string>
     <string name="setup_songs_samples_note">Henüz ilahi yok mu? Sistem sekmesindeki „Örnek ilahiler ekle” klasörü çalışan bir setle doldurur.</string>
     <string name="setup_proj_rows_note">Bağlı her ekran aşağıda kendi satırını alır. Sunum penceresi sayısı oradaki atamalarınızdan çıkar, elle ayarlanacak bir şey yoktur.</string>
     <string name="setup_proj_assign_note">Her ekran için bir görüntü aygıtı ve bir görüntüleme modu seçin, ardından „İçerik çıkışları” ile orada ne görüneceğini belirleyin. „Stilleri geçersiz kıl” o ekrana kendi görünümünü verir.</string>
@@ -2149,7 +2144,6 @@
     <string name="bible_lottie_gen_window_title">Alt Üçte Bir Oluşturucu</string>
     <string name="song_lottie_unsupported_note">Şablon, yerleşimi ve başlığın yerini belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili, kelime aralığı, sonrakini önizleme ve akorlar uygulanmaz.</string>
     <string name="bible_lottie_unsupported_note">Şablon, yerleşimi, referansın konumunu ve iki dilin bandı nasıl paylaşacağını belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili ve kelime aralığı uygulanmaz.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Dış çizgi</string>
     <string name="tooltip_outline_options">Dış çizgi seçenekleri</string>

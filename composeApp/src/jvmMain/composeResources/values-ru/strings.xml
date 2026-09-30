@@ -1050,7 +1050,6 @@
     <string name="canvas_capture_mode">Режим захвата</string>
     <string name="canvas_capture_mode_region">Область экрана</string>
     <string name="canvas_capture_mode_window">Окно</string>
-    <string name="canvas_capture_window">Окно</string>
     <string name="canvas_capture_refresh_windows">Обновить список окон</string>
     <string name="canvas_capture_interval">Интервал захвата</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1071,7 +1070,6 @@
     <string name="canvas_source_name">Имя</string>
     <string name="canvas_rotation">Поворот</string>
     <string name="canvas_file_path">Путь к файлу</string>
-    <string name="canvas_browse">Обзор</string>
     <string name="canvas_scale">Масштаб</string>
     <string name="canvas_scale_fit">Вписать</string>
     <string name="canvas_scale_fill">Заполнить</string>
@@ -1956,7 +1954,6 @@
     <string name="song_element_number">Номер</string>
     <string name="song_element_title">Название</string>
     <string name="song_element_lyrics">Текст</string>
-    <string name="song_element_next_section">Следующий раздел</string>
     <string name="song_element_author">Автор</string>
     <string name="song_element_composer">Композитор</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2059,7 +2056,6 @@
     <string name="customize_type_color">Цвет</string>
     <string name="customize_type_image">Изображение</string>
     <string name="customize_type_video">Видео</string>
-    <string name="customize_type_transparent">Прозрачный</string>
     <string name="customize_type_default">По умолчанию</string>
     <string name="customize_type_gradient">Градиент</string>
     <string name="customize_show_abbreviation">Сокращение</string>
@@ -2090,7 +2086,6 @@
     <string name="setup_bible_pick_translations">Перейдите на вкладку «Библия» и выберите переводы — первый из них основной.</string>
     <string name="setup_songs_format_note">Папка библиотеки песен читает файлы .song. Песни в другом формате нужно сначала преобразовать.</string>
     <string name="setup_songs_converter_body">Переходите с SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm или SoftProjector? Встроенный конвертер песен и Библий читает их все — и тексты из PDF, Word, PowerPoint и Keynote — и создаёт файлы .song, которые ожидает эта папка.</string>
-    <string name="setup_songs_converter_button">Открыть конвертер песен и Библий</string>
     <string name="setup_songs_samples_note">Ещё нет песен? Кнопка «Добавить примеры песен» на вкладке «Система» наполнит папку рабочим набором.</string>
     <string name="setup_proj_rows_note">Каждый подключённый экран получает свою строку ниже. Количество окон вывода следует из того, что вы там назначите, — задавать его вручную не нужно.</string>
     <string name="setup_proj_assign_note">Для каждого экрана выберите дисплей и режим отображения, затем через «Выводимое содержимое» укажите, что на нём показывать. «Переопределить стили» задаёт этому экрану собственный вид.</string>
@@ -2107,7 +2102,6 @@
     <string name="bible_lottie_gen_window_title">Генератор нижних титров</string>
     <string name="song_lottie_unsupported_note">Шаблон определяет макет и положение названия. Стиль нижней трети задаёт шрифт, размер, цвет, выравнивание, межбуквенный интервал, регистр и тень; подложка, подчёркивание, зачёркивание, межсловный интервал, предпросмотр следующего и аккорды не применяются.</string>
     <string name="bible_lottie_unsupported_note">Шаблон определяет макет, положение ссылки и то, как два языка делят полосу. Стиль нижней трети задаёт шрифт, размер, цвет, выравнивание, межбуквенный интервал, регистр и тень; подложка, подчёркивание, зачёркивание и межсловный интервал не применяются.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Параметры контура</string>

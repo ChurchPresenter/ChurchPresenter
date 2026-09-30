@@ -91,7 +91,6 @@
     <string name="backdrop_opacity">Opacity %</string>
     <string name="backdrop_height_offset">Height offset</string>
     <string name="backdrop_width_offset">Width offset</string>
-    <string name="backdrop_fill_radius">Corner radius</string>
     <string name="backdrop_fill_uniform_width">Same width for every line</string>
     <string name="backdrop_vertical_offset">Vertical offset</string>
     <string name="backdrop_border_color">Border color</string>
@@ -377,8 +376,6 @@
     <string name="customize_theme_use_custom_colors_hint">Off keeps the current theme's colors and applies only the font and text size.</string>
     <string name="customize_theme_accent">Accent color</string>
     <string name="customize_theme_base">Base</string>
-    <string name="customize_theme_base_light">Light</string>
-    <string name="customize_theme_base_dark">Dark</string>
     <string name="customize_theme_font">Font</string>
     <string name="customize_theme_font_default">System default</string>
     <string name="customize_theme_use_default_font">Use default</string>
@@ -853,7 +850,6 @@
     <string name="song_element_title">Title</string>
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
-    <string name="song_element_next_section">Next Section</string>
     <string name="song_element_section_label">Section Label</string>
     <string name="song_element_section_label_short">Label</string>
     <string name="song_element_author">Author</string>
@@ -948,7 +944,6 @@
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
     <string name="output_profile_empty_state">Create a profile to start styling it</string>
-    <string name="output_profile_list_header">Profiles</string>
     <string name="output_profile_badge_full">Full</string>
     <string name="output_profile_badge_lower_third">Lower 3rd</string>
     <string name="output_profile_badge_stage">Stage</string>
@@ -965,7 +960,6 @@
     <string name="output_profile_bible_off">Bible off</string>
     <string name="output_profile_songs_off">Songs off</string>
     <string name="output_profile_bible_none_loaded">No Bibles loaded — add them on the Bible tab</string>
-    <string name="output_profile_add_translation">Add translation</string>
     <string name="output_profile_song_order_header">Languages · shown in this order</string>
     <string name="output_profile_song_count">%1$d of %2$d languages</string>
     <string name="output_profile_add_language">Add language</string>
@@ -996,10 +990,8 @@
     <string name="customize_type_color">Color</string>
     <string name="customize_type_image">Image</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Default</string>
     <string name="customize_type_gradient">Gradient</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="percent_suffix">%</string>
     <string name="customize_show_abbreviation">Abbreviation</string>
     <string name="customize_background_opacity">Opacity</string>
@@ -1400,7 +1392,6 @@
     <string name="canvas_source_name">Name</string>
     <string name="canvas_rotation">Rotation</string>
     <string name="canvas_file_path">File path</string>
-    <string name="canvas_browse">Browse</string>
     <string name="canvas_scale">Scale</string>
     <string name="canvas_scale_fit">Fit</string>
     <string name="canvas_scale_fill">Fill</string>
@@ -1517,7 +1508,6 @@
     <string name="canvas_capture_mode">Capture Mode</string>
     <string name="canvas_capture_mode_region">Screen Region</string>
     <string name="canvas_capture_mode_window">Window</string>
-    <string name="canvas_capture_window">Window</string>
     <string name="canvas_capture_refresh_windows">Refresh Window List</string>
     <string name="canvas_capture_interval">Capture Interval</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -2619,7 +2609,6 @@
          SongPro; it reads .song only, and the other formats go through the Converter. -->
     <string name="setup_songs_format_note">The song library folder reads .song files. Songs saved in another format need converting first.</string>
     <string name="setup_songs_converter_body">Coming from SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm or SoftProjector? The built-in Song and Bible Converter reads all of them — and lyrics out of PDF, Word, PowerPoint and Keynote — and writes the .song files this folder expects.</string>
-    <string name="setup_songs_converter_button">Open Song and Bible Converter</string>
     <string name="setup_songs_samples_note">No songs yet? "Add Song Samples" on the System tab fills the folder with a working set to try.</string>
 
     <!-- Step 6: projection. setup_proj_step3 told the user to set a window count; there is no
@@ -2664,7 +2653,6 @@
     <string name="calendar_sync_instance">Instance</string>
     <!-- Settings → Profiles: the four-column layout -->
     <string name="profile_nav_profile">Profile</string>
-    <string name="profile_nav_appearance">Appearance</string>
     <string name="profile_nav_stage_monitor">Stage monitor</string>
     <string name="profile_nav_general">General</string>
     <string name="profile_nav_outputs">Outputs</string>
@@ -2811,7 +2799,6 @@
     <string name="profile_box_area_margins">Inside margins</string>
     <string name="profile_box_band">On a lower third</string>
     <string name="profile_box_band_band">The band</string>
-    <string name="profile_box_band_screen">Whole screen</string>
     <string name="profile_box_languages">Languages</string>
     <string name="profile_box_languages_own">Own box each</string>
     <string name="profile_box_languages_shared">Share one box</string>
@@ -2932,9 +2919,7 @@
     <string name="profile_caption_translation">Translation</string>
     <string name="profile_caption_both">Both</string>
     <string name="profile_caption_layout">Layout</string>
-    <string name="profile_caption_layout_stacked">Stacked</string>
     <string name="profile_caption_layout_stacked_inverse">Stacked, translation first</string>
-    <string name="profile_caption_layout_side">Side by side</string>
     <string name="profile_caption_layout_side_inverse">Side by side, translation first</string>
     <string name="profile_caption_highlight">Highlight the word being spoken</string>
     <string name="profile_caption_in_progress">Show words still being spoken</string>

@@ -752,7 +752,6 @@
     <string name="canvas_source_name">Nombre</string>
     <string name="canvas_rotation">Rotación</string>
     <string name="canvas_file_path">Ruta del archivo</string>
-    <string name="canvas_browse">Examinar</string>
     <string name="canvas_scale">Escala</string>
     <string name="canvas_scale_fit">Ajustar</string>
     <string name="canvas_scale_fill">Rellenar</string>
@@ -842,7 +841,6 @@
     <string name="canvas_capture_mode">Modo de captura</string>
     <string name="canvas_capture_mode_region">Región de pantalla</string>
     <string name="canvas_capture_mode_window">Ventana</string>
-    <string name="canvas_capture_window">Ventana</string>
     <string name="canvas_capture_refresh_windows">Actualizar lista de ventanas</string>
     <string name="canvas_capture_interval">Intervalo de captura</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1981,7 +1979,6 @@
     <string name="song_element_number">Número</string>
     <string name="song_element_title">Título</string>
     <string name="song_element_lyrics">Letra</string>
-    <string name="song_element_next_section">Sección siguiente</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Compositor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2084,7 +2081,6 @@
     <string name="customize_type_color">Color</string>
     <string name="customize_type_image">Imagen</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparente</string>
     <string name="customize_type_default">Predeterminado</string>
     <string name="customize_type_gradient">Degradado</string>
     <string name="customize_show_abbreviation">Abreviatura</string>
@@ -2115,7 +2111,6 @@
     <string name="setup_bible_pick_translations">Vaya a la pestaña Biblia y elija sus traducciones: la primera es la principal.</string>
     <string name="setup_songs_format_note">La carpeta de la biblioteca de canciones lee archivos .song. Las canciones guardadas en otro formato deben convertirse primero.</string>
     <string name="setup_songs_converter_body">¿Viene de SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm o SoftProjector? El conversor de cantos y Biblias integrado los lee todos —y también las letras de PDF, Word, PowerPoint y Keynote— y escribe los archivos .song que esta carpeta espera.</string>
-    <string name="setup_songs_converter_button">Abrir el conversor de cantos y Biblias</string>
     <string name="setup_songs_samples_note">¿Aún no tiene canciones? «Añadir canciones de ejemplo» en la pestaña Sistema llena la carpeta con un conjunto funcional.</string>
     <string name="setup_proj_rows_note">Cada pantalla conectada obtiene su propia fila abajo. El número de ventanas de proyección se deriva de lo que asigne allí, así que no hay nada que ajustar a mano.</string>
     <string name="setup_proj_assign_note">Para cada pantalla elija un dispositivo y un modo de visualización, y luego use «Salidas de contenido» para decidir qué aparece allí. «Sobrescribir estilos» da a esa pantalla su propio aspecto.</string>
@@ -2132,7 +2127,6 @@
     <string name="bible_lottie_gen_window_title">Generador de tercios inferiores</string>
     <string name="song_lottie_unsupported_note">La plantilla decide la disposición y dónde va el título. El estilo del tercio inferior fija la fuente, el tamaño, el color, la alineación, el espaciado entre letras, las mayúsculas y la sombra; el fondo del texto, el subrayado, el tachado, el espaciado entre palabras, la vista previa de la siguiente sección y los acordes no se aplican.</string>
     <string name="bible_lottie_unsupported_note">La plantilla decide la disposición, la posición de la referencia y cómo dos idiomas comparten la banda. El estilo del tercio inferior fija la fuente, el tamaño, el color, la alineación, el espaciado entre letras, las mayúsculas y la sombra; el fondo del texto, el subrayado, el tachado y el espaciado entre palabras no se aplican.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Contorno</string>
     <string name="tooltip_outline_options">Opciones de contorno</string>

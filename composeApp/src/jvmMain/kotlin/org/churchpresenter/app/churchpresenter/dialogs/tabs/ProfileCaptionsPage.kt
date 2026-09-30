@@ -10,9 +10,9 @@ import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_layout
-import churchpresenter.composeapp.generated.resources.profile_caption_layout_side
+import churchpresenter.composeapp.generated.resources.profile_layout_side_by_side
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_side_inverse
-import churchpresenter.composeapp.generated.resources.profile_caption_layout_stacked
+import churchpresenter.composeapp.generated.resources.profile_layout_stacked
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_stacked_inverse
 import churchpresenter.composeapp.generated.resources.profile_caption_lines
 import churchpresenter.composeapp.generated.resources.profile_caption_mode
@@ -169,9 +169,9 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
             SettingsRow(stringResource(Res.string.profile_caption_layout), paths = listOf("$STT.layout")) {
                 RowSegmented(
                     options = listOf(
-                        RowOption("stacked", stringResource(Res.string.profile_caption_layout_stacked)),
+                        RowOption("stacked", stringResource(Res.string.profile_layout_stacked)),
                         RowOption("stacked_inverse", stringResource(Res.string.profile_caption_layout_stacked_inverse)),
-                        RowOption("side_by_side", stringResource(Res.string.profile_caption_layout_side)),
+                        RowOption("side_by_side", stringResource(Res.string.profile_layout_side_by_side)),
                         RowOption(
                             "side_by_side_inverse",
                             stringResource(Res.string.profile_caption_layout_side_inverse),

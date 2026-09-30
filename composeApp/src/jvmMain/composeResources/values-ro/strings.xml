@@ -791,7 +791,6 @@
     <string name="canvas_source_name">Nume</string>
     <string name="canvas_rotation">Rotație</string>
     <string name="canvas_file_path">Cale fișier</string>
-    <string name="canvas_browse">Răsfoire</string>
     <string name="canvas_scale">Scală</string>
     <string name="canvas_scale_fit">Potrivire</string>
     <string name="canvas_scale_fill">Umplere</string>
@@ -881,7 +880,6 @@
     <string name="canvas_capture_mode">Mod Captură</string>
     <string name="canvas_capture_mode_region">Regiune Ecran</string>
     <string name="canvas_capture_mode_window">Fereastră</string>
-    <string name="canvas_capture_window">Fereastră</string>
     <string name="canvas_capture_refresh_windows">Reîmprospătare Listă Ferestre</string>
     <string name="canvas_capture_interval">Interval Captură</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1983,7 +1981,6 @@
     <string name="song_element_number">Număr</string>
     <string name="song_element_title">Titlu</string>
     <string name="song_element_lyrics">Versuri</string>
-    <string name="song_element_next_section">Secțiunea Următoare</string>
     <string name="song_element_author">Autor</string>
     <string name="song_element_composer">Compozitor</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2086,7 +2083,6 @@
     <string name="customize_type_color">Culoare</string>
     <string name="customize_type_image">Imagine</string>
     <string name="customize_type_video">Video</string>
-    <string name="customize_type_transparent">Transparent</string>
     <string name="customize_type_default">Implicit</string>
     <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Abreviere</string>
@@ -2117,7 +2113,6 @@
     <string name="setup_bible_pick_translations">Mergeți la fila Biblie și alegeți traducerile — prima este cea principală.</string>
     <string name="setup_songs_format_note">Folderul bibliotecii de cântări citește fișiere .song. Cântările salvate în alt format trebuie convertite mai întâi.</string>
     <string name="setup_songs_converter_body">Veniți de la SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm sau SoftProjector? Convertorul de cântări și Biblii încorporat le citește pe toate — și versurile din PDF, Word, PowerPoint și Keynote — și scrie fișierele .song pe care le așteaptă acest folder.</string>
-    <string name="setup_songs_converter_button">Deschide convertorul de cântări și Biblii</string>
     <string name="setup_songs_samples_note">Încă nu aveți cântări? „Adaugă cântări exemplu” din fila Sistem umple folderul cu un set funcțional.</string>
     <string name="setup_proj_rows_note">Fiecare ecran conectat primește mai jos propriul rând. Numărul ferestrelor de proiecție rezultă din ce alocați acolo, deci nu trebuie setat manual.</string>
     <string name="setup_proj_assign_note">Pentru fiecare ecran alegeți un afișaj și un mod de afișare, apoi folosiți „Ieșiri de conținut” pentru a stabili ce apare acolo. „Suprascrie stilurile” dă acelui ecran un aspect propriu.</string>
@@ -2134,7 +2129,6 @@
     <string name="bible_lottie_gen_window_title">Generator de treimi inferioare</string>
     <string name="song_lottie_unsupported_note">Șablonul decide aspectul și locul titlului. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea, spațierea cuvintelor, previzualizarea următoarei părți și acordurile nu se aplică.</string>
     <string name="bible_lottie_unsupported_note">Șablonul decide aspectul, poziția referinței și felul în care două limbi împart banda. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea și spațierea cuvintelor nu se aplică.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">Contur</string>
     <string name="tooltip_outline_options">Opțiuni contur</string>

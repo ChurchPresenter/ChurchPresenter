@@ -963,7 +963,6 @@
     <string name="canvas_source_name">ຊື່</string>
     <string name="canvas_rotation">ການໝຸນ</string>
     <string name="canvas_file_path">ເສັ້ນທາງໄຟລ໌</string>
-    <string name="canvas_browse">ເລືອກ</string>
     <string name="canvas_scale">ຂະໜາດ</string>
     <string name="canvas_scale_fit">ພໍດີ</string>
     <string name="canvas_scale_fill">ເຕັມ</string>
@@ -1055,7 +1054,6 @@
     <string name="canvas_capture_mode">ຮູບແບບການຈັບພາບ</string>
     <string name="canvas_capture_mode_region">ພື້ນທີ່ໜ້າຈໍ</string>
     <string name="canvas_capture_mode_window">ໜ້າຕ່າງ</string>
-    <string name="canvas_capture_window">ໜ້າຕ່າງ</string>
     <string name="canvas_capture_refresh_windows">ໂຫຼດລາຍການໜ້າຕ່າງຄືນ</string>
     <string name="canvas_capture_interval">ໄລຍະການຈັບພາບ</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1998,7 +1996,6 @@
     <string name="song_element_number">ໝາຍເລກ</string>
     <string name="song_element_title">ຫົວຂໍ້</string>
     <string name="song_element_lyrics">ເນື້ອເພງ</string>
-    <string name="song_element_next_section">ທ່ອນຕໍ່ໄປ</string>
     <string name="song_element_author">ຜູ້ແຕ່ງຄຳຮ້ອງ</string>
     <string name="song_element_composer">ຜູ້ແຕ່ງທຳນອງ</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2098,6 @@
     <string name="customize_type_color">ສີ</string>
     <string name="customize_type_image">ຮູບ</string>
     <string name="customize_type_video">ວິດີໂອ</string>
-    <string name="customize_type_transparent">ໂປ່ງໃສ</string>
     <string name="customize_type_default">ຄ່າເລີ່ມຕົ້ນ</string>
     <string name="customize_type_gradient">ໄລ່ສີ</string>
     <string name="customize_show_abbreviation">ຕົວຫຍໍ້</string>
@@ -2132,7 +2128,6 @@
     <string name="setup_bible_pick_translations">ໄປທີ່ແທັບພຣະຄຳພີ ແລ້ວເລືອກສະບັບແປ — ສະບັບທຳອິດແມ່ນສະບັບຫຼັກ</string>
     <string name="setup_songs_format_note">ໂຟນເດີຫ້ອງສະໝຸດເພງອ່ານໄຟລ໌ .song ເພງທີ່ບັນທຶກໃນຮູບແບບອື່ນຕ້ອງແປງກ່ອນ</string>
     <string name="setup_songs_converter_body">ຍ້າຍມາຈາກ SongBeamer, OpenLP, OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm ຫຼື SoftProjector ບໍ? ຕົວແປງເພງ ແລະ ພຣະຄຳພີໃນຕົວອ່ານໄດ້ທັງໝົດ — ລວມທັງເນື້ອຮ້ອງຈາກ PDF, Word, PowerPoint ແລະ Keynote — ແລ້ວຂຽນໄຟລ໌ .song ທີ່ໂຟນເດີນີ້ຕ້ອງການ</string>
-    <string name="setup_songs_converter_button">ເປີດຕົວແປງເພງ ແລະ ພຣະຄຳພີ</string>
     <string name="setup_songs_samples_note">ຍັງບໍ່ມີເພງບໍ? ປຸ່ມ «ເພີ່ມເພງຕົວຢ່າງ» ໃນແທັບລະບົບຈະຕື່ມໂຟນເດີດ້ວຍຊຸດທີ່ໃຊ້ໄດ້</string>
     <string name="setup_proj_rows_note">ຈໍທີ່ເຊື່ອມຕໍ່ແຕ່ລະຈໍຈະໄດ້ແຖວຂອງຕົນຢູ່ລຸ່ມ. ຈຳນວນປ່ອງນຳສະເໜີເກີດຈາກສິ່ງທີ່ທ່ານກຳນົດຢູ່ນັ້ນ ຈຶ່ງບໍ່ຕ້ອງຕັ້ງດ້ວຍມື</string>
     <string name="setup_proj_assign_note">ສຳລັບແຕ່ລະຈໍ ໃຫ້ເລືອກຈໍສະແດງຜົນ ແລະ ໂໝດການສະແດງ ຈາກນັ້ນໃຊ້ «ຜົນອອກເນື້ອຫາ» ເພື່ອກຳນົດວ່າຈະສະແດງຫຍັງ. «ຂຽນທັບຮູບແບບ» ຈະໃຫ້ຈໍນັ້ນມີຮູບລັກສະນະຂອງຕົນ</string>
@@ -2149,7 +2144,6 @@
     <string name="bible_lottie_gen_window_title">ຕົວສ້າງແຖບລຸ່ມ</string>
     <string name="song_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ ແລະ ຕຳແໜ່ງຂອງຊື່ເພງ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ, ໄລຍະຫ່າງຄຳ, ການເບິ່ງທ່ອນຖັດໄປ ແລະ ຄອດບໍ່ມີຜົນ.</string>
     <string name="bible_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ, ຕຳແໜ່ງຂອງຂໍ້ອ້າງອີງ ແລະ ວິທີທີ່ສອງພາສາແບ່ງແຖບ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ ແລະ ໄລຍະຫ່າງຄຳບໍ່ມີຜົນ.</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">ເສັ້ນຂອບ</string>
     <string name="tooltip_outline_options">ຕົວເລືອກເສັ້ນຂອບ</string>

@@ -71,7 +71,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.output_profile_delete
 import churchpresenter.composeapp.generated.resources.output_profile_duplicate
-import churchpresenter.composeapp.generated.resources.output_profile_list_header
+import churchpresenter.composeapp.generated.resources.output_profiles_tab
 import churchpresenter.composeapp.generated.resources.profile_list_hint
 import churchpresenter.composeapp.generated.resources.profile_list_new
 import churchpresenter.composeapp.generated.resources.profile_menu_create_linked
@@ -248,7 +248,7 @@ private fun ProfileListHeader(onNew: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 10.dp, top = 12.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        GroupCaption(stringResource(Res.string.output_profile_list_header), Modifier.weight(1f))
+        GroupCaption(stringResource(Res.string.output_profiles_tab), Modifier.weight(1f))
         KeyIconButton(onClick = onNew, modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG)) {
             Icon(
                 Icons.Filled.Add,

@@ -116,7 +116,7 @@ import churchpresenter.composeapp.generated.resources.setup_rail_ready
 import churchpresenter.composeapp.generated.resources.setup_rail_songs
 import churchpresenter.composeapp.generated.resources.setup_rail_welcome
 import churchpresenter.composeapp.generated.resources.setup_songs_converter_body
-import churchpresenter.composeapp.generated.resources.setup_songs_converter_button
+import churchpresenter.composeapp.generated.resources.shortcut_description_open_converter
 import churchpresenter.composeapp.generated.resources.setup_songs_format_note
 import churchpresenter.composeapp.generated.resources.setup_songs_samples_note
 import churchpresenter.composeapp.generated.resources.setup_step0_subtitle
@@ -866,7 +866,7 @@ private fun ConverterCallout(onOpenConverter: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurface,
         )
         RaisedButton(shape = AppShape(8.dp), onClick = onOpenConverter) {
-            Text(stringResource(Res.string.setup_songs_converter_button))
+            Text(stringResource(Res.string.shortcut_description_open_converter))
         }
     }
 }

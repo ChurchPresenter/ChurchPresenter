@@ -14,7 +14,6 @@ import churchpresenter.composeapp.generated.resources.profile_box_area_margins
 import churchpresenter.composeapp.generated.resources.profile_box_area_screen
 import churchpresenter.composeapp.generated.resources.profile_box_band
 import churchpresenter.composeapp.generated.resources.profile_box_band_band
-import churchpresenter.composeapp.generated.resources.profile_box_band_screen
 import churchpresenter.composeapp.generated.resources.profile_box_height
 import churchpresenter.composeapp.generated.resources.profile_box_keep_clear
 import churchpresenter.composeapp.generated.resources.profile_box_keep_clear_sub
@@ -175,7 +174,7 @@ private fun TextBoxOptionRows(
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_box_band_band)),
-                    RowOption(true, stringResource(Res.string.profile_box_band_screen)),
+                    RowOption(true, stringResource(Res.string.profile_box_area_screen)),
                 ),
                 selected = options.lowerThirdWholeScreen,
                 onSelect = { onOptions(options.copy(lowerThirdWholeScreen = it)) },

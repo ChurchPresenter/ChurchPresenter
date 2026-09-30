@@ -963,7 +963,6 @@
     <string name="canvas_source_name">名前</string>
     <string name="canvas_rotation">回転</string>
     <string name="canvas_file_path">ファイルのパス</string>
-    <string name="canvas_browse">参照</string>
     <string name="canvas_scale">拡大縮小</string>
     <string name="canvas_scale_fit">全体を表示</string>
     <string name="canvas_scale_fill">画面を埋める</string>
@@ -1055,7 +1054,6 @@
     <string name="canvas_capture_mode">キャプチャの方法</string>
     <string name="canvas_capture_mode_region">画面の範囲</string>
     <string name="canvas_capture_mode_window">ウィンドウ</string>
-    <string name="canvas_capture_window">ウィンドウ</string>
     <string name="canvas_capture_refresh_windows">ウィンドウ一覧を更新</string>
     <string name="canvas_capture_interval">キャプチャ間隔</string>
     <string name="canvas_placeholder_qr">QR</string>
@@ -1998,7 +1996,6 @@
     <string name="song_element_number">番号</string>
     <string name="song_element_title">タイトル</string>
     <string name="song_element_lyrics">歌詞</string>
-    <string name="song_element_next_section">次のセクション</string>
     <string name="song_element_author">作詞者</string>
     <string name="song_element_composer">作曲者</string>
     <string name="song_element_ccli">CCLI</string>
@@ -2101,7 +2098,6 @@
     <string name="customize_type_color">色</string>
     <string name="customize_type_image">画像</string>
     <string name="customize_type_video">動画</string>
-    <string name="customize_type_transparent">透過</string>
     <string name="customize_type_default">既定</string>
     <string name="customize_type_gradient">グラデーション</string>
     <string name="customize_show_abbreviation">略称</string>
@@ -2132,7 +2128,6 @@
     <string name="setup_bible_pick_translations">「聖書」タブを開いて訳を選びます。最初のものが主たる訳になります。</string>
     <string name="setup_songs_format_note">賛美歌ライブラリのフォルダーは .song ファイルを読み込みます。ほかの形式で保存された曲は、まず変換が必要です。</string>
     <string name="setup_songs_converter_body">SongBeamer、OpenLP、OpenSong、FreeShow、Free Worship、EasySlides、Quelea、VideoPsalm、SoftProjector からの移行ですか。内蔵の賛美歌・聖書コンバーターはそのすべてを読み込み、PDF・Word・PowerPoint・Keynote の歌詞にも対応して、このフォルダーが必要とする .song ファイルを書き出します。</string>
-    <string name="setup_songs_converter_button">賛美歌・聖書コンバーターを開く</string>
     <string name="setup_songs_samples_note">まだ曲がありませんか。「システム」タブの「サンプル曲を追加」でフォルダーに一式が入ります。</string>
     <string name="setup_proj_rows_note">接続された画面ごとに下へ行が追加されます。表示ウィンドウの数はそこでの割り当てから決まるため、手動で設定する項目はありません。</string>
     <string name="setup_proj_assign_note">画面ごとにディスプレイと表示モードを選び、「コンテンツ出力」でそこに何を映すかを決めます。「スタイルを上書き」でその画面だけ別の見た目にできます。</string>
@@ -2149,7 +2144,6 @@
     <string name="bible_lottie_gen_window_title">ローワーサード ジェネレーター</string>
     <string name="song_lottie_unsupported_note">レイアウトとタイトルの位置はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔、次のプレビュー、コードは適用されません。</string>
     <string name="bible_lottie_unsupported_note">レイアウト、聖句参照の位置、2 言語のバンドの分け方はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔は適用されません。</string>
-    <string name="customize_type_lottie">Lottie</string>
     <string name="text_style_outline">O</string>
     <string name="tooltip_outline">縁取り</string>
     <string name="tooltip_outline_options">縁取りのオプション</string>
