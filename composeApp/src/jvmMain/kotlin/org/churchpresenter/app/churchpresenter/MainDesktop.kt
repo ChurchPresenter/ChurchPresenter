@@ -896,6 +896,7 @@ fun MainDesktop(
         remoteSelectPresentationFlow = remoteSelectPresentationFlow,
         remoteSelectMediaFlow = remoteSelectMediaFlow,
         uploadPresentationFlow = uploadPresentationFlow,
+        statisticsManager = statisticsManager,
     )
 
     LaunchedEffect(selectedTabIndex) {

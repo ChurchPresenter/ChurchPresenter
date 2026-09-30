@@ -248,11 +248,14 @@ internal fun nextImageIndex(index: Int, imageCount: Int): Int =
 /**
  * The verses to put on screen for a remote "select bible verse" request.
  *
- * Two different situations, and the fallback is the one that matters. [resolved] is what this
- * machine's own bibles made of the reference; when they made nothing — the phone is showing a
- * translation that is not installed here, or names the book differently — the request carries its
- * own [SelectBibleVerseRequest.verseText], and showing that is far better than showing nothing at
- * all. The bible metadata is still this instance's, since that is what the styling is keyed to.
+ * Three situations. A client reading a Bible downloaded onto the phone sets
+ * [SelectBibleVerseRequest.useClientText]: its text is shown as sent, under its own translation
+ * name, because the operator chose that translation and the screen should show what the phone
+ * shows. Otherwise [resolved] is what this machine's own bibles made of the reference; when they
+ * made nothing — the phone names the book differently — the request's own
+ * [SelectBibleVerseRequest.verseText] is still better than showing nothing at all. In both
+ * fallbacks the style profile stays this instance's ([translationFileName]), since that is what
+ * the look is keyed to.
  *
  * When it did resolve, the request's [SelectBibleVerseRequest.verseRange] is stamped onto every
  * verse: the local lookup knows the verses but not the span the client asked for, and the range is
@@ -264,23 +267,31 @@ internal fun remoteSelectedVerses(
     translationFileName: String,
     bibleAbbreviation: String,
     bibleName: String,
-): List<SelectedVerse> =
-    if (resolved.isNotEmpty()) {
-        resolved.map { it.copy(verseRange = request.verseRange) }
-    } else {
-        listOf(
-            SelectedVerse(
-                translationFileName = translationFileName,
-                bibleAbbreviation = bibleAbbreviation,
-                bibleName = bibleName,
-                bookName = request.bookName,
-                chapter = request.chapter,
-                verseNumber = request.verseNumber,
-                verseText = request.verseText,
-                verseRange = request.verseRange,
-            ),
-        )
+): List<SelectedVerse> {
+    val clientText = request.useClientText && request.verseText.isNotBlank()
+    if (resolved.isNotEmpty() && !clientText) {
+        return resolved.map { it.copy(verseRange = request.verseRange) }
     }
+    return listOf(
+        SelectedVerse(
+            translationFileName = translationFileName,
+            bibleAbbreviation = if (clientText) {
+                request.bibleAbbreviation.ifBlank { bibleAbbreviation }
+            } else {
+                bibleAbbreviation
+            },
+            bibleName = if (clientText) request.bibleName.ifBlank { bibleName } else bibleName,
+            bookName = request.bookName,
+            chapter = request.chapter,
+            verseNumber = request.verseNumber,
+            verseText = request.verseText,
+            verseRange = request.verseRange,
+            // The canonical book id: from the local lookup when there was one, else as the client
+            // sent it — so anything keyed on it keeps working whatever language the book is named in.
+            bookId = resolved.firstOrNull()?.bookId ?: request.bookId,
+        ),
+    )
+}
 
 /**
  * Whether this instance should mirror the primary's content over Instance Link.
@@ -331,6 +342,27 @@ internal fun resolveSelectedConnectionId(currentId: String?, connections: List<C
 
 internal fun resolveBookIndex(bookNames: List<String>, requestedBookName: String): Int =
     bookNames.indexOfFirst { it.equals(requestedBookName, ignoreCase = true) }
+
+/**
+ * Every verse a remote's request put on screen: the numbers its range names ("16-18", "2,4,5"),
+ * or just its verse. A backwards or absurd range falls back to the single verse rather than
+ * recording hundreds of plays.
+ */
+internal fun remoteVerseNumbers(request: SelectBibleVerseRequest): List<Int> {
+    val numbers = request.verseRange.split(",").flatMap { part ->
+        val bounds = part.split("-").mapNotNull { it.trim().toIntOrNull() }
+        when {
+            bounds.size == 2 && bounds[1] >= bounds[0] && bounds[1] - bounds[0] < MAX_REMOTE_RANGE ->
+                (bounds[0]..bounds[1]).toList()
+            bounds.size == 1 -> bounds
+            else -> emptyList()
+        }
+    }.distinct()
+    return numbers.ifEmpty { listOf(request.verseNumber) }
+}
+
+/** No chapter has more verses than Psalm 119's 176. */
+private const val MAX_REMOTE_RANGE = 200
 
 internal fun parseVerseRangeEnd(verseRange: String, verseNumber: Int): Int? {
     val rangeNums = verseRange
