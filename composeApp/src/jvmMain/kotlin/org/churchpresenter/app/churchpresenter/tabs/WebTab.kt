@@ -115,17 +115,24 @@ fun WebTab(
     val isLive = presentingMode == Presenting.WEBSITE
 
     val navController = rememberWebNavController()
-    val tab = WebTabScope(
-        presenterManager = presenterManager,
-        appSettings = appSettings,
-        onSettingsChange = onSettingsChange,
-        onAddToSchedule = onAddToSchedule,
-        onUpdateScheduleTitle = onUpdateScheduleTitle,
-        state = state,
-        isLive = isLive,
-        navController = navController,
-        previewAspectRatio = previewAspectRatio,
-    )
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val tab = remember(
+        presenterManager, appSettings, onSettingsChange, onAddToSchedule, onUpdateScheduleTitle, state, isLive,
+        navController, previewAspectRatio
+    ) {
+        WebTabScope(
+            presenterManager = presenterManager,
+            appSettings = appSettings,
+            onSettingsChange = onSettingsChange,
+            onAddToSchedule = onAddToSchedule,
+            onUpdateScheduleTitle = onUpdateScheduleTitle,
+            state = state,
+            isLive = isLive,
+            navController = navController,
+            previewAspectRatio = previewAspectRatio,
+        )
+    }
     tab.WebTabEffects(selectedWebsiteItem, selectedWebsiteItemVersion)
 
     Column(modifier = modifier.fillMaxSize()) {

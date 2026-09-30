@@ -49,7 +49,7 @@ internal class CanvasTabScope(
     val isMaximized: Boolean,
     val sourceNames: CanvasSourceNames,
     val wentLive: (ScheduleItem) -> Unit,
-    state: CanvasTabState,
+    private val state: CanvasTabState,
 ) {
     var leftPanelPx by state.leftPanelPx
     var rightPanelPx by state.rightPanelPx
@@ -87,9 +87,9 @@ internal class CanvasTabScope(
         onSettingsChangeState.value { s -> withCanvasRightPanelWidth(s, isMaximized, dp) }
     }
 
-    val currentScene = sceneViewModel.currentScene
+    val currentScene get() = sceneViewModel.currentScene
     val selectedSourceId: String? get() = sceneViewModel.selectedSourceId.value
-    val selectedSource = sceneViewModel.selectedSource
+    val selectedSource get() = sceneViewModel.selectedSource
 }
 
 /** The source types' default names, localised in composable scope for the menu's onClick lambdas. */
@@ -125,20 +125,25 @@ internal fun rememberCanvasSourceNames(): CanvasSourceNames {
     val strOmt           = stringResource(Res.string.canvas_source_omt)
     val strBrowser       = stringResource(Res.string.canvas_source_browser)
     val strBible         = stringResource(Res.string.canvas_source_bible)
-    return CanvasSourceNames(
-        strImage = strImage,
-        strText = strText,
-        strColor = strColor,
-        strVideo = strVideo,
-        strTimer = strTimer,
-        strQrCode = strQrCode,
-        strCamera = strCamera,
-        strScreenCapture = strScreenCapture,
-        strNdi = strNdi,
-        strOmt = strOmt,
-        strBrowser = strBrowser,
-        strBible = strBible,
-    )
+    return remember(
+        strImage, strText, strColor, strVideo, strTimer, strQrCode, strCamera, strScreenCapture, strNdi, strOmt,
+        strBrowser, strBible
+    ) {
+        CanvasSourceNames(
+            strImage = strImage,
+            strText = strText,
+            strColor = strColor,
+            strVideo = strVideo,
+            strTimer = strTimer,
+            strQrCode = strQrCode,
+            strCamera = strCamera,
+            strScreenCapture = strScreenCapture,
+            strNdi = strNdi,
+            strOmt = strOmt,
+            strBrowser = strBrowser,
+            strBible = strBible,
+        )
+    }
 }
 
 /** The Canvas tab's remembered editing state: panel widths, renaming, and the drawing tool. */
@@ -161,21 +166,38 @@ internal fun rememberCanvasTabState(
     currentLayout: WindowLayoutSettings,
     isMaximized: Boolean,
     density: Density,
-): CanvasTabState = CanvasTabState(
-    leftPanelPx = remember(currentLayout.canvasLeftPanelWidthDp, isMaximized) {
+): CanvasTabState {
+    val leftPanelPx = remember(currentLayout.canvasLeftPanelWidthDp, isMaximized) {
         mutableStateOf(with(density) { currentLayout.canvasLeftPanelWidthDp.dp.toPx() })
-    },
-    rightPanelPx = remember(currentLayout.canvasRightPanelWidthDp, isMaximized) {
+    }
+    val rightPanelPx = remember(currentLayout.canvasRightPanelWidthDp, isMaximized) {
         mutableStateOf(with(density) { currentLayout.canvasRightPanelWidthDp.dp.toPx() })
-    },
-    renamingSceneId = remember { mutableStateOf<String?>(null) },
-    confirmSingleLayoutSceneId = remember { mutableStateOf<String?>(null) },
-    renameText = remember { mutableStateOf("") },
-    activeTool = remember { mutableStateOf("select") },
-    drawingStrokeColor = remember { mutableStateOf("#FFFFFF") },
-    drawingFillColor = remember { mutableStateOf("#00000000") },
-    drawingStrokeWidth = remember { mutableStateOf(DEFAULT_DRAWING_STROKE_WIDTH) },
-    focusRequester = remember { FocusRequester() },
-)
+    }
+    val renamingSceneId = remember { mutableStateOf<String?>(null) }
+    val confirmSingleLayoutSceneId = remember { mutableStateOf<String?>(null) }
+    val renameText = remember { mutableStateOf("") }
+    val activeTool = remember { mutableStateOf("select") }
+    val drawingStrokeColor = remember { mutableStateOf("#FFFFFF") }
+    val drawingFillColor = remember { mutableStateOf("#00000000") }
+    val drawingStrokeWidth = remember { mutableStateOf(DEFAULT_DRAWING_STROKE_WIDTH) }
+    val focusRequester = remember { FocusRequester() }
+    return remember(
+        leftPanelPx, rightPanelPx, renamingSceneId, confirmSingleLayoutSceneId, renameText, activeTool,
+        drawingStrokeColor, drawingFillColor, drawingStrokeWidth, focusRequester
+    ) {
+        CanvasTabState(
+            leftPanelPx = leftPanelPx,
+            rightPanelPx = rightPanelPx,
+            renamingSceneId = renamingSceneId,
+            confirmSingleLayoutSceneId = confirmSingleLayoutSceneId,
+            renameText = renameText,
+            activeTool = activeTool,
+            drawingStrokeColor = drawingStrokeColor,
+            drawingFillColor = drawingFillColor,
+            drawingStrokeWidth = drawingStrokeWidth,
+            focusRequester = focusRequester,
+        )
+    }
+}
 
 private const val DEFAULT_DRAWING_STROKE_WIDTH = 3f

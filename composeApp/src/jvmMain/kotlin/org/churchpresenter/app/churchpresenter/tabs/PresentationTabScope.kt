@@ -78,13 +78,13 @@ internal class PresentationTabScope(
     // selected deck, next/prev first advances/rewinds its build steps (PowerPoint click
     // semantics). The identity/visibility guard lives in PresenterManager — in every other
     // situation (not live, cleared display, different deck/slide) arrows change slides.
-    val goNext: () -> Unit = {
+    val goNext: () -> Unit get() = {
         val deck = viewModel.deck
         val stepped = deck != null && presenterManager
             ?.advancePresentationStep(deck, viewModel.selectedSlideIndex) == true
         if (!stepped) viewModel.nextSlide(onInstanceLinkSendNextSlide)
     }
-    val goPrevious: () -> Unit = {
+    val goPrevious: () -> Unit get() = {
         val deck = viewModel.deck
         val stepped = deck != null && presenterManager
             ?.rewindPresentationStep(deck, viewModel.selectedSlideIndex) == true

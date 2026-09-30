@@ -269,7 +269,7 @@ private fun AppRootState.MainWindowContent(
     // background thread, so it works with the Calendar window closed.
     val calendarFolder =
         remember(appSettings.calendarStorageDirectory) { appSettings.calendarFolder() }
-    val cueHost = calendarCueHost()
+    val cueHost = remember(this) { calendarCueHost() }
     // Kept here rather than inside its loop so the Schedule tab can read what it
     // is about to load, and load it early.
     val serviceAutoLoader = remember(calendarFolder) {
@@ -285,20 +285,28 @@ private fun AppRootState.MainWindowContent(
             save = { document -> withContext(Dispatchers.IO) { store.save(document) } },
         )
     }
-    val scope = MainWindowScope(
-        root = this,
-        win = win,
-        frame = frame,
-        bannerModifier = bannerModifier,
-        calendarSync = calendarSync,
-        effectiveAppSettings = effectiveAppSettings,
-        tunnelStatus = tunnelStatus,
-        tunnelUrl = tunnelUrl,
-        onThemeCustomizationChange = onThemeCustomizationChange,
-        calendarFolder = calendarFolder,
-        cueHost = cueHost,
-        serviceAutoLoader = serviceAutoLoader,
-    )
+    val root = this
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val scope = remember(
+        root, win, frame, bannerModifier, calendarSync, effectiveAppSettings, tunnelStatus, tunnelUrl,
+        onThemeCustomizationChange, calendarFolder, cueHost, serviceAutoLoader
+    ) {
+        MainWindowScope(
+            root = root,
+            win = win,
+            frame = frame,
+            bannerModifier = bannerModifier,
+            calendarSync = calendarSync,
+            effectiveAppSettings = effectiveAppSettings,
+            tunnelStatus = tunnelStatus,
+            tunnelUrl = tunnelUrl,
+            onThemeCustomizationChange = onThemeCustomizationChange,
+            calendarFolder = calendarFolder,
+            cueHost = cueHost,
+            serviceAutoLoader = serviceAutoLoader,
+        )
+    }
     with(scope) {
         RemoteAddRequests()
         RemoteEnrollRequests()

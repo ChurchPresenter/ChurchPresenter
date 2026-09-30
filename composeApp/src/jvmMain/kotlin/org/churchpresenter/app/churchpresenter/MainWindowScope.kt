@@ -73,7 +73,7 @@ internal class MainWindowScope(
     var calendarEnrollQr by win::calendarEnrollQr
     var calendarSyncWasOn by win::calendarSyncWasOn
 
-    val fireScheduleCue: (ScheduleItem.CueItem) -> Unit = { cue ->
+    val fireScheduleCue: (ScheduleItem.CueItem) -> Unit get() = { cue ->
         fireCue(cueHost, root.currentScheduleItems, cue, loadRows = false)
     }
 }

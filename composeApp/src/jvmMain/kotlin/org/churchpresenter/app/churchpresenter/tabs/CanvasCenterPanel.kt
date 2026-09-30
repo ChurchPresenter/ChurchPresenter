@@ -85,6 +85,7 @@ internal fun CanvasTabScope.CanvasCenterPanel(modifier: Modifier) {
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val currentScene = currentScene
         if (currentScene != null) {
             CanvasToolbar(currentScene)
             CanvasAspectWarning(currentScene)
@@ -446,6 +447,7 @@ internal fun CanvasTabScope.CanvasPropertiesPanel() {
             .padding(end = 4.dp, top = 4.dp, bottom = 4.dp)
             .bibleListCard()
     ) {
+        val selectedSource = selectedSource
         if (selectedSource != null) {
             SourcePropertiesPanel(
                 source = selectedSource,

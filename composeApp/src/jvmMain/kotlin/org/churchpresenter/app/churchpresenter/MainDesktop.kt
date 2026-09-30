@@ -84,41 +84,55 @@ fun MainDesktop(
     val visibleTabs = remember(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections) {
         computeVisibleTabs(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections)
     }
-    val owned = MainDesktopOwned(
-        state = state,
-        vms = vms,
-        mediaViewModel = LocalMediaViewModel.current,
-        visibleTabs = visibleTabs,
-        clickerScope = rememberCoroutineScope(),
-        shortcuts = LocalShortcuts.current,
-    )
-    val scope = MainDesktopScope(
-        hostWindow = hostWindow,
-        appSettings = appSettings,
-        livePreviewAppSettings = livePreviewAppSettings,
-        activeQuickBackground = activeQuickBackground,
-        onQuickBackgroundPicked = onQuickBackgroundPicked,
-        presenterManager = presenterManager,
-        statisticsManager = statisticsManager,
-        verseSequenceLog = verseSequenceLog,
-        live = live,
-        service = service,
-        publish = publish,
-        flows = flows,
-        link = link,
-        web = web,
-        onShowSettings = onShowSettings,
-        onShowBackgroundSettings = onShowBackgroundSettings,
-        onSettingsChange = onSettingsChange,
-        theme = theme,
-        qaManager = qaManager,
-        onOpenLottieGen = onOpenLottieGen,
-        sttManager = sttManager,
-        dialogDismissSignal = dialogDismissSignal,
-        companionSatelliteViewModel = companionSatelliteViewModel,
-        onRequestDeveloperMenuUnlock = onRequestDeveloperMenuUnlock,
-        owned = owned,
-    )
+    val mediaViewModel = LocalMediaViewModel.current
+    val clickerScope = rememberCoroutineScope()
+    val shortcuts = LocalShortcuts.current
+    val owned = remember(state, vms, mediaViewModel, visibleTabs, clickerScope, shortcuts) {
+        MainDesktopOwned(
+            state = state,
+            vms = vms,
+            mediaViewModel = mediaViewModel,
+            visibleTabs = visibleTabs,
+            clickerScope = clickerScope,
+            shortcuts = shortcuts,
+        )
+    }
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val scope = remember(
+        hostWindow, appSettings, livePreviewAppSettings, activeQuickBackground, onQuickBackgroundPicked,
+        presenterManager, statisticsManager, verseSequenceLog, live, service, publish, flows, link, web, onShowSettings,
+        onShowBackgroundSettings, onSettingsChange, theme, qaManager, onOpenLottieGen, sttManager, dialogDismissSignal,
+        companionSatelliteViewModel, onRequestDeveloperMenuUnlock, owned
+    ) {
+        MainDesktopScope(
+            hostWindow = hostWindow,
+            appSettings = appSettings,
+            livePreviewAppSettings = livePreviewAppSettings,
+            activeQuickBackground = activeQuickBackground,
+            onQuickBackgroundPicked = onQuickBackgroundPicked,
+            presenterManager = presenterManager,
+            statisticsManager = statisticsManager,
+            verseSequenceLog = verseSequenceLog,
+            live = live,
+            service = service,
+            publish = publish,
+            flows = flows,
+            link = link,
+            web = web,
+            onShowSettings = onShowSettings,
+            onShowBackgroundSettings = onShowBackgroundSettings,
+            onSettingsChange = onSettingsChange,
+            theme = theme,
+            qaManager = qaManager,
+            onOpenLottieGen = onOpenLottieGen,
+            sttManager = sttManager,
+            dialogDismissSignal = dialogDismissSignal,
+            companionSatelliteViewModel = companionSatelliteViewModel,
+            onRequestDeveloperMenuUnlock = onRequestDeveloperMenuUnlock,
+            owned = owned,
+        )
+    }
     with(scope) {
         LeadingEffects()
         ContentPublishWiring()

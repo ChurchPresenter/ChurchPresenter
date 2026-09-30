@@ -31,9 +31,10 @@ internal class MainDesktopOwned(
  * Everything MainDesktop's pieces read, for one composition: its parameters, its state and its
  * ViewModels, under the names the screen has always used for them.
  *
- * Built afresh on every composition of MainDesktop — never remembered — so a lambda built inside
- * one of the pieces captures that composition's parameters, exactly as when the pieces were one
- * function. The state and the ViewModels it forwards to are the remembered ones.
+ * Remembered, keyed on every constructor argument: a changed argument builds a new scope, so a lambda
+ * built inside one of the pieces still captures the current parameters, while unchanged arguments
+ * keep the pieces' lambdas stable across recompositions. The state and the ViewModels it forwards to
+ * are the remembered ones.
  */
 // Wide by design: it stands in for the parameter list and locals of the one function it was split
 // out of, so every piece reads them under the same names.
@@ -63,7 +64,7 @@ internal class MainDesktopScope(
     val dialogDismissSignal: Int,
     val companionSatelliteViewModel: CompanionSatelliteViewModel,
     val onRequestDeveloperMenuUnlock: () -> Unit,
-    owned: MainDesktopOwned,
+    private val owned: MainDesktopOwned,
 ) {
     val state = owned.state
     val mediaViewModel = owned.mediaViewModel
@@ -72,10 +73,10 @@ internal class MainDesktopScope(
     val shortcuts = owned.shortcuts
 
     // Clamp synchronously so no composition pass ever sees an out-of-bounds index.
-    val effectiveTabIndex = clampedTabIndex(state.selectedTabIndex, visibleTabs)
-    val currentTab = visibleTabs[effectiveTabIndex]
+    val effectiveTabIndex get() = clampedTabIndex(state.selectedTabIndex, visibleTabs)
+    val currentTab get() = visibleTabs[effectiveTabIndex]
     val presentingMode: Presenting get() = presenterManager.presentingMode.value
-    val mainFocusRequester get() = state.mainFocusRequester
+    val mainFocusRequester = state.mainFocusRequester
 
     val picturesViewModel = owned.vms.picturesViewModel
     val presentationViewModel = owned.vms.presentationViewModel
@@ -87,7 +88,7 @@ internal class MainDesktopScope(
     val scheduleViewModel = owned.vms.scheduleViewModel
 
     /** The Schedule tab's actions as they stand now, for a toolbar lambda built earlier. */
-    val currentScheduleActions get() = state.scheduleActions
+    val currentScheduleActions = state.scheduleActions
 
     fun selectTab(tab: Tabs) {
         state.selectedTabIndex = resolveTabSelection(tab, visibleTabs, state.selectedTabIndex)

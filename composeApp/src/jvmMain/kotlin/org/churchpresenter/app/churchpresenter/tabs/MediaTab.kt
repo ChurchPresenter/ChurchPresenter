@@ -161,22 +161,31 @@ fun MediaTab(
     val selectFileLabel = stringResource(Res.string.media_select_file)
     val mediaFilesLabel = stringResource(Res.string.media_files_filter)
 
-    val tab = MediaTabScope(
-        appSettings = appSettings,
-        onSettingsChange = onSettingsChange,
-        onAddToSchedule = onAddToSchedule,
-        onSavePreset = onSavePreset,
-        presenterManager = presenterManager,
-        onInstanceLinkSendProject = onInstanceLinkSendProject,
-        viewModel = viewModel,
-        state = state,
-        scope = scope,
-        sourceTypeItems = sourceTypeItems,
-        selectFileLabel = selectFileLabel,
-        mediaFilesLabel = mediaFilesLabel,
-        shortcuts = LocalShortcuts.current,
-        wentLive = LocalWentLive.current,
-    )
+    val shortcuts = LocalShortcuts.current
+    val wentLive = LocalWentLive.current
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val tab = remember(
+        appSettings, onSettingsChange, onAddToSchedule, onSavePreset, presenterManager, onInstanceLinkSendProject,
+        viewModel, state, scope, sourceTypeItems, selectFileLabel, mediaFilesLabel, shortcuts, wentLive
+    ) {
+        MediaTabScope(
+            appSettings = appSettings,
+            onSettingsChange = onSettingsChange,
+            onAddToSchedule = onAddToSchedule,
+            onSavePreset = onSavePreset,
+            presenterManager = presenterManager,
+            onInstanceLinkSendProject = onInstanceLinkSendProject,
+            viewModel = viewModel,
+            state = state,
+            scope = scope,
+            sourceTypeItems = sourceTypeItems,
+            selectFileLabel = selectFileLabel,
+            mediaFilesLabel = mediaFilesLabel,
+            shortcuts = shortcuts,
+            wentLive = wentLive,
+        )
+    }
     tab.MediaTabEffects(selectedMediaItem, selectedMediaItemVersion, instanceLinkMediaStreamUrl, focusRequester)
 
     Column(

@@ -133,28 +133,10 @@ fun BibleTab(
     // click detectors on the lambdas built from it, and a new scope on each selection would give
     // them new lambdas between the two clicks of a double-click.
     val tab = remember(
-        viewModel,
-        appSettings,
-        onSettingsChange,
-        onAddToSchedule,
-        onVerseSelected,
-        onInstanceLinkSendVerse,
-        onInstanceLinkSendBibleHold,
-        onPresenting,
-        presenterManager,
-        statisticsManager,
-        verseSequenceLog,
-        sttManager,
-        bibleEngineClient,
-        focusRequester,
-        crossRefs,
-        live,
-        ui,
-        widths,
-        displayedVersesState,
-        currentIsPresentingState,
-        scope,
-        shortcuts,
+        viewModel, appSettings, onSettingsChange, onAddToSchedule, onVerseSelected, onInstanceLinkSendVerse,
+        onInstanceLinkSendBibleHold, onPresenting, presenterManager, statisticsManager, verseSequenceLog, sttManager,
+        bibleEngineClient, focusRequester, crossRefs, live, ui, widths, displayedVersesState, currentIsPresentingState,
+        scope, shortcuts
     ) {
         BibleTabScope(
             viewModel = viewModel,

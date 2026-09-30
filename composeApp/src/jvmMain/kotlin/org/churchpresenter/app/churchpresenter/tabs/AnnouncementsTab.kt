@@ -121,20 +121,29 @@ fun AnnouncementsTab(
     val windowState = LocalMainWindowState.current
     val isMaximized = windowState?.placement != WindowPlacement.Floating
     val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
-    val scope = AnnouncementsTabScope(
-        appSettings = appSettings,
-        onSettingsChange = onSettingsChange,
-        presenterManager = presenterManager,
-        onAddToSchedule = onAddToSchedule,
-        onSavePreset = onSavePreset,
-        viewModel = viewModel,
-        availableFonts = availableFonts,
-        labels = rememberAnnouncementsLabels(),
-        density = density,
-        onSettingsChangeState = onSettingsChangeState,
-        isMaximized = isMaximized,
-        panels = rememberAnnouncementsPanelState(currentLayout, isMaximized, density),
-    )
+    val labels = rememberAnnouncementsLabels()
+    val panels = rememberAnnouncementsPanelState(currentLayout, isMaximized, density)
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val scope = remember(
+        appSettings, onSettingsChange, presenterManager, onAddToSchedule, onSavePreset, viewModel, availableFonts,
+        labels, density, onSettingsChangeState, isMaximized, panels
+    ) {
+        AnnouncementsTabScope(
+            appSettings = appSettings,
+            onSettingsChange = onSettingsChange,
+            presenterManager = presenterManager,
+            onAddToSchedule = onAddToSchedule,
+            onSavePreset = onSavePreset,
+            viewModel = viewModel,
+            availableFonts = availableFonts,
+            labels = labels,
+            density = density,
+            onSettingsChangeState = onSettingsChangeState,
+            isMaximized = isMaximized,
+            panels = panels,
+        )
+    }
     with(scope) {
         Column(modifier = modifier.fillMaxSize()) {
             // ── Resizable split panel ─────────────────────────────────────

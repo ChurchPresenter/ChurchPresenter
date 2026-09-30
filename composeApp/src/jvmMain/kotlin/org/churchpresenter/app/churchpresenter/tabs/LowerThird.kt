@@ -142,30 +142,39 @@ fun LowerThirdTab(
         mutableStateOf(with(density) { currentLayout.lowerThirdListWidthDp.dp.toPx() })
     }
 
-    val tabScope = LowerThirdTabScope(
-        appSettings = appSettings,
-        selectedLowerThirdItem = selectedLowerThirdItem,
-        selectedLowerThirdItemVersion = selectedLowerThirdItemVersion,
-        onSettingsChange = onSettingsChange,
-        onAddToSchedule = onAddToSchedule,
-        onGoLive = onGoLive,
-        onOpenLottieGen = onOpenLottieGen,
-        queryAtemState = queryAtemState,
-        probeAtemReachable = probeAtemReachable,
-        ui = ui,
-        lottieFolder = lottieFolder,
-        lottieFilesOrNullState = lottieFilesOrNullState,
-        scope = scope,
-        atemEverConnectedState = atemEverConnectedState,
-        remoteUploadState = remoteUploadState,
-        jsonContent = jsonContent,
-        compositionState = compositionState,
-        isCompositionLoadingState = isCompositionLoadingState,
-        density = density,
-        onSettingsChangeState = onSettingsChangeState,
-        isMaximized = isMaximized,
-        listWidthPxState = listWidthPxState,
-    )
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val tabScope = remember(
+        appSettings, selectedLowerThirdItem, selectedLowerThirdItemVersion, onSettingsChange, onAddToSchedule, onGoLive,
+        onOpenLottieGen, queryAtemState, probeAtemReachable, ui, lottieFolder, lottieFilesOrNullState, scope,
+        atemEverConnectedState, remoteUploadState, jsonContent, compositionState, isCompositionLoadingState, density,
+        onSettingsChangeState, isMaximized, listWidthPxState
+    ) {
+        LowerThirdTabScope(
+            appSettings = appSettings,
+            selectedLowerThirdItem = selectedLowerThirdItem,
+            selectedLowerThirdItemVersion = selectedLowerThirdItemVersion,
+            onSettingsChange = onSettingsChange,
+            onAddToSchedule = onAddToSchedule,
+            onGoLive = onGoLive,
+            onOpenLottieGen = onOpenLottieGen,
+            queryAtemState = queryAtemState,
+            probeAtemReachable = probeAtemReachable,
+            ui = ui,
+            lottieFolder = lottieFolder,
+            lottieFilesOrNullState = lottieFilesOrNullState,
+            scope = scope,
+            atemEverConnectedState = atemEverConnectedState,
+            remoteUploadState = remoteUploadState,
+            jsonContent = jsonContent,
+            compositionState = compositionState,
+            isCompositionLoadingState = isCompositionLoadingState,
+            density = density,
+            onSettingsChangeState = onSettingsChangeState,
+            isMaximized = isMaximized,
+            listWidthPxState = listWidthPxState,
+        )
+    }
     tabScope.LowerThirdAtemEffects()
     tabScope.LowerThirdSelectionEffects()
     tabScope.LowerThirdAtemDialog()

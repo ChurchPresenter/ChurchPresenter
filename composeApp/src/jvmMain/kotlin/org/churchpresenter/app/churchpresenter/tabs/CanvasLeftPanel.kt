@@ -124,6 +124,8 @@ internal fun CanvasTabScope.CanvasLeftPanel() {
         )
         Spacer(Modifier.height(4.dp))
 
+        val currentScene = currentScene
+
         if (currentScene != null) {
             CanvasSourcePanel(currentScene, Modifier.weight(CANVAS_SOURCE_LIST_WEIGHT).fillMaxWidth())
         }

@@ -115,21 +115,29 @@ fun PicturesTab(
     val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
     val shortcuts = LocalShortcuts.current
     val wentLive = LocalWentLive.current
-    val tabScope = PicturesTabScope(
-        appSettings = appSettings,
-        onAddToSchedule = onAddToSchedule,
-        onSavePreset = onSavePreset,
-        onInstanceLinkSendProject = onInstanceLinkSendProject,
-        onInstanceLinkSendNextPicture = onInstanceLinkSendNextPicture,
-        onInstanceLinkSendPreviousPicture = onInstanceLinkSendPreviousPicture,
-        presenterManager = presenterManager,
-        onSettingsChange = onSettingsChange,
-        viewModel = viewModel,
-        folderDialogTitle = folderDialogTitle,
-        gridState = gridState,
-        shortcuts = shortcuts,
-        wentLive = wentLive,
-    )
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val tabScope = remember(
+        appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextPicture,
+        onInstanceLinkSendPreviousPicture, presenterManager, onSettingsChange, viewModel, folderDialogTitle, gridState,
+        shortcuts, wentLive
+    ) {
+        PicturesTabScope(
+            appSettings = appSettings,
+            onAddToSchedule = onAddToSchedule,
+            onSavePreset = onSavePreset,
+            onInstanceLinkSendProject = onInstanceLinkSendProject,
+            onInstanceLinkSendNextPicture = onInstanceLinkSendNextPicture,
+            onInstanceLinkSendPreviousPicture = onInstanceLinkSendPreviousPicture,
+            presenterManager = presenterManager,
+            onSettingsChange = onSettingsChange,
+            viewModel = viewModel,
+            folderDialogTitle = folderDialogTitle,
+            gridState = gridState,
+            shortcuts = shortcuts,
+            wentLive = wentLive,
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize()

@@ -94,11 +94,12 @@ internal class AnnouncementsTabScope(
     // If Stage Monitor is the ONLY configured screen there's nothing else to protect from being
     // locked out, so the button instead behaves as a plain Go Live (global presenting mode, no
     // per-screen lock) — same visible result, without blocking Bible/Songs from ever showing.
-    val stageMonitorScreenIndices = stageMonitorScreenIndices(appSettings.projectionSettings)
-    val hasSeparateMainScreen = stageMonitorScreenIndices.size < appSettings.projectionSettings.screenAssignments.size
-    val canSendToStageMonitor = stageMonitorScreenIndices.isNotEmpty()
-    val currentScreenLocks = presenterManager?.screenLocks?.value ?: emptyMap()
-    val isSentToStageMonitor = if (hasSeparateMainScreen) {
+    val stageMonitorScreenIndices get() = stageMonitorScreenIndices(appSettings.projectionSettings)
+    val hasSeparateMainScreen get() =
+        stageMonitorScreenIndices.size < appSettings.projectionSettings.screenAssignments.size
+    val canSendToStageMonitor get() = stageMonitorScreenIndices.isNotEmpty()
+    val currentScreenLocks get() = presenterManager?.screenLocks?.value ?: emptyMap()
+    val isSentToStageMonitor get() = if (hasSeparateMainScreen) {
         canSendToStageMonitor && stageMonitorScreenIndices.all { currentScreenLocks[it] == Presenting.ANNOUNCEMENTS }
     } else {
         presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
@@ -133,10 +134,10 @@ internal class AnnouncementsTabScope(
     // (not timerRunning, which is only ever true for Duration/Count-Up) reflects all four.
     val isDurationOrCountUp =
         viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
-    val isTimerRunning = presenterManager?.announcementTickerActive?.value == true
-    val isTimerExpired = viewModel.timerMode == Constants.TIMER_MODE_DURATION &&
+    val isTimerRunning get() = presenterManager?.announcementTickerActive?.value == true
+    val isTimerExpired get() = viewModel.timerMode == Constants.TIMER_MODE_DURATION &&
         presenterManager?.announcementTimerExpired?.value == true
-    val timerDisplayValue = when {
+    val timerDisplayValue get() = when {
         isTimerRunning && presenterManager != null -> presenterManager.timerRemainingSeconds.value
         viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP -> viewModel.countUpElapsed
         else -> viewModel.timerRemaining
@@ -160,7 +161,7 @@ internal class AnnouncementsTabScope(
         }
     }
 
-    val selectedAnim = when (viewModel.animationType) {
+    val selectedAnim get() = when (viewModel.animationType) {
         Constants.ANIMATION_SLIDE_FROM_LEFT        -> slideFromLeftText
         Constants.ANIMATION_SLIDE_FROM_RIGHT       -> slideFromRightText
         Constants.ANIMATION_SLIDE_FROM_TOP         -> slideFromTopText
@@ -168,12 +169,12 @@ internal class AnnouncementsTabScope(
         Constants.ANIMATION_FADE                   -> fadeText
         else                                       -> noneText
     }
-    val durationMs = viewModel.animationDuration
+    val durationMs get() = viewModel.animationDuration
 
     // The tallest the text box may be: the split panel less the text card's buttons and
     // formatting rows around the box, the divider, and the timer card's minimum. Applied to a
     // saved height too, so one dragged in a tall window cannot swallow the timer in a short one.
-    val maxTextHeightPx = with(density) {
+    val maxTextHeightPx get() = with(density) {
         val around = (textCardHeightPx - naturalTextHeightPx).coerceAtLeast(0)
         val reserved = ANNOUNCEMENT_MIN_SETTINGS_HEIGHT + ANNOUNCEMENT_DIVIDER_HEIGHT + ANNOUNCEMENT_SPLIT_PANEL_INSETS
         (twoColHeightPx - around - reserved.toPx()).coerceAtLeast(ANNOUNCEMENT_MIN_TEXT_HEIGHT.toPx())
@@ -189,7 +190,7 @@ internal class AnnouncementsTabScope(
     // mutually exclusive with the announcement text — so this preview must follow
     // whichever one is actually running/live, not just which mode is selected, or it
     // shows the clock/specific-time value even while text is the one live on screen.
-    val previewText = when {
+    val previewText get() = when {
         isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
         isTimerRunning && viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
         isTimerRunning -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
@@ -198,18 +199,18 @@ internal class AnnouncementsTabScope(
     // A live timer/clock value changes every second and must stay legible, so skip the
     // configured entrance animation in the preview (it would otherwise cycle the value
     // fully off-screen on every animation loop, looking like it froze or went dark).
-    val isShowingLiveTimerValue = isTimerExpired || isTimerRunning
-    val isDirectional = !isShowingLiveTimerValue && viewModel.animationType in listOf(
+    val isShowingLiveTimerValue get() = isTimerExpired || isTimerRunning
+    val isDirectional get() = !isShowingLiveTimerValue && viewModel.animationType in listOf(
         Constants.ANIMATION_SLIDE_FROM_LEFT,
         Constants.ANIMATION_SLIDE_FROM_RIGHT,
         Constants.ANIMATION_SLIDE_FROM_TOP,
         Constants.ANIMATION_SLIDE_FROM_BOTTOM
     )
-    val isHorizontal = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
+    val isHorizontal get() = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
                        viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_RIGHT
-    val movesPositive = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
+    val movesPositive get() = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
                        viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_TOP
-    val slideAlignment: Alignment = if (isHorizontal) {
+    val slideAlignment: Alignment get() = if (isHorizontal) {
         when {
             viewModel.position.startsWith("Top")    -> Alignment.TopCenter
             viewModel.position.startsWith("Bottom") -> Alignment.BottomCenter
@@ -222,8 +223,8 @@ internal class AnnouncementsTabScope(
             else                                 -> Alignment.Center
         }
     }
-    val scrollDurationMs = durationMs.coerceAtLeast(500)
-    val previewTextAlign = when (viewModel.horizontalAlignment) {
+    val scrollDurationMs get() = durationMs.coerceAtLeast(500)
+    val previewTextAlign get() = when (viewModel.horizontalAlignment) {
         Constants.LEFT -> TextAlign.Left
         Constants.RIGHT -> TextAlign.Right
         else -> TextAlign.Center
@@ -281,23 +282,28 @@ internal fun rememberAnnouncementsLabels(): AnnouncementsLabels {
         slideFromLeftText, slideFromRightText,
         fadeText, noneText
     )
-    return AnnouncementsLabels(
-        timerExpiredLabel = timerExpiredLabel,
-        startLabel = startLabel,
-        pauseLabel = pauseLabel,
-        resetLabel = resetLabel,
-        hrLabel = hrLabel,
-        minLabel = minLabel,
-        secLabel = secLabel,
-        slideFromLeftText = slideFromLeftText,
-        slideFromRightText = slideFromRightText,
-        slideFromTopText = slideFromTopText,
-        slideFromBottomText = slideFromBottomText,
-        fadeText = fadeText,
-        noneText = noneText,
-        positions = positions,
-        animItems = animItems,
-    )
+    return remember(
+        timerExpiredLabel, startLabel, pauseLabel, resetLabel, hrLabel, minLabel, secLabel, slideFromLeftText,
+        slideFromRightText, slideFromTopText, slideFromBottomText, fadeText, noneText, positions, animItems
+    ) {
+        AnnouncementsLabels(
+            timerExpiredLabel = timerExpiredLabel,
+            startLabel = startLabel,
+            pauseLabel = pauseLabel,
+            resetLabel = resetLabel,
+            hrLabel = hrLabel,
+            minLabel = minLabel,
+            secLabel = secLabel,
+            slideFromLeftText = slideFromLeftText,
+            slideFromRightText = slideFromRightText,
+            slideFromTopText = slideFromTopText,
+            slideFromBottomText = slideFromBottomText,
+            fadeText = fadeText,
+            noneText = noneText,
+            positions = positions,
+            animItems = animItems,
+        )
+    }
 }
 
 /** The split panel's sizes: remembered per window mode, measured, or dragged. */
@@ -315,17 +321,27 @@ internal fun rememberAnnouncementsPanelState(
     currentLayout: WindowLayoutSettings,
     isMaximized: Boolean,
     density: Density,
-): AnnouncementsPanelState = AnnouncementsPanelState(
-    leftPanelPx = remember(currentLayout.announcementsLeftPanelWidthDp, isMaximized) {
+): AnnouncementsPanelState {
+    val leftPanelPx = remember(currentLayout.announcementsLeftPanelWidthDp, isMaximized) {
         mutableStateOf(with(density) { currentLayout.announcementsLeftPanelWidthDp.dp.toPx() })
-    },
+    }
     // The text box's dragged height; 0 until the divider under the text card is first dragged, and
     // until then the box keeps its natural height of up to three lines.
-    textHeightPx = remember(currentLayout.announcementsTextHeightDp, isMaximized) {
+    val textHeightPx = remember(currentLayout.announcementsTextHeightDp, isMaximized) {
         mutableStateOf(with(density) { currentLayout.announcementsTextHeightDp.dp.toPx() })
-    },
-    naturalTextHeightPx = remember { mutableStateOf(0) },
-    textCardHeightPx = remember { mutableStateOf(0) },
-    twoColHeightPx = remember { mutableStateOf(0) },
-    twoColWidthPx = remember { mutableStateOf(0) },
-)
+    }
+    val naturalTextHeightPx = remember { mutableStateOf(0) }
+    val textCardHeightPx = remember { mutableStateOf(0) }
+    val twoColHeightPx = remember { mutableStateOf(0) }
+    val twoColWidthPx = remember { mutableStateOf(0) }
+    return remember(leftPanelPx, textHeightPx, naturalTextHeightPx, textCardHeightPx, twoColHeightPx, twoColWidthPx) {
+        AnnouncementsPanelState(
+            leftPanelPx = leftPanelPx,
+            textHeightPx = textHeightPx,
+            naturalTextHeightPx = naturalTextHeightPx,
+            textCardHeightPx = textCardHeightPx,
+            twoColHeightPx = twoColHeightPx,
+            twoColWidthPx = twoColWidthPx,
+        )
+    }
+}

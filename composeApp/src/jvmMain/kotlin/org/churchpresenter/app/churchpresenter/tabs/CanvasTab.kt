@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
@@ -80,20 +81,30 @@ fun CanvasTab(
     val windowState = LocalMainWindowState.current
     val isMaximized = windowState?.placement != WindowPlacement.Floating
     val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
-    val scope = CanvasTabScope(
-        appSettings = appSettings,
-        presenterManager = presenterManager,
-        sceneViewModel = sceneViewModel,
-        onAddToSchedule = onAddToSchedule,
-        onSavePreset = onSavePreset,
-        cameraHost = cameraHost,
-        density = density,
-        onSettingsChangeState = onSettingsChangeState,
-        isMaximized = isMaximized,
-        sourceNames = rememberCanvasSourceNames(),
-        wentLive = LocalWentLive.current,
-        state = rememberCanvasTabState(currentLayout, isMaximized, density),
-    )
+    val sourceNames = rememberCanvasSourceNames()
+    val wentLive = LocalWentLive.current
+    val state = rememberCanvasTabState(currentLayout, isMaximized, density)
+    // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
+    // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
+    val scope = remember(
+        appSettings, presenterManager, sceneViewModel, onAddToSchedule, onSavePreset, cameraHost, density,
+        onSettingsChangeState, isMaximized, sourceNames, wentLive, state
+    ) {
+        CanvasTabScope(
+            appSettings = appSettings,
+            presenterManager = presenterManager,
+            sceneViewModel = sceneViewModel,
+            onAddToSchedule = onAddToSchedule,
+            onSavePreset = onSavePreset,
+            cameraHost = cameraHost,
+            density = density,
+            onSettingsChangeState = onSettingsChangeState,
+            isMaximized = isMaximized,
+            sourceNames = sourceNames,
+            wentLive = wentLive,
+            state = state,
+        )
+    }
     with(scope) {
         confirmSingleLayoutSceneId?.let { sceneId ->
             SingleLayoutConfirmDialog(
