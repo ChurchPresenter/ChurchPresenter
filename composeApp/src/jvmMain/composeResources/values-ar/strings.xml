@@ -166,11 +166,9 @@
     <string name="report_bug">الإبلاغ عن خطأ</string>
     <string name="submit_feature_request">طلب ميزة</string>
     <string name="action_ok">موافق</string>
-    <string name="menu_help_item">مساعدة</string>
     <string name="menu_how_to_blog">مدوّنة الإرشادات</string>
     <string name="menu_check_for_updates">التحقق من التحديثات…</string>
     <string name="menu_keyboard_shortcuts">اختصارات لوحة المفاتيح</string>
-    <string name="keyboard_shortcuts_title">اختصارات لوحة المفاتيح</string>
     <string name="shortcut_category_global">عام</string>
     <string name="shortcut_category_bible">تبويب الكتاب المقدس</string>
     <string name="shortcut_category_songs">تبويب الترانيم</string>
@@ -562,7 +560,6 @@
     <string name="schedule_add_files_title">إضافة ملفات إلى البرنامج</string>
     <string name="tooltip_toggle_displays">تبديل شاشات العرض</string>
     <string name="tooltip_settings">الإعدادات</string>
-    <string name="tooltip_theme_light">المظهر الفاتح</string>
     <string name="tooltip_theme_dark">المظهر الداكن</string>
     <string name="tooltip_theme_system">مظهر النظام</string>
     <string name="tooltip_remove">إزالة</string>
@@ -1915,7 +1912,6 @@
     <string name="planning_center_disconnect">قطع الاتصال</string>
     <string name="planning_center_status_connected">متصل باسم %1$s</string>
     <string name="planning_center_status_connecting">جارٍ الاتصال…</string>
-    <string name="planning_center_status_error">خطأ: %1$s</string>
     <string name="planning_center_import_title">الاستيراد من Planning Center</string>
     <string name="planning_center_import_service_type">نوع الخدمة</string>
     <string name="planning_center_import_select_plan">اختر خطة</string>
@@ -1993,8 +1989,6 @@
     <string name="bible_preview_sample_verse">لأنه هكذا أحب الله العالم حتى بذل ابنه الوحيد.</string>
     <string name="bible_preview_sample_book">يوحنا</string>
     <string name="bible_preview_no_translations">أضف ترجمة لعرضها هنا</string>
-    <string name="song_preview_full_screen">معاينة ملء الشاشة</string>
-    <string name="song_preview_lower_third">معاينة الشريط السفلي</string>
     <string name="song_element_number">الرقم</string>
     <string name="song_element_title">العنوان</string>
     <string name="song_element_lyrics">الكلمات</string>
@@ -2255,7 +2249,6 @@
     <string name="ffmpeg_missing_help">تُفتح الكاميرات وبطاقات الالتقاط باستخدام ffmpeg. ينبغي أن يتضمن هذا الإصدار نسخة — اختر ffmpeg أدناه، أو ثبّت ffmpeg وتحقق مجددًا.</string>
     <string name="ffmpeg_path_hint">اختر برنامج ffmpeg</string>
     <string name="ffmpeg_browse">اختيار ffmpeg</string>
-    <string name="ffmpeg_check_again">التحقق مجددًا</string>
     <string name="ffmpeg_clear">استخدام المضمّن</string>
     <string name="ffmpeg_download_link">الحصول على ffmpeg</string>
     <string name="ffmpeg_path_help">اتركه فارغًا لاستخدام ffmpeg المضمّن مع ChurchPresenter.</string>
@@ -2356,8 +2349,6 @@
     <string name="preview_settings_show_modes">إظهار نوع العرض</string>
     <string name="song_add_translation">إضافة لغة</string>
     <string name="song_fourth_language">اللغة 4</string>
-    <string name="song_language_fourth">اللغة 4</string>
-    <string name="song_language_third">اللغة 3</string>
     <string name="song_pane_translation">اللغة %1$d</string>
     <string name="song_third_language">اللغة 3</string>
     <string name="song_translation_label">اسم اللغة</string>

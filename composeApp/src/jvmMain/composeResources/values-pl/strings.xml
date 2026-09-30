@@ -82,7 +82,6 @@
     <string name="report_bug">Zgłoś błąd</string>
     <string name="submit_feature_request">Prześlij propozycję funkcji</string>
     <string name="action_ok">OK</string>
-    <string name="menu_help_item">Pomoc</string>
     <string name="menu_how_to_blog">Blog poradnikowy</string>
     <string name="menu_check_for_updates">Sprawdź aktualizacje…</string>
 
@@ -468,7 +467,6 @@
     <string name="lottie_select_preset">Wybierz preferencje do podglądu</string>
     <string name="delete_saved_string">Usuń</string>
     <string name="menu_keyboard_shortcuts">Skróty klawiszowe</string>
-    <string name="keyboard_shortcuts_title">Skróty klawiszowe</string>
     <string name="shortcut_category_global">Globalne</string>
     <string name="shortcut_category_bible">Zakładka Biblia</string>
     <string name="shortcut_category_songs">Zakładka Pieśni</string>
@@ -712,7 +710,6 @@
     <string name="tooltip_collapse_schedule">Zwiń program</string>
     <string name="tooltip_expand_schedule">Rozwiń program</string>
     <string name="tooltip_theme_dark">Ciemny motyw</string>
-    <string name="tooltip_theme_light">Jasny motyw</string>
     <string name="tooltip_theme_system">Motyw systemowy</string>
     <string name="transparent_default">Przezroczyste (domyślne)</string>
     <string name="web_add_to_schedule">Dodaj do programu</string>
@@ -1770,7 +1767,6 @@
     <string name="planning_center_disconnect">Rozłącz</string>
     <string name="planning_center_status_connected">Połączono jako %1$s</string>
     <string name="planning_center_status_connecting">Łączenie…</string>
-    <string name="planning_center_status_error">Błąd: %1$s</string>
     <string name="planning_center_import_title">Import z Planning Center</string>
     <string name="planning_center_import_service_type">Rodzaj nabożeństwa</string>
     <string name="planning_center_import_select_plan">Wybierz plan</string>
@@ -1948,8 +1944,6 @@
     <string name="bible_preview_sample_verse">Tak bowiem Bóg umiłował świat, że Syna swego Jednorodzonego dał.</string>
     <string name="bible_preview_sample_book">Jana</string>
     <string name="bible_preview_no_translations">Dodaj przekład, aby zobaczyć go tutaj</string>
-    <string name="song_preview_full_screen">Podgląd pełnego ekranu</string>
-    <string name="song_preview_lower_third">Podgląd dolnej tercji</string>
     <string name="song_element_number">Numer</string>
     <string name="song_element_title">Tytuł</string>
     <string name="song_element_lyrics">Tekst</string>
@@ -2210,7 +2204,6 @@
     <string name="ffmpeg_missing_help">Kamery i karty przechwytujące są otwierane przez ffmpeg. Ta kompilacja powinna go zawierać — wybierz ffmpeg poniżej lub zainstaluj ffmpeg i sprawdź ponownie.</string>
     <string name="ffmpeg_path_hint">Wybierz program ffmpeg</string>
     <string name="ffmpeg_browse">Wybierz ffmpeg</string>
-    <string name="ffmpeg_check_again">Sprawdź ponownie</string>
     <string name="ffmpeg_clear">Użyj dołączonego</string>
     <string name="ffmpeg_download_link">Pobierz ffmpeg</string>
     <string name="ffmpeg_path_help">Pozostaw puste, aby użyć ffmpeg dołączonego do ChurchPresenter.</string>
@@ -2311,8 +2304,6 @@
     <string name="preview_settings_show_modes">Pokaż typ wyświetlania</string>
     <string name="song_add_translation">Dodaj język</string>
     <string name="song_fourth_language">Język 4</string>
-    <string name="song_language_fourth">Język 4</string>
-    <string name="song_language_third">Język 3</string>
     <string name="song_pane_translation">Język %1$d</string>
     <string name="song_third_language">Język 3</string>
     <string name="song_translation_label">Nazwa języka</string>
