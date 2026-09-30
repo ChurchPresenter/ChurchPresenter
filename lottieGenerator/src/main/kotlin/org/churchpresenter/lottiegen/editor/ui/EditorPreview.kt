@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,11 +95,13 @@ fun EditorPreview(
                         if (isPlaying) onSeekChange(progress)
                     }
 
+                    // Compottie keeps the first progress lambda it is given, so it must read state, not a value.
+                    val shown by rememberUpdatedState(if (isPlaying) progress else seek)
                     composition?.let {
                         Image(
                             painter = rememberLottiePainter(
                                 composition = it,
-                                progress = { if (isPlaying) progress else seek }
+                                progress = { shown }
                             ),
                             contentDescription = null,
                             contentScale = ContentScale.Fit,

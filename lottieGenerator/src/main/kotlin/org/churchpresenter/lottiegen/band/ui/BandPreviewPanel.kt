@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -132,9 +133,15 @@ private fun Stage(
         )
         LaunchedEffect(progress) { if (isPlaying) onProgress(progress) }
         val shown = if (isPlaying) progress else seekValue
+        // Compottie keeps the first progress lambda it is given, so it must read state, not a value.
+        val currentShown by rememberUpdatedState(shown)
         composition?.let {
             Image(
-                painter = rememberLottiePainter(composition = it, progress = { shown }, dynamicProperties = textMotion),
+                painter = rememberLottiePainter(
+                    composition = it,
+                    progress = { currentShown },
+                    dynamicProperties = textMotion,
+                ),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
