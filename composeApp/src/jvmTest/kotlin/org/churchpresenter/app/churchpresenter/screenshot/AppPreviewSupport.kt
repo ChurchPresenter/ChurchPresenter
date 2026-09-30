@@ -14,7 +14,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
+import org.churchpresenter.app.churchpresenter.LiveOutputCallbacks
 import org.churchpresenter.app.churchpresenter.MainDesktop
+import org.churchpresenter.app.churchpresenter.MainDesktopPublishers
+import org.churchpresenter.app.churchpresenter.WebAccessState
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
@@ -166,23 +169,29 @@ internal fun appPreview(
                         // default null the tab is selectable and draws nothing at all. Constructing
                         // one is inert: STTManager opens no socket until it is told to connect.
                         sttManager = STTManager(),
-                        // The app treats a non-empty server URL as "the companion server is up" —
-                        // it is what clears the Q&A tab's "server not running" banner and gives the
-                        // remote panels something to show.
-                        serverUrl = "http://192.168.1.42:8080",
-                        onScheduleActionsReady = { actions = it },
-                        // What main.kt does: without it nothing ever goes live and the preview
-                        // panel stays on the background.
-                        presenting = { presenterManager.setPresentingMode(it) },
-                        onVerseSelected = { presenterManager.setSelectedVerses(it) },
-                        onSongItemSelected = {
-                            presenterManager.setLyricSection(it)
-                            presenterManager.setDisplayedLyricSection(it)
-                        },
-                        onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
-                        onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
-                        onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                         theme = mode,
+                        live = LiveOutputCallbacks(
+                            // What main.kt does: without it nothing ever goes live and the preview
+                            // panel stays on the background.
+                            presenting = { presenterManager.setPresentingMode(it) },
+                            onVerseSelected = { presenterManager.setSelectedVerses(it) },
+                            onSongItemSelected = {
+                                presenterManager.setLyricSection(it)
+                                presenterManager.setDisplayedLyricSection(it)
+                            },
+                            onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
+                            onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
+                            onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
+                        ),
+                        publish = MainDesktopPublishers(
+                            onScheduleActionsReady = { actions = it },
+                        ),
+                        web = WebAccessState(
+                            // The app treats a non-empty server URL as "the companion server is up" —
+                            // it is what clears the Q&A tab's "server not running" banner and gives the
+                            // remote panels something to show.
+                            serverUrl = "http://192.168.1.42:8080",
+                        ),
                     )
                     }
                 }

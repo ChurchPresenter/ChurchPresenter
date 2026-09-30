@@ -1863,143 +1863,6 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 shouldUseRemoteContent(instanceLinkStatus, appSettings.instanceLink.role)
                             MainDesktop(
                                 hostWindow = window,
-                                onPresentCue = fireScheduleCue,
-                                upcomingServiceLoad = upcomingServiceLoad,
-                                onLoadServiceNow = { replace ->
-                                    upcomingServiceLoad?.let { upcoming ->
-                                        coroutineScope.launch { serviceAutoLoader.loadNow(upcoming.serviceId, replace) }
-                                    }
-                                },
-                                scheduleService = scheduleService,
-                                onSaveScheduleToCalendar = {
-                                    coroutineScope.launch { serviceAutoLoader.saveScheduleToService() }
-                                },
-                                onAddScheduleToCalendar = {
-                                    calendarNewServiceFromSchedule++
-                                    showCalendarWindow = true
-                                },
-                                onRowWentLive = { item -> liveDurationLog.wentLive(item) },
-                                typicalSongSeconds = { song ->
-                                    liveDurationLog.median(
-                                        ScheduleItem.SongItem(
-                                            id = song.songId,
-                                            songNumber = song.number.toIntOrNull() ?: 0,
-                                            title = song.title,
-                                            songbook = song.songbook,
-                                            songId = song.songId,
-                                        )
-                                    )
-                                },
-                                instanceLinkConnectionStatus =
-                                    instanceLinkViewModel.connectionStatus.collectAsState().value,
-                                instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
-                                instanceLinkBibleUpdatedSignal =
-                                    instanceLinkViewModel.bibleUpdatedSignal.collectAsState().value,
-                                instanceLinkSecondaryBibleUpdatedSignal =
-                                    instanceLinkViewModel.secondaryBibleUpdatedSignal.collectAsState().value,
-                                instanceLinkFollowingHost = appSettings.instanceLink.primaryHost,
-                                connectedInstanceLinkFollowerCount =
-                                    companionServer.connectedInstanceLinkFollowers.collectAsState().value.size,
-                                onInstanceLinkConnect = {
-                                    val link = appSettings.instanceLink
-                                    setInstanceLinkEnabled(true)
-                                    instanceLinkViewModel.connect(
-                                        link.primaryHost, link.primaryPort, link.apiKey, link.deviceId,
-                                        link.reconnectDelayMs.toLong()
-                                    )
-                                },
-                                onInstanceLinkDisconnect = {
-                                    setInstanceLinkEnabled(false)
-                                    instanceLinkViewModel.disconnect()
-                                },
-                                instanceLinkRemoteSchedule =
-                                    instanceLinkViewModel.remoteSchedule.collectAsState().value,
-                                instanceLinkRemoteSongCatalog =
-                                    instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
-                                instanceLinkFetchSongDetail = { number, songbook ->
-                                    instanceLinkViewModel.fetchSongDetail(number, songbook)
-                                },
-                                instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
-                                instanceLinkBibleSyncMode = appSettings.instanceLink.bibleSyncMode,
-                                instanceLinkFetchSecondaryBibleFile = {
-                                    instanceLinkViewModel.fetchSecondaryBibleFile()
-                                },
-                                instanceLinkFetchBibleTranslations = { instanceLinkViewModel.fetchBibleTranslations() },
-                                instanceLinkOnSecondaryBibleFilePathChanged = { path ->
-                                    companionServer.updateSecondaryBibleFilePath(path)
-                                },
-                                instanceLinkOnBibleFilePathsChanged = { paths ->
-                                    companionServer.updateBibleFilePaths(paths)
-                                },
-                                instanceLinkSendAddToSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
-                                    { item -> instanceLinkViewModel.sendAddToSchedule(item) }
-                                } else null,
-                                instanceLinkSendRemoveFromSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
-                                    { id -> instanceLinkViewModel.sendRemoveFromSchedule(id) }
-                                } else null,
-                                instanceLinkRole = appSettings.instanceLink.role,
-                                instanceLinkSendProject = if (instanceLinkIsControllerConnected) {
-                                    { item -> instanceLinkViewModel.sendProject(item) }
-                                } else null,
-                                instanceLinkSendVerse = if (instanceLinkIsControllerConnected) {
-                                    { bookName, chapter, verseNumber, verseText, verseRange ->
-                                        instanceLinkViewModel.sendSelectBibleVerse(
-                                            bookName,
-                                            chapter,
-                                            verseNumber,
-                                            verseText,
-                                            verseRange
-                                        )
-                                    }
-                                } else null,
-                                instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
-                                    { number, section, lineIndex ->
-                                        instanceLinkViewModel.sendSelectSongSection(number, section, lineIndex)
-                                    }
-                                } else null,
-                                instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
-                                    { instanceLinkViewModel.sendClear() }
-                                } else null,
-                                instanceLinkSendBibleHold = if (instanceLinkIsControllerConnected) {
-                                    { hold -> instanceLinkViewModel.sendBibleHold(hold) }
-                                } else null,
-                                instanceLinkSendNextPicture = if (instanceLinkIsControllerConnected) {
-                                    { instanceLinkViewModel.sendNextPicture() }
-                                } else null,
-                                instanceLinkSendPreviousPicture = if (instanceLinkIsControllerConnected) {
-                                    { instanceLinkViewModel.sendPreviousPicture() }
-                                } else null,
-                                instanceLinkSendNextSlide = if (instanceLinkIsControllerConnected) {
-                                    { instanceLinkViewModel.sendNextSlide() }
-                                } else null,
-                                instanceLinkSendPreviousSlide = if (instanceLinkIsControllerConnected) {
-                                    { instanceLinkViewModel.sendPreviousSlide() }
-                                } else null,
-                                instanceLinkFetchPictureImageBytes = if (instanceLinkUsesRemoteContent) {
-                                    { folderId, index -> instanceLinkViewModel.fetchPictureImageBytes(folderId, index) }
-                                } else null,
-                                instanceLinkFetchPresentationSlideBytes = if (instanceLinkUsesRemoteContent) {
-                                    { id, index -> instanceLinkViewModel.fetchPresentationSlideBytes(id, index) }
-                                } else null,
-                                instanceLinkMediaStreamUrl = run {
-                                    val link = appSettings.instanceLink
-                                    if (instanceLinkUsesRemoteContent) {
-                                        ({ itemId: String ->
-                                            instanceLinkMediaStreamUrl(
-                                                link.primaryHost, link.primaryPort, link.apiKey, itemId,
-                                            )
-                                        })
-                                    } else null
-                                },
-                                onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
-                                // Line mode used to push the section straight to the outputs from
-                                // here. That put the words on screen behind the transition driver's
-                                // back, so the Lottie band animated a swap for text that had
-                                // already changed. Every mode now goes through the driver.
-                                onSongItemSelected = { section -> presenterManager.setLyricSection(section) },
-                                onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
-                                onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
-                                onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                 appSettings = appSettings,
                                 livePreviewAppSettings = effectiveAppSettings,
                                 activeQuickBackground = activeQuickBackground,
@@ -2007,14 +1870,6 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 presenterManager = presenterManager,
                                 statisticsManager = statisticsManager,
                                 verseSequenceLog = verseSequenceLog,
-                                onScheduleActionsReady = { scheduleActions = it },
-                                presenting = { mode ->
-                                    presenterManager.setPresentingMode(mode)
-                                    if (shouldShowPresenterWindowFor(mode)) {
-                                        presenterManager.setShowPresenterWindow(true)
-                                    }
-                                },
-                                onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
                                 onShowSettings = { openOptionsDialog(0) },
                                 onShowBackgroundSettings = { openOptionsDialog(OPTIONS_TAB_BACKGROUND) },
                                 onSettingsChange = { updateFn ->
@@ -2022,96 +1877,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                                     settingsManager.saveSettings(appSettings)
                                 },
                                 theme = theme,
-                                onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
-                                onScenesChanged = { scenes -> scenesForInstanceLink = scenes },
-                                onBibleLoaded = { bible, translation ->
-                                    primaryBibleForInstanceLink = bible
-                                    companionServer.updateBible(
-                                        bible,
-                                        translation,
-                                        filePath = bibleFilePath(
-                                            appSettings.bibleSettings.storageDirectory,
-                                            translation
-                                        )
-                                    )
-                                },
-                                onScheduleChanged = { items ->
-                                    currentScheduleItems = items
-                                    companionServer.updateSchedule(items)
-                                },
-                                onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
-                                    companionServer.updatePresentation(id, filePath, fileName, fileType, slides, notes)
-                                },
-                                onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
-                                    companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)
-                                },
-                                selectPictureImageFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onSelectPicture.collect { req ->
-                                        emit(req.folderId to req.index)
-                                    }
-                                },
-                                resolveImageFile = { folderId, index ->
-                                    companionServer.getImageFile(folderId, index)
-                                },
-                                selectSlideFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onSelectSlide.collect { req ->
-                                        emit(req.id to req.index)
-                                    }
-                                },
-                                selectBibleVerseFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onSelectBibleVerse.collect { req ->
-                                        emit(req)
-                                    }
-                                },
-                                remoteSelectSongFlow = remoteSelectSongFlow,
-                                remoteSelectPictureFlow = remoteSelectPictureFlow,
-                                remoteSelectPresentationFlow = remoteSelectPresentationFlow,
-                                remoteSelectMediaFlow = remoteSelectMediaFlow,
-                                nextPictureFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onNextPicture.collect { emit(Unit) }
-                                },
-                                previousPictureFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onPreviousPicture.collect { emit(Unit) }
-                                },
-                                nextSlideFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onNextSlide.collect { emit(Unit) }
-                                },
-                                previousSlideFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onPreviousSlide.collect { emit(Unit) }
-                                },
-                                uploadPresentationFlow = kotlinx.coroutines.flow.flow {
-                                    companionServer.onPresentationUploaded.collect { file ->
-                                        emit(file)
-                                    }
-                                },
-                                serverUrl = companionServer.serverUrl.collectAsState().value,
                                 qaManager = qaManager,
-                                tunnelStatus = tunnelStatus,
-                                tunnelUrl = tunnelUrl ?: "",
-                                onStartTunnel = {
-                                    companionServer.tunnelManager.start(appSettings.serverSettings.port)
-                                },
-                                onStopTunnel = { companionServer.tunnelManager.stop() },
-                                qaDisplayUrl = qaDisplayUrl,
-                                onQaDisplayUrlChanged = { qaDisplayUrl = it },
-                                presentationDisplayUrl = presentationDisplayUrl,
-                                onPresentationDisplayUrlChanged = { presentationDisplayUrl = it },
-                                onSlideChanged = { id, index, total, isPlaying ->
-                                    companionServer.broadcastSlideChange(id, index, total, isPlaying)
-                                },
-                                remotePresentationPlayPauseFlow = companionServer.onPresentationPlayPause,
-                                remotePresentationLoopToggleFlow = companionServer.onPresentationLoopToggle,
-                                remotePresentationGotoFlow = companionServer.onPresentationGoto,
-                                presentationFrozen = presentationFrozen,
-                                onFreezeToggle = {
-                                    presentationFrozen = !presentationFrozen
-                                    companionServer.broadcastFreezeChange(presentationFrozen)
-                                    presenterManager.setSlideFrozen(presentationFrozen)
-                                },
-                                onClearPresentation = {
-                                    companionServer.clearPresentationState()
-                                    presenterManager.requestClearDisplay()
-                                },
                                 onOpenLottieGen = { outputDir, onSaved ->
                                     if (isUsableOutputDir(outputDir)) {
                                         lottieGenOutputDir = File(outputDir)
@@ -2129,7 +1895,256 @@ private fun ApplicationScope.ChurchPresenterApp(
                                 sttManager = sttManager,
                                 dialogDismissSignal = dialogDismissSignal,
                                 companionSatelliteViewModel = companionSatelliteViewModel,
-                                onRequestDeveloperMenuUnlock = { developerMenuUnlocked = true }
+                                onRequestDeveloperMenuUnlock = { developerMenuUnlocked = true },
+                                live = LiveOutputCallbacks(
+                                    onRowWentLive = { item -> liveDurationLog.wentLive(item) },
+                                    onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
+                                    // Line mode used to push the section straight to the outputs from
+                                    // here. That put the words on screen behind the transition driver's
+                                    // back, so the Lottie band animated a swap for text that had
+                                    // already changed. Every mode now goes through the driver.
+                                    onSongItemSelected = { section -> presenterManager.setLyricSection(section) },
+                                    onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
+                                    onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
+                                    onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
+                                    presenting = { mode ->
+                                        presenterManager.setPresentingMode(mode)
+                                        if (shouldShowPresenterWindowFor(mode)) {
+                                            presenterManager.setShowPresenterWindow(true)
+                                        }
+                                    },
+                                ),
+                                service = ServicePlanLink(
+                                    onPresentCue = fireScheduleCue,
+                                    upcomingServiceLoad = upcomingServiceLoad,
+                                    onLoadServiceNow = { replace ->
+                                        upcomingServiceLoad?.let { upcoming ->
+                                            coroutineScope.launch {
+                                                serviceAutoLoader.loadNow(upcoming.serviceId, replace)
+                                            }
+                                        }
+                                    },
+                                    scheduleService = scheduleService,
+                                    onSaveScheduleToCalendar = {
+                                        coroutineScope.launch { serviceAutoLoader.saveScheduleToService() }
+                                    },
+                                    onAddScheduleToCalendar = {
+                                        calendarNewServiceFromSchedule++
+                                        showCalendarWindow = true
+                                    },
+                                    typicalSongSeconds = { song ->
+                                        liveDurationLog.median(
+                                            ScheduleItem.SongItem(
+                                                id = song.songId,
+                                                songNumber = song.number.toIntOrNull() ?: 0,
+                                                title = song.title,
+                                                songbook = song.songbook,
+                                                songId = song.songId,
+                                            )
+                                        )
+                                    },
+                                ),
+                                publish = MainDesktopPublishers(
+                                    onScheduleActionsReady = { scheduleActions = it },
+                                    onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
+                                    onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
+                                    onScenesChanged = { scenes -> scenesForInstanceLink = scenes },
+                                    onBibleLoaded = { bible, translation ->
+                                        primaryBibleForInstanceLink = bible
+                                        companionServer.updateBible(
+                                            bible,
+                                            translation,
+                                            filePath = bibleFilePath(
+                                                appSettings.bibleSettings.storageDirectory,
+                                                translation
+                                            )
+                                        )
+                                    },
+                                    onScheduleChanged = { items ->
+                                        currentScheduleItems = items
+                                        companionServer.updateSchedule(items)
+                                    },
+                                    onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
+                                        companionServer.updatePresentation(
+                                            id, filePath, fileName, fileType, slides, notes,
+                                        )
+                                    },
+                                    onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
+                                        companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)
+                                    },
+                                    onSlideChanged = { id, index, total, isPlaying ->
+                                        companionServer.broadcastSlideChange(id, index, total, isPlaying)
+                                    },
+                                ),
+                                flows = RemoteControlFlows(
+                                    selectPictureImageFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onSelectPicture.collect { req ->
+                                            emit(req.folderId to req.index)
+                                        }
+                                    },
+                                    resolveImageFile = { folderId, index ->
+                                        companionServer.getImageFile(folderId, index)
+                                    },
+                                    selectSlideFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onSelectSlide.collect { req ->
+                                            emit(req.id to req.index)
+                                        }
+                                    },
+                                    selectBibleVerseFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onSelectBibleVerse.collect { req ->
+                                            emit(req)
+                                        }
+                                    },
+                                    remoteSelectSongFlow = remoteSelectSongFlow,
+                                    remoteSelectPictureFlow = remoteSelectPictureFlow,
+                                    remoteSelectPresentationFlow = remoteSelectPresentationFlow,
+                                    remoteSelectMediaFlow = remoteSelectMediaFlow,
+                                    nextPictureFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onNextPicture.collect { emit(Unit) }
+                                    },
+                                    previousPictureFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onPreviousPicture.collect { emit(Unit) }
+                                    },
+                                    nextSlideFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onNextSlide.collect { emit(Unit) }
+                                    },
+                                    previousSlideFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onPreviousSlide.collect { emit(Unit) }
+                                    },
+                                    uploadPresentationFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onPresentationUploaded.collect { file ->
+                                            emit(file)
+                                        }
+                                    },
+                                    remotePresentationPlayPauseFlow = companionServer.onPresentationPlayPause,
+                                    remotePresentationLoopToggleFlow = companionServer.onPresentationLoopToggle,
+                                    remotePresentationGotoFlow = companionServer.onPresentationGoto,
+                                ),
+                                link = InstanceLinkBridge(
+                                    connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    nextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
+                                    bibleUpdatedSignal =
+                                        instanceLinkViewModel.bibleUpdatedSignal.collectAsState().value,
+                                    secondaryBibleUpdatedSignal =
+                                        instanceLinkViewModel.secondaryBibleUpdatedSignal.collectAsState().value,
+                                    followingHost = appSettings.instanceLink.primaryHost,
+                                    followerCount =
+                                        companionServer.connectedInstanceLinkFollowers.collectAsState().value.size,
+                                    onConnect = {
+                                        val link = appSettings.instanceLink
+                                        setInstanceLinkEnabled(true)
+                                        instanceLinkViewModel.connect(
+                                            link.primaryHost, link.primaryPort, link.apiKey, link.deviceId,
+                                            link.reconnectDelayMs.toLong()
+                                        )
+                                    },
+                                    onDisconnect = {
+                                        setInstanceLinkEnabled(false)
+                                        instanceLinkViewModel.disconnect()
+                                    },
+                                    remoteSchedule = instanceLinkViewModel.remoteSchedule.collectAsState().value,
+                                    remoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
+                                    fetchSongDetail = { number, songbook ->
+                                        instanceLinkViewModel.fetchSongDetail(number, songbook)
+                                    },
+                                    fetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
+                                    bibleSyncMode = appSettings.instanceLink.bibleSyncMode,
+                                    fetchSecondaryBibleFile = {
+                                        instanceLinkViewModel.fetchSecondaryBibleFile()
+                                    },
+                                    fetchBibleTranslations = { instanceLinkViewModel.fetchBibleTranslations() },
+                                    onSecondaryBibleFilePathChanged = { path ->
+                                        companionServer.updateSecondaryBibleFilePath(path)
+                                    },
+                                    onBibleFilePathsChanged = { paths ->
+                                        companionServer.updateBibleFilePaths(paths)
+                                    },
+                                    sendAddToSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
+                                        { item -> instanceLinkViewModel.sendAddToSchedule(item) }
+                                    } else null,
+                                    sendRemoveFromSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
+                                        { id -> instanceLinkViewModel.sendRemoveFromSchedule(id) }
+                                    } else null,
+                                    role = appSettings.instanceLink.role,
+                                    sendProject = if (instanceLinkIsControllerConnected) {
+                                        { item -> instanceLinkViewModel.sendProject(item) }
+                                    } else null,
+                                    sendVerse = if (instanceLinkIsControllerConnected) {
+                                        { bookName, chapter, verseNumber, verseText, verseRange ->
+                                            instanceLinkViewModel.sendSelectBibleVerse(
+                                                bookName,
+                                                chapter,
+                                                verseNumber,
+                                                verseText,
+                                                verseRange
+                                            )
+                                        }
+                                    } else null,
+                                    sendSongSection = if (instanceLinkIsControllerConnected) {
+                                        { number, section, lineIndex ->
+                                            instanceLinkViewModel.sendSelectSongSection(number, section, lineIndex)
+                                        }
+                                    } else null,
+                                    sendClear = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendClear() }
+                                    } else null,
+                                    sendBibleHold = if (instanceLinkIsControllerConnected) {
+                                        { hold -> instanceLinkViewModel.sendBibleHold(hold) }
+                                    } else null,
+                                    sendNextPicture = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendNextPicture() }
+                                    } else null,
+                                    sendPreviousPicture = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendPreviousPicture() }
+                                    } else null,
+                                    sendNextSlide = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendNextSlide() }
+                                    } else null,
+                                    sendPreviousSlide = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendPreviousSlide() }
+                                    } else null,
+                                    fetchPictureImageBytes = if (instanceLinkUsesRemoteContent) {
+                                        { folderId, index ->
+                                            instanceLinkViewModel.fetchPictureImageBytes(folderId, index)
+                                        }
+                                    } else null,
+                                    fetchPresentationSlideBytes = if (instanceLinkUsesRemoteContent) {
+                                        { id, index -> instanceLinkViewModel.fetchPresentationSlideBytes(id, index) }
+                                    } else null,
+                                    mediaStreamUrl = run {
+                                        val link = appSettings.instanceLink
+                                        if (instanceLinkUsesRemoteContent) {
+                                            ({ itemId: String ->
+                                                instanceLinkMediaStreamUrl(
+                                                    link.primaryHost, link.primaryPort, link.apiKey, itemId,
+                                                )
+                                            })
+                                        } else null
+                                    },
+                                ),
+                                web = WebAccessState(
+                                    serverUrl = companionServer.serverUrl.collectAsState().value,
+                                    tunnelStatus = tunnelStatus,
+                                    tunnelUrl = tunnelUrl ?: "",
+                                    onStartTunnel = {
+                                        companionServer.tunnelManager.start(appSettings.serverSettings.port)
+                                    },
+                                    onStopTunnel = { companionServer.tunnelManager.stop() },
+                                    qaDisplayUrl = qaDisplayUrl,
+                                    onQaDisplayUrlChanged = { qaDisplayUrl = it },
+                                    presentationDisplayUrl = presentationDisplayUrl,
+                                    onPresentationDisplayUrlChanged = { presentationDisplayUrl = it },
+                                    presentationFrozen = presentationFrozen,
+                                    onFreezeToggle = {
+                                        presentationFrozen = !presentationFrozen
+                                        companionServer.broadcastFreezeChange(presentationFrozen)
+                                        presenterManager.setSlideFrozen(presentationFrozen)
+                                    },
+                                    onClearPresentation = {
+                                        companionServer.clearPresentationState()
+                                        presenterManager.requestClearDisplay()
+                                    },
+                                ),
                             )
                             // After MainDesktop, not before it: siblings in a Box draw in order and
                             // MainDesktop's root is an opaque fillMaxSize surface, so a banner

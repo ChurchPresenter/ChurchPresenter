@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
 data class ScheduleActions(
@@ -64,4 +65,53 @@ data class ScheduleActions(
     val playSlideshow: (item: ScheduleItem, plays: Int) -> Unit = { _, _ -> },
     /** Selects a row, so the Schedule shows what the automation has just put on screen. */
     val selectItem: (id: String) -> Unit = {},
+)
+
+/**
+ * The menu's view of the Schedule tab's [actions]. [presentScene] and [playSlideshow] are the two it
+ * cannot take from the tab, because they reach past the Schedule into the Canvas and the players.
+ */
+internal fun scheduleActionsFrom(
+    actions: ScheduleTabActions,
+    presentScene: (sceneId: String) -> Unit,
+    playSlideshow: (item: ScheduleItem, plays: Int) -> Unit,
+): ScheduleActions = ScheduleActions(
+    newSchedule = actions.newSchedule,
+    openSchedule = actions.openSchedule,
+    saveSchedule = actions.saveSchedule,
+    saveScheduleAs = actions.saveScheduleAs,
+    removeSelected = actions.removeSelected,
+    removeById = actions.removeById,
+    clearSchedule = actions.clearSchedule,
+    addSong = actions.addSong,
+    addBibleVerse = actions.addBibleVerse,
+    addPicture = actions.addPicture,
+    addPresentation = actions.addPresentation,
+    addMedia = actions.addMedia,
+    addScene = actions.addScene,
+    addDictionary = actions.addDictionary,
+    addAnnouncement = { item ->
+        actions.addAnnouncement(
+            item.text, item.textColor, item.backgroundColor,
+            item.fontSize, item.fontType, item.bold, item.italic,
+            item.underline, item.shadow, item.shadowColor,
+            item.shadowSize, item.shadowOpacity, item.horizontalAlignment,
+            item.position, item.animationType, item.animationDuration,
+            item.loopCount, item.isTimer, item.timerHours,
+            item.timerMinutes, item.timerSeconds, item.timerTextColor,
+            item.timerExpiredText, item.timerMode, item.targetHour,
+            item.targetMinute, item.targetSecond, item.liveClockFormat,
+            item.backdrop, item.outline,
+        )
+    },
+    addWebsite = actions.addWebsite,
+    addCue = actions.addCue,
+    addRow = actions.addRow,
+    selectItem = actions.selectItem,
+    currentTiming = actions.currentTiming,
+    setServiceStart = actions.setServiceStart,
+    addLabel = actions.addLabel,
+    addLowerThird = actions.addLowerThird,
+    presentScene = presentScene,
+    playSlideshow = playSlideshow,
 )

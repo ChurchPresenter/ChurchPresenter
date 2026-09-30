@@ -25,9 +25,11 @@ demand.
 - Only acceptable exception: a rendering bridge whose panel lifecycle is tightly coupled to the
   ViewModel (`MediaPresenter`/`VideoPlayer`, `PresentationPlayer`, `LottieFrameStream`) — document
   it explicitly at the site.
-- Known standing deviation: `MainDesktop.kt` and the wiring files split out of it
-  (`*Wiring.kt`, `PresenterWindows.kt`, `RemoteCommandEffects.kt`) pass ViewModels top-down. Not new
-  precedent.
+- Known standing deviation: `MainDesktop.kt` and the files split out of it pass ViewModels
+  top-down — the wiring (`*Wiring.kt`, `MainDesktopEffects.kt`, `RemoteCommandEffects.kt`,
+  `PresenterWindows.kt`) and the root screen's layout pieces, which reach them through
+  `MainDesktopScope`/`MainDesktopViewModels` (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`,
+  `MainTabArea.kt`, `ContentTabPanes.kt`, `PreviewSidebar.kt`). Not new precedent.
 
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
