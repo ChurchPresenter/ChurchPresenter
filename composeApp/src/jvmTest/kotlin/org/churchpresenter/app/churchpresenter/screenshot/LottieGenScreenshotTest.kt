@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -21,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import org.churchpresenter.lottiegen.model.Preset
 import org.churchpresenter.lottiegen.persistence.PresetStorage
+import org.churchpresenter.lottiegen.ui.LOWER_THIRD_STYLE_THUMBNAIL_TAG
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -99,6 +103,14 @@ class LottieGenScreenshotTest {
                 }
                 waitForIdle()
                 scrubToHeldFrame()
+                // Generation is debounced and the composition parsed off the test's clock, so the
+                // preview is waited for by its pixels: the default accent bar is the only red right
+                // of the controls.
+                waitUntil("the preview rendered", RENDER_TIMEOUT_MS) { previewAccentPixels() >= PREVIEW_ACCENT_PIXELS }
+                waitUntil("the style thumbnail", RENDER_TIMEOUT_MS) {
+                    onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG, useUnmergedTree = true)
+                        .fetchSemanticsNodes().isNotEmpty()
+                }
                 drive()
                 captureTo(file)
             }
@@ -127,6 +139,20 @@ class LottieGenScreenshotTest {
         val x = transport.right + (window.width - transport.right) * SCRUB_FRACTION
         onRoot().performTouchInput { click(Offset(x, transport.center.y)) }
         waitForIdle()
+    }
+
+    private fun ComposeUiTest.previewAccentPixels(): Int {
+        // Paused by the scrub, so the button now offers to play.
+        val transport = onNodeWithContentDescription("Play").fetchSemanticsNode().boundsInRoot
+        val pixels = onRoot().captureToImage().toPixelMap()
+        var count = 0
+        for (y in 0 until transport.top.toInt()) {
+            for (x in transport.left.toInt() until pixels.width) {
+                val c = pixels[x, y]
+                if (c.red > ACCENT_MIN_RED && c.green < ACCENT_MAX_GREEN_BLUE && c.blue < ACCENT_MAX_GREEN_BLUE) count++
+            }
+        }
+        return count
     }
 
     /** Opens a collapsed section, scrolling it into view first — the panel is taller than the window. */
@@ -164,6 +190,10 @@ class LottieGenScreenshotTest {
 
         /** The name of the last preset [seedLibrary] writes — the foot of the panel. */
         const val LAST_PRESET = "Welcome"
+
+        const val PREVIEW_ACCENT_PIXELS = 20
+        const val ACCENT_MIN_RED = 0.7f
+        const val ACCENT_MAX_GREEN_BLUE = 0.4f
     }
 
     private fun preset(name: String, nameText: String, infoText: String) = Preset(
