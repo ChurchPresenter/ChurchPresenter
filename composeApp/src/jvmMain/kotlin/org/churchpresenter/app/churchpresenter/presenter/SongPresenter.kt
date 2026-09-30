@@ -158,7 +158,7 @@ fun SongPresenter(
             transparentWhenBlank = LocalTransparentBlanking.current,
             ownBackground = if (isLowerThird) lyricSection.lowerThirdBackground else lyricSection.background,
         )
-        val backdrop = SongBackdrop(resolvedBg, rememberBackgroundBitmap(resolvedBg, isLowerThird))
+        val backdrop = PresenterBackdrop(resolvedBg, rememberBackgroundBitmap(resolvedBg, isLowerThird))
 
         // Fade-in on first appearance (covers background + text)
         val fadeInDuration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)

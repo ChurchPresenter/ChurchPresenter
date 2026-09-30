@@ -52,7 +52,7 @@ import androidx.compose.foundation.layout.BoxWithConstraintsScope
 @Suppress("LongParameterList")
 internal class SongFrame(
     val look: SongLook,
-    val backdrop: SongBackdrop,
+    val backdrop: PresenterBackdrop,
     val blurRadius: Dp,
     val maxWidth: Dp,
     val maxHeight: Dp,
@@ -221,7 +221,7 @@ internal fun songFitsEachSlide(ss: SongSettings, isLowerThird: Boolean): Boolean
  * then the text itself.
  */
 @Composable
-internal fun BoxWithConstraintsScope.SongFrameContent(look: SongLook, backdrop: SongBackdrop, blurRadius: Dp) {
+internal fun BoxWithConstraintsScope.SongFrameContent(look: SongLook, backdrop: PresenterBackdrop, blurRadius: Dp) {
     val scaleFactor = presenterScale(maxWidth, maxHeight)
     val fitEachSlide = songFitsEachSlide(look.ss, look.isLowerThird)
     // Auto-fit: compute the largest font size that fits ALL sections without line wrapping.

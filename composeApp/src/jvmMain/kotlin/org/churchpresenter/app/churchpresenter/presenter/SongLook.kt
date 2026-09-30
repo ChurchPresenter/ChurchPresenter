@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -30,7 +29,6 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.SongSettings
-import androidx.compose.ui.graphics.ImageBitmap
 
 /**
  * How a song is drawn on one output, before any sizes are known: which languages, and the fonts,
@@ -287,16 +285,4 @@ internal fun rememberSongLookResources(
     return SongLookResources(
         titleFontFamily, lyricsFontFamily, titleColor, lyricsColor, chordColor, laColor, laFontFamily,
     )
-}
-
-/** A song's background on one output, resolved once per composition. */
-internal class SongBackdrop(val resolvedBg: ResolvedBackground, val backgroundImageBitmap: ImageBitmap?) {
-    val bgDimPercent = resolvedBg.dimPercent
-    val bgBlurReferencePx = resolvedBg.blurReferencePx
-    val effectiveOpacity = resolvedBg.opacity
-    val bgModifier: Modifier = backgroundModifier(resolvedBg, backgroundImageBitmap)
-    // A blurred background has to be its own layer — blurring the box the lyrics sit in would blur
-    // the lyrics with it. Only a song background can ask for blur, so an unblurred one keeps the
-    // original single-box shape and its behaviour exactly.
-    val blurred = bgBlurReferencePx > 0
 }
