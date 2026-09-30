@@ -4,6 +4,7 @@ import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,7 +39,8 @@ class LottieGenViewModel(
     private val outputDir: File? = null,
     private val onFileSaved: (() -> Unit)? = null,
     canvasWidth: Int? = null,
-    canvasHeight: Int? = null
+    canvasHeight: Int? = null,
+    private val thumbnails: StyleThumbnails = StyleThumbnails(scope),
 ) : LottieGenState {
     /** True when launched inside ChurchPresenter with a configured output folder */
     override val hasOutputDir: Boolean get() = outputDir != null
@@ -61,6 +63,10 @@ class LottieGenViewModel(
 
     var statusText by mutableStateOf("")
         private set
+
+    override val styleThumbnails: Map<String, ImageBitmap> get() = thumbnails.thumbnails
+
+    override fun ensureStyleThumbnails() = thumbnails.request(config)
 
     private var generateJob: Job? = null
     private val json = Json { prettyPrint = true }
