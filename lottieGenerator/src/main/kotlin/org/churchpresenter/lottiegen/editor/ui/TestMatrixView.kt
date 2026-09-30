@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -92,9 +93,11 @@ private fun MatrixCellView(cell: MatrixCell, progress: Float, aspect: Float, mod
             val composition by rememberLottieComposition(cell.json) {
                 LottieCompositionSpec.JsonString(cell.json)
             }
+            // Compottie keeps the first progress lambda it is given, so it must read state, not a value.
+            val current by rememberUpdatedState(progress)
             composition?.let {
                 Image(
-                    painter = rememberLottiePainter(composition = it, progress = { progress }),
+                    painter = rememberLottiePainter(composition = it, progress = { current }),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
