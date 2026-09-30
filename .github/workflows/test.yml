@@ -268,7 +268,11 @@ jobs:
         # headroom for a slower runner. If a legitimate test ever trips this, the answer is to fix
         # the test, not to raise the number: AGENT.md budgets ~1s a test.
         timeout-minutes: 40
-        run: ./gradlew :composeApp:jvmTest -PhangThresholdMs=150000
+        # TEMPORARY DIAGNOSTIC (#729): log memory every 20s and tighten the hang watchdog, to tell a
+        # runner killed for memory from a hung test. Revert before merge.
+        run: |
+          ( while true; do echo "[mem] $(date -u +%T) $(free -m | awk '/Mem:/{print "used="$3"M avail="$7"M"}') $(free -m | awk '/Swap:/{print "swap="$3"M"}') jvms=$(pgrep -c java)"; sleep 20; done ) &
+          ./gradlew :composeApp:jvmTest -PhangThresholdMs=60000
 
       # So an outlier explains itself instead of needing a guess: the one killed run above was
       # attributed to the wrong fixture precisely because nothing recorded where the time went.
