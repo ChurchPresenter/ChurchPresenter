@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.dialogs.CUSTOMIZE_THEME_DIALOG_HEIGHT
 import org.churchpresenter.app.churchpresenter.dialogs.CUSTOMIZE_THEME_DIALOG_WIDTH
 import org.churchpresenter.app.churchpresenter.dialogs.CustomizeThemeContent

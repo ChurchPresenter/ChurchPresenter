@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.screenshot
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.runSkikoComposeUiTest
+import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.composables.SCANNING_ROW_TAG

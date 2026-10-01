@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.RoborazziTaskType
