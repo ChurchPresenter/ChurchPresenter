@@ -17,6 +17,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
 import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference
 import org.churchpresenter.app.churchpresenter.viewmodel.updateSettings
+import org.churchpresenter.settings.operatorBibleSettings
 
 /** Reloads on a settings change, resolves a scheduled verse, and takes focus back after a dialog. */
 @Composable
@@ -39,8 +40,8 @@ internal fun BibleTabScope.BibleTabEffects(
         // it here the view model keeps the snapshot it was constructed with and the setting does
         // nothing until the app is restarted. The threshold is a key for the same reason -- moving
         // the slider without crossing its Off stop changes only this number.
-        appSettings.bibleSettings.splitLongVerses,
-        appSettings.bibleSettings.longVerseWordCount,
+        appSettings.operatorBibleSettings().splitLongVerses,
+        appSettings.operatorBibleSettings().longVerseWordCount,
     ) {
         if (isFirstComposition.value) {
             isFirstComposition.value = false

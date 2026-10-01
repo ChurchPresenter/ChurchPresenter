@@ -10,7 +10,8 @@ import kotlin.test.assertEquals
 
 /**
  * Which captions the STT tab's own transcript follows, now that captions are styled per profile:
- * a profile an output is using that shows captions, else any that shows them, else the document.
+ * a profile an output is using that shows captions, else any that shows them, else the first
+ * profile, else the document.
  */
 class CaptionSettingsOnScreenTest {
 
@@ -42,8 +43,13 @@ class CaptionSettingsOnScreenTest {
     }
 
     @Test
-    fun `with no profile showing captions the document's copy is used`() {
-        assertEquals(9, doc(listOf(silent)).captionSettingsOnScreen().maxSegments)
+    fun `with no profile showing captions the first profile is used`() {
+        assertEquals(3, doc(listOf(silent)).captionSettingsOnScreen().maxSegments)
+    }
+
+    @Test
+    fun `with no profiles at all the document's copy is used`() {
+        assertEquals(9, doc(emptyList()).captionSettingsOnScreen().maxSegments)
     }
 
     @Test

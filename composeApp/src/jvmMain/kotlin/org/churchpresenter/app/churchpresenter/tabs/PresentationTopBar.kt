@@ -234,6 +234,7 @@ private fun PresentationTabScope.PresentationGoLiveButton(
                     }
                 }
                 presenterManager.setSelectedSlide(bitmap)
+                presenterManager.setLiveSlide(viewModel.selectedPresentation?.name, idx)
                 presenterManager.setNextSlide(nextBitmap)
                 presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
             }

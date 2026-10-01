@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import androidx.compose.runtime.State
@@ -49,6 +50,9 @@ private const val FRAME_INTERVAL_MS = 33L
 private const val TICK_INTERVAL_MS = 1000L
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_MINUTE = 60
+
+/** A live presentation slide by identity: the deck's file name and the slide's index in it. */
+data class LiveSlide(val fileName: String?, val index: Int)
 
 class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
@@ -397,6 +401,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         if (mode != Presenting.PRESENTATION) {
             // Leaving presentation mode releases the animated player and its layer bitmaps.
             clearPresentationPlayback()
+            _liveSlide.value = null
         }
         notifyLiveStateChanged(mode)
     }
@@ -630,6 +635,20 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _selectedSlide.value = slide
     }
 
+    private val _liveSlide = mutableStateOf<LiveSlide?>(null)
+
+    /** Which deck and slide [selectedSlide] is, for the on-screen history. Null outside PRESENTATION. */
+    val liveSlide: State<LiveSlide?> = _liveSlide
+
+    /**
+     * Names the slide just pushed with [setSelectedSlide]. Reported only while PRESENTATION is the
+     * live mode: a slide pushed ahead of the mode switch is picked up when [setPresentingMode] reports.
+     */
+    fun setLiveSlide(fileName: String?, index: Int) {
+        _liveSlide.value = LiveSlide(fileName, index)
+        if (_presentingMode.value == Presenting.PRESENTATION) notifyLiveStateChanged(Presenting.PRESENTATION)
+    }
+
     // ── Animated presentation playback ───────────────────────────────────────
     // The player is a rendering bridge like LottieFrameStream: one evaluation per display
     // frame, published here, drawn by every output window's PresentationPresenter.
@@ -768,6 +787,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
     private val _lottieJsonContent = mutableStateOf("")
     val lottieJsonContent: State<String> = _lottieJsonContent
 
+    private val _lottieGroupsText = mutableStateOf(false)
+
+    /** Whether [lottieJsonContent]'s text is drawn as whole lines, as its file asks ([LottieTextShaping]). */
+    val lottieGroupsText: State<Boolean> = _lottieGroupsText
+
     private val _lottiePauseAtFrame = mutableStateOf(false)
     val lottiePauseAtFrame: State<Boolean> = _lottiePauseAtFrame
 
@@ -786,6 +810,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String = "") {
         _lottieJsonContent.value = json
+        _lottieGroupsText.value = LottieTextShaping.groupsText(json)
         _lottiePauseAtFrame.value = pauseAtFrame
         _lottiePauseFrame.value = pauseFrame
         _lottiePauseDurationMs.value = pauseDurationMs

@@ -20,9 +20,11 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.band.BandFontPicker
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
+import org.churchpresenter.lottiegen.lottie.TextShaping
 import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.Strings
+import org.churchpresenter.lottiegen.ui.Tokens
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.theme.components.TextStyleToggleButton
@@ -94,6 +96,10 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
         onSize = { v -> viewModel.updateConfig { it.copy(previewReferenceSizePx = v) } },
     )
     TextOpacityRow(viewModel, kind)
+    EnumDropdown(
+        Strings.textShaping, cfg.textShaping, TextShaping.entries, { Strings.bandEnumLabel("shaping", it.key) },
+    ) { v -> viewModel.updateConfig { it.copy(textShaping = v) } }
+    Text(Strings.textShapingHint, fontSize = 10.sp, color = Tokens.HintText)
     Hairline()
     var lang by remember { mutableStateOf(0) }
     // As many tabs as the layout has cells for -- one for [SlotLayout.SINGLE], up to four for a

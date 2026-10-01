@@ -191,6 +191,7 @@ class STTManager {
                     scope.launch(Dispatchers.IO) {
                         fetchWordHighlighting(url)
                     }
+                    // startDbCapture's loop reads the session id on its first tick, i.e. right now.
                     startDbCapture(url)
                 }
 
@@ -257,6 +258,7 @@ class STTManager {
     }
 
     internal fun handleTranscriptionUpdate(data: JSONObject) {
+        applySessionId(data.stringOrNull("session_id"))
         val segmentsArray = data.optJSONArray("segments")
         if (segmentsArray != null) {
             _segments.clear()
@@ -284,6 +286,7 @@ class STTManager {
     }
 
     internal fun handleTranslationUpdate(data: JSONObject) {
+        applySessionId(data.stringOrNull("session_id"))
         val segmentsArray = data.optJSONArray("segments")
         if (segmentsArray != null) {
             _translationSegments.clear()
@@ -408,10 +411,38 @@ class STTManager {
         dbCaptureJob?.cancel()
         dbCaptureJob = scope.launch(Dispatchers.IO) {
             while (isActive) {
+                // Every tick, Help Dev or not: STT starts a new session id for each service.
+                applySessionId(fetchSessionId(baseUrl))
                 if (helpDevModeEnabled) runCatching { captureDbSnapshot(baseUrl) }
                 delay(MODEL_POLL_INTERVAL_MS)
             }
         }
+    }
+
+    /**
+     * The STT server's current session id, from `GET /api/health`'s `session_id`. Null when the
+     * server is unreachable, answers non-200, or has no session yet. Never throws.
+     */
+    internal fun fetchSessionId(baseUrl: String): String? = runCatching {
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/api/health"))
+            .GET()
+            .build()
+        val response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() != HTTP_OK) return@runCatching null
+        JSONObject(response.body()).stringOrNull("session_id")
+    }.getOrNull()
+
+    /**
+     * Keys the training-data and on-screen history logs by [sessionId] from now on, so a service's
+     * opening songs share its session's files instead of waiting for the first Bible detection
+     * (which still sets it too, as a fallback). Two sources feed it: `/api/health`, read on connect
+     * and on every poll, which knows the session before anyone speaks; and the top-level
+     * `session_id` STT puts on every socket payload, which follows a new session the moment it
+     * starts. Null leaves the current id alone.
+     */
+    internal fun applySessionId(sessionId: String?) {
+        if (sessionId != null) TrainingDataLogger.sessionId = sessionId
     }
 
     internal fun captureDbSnapshot(baseUrl: String) {

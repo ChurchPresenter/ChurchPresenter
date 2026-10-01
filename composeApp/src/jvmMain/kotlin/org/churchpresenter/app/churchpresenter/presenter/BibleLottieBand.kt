@@ -41,6 +41,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.settings.utils.Constants
 
 /** The output height the Bible font sizes are specified against, as the classic band scales them. */
@@ -277,11 +278,16 @@ private fun BandLayer(
         }
     }
 
+    // Judged on the words being shown, not the file's sample: those are the player's to replace.
+    val groupsText = remember(template.meta.textShaping, texts) {
+        LottieTextShaping.groupsText(template.meta.textShaping, texts.values)
+    }
     val painter = rememberLottiePainter(
         composition = composition,
         progress = progress,
         fontManager = LottieFonts,
         dynamicProperties = dynamic,
+        enableTextGrouping = groupsText,
     )
     BoxWithConstraints(modifier) {
         val contentScale = bandContentScale(maxWidth / maxHeight, template.width / template.height)

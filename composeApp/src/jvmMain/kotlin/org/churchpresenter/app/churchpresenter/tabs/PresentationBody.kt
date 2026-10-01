@@ -235,6 +235,7 @@ private fun PresentationTabScope.goLiveAtSlide(
             }
         }
         presenterManager.setSelectedSlide(cur)
+        presenterManager.setLiveSlide(viewModel.selectedPresentation?.name, index)
         presenterManager.setNextSlide(next)
         presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
     }

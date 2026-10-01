@@ -8,6 +8,7 @@
 | [FEATURES.md](FEATURES.md) | Every feature and where its source lives |
 | `<module>/AGENT.md` | Each module's own layout, commands and rules |
 | [BUILD_INSTALLERS.md](BUILD_INSTALLERS.md), [QUICK_START_INSTALLERS.md](QUICK_START_INSTALLERS.md) | Building the installers |
+| [GRAPHICS_BACKEND.md](GRAPHICS_BACKEND.md) | Choosing the GPU backend on a machine, and what it does to screen capture |
 
 ## Before every commit
 

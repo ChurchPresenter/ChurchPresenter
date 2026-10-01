@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
+import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.file.Files
@@ -51,7 +52,7 @@ class LottieFrameStreamTest {
         file.deleteOnExit()
         RandomAccessFile(file, "rw").use { raf ->
             raf.writeBytes("LRCC")
-            raf.writeByte(1)
+            raf.writeByte(LottieRenderCache.VERSION)
             raf.writeByte(0)
             raf.writeInt(width)
             raf.writeInt(height)

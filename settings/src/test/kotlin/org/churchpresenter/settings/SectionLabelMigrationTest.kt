@@ -37,6 +37,13 @@ class SectionLabelMigrationTest {
 
     private fun decode(raw: String): AppSettings = SettingsManager().migrateAndDecode(raw)
 
+    /**
+     * Where the document's song settings end up: on the profile that carried none of its own, which
+     * version 22 gives the document's copy before dropping it.
+     */
+    private fun AppSettings.documentSongs(): SongSettings =
+        projectionSettings.outputProfiles.first { it.id == "default" }.songSettings
+
     /** A version-17 document with a styled, positioned label on the document and on one profile. */
     private fun v17(documentLabel: String) = """
         {"settingsVersion":17,
@@ -57,7 +64,7 @@ class SectionLabelMigrationTest {
 
     @Test
     fun `the label keeps the look it had, on full screen`() {
-        val label = decode(v17(styled)).songSettings.layoutExtras.sectionLabel
+        val label = decode(v17(styled)).documentSongs().layoutExtras.sectionLabel
 
         assertEquals(true, label.enabled)
         with(label.fullScreen) {
@@ -76,14 +83,14 @@ class SectionLabelMigrationTest {
 
     @Test
     fun `the lower third draws with the same look it always shared`() {
-        val label = decode(v17(styled)).songSettings.layoutExtras.sectionLabel
+        val label = decode(v17(styled)).documentSongs().layoutExtras.sectionLabel
 
         assertEquals(label.fullScreen, label.lowerThird)
     }
 
     @Test
     fun `the offset gives way to the label sitting on the lyrics`() {
-        val label = decode(v17(styled)).songSettings.layoutExtras.sectionLabel
+        val label = decode(v17(styled)).documentSongs().layoutExtras.sectionLabel
 
         assertEquals(Constants.ABOVE_LYRICS, label.position)
         assertEquals(Constants.ABOVE_LYRICS, label.lowerThirdPosition)
@@ -91,7 +98,7 @@ class SectionLabelMigrationTest {
 
     @Test
     fun `a field the old file left out keeps the old default, not the credits'`() {
-        val label = decode(v17("""{"enabled":true}""")).songSettings.layoutExtras.sectionLabel
+        val label = decode(v17("""{"enabled":true}""")).documentSongs().layoutExtras.sectionLabel
 
         // Blank follows the title's face, which is what the label always drew in; 32 is its old size.
         assertEquals("", label.fullScreen.fontType)
@@ -114,7 +121,7 @@ class SectionLabelMigrationTest {
         val current = """{"enabled":true,"fullScreen":{"fontSize":12},"lowerThird":{"fontSize":9},
             "position":"BelowVerse"}"""
 
-        val label = decode(v17(current)).songSettings.layoutExtras.sectionLabel
+        val label = decode(v17(current)).documentSongs().layoutExtras.sectionLabel
 
         assertEquals(12, label.fullScreen.fontSize)
         assertEquals(9, label.lowerThird.fontSize)

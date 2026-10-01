@@ -8,6 +8,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.utils.withSongsEverywhere
+import org.churchpresenter.settings.SongSettings
 
 /**
  * `SongsViewModel.getLyricSections(song)` turns a stored song into the ordered sections the
@@ -24,7 +26,7 @@ class LyricSectionsTest {
 
     /** The same view model with the chorus auto-repeat switched off. */
     private val asWritten = SongsViewModel(
-        AppSettings().let { it.copy(songSettings = it.songSettings.copy(autoRepeatChorus = false)) },
+        AppSettings().withSongsEverywhere(SongSettings(autoRepeatChorus = false)),
     )
 
     private fun song(

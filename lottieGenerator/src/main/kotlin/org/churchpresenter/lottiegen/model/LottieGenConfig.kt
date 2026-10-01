@@ -28,6 +28,8 @@ data class LottieGenConfig(
     val nameTransform: String = "uppercase",
     val infoTransform: String = "none",
     val detailTransform: String = "none",
+    /** A [org.churchpresenter.lottiegen.lottie.TextShaping] key, written into the file for players. */
+    val textShaping: String = "auto",
     // Colors
     val nameColor: String = "#F2F2F2",
     val infoColor: String = "#CCCCCC",

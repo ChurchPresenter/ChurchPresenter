@@ -109,6 +109,7 @@ internal class MainDesktopScope(
             presentationViewModel.nextShownSlideIndex(index),
         )
         presenterManager.setSelectedSlide(bitmap)
+        presenterManager.setLiveSlide(presentationViewModel.selectedPresentation?.name, index)
         presenterManager.setNextSlide(nextBitmap)
         presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))
         // Keep animated playback in sync (or cleared) so a stale animated frame from a

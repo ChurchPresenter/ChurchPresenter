@@ -31,7 +31,10 @@ class ProfileOverlayPagesTest {
         openCustomizePane(CustomizePane.CAPTIONS)
         segment("Both").performClick()
         waitForIdle()
-        segment("Side by side, translation first").performScrollTo().performClick()
+        segment("Side by side").performScrollTo().performClick()
+        waitForIdle()
+        // The second "Translation": the first is what the captions show, this one is which comes first
+        segment("Translation", nth = 1).performScrollTo().performClick()
         waitForIdle()
         toggleCheckbox("Highlight the word being spoken")
         toggleCheckbox("Show words still being spoken")

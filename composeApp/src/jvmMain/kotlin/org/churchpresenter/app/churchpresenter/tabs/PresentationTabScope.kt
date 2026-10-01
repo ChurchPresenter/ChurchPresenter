@@ -225,6 +225,7 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
                 }
             }
             presenterManager.setSelectedSlide(bitmap)
+            presenterManager.setLiveSlide(viewModel.selectedPresentation?.name, idx)
             presenterManager.setNextSlide(nextBitmap)
             presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
             // Animated playback: point the player at the new slide (no-op → static path
