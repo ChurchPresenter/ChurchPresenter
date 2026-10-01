@@ -114,7 +114,7 @@ private fun TextShapingRow(viewModel: LottieGenState) {
             }
         }
     }
-    Text(Strings.textShapingHint, fontSize = 10.sp, color = Tokens.UnitText)
+    Text(Strings.textShapingHint, fontSize = 10.sp, lineHeight = 14.sp, color = Tokens.UnitText)
 }
 
 

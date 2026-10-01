@@ -61,6 +61,14 @@ class LottieGenScreenshotTest {
     @Test
     fun `text style section`() = generator("section_text_style") { expand(Strings.sectionTextStyle) }
 
+    /** The section's last row, below the fold of the one above: how the file's text is drawn. */
+    @Test
+    fun `text shaping row`() = generator("section_text_shaping") {
+        expand(Strings.sectionTextStyle)
+        onNodeWithText(Strings.textShapingHint).performScrollTo()
+        waitForIdle()
+    }
+
     @Test
     fun `shape section`() = generator("section_shape") { expand(Strings.sectionShape) }
 
