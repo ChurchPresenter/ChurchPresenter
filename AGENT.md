@@ -59,10 +59,10 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `server/`        | Ktor REST/WebSocket server, ATEM *bridge*, tunnel, SSL — the ATEM client is `:atem`, the PCO OAuth callback listener is `:planning-center` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
-| `models/`        | Only what needs the app: `ShortcutAction`, `PresetItems`, the two Companion UI states |
-| `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
+| `models/`        | Only what needs the app: `PresetItems`, the two Companion UI states — `ShortcutAction` is `:shared-ui` |
+| `composables/`   | UI components with app or feature ties (VideoPlayer, SceneCanvas, etc.) — the shared ones are `:shared-ui` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
-| `utils/`         | Stateless helpers (AutoFit, UpdateChecker, etc.) — crash reporting is `:diagnostics` |
+| `utils/`         | Stateless helpers (UpdateChecker, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics` |
 | `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
 
 ```
@@ -70,7 +70,7 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
                         ↘ CompanionServer (server/)
                         ↘ StageMonitorScreen.kt
 ```
-- `MainDesktop.kt` is the root composable; `presenter/Presenting.kt` is the live-content enum.
+- `MainDesktop.kt` is the root composable; `Presenting` (in `:shared-ui`) is the live-content enum.
 - New user-facing strings go in `strings/src/main/composeResources/values/strings.xml` — the
   `:strings` module.
 - Per-feature source locations are listed in `FEATURES.md`.
@@ -105,6 +105,7 @@ module-specific notes there, not here.**
 | `calendar/`            | `:calendar`            | The Calendar Manager — planned services on a month grid, each with a run of show   | [AGENT.md](calendar/AGENT.md)            |
 | `strings/`             | `:strings`             | The app's user-facing strings, every locale, and the `Res` class generated from them | [AGENT.md](strings/AGENT.md)             |
 | `icons/`               | `:icons`               | The UI drawables and the window-icon frames — not the installer icons               | [AGENT.md](icons/AGENT.md)               |
+| `shared-ui/`           | `:shared-ui`           | The composables and helpers more than one feature uses — fields, pickers, buttons, text styling | [AGENT.md](shared-ui/AGENT.md)           |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

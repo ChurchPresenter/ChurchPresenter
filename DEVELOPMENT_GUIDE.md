@@ -47,8 +47,6 @@ A string that stops being referenced is deleted in the same change, from `values
 **Technical strings** are constants:
 - `settings/src/main/kotlin/org/churchpresenter/settings/utils/Constants.kt` — anything persisted or
   shared with the settings (keys, target types, sort keys, background types).
-- `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt` — the
-  app's own.
 - A closed set of ids that belongs to one feature gets its own small object next to it
   (`SongColumnId`, `PcoItemType`).
 

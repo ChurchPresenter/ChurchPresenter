@@ -92,7 +92,7 @@ object TrainingDataLogger {
     /**
      * Deletes dated training-data logs older than [MAX_AGE_DAYS]. Runs at most once per process
      * (first write triggers it). Mirrors CrashReporter's age-based cleanup. Best-effort.
-     * Also sweeps the `.db` snapshots [org.churchpresenter.app.churchpresenter.viewmodel.STTManager]'s
+     * Also sweeps the `.db` snapshots `STTManager`'s
      * "Help Dev" capture writes into this same folder — they bypass this object's own write path
      * entirely, but share its retention policy, so `internal` lets STTManager trigger this sweep too
      * (idempotent either way; whichever of the two runs first each process wins).
@@ -124,7 +124,7 @@ object TrainingDataLogger {
      * the two are directly comparable. That matters beyond book order: a Synodal module follows the
      * LXX, where the Psalm a Russian congregation sees as 23 is canonical 24, so logging the
      * displayed number would score every Psalm as a miss. Map with
-     * [org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel.canonicalRefForDisplay].
+     * `BibleViewModel.canonicalRefForDisplay`.
      * [displayChapter]/[displayVerseStart]/[displayVerseEnd] are what the operator actually saw on
      * screen, in the primary Bible's own numbering — kept alongside so a log stays readable by hand.
      * [source] is "manual" (operator button/double-click/Enter), "auto" (auto-follow drove the

@@ -214,6 +214,17 @@ jobs:
               - 'calendar/**'
               - 'core-models/**'          # implementation(projects.coreModels)
               - 'theme/**'                # implementation(projects.theme)
+            sharedui:
+              - *shared
+              - 'shared-ui/**'
+              - 'strings/**'              # api(projects.strings)
+              - 'icons/**'                # api(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'song-chords/**'          # implementation(projects.songChords)
+              - 'bible/**'                # implementation(projects.bible)
+              - 'diagnostics/**'          # via :bible
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -243,7 +254,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -585,6 +596,14 @@ jobs:
           fi
           exit "$status"
 
+      - name: Shared UI tests
+        if: ${{ !cancelled() && steps.modules.outputs.sharedui == 'true' }}
+        run: ./gradlew :shared-ui:test
+
+      - name: Shared UI coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.sharedui == 'true' }}
+        run: ./gradlew :shared-ui:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -621,6 +640,7 @@ jobs:
             song-chords/build/test-results/**/TEST-*.xml
             bible/build/test-results/**/TEST-*.xml
             calendar/build/test-results/**/TEST-*.xml
+            shared-ui/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -645,6 +665,7 @@ jobs:
             Song chords
             Bible
             Calendar
+            Shared UI
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -816,3 +837,5 @@ jobs:
             bible-formats/build/test-results/
             song-chords/build/reports/tests/
             song-chords/build/test-results/
+            shared-ui/build/reports/tests/
+            shared-ui/build/test-results/

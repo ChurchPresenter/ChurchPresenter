@@ -21,10 +21,10 @@ are spelled with, which are not themselves settings.
 
 **Never rewrite by package prefix.** `:composeApp` owns 34 files in `…utils`, 34 in `…data` and
 `ObsSceneSelection` in `…data.settings`; a prefix rewrite drags all of them along. Key on the
-symbols this module declares. In particular `:composeApp` has **its own `utils/Constants.kt`**
-holding top-level functions like `presenterScreenBounds()` — three `SceneViewModel` suites stub its
-file class by name, `mockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")`, and
-that string is not this module's and must not be re-pointed at it.
+symbols this module declares. In particular `:shared-ui` has **its own `utils/Constants.kt`**
+holding top-level functions like `presenterScreenBounds()` — the `SceneViewModel` suites stub its
+file class by name, `mockkStatic("org.churchpresenter.sharedui.utils.ConstantsKt")`, and that
+string is not this module's and must not be re-pointed at it.
 
 **`settings.json` is unaffected by any of this.** Nothing here is a sealed `@Serializable`, so no
 class name is ever written to disk — the file is keyed on property names and enum constant names,
@@ -60,11 +60,11 @@ old document is still migrated on load and on Settings → Import.
 `presenter.Presenting` — moving it would have dragged the live-content enum down here.
 
 **Only `object Constants` came out of `Constants.kt`.** The screen-device, aspect-ratio and song
-header helpers that shared that file stayed behind, in `:composeApp`'s own `utils/Constants.kt`,
-under the name they always had: they are `@Composable`, they read `GraphicsEnvironment`, and they
+header helpers that shared that file stayed behind — now in `:shared-ui`'s `utils/Constants.kt`,
+`AspectRatio.kt` and `SongLines.kt`: they are `@Composable`, they read `GraphicsEnvironment`, and they
 take a `ScreenAssignment` — i.e. they depend on this module, not the other way round. Two files
 named `Constants.kt` is fine here for the same reason two modules may share a package: this one
-declares nothing at top level, so it generates no `ConstantsKt` facade to collide with the app's.
+declares nothing at top level, so it generates no `ConstantsKt` facade to collide with that one.
 
 ## Rules
 

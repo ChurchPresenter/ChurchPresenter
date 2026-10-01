@@ -73,7 +73,7 @@
 - `dialogs/tabs/BibleSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/bible/SelectedVerse.kt` (the `:core-models` module)
 - `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
-- `utils/TrainingDataLogger.kt`, `utils/LiveHistoryLogger.kt` — the session logs in
+- `shared-ui/…/utils/TrainingDataLogger.kt`, `LiveHistoryLogger.kt` (the `:shared-ui` module) — the session logs in
   `~/.churchpresenter/bible-stt-logs/`, named after the STT session id (read from STT's
   `/api/health` on connect and from its socket payloads) or else the app's start time, opened by one `{"type":"session"}` header
   line and deleted after 30 days. `live-content-<session>.jsonl` is the on-screen history, one JSON
@@ -110,12 +110,12 @@
 - `tabs/PicturesTab.kt` — image slideshow UI; its pieces in `tabs/PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
 - `tabs/MediaTab.kt` — audio/video UI; its pieces in `tabs/MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
 - `viewmodel/PicturesViewModel.kt`, `viewmodel/MediaViewModel.kt`, `viewmodel/LocalMediaViewModel.kt`
-- `data/HiddenItemsStore.kt`, `composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
+- `data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
 - `presenter/PicturePresenter.kt`, `presenter/MediaPresenter.kt`
 - `composables/VideoPlayer.kt`
 - `dialogs/tabs/MediaSettingsTab.kt`
-- `dialogs/tabs/ProfileScaleRow.kt`, `utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
+- `dialogs/tabs/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
 - `dialogs/tabs/ProfileOverlayPages.kt`, `dialogs/tabs/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles
 
 ## Lower Thirds & Graphics
@@ -251,7 +251,7 @@
 
 **Source locations:**
 - `PresenterScreen.kt` — output window
-- `presenter/Presenting.kt` — active-content state enum
+- `shared-ui/…/models/Presenting.kt` — active-content state enum
 - `presenter/DeckLinkComposeOutput.kt`
 - `presenter/BrowserSourceVideoRenderer.kt`, `presenter/LocalTransparentBlanking.kt` — Browser Source output
 - `presenter/ComposeScenePump.kt`, `presenter/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
@@ -265,7 +265,7 @@
 - `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
 - `dialogs/tabs/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
-- `utils/AutoFitUtils.kt`
+- `shared-ui/…/utils/AutoFitUtils.kt`
 - `dialogs/tabs/ProfilesSettingsTab.kt`, `dialogs/tabs/ProfileEditor.kt`, `dialogs/tabs/ProfileHeader.kt` — the Profiles tab: the list, the editor, the header
 - `dialogs/tabs/ProfileContentPage.kt`, `dialogs/tabs/ProfileSourcePickers.kt`, `dialogs/tabs/ProfileSources.kt` — what a profile shows, and its Bible and song sources
 - `dialogs/tabs/PreviewShape.kt`, `dialogs/tabs/PreviewShapeChooser.kt` — the preview's shape: presets, a custom ratio or a custom resolution
