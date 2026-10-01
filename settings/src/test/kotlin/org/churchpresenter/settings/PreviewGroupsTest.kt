@@ -8,6 +8,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
 /** How the preview panel's groups are edited: shapes, membership, ordering and renumbering. */
 class PreviewGroupsTest {
 
@@ -217,7 +220,7 @@ class PreviewGroupsTest {
 
     @Test
     fun `settings saved before groups existed load with none and everything shown`() {
-        val s = Json { ignoreUnknownKeys = true }.decodeFromString<ProjectionSettings>("{}")
+        val s = lenientJson.decodeFromString<ProjectionSettings>("{}")
         assertEquals(emptyList(), s.previewGroups)
         assertEquals(true, s.showOutputLabels)
         assertEquals(true, s.showOutputModes)
@@ -228,7 +231,7 @@ class PreviewGroupsTest {
         val original = settings(
             PreviewGroup("g", "Sanctuary", PreviewGroupShape.THREE_BY_ONE, listOf(bs0, screen0), hidden = true),
         ).copy(showOutputLabels = false, showOutputModes = false)
-        val json = Json { ignoreUnknownKeys = true }
+        val json = lenientJson
         assertEquals(original, json.decodeFromString<ProjectionSettings>(json.encodeToString(original)))
     }
 }

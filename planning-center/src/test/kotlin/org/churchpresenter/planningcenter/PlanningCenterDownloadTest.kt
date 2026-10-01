@@ -158,7 +158,7 @@ class PlanningCenterDownloadTest {
         val outcome = download("/attachment.pdf", target)
 
         assertTrue(outcome is PlanningCenterClient.FileDownloadOutcome.Success, "got $outcome")
-        assertEquals(target, (outcome as PlanningCenterClient.FileDownloadOutcome.Success).file)
+        assertEquals(target, outcome.file)
         assertTrue(target.exists())
     }
 

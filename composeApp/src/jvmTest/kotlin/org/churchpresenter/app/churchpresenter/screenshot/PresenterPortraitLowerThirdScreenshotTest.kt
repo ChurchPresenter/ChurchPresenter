@@ -12,10 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -41,6 +40,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
  * The portrait/mobile-aspect counterpart of [PresenterLowerThirdScreenshotTest] -- every one of its
@@ -637,7 +637,7 @@ class PresenterPortraitLowerThirdScreenshotTest {
     @Composable
     private fun CameraFeed() {
         Image(
-            painter = BitmapPainter(loadImageBitmap(photo().inputStream())),
+            painter = BitmapPainter(photo().readBytes().decodeToImageBitmap()),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),

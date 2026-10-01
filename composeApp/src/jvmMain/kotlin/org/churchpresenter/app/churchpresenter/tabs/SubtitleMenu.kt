@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -188,7 +188,8 @@ private fun SidecarRow(
                             modifier = Modifier.widthIn(max = ROUTING_SUMMARY_MAX),
                         )
                         Icon(
-                            if (routingOpen) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowRight,
+                            if (routingOpen) Icons.Filled.KeyboardArrowDown
+                            else Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = stringResource(Res.string.media_subtitles_show_on),
                             modifier = Modifier.size(CHEVRON_SIZE),
                             tint = if (routingOpen) MaterialTheme.colorScheme.primary

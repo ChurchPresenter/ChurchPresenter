@@ -31,7 +31,7 @@ class HostingTest {
             waitForIdle()
 
             assertNotNull(asked, "the host was asked for an editor")
-            assertTrue(isShowing("editing ${asked?.title}"), "and what it returned is what is on screen")
+            assertTrue(isShowing("editing ${asked.title}"), "and what it returned is what is on screen")
         }
     }
 

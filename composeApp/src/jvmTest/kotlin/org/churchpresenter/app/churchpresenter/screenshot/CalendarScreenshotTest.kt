@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.CalendarBibleBook
@@ -49,6 +49,9 @@ import java.util.Locale
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import java.awt.Color as AwtColor
+
+/** Writes settings the way the app does, defaults included. */
+private val defaultsJson = Json { encodeDefaults = true }
 
 /**
  * The Calendar Manager window, state by state, in both themes.
@@ -419,7 +422,7 @@ class CalendarScreenshotTest {
      * read, not by being told.
      */
     private fun seed(folder: File, document: CalendarDocument, corrupt: Boolean) {
-        val json = Json { encodeDefaults = true }.encodeToString(CalendarDocument.serializer(), document)
+        val json = defaultsJson.encodeToString(CalendarDocument.serializer(), document)
         File(folder, "calendar.json").writeText(if (corrupt) "{ not json" else json)
         if (corrupt) File(folder, "calendar.json.bak1").writeText(json)
         PresetStore(folder).save(PresetDocument(presets = STOCK_PRESETS))

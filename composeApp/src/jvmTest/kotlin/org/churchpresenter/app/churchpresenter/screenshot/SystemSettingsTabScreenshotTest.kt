@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalDefaultCalendarFolder
 import org.churchpresenter.settings.AppSettings

@@ -8,13 +8,19 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
+/** Writes settings the way the app does, defaults included. */
+private val defaultsJson = Json { encodeDefaults = true }
+
 /** The Lottie band background: its type constant, its path on the config, and where its templates live. */
 class LottieBandBackgroundTest {
 
     private fun roundTrip(settings: AppSettings): AppSettings =
-        Json { ignoreUnknownKeys = true }.decodeFromString(
+        lenientJson.decodeFromString(
             AppSettings.serializer(),
-            Json { encodeDefaults = true }.encodeToString(AppSettings.serializer(), settings),
+            defaultsJson.encodeToString(AppSettings.serializer(), settings),
         )
 
     @Test
@@ -38,7 +44,7 @@ class LottieBandBackgroundTest {
     @Test
     fun `a file from before the field reads with no template`() {
         val json = """{"backgroundSettings":{"bibleLowerThirdBackground":{"backgroundType":"Color"}}}"""
-        val settings = Json { ignoreUnknownKeys = true }.decodeFromString(AppSettings.serializer(), json)
+        val settings = lenientJson.decodeFromString(AppSettings.serializer(), json)
         assertEquals("", settings.backgroundSettings.bibleLowerThirdBackground.backgroundLottie)
     }
 

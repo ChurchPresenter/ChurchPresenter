@@ -12,7 +12,7 @@ import androidx.compose.ui.SystemTheme
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,6 +37,9 @@ import kotlin.test.assertTrue
  * light would pass on one machine and fail on the next.
  */
 @OptIn(ExperimentalTestApi::class, InternalComposeUiApi::class)
+// LocalSystemTheme/SystemTheme are deprecated with no replacement: they are still the only way to
+// override what `isSystemInDarkTheme()` reads, which the SYSTEM-mode tests need.
+@Suppress("DEPRECATION")
 class ThemeRenderTest {
 
     /** One of the private schemes in `Theme.kt`, by name. */

@@ -279,8 +279,8 @@ object Fixtures {
         val target = slide.xmlObject.newCursor()
         target.toEndToken()
         source.copyXml(target)
-        source.dispose()
-        target.dispose()
+        source.close()
+        target.close()
     }
 
     fun jpegBytes(width: Int, height: Int, color: Color): ByteArray {

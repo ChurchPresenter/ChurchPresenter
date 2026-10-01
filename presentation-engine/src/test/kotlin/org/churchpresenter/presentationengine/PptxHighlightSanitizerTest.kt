@@ -71,7 +71,7 @@ class PptxHighlightSanitizerTest {
                 if (cursor.isStart && cursor.name == QName(dml, "highlight")) count++
             }
         } finally {
-            cursor.dispose()
+            cursor.close()
         }
         return count
     }

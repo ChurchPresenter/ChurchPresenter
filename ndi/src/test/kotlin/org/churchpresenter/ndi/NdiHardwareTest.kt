@@ -31,7 +31,7 @@ import kotlin.test.assertTrue
  * NDI Studio Monitor running beside it. What it proves is that every call this app makes reaches the
  * runtime and comes back sane.
  */
-private const val HALF_RED = 0x80FF0000.toInt().toInt()
+private const val HALF_RED = 0x80FF0000.toInt()
 
 /** How red a received pixel has to be to have come from the frame that was sent. */
 private const val REDDISH = 0x80

@@ -128,7 +128,7 @@ class SongFolderWatcherEventTest {
         File(sub, "new.song").writeText("[Verse 1]")
         val key = watchService.poll(5, TimeUnit.SECONDS)
         assertTrue(key != null, "a song added to the new folder must reach the watcher")
-        key?.reset()
+        key.reset()
     }
 
     @Test

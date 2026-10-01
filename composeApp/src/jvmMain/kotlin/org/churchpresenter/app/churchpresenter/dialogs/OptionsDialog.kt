@@ -19,7 +19,7 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.SettingsRemote
@@ -292,7 +292,7 @@ private fun SettingsTabStrip(
             // reached from the gear on the Dictionary tab itself.
             listOfNotNull(
                 StripTab(0, stringResource(Res.string.appearance), Icons.Filled.Palette),
-                StripTab(1, stringResource(Res.string.bible), Icons.Filled.MenuBook),
+                StripTab(1, stringResource(Res.string.bible), Icons.AutoMirrored.Filled.MenuBook),
                 StripTab(TAB_BACKGROUND, stringResource(Res.string.background), Icons.Filled.Wallpaper),
                 StripTab(TAB_PROFILES, stringResource(Res.string.output_profiles_tab), Icons.Filled.Tune),
                 StripTab(TAB_PROJECTION, stringResource(Res.string.projection), Icons.Filled.DesktopWindows),

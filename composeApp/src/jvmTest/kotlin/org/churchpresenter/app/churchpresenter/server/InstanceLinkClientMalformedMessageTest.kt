@@ -40,7 +40,9 @@ class InstanceLinkClientMalformedMessageTest {
                 webSocket(Constants.ENDPOINT_WS) {
                     session = this
                     try {
-                        while (incoming.receiveCatching().isSuccess) Unit
+                        do {
+                            val frame = incoming.receiveCatching()
+                        } while (frame.isSuccess)
                     } catch (_: Exception) {
                         // the client disconnected, which every test here does on cleanup
                     }

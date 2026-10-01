@@ -15,7 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -135,7 +135,7 @@ fun ServiceSheet(
             } else {
                 stringResource(Res.string.calendar_edit_service)
             },
-            icon = Icons.Filled.EventNote,
+            icon = Icons.AutoMirrored.Filled.EventNote,
             width = SHEET_WIDTH,
             onDismiss = onDismiss,
             footer = {

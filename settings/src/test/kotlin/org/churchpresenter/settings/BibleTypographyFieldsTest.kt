@@ -5,13 +5,19 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
+/** Writes settings the way the app does, defaults included. */
+private val defaultsJson = Json { encodeDefaults = true }
+
 /** The typography fields added for the redesigned Bible settings tab, through settings.json. */
 class BibleTypographyFieldsTest {
 
     private fun roundTrip(settings: AppSettings): AppSettings =
-        Json { ignoreUnknownKeys = true }.decodeFromString(
+        lenientJson.decodeFromString(
             AppSettings.serializer(),
-            Json { encodeDefaults = true }.encodeToString(AppSettings.serializer(), settings),
+            defaultsJson.encodeToString(AppSettings.serializer(), settings),
         )
 
     private val styled = BibleTranslationSettings(
@@ -56,7 +62,7 @@ class BibleTypographyFieldsTest {
         // The fields are additive, so an older file simply has none of them and takes the defaults.
         val older = """{"bibleSettings":{"translations":[{"fileName":"kjv.spb","textFontSize":88}]}}"""
 
-        val decoded = Json { ignoreUnknownKeys = true }.decodeFromString(AppSettings.serializer(), older)
+        val decoded = lenientJson.decodeFromString(AppSettings.serializer(), older)
         val translation = decoded.bibleSettings.translationList().single()
 
         assertEquals(88, translation.textFontSize)

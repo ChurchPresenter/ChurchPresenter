@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -159,7 +159,7 @@ fun NewSongBookDialog(
     val valid = trimmed.isNotEmpty() && !clash && !invalid
 
     LibraryDialog(
-        icon = Icons.Default.LibraryBooks,
+        icon = Icons.AutoMirrored.Filled.LibraryBooks,
         title = stringResource(Res.string.new_song_book),
         subtitle = stringResource(Res.string.new_song_book_subhead),
         onDismiss = onDismiss,
