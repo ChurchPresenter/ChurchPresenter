@@ -75,7 +75,7 @@ class PresentationLoaderFormatTest {
             val file = File(temp, name).apply { writeText("this is not a presentation at all") }
             val result = assertIs<LoadResult.Failure>(PresentationLoader.load(file), name)
             assertNotNull(result.detail, "$name failed with no reason attached")
-            assertTrue(result.detail!!.isNotBlank(), "$name attached a blank reason")
+            assertTrue(result.detail.isNotBlank(), "$name attached a blank reason")
         }
     }
 

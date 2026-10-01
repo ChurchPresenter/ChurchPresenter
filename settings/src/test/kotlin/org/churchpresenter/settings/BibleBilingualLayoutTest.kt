@@ -7,6 +7,12 @@ import org.churchpresenter.settings.utils.bilingualGrid
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
+/** Writes settings the way the app does, defaults included. */
+private val defaultsJson = Json { encodeDefaults = true }
+
 /**
  * How two or more Bible translations sit against each other, per output shape.
  *
@@ -16,11 +22,11 @@ import kotlin.test.assertEquals
  */
 class BibleBilingualLayoutTest {
 
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = lenientJson
 
     private fun roundTrip(settings: AppSettings): AppSettings = json.decodeFromString(
         AppSettings.serializer(),
-        Json { encodeDefaults = true }.encodeToString(AppSettings.serializer(), settings),
+        defaultsJson.encodeToString(AppSettings.serializer(), settings),
     )
 
     @Test

@@ -156,7 +156,7 @@ class AppPathsDeepTest {
         try {
             File(folder, "calendar.json").writeText("{ not json")
             File(folder, "calendar.json.bak1").writeText(
-                kotlinx.serialization.json.Json { encodeDefaults = true }
+                documentJson
                     .encodeToString(
                         org.churchpresenter.calendar.model.CalendarDocument.serializer(),
                         documentWith(service()),

@@ -5,6 +5,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
 /**
  * Resolving what an output actually renders with, once it only ever *assigns* a profile.
  *
@@ -177,7 +180,7 @@ class OutputSettingsResolutionTest {
 
     @Test
     fun `an assignment written before profiles existed decodes with no active profile`() {
-        val assignment = Json { ignoreUnknownKeys = true }
+        val assignment = lenientJson
             .decodeFromString<ScreenAssignment>("""{"targetDisplay":1}""")
         assertNull(assignment.activeProfileId)
     }
@@ -185,7 +188,7 @@ class OutputSettingsResolutionTest {
     @Test
     fun `a profile round-trips through json`() {
         val profile = OutputProfile(id = "p1", name = "Choir", songSettings = SongSettings(lyricsColor = "#FF0000"))
-        val json = Json { ignoreUnknownKeys = true }
+        val json = lenientJson
         val read = json.decodeFromString<OutputProfile>(json.encodeToString(profile))
 
         assertEquals(profile, read)

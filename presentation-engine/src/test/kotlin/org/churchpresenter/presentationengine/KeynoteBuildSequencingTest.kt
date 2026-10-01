@@ -343,7 +343,7 @@ class KeynoteBuildSequencingTest {
         )
         assertEquals(1, assertNotNull(result.timeline).stepCount)
         assertTrue(result.paragraphBuiltDrawableIds.isEmpty(), "nothing was fanned out, so nothing is flagged")
-        assertEquals(KeynoteBuildMapper.layerIdFor(1L), result.timeline!!.steps.single().intervals.single().layerId)
+        assertEquals(KeynoteBuildMapper.layerIdFor(1L), result.timeline.steps.single().intervals.single().layerId)
     }
 
     @Test

@@ -65,7 +65,7 @@ class TransitionParserTest {
                 if (dir != null) cursor.insertAttributeWithValue("dir", dir)
                 if (orient != null) cursor.insertAttributeWithValue("orient", orient)
             }
-            cursor.dispose()
+            cursor.close()
             file.outputStream().use { ppt.write(it) }
         }
         // Re-open from disk: the parser reaches the transition the same way it would in the wild.

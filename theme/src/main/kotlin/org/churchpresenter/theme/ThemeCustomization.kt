@@ -278,7 +278,7 @@ private fun readableOn(picked: Color, backgrounds: List<Color>, lighten: Boolean
 private fun contrast(a: Color, b: Color): Double {
     val la = a.luminance() + LUMINANCE_OFFSET
     val lb = b.luminance() + LUMINANCE_OFFSET
-    return maxOf(la, lb).toDouble() / minOf(la, lb).toDouble()
+    return maxOf(la, lb) / minOf(la, lb)
 }
 
 private fun wrapHue(hue: Float): Float = ((hue % FULL_CIRCLE) + FULL_CIRCLE) % FULL_CIRCLE

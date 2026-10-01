@@ -14,7 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.churchpresenter.calendar.CalendarBibleBook
@@ -53,7 +53,7 @@ internal fun withCalendar(
     try {
         if (document != CalendarDocument()) {
             File(folder, "calendar.json").writeText(
-                Json { encodeDefaults = true }.encodeToString(CalendarDocument.serializer(), document)
+                documentJson.encodeToString(CalendarDocument.serializer(), document)
             )
         }
         runComposeUiTest {
@@ -91,7 +91,7 @@ internal fun withCalendarEditor(
     val folder = Files.createTempDirectory("calendar-editor").toFile()
     try {
         File(folder, "calendar.json").writeText(
-            Json { encodeDefaults = true }.encodeToString(CalendarDocument.serializer(), document)
+            documentJson.encodeToString(CalendarDocument.serializer(), document)
         )
         runComposeUiTest {
             setContent {
@@ -163,6 +163,9 @@ internal fun seedPresets(folder: File, vararg presets: ItemPreset) {
 }
 
 /** A fixed day, so a month grid and a service's "today" never depend on when the suite runs. */
+/** Writes a calendar document the way the app does, defaults included. */
+internal val documentJson = Json { encodeDefaults = true }
+
 internal val TODAY: LocalDate = LocalDate.of(2026, 9, 20)
 
 internal fun song(id: String, title: String = "Song $id") = ScheduleItem.SongItem(

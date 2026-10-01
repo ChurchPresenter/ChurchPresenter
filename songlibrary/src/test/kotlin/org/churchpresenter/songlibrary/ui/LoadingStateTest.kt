@@ -3,7 +3,7 @@
 package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.songs.SongLibrary
 import kotlinx.coroutines.CoroutineDispatcher
 import org.churchpresenter.theme.AppThemeWrapper

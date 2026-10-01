@@ -162,7 +162,7 @@ object SslCertificateManager {
         // Only reuse the server cert if it already uses ECDSA — migrate RSA keystores
         val stillUsable = key != null && cert != null && key.algorithm == "EC" &&
             cert.notAfter.after(Date.from(Instant.now().plus(CERT_RENEWAL_MARGIN_DAYS, ChronoUnit.DAYS)))
-        if (stillUsable && cert != null && serverHost in extractSanNames(cert)) ks else null
+        if (stillUsable && serverHost in extractSanNames(cert)) ks else null
     } catch (_: Exception) {
         null
     }

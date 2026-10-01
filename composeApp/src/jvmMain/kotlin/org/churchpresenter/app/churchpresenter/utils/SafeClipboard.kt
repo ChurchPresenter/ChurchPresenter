@@ -49,6 +49,8 @@ internal class SafeClipboard(private val delegate: Clipboard) : Clipboard {
      * thing with it — wrapping it would be a lie about what they were given, and the failure this
      * class exists for happens on use rather than on access.
      */
+    @Deprecated("Use platform-specific extension to get platform reference.")
+    @Suppress("DEPRECATION")
     override val nativeClipboard: Any get() = delegate.nativeClipboard
 }
 

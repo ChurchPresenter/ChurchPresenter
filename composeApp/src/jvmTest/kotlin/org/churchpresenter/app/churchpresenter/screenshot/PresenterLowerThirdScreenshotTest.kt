@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -42,6 +41,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
  * The lower third — the band across the foot of the screen a broadcast keys over its camera feed.
@@ -658,7 +658,7 @@ class PresenterLowerThirdScreenshotTest {
     @Composable
     private fun CameraFeed() {
         Image(
-            painter = BitmapPainter(loadImageBitmap(photo().inputStream())),
+            painter = BitmapPainter(photo().readBytes().decodeToImageBitmap()),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),

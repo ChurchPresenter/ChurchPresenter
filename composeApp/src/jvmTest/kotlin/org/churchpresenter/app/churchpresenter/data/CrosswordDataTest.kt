@@ -379,7 +379,7 @@ class CrosswordDataTest {
         // Every letter placed must be consistent: read every across and down run back out of the
         // grid and check none of them contradicts itself.
         built.grid.forEach { row ->
-            row.forEach { cell -> if (cell.answer != null) assertTrue(cell.answer!!.isLetter()) }
+            row.forEach { cell -> if (cell.answer != null) assertTrue(cell.answer.isLetter()) }
         }
         assertTrue(built.acrossClues.isNotEmpty() && built.downClues.isNotEmpty())
     }

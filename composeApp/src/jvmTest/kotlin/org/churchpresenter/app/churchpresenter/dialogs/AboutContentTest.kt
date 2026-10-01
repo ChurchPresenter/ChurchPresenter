@@ -92,7 +92,7 @@ class AboutContentTest {
     private fun stubDesktop() {
         openedFile = null
         val fakeDesktop = mockk<Desktop>()
-        every { fakeDesktop.open(any()) } answers { openedFile = firstArg(); Unit }
+        every { fakeDesktop.open(any()) } answers { openedFile = firstArg() }
         mockkStatic(Desktop::class)
         every { Desktop.getDesktop() } returns fakeDesktop
     }
@@ -183,7 +183,6 @@ class AboutContentTest {
         mockkStatic(JOptionPane::class)
         every { JOptionPane.showMessageDialog(any(), any(), any(), any()) } answers {
             told += secondArg<Any?>().toString()
-            Unit
         }
     }
 

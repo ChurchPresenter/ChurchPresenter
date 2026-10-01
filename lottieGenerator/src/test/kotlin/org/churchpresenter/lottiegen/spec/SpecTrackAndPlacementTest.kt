@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
 
 class SpecTrackAndPlacementTest {
 
@@ -197,6 +198,6 @@ class SpecTrackAndPlacementTest {
 
     @Test
     fun `a bundled spec resource loads`() {
-        assertTrue(SpecStyleGenerator.fromResource("/styles/style1_bar_port.json") is SpecStyleGenerator)
+        assertNotNull(SpecStyleGenerator.fromResource("/styles/style1_bar_port.json"))
     }
 }
