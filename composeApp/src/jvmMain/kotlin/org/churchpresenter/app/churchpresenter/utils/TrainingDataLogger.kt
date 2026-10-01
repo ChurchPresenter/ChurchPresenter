@@ -38,9 +38,9 @@ object TrainingDataLogger {
      */
     private const val ENGINE_ERRORS_FILE = "engine-errors.jsonl"
 
-    // Stable per-service session id from STT (db base name or UUID), read by STTManager from STT's
-    // /api/health when it connects (and on its poll), and set again by BibleViewModel on each engine
-    // detection. Null until then; the filename falls back to [runStamp].
+    // Stable per-service session id from STT (db base name or UUID), set by STTManager from STT's
+    // /api/health (on connect and on its poll) and from every socket payload, and again by
+    // BibleViewModel on each engine detection. Null until then; the filename falls back to [runStamp].
     @Volatile var sessionId: String? = null
 
     private val lock = Any()

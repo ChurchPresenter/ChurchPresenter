@@ -258,6 +258,7 @@ class STTManager {
     }
 
     internal fun handleTranscriptionUpdate(data: JSONObject) {
+        applySessionId(data.stringOrNull("session_id"))
         val segmentsArray = data.optJSONArray("segments")
         if (segmentsArray != null) {
             _segments.clear()
@@ -285,6 +286,7 @@ class STTManager {
     }
 
     internal fun handleTranslationUpdate(data: JSONObject) {
+        applySessionId(data.stringOrNull("session_id"))
         val segmentsArray = data.optJSONArray("segments")
         if (segmentsArray != null) {
             _translationSegments.clear()
@@ -428,13 +430,16 @@ class STTManager {
             .build()
         val response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
         if (response.statusCode() != HTTP_OK) return@runCatching null
-        JSONObject(response.body()).stringOrNull("session_id")?.takeIf { it.isNotBlank() }
+        JSONObject(response.body()).stringOrNull("session_id")
     }.getOrNull()
 
     /**
      * Keys the training-data and on-screen history logs by [sessionId] from now on, so a service's
      * opening songs share its session's files instead of waiting for the first Bible detection
-     * (which still sets it too, as a fallback). Null leaves the current id alone.
+     * (which still sets it too, as a fallback). Two sources feed it: `/api/health`, read on connect
+     * and on every poll, which knows the session before anyone speaks; and the top-level
+     * `session_id` STT puts on every socket payload, which follows a new session the moment it
+     * starts. Null leaves the current id alone.
      */
     internal fun applySessionId(sessionId: String?) {
         if (sessionId != null) TrainingDataLogger.sessionId = sessionId
