@@ -45,10 +45,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.select_presentation_file
 import org.churchpresenter.strings.generated.resources.media_vlc_required
 import org.churchpresenter.strings.generated.resources.slide_number
@@ -283,7 +283,7 @@ internal fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: M
                 Text(detail, style = MaterialTheme.typography.bodySmall)
             }
             KeyIconButton(onClick = onDismiss) {
-                Icon(painterResource(AppRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
+                Icon(painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
             }
         }
     }

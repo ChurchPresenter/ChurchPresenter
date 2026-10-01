@@ -104,6 +104,7 @@ module-specific notes there, not here.**
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
 | `calendar/`            | `:calendar`            | The Calendar Manager — planned services on a month grid, each with a run of show   | [AGENT.md](calendar/AGENT.md)            |
 | `strings/`             | `:strings`             | The app's user-facing strings, every locale, and the `Res` class generated from them | [AGENT.md](strings/AGENT.md)             |
+| `icons/`               | `:icons`               | The UI drawables and the window-icon frames — not the installer icons               | [AGENT.md](icons/AGENT.md)               |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

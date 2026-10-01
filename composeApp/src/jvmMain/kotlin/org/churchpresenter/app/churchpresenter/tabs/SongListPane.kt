@@ -71,16 +71,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.filter
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.churchpresenter.strings.generated.resources.song_favorites
 import org.churchpresenter.strings.generated.resources.song_favorites_clear
 import org.churchpresenter.strings.generated.resources.song_play_count
@@ -361,7 +361,7 @@ private fun SongListScope.SongSearchBar() {
                 )
             } else {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_search),
+                    painter = painterResource(IconRes.drawable.ic_search),
                     contentDescription = stringResource(Res.string.search),
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onPrimary,
@@ -384,7 +384,7 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_search),
+            painter = painterResource(IconRes.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -434,7 +434,7 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
                 modifier = Modifier.size(30.dp),
             ) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -509,7 +509,7 @@ private fun SongListScope.SongFavoritesHeader() {
     ) {
         Icon(
             painter = painterResource(
-                if (favoritesExpanded) AppRes.drawable.ic_arrow_down else AppRes.drawable.ic_arrow_up
+                if (favoritesExpanded) IconRes.drawable.ic_arrow_down else IconRes.drawable.ic_arrow_up
             ),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
@@ -546,7 +546,7 @@ private fun SongListScope.SongFavoritesHeader() {
                 onClearFavorites()
             }) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_delete),
+                    painter = painterResource(IconRes.drawable.ic_delete),
                     contentDescription = stringResource(Res.string.song_favorites_clear),
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -589,7 +589,7 @@ private fun SongListScope.SongFavoriteItem(song: SongItem) {
                 modifier = Modifier.size(20.dp)
             ) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_playlist_add),
+                    painter = painterResource(IconRes.drawable.ic_playlist_add),
                     contentDescription = stringResource(Res.string.add_to_schedule),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.secondary

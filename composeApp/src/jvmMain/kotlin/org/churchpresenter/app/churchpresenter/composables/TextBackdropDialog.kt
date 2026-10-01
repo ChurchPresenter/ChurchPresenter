@@ -43,7 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.backdrop_border_color
 import org.churchpresenter.strings.generated.resources.backdrop_border_padding
@@ -62,7 +62,7 @@ import org.churchpresenter.strings.generated.resources.backdrop_saved_look
 import org.churchpresenter.strings.generated.resources.backdrop_style
 import org.churchpresenter.strings.generated.resources.backdrop_vertical_offset
 import org.churchpresenter.strings.generated.resources.close
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -128,7 +128,7 @@ fun TextBackdropDialog(
                         SectionLabel(stringResource(Res.string.backdrop_style), Modifier.weight(1f))
                         KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
                             Icon(
-                                painter = painterResource(AppRes.drawable.ic_close),
+                                painter = painterResource(IconRes.drawable.ic_close),
                                 contentDescription = stringResource(Res.string.close),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(CLOSE_ICON_SIZE),

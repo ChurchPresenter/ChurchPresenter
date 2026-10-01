@@ -38,9 +38,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.loading_slides
 import org.churchpresenter.strings.generated.resources.remove
 import org.churchpresenter.strings.generated.resources.select_presentation_file
@@ -118,7 +118,7 @@ internal fun PresentationTabScope.PresentationBody(viewModel: PresentationViewMo
                                 viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
                             }, modifier = Modifier.size(16.dp)) {
                                 Icon(
-                                    painterResource(AppRes.drawable.ic_close),
+                                    painterResource(IconRes.drawable.ic_close),
                                     contentDescription = stringResource(Res.string.remove),
                                     modifier = Modifier.size(10.dp),
                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),

@@ -14,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_remove
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_remove
 import org.churchpresenter.strings.generated.resources.preview_transpose
 import org.churchpresenter.strings.generated.resources.song_transpose_down
 import org.churchpresenter.strings.generated.resources.song_transpose_up
@@ -46,7 +46,7 @@ internal fun TransposeOverlay(steps: Int, onStep: (Int?) -> Unit, modifier: Modi
     ) {
         KeyIconButton(onClick = { onStep(-1) }, modifier = Modifier.size(22.dp)) {
             Icon(
-                painter = painterResource(AppRes.drawable.ic_remove),
+                painter = painterResource(IconRes.drawable.ic_remove),
                 contentDescription = stringResource(Res.string.song_transpose_down),
                 tint = ink,
                 modifier = Modifier.size(12.dp),
@@ -62,7 +62,7 @@ internal fun TransposeOverlay(steps: Int, onStep: (Int?) -> Unit, modifier: Modi
         )
         KeyIconButton(onClick = { onStep(1) }, modifier = Modifier.size(22.dp)) {
             Icon(
-                painter = painterResource(AppRes.drawable.ic_add),
+                painter = painterResource(IconRes.drawable.ic_add),
                 contentDescription = stringResource(Res.string.song_transpose_up),
                 tint = ink,
                 modifier = Modifier.size(12.dp),

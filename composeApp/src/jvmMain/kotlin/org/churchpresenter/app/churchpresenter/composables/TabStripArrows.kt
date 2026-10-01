@@ -11,10 +11,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import org.churchpresenter.icons.generated.resources.ic_arrow_left
+import org.churchpresenter.icons.generated.resources.ic_arrow_right
 import org.churchpresenter.strings.generated.resources.tab_strip_scroll_back
 import org.churchpresenter.strings.generated.resources.tab_strip_scroll_forward
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +55,7 @@ fun TabStripBackArrow(scrollState: ScrollState) {
     val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value > 0) {
         TabStripArrow(
-            AppRes.drawable.ic_arrow_left,
+            IconRes.drawable.ic_arrow_left,
             Res.string.tab_strip_scroll_back,
             TAB_STRIP_ARROW_BACK_TAG,
             coroutineScope,
@@ -72,7 +72,7 @@ fun TabStripForwardArrow(scrollState: ScrollState) {
     val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue) {
         TabStripArrow(
-            AppRes.drawable.ic_arrow_right,
+            IconRes.drawable.ic_arrow_right,
             Res.string.tab_strip_scroll_forward,
             TAB_STRIP_ARROW_FORWARD_TAG,
             coroutineScope,

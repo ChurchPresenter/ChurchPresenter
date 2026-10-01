@@ -64,16 +64,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.ic_label
-import churchpresenter.composeapp.generated.resources.ic_redo
-import churchpresenter.composeapp.generated.resources.ic_save
-import churchpresenter.composeapp.generated.resources.ic_undo
-import churchpresenter.composeapp.generated.resources.ic_zoom_in
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_label
+import org.churchpresenter.icons.generated.resources.ic_redo
+import org.churchpresenter.icons.generated.resources.ic_save
+import org.churchpresenter.icons.generated.resources.ic_undo
+import org.churchpresenter.icons.generated.resources.ic_zoom_in
 import org.churchpresenter.strings.generated.resources.open_calendar_manager
 import org.churchpresenter.strings.generated.resources.planning_center_import_title
 import org.churchpresenter.strings.generated.resources.schedule
@@ -298,14 +298,14 @@ private fun scheduleToolbarIconSizeLabel(size: ScheduleToolbarIconSize): String 
 @Composable
 private fun scheduleToolbarButtonPainter(button: ScheduleToolbarButton): Painter = when (button) {
     ScheduleToolbarButton.ITEM_COUNT -> rememberVectorPainter(Icons.AutoMirrored.Filled.List)
-    ScheduleToolbarButton.ZOOM -> painterResource(AppRes.drawable.ic_zoom_in)
-    ScheduleToolbarButton.NEW -> painterResource(AppRes.drawable.ic_add)
-    ScheduleToolbarButton.OPEN -> painterResource(AppRes.drawable.ic_folder)
-    ScheduleToolbarButton.SAVE -> painterResource(AppRes.drawable.ic_save)
-    ScheduleToolbarButton.CLEAR -> painterResource(AppRes.drawable.ic_delete)
-    ScheduleToolbarButton.UNDO -> painterResource(AppRes.drawable.ic_undo)
-    ScheduleToolbarButton.REDO -> painterResource(AppRes.drawable.ic_redo)
-    ScheduleToolbarButton.ADD_LABEL -> painterResource(AppRes.drawable.ic_label)
+    ScheduleToolbarButton.ZOOM -> painterResource(IconRes.drawable.ic_zoom_in)
+    ScheduleToolbarButton.NEW -> painterResource(IconRes.drawable.ic_add)
+    ScheduleToolbarButton.OPEN -> painterResource(IconRes.drawable.ic_folder)
+    ScheduleToolbarButton.SAVE -> painterResource(IconRes.drawable.ic_save)
+    ScheduleToolbarButton.CLEAR -> painterResource(IconRes.drawable.ic_delete)
+    ScheduleToolbarButton.UNDO -> painterResource(IconRes.drawable.ic_undo)
+    ScheduleToolbarButton.REDO -> painterResource(IconRes.drawable.ic_redo)
+    ScheduleToolbarButton.ADD_LABEL -> painterResource(IconRes.drawable.ic_label)
     ScheduleToolbarButton.PLANNING_CENTER -> rememberVectorPainter(Icons.Default.CloudDownload)
     ScheduleToolbarButton.CALENDAR -> rememberVectorPainter(Icons.Default.CalendarMonth)
 }
@@ -437,7 +437,7 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_add),
+            painter = painterResource(IconRes.drawable.ic_add),
             contentDescription = null,
             tint = contentColor,
             modifier = Modifier.size(11.dp)

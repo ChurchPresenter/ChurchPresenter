@@ -26,9 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_check
+import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.strings.generated.resources.media_subtitles_all_outputs
 import org.churchpresenter.strings.generated.resources.media_subtitles_embedded
 import org.churchpresenter.strings.generated.resources.media_subtitles_off
@@ -251,7 +251,7 @@ private fun routingSummary(track: SidecarSubtitle, profiles: List<OutputProfile>
 
 @Composable
 private fun CheckMark() {
-    Icon(painterResource(AppRes.drawable.ic_check), null, Modifier.size(CHECK_SIZE))
+    Icon(painterResource(IconRes.drawable.ic_check), null, Modifier.size(CHECK_SIZE))
 }
 
 /** Test handle for the Off row. */

@@ -50,13 +50,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.strings.generated.resources.filter
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.icons.generated.resources.ic_star
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.churchpresenter.strings.generated.resources.song_columns
 import org.churchpresenter.app.churchpresenter.utils.moveColumn
 import org.jetbrains.compose.resources.painterResource
@@ -199,8 +199,8 @@ private fun SongListScope.SongActionHeaderCell(
             // name is a semantics question for the whole table, not this icon.
             Icon(
                 painter = painterResource(
-                    if (colId == SongColumnId.FAVORITES) AppRes.drawable.ic_star
-                    else AppRes.drawable.ic_playlist_add
+                    if (colId == SongColumnId.FAVORITES) IconRes.drawable.ic_star
+                    else IconRes.drawable.ic_playlist_add
                 ),
                 contentDescription = null,
                 modifier = Modifier.size(13.dp),
@@ -209,7 +209,7 @@ private fun SongListScope.SongActionHeaderCell(
             if (isSorted) {
                 Icon(
                     painter = painterResource(
-                        if (currentSortAscending) AppRes.drawable.ic_arrow_up else AppRes.drawable.ic_arrow_down,
+                        if (currentSortAscending) IconRes.drawable.ic_arrow_up else IconRes.drawable.ic_arrow_down,
                     ),
                     contentDescription = null,
                     modifier = Modifier.size(8.dp),
@@ -258,7 +258,7 @@ private fun SongListScope.SongDataHeaderCell(
             if (isSorted) {
                 Icon(
                     painter = painterResource(
-                        if (currentSortAscending) AppRes.drawable.ic_arrow_up else AppRes.drawable.ic_arrow_down,
+                        if (currentSortAscending) IconRes.drawable.ic_arrow_up else IconRes.drawable.ic_arrow_down,
                     ),
                     contentDescription = null,
                     modifier = Modifier.size(10.dp),

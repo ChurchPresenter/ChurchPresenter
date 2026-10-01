@@ -47,11 +47,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.apply
 import org.churchpresenter.strings.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.ic_warning
+import org.churchpresenter.icons.generated.resources.ic_warning
 import org.churchpresenter.strings.generated.resources.menu_keyboard_shortcuts
 import org.churchpresenter.strings.generated.resources.no_results_found
 import org.churchpresenter.strings.generated.resources.ok
@@ -611,7 +611,7 @@ private fun ConflictsFilterChip(count: Int, selected: Boolean, onClick: () -> Un
         onClick = onClick,
         leadingIcon = {
             Icon(
-                painter = painterResource(AppRes.drawable.ic_warning),
+                painter = painterResource(IconRes.drawable.ic_warning),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = if (count > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

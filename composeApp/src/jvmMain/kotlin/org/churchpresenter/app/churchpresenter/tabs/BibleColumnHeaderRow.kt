@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.BibleTranslationSettings
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.bible_translation_order
@@ -42,9 +42,9 @@ import org.churchpresenter.strings.generated.resources.swap_bibles
 import org.churchpresenter.strings.generated.resources.bible_cross_references
 import org.churchpresenter.strings.generated.resources.bible_cross_references_title
 import org.churchpresenter.strings.generated.resources.hold_live_modifier_hint
-import churchpresenter.composeapp.generated.resources.ic_link
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_swap
+import org.churchpresenter.icons.generated.resources.ic_link
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_swap
 import org.churchpresenter.strings.generated.resources.stt_connect
 import org.churchpresenter.strings.generated.resources.stt_disconnect
 import org.churchpresenter.strings.generated.resources.swap_bibles_hint
@@ -182,7 +182,7 @@ private fun CrossRefsPill(crossRefsDocked: Boolean, onCrossReferencesToggle: () 
             onClick = onCrossReferencesToggle,
             leadingIcon = {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_link),
+                    painter = painterResource(IconRes.drawable.ic_link),
                     contentDescription = stringResource(Res.string.bible_cross_references),
                     modifier = Modifier.size(12.dp),
                 )
@@ -210,7 +210,7 @@ private fun HoldLivePill(
     ) {
         val icon: @Composable () -> Unit = {
             Icon(
-                painter = painterResource(AppRes.drawable.ic_pause),
+                painter = painterResource(IconRes.drawable.ic_pause),
                 contentDescription = null,
                 modifier = Modifier.size(10.dp),
             )
@@ -249,7 +249,7 @@ private fun TranslationControls(
                 onSwapTranslations()
             },
             tooltipText = swapBiblesStr,
-            painter = painterResource(AppRes.drawable.ic_swap),
+            painter = painterResource(IconRes.drawable.ic_swap),
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary,
             tooltipContent = {

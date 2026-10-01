@@ -30,10 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.background
-import churchpresenter.composeapp.generated.resources.ic_settings
+import org.churchpresenter.icons.generated.resources.ic_settings
 import org.churchpresenter.strings.generated.resources.tab_visibility
 import org.churchpresenter.strings.generated.resources.tooltip_settings
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
@@ -100,7 +100,7 @@ private fun MainDesktopScope.TabBar() {
             buttonSize = TOOLBAR_KEY_SIZE,
         )
         ToolbarKey(
-            painter = painterResource(AppRes.drawable.ic_settings),
+            painter = painterResource(IconRes.drawable.ic_settings),
             text = stringResource(Res.string.tooltip_settings),
             onClick = onShowSettings,
             style = ToolbarKeyStyle.PANEL_TOGGLE,

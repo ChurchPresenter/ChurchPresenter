@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.animation_crossfade
 import org.churchpresenter.strings.generated.resources.animation_fade
@@ -62,11 +62,11 @@ import org.churchpresenter.strings.generated.resources.animation_slide_right
 import org.churchpresenter.strings.generated.resources.animation_type
 import org.churchpresenter.strings.generated.resources.auto_scroll_interval
 import org.churchpresenter.strings.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_skip_next
-import churchpresenter.composeapp.generated.resources.ic_skip_previous
+import org.churchpresenter.icons.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_skip_next
+import org.churchpresenter.icons.generated.resources.ic_skip_previous
 import org.churchpresenter.strings.generated.resources.loop_off
 import org.churchpresenter.strings.generated.resources.loop_on
 import org.churchpresenter.strings.generated.resources.next_image
@@ -199,7 +199,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
         ) {
             KeyIconButton(onClick = { goPrevious(viewModel) }, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painterResource(AppRes.drawable.ic_skip_previous),
+                    painterResource(IconRes.drawable.ic_skip_previous),
                     contentDescription = stringResource(Res.string.previous_image),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
@@ -237,7 +237,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
                 )
             ) {
                 Icon(
-                    painterResource(if (viewModel.isPlaying) AppRes.drawable.ic_pause else AppRes.drawable.ic_play),
+                    painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                     contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                     modifier = Modifier.size(15.dp),
                 )
@@ -265,7 +265,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
         ) {
             KeyIconButton(onClick = { goNext(viewModel) }, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painterResource(AppRes.drawable.ic_skip_next),
+                    painterResource(IconRes.drawable.ic_skip_next),
                     contentDescription = stringResource(Res.string.next_image),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
@@ -356,7 +356,7 @@ private fun PresentationTabScope.PresentationLoopButton(viewModel: PresentationV
             )
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_refresh),
+                painterResource(IconRes.drawable.ic_refresh),
                 contentDescription = stringResource(
                     if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off,
                 ),

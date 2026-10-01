@@ -16,9 +16,9 @@ The Compose Resources class is generated into `org.churchpresenter.strings.gener
 by `packageOfResClass` in `build.gradle.kts`. Code reads a string as `Res.string.<key>` with both
 imported from that package.
 
-`:composeApp` keeps its drawables, fonts and files, so it still has its own `Res` in
-`churchpresenter.composeapp.generated.resources`. A file that needs both imports that one as
-`Res as AppRes` (`AppRes.drawable.ic_play`) and leaves `Res` to the strings.
+Drawables have their own `Res` in `:icons`. A file that needs both imports that one as
+`Res as IconRes` (`IconRes.drawable.ic_play`) and leaves `Res` to the strings; the rare file that
+also reads `:composeApp`'s fonts or files imports that `Res` as `AppRes`.
 
 ## Rules
 

@@ -74,12 +74,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.output_profile_blank
 import org.churchpresenter.strings.generated.resources.output_profile_swap_menu_tooltip
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
 import org.churchpresenter.strings.generated.resources.fill_badge
 import org.churchpresenter.strings.generated.resources.browser_source_output_label
 import org.churchpresenter.strings.generated.resources.ndi_output_numbered
@@ -1177,7 +1177,7 @@ private fun MediaPreviewControls(
         ) {
             Icon(
                 painter = painterResource(
-                    if (isPlaying) AppRes.drawable.ic_pause else AppRes.drawable.ic_play
+                    if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
                 ),
                 contentDescription = stringResource(
                     if (isPlaying) Res.string.pause else Res.string.play

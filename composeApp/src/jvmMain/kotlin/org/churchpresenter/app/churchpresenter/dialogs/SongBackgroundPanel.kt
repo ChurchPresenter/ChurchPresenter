@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import org.churchpresenter.strings.generated.resources.close
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.strings.generated.resources.song_background_applies_to
@@ -329,7 +329,7 @@ private fun PanelHeader(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                painter = painterResource(AppRes.drawable.ic_close),
+                painter = painterResource(IconRes.drawable.ic_close),
                 contentDescription = stringResource(Res.string.close),
                 modifier = Modifier.size(11.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

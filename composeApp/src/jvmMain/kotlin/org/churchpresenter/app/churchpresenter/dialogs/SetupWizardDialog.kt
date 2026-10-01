@@ -70,7 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.setup_wizard_title
 import org.churchpresenter.strings.generated.resources.appearance
@@ -81,8 +81,8 @@ import org.churchpresenter.strings.generated.resources.content_outputs_enabled_s
 import org.churchpresenter.strings.generated.resources.detected_screens
 import org.churchpresenter.strings.generated.resources.full_screen
 import org.churchpresenter.strings.generated.resources.display_mode
-import churchpresenter.composeapp.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.ic_settings
+import org.churchpresenter.icons.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_settings
 import org.churchpresenter.strings.generated.resources.identify_screen
 import org.churchpresenter.strings.generated.resources.key_output
 import org.churchpresenter.strings.generated.resources.key_output_none
@@ -245,7 +245,7 @@ fun SetupWizardDialog(
     Window(
         onCloseRequest = onDismiss,
         title = stringResource(Res.string.setup_wizard_title),
-        icon = painterResource(AppRes.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = windowState,
         resizable = true,
         alwaysOnTop = alwaysOnTop
@@ -695,7 +695,7 @@ private fun WelcomeStep(onGoToStep: (Int) -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(AppRes.drawable.ic_app_icon),
+                painter = painterResource(IconRes.drawable.ic_app_icon),
                 contentDescription = null,
                 modifier = Modifier.size(30.dp),
             )
@@ -1297,7 +1297,7 @@ internal fun withoutLeadingNumber(text: String): String = text.replace(LEADING_N
 private fun OpenSettingsButton(onOpenSettings: () -> Unit) {
     KeyButton(shape = AppShape(8.dp), onClick = onOpenSettings) {
         Image(
-            painter = painterResource(AppRes.drawable.ic_settings),
+            painter = painterResource(IconRes.drawable.ic_settings),
             contentDescription = null,
             modifier = Modifier.size(15.dp),
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),

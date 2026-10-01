@@ -73,7 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.ccli_activity_title
 import org.churchpresenter.strings.generated.resources.ccli_bible_books_chart
@@ -106,7 +106,7 @@ import org.churchpresenter.strings.generated.resources.clear_statistics
 import org.churchpresenter.strings.generated.resources.confirm_delete
 import org.churchpresenter.strings.generated.resources.delete_saved_string
 import org.churchpresenter.strings.generated.resources.em_dash
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.ccli_report_title
 import org.churchpresenter.strings.generated.resources.stats_filter_all_bibles
 import org.churchpresenter.strings.generated.resources.stats_filter_all_songbooks
@@ -948,7 +948,7 @@ private fun LibraryPicker(
 @Composable
 private fun RowClearButton(label: String, alpha: Float, onClear: () -> Unit) {
     TooltipIconButton(
-        painter = painterResource(AppRes.drawable.ic_delete),
+        painter = painterResource(IconRes.drawable.ic_delete),
         text = stringResource(Res.string.stats_clear_item),
         onClick = onClear,
         iconSize = 13.dp,
