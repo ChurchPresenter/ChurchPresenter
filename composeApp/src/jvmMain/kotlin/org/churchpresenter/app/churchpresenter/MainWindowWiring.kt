@@ -16,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.calendar.CalendarFileWatcher
@@ -50,8 +49,10 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
                     },
                 ),
                 operatorLive = {
-                    presenterManager.presentingMode.value != Presenting.NONE &&
-                        engineLiveItem?.let { liveDurationLog.showing(it) } != true
+                    isOperatorLive(
+                        presenterManager.presentingMode.value,
+                        engineLiveItem?.let { liveDurationLog.showing(it) },
+                    )
                 },
             )
         }
@@ -214,11 +215,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
                 remoteActivityNotifications.add(
                     RemoteActivityNotification(
                         type = type,
-                        title = if (type == RemoteEventType.CLEAR) {
-                            clearDisplayTitle
-                        } else {
-                            action.title.text()
-                        },
+                        title = remoteActivityTitle(type, clearDisplayTitle, action.title.text()),
                         detail = action.detail.text(),
                         clientId = action.clientId,
                         clientLabel = remoteClientManager.getLabel(action.clientId)

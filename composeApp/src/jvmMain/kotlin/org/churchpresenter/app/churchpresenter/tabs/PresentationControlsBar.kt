@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.TooltipArea
@@ -94,7 +95,7 @@ import org.churchpresenter.theme.sunken
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun PresentationTabScope.PresentationControlsBar() {
+internal fun PresentationTabScope.PresentationControlsBar(viewModel: PresentationViewModel) {
     // ── Playback controls bar ─────────────────────────────────────
     // Adaptive shortcut hint: inline at the end of the controls bar when it fits on one
     // line there, otherwise on its own full-width row below the bar — never ellipsized.
@@ -121,16 +122,16 @@ internal fun PresentationTabScope.PresentationControlsBar() {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        PresentationTransport()
-        PresentationSlideCounter()
-        PresentationLoopButton()
+        PresentationTransport(viewModel)
+        PresentationSlideCounter(viewModel)
+        PresentationLoopButton(viewModel)
 
         // Divider
         Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-        AutoScrollIntervalBox()
-        TransitionDurationBox()
-        PresentationAnimationDropdown()
+        AutoScrollIntervalBox(viewModel)
+        TransitionDurationBox(viewModel)
+        PresentationAnimationDropdown(viewModel)
 
         // Measuring slot: takes the leftover width of the bar's last flow line and only
         // renders the hint here when the whole text fits it on a single line. The Box
@@ -172,7 +173,7 @@ internal fun PresentationTabScope.PresentationControlsBar() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PresentationTabScope.PresentationTransport() {
+private fun PresentationTabScope.PresentationTransport(viewModel: PresentationViewModel) {
     // Transport (inner gap: 4dp)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         TooltipArea(
@@ -195,7 +196,7 @@ private fun PresentationTabScope.PresentationTransport() {
                 offset = DpOffset(0.dp, 4.dp),
             )
         ) {
-            KeyIconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
+            KeyIconButton(onClick = { goPrevious(viewModel) }, modifier = Modifier.size(30.dp)) {
                 Icon(
                     painterResource(Res.drawable.ic_skip_previous),
                     contentDescription = stringResource(Res.string.previous_image),
@@ -261,7 +262,7 @@ private fun PresentationTabScope.PresentationTransport() {
                 offset = DpOffset(0.dp, 4.dp),
             )
         ) {
-            KeyIconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
+            KeyIconButton(onClick = { goNext(viewModel) }, modifier = Modifier.size(30.dp)) {
                 Icon(
                     painterResource(Res.drawable.ic_skip_next),
                     contentDescription = stringResource(Res.string.next_image),
@@ -274,7 +275,7 @@ private fun PresentationTabScope.PresentationTransport() {
 }
 
 @Composable
-private fun PresentationTabScope.PresentationSlideCounter() {
+private fun PresentationTabScope.PresentationSlideCounter(viewModel: PresentationViewModel) {
     if (viewModel.slideFiles.isNotEmpty()) {
         val hiddenCount = viewModel.hiddenSlides.count { it in viewModel.slideFiles.indices }
         Text(
@@ -315,7 +316,7 @@ private fun PresentationTabScope.PresentationSlideCounter() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PresentationTabScope.PresentationLoopButton() {
+private fun PresentationTabScope.PresentationLoopButton(viewModel: PresentationViewModel) {
     // Loop button
     TooltipArea(
         tooltip = {
@@ -365,7 +366,7 @@ private fun PresentationTabScope.PresentationLoopButton() {
 }
 
 @Composable
-private fun PresentationTabScope.AutoScrollIntervalBox() {
+private fun PresentationTabScope.AutoScrollIntervalBox(viewModel: PresentationViewModel) {
     var editingInterval by remember { mutableStateOf(false) }
     var intervalInput by remember(appSettings.presentationSettings.autoScrollInterval) {
         mutableStateOf(appSettings.presentationSettings.autoScrollInterval.toInt().toString())
@@ -441,7 +442,7 @@ private fun PresentationTabScope.AutoScrollIntervalBox() {
 }
 
 @Composable
-private fun PresentationTabScope.TransitionDurationBox() {
+private fun PresentationTabScope.TransitionDurationBox(viewModel: PresentationViewModel) {
     var editingTransition by remember { mutableStateOf(false) }
     var transitionInput by remember(appSettings.presentationSettings.transitionDuration) {
         mutableStateOf(appSettings.presentationSettings.transitionDuration.toInt().toString())
@@ -519,7 +520,7 @@ private fun PresentationTabScope.TransitionDurationBox() {
 }
 
 @Composable
-private fun PresentationTabScope.PresentationAnimationDropdown() {
+private fun PresentationTabScope.PresentationAnimationDropdown(viewModel: PresentationViewModel) {
     val crossfadeText = stringResource(Res.string.animation_crossfade)
     val fadeText = stringResource(Res.string.animation_fade)
     val slideLeftText = stringResource(Res.string.animation_slide_left)

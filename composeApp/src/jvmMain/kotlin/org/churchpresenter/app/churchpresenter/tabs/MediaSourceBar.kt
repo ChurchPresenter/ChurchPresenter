@@ -5,6 +5,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -81,18 +82,18 @@ import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
 /** The top card: the source bar, the recent files, and the playback controls. */
 @Composable
-internal fun MediaTabScope.MediaTopCard() {
+internal fun MediaTabScope.MediaTopCard(viewModel: MediaViewModel) {
     Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
-        MediaSourceBar()
+        MediaSourceBar(viewModel)
 
-        MediaRecentBar()
+        MediaRecentBar(viewModel)
 
-        MediaControlsBar()
+        MediaControlsBar(viewModel)
     }
 }
 
 @Composable
-private fun MediaTabScope.MediaSourceBar() {
+private fun MediaTabScope.MediaSourceBar(viewModel: MediaViewModel) {
     // ── Source bar ────────────────────────────────────────────────
     // FlowRow rather than Row: Media carries a source-type SegmentedButton that neither the
     // Pictures nor the Presentation bar has, so at a narrow panel width the fixed content
@@ -121,22 +122,22 @@ private fun MediaTabScope.MediaSourceBar() {
 
         when (selectedSourceType) {
             Constants.MEDIA_TYPE_LOCAL -> {
-                MediaLocalSource(Modifier.weight(1f))
+                MediaLocalSource(viewModel, Modifier.weight(1f))
             }
             Constants.MEDIA_TYPE_URL -> {
-                MediaUrlSource(Modifier.weight(1f))
+                MediaUrlSource(viewModel, Modifier.weight(1f))
             }
         }
         // The "now playing" label travels with the two action buttons as one group, so the
         // status and the controls it describes wrap together rather than splitting across
         // lines at a narrow width.
-        MediaSourceActions()
+        MediaSourceActions(viewModel)
     }
 }
 
 /** Choose a file, and the name of the one loaded. */
 @Composable
-private fun MediaTabScope.MediaLocalSource(modifier: Modifier) {
+private fun MediaTabScope.MediaLocalSource(viewModel: MediaViewModel, modifier: Modifier) {
     RaisedButton(
         onClick = {
             scope.launch {
@@ -210,7 +211,7 @@ private fun MediaTabScope.MediaLocalSource(modifier: Modifier) {
 
 /** The address field and Load. */
 @Composable
-private fun MediaTabScope.MediaUrlSource(modifier: Modifier) {
+private fun MediaTabScope.MediaUrlSource(viewModel: MediaViewModel, modifier: Modifier) {
     Row(
         modifier = modifier
             .height(42.dp)
@@ -268,7 +269,7 @@ private fun MediaTabScope.MediaUrlSource(modifier: Modifier) {
 
 /** "Now playing", Save preset, Add to Schedule and Go Live, which wrap together. */
 @Composable
-private fun MediaTabScope.MediaSourceActions() {
+private fun MediaTabScope.MediaSourceActions(viewModel: MediaViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         if (viewModel.isLoaded) {
             Text(
@@ -329,7 +330,7 @@ private fun MediaTabScope.MediaSourceActions() {
 }
 
 @Composable
-private fun MediaTabScope.MediaRecentBar() {
+private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {
     // ── Recent files bar ──────────────────────────────────────────
     val recentOrdered = RecentMediaFiles.pinned +
         RecentMediaFiles.paths.filter { it !in RecentMediaFiles.pinned }

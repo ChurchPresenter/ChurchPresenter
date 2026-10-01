@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,15 +72,15 @@ import org.churchpresenter.theme.raisedHover
 /* The Presentation tab's body: the slide grid, or the loading, error and empty states, and the open files. */
 
 @Composable
-internal fun PresentationTabScope.PresentationBody() {
+internal fun PresentationTabScope.PresentationBody(viewModel: PresentationViewModel) {
     // ── Slide content + right sidebar ────────────────────────────
     Row(modifier = Modifier.fillMaxSize()) {
         // ── Left: slide grid / states ────────────────────────────
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
             if (viewModel.slideFiles.isNotEmpty()) {
-                PresentationSlideGrid(Modifier.weight(1f).fillMaxWidth())
+                PresentationSlideGrid(viewModel, Modifier.weight(1f).fillMaxWidth())
             } else if (viewModel.selectedPresentation != null) {
-                PresentationLoadingOrError(Modifier.weight(1f).fillMaxWidth())
+                PresentationLoadingOrError(viewModel, Modifier.weight(1f).fillMaxWidth())
             } else {
                 PresentationEmptyState(Modifier.weight(1f).fillMaxWidth())
             }
@@ -131,7 +132,7 @@ internal fun PresentationTabScope.PresentationBody() {
 }
 
 @Composable
-private fun PresentationTabScope.PresentationSlideGrid(gridModifier: Modifier) {
+private fun PresentationTabScope.PresentationSlideGrid(viewModel: PresentationViewModel, gridModifier: Modifier) {
     // Embedded video degrades gracefully with no VLC (the slide just shows its
     // static poster forever, see EmbeddedVideoDecoder.start()) — this banner only
     // tells the operator why, so it's not a silent surprise during a live service.
@@ -163,13 +164,13 @@ private fun PresentationTabScope.PresentationSlideGrid(gridModifier: Modifier) {
         contentPadding = PaddingValues(vertical = 18.dp)
     ) {
         itemsIndexed(viewModel.slideFiles) { index, slideFile ->
-            PresentationSlideCell(index, slideFile)
+            PresentationSlideCell(viewModel, index, slideFile)
         }
     }
 }
 
 @Composable
-private fun PresentationTabScope.PresentationSlideCell(index: Int, slideFile: File) {
+private fun PresentationTabScope.PresentationSlideCell(viewModel: PresentationViewModel, index: Int, slideFile: File) {
     // Decode off the composition thread — big decks scrolled fast used
     // to jank the whole UI decoding full-res JPEGs during layout.
     // slideFile can be deleted out from under this (removePresentation
@@ -200,14 +201,18 @@ private fun PresentationTabScope.PresentationSlideCell(index: Int, slideFile: Fi
         onDoubleClick = {
             viewModel.selectSlide(index)
             if (presenterManager != null) {
-                goLiveAtSlide(presenterManager, index)
+                goLiveAtSlide(viewModel, presenterManager, index)
             }
         }
     )
 }
 
 /** Puts slide [index] live from a double-click on its thumbnail. */
-private fun PresentationTabScope.goLiveAtSlide(presenterManager: PresenterManager, index: Int) {
+private fun PresentationTabScope.goLiveAtSlide(
+    viewModel: PresentationViewModel,
+    presenterManager: PresenterManager,
+    index: Int,
+) {
     scope.launch {
         val cur = viewModel.slideFiles.getOrNull(index)?.let { f ->
             withContext(Dispatchers.IO) {
@@ -253,7 +258,7 @@ private fun PresentationTabScope.goLiveAtSlide(presenterManager: PresenterManage
 }
 
 @Composable
-private fun PresentationTabScope.PresentationLoadingOrError(modifier: Modifier) {
+private fun PresentationTabScope.PresentationLoadingOrError(viewModel: PresentationViewModel, modifier: Modifier) {
     val currentLoadError = viewModel.loadError
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         if (!viewModel.isLoading && currentLoadError != null) {

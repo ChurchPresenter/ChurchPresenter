@@ -56,7 +56,6 @@ internal class AnnouncementsTabScope(
     val presenterManager: PresenterManager?,
     val onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)?,
     val onSavePreset: ((settings: AnnouncementsSettings) -> Unit)?,
-    val viewModel: AnnouncementsViewModel,
     val availableFonts: List<String>,
     val labels: AnnouncementsLabels,
     val density: Density,
@@ -107,7 +106,7 @@ internal class AnnouncementsTabScope(
     // [stopTicker] must be true when [text] is plain announcement text (the ticker would otherwise
     // silently overwrite it within a second) and false when [text] IS the timer/clock's own current
     // value (stopping the ticker there would freeze the very content being sent).
-    fun toggleStageMonitor(text: String, stopTicker: Boolean = false) {
+    fun toggleStageMonitor(viewModel: AnnouncementsViewModel, text: String, stopTicker: Boolean = false) {
         if (presenterManager == null || !canSendToStageMonitor) return
         if (!hasSeparateMainScreen) {
             if (isSentToStageMonitor) {
@@ -132,15 +131,15 @@ internal class AnnouncementsTabScope(
     // "what's the current value" must be read from there rather than from the tab's own ViewModel,
     // which may have been recreated since the countdown was actually started. announcementTickerActive
     // (not timerRunning, which is only ever true for Duration/Count-Up) reflects all four.
-    val isDurationOrCountUp =
-        viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
+    val AnnouncementsViewModel.isDurationOrCountUp get() =
+        timerMode == Constants.TIMER_MODE_DURATION || timerMode == Constants.TIMER_MODE_COUNT_UP
     val isTimerRunning get() = presenterManager?.announcementTickerActive?.value == true
-    val isTimerExpired get() = viewModel.timerMode == Constants.TIMER_MODE_DURATION &&
+    val AnnouncementsViewModel.isTimerExpired get() = timerMode == Constants.TIMER_MODE_DURATION &&
         presenterManager?.announcementTimerExpired?.value == true
-    val timerDisplayValue get() = when {
+    val AnnouncementsViewModel.timerDisplayValue get() = when {
         isTimerRunning && presenterManager != null -> presenterManager.timerRemainingSeconds.value
-        viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP -> viewModel.countUpElapsed
-        else -> viewModel.timerRemaining
+        timerMode == Constants.TIMER_MODE_COUNT_UP -> countUpElapsed
+        else -> timerRemaining
     }
 
     fun saveLeftPanel() {
@@ -161,7 +160,7 @@ internal class AnnouncementsTabScope(
         }
     }
 
-    val selectedAnim get() = when (viewModel.animationType) {
+    val AnnouncementsViewModel.selectedAnim get() = when (animationType) {
         Constants.ANIMATION_SLIDE_FROM_LEFT        -> slideFromLeftText
         Constants.ANIMATION_SLIDE_FROM_RIGHT       -> slideFromRightText
         Constants.ANIMATION_SLIDE_FROM_TOP         -> slideFromTopText
@@ -169,7 +168,7 @@ internal class AnnouncementsTabScope(
         Constants.ANIMATION_FADE                   -> fadeText
         else                                       -> noneText
     }
-    val durationMs get() = viewModel.animationDuration
+    val AnnouncementsViewModel.durationMs get() = animationDuration
 
     // The tallest the text box may be: the split panel less the text card's buttons and
     // formatting rows around the box, the divider, and the timer card's minimum. Applied to a
@@ -179,7 +178,7 @@ internal class AnnouncementsTabScope(
         val reserved = ANNOUNCEMENT_MIN_SETTINGS_HEIGHT + ANNOUNCEMENT_DIVIDER_HEIGHT + ANNOUNCEMENT_SPLIT_PANEL_INSETS
         (twoColHeightPx - around - reserved.toPx()).coerceAtLeast(ANNOUNCEMENT_MIN_TEXT_HEIGHT.toPx())
     }
-    val shownTextHeightPx =
+    val shownTextHeightPx get() =
         if (textHeightPx > 0f && twoColHeightPx > 0 && textCardHeightPx > 0) {
             textHeightPx.coerceAtMost(maxTextHeightPx)
         } else {
@@ -190,41 +189,41 @@ internal class AnnouncementsTabScope(
     // mutually exclusive with the announcement text — so this preview must follow
     // whichever one is actually running/live, not just which mode is selected, or it
     // shows the clock/specific-time value even while text is the one live on screen.
-    val previewText get() = when {
-        isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
-        isTimerRunning && viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
+    val AnnouncementsViewModel.previewText get() = when {
+        isTimerExpired -> timerExpiredText.ifBlank { timerExpiredLabel }
+        isTimerRunning && timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> liveClockText
         isTimerRunning -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
-        else -> viewModel.text
+        else -> text
     }
     // A live timer/clock value changes every second and must stay legible, so skip the
     // configured entrance animation in the preview (it would otherwise cycle the value
     // fully off-screen on every animation loop, looking like it froze or went dark).
-    val isShowingLiveTimerValue get() = isTimerExpired || isTimerRunning
-    val isDirectional get() = !isShowingLiveTimerValue && viewModel.animationType in listOf(
+    val AnnouncementsViewModel.isShowingLiveTimerValue get() = isTimerExpired || isTimerRunning
+    val AnnouncementsViewModel.isDirectional get() = !isShowingLiveTimerValue && animationType in listOf(
         Constants.ANIMATION_SLIDE_FROM_LEFT,
         Constants.ANIMATION_SLIDE_FROM_RIGHT,
         Constants.ANIMATION_SLIDE_FROM_TOP,
         Constants.ANIMATION_SLIDE_FROM_BOTTOM
     )
-    val isHorizontal get() = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
-                       viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_RIGHT
-    val movesPositive get() = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
-                       viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_TOP
-    val slideAlignment: Alignment get() = if (isHorizontal) {
+    val AnnouncementsViewModel.isHorizontal get() = animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
+                       animationType == Constants.ANIMATION_SLIDE_FROM_RIGHT
+    val AnnouncementsViewModel.movesPositive get() = animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
+                       animationType == Constants.ANIMATION_SLIDE_FROM_TOP
+    val AnnouncementsViewModel.slideAlignment: Alignment get() = if (isHorizontal) {
         when {
-            viewModel.position.startsWith("Top")    -> Alignment.TopCenter
-            viewModel.position.startsWith("Bottom") -> Alignment.BottomCenter
+            position.startsWith("Top")    -> Alignment.TopCenter
+            position.startsWith("Bottom") -> Alignment.BottomCenter
             else                                    -> Alignment.Center
         }
     } else {
         when {
-            viewModel.position.endsWith("Left")  -> Alignment.CenterStart
-            viewModel.position.endsWith("Right") -> Alignment.CenterEnd
+            position.endsWith("Left")  -> Alignment.CenterStart
+            position.endsWith("Right") -> Alignment.CenterEnd
             else                                 -> Alignment.Center
         }
     }
-    val scrollDurationMs get() = durationMs.coerceAtLeast(500)
-    val previewTextAlign get() = when (viewModel.horizontalAlignment) {
+    val AnnouncementsViewModel.scrollDurationMs get() = durationMs.coerceAtLeast(500)
+    val AnnouncementsViewModel.previewTextAlign get() = when (horizontalAlignment) {
         Constants.LEFT -> TextAlign.Left
         Constants.RIGHT -> TextAlign.Right
         else -> TextAlign.Center

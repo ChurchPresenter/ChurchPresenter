@@ -70,7 +70,7 @@ import org.churchpresenter.theme.elevationPalette
 /* The Announcements tab's timer: its mode, its display, its steppers, its controls. */
 
 @Composable
-internal fun AnnouncementsTabScope.AnnouncementsTimerSection() {
+internal fun AnnouncementsTabScope.AnnouncementsTimerSection(viewModel: AnnouncementsViewModel) {
     // ── TIMER section ──────────────────────────────────────
     Column(
         modifier = Modifier
@@ -113,13 +113,13 @@ internal fun AnnouncementsTabScope.AnnouncementsTimerSection() {
         // Countdown / count-up / live clock display
         Text(
             text = when {
-                isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
+                viewModel.isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
                 viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY ->
                     viewModel.liveClockText
-                else -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
+                else -> AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
             },
             style = MaterialTheme.typography.displayMedium,
-            color = if (isTimerExpired) MaterialTheme.colorScheme.error
+            color = if (viewModel.isTimerExpired) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
@@ -154,20 +154,20 @@ internal fun AnnouncementsTabScope.AnnouncementsTimerSection() {
             }
         }
         if (viewModel.timerMode == Constants.TIMER_MODE_DURATION) {
-            DurationSteppers(sepBox)
+            DurationSteppers(viewModel, sepBox)
         } else if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-            ClockSteppers(use24Hour, targetIsPm, ::displayHour, sepBox)
+            ClockSteppers(viewModel, use24Hour, targetIsPm, ::displayHour, sepBox)
         } else if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
-            ClockFormatField()
+            ClockFormatField(viewModel)
         }
 
-        TimerControls()
-        ExpiredTextField()
+        TimerControls(viewModel)
+        ExpiredTextField(viewModel)
     }
 }
 
 @Composable
-private fun AnnouncementsTabScope.DurationSteppers(sepBox: @Composable () -> Unit) {
+private fun AnnouncementsTabScope.DurationSteppers(viewModel: AnnouncementsViewModel, sepBox: @Composable () -> Unit) {
     var hrText by remember { mutableStateOf("%02d".format(viewModel.timerHours)) }
     var minText by remember { mutableStateOf("%02d".format(viewModel.timerMinutes)) }
     var secText by remember { mutableStateOf("%02d".format(viewModel.timerSeconds)) }
@@ -223,6 +223,7 @@ private fun AnnouncementsTabScope.DurationSteppers(sepBox: @Composable () -> Uni
 
 @Composable
 private fun AnnouncementsTabScope.ClockSteppers(
+    viewModel: AnnouncementsViewModel,
     use24Hour: Boolean,
     targetIsPm: Boolean,
     displayHour: (Int) -> Int,
@@ -310,7 +311,7 @@ private fun AnnouncementsTabScope.ClockSteppers(
 }
 
 @Composable
-private fun AnnouncementsTabScope.ClockFormatField() {
+private fun AnnouncementsTabScope.ClockFormatField(viewModel: AnnouncementsViewModel) {
     val clockFormatLabels = mapOf(
         "h:mm:ss a" to stringResource(Res.string.timer_clock_format_12h_sec),
         "h:mm a" to stringResource(Res.string.timer_clock_format_12h),
@@ -335,7 +336,7 @@ private fun AnnouncementsTabScope.ClockFormatField() {
 
 /** Play/pause, reset, stage monitor, Save preset, Add to schedule and Go live, for the timer. */
 @Composable
-private fun AnnouncementsTabScope.TimerControls() {
+private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewModel) {
     // Controls row
     @OptIn(ExperimentalLayoutApi::class)
     FlowRow(
@@ -371,7 +372,7 @@ private fun AnnouncementsTabScope.TimerControls() {
         // Reset only makes sense for Timer/Duration, which count down/up from a
         // starting point. Specific Time and the live Clock always track the wall
         // clock automatically — there's nothing to reset back to.
-        if (isDurationOrCountUp) {
+        if (viewModel.isDurationOrCountUp) {
             ActionIconButton(
                 onClick = { viewModel.resetTimer(presenterManager) },
                 tooltipText = resetLabel,
@@ -382,14 +383,14 @@ private fun AnnouncementsTabScope.TimerControls() {
         }
         // Stage Monitor already shows its own always-on clock, so the plain
         // "Clock" timer mode has nothing extra to send there.
-        TimerStageMonitorButton()
-        TimerScheduleButtons()
+        TimerStageMonitorButton(viewModel)
+        TimerScheduleButtons(viewModel)
     }
 }
 
 /** Sends the timer to the stage monitor, or takes it off; the only other way (with Go live) to mark it live. */
 @Composable
-private fun AnnouncementsTabScope.TimerStageMonitorButton() {
+private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: AnnouncementsViewModel) {
     if (presenterManager != null &&
         canSendToStageMonitor &&
         viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
@@ -409,8 +410,8 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton() {
                     }
                     presenterManager.setAnnouncementTickerLive(true)
                 }
-                val liveText = AnnouncementsViewModel.formatTimer(timerDisplayValue)
-                toggleStageMonitor(liveText)
+                val liveText = AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
+                toggleStageMonitor(viewModel, liveText)
             },
             tooltipText = if (isSentToStageMonitor) stringResource(
                 Res.string.tooltip_hide_from_stage_monitor,
@@ -432,7 +433,7 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton() {
 
 /** Save preset, Add to schedule and Go live, for the timer. */
 @Composable
-private fun AnnouncementsTabScope.TimerScheduleButtons() {
+private fun AnnouncementsTabScope.TimerScheduleButtons(viewModel: AnnouncementsViewModel) {
     if (onSavePreset != null) {
         SavePresetButton(
             onClick = { onSavePreset.invoke(viewModel.buildSettings()) },
@@ -477,7 +478,7 @@ private fun AnnouncementsTabScope.TimerScheduleButtons() {
                 val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
                     viewModel.liveClockText
                 } else {
-                    AnnouncementsViewModel.formatTimer(timerDisplayValue)
+                    AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
                 }
                 presenterManager.setAnnouncementText(liveText)
                 presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
@@ -488,7 +489,7 @@ private fun AnnouncementsTabScope.TimerScheduleButtons() {
 }
 
 @Composable
-private fun AnnouncementsTabScope.ExpiredTextField() {
+private fun AnnouncementsTabScope.ExpiredTextField(viewModel: AnnouncementsViewModel) {
     // Expired text field — only meaningful for modes that actually reach an
     // endpoint (Timer countdown, Specific Time). Duration (count-up) and the
     // live Clock display never "expire".

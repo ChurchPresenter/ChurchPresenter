@@ -1202,6 +1202,24 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             // out of the enforced number. Counting it costs the gate about half a point against a
             // ~14 point margin. This list is only worth reading if every entry on it is still true.
             exclude("org/churchpresenter/app/churchpresenter/MainKt*")
+            // The rest of main.kt, split out of it into its own files: the same window, menu and
+            // dialog construction, which only runs under a display. Its decisions are pulled out
+            // into CalendarLogic.kt and MainWindowLogic.kt, which are counted and tested. Temporary:
+            // it comes off this list once display-driven tests cover these files.
+            exclude("org/churchpresenter/app/churchpresenter/AppRootState.class")
+            exclude("org/churchpresenter/app/churchpresenter/AppRootState$*")
+            exclude("org/churchpresenter/app/churchpresenter/AppRootStateKt*")
+            exclude("org/churchpresenter/app/churchpresenter/AppWiringKt*")
+            exclude("org/churchpresenter/app/churchpresenter/CalendarAutomationKt*")
+            exclude("org/churchpresenter/app/churchpresenter/CalendarManagerWindowKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowChromeKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowDialogsKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowScope*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowState*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowWiringKt*")
+            exclude("org/churchpresenter/app/churchpresenter/RemoteRequestWiringKt*")
+            exclude("org/churchpresenter/app/churchpresenter/VirtualOutputsKt*")
         }
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))

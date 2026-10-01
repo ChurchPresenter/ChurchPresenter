@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.Image
@@ -80,17 +81,17 @@ import org.churchpresenter.app.churchpresenter.composables.RecentChip
 /* The Presentation tab's top bar: the file bar, the recent files, and the playback controls. */
 
 @Composable
-internal fun PresentationTabScope.PresentationTopBar() {
+internal fun PresentationTabScope.PresentationTopBar(viewModel: PresentationViewModel) {
     Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
-        PresentationFileBar()
-        PresentationRecentFiles()
-        PresentationControlsBar()
+        PresentationFileBar(viewModel)
+        PresentationRecentFiles(viewModel)
+        PresentationControlsBar(viewModel)
     }
 }
 
 /** Open, the file's name and loading progress, remote, blank, clear, Save preset, Add to schedule and Go live. */
 @Composable
-private fun PresentationTabScope.PresentationFileBar() {
+private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationViewModel) {
     // ── File bar ──────────────────────────────────────────────────
     Row(
         modifier = Modifier
@@ -100,7 +101,7 @@ private fun PresentationTabScope.PresentationFileBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        OpenPresentationButton()
+        OpenPresentationButton(viewModel)
         Text(
             text = viewModel.selectedPresentationDisplayName
                 ?: stringResource(Res.string.no_file_selected_presentation),
@@ -124,7 +125,7 @@ private fun PresentationTabScope.PresentationFileBar() {
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        PresentationOutputButtons()
+        PresentationOutputButtons(viewModel)
         if (onSavePreset != null) {
             SavePresetButton(
                 onClick = {
@@ -156,13 +157,13 @@ private fun PresentationTabScope.PresentationFileBar() {
             )
         }
         if (presenterManager != null) {
-            PresentationGoLiveButton(presenterManager)
+            PresentationGoLiveButton(viewModel, presenterManager)
         }
     }
 }
 
 @Composable
-private fun PresentationTabScope.OpenPresentationButton() {
+private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationViewModel) {
     RaisedButton(
         onClick = {
             scope.launch {
@@ -204,7 +205,10 @@ private fun PresentationTabScope.OpenPresentationButton() {
 }
 
 @Composable
-private fun PresentationTabScope.PresentationGoLiveButton(presenterManager: PresenterManager) {
+private fun PresentationTabScope.PresentationGoLiveButton(
+    viewModel: PresentationViewModel,
+    presenterManager: PresenterManager,
+) {
     GoLiveButton(
         onClick = {
             val idx = viewModel.selectedSlideIndex
@@ -258,7 +262,7 @@ private fun PresentationTabScope.PresentationGoLiveButton(presenterManager: Pres
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PresentationTabScope.PresentationRecentFiles() {
+private fun PresentationTabScope.PresentationRecentFiles(viewModel: PresentationViewModel) {
     // ── Recent files bar ──────────────────────────────────────────
     val recentOrdered =
         RecentPresentationFiles.pinned + RecentPresentationFiles.files.filter { it !in RecentPresentationFiles.pinned }
@@ -334,7 +338,7 @@ private fun PresentationTabScope.PresentationRecentFiles() {
 
 /** Remote, blank and clear. */
 @Composable
-private fun PresentationTabScope.PresentationOutputButtons() {
+private fun PresentationTabScope.PresentationOutputButtons(viewModel: PresentationViewModel) {
     ActionIconButton(
         onClick = { showRemoteDialog = true },
         tooltipText = stringResource(Res.string.tooltip_presentation_remote),
