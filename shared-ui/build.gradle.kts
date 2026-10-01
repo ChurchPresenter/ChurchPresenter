@@ -15,6 +15,12 @@ kotlin {
     jvmToolchain(21)
 }
 
+// The strings and icons come from :strings and :icons; this module ships no resources of its own,
+// so it has no Res class to generate.
+compose.resources {
+    generateResClass = never
+}
+
 dependencies {
     api(projects.strings)
     api(projects.icons)
