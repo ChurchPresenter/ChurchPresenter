@@ -51,7 +51,6 @@ import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
@@ -108,12 +107,9 @@ internal fun AppRootState.StartupEffect() {
             val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
             appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
             settingsManager.saveSettings(appSettings)
-            if (isFirstEverUpdateCheck) {
-                pendingUpdateResult = result
-                pendingUpdateCheckWasManual = true
-            } else if (result is UpdateCheckResult.Available) {
-                pendingUpdateResult = result
-                pendingUpdateCheckWasManual = false
+            pendingUpdateFor(isFirstEverUpdateCheck, result)?.let { (pending, manual) ->
+                pendingUpdateResult = pending
+                pendingUpdateCheckWasManual = manual
             }
         }
 
@@ -121,7 +117,7 @@ internal fun AppRootState.StartupEffect() {
         val storyPrompt = appSettings.storyPrompt.stampingInstall(now).recordingUse(now)
         appSettings = appSettings.copy(storyPrompt = storyPrompt)
         settingsManager.saveSettings(appSettings)
-        if (storyPrompt.isDue(now) && pendingUpdateResult == null) {
+        if (shouldShowStoryPrompt(storyPrompt.isDue(now), updatePending = pendingUpdateResult != null)) {
             delay(STORY_PROMPT_DELAY_MS)
             appSettings = appSettings.copy(storyPrompt = storyPrompt.shown(System.currentTimeMillis()))
             settingsManager.saveSettings(appSettings)

@@ -126,7 +126,7 @@ fun AnnouncementsTab(
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val scope = remember(
-        appSettings, onSettingsChange, presenterManager, onAddToSchedule, onSavePreset, viewModel, availableFonts,
+        appSettings, onSettingsChange, presenterManager, onAddToSchedule, onSavePreset, availableFonts,
         labels, density, onSettingsChangeState, isMaximized, panels
     ) {
         AnnouncementsTabScope(
@@ -135,7 +135,6 @@ fun AnnouncementsTab(
             presenterManager = presenterManager,
             onAddToSchedule = onAddToSchedule,
             onSavePreset = onSavePreset,
-            viewModel = viewModel,
             availableFonts = availableFonts,
             labels = labels,
             density = density,
@@ -153,7 +152,7 @@ fun AnnouncementsTab(
             }) {
                 Row(modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 4.dp, bottom = 4.dp)) {
                     // ── LEFT: text + timer ──────────────
-                    AnnouncementsLeftColumn()
+                    AnnouncementsLeftColumn(viewModel)
 
                     // Drag handle
                     DragHandle(onDragEnd = { saveLeftPanel() }) { delta ->
@@ -166,7 +165,7 @@ fun AnnouncementsTab(
                     }
 
                     // ── RIGHT COLUMN: preview + animation/loop/speed ──────────
-                    AnnouncementsRightColumn(Modifier.weight(1f))
+                    AnnouncementsRightColumn(viewModel, Modifier.weight(1f))
                 }
             }
         }

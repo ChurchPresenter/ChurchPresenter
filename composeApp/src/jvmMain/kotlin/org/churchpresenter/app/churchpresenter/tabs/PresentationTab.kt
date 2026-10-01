@@ -183,7 +183,7 @@ fun PresentationTab(
     val tab = remember(
         hostWindow, appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextSlide,
         onInstanceLinkSendPreviousSlide, instanceLinkFetchPresentationSlideBytes, selectedPresentationItem,
-        selectedPresentationItemVersion, presenterManager, onSlidesLoaded, onSettingsChange, viewModel, tunnelStatus,
+        selectedPresentationItemVersion, presenterManager, onSlidesLoaded, onSettingsChange, tunnelStatus,
         tunnelUrl, serverUrl, presentationDisplayUrl, onPresentationDisplayUrlChanged, onStartTunnel, onStopTunnel,
         presentationFrozen, onFreezeToggle, onClearPresentation, vlcAvailable, vlcArchMismatch, vlcLoadFailed, scope,
         focusRequester, focusRescue, shortcuts, wentLive, presentationFileDialogTitle, showRemoteDialogState
@@ -202,7 +202,6 @@ fun PresentationTab(
             presenterManager = presenterManager,
             onSlidesLoaded = onSlidesLoaded,
             onSettingsChange = onSettingsChange,
-            viewModel = viewModel,
             tunnelStatus = tunnelStatus,
             tunnelUrl = tunnelUrl,
             serverUrl = serverUrl,
@@ -226,8 +225,8 @@ fun PresentationTab(
         )
     }
     with(tab) {
-        PresentationLoadEffects()
-        PresentationLiveEffects()
+        PresentationLoadEffects(viewModel)
+        PresentationLiveEffects(viewModel)
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -236,10 +235,10 @@ fun PresentationTab(
                 .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
                 .focusRescuePressHook(focusRescue)
                 .focusable()
-                .onKeyEvent { keyEvent -> handleKey(keyEvent) }
+                .onKeyEvent { keyEvent -> handleKey(viewModel, keyEvent) }
         ) {
-            PresentationTopBar()
-            PresentationBody()
+            PresentationTopBar(viewModel)
+            PresentationBody(viewModel)
         }
 
         if (showRemoteDialog) {

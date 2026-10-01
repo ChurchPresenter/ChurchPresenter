@@ -110,8 +110,7 @@ internal fun MainWindowScope.SettingsDialogs() {
                 appSettings,
                 // On unless a custom look exists and a preset has been picked
                 // since: then opening this is more likely about font or size.
-                useCustomColors = theme == ThemeMode.CUSTOM ||
-                    appSettings.customThemeAccent.isBlank(),
+                useCustomColors = customColorsByDefault(theme, appSettings.customThemeAccent),
             ),
             onApply = { choice ->
                 if (choice.useCustomColors) theme = ThemeMode.CUSTOM
@@ -296,16 +295,11 @@ internal fun MainWindowScope.RemoteApprovalDialog() {
                 if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
             },
             onAllowForSession = {
-                if (currentClientId.isNotBlank() && !sessionAllowedClients.contains(
-                        currentClientId
-                    )
-                ) {
+                if (shouldRecordSessionClient(currentClientId, sessionAllowedClients)) {
                     sessionAllowedClients.add(currentClientId)
                 }
                 val clientToAllow = currentClientId
-                val toApprove = remoteEventQueue.filter {
-                    remoteEventTargetsClient(it.first.clientId, clientToAllow)
-                }
+                val toApprove = remoteEventsSettledBy(remoteEventQueue, clientToAllow)
                 UsageEvents.record(UsageEvent.REMOTE_APPROVED, toApprove.size)
                 toApprove.forEach { it.second.invoke() }
                 remoteEventQueue.removeAll(toApprove)
@@ -313,24 +307,17 @@ internal fun MainWindowScope.RemoteApprovalDialog() {
             onAllowPermanently = {
                 remoteClientManager.allowPermanently(currentClientId)
                 val clientToAllow = currentClientId
-                val toApprove = remoteEventQueue.filter {
-                    remoteEventTargetsClient(it.first.clientId, clientToAllow)
-                }
+                val toApprove = remoteEventsSettledBy(remoteEventQueue, clientToAllow)
                 UsageEvents.record(UsageEvent.REMOTE_APPROVED, toApprove.size)
                 toApprove.forEach { it.second.invoke() }
                 remoteEventQueue.removeAll(toApprove)
             },
             onBlockForSession = {
-                if (currentClientId.isNotBlank() && !sessionBlockedClients.contains(
-                        currentClientId
-                    )
-                ) {
+                if (shouldRecordSessionClient(currentClientId, sessionBlockedClients)) {
                     sessionBlockedClients.add(currentClientId)
                 }
                 val clientToBlock = currentClientId
-                val toRemove = remoteEventQueue.filter {
-                    remoteEventTargetsClient(it.first.clientId, clientToBlock)
-                }
+                val toRemove = remoteEventsSettledBy(remoteEventQueue, clientToBlock)
                 UsageEvents.record(UsageEvent.REMOTE_DENIED, toRemove.size)
                 toRemove.forEach { it.third.invoke() }
                 remoteEventQueue.removeAll(toRemove)
@@ -338,9 +325,7 @@ internal fun MainWindowScope.RemoteApprovalDialog() {
             onBlockPermanently = {
                 remoteClientManager.blockPermanently(currentClientId)
                 val clientToBlock = currentClientId
-                val toRemove = remoteEventQueue.filter {
-                    remoteEventTargetsClient(it.first.clientId, clientToBlock)
-                }
+                val toRemove = remoteEventsSettledBy(remoteEventQueue, clientToBlock)
                 UsageEvents.record(UsageEvent.REMOTE_DENIED, toRemove.size)
                 toRemove.forEach { it.third.invoke() }
                 remoteEventQueue.removeAll(toRemove)
@@ -370,7 +355,7 @@ internal fun MainWindowScope.ActivityToasts() {
             onDismissAll = { remoteActivityNotifications.clear() },
             onBlockForSession = { n ->
                 val cid = n.clientId
-                if (cid.isNotBlank() && !sessionBlockedClients.contains(cid)) {
+                if (shouldRecordSessionClient(cid, sessionBlockedClients)) {
                     sessionBlockedClients.add(cid)
                     sessionAllowedClients.remove(cid)
                 }

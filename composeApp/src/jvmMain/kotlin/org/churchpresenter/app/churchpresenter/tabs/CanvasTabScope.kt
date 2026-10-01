@@ -18,7 +18,6 @@ import churchpresenter.composeapp.generated.resources.canvas_source_video
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.canvas_source_timer
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
@@ -40,7 +39,6 @@ import org.churchpresenter.settings.WindowLayoutSettings
 internal class CanvasTabScope(
     val appSettings: AppSettings,
     val presenterManager: PresenterManager,
-    val sceneViewModel: SceneViewModel,
     val onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
     val onSavePreset: ((sceneId: String, sceneName: String) -> Unit)?,
     val cameraHost: CameraHost?,
@@ -87,9 +85,6 @@ internal class CanvasTabScope(
         onSettingsChangeState.value { s -> withCanvasRightPanelWidth(s, isMaximized, dp) }
     }
 
-    val currentScene get() = sceneViewModel.currentScene
-    val selectedSourceId: String? get() = sceneViewModel.selectedSourceId.value
-    val selectedSource get() = sceneViewModel.selectedSource
 }
 
 /** The source types' default names, localised in composable scope for the menu's onClick lambdas. */

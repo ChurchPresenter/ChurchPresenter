@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -76,7 +77,7 @@ import org.churchpresenter.core.models.scene.Scene
 /* The Canvas tab's centre: the toolbar, the warnings, and the scene's canvas (or both layouts). */
 
 @Composable
-internal fun CanvasTabScope.CanvasCenterPanel(modifier: Modifier) {
+internal fun CanvasTabScope.CanvasCenterPanel(sceneViewModel: SceneViewModel, modifier: Modifier) {
     Column(
         modifier = modifier
             .fillMaxHeight()
@@ -85,15 +86,15 @@ internal fun CanvasTabScope.CanvasCenterPanel(modifier: Modifier) {
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val currentScene = currentScene
+        val currentScene = sceneViewModel.currentScene
         if (currentScene != null) {
             CanvasToolbar(currentScene)
-            CanvasAspectWarning(currentScene)
+            CanvasAspectWarning(sceneViewModel, currentScene)
             // Layers the canvas is clipping away, with one click to put them back inside.
             val canvasLayouts = remember(currentScene) { currentScene.editorLayouts() }
             val outsideLayers = currentScene.sources.filter { canvasLayouts.misplacements(it.id).isNotEmpty() }
-            CanvasOutsideLayers(outsideLayers, canvasLayouts)
-            CanvasEditorArea(canvasLayouts, Modifier.weight(1f).fillMaxWidth().padding(8.dp))
+            CanvasOutsideLayers(sceneViewModel, outsideLayers, canvasLayouts)
+            CanvasEditorArea(sceneViewModel, canvasLayouts, Modifier.weight(1f).fillMaxWidth().padding(8.dp))
         } else {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -264,7 +265,7 @@ private fun CanvasTabScope.CanvasSceneActions(currentScene: Scene) {
 
 /** A warning when the scene's shape is not the output's, with a button to match them. */
 @Composable
-private fun CanvasTabScope.CanvasAspectWarning(currentScene: Scene) {
+private fun CanvasTabScope.CanvasAspectWarning(sceneViewModel: SceneViewModel, currentScene: Scene) {
     // Aspect ratio mismatch warning
     val presentationAssignment = appSettings.projectionSettings.getAssignment(0)
     val presentationBounds = remember(
@@ -326,7 +327,11 @@ private fun CanvasTabScope.CanvasAspectWarning(currentScene: Scene) {
 
 /** Layers the canvas is clipping away, with one click to put them back inside. */
 @Composable
-private fun CanvasTabScope.CanvasOutsideLayers(outsideLayers: List<SceneSource>, canvasLayouts: List<EditorLayout>) {
+private fun CanvasTabScope.CanvasOutsideLayers(
+    sceneViewModel: SceneViewModel,
+    outsideLayers: List<SceneSource>,
+    canvasLayouts: List<EditorLayout>,
+) {
     if (outsideLayers.isNotEmpty()) {
         Row(
             modifier = Modifier
@@ -377,7 +382,12 @@ private fun CanvasTabScope.CanvasOutsideLayers(outsideLayers: List<SceneSource>,
 }
 
 @Composable
-private fun CanvasTabScope.CanvasEditorArea(canvasLayouts: List<EditorLayout>, modifier: Modifier) {
+private fun CanvasTabScope.CanvasEditorArea(
+    sceneViewModel: SceneViewModel,
+    canvasLayouts: List<EditorLayout>,
+    modifier: Modifier,
+) {
+    val selectedSourceId = sceneViewModel.selectedSourceId.value
     // Canvas preview -- padded all round, so a canvas bound by the height (portrait) or
     // the width (ultra-wide) does not run into the edges of the area it sits in.
     Box(
@@ -438,7 +448,7 @@ private fun CanvasTabScope.CanvasEditorArea(canvasLayouts: List<EditorLayout>, m
 }
 
 @Composable
-internal fun CanvasTabScope.CanvasPropertiesPanel() {
+internal fun CanvasTabScope.CanvasPropertiesPanel(sceneViewModel: SceneViewModel) {
     // Right panel: Properties
     Column(
         modifier = Modifier
@@ -447,7 +457,7 @@ internal fun CanvasTabScope.CanvasPropertiesPanel() {
             .padding(end = 4.dp, top = 4.dp, bottom = 4.dp)
             .bibleListCard()
     ) {
-        val selectedSource = selectedSource
+        val selectedSource = sceneViewModel.selectedSource
         if (selectedSource != null) {
             SourcePropertiesPanel(
                 source = selectedSource,
