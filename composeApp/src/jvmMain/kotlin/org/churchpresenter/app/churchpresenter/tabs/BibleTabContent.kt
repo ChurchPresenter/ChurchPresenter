@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,11 @@ import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
 
 /** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
 @Composable
-internal fun ColumnScope.BibleTabContent(tab: BibleTabScope, focusRescue: FocusLostRescueState) {
+internal fun ColumnScope.BibleTabContent(
+    viewModel: BibleViewModel,
+    tab: BibleTabScope,
+    focusRescue: FocusLostRescueState,
+) {
     with(tab) {
         if (loadErrors.isNotEmpty()) {
             BibleLoadErrorBanner(
@@ -97,7 +102,7 @@ internal fun ColumnScope.BibleTabContent(tab: BibleTabScope, focusRescue: FocusL
 
 
         if (engineSettings.enabled && sttConnected) {
-            sttManager?.let { BibleTabDetection(it) }
+            sttManager?.let { BibleTabDetection(viewModel, it) }
         }
 
         if (appSettings.bibleSettings.primaryBible.isBlank() && viewModel.primaryBible.value == null) {
@@ -124,7 +129,7 @@ internal fun ColumnScope.BibleTabContent(tab: BibleTabScope, focusRescue: FocusL
                 )
             }
         } else {
-            BibleBrowser(tab, focusRescue)
+            BibleBrowser(viewModel, tab, focusRescue)
         }
     }
 }
@@ -185,7 +190,7 @@ private fun ColumnScope.BibleNoPrimaryHint(appSettings: AppSettings) {
 }
 
 @Composable
-private fun BibleTabScope.BibleTabDetection(sttManager: STTManager) {
+private fun BibleTabScope.BibleTabDetection(viewModel: BibleViewModel, sttManager: STTManager) {
     val engineStartFailed = bibleEngineClient?.startFailed?.value == true
 
     val engineSttDown = bibleEngineClient?.engineSttConnected?.value == false
@@ -260,7 +265,7 @@ private fun BibleTabScope.BibleTabDetection(sttManager: STTManager) {
 
 /** The book, chapter and verse browser, with the history panel under it. */
 @Composable
-private fun ColumnScope.BibleBrowser(tab: BibleTabScope, focusRescue: FocusLostRescueState) {
+private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabScope, focusRescue: FocusLostRescueState) {
     with(tab) {
         val crossRefCountStr = stringResource(Res.string.bible_cross_references_count)
         val crossRefPopoverTitleStr = stringResource(Res.string.bible_cross_references_popover_title)
@@ -300,9 +305,9 @@ private fun ColumnScope.BibleBrowser(tab: BibleTabScope, focusRescue: FocusLostR
                 crossRefsDocked = crossRefsDocked,
                 crossRefCountLabel = { count -> crossRefCountStr.format(count) },
                 crossRefPopoverTitle = { label, size -> crossRefPopoverTitleStr.format(label, size) },
-                onOpenCrossRef = ::openCrossRef,
-                onGoLiveCrossRef = ::goLiveCrossRef,
-                onScheduleCrossRef = ::scheduleCrossRef,
+                onOpenCrossRef = { row -> openCrossRef(viewModel, row) },
+                onGoLiveCrossRef = { row -> goLiveCrossRef(viewModel, row) },
+                onScheduleCrossRef = { row -> scheduleCrossRef(viewModel, row) },
                 onDockCrossRefs = {
                     onSettingsChange { s -> withBibleCrossReferencePanel(s, true) }
                     crossRefs.closePopover()
@@ -313,12 +318,12 @@ private fun ColumnScope.BibleBrowser(tab: BibleTabScope, focusRescue: FocusLostR
                     focusRequester.requestFocus()
                 },
                 onDismissPopover = { crossRefs.closePopover(); focusRequester.requestFocus() },
-                onRefsChipClicked = { index -> refsChipClicked(index) },
-                onBookSelected = { index -> selectFilteredBook(index) },
+                onRefsChipClicked = { index -> refsChipClicked(viewModel, index) },
+                onBookSelected = { index -> selectFilteredBook(viewModel, index) },
                 onChapterSelected = { index ->
                     filteredChapters.getOrNull(index)?.toIntOrNull()?.let(viewModel::selectChapter)
                 },
-                onVerseSelected = { index -> clickFilteredVerse(index) },
+                onVerseSelected = { index -> clickFilteredVerse(viewModel, index) },
                 onVerseCtrlClicked = { index ->
                     filteredVerses.getOrNull(index)?.let {
                         val realIndex = verses.indexOf(it)
@@ -337,23 +342,23 @@ private fun ColumnScope.BibleBrowser(tab: BibleTabScope, focusRescue: FocusLostR
                         if (realIndex >= 0) viewModel.selectVerse(realIndex)
                     }
                 },
-                onVerseDoubleClicked = { goLiveWithHistory(); focusRequester.requestFocus() },
+                onVerseDoubleClicked = { goLiveWithHistory(viewModel); focusRequester.requestFocus() },
                 onCopyVerse = { copySelectedVerse() },
-                onAddToSchedule = { scheduleCurrentVerse() },
+                onAddToSchedule = { scheduleCurrentVerse(viewModel) },
                 isSplitActive = isSplitActive,
                 liveChapterVerses = liveChapterVerses,
                 liveVerseNumbers = liveVerseNumbers,
-                onLiveVerseClicked = { verseNum -> liveVerseClicked(verseNum) },
-                verseHeader = { showLabel -> BibleTabVerseHeader(showLabel) },
+                onLiveVerseClicked = { verseNum -> liveVerseClicked(viewModel, verseNum) },
+                verseHeader = { showLabel -> BibleTabVerseHeader(viewModel, showLabel) },
             ) {
-                BibleTabHistory()
+                BibleTabHistory(viewModel)
             }
         }
     }
 }
 
 @Composable
-private fun BibleTabScope.BibleTabVerseHeader(showLabel: Boolean) {
+private fun BibleTabScope.BibleTabVerseHeader(viewModel: BibleViewModel, showLabel: Boolean) {
     BibleVerseHeader(
         showLabel = showLabel,
         crossRefsVisible = crossRefsAvailable,
@@ -378,13 +383,13 @@ private fun BibleTabScope.BibleTabVerseHeader(showLabel: Boolean) {
             onSettingsChange { app -> app.moveBibleTranslation(index, offset) }
             focusRequester.requestFocus()
         },
-        onAddToSchedule = { scheduleCurrentVerse() },
-        onGoLive = { goLiveWithHistory(); focusRequester.requestFocus() },
+        onAddToSchedule = { scheduleCurrentVerse(viewModel) },
+        onGoLive = { goLiveWithHistory(viewModel); focusRequester.requestFocus() },
     )
 }
 
 @Composable
-private fun BibleTabScope.BibleTabHistory() {
+private fun BibleTabScope.BibleTabHistory(viewModel: BibleViewModel) {
     BibleHistoryPanel(
         entries = viewModel.history,
         expanded = historyExpanded,

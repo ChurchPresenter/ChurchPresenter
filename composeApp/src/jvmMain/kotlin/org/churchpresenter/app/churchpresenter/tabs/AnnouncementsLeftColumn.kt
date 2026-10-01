@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
@@ -66,9 +67,9 @@ import org.churchpresenter.theme.elevationPalette
  */
 
 @Composable
-internal fun AnnouncementsTabScope.AnnouncementsLeftColumn() {
+internal fun AnnouncementsTabScope.AnnouncementsLeftColumn(viewModel: AnnouncementsViewModel) {
     Column(modifier = Modifier.width(with(density) { leftPanelPx.toDp() }).fillMaxHeight()) {
-        AnnouncementsTextCard()
+        AnnouncementsTextCard(viewModel)
         // Drag down to give the text box more lines; the settings card below keeps at least
         // ANNOUNCEMENT_MIN_SETTINGS_HEIGHT so the timer stays reachable.
         DragHandle(
@@ -80,12 +81,12 @@ internal fun AnnouncementsTabScope.AnnouncementsLeftColumn() {
             val min = with(density) { ANNOUNCEMENT_MIN_TEXT_HEIGHT.toPx() }
             textHeightPx = (start + delta).coerceIn(min, maxTextHeightPx)
         }
-        AnnouncementsSettingsCard(Modifier.fillMaxWidth().weight(1f))
+        AnnouncementsSettingsCard(viewModel, Modifier.fillMaxWidth().weight(1f))
     }
 }
 
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsTextCard() {
+private fun AnnouncementsTabScope.AnnouncementsTextCard(viewModel: AnnouncementsViewModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,9 +94,9 @@ private fun AnnouncementsTabScope.AnnouncementsTextCard() {
             .bibleListCard()
             .onSizeChanged { textCardHeightPx = it.height }
     ) {
-        AnnouncementsTextActions()
-        AnnouncementsTextInput()
-        AnnouncementsFormattingBar()
+        AnnouncementsTextActions(viewModel)
+        AnnouncementsTextInput(viewModel)
+        AnnouncementsFormattingBar(viewModel)
         AnimatedVisibility(visible = viewModel.shadow) {
             Column {
                 Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(
@@ -124,7 +125,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextCard() {
 
 /** Stage monitor, Save preset, Add to schedule and Go live, for the text. */
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsTextActions() {
+private fun AnnouncementsTabScope.AnnouncementsTextActions(viewModel: AnnouncementsViewModel) {
     // ── Text actions ──────────────────────────────────────────────
     Row(
         modifier = Modifier
@@ -136,7 +137,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions() {
         if (presenterManager != null) {
             if (canSendToStageMonitor) {
                 ActionIconButton(
-                    onClick = { toggleStageMonitor(viewModel.text, stopTicker = true) },
+                    onClick = { toggleStageMonitor(viewModel, viewModel.text, stopTicker = true) },
                     enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
                     tooltipText = if (isSentToStageMonitor) stringResource(
                         Res.string.tooltip_hide_from_stage_monitor,
@@ -200,7 +201,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions() {
 }
 
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsTextInput() {
+private fun AnnouncementsTabScope.AnnouncementsTextInput(viewModel: AnnouncementsViewModel) {
     // ── Text input ────────────────────────────────────────────────
     Box(
         modifier = Modifier
@@ -243,7 +244,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextInput() {
 
 /** Colour, style, alignment, font and size — wraps to the column's width. */
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsFormattingBar() {
+private fun AnnouncementsTabScope.AnnouncementsFormattingBar(viewModel: AnnouncementsViewModel) {
     @OptIn(ExperimentalLayoutApi::class)
     FlowRow(
         modifier = Modifier
@@ -312,7 +313,7 @@ private fun AnnouncementsTabScope.AnnouncementsFormattingBar() {
 }
 
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsSettingsCard(modifier: Modifier) {
+private fun AnnouncementsTabScope.AnnouncementsSettingsCard(viewModel: AnnouncementsViewModel, modifier: Modifier) {
     val settingsScroll = rememberScrollState()
     Box(modifier = modifier.bibleListCard().testTag(ANNOUNCEMENTS_TIMER_CARD_TAG)) {
         Column(
@@ -322,7 +323,7 @@ private fun AnnouncementsTabScope.AnnouncementsSettingsCard(modifier: Modifier) 
                 .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 16.dp + SettingsScrollbarGutter),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            AnnouncementsTimerSection()
+            AnnouncementsTimerSection(viewModel)
 
         } // end settings column
         SettingsScrollbar(settingsScroll)

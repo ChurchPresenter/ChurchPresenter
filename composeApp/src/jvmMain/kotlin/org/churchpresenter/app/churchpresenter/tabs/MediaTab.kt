@@ -5,6 +5,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -167,7 +168,7 @@ fun MediaTab(
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
         appSettings, onSettingsChange, onAddToSchedule, onSavePreset, presenterManager, onInstanceLinkSendProject,
-        viewModel, state, scope, sourceTypeItems, selectFileLabel, mediaFilesLabel, shortcuts, wentLive
+        state, scope, sourceTypeItems, selectFileLabel, mediaFilesLabel, shortcuts, wentLive
     ) {
         MediaTabScope(
             appSettings = appSettings,
@@ -176,7 +177,6 @@ fun MediaTab(
             onSavePreset = onSavePreset,
             presenterManager = presenterManager,
             onInstanceLinkSendProject = onInstanceLinkSendProject,
-            viewModel = viewModel,
             state = state,
             scope = scope,
             sourceTypeItems = sourceTypeItems,
@@ -186,18 +186,24 @@ fun MediaTab(
             wentLive = wentLive,
         )
     }
-    tab.MediaTabEffects(selectedMediaItem, selectedMediaItemVersion, instanceLinkMediaStreamUrl, focusRequester)
+    tab.MediaTabEffects(
+        viewModel,
+        selectedMediaItem,
+        selectedMediaItemVersion,
+        instanceLinkMediaStreamUrl,
+        focusRequester,
+    )
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
             .focusable()
-            .onPreviewKeyEvent { keyEvent -> tab.handleKey(keyEvent) }
+            .onPreviewKeyEvent { keyEvent -> tab.handleKey(viewModel, keyEvent) }
     ) {
-        tab.MediaTopCard()
+        tab.MediaTopCard(viewModel)
         // Seek bar and preview share one card.
-        tab.MediaPreviewCard(Modifier.weight(1f))
+        tab.MediaPreviewCard(viewModel, Modifier.weight(1f))
     }
 }
 
@@ -231,7 +237,7 @@ private fun MediaVlcUnavailable(modifier: Modifier, vlcArchMismatch: Boolean, vl
 }
 
 @Composable
-private fun MediaTabScope.MediaPreviewCard(modifier: Modifier) {
+private fun MediaTabScope.MediaPreviewCard(viewModel: MediaViewModel, modifier: Modifier) {
     Column(
         modifier = modifier.fillMaxWidth()
             .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
@@ -273,14 +279,14 @@ private fun MediaTabScope.MediaPreviewCard(modifier: Modifier) {
             // The shape of the output this media actually goes out on. Media can be routed to
             // several differently-shaped outputs at once, so which one the preview stands for is
             // the operator's to say -- the picker draws nothing until there is more than one.
-            MediaOutputPreview(isPresenting, Modifier.weight(1f))
+            MediaOutputPreview(viewModel, isPresenting, Modifier.weight(1f))
         }
     }
 }
 
 /** The output picker and the preview of what goes out, in the output's own shape. */
 @Composable
-private fun MediaTabScope.MediaOutputPreview(isPresenting: Boolean, modifier: Modifier) {
+private fun MediaTabScope.MediaOutputPreview(viewModel: MediaViewModel, isPresenting: Boolean, modifier: Modifier) {
     val previewOutput = rememberPreviewOutput(appSettings, Constants.PREVIEW_TAB_MEDIA, Presenting.MEDIA)
     PreviewOutputPicker(
         settings = appSettings,

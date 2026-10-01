@@ -34,14 +34,7 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int) {
         // the one way there. Everything else is what a phone can project.
         is ScheduleItem.SceneItem -> currentScheduleActions.presentScene(item.sceneId)
         else -> {
-            val looping = item is ScheduleItem.AnnouncementItem &&
-                !item.isTimer && plays != 1
-            val shown = if (looping) {
-                // The announcement's own loop count: 0 is forever there too.
-                item.copy(loopCount = plays)
-            } else {
-                item
-            }
+            val shown = calendarShownItem(item, plays)
             if (shown is ScheduleItem.AnnouncementItem) {
                 appSettings = appSettings.withAnnouncement(shown)
             }
@@ -53,8 +46,7 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int) {
             )
             if (shown is ScheduleItem.MediaItem) {
                 mediaViewModel.setLooping(plays != 1)
-                // Media counts repeats after the first play; 0 is forever.
-                mediaViewModel.setLoopCount(if (plays == 0) 0 else plays - 1)
+                mediaViewModel.setLoopCount(calendarMediaLoopCount(plays))
             }
             currentScheduleActions.playSlideshow(shown, plays)
             coroutineScope.launch {
@@ -82,7 +74,7 @@ internal fun AppRootState.loadFromCalendar(
     // already runs from; appending to an empty one adopts this one's.
     val wasEmpty = currentScheduleItems.isEmpty()
     if (replace) currentScheduleActions.clearSchedule()
-    if (replace || wasEmpty) currentScheduleActions.setServiceStart(startTime)
+    if (calendarSetsServiceStart(replace, wasEmpty)) currentScheduleActions.setServiceStart(startTime)
     // Rows go in whole, ids and all: a plan's headings, lower thirds,
     // scenes and cues survive the trip, and each row's timing lands on it.
     items.forEach { item ->

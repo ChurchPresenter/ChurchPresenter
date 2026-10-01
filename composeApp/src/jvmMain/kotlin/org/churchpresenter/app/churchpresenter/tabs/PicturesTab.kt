@@ -119,7 +119,7 @@ fun PicturesTab(
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tabScope = remember(
         appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextPicture,
-        onInstanceLinkSendPreviousPicture, presenterManager, onSettingsChange, viewModel, folderDialogTitle, gridState,
+        onInstanceLinkSendPreviousPicture, presenterManager, onSettingsChange, folderDialogTitle, gridState,
         shortcuts, wentLive
     ) {
         PicturesTabScope(
@@ -131,7 +131,6 @@ fun PicturesTab(
             onInstanceLinkSendPreviousPicture = onInstanceLinkSendPreviousPicture,
             presenterManager = presenterManager,
             onSettingsChange = onSettingsChange,
-            viewModel = viewModel,
             folderDialogTitle = folderDialogTitle,
             gridState = gridState,
             shortcuts = shortcuts,
@@ -145,14 +144,14 @@ fun PicturesTab(
             .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
             .focusRescuePressHook(focusRescue)
             .focusable()
-            .onPreviewKeyEvent { keyEvent -> tabScope.handleKey(keyEvent) }
+            .onPreviewKeyEvent { keyEvent -> tabScope.handleKey(viewModel, keyEvent) }
     ) {
-        tabScope.PicturesHeader()
+        tabScope.PicturesHeader(viewModel)
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
         // ── Thumbnail grid ────────────────────────────────────────────
         if (viewModel.images.isNotEmpty()) {
-            tabScope.PicturesGrid()
+            tabScope.PicturesGrid(viewModel)
         } else {
             PicturesEmptyState()
         }
