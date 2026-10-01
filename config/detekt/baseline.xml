@@ -210,38 +210,6 @@
     <ID>MaxLineLength:ColorPickerDialog.kt$drawLine(Color.Black.copy(alpha = 0.35f), Offset(x - 1.dp.toPx(), 0f), Offset(x - 1.dp.toPx(), size.height), strokeWidth = 1.dp.toPx())</ID>
     <ID>MaxLineLength:ColorPickerField.kt$.</ID>
     <ID>MaxLineLength:CompanionApiDtos.kt$ScheduleItemDto$val type: String</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$?:</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$Text(stringResource(Res.string.companion_satellite_remove_connection), color = MaterialTheme.colorScheme.error)</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$if</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onBitmapSizeChange = { v -&gt; leftBitmapSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarBitmapSize = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onBitmapSizeChange = { v -&gt; rightBitmapSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarBitmapSize = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onBitmapSizeChange = { v -&gt; tabBitmapSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(tabBitmapSize = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onColumnsChange = { v -&gt; leftColumnsText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarColumns = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onColumnsChange = { v -&gt; rightColumnsText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarColumns = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onColumnsChange = { v -&gt; tabColumnsText = v; v.toIntOrNull()?.let { onUpdate { copy(tabColumns = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onMaxButtonSizeChange = { v -&gt; leftMaxButtonSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onMaxButtonSizeChange = { v -&gt; rightMaxButtonSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onMaxButtonSizeChange = { v -&gt; tabMaxButtonSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(tabMaxButtonSizeDp = it.coerceAtLeast(0)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onRowsChange = { v -&gt; leftRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarRows = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onRowsChange = { v -&gt; rightRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarRows = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onRowsChange = { v -&gt; tabRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(tabRows = it.coerceAtLeast(1)) } } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$v.toIntOrNull()?.let { onUpdate { copy(reconnectDelayMs = it.coerceAtLeast(MIN_RECONNECT_DELAY_MS)) } }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftBitmapSizeText by remember(connection.id, connection.leftSidebarBitmapSize) { mutableStateOf(connection.leftSidebarBitmapSize.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftColumnsText by remember(connection.id, connection.leftSidebarColumns) { mutableStateOf(connection.leftSidebarColumns.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftMaxButtonSizeText by remember(connection.id, connection.leftSidebarMaxButtonSizeDp) { mutableStateOf(connection.leftSidebarMaxButtonSizeDp.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftRowsText by remember(connection.id, connection.leftSidebarRows) { mutableStateOf(connection.leftSidebarRows.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftSidebarDeviceIdText by remember(connection.id, connection.leftSidebarDeviceId) { mutableStateOf(connection.leftSidebarDeviceId) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var reconnectDelayText by remember(connection.id, connection.reconnectDelayMs) { mutableStateOf(connection.reconnectDelayMs.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var rightBitmapSizeText by remember(connection.id, connection.rightSidebarBitmapSize) { mutableStateOf(connection.rightSidebarBitmapSize.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var rightColumnsText by remember(connection.id, connection.rightSidebarColumns) { mutableStateOf(connection.rightSidebarColumns.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var rightMaxButtonSizeText by remember(connection.id, connection.rightSidebarMaxButtonSizeDp) { mutableStateOf(connection.rightSidebarMaxButtonSizeDp.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var rightRowsText by remember(connection.id, connection.rightSidebarRows) { mutableStateOf(connection.rightSidebarRows.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var rightSidebarDeviceIdText by remember(connection.id, connection.rightSidebarDeviceId) { mutableStateOf(connection.rightSidebarDeviceId) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var tabBitmapSizeText by remember(connection.id, connection.tabBitmapSize) { mutableStateOf(connection.tabBitmapSize.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var tabColumnsText by remember(connection.id, connection.tabColumns) { mutableStateOf(connection.tabColumns.toString()) }</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var tabMaxButtonSizeText by remember(connection.id, connection.tabMaxButtonSizeDp) { mutableStateOf(connection.tabMaxButtonSizeDp.toString()) }</ID>
     <ID>MaxLineLength:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel$"Companion Satellite connection error (${slot.connectionId}/${slot.placement}): ${error ?: "unknown"}"</ID>
     <ID>MaxLineLength:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel$CrashReporter.breadcrumb("Companion Satellite connected (${slot.connectionId}/${slot.placement})", category = "integration")</ID>
     <ID>MaxLineLength:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel$CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})", category = "integration")</ID>
@@ -321,28 +289,6 @@
     <ID>MaxLineLength:LottieRenderCache.kt$LottieRenderCache$System.err.println("[LottieRenderCache] WARNING: all frames of $key are uniform — captures may be blank")</ID>
     <ID>MaxLineLength:LowerThirdAndAtemRoutes.kt$"""{"error":${server.atem.jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""</ID>
     <ID>MaxLineLength:LowerThirdSequencer.kt$LowerThirdSequencer$onShow.emit(ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs, name = name))</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$"""{"ok":true,"folder-id":"$dateFolderId","image-index":$newIndex,"file-name":"${file.name}"}"""</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$?.</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}""")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$if (isVideo) settings.bibleBackground.backgroundVideo else settings.bibleBackground.backgroundImage</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$if (isVideo) settings.bibleLowerThirdBackground.backgroundVideo else settings.bibleLowerThirdBackground.backgroundImage</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$if (isVideo) settings.defaultLowerThirdBackgroundVideo else settings.defaultLowerThirdBackgroundImage</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$if (isVideo) settings.songBackground.backgroundVideo else settings.songBackground.backgroundImage</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$if (isVideo) settings.songLowerThirdBackground.backgroundVideo else settings.songLowerThirdBackground.backgroundImage</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$pictureSelectAndUploadRoutes(server, deviceUploadsFolderId, _fileUploadEnabled, _pictureCatalogs, _pictureFiles, json, scope)</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.NotFound.value, "no_asset_configured_for_slot")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/bible/file/secondary", HttpStatusCode.NotFound.value, "file_not_found_on_disk")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/bible/file/secondary", HttpStatusCode.NotFound.value, "no_secondary_bible_loaded")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/bible/file/translation/{index}", HttpStatusCode.NotFound.value, "translation_not_found")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/media/stream/{id}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.InternalServerError.value, "heic_conversion_failed")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "folder_not_found")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "index_out_of_range")</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }</ID>
-    <ID>MaxLineLength:MediaAndAssetRoutes.kt$val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }</ID>
     <ID>MaxLineLength:MediaSettingsTab.kt$trailingLabel = "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}"</ID>
     <ID>MaxLineLength:MediaViewModel.kt$MediaViewModel$fun markFinished()</ID>
     <ID>MaxLineLength:NavigationTopBar.kt$Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))</ID>
@@ -433,68 +379,6 @@
     <ID>MaxLineLength:ProjectionSettingsTab.kt$label = "Display $displayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})"</ID>
     <ID>MaxLineLength:ProjectionSettingsTab.kt$s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))</ID>
     <ID>MaxLineLength:ProjectionSettingsTab.kt$text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$.</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(150.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Image(bitmap = submissionQR, contentDescription = stringResource(Res.string.qa_submit_questions), modifier = Modifier.size(150.dp))</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Row</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_admin_panel), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_qr_code_shows), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$if</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } }</ID>
-    <ID>MaxLineLength:QARemoteDialog.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$"[${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(q.timestamp))}] [${q.status}] ${q.text}"</ID>
-    <ID>MaxLineLength:QATab.kt$0 -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
-    <ID>MaxLineLength:QATab.kt$1 -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
-    <ID>MaxLineLength:QATab.kt$3 -&gt; sorted(questions.filter { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED })</ID>
-    <ID>MaxLineLength:QATab.kt$FILTER_QUEUED -&gt; if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)</ID>
-    <ID>MaxLineLength:QATab.kt$FilledIconButton</ID>
-    <ID>MaxLineLength:QATab.kt$GoLiveButton(onClick = { confirmGoLive = false; onApprove(); onDisplay() }, tooltipText = strConfirmGoLive)</ID>
-    <ID>MaxLineLength:QATab.kt$Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QATab.kt$Icon(Icons.Default.Refresh, strBackToIncoming, tint = MaterialTheme.colorScheme.tertiary)</ID>
-    <ID>MaxLineLength:QATab.kt$Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$QAIconButton</ID>
-    <ID>MaxLineLength:QATab.kt$StatBadge(stringResource(Res.string.qa_finished), doneCount + deniedCount, MaterialTheme.colorScheme.secondary)</ID>
-    <ID>MaxLineLength:QATab.kt$Surface</ID>
-    <ID>MaxLineLength:QATab.kt$Text("${stringResource(Res.string.qa_history)} ($historyCount)", style = MaterialTheme.typography.labelMedium)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(strConfirmDelete, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_add_question_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(end = 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(end = 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_edit_question_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:QATab.kt$TextButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }</ID>
-    <ID>MaxLineLength:QATab.kt$colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)</ID>
-    <ID>MaxLineLength:QATab.kt$containerColor = if (qaSettings.votingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$containerColor = if (showQROnDisplay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$contentColor = if (qaSettings.votingEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$contentColor = if (showQROnDisplay) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer</ID>
-    <ID>MaxLineLength:QATab.kt$filters = listOf(javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt"))</ID>
-    <ID>MaxLineLength:QATab.kt$if</ID>
-    <ID>MaxLineLength:QATab.kt$onClick = { onSettingsChange { s -&gt; s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } }</ID>
-    <ID>MaxLineLength:QATab.kt$selected = if (selectedFilter &lt; 6) filterItemsWithCount[selectedFilter] else filterItemsWithCount[0]</ID>
-    <ID>MaxLineLength:QATab.kt$text = stringResource(Res.string.qa_submitter_device, question.submitterDeviceId)</ID>
-    <ID>MaxLineLength:QATab.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:QATab.kt$tint = if (editing) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.tertiary</ID>
-    <ID>MaxLineLength:QATab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomStart, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:QATab.kt$tooltipText = stringResource(if (qaSettings.votingEnabled) Res.string.qa_voting_enabled else Res.string.qa_voting_disabled)</ID>
-    <ID>MaxLineLength:QATab.kt$val incomingApprovedCount = questions.count { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }</ID>
     <ID>MaxLineLength:QaRoutes.kt$"""{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":${server.qaCooldownSeconds},"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}"""</ID>
     <ID>MaxLineLength:QaRoutes.kt$call.respond(HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")</ID>
     <ID>MaxLineLength:QaRoutes.kt$if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }</ID>
@@ -571,25 +455,6 @@
     <ID>MaxLineLength:ScheduleTab.kt$saveSchedule = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } }</ID>
     <ID>MaxLineLength:ScheduleTab.kt$saveScheduleAs = { scope.launch { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) } }</ID>
     <ID>MaxLineLength:ScheduleTab.kt$val viewModel = scheduleViewModel ?: remember { ScheduleViewModel(onScheduleChanged = { items -&gt; onScheduleChangedState.value?.invoke(items) }) }</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$"announcement" -&gt; ScheduleItem.AnnouncementItem(id = id, text = text ?: "", textColor = textColor ?: "#FFFFFF", backgroundColor = backgroundColor ?: "#000000")</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$"dictionary" -&gt; ScheduleItem.DictionaryItem(id = id, number = "", word = displayText, transliteration = "", definition = "")</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$"label" -&gt; ScheduleItem.LabelItem(id = id, text = text ?: "", textColor = textColor ?: "#FFFFFF", backgroundColor = backgroundColor ?: "#2196F3")</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$"media" -&gt; ScheduleItem.MediaItem(id = id, mediaUrl = mediaUrl ?: "", mediaTitle = mediaTitle ?: "", mediaType = mediaType ?: "")</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$"picture" -&gt; ScheduleItem.PictureItem(id = id, folderPath = folderPath ?: "", folderName = folderName ?: "", imageCount = imageCount ?: 0)</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$"song" -&gt; ScheduleItem.SongItem(id = id, songNumber = songNumber ?: 0, title = title ?: "", songbook = songbook ?: "")</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$_scheduleItems[index] = ScheduleItem.LabelItem(id = id, text = text, textColor = textColor, backgroundColor = backgroundColor)</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$addOrPush(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$fun</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$id = id</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$is ScheduleItem.AnnouncementItem -&gt; onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$is ScheduleItem.DictionaryItem -&gt; onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)</ID>
-    <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$is ScheduleItem.PresentationItem -&gt; onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)</ID>
     <ID>MaxLineLength:SelectionList.kt$val isSelected = if (selectedIndices != null) selectedIndices.contains(index) else index == selectedIndex</ID>
     <ID>MaxLineLength:ServerSettingsTab.kt$Text(stringResource(Res.string.server_restart), style = MaterialTheme.typography.labelSmall)</ID>
     <ID>MaxLineLength:ServerSettingsTab.kt$Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)</ID>

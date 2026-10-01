@@ -81,6 +81,7 @@ import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import java.net.URLEncoder
 
 
 @Composable
@@ -190,8 +191,11 @@ internal fun QARemoteContent(
     val adminBaseUrl = if (tunnelUrl.isNotEmpty() && qaDisplayUrl == tunnelUrl) tunnelUrl else serverUrl
     val adminDisplayUrl = if (adminBaseUrl.isNotEmpty()) "$adminBaseUrl/qa/admin" else ""
     val adminQrUrl = if (adminBaseUrl.isNotEmpty()) {
-        if (apiKeyEnabled && apiKey.isNotEmpty()) "$adminBaseUrl/qa/admin?password=${java.net.URLEncoder.encode(apiKey, "UTF-8")}"
-        else "$adminBaseUrl/qa/admin"
+        if (apiKeyEnabled && apiKey.isNotEmpty()) {
+            "$adminBaseUrl/qa/admin?password=${URLEncoder.encode(apiKey, "UTF-8")}"
+        } else {
+            "$adminBaseUrl/qa/admin"
+        }
     } else ""
 
     Surface(
@@ -230,7 +234,11 @@ internal fun QARemoteContent(
                         Spacer(Modifier.height(8.dp))
                         val submissionQR = remember(submissionUrl) { generateQRCodeBitmap(submissionUrl, 150) }
                         if (submissionQR != null) {
-                            Image(bitmap = submissionQR, contentDescription = stringResource(Res.string.qa_submit_questions), modifier = Modifier.size(150.dp))
+                            Image(
+                                bitmap = submissionQR,
+                                contentDescription = stringResource(Res.string.qa_submit_questions),
+                                modifier = Modifier.size(150.dp)
+                            )
                         }
                         Spacer(Modifier.height(8.dp))
                         SelectionContainer {
@@ -278,26 +286,48 @@ internal fun QARemoteContent(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = AppShape(6.dp)
                                 ) {
-                                    Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        stringResource(Res.string.qa_enable_public_access),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
                             }
                             TunnelStatus.Downloading -> {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                    Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        stringResource(Res.string.qa_downloading_tunnel),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             }
                             TunnelStatus.Starting -> {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                    Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        stringResource(Res.string.qa_starting_tunnel),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             }
                             is TunnelStatus.Connected -> {
-                                Text(stringResource(Res.string.qa_qr_code_shows), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    stringResource(Res.string.qa_qr_code_shows),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                                 Spacer(Modifier.height(4.dp))
 
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
                                     val isLocal = qaDisplayUrl.isEmpty() || qaDisplayUrl == serverUrl
                                     RaisedButton(
                                         onClick = { onQaDisplayUrlChanged(serverUrl) },
@@ -311,7 +341,10 @@ internal fun QARemoteContent(
                                         ),
                                         shape = AppShape(6.dp)
                                     ) {
-                                        Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            stringResource(Res.string.qa_local),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
                                     }
                                     RaisedButton(
                                         onClick = { onQaDisplayUrlChanged(tunnelUrl) },
@@ -325,7 +358,10 @@ internal fun QARemoteContent(
                                         ),
                                         shape = AppShape(6.dp)
                                     ) {
-                                        Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            stringResource(Res.string.qa_public),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
                                     }
                                 }
 
@@ -342,7 +378,10 @@ internal fun QARemoteContent(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = AppShape(6.dp)
                                 ) {
-                                    Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        stringResource(Res.string.qa_disable_public_access),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
                             }
                             is TunnelStatus.Error -> {
@@ -358,7 +397,10 @@ internal fun QARemoteContent(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = AppShape(6.dp)
                                 ) {
-                                    Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        stringResource(Res.string.qa_retry),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
                             }
                         }
@@ -368,14 +410,23 @@ internal fun QARemoteContent(
                             label = stringResource(Res.string.qa_cooldown_label),
                             initialText = qaSettings.rateLimitCooldownSeconds,
                             range = 0..600,
-                            onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } },
+                            onValueChange = {
+                                onSettingsChange { s ->
+                                    s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it))
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
 
                     // ── Right: Admin QR ──────────────────────────────
                     Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(Res.string.qa_admin_panel), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            stringResource(Res.string.qa_admin_panel),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                         Spacer(Modifier.height(4.dp))
                         Text(
                             stringResource(Res.string.qa_admin_uses_api_key),
@@ -387,7 +438,11 @@ internal fun QARemoteContent(
 
                         val adminQR = remember(adminQrUrl) { generateQRCodeBitmap(adminQrUrl, 150) }
                         if (adminQR != null) {
-                            Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(150.dp))
+                            Image(
+                                bitmap = adminQR,
+                                contentDescription = stringResource(Res.string.qa_admin_panel),
+                                modifier = Modifier.size(150.dp)
+                            )
                         }
                         Spacer(Modifier.height(8.dp))
                         SelectionContainer {
@@ -418,7 +473,11 @@ internal fun QARemoteContent(
                 // What the QR code's link page says -- one message for the install. How a question
                 // and its QR code look on each output is styled per profile, on the Profiles tab.
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(
+                        stringResource(Res.string.qa_qr_message_label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     Spacer(Modifier.height(4.dp))
                     Row(
                         modifier = Modifier
@@ -431,26 +490,44 @@ internal fun QARemoteContent(
                         Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
                             BasicTextField(
                                 value = qaSettings.qrCodeMessage,
-                                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
+                                onValueChange = {
+                                    onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) }
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                 decorationBox = { innerTextField ->
                                     if (qaSettings.qrCodeMessage.isEmpty()) {
-                                        Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                                        Text(
+                                            strQrMessageDefault,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                            maxLines = 1
+                                        )
                                     }
                                     innerTextField()
                                 }
                             )
                         }
                         RaisedIconButton(
-                            onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
+                            onClick = {
+                                onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) }
+                            },
                             modifier = Modifier.size(30.dp),
                             shape = AppShape(5.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = stringResource(Res.string.qa_qr_message_reset),
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                     Spacer(Modifier.height(8.dp))

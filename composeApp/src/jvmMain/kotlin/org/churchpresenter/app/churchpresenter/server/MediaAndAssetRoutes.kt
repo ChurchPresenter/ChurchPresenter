@@ -149,7 +149,10 @@ private fun Route.pictureRoutes(
                  */
                 get("${Constants.ENDPOINT_PICTURES}/{id}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
                     val catalog = _pictureCatalogs[id]
                     if (catalog == null) {
                         server.logRest("/api/pictures/{id}", HttpStatusCode.NotFound.value, "folder_not_found")
@@ -166,22 +169,40 @@ private fun Route.pictureRoutes(
                  */
                 get("${Constants.ENDPOINT_PICTURES}/{id}/images/{index}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id    = call.parameters["id"]    ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
-                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val id    = call.parameters["id"]    ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid index")
+                        return@get
+                    }
                     val files = _pictureFiles[id]
                     if (files == null) {
-                        server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "folder_not_found")
+                        server.logRest(
+                            "/api/pictures/{id}/images/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "folder_not_found"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     if (index < 0 || index >= files.size) {
-                        server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "index_out_of_range")
+                        server.logRest(
+                            "/api/pictures/{id}/images/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "index_out_of_range"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Image index out of range")
                         return@get
                     }
                     val file = files[index]
                     if (!file.exists()) {
-                        server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/pictures/{id}/images/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Image file not found on disk")
                         return@get
                     }
@@ -193,7 +214,11 @@ private fun Route.pictureRoutes(
                             server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.OK.value)
                             call.respondBytes(jpegBytes, ContentType.Image.JPEG)
                         } else {
-                            server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.InternalServerError.value, "heic_conversion_failed")
+                            server.logRest(
+                                "/api/pictures/{id}/images/{index}",
+                                HttpStatusCode.InternalServerError.value,
+                                "heic_conversion_failed"
+                            )
                             call.respond(HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
                         }
                     } else {
@@ -216,7 +241,10 @@ private fun Route.mediaStreamAndBibleFileRoutes(
 ) {
                 get("${Constants.ENDPOINT_MEDIA_STREAM}/{id}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
                     val path = _scheduleItemToMediaPath[id]
                     if (path == null) {
                         server.logRest("/api/media/stream/{id}", HttpStatusCode.NotFound.value, "media_item_not_found")
@@ -225,7 +253,11 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                     }
                     val file = File(path)
                     if (!file.exists()) {
-                        server.logRest("/api/media/stream/{id}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/media/stream/{id}",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Media file not found on disk")
                         return@get
                     }
@@ -264,13 +296,21 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                     if (!server.checkApiKey(call)) return@get
                     val path = server._secondaryBibleFilePath
                     if (path.isEmpty()) {
-                        server.logRest("/api/bible/file/secondary", HttpStatusCode.NotFound.value, "no_secondary_bible_loaded")
+                        server.logRest(
+                            "/api/bible/file/secondary",
+                            HttpStatusCode.NotFound.value,
+                            "no_secondary_bible_loaded"
+                        )
                         call.respond(HttpStatusCode.NotFound, "No secondary bible loaded")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
-                        server.logRest("/api/bible/file/secondary", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/bible/file/secondary",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
                         return@get
                     }
@@ -289,7 +329,11 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                     val index = call.parameters["index"]?.toIntOrNull()
                     val path = index?.let { server._bibleFilePaths.getOrNull(it) }
                     if (path == null || !File(path).exists()) {
-                        server.logRest("/api/bible/file/translation/{index}", HttpStatusCode.NotFound.value, "translation_not_found")
+                        server.logRest(
+                            "/api/bible/file/translation/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "translation_not_found"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Bible translation not found")
                         return@get
                     }
@@ -333,25 +377,53 @@ private fun Route.backgroundAndPictureUploadRoutes(
                         Constants.BACKGROUND_SLOT_DEFAULT ->
                             if (isVideo) settings.defaultBackgroundVideo else settings.defaultBackgroundImage
                         Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD ->
-                            if (isVideo) settings.defaultLowerThirdBackgroundVideo else settings.defaultLowerThirdBackgroundImage
+                            if (isVideo) {
+                                settings.defaultLowerThirdBackgroundVideo
+                            } else {
+                                settings.defaultLowerThirdBackgroundImage
+                            }
                         Constants.BACKGROUND_SLOT_BIBLE ->
-                            if (isVideo) settings.bibleBackground.backgroundVideo else settings.bibleBackground.backgroundImage
+                            if (isVideo) {
+                                settings.bibleBackground.backgroundVideo
+                            } else {
+                                settings.bibleBackground.backgroundImage
+                            }
                         Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD ->
-                            if (isVideo) settings.bibleLowerThirdBackground.backgroundVideo else settings.bibleLowerThirdBackground.backgroundImage
+                            if (isVideo) {
+                                settings.bibleLowerThirdBackground.backgroundVideo
+                            } else {
+                                settings.bibleLowerThirdBackground.backgroundImage
+                            }
                         Constants.BACKGROUND_SLOT_SONG ->
-                            if (isVideo) settings.songBackground.backgroundVideo else settings.songBackground.backgroundImage
+                            if (isVideo) {
+                                settings.songBackground.backgroundVideo
+                            } else {
+                                settings.songBackground.backgroundImage
+                            }
                         Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD ->
-                            if (isVideo) settings.songLowerThirdBackground.backgroundVideo else settings.songLowerThirdBackground.backgroundImage
+                            if (isVideo) {
+                                settings.songLowerThirdBackground.backgroundVideo
+                            } else {
+                                settings.songLowerThirdBackground.backgroundImage
+                            }
                         else -> ""
                     }
                     if (path.isBlank()) {
-                        server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.NotFound.value, "no_asset_configured_for_slot")
+                        server.logRest(
+                            "/api/backgrounds/asset/{slot}",
+                            HttpStatusCode.NotFound.value,
+                            "no_asset_configured_for_slot"
+                        )
                         call.respond(HttpStatusCode.NotFound, "No asset configured for slot")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
-                        server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/backgrounds/asset/{slot}",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Background asset not found on disk")
                         return@get
                     }
@@ -365,7 +437,15 @@ private fun Route.backgroundAndPictureUploadRoutes(
                  * When "file-name" is provided the index is resolved by name so the correct
                  * image is displayed regardless of sort-order differences between clients.
                  */
-    pictureSelectAndUploadRoutes(server, deviceUploadsFolderId, _fileUploadEnabled, _pictureCatalogs, _pictureFiles, json, scope)
+    pictureSelectAndUploadRoutes(
+        server,
+        deviceUploadsFolderId,
+        _fileUploadEnabled,
+        _pictureCatalogs,
+        _pictureFiles,
+        json,
+        scope
+    )
 }
 
 private fun Route.pictureSelectAndUploadRoutes(
@@ -383,7 +463,9 @@ private fun Route.pictureSelectAndUploadRoutes(
                         val req = json.decodeFromString(SelectPictureRequest.serializer(), call.receiveText())
                         // Resolve index by filename when provided — immune to sort-order mismatch
                         val resolvedIndex = req.fileName
-                            ?.let { name -> _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 } }
+                            ?.let { name ->
+                                _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 }
+                            }
                             ?: req.index
                         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onSelectPicture.emit(req.copy(index = resolvedIndex)) }
@@ -436,15 +518,11 @@ private fun Route.pictureSelectAndUploadRoutes(
                         // date so uploads from different days are catalogued separately.
                         val dateStr = java.time.LocalDate.now().toString()   // "yyyy-MM-dd"
                         val dateFolderId = "${deviceUploadsFolderId}_$dateStr"
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }
-                        // Ensure the file name is unique by appending a timestamp if needed
-                        val uniqueName = if (File(uploadDir, safeName).exists()) {
-                            val ts = System.currentTimeMillis()
-                            val ext = safeName.substringAfterLast('.', "jpg")
-                            val base = safeName.substringBeforeLast('.', safeName)
-                            "${base}_$ts.$ext"
-                        } else safeName
-                        val file = File(uploadDir, uniqueName)
+                        val uploadDir = File(
+                            System.getProperty("user.home"),
+                            ".churchpresenter/device_uploads/$dateStr"
+                        ).also { it.mkdirs() }
+                        val file = File(uploadDir, uniqueUploadName(uploadDir, safeName))
                         file.writeBytes(imageBytes)
                         // Accumulate into today's dated "Device Photos" folder.
                         // Sort by filename so the catalog index order matches the desktop's
@@ -456,19 +534,7 @@ private fun Route.pictureSelectAndUploadRoutes(
                         existingFiles.sortBy { it.name }          // ← match desktop sort order
                         val newIndex = existingFiles.indexOf(file) // recalculate after sort
                         _pictureFiles[dateFolderId] = existingFiles
-                        val catalog = PictureFolderResponse(
-                            folderId   = dateFolderId,
-                            folderName = "Device Photos ($dateStr)",
-                            folderPath = uploadDir.absolutePath,
-                            imageTotal = existingFiles.size,
-                            images     = existingFiles.mapIndexed { idx, f ->
-                                PictureFileDto(
-                                    index        = idx,
-                                    fileName     = f.name,
-                                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$dateFolderId/images/$idx"
-                                )
-                            }
-                        )
+                        val catalog = deviceUploadsCatalog(dateFolderId, dateStr, uploadDir, existingFiles)
                         _pictureCatalogs[dateFolderId] = catalog
                         // Do NOT update _pictureCatalog here — that would replace the desktop's
                         // active folder with device_uploads, making GET /api/pictures return the
@@ -485,13 +551,46 @@ private fun Route.pictureSelectAndUploadRoutes(
                             clientId = picUploadClientId
                         )) }
                         call.respondText(
-                            """{"ok":true,"folder-id":"$dateFolderId","image-index":$newIndex,"file-name":"${file.name}"}""",
+                            """{"ok":true,"folder-id":"$dateFolderId","image-index":""" +
+                                """$newIndex,"file-name":"${file.name}"}""",
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
-                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}""")
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}"""
+                        )
                     }
                 }
 }
+
+/** [safeName], or — when a file of that name is already in [uploadDir] — the name with a timestamp. */
+private fun uniqueUploadName(uploadDir: File, safeName: String): String =
+    if (File(uploadDir, safeName).exists()) {
+        val ts = System.currentTimeMillis()
+        val ext = safeName.substringAfterLast('.', "jpg")
+        val base = safeName.substringBeforeLast('.', safeName)
+        "${base}_$ts.$ext"
+    } else safeName
+
+/** The catalog of one day's "Device Photos" folder, holding [files] in the order given. */
+private fun deviceUploadsCatalog(
+    dateFolderId: String,
+    dateStr: String,
+    uploadDir: File,
+    files: List<File>,
+) = PictureFolderResponse(
+    folderId   = dateFolderId,
+    folderName = "Device Photos ($dateStr)",
+    folderPath = uploadDir.absolutePath,
+    imageTotal = files.size,
+    images     = files.mapIndexed { idx, f ->
+        PictureFileDto(
+            index        = idx,
+            fileName     = f.name,
+            thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$dateFolderId/images/$idx"
+        )
+    }
+)
 
 
