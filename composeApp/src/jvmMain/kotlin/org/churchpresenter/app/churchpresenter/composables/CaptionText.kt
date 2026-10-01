@@ -1,9 +1,12 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
@@ -12,6 +15,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
+import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 
@@ -35,6 +41,9 @@ fun BottomAlignedText(
     // so a caller drawing at other than 1x (see `presenterScale`) keeps the two in proportion.
     // 1f (the default) is right for a caller that never scales, e.g. STTPresenter today.
     scaleFactor: Float = 1f,
+    // How long the lines take to slide up when a new one pushes them, or 0 to jump as they always
+    // did. Only text taller than its clip moves, so a caption still filling up never slides.
+    rollUpMillis: Int = 0,
 ) {
     // The painter goes on the content text in both branches, never on the invisible reference
     // below: that one exists to measure a fixed number of lines, and banding it would paint a
@@ -60,6 +69,7 @@ fun BottomAlignedText(
 
     // Reference text with exactly maxLines lines — measured to get precise pixel height
     val referenceText = remember(maxLines) { "\n".repeat(maxLines - 1).ifEmpty { " " } }
+    val roll = rememberRollUp(rollUpMillis)
 
     Layout(
         content = {
@@ -102,11 +112,46 @@ fun BottomAlignedText(
         val textPlaceable = measurables[1].measure(unconstrainedConstraints)
 
         val reportedHeight = clipHeightPx.coerceAtMost(textPlaceable.height)
+        // Bottom-aligned: shifted up so the last lines are the visible ones
+        val y = (reportedHeight - textPlaceable.height).coerceAtMost(0)
+        roll.moved(y)
         layout(constraints.maxWidth, reportedHeight) {
-            // Place text bottom-aligned: shift up so last lines are visible
-            val y = reportedHeight - textPlaceable.height
-            textPlaceable.place(0, y.coerceAtMost(0))
+            // Read here, not above, so the slide re-places the text without measuring it again
+            textPlaceable.place(0, y + roll.offset())
             // Don't place reference — it's just for measurement
         }
     }
+}
+
+/**
+ * The slide behind roll-up: when the text moves up by some amount, it is drawn that much lower and
+ * eased back into place over [millis]. Does nothing at 0.
+ */
+private class RollUp(private val millis: Int, private val scope: CoroutineScope) {
+    private val slide = Animatable(0f)
+    private var lastY: Int? = null
+
+    // The slide for the frame the text moved in, before the animation has picked it up
+    private var pending: Float? = null
+
+    fun moved(y: Int) {
+        val previous = lastY
+        lastY = y
+        if (millis <= 0 || previous == null || y >= previous) return
+        val shift = (previous - y).toFloat() + offset()
+        pending = shift
+        scope.launch {
+            slide.snapTo(shift)
+            pending = null
+            slide.animateTo(0f, tween(millis))
+        }
+    }
+
+    fun offset(): Int = (pending ?: slide.value).roundToInt()
+}
+
+@Composable
+private fun rememberRollUp(millis: Int): RollUp {
+    val scope = rememberCoroutineScope()
+    return remember(millis, scope) { RollUp(millis, scope) }
 }

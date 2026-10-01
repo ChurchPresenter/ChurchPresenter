@@ -3,13 +3,22 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.bible_letter_spacing
+import churchpresenter.composeapp.generated.resources.bible_word_spacing
 import churchpresenter.composeapp.generated.resources.percent_suffix
+import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.profile_box_item_transcript
 import churchpresenter.composeapp.generated.resources.profile_box_item_translation
+import churchpresenter.composeapp.generated.resources.profile_caption_all_caps
 import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_layout
+import churchpresenter.composeapp.generated.resources.profile_caption_translation_bold
+import churchpresenter.composeapp.generated.resources.profile_caption_translation_caps
+import churchpresenter.composeapp.generated.resources.profile_caption_translation_italic
+import churchpresenter.composeapp.generated.resources.profile_caption_translation_size
+import churchpresenter.composeapp.generated.resources.profile_caption_translation_size_sub
 import churchpresenter.composeapp.generated.resources.profile_layout_side_by_side
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_side_inverse
 import churchpresenter.composeapp.generated.resources.profile_layout_stacked
@@ -28,7 +37,9 @@ import churchpresenter.composeapp.generated.resources.profile_group_position
 import churchpresenter.composeapp.generated.resources.profile_group_show
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_line_spacing
+import churchpresenter.composeapp.generated.resources.profile_margins
 import churchpresenter.composeapp.generated.resources.profile_ms
+import churchpresenter.composeapp.generated.resources.profile_text_size_unit
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
@@ -100,19 +111,13 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
             )
         }
     }
+    CaptionReadingGroup(stt.reading) { t -> update { it.copy(reading = t(it.reading)) } }
     SettingsGroup(
         stringResource(Res.string.profile_group_text),
-        paths = displayTextPaths(STT) + "$STT.translationTextColor",
+        paths = displayTextPaths(STT) + CAPTION_TEXT_PATHS,
     ) {
         DisplayTextRows(stt.displayStyle(), { t -> update { it.withDisplayStyle(t) } }, STT, extraBasic = {
-            if (stt.displayMode != MODE_TRANSCRIBE) {
-                SettingsRow(
-                    stringResource(Res.string.profile_caption_translation_color),
-                    paths = listOf("$STT.translationTextColor"),
-                ) {
-                    RowColor(stt.translationTextColor, { v -> update { it.copy(translationTextColor = v) } })
-                }
-            }
+            CaptionTextRows(stt, update)
         })
     }
     DisplayBoxGroup(
@@ -124,10 +129,20 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
     )
     SettingsGroup(
         stringResource(Res.string.profile_group_position),
-        paths = listOf("$STT.position", "$STT.horizontalAlignment"),
+        paths = listOf("$STT.position", "$STT.horizontalAlignment") + CAPTION_MARGIN_PATHS,
     ) {
         ScreenPlacementRow(stt.position, { v -> update { it.copy(position = v) } }, STT)
         DisplayAlignmentRow(stt.horizontalAlignment, { v -> update { it.copy(horizontalAlignment = v) } }, STT)
+        SettingsRow(stringResource(Res.string.profile_margins), paths = CAPTION_MARGIN_PATHS) {
+            MarginFields(
+                Margins(stt.marginTop, stt.marginBottom, stt.marginLeft, stt.marginRight),
+                { m ->
+                    update {
+                        it.copy(marginTop = m.top, marginBottom = m.bottom, marginLeft = m.left, marginRight = m.right)
+                    }
+                },
+            )
+        }
     }
     ItemBoxGroup(
         items = listOf(
@@ -222,4 +237,76 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
             },
         )
     }
+}
+
+private val CAPTION_MARGIN_PATHS = listOf("marginTop", "marginBottom", "marginLeft", "marginRight").map { "$STT.$it" }
+
+private val CAPTION_TEXT_PATHS = listOf(
+    "translationTextColor", "translationFontSize", "translationBold", "translationItalic",
+    "transcriptAllCaps", "translationAllCaps", "letterSpacing", "wordSpacing",
+).map { "$STT.$it" }
+
+private val TRANSLATION_SIZE_RANGE = 0..200
+private val LETTER_SPACING_RANGE = -10..30
+private val WORD_SPACING_RANGE = 0..40
+
+/** The captions' own text rows: capitals, spacing, and the translation's colour, size and style. */
+@Composable
+private fun CaptionTextRows(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
+    val px = stringResource(Res.string.pixels_short)
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_all_caps),
+        stt.transcriptAllCaps,
+        { v -> update { it.copy(transcriptAllCaps = v) } },
+        paths = listOf("$STT.transcriptAllCaps"),
+    )
+    SettingsRow(
+        stringResource(Res.string.bible_letter_spacing),
+        advanced = true,
+        paths = listOf("$STT.letterSpacing"),
+    ) {
+        RowStepper(stt.letterSpacing, { v -> update { it.copy(letterSpacing = v) } }, LETTER_SPACING_RANGE, unit = px)
+    }
+    SettingsRow(stringResource(Res.string.bible_word_spacing), advanced = true, paths = listOf("$STT.wordSpacing")) {
+        RowStepper(stt.wordSpacing, { v -> update { it.copy(wordSpacing = v) } }, WORD_SPACING_RANGE, unit = px)
+    }
+    if (stt.displayMode == MODE_TRANSCRIBE) return
+    SettingsRow(
+        stringResource(Res.string.profile_caption_translation_color),
+        paths = listOf("$STT.translationTextColor"),
+    ) {
+        RowColor(stt.translationTextColor, { v -> update { it.copy(translationTextColor = v) } })
+    }
+    SettingsRow(
+        stringResource(Res.string.profile_caption_translation_size),
+        sub = stringResource(Res.string.profile_caption_translation_size_sub),
+        paths = listOf("$STT.translationFontSize"),
+    ) {
+        RowStepper(
+            stt.translationFontSize,
+            { v -> update { it.copy(translationFontSize = v) } },
+            TRANSLATION_SIZE_RANGE,
+            unit = stringResource(Res.string.profile_text_size_unit),
+        )
+    }
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_translation_caps),
+        stt.translationAllCaps,
+        { v -> update { it.copy(translationAllCaps = v) } },
+        paths = listOf("$STT.translationAllCaps"),
+    )
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_translation_bold),
+        stt.translationBold,
+        { v -> update { it.copy(translationBold = v) } },
+        advanced = true,
+        paths = listOf("$STT.translationBold"),
+    )
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_translation_italic),
+        stt.translationItalic,
+        { v -> update { it.copy(translationItalic = v) } },
+        advanced = true,
+        paths = listOf("$STT.translationItalic"),
+    )
 }

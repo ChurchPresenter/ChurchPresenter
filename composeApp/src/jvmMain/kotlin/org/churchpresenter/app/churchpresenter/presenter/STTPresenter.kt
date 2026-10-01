@@ -21,7 +21,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.em
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.draw.clip
@@ -39,8 +41,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.composables.BottomAlignedText
+import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
+import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt
@@ -95,8 +99,12 @@ fun STTPresenter(
             else -> TextAlign.Center
         },
         fontSize = sttSettings.fontSize.sp,
-        lineHeight = lineHeightSp
+        lineHeight = lineHeightSp,
+        letterSpacing = spacingEm(sttSettings.letterSpacing, sttSettings.fontSize).em,
     )
+    val transcriptLook = baseTextStyle.copy(color = textColor)
+    val translationLook = translationTextStyle(baseTextStyle, sttSettings).copy(color = translationColor)
+    val reading = sttSettings.reading
 
     val boxAlignment = sttPositionToAlignment(sttSettings.position)
 
@@ -104,33 +112,37 @@ fun STTPresenter(
     val showTranscription = sttSettings.displayMode == "transcribe" || sttSettings.displayMode == "both"
     val showTranslation = sttSettings.displayMode == "translate" || sttSettings.displayMode == "both"
 
-    // Drip feed: reveal newest segment letter-by-letter
-    val dripEnabled = sttSettings.dripFeedEnabled
-    val dripSpeed = sttSettings.dripFeedSpeed.toLong().coerceAtLeast(1L)
-    val dripTranscription = useDripFeed(
-        segments,
-        enabled = dripEnabled && !sttSettings.showInProgress,
-        delayMs = dripSpeed
-    )
-    val dripTranslation = useDripFeed(
-        translationSegments,
-        enabled = dripEnabled && !sttSettings.showTranslationInProgress,
-        delayMs = dripSpeed
-    )
+    // Drip feed and the reading-speed limit: the newest words revealed at a pace, not all at once
+    val pace = revealPace(sttSettings)
+    val dripTranscription = useDripFeed(segments, pace.takeIf { !sttSettings.showInProgress })
+    val dripTranslation = useDripFeed(translationSegments, pace.takeIf { !sttSettings.showTranslationInProgress })
 
     // Only the newest [STTSettings.maxSegments] of them (0 keeps every one): how much of the
     // running transcript this output keeps is set per profile. `maxLines` still trims whatever is
     // left to what fits.
     val keptTranscription = keepNewest(dripTranscription, sttSettings.maxSegments)
     val keptTranslation = keepNewest(dripTranslation, sttSettings.maxSegments)
+    val wordEm = spacingEm(sttSettings.wordSpacing, sttSettings.fontSize)
+    val spaceTrackingEm = (spacingEm(sttSettings.letterSpacing, sttSettings.fontSize) + wordEm).takeIf { wordEm != 0f }
+    val highlights = highlightedWords.takeIf { sttSettings.showWordHighlighting }.orEmpty()
     val transcriptionText = buildDisplayText(
-        keptTranscription, inProgressText, sttSettings.showInProgress,
-        highlightedWords, sttSettings.showWordHighlighting, textColor
+        captionBody(
+            keptTranscription, inProgressText.takeIf { sttSettings.showInProgress }, reading,
+            sttSettings.transcriptAllCaps,
+        ),
+        keptTranscription.isNotEmpty(), reading, CaptionInk(textColor, highlights, spaceTrackingEm),
     )
     val translationText = buildDisplayText(
-        keptTranslation, inProgressTranslation, sttSettings.showTranslationInProgress,
-        highlightedWords, sttSettings.showWordHighlighting, translationColor
+        captionBody(
+            keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress }, reading,
+            sttSettings.translationAllCaps,
+        ),
+        keptTranslation.isNotEmpty(), reading, CaptionInk(translationColor, highlights, spaceTrackingEm),
     )
+    val silenceFade = rememberSilenceFade(transcriptionText.text + "\u0000" + translationText.text, reading)
+    val faded = modifier.graphicsLayer {
+        alpha = silenceFade.value
+    }
 
     val isBothMode = showTranscription && showTranslation
     val isSideBySide = sttSettings.layout == "side_by_side" || sttSettings.layout == "side_by_side_inverse"
@@ -145,18 +157,18 @@ fun STTPresenter(
         // line limit still decides how much of the running text is kept.
         val parts = buildList {
             if (showTranscription) {
-                add(CaptionPart(CAPTION_TRANSCRIPT_BOX, transcriptionText, textColor, transcriptBox))
+                add(CaptionPart(CAPTION_TRANSCRIPT_BOX, transcriptionText, transcriptLook, transcriptBox))
             }
             if (showTranslation) {
-                add(CaptionPart(CAPTION_TRANSLATION_BOX, translationText, translationColor, translationBox))
+                add(CaptionPart(CAPTION_TRANSLATION_BOX, translationText, translationLook, translationBox))
             }
         }
-        BoxedCaptions(parts, baseTextStyle, cardBg, sttSettings, boxAlignment, modifier)
+        BoxedCaptions(parts, cardBg, sttSettings, boxAlignment, faded)
         return
     }
 
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize().padding(32.dp),
+        modifier = faded.fillMaxSize().captionMargins(sttSettings),
         contentAlignment = boxAlignment
     ) {
         if (transcriptionText.isNotEmpty() || translationText.isNotEmpty() || isBothMode) {
@@ -169,9 +181,9 @@ fun STTPresenter(
             ) {
                 if (isBothMode) {
                     val first = if (isInverse) translationText else transcriptionText
-                    val firstStyle = baseTextStyle.copy(color = if (isInverse) translationColor else textColor)
+                    val firstStyle = if (isInverse) translationLook else transcriptLook
                     val second = if (isInverse) transcriptionText else translationText
-                    val secondStyle = baseTextStyle.copy(color = if (isInverse) textColor else translationColor)
+                    val secondStyle = if (isInverse) transcriptLook else translationLook
 
                     if (isSideBySide) {
                         Row(
@@ -186,6 +198,7 @@ fun STTPresenter(
                                 modifier = Modifier.weight(1f),
                                 backdrop = sttSettings.backdrop,
                                 outline = sttSettings.outline,
+                                rollUpMillis = reading.rollUpMillisOrOff(),
                             )
                             BottomAlignedText(
                                 text = second,
@@ -194,6 +207,7 @@ fun STTPresenter(
                                 modifier = Modifier.weight(1f),
                                 backdrop = sttSettings.backdrop,
                                 outline = sttSettings.outline,
+                                rollUpMillis = reading.rollUpMillisOrOff(),
                             )
                         }
                     } else {
@@ -206,6 +220,7 @@ fun STTPresenter(
                                     modifier = Modifier.fillMaxWidth(),
                                     backdrop = sttSettings.backdrop,
                                     outline = sttSettings.outline,
+                                rollUpMillis = reading.rollUpMillisOrOff(),
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
@@ -217,6 +232,7 @@ fun STTPresenter(
                                     modifier = Modifier.fillMaxWidth(),
                                     backdrop = sttSettings.backdrop,
                                     outline = sttSettings.outline,
+                                rollUpMillis = reading.rollUpMillisOrOff(),
                                 )
                             }
                         }
@@ -228,18 +244,19 @@ fun STTPresenter(
                         transcriptionText.isNotEmpty() -> transcriptionText
                         else -> translationText
                     }
-                    val displayColor = when {
-                        showTranscription && transcriptionText.isNotEmpty() -> textColor
-                        showTranslation && translationText.isNotEmpty() -> translationColor
-                        else -> textColor
+                    val displayStyle = when {
+                        showTranscription && transcriptionText.isNotEmpty() -> transcriptLook
+                        showTranslation && translationText.isNotEmpty() -> translationLook
+                        else -> transcriptLook
                     }
                     BottomAlignedText(
                         text = displayText,
-                        style = baseTextStyle.copy(color = displayColor),
+                        style = displayStyle,
                         maxLines = maxLines,
                         modifier = Modifier.fillMaxWidth(),
                         backdrop = sttSettings.backdrop,
                         outline = sttSettings.outline,
+                        rollUpMillis = reading.rollUpMillisOrOff(),
                     )
                 }
             }
@@ -248,13 +265,12 @@ fun STTPresenter(
 }
 
 /** One part of the captions -- the transcript or the translation -- with its text, colour and box. */
-private class CaptionPart(val key: String, val text: AnnotatedString, val color: Color, val box: TextBox)
+private class CaptionPart(val key: String, val text: AnnotatedString, val style: TextStyle, val box: TextBox)
 
 /** [parts] each in a card of its own: boxed parts in their box, the rest where the page puts captions. */
 @Composable
 private fun BoxedCaptions(
     parts: List<CaptionPart>,
-    style: TextStyle,
     cardBg: Color,
     sttSettings: STTSettings,
     alignment: Alignment,
@@ -277,11 +293,12 @@ private fun BoxedCaptions(
             ) {
                 BottomAlignedText(
                     text = part.text,
-                    style = style.copy(color = part.color),
+                    style = part.style,
                     maxLines = sttSettings.maxLines,
                     modifier = Modifier.fillMaxWidth(),
                     backdrop = sttSettings.backdrop,
                     outline = sttSettings.outline,
+                    rollUpMillis = sttSettings.reading.rollUpMillisOrOff(),
                 )
             }
         }
@@ -290,49 +307,45 @@ private fun BoxedCaptions(
         }
         val rest = parts.filter { !it.box.enabled && it.text.isNotEmpty() }
         if (rest.isNotEmpty()) {
-            Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = alignment) {
+            Box(Modifier.fillMaxSize().captionMargins(sttSettings), contentAlignment = alignment) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) { rest.forEach { card(it) } }
             }
         }
     }
 }
 
+/** What a side's caption is painted with: its colour, the words to highlight, and its word spacing. */
+private class CaptionInk(val baseColor: Color, val highlights: List<HighlightedWord>, val spaceTrackingEm: Float?)
+
 private fun buildDisplayText(
-    segments: List<STTSegment>,
-    inProgressText: String,
-    showInProgress: Boolean,
-    highlightedWords: List<HighlightedWord>,
-    showWordHighlighting: Boolean,
-    baseColor: Color
+    body: CaptionBody,
+    hasSegments: Boolean,
+    reading: CaptionReading,
+    ink: CaptionInk,
 ): AnnotatedString {
-    // Same shaping the drip-feed cursor counts against — see captionText in SttDripFeed.kt.
-    val lines = mutableListOf<String>()
-    captionText(segments).takeIf { it.isNotEmpty() }?.let { lines.add(it) }
-    if (showInProgress && inProgressText.isNotBlank()) {
-        lines.add(normalizeSegmentText(inProgressText))
-    }
-
-    if (lines.isEmpty()) return AnnotatedString("")
-
-    val fullText = lines.joinToString(" ")
+    val baseColor = ink.baseColor
+    val fullText = body.text
+    if (fullText.isEmpty()) return AnnotatedString("")
 
     // Build per-character color array then construct contiguous runs
     val colors = Array(fullText.length) { baseColor }
 
+    // Older units fainter; the in-progress words, which are no unit's age, stay out of the count
+    val progressFrom = body.inProgressStart ?: fullText.length
+    val settled = body.units.filter { it.first < progressFrom }
+    unitAlphas(settled.size, reading).forEachIndexed { i, alpha ->
+        if (alpha < 1f) for (j in settled[i]) colors[j] = baseColor.copy(alpha = baseColor.alpha * alpha)
+    }
+
     // Dim in-progress text
-    if (showInProgress && inProgressText.isNotBlank() && segments.isNotEmpty()) {
-        val inProgressStart = fullText.length - inProgressText.trim().length
-        if (inProgressStart >= 0) {
-            for (j in inProgressStart until fullText.length) colors[j] = baseColor.copy(alpha = 0.6f)
-        }
+    if (body.inProgressStart != null && hasSegments) {
+        for (j in body.inProgressStart until fullText.length) colors[j] = baseColor.copy(alpha = 0.6f)
     }
 
     // Apply word highlighting with Unicode word boundaries
-    if (showWordHighlighting) {
-        highlightedWords.forEach { applyHighlight(it, fullText, colors) }
-    }
+    ink.highlights.forEach { applyHighlight(it, fullText, colors) }
 
-    return runsOf(fullText, colors)
+    return runsOf(fullText, colors, ink.spaceTrackingEm)
 }
 
 /** Paints every match of one highlighted word into [colors]. A pattern that won't compile is skipped. */
@@ -353,18 +366,27 @@ private fun applyHighlight(hw: HighlightedWord, fullText: String, colors: Array<
     } catch (_: Exception) {}
 }
 
-/** The per-character colours collapsed into contiguous styled runs. */
-private fun runsOf(fullText: String, colors: Array<Color>): AnnotatedString = buildAnnotatedString {
-    var i = 0
-    while (i < fullText.length) {
-        val color = colors[i]
-        val start = i
-        while (i < fullText.length && colors[i] == color) i++
-        withStyle(SpanStyle(color = color)) {
-            append(fullText.substring(start, i))
+/**
+ * The per-character colours collapsed into contiguous styled runs, each space widened by
+ * [spaceTrackingEm] when word spacing is set (see `styledDisplayText`).
+ */
+private fun runsOf(fullText: String, colors: Array<Color>, spaceTrackingEm: Float?): AnnotatedString =
+    buildAnnotatedString {
+        var i = 0
+        while (i < fullText.length) {
+            val color = colors[i]
+            val start = i
+            while (i < fullText.length && colors[i] == color) i++
+            withStyle(SpanStyle(color = color)) {
+                append(fullText.substring(start, i))
+            }
+        }
+        if (spaceTrackingEm != null) {
+            fullText.forEachIndexed { index, c ->
+                if (c == ' ') addStyle(SpanStyle(letterSpacing = spaceTrackingEm.em), index, index + 1)
+            }
         }
     }
-}
 
 /**
  * Drip feed: reveals the caption letter-by-letter (ChatGPT-style) at [delayMs] per character.
@@ -378,14 +400,14 @@ private fun runsOf(fullText: String, colors: Array<Color>): AnnotatedString = bu
  * The character arithmetic lives in `SttDripFeed.kt`.
  */
 @Composable
-private fun useDripFeed(segments: List<STTSegment>, enabled: Boolean, delayMs: Long): List<STTSegment> {
-    if (!enabled) return segments
+private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): List<STTSegment> {
+    if (pace == null) return segments
 
     val fullText = captionText(segments)
     val latestFullText = rememberUpdatedState(fullText)
     val revealed = remember { mutableIntStateOf(fullText.length) }
 
-    LaunchedEffect(delayMs) {
+    LaunchedEffect(pace) {
         var previous = latestFullText.value
         snapshotFlow { latestFullText.value }.collectLatest { current ->
             if (current != previous) {
@@ -393,11 +415,16 @@ private fun useDripFeed(segments: List<STTSegment>, enabled: Boolean, delayMs: L
                 previous = current
             }
             while (revealed.intValue < current.length) {
-                delay(delayMs)
-                revealed.intValue = minOf(
-                    current.length,
-                    revealed.intValue + revealStep(revealed.intValue, current.length)
-                )
+                val speedUp = revealStep(revealed.intValue, current.length)
+                if (pace.byWord) {
+                    // Whole words, each held back for as long as its letters would take to type
+                    val next = nextWordEnd(current, revealed.intValue)
+                    delay(pace.delayMs * (next - revealed.intValue) / speedUp)
+                    revealed.intValue = next
+                } else {
+                    delay(pace.delayMs)
+                    revealed.intValue = minOf(current.length, revealed.intValue + speedUp)
+                }
             }
         }
     }

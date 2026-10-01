@@ -1,0 +1,216 @@
+package org.churchpresenter.app.churchpresenter.dialogs.tabs
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.percent_suffix
+import churchpresenter.composeapp.generated.resources.profile_caption_blank_line
+import churchpresenter.composeapp.generated.resources.profile_caption_break_off
+import churchpresenter.composeapp.generated.resources.profile_caption_break_phrase
+import churchpresenter.composeapp.generated.resources.profile_caption_break_sentence
+import churchpresenter.composeapp.generated.resources.profile_caption_clear
+import churchpresenter.composeapp.generated.resources.profile_caption_clear_fade
+import churchpresenter.composeapp.generated.resources.profile_caption_clear_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_dim
+import churchpresenter.composeapp.generated.resources.profile_caption_dim_floor
+import churchpresenter.composeapp.generated.resources.profile_caption_dim_step
+import churchpresenter.composeapp.generated.resources.profile_caption_dim_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_line_breaks
+import churchpresenter.composeapp.generated.resources.profile_caption_max_chars
+import churchpresenter.composeapp.generated.resources.profile_caption_max_chars_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_reading_speed
+import churchpresenter.composeapp.generated.resources.profile_caption_reading_speed_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_reading_speed_unit
+import churchpresenter.composeapp.generated.resources.profile_caption_roll_up
+import churchpresenter.composeapp.generated.resources.profile_caption_roll_up_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_roll_up_time
+import churchpresenter.composeapp.generated.resources.profile_group_reading
+import churchpresenter.composeapp.generated.resources.profile_ms
+import churchpresenter.composeapp.generated.resources.seconds_suffix
+import org.churchpresenter.settings.CAPTION_BREAK_NONE
+import org.churchpresenter.settings.CAPTION_BREAK_SEGMENT
+import org.churchpresenter.settings.CAPTION_BREAK_SENTENCE
+import org.churchpresenter.settings.CaptionReading
+import org.jetbrains.compose.resources.stringResource
+
+private const val READING = "sttSettings.reading"
+private val CLEAR_SECONDS_RANGE = 1..120
+private val FADE_MS_RANGE = 0..5000
+private const val FADE_MS_STEP = 100
+private val READING_CPS_RANGE = 5..40
+private val SLIDE_MS_RANGE = 50..2000
+private const val SLIDE_MS_STEP = 50
+private val PERCENT_RANGE = 0..100
+private const val PERCENT_STEP = 5
+private val MAX_CHARS_RANGE = 0..120
+
+/**
+ * READING: when captions leave the screen, how fast words may arrive, how the lines move and break,
+ * and how the newest words stand out. The everyday switches are Basic; their fine values Advanced.
+ */
+@Composable
+internal fun CaptionReadingGroup(reading: CaptionReading, update: ((CaptionReading) -> CaptionReading) -> Unit) {
+    val path = { field: String -> listOf("$READING.$field") }
+    val ms = stringResource(Res.string.profile_ms)
+    val percent = stringResource(Res.string.percent_suffix)
+    SettingsGroup(stringResource(Res.string.profile_group_reading), paths = listOf(READING)) {
+        TimingRows(reading, update, path)
+        SettingsSwitchRow(
+            stringResource(Res.string.profile_caption_roll_up),
+            reading.rollUp,
+            { v -> update { it.copy(rollUp = v) } },
+            sub = stringResource(Res.string.profile_caption_roll_up_sub),
+            paths = path("rollUp"),
+        )
+        if (reading.rollUp) {
+            SettingsRow(
+                stringResource(Res.string.profile_caption_roll_up_time),
+                advanced = true,
+                paths = path("rollUpMillis"),
+            ) {
+                RowStepper(
+                    reading.rollUpMillis,
+                    { v -> update { it.copy(rollUpMillis = v) } },
+                    SLIDE_MS_RANGE,
+                    step = SLIDE_MS_STEP,
+                    unit = ms,
+                    fieldWidth = 76.dp,
+                )
+            }
+        }
+        SettingsSwitchRow(
+            stringResource(Res.string.profile_caption_dim),
+            reading.dimOlderLines,
+            { v -> update { it.copy(dimOlderLines = v) } },
+            sub = stringResource(Res.string.profile_caption_dim_sub),
+            paths = path("dimOlderLines"),
+        )
+        if (reading.dimOlderLines) {
+            SettingsRow(
+                stringResource(Res.string.profile_caption_dim_step),
+                advanced = true,
+                paths = path("dimStepPercent"),
+            ) {
+                RowStepper(
+                    reading.dimStepPercent,
+                    { v -> update { it.copy(dimStepPercent = v) } },
+                    PERCENT_RANGE,
+                    step = PERCENT_STEP,
+                    unit = percent,
+                )
+            }
+            SettingsRow(
+                stringResource(Res.string.profile_caption_dim_floor),
+                advanced = true,
+                paths = path("dimFloorPercent"),
+            ) {
+                RowStepper(
+                    reading.dimFloorPercent,
+                    { v -> update { it.copy(dimFloorPercent = v) } },
+                    PERCENT_RANGE,
+                    step = PERCENT_STEP,
+                    unit = percent,
+                )
+            }
+        }
+        LineBreakRows(reading, update, path)
+    }
+}
+
+/** When the captions leave the screen after a silence, and how fast words may arrive. */
+@Composable
+private fun TimingRows(
+    reading: CaptionReading,
+    update: ((CaptionReading) -> CaptionReading) -> Unit,
+    path: (String) -> List<String>,
+) {
+    val ms = stringResource(Res.string.profile_ms)
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_clear),
+        reading.clearAfterSilence,
+        { v -> update { it.copy(clearAfterSilence = v) } },
+        sub = stringResource(Res.string.profile_caption_clear_sub),
+        paths = path("clearAfterSilence") + path("clearAfterSeconds"),
+        extra = {
+            if (reading.clearAfterSilence) {
+                RowStepper(
+                    reading.clearAfterSeconds,
+                    { v -> update { it.copy(clearAfterSeconds = v) } },
+                    CLEAR_SECONDS_RANGE,
+                    unit = stringResource(Res.string.seconds_suffix),
+                )
+            }
+        },
+    )
+    if (reading.clearAfterSilence) {
+        SettingsRow(
+            stringResource(Res.string.profile_caption_clear_fade),
+            advanced = true,
+            paths = path("clearFadeMillis"),
+        ) {
+            RowStepper(
+                reading.clearFadeMillis,
+                { v -> update { it.copy(clearFadeMillis = v) } },
+                FADE_MS_RANGE,
+                step = FADE_MS_STEP,
+                unit = ms,
+                fieldWidth = 76.dp,
+            )
+        }
+    }
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_reading_speed),
+        reading.readingSpeedLimit,
+        { v -> update { it.copy(readingSpeedLimit = v) } },
+        sub = stringResource(Res.string.profile_caption_reading_speed_sub),
+        paths = path("readingSpeedLimit") + path("readingSpeedCps"),
+        extra = {
+            if (reading.readingSpeedLimit) {
+                RowStepper(
+                    reading.readingSpeedCps,
+                    { v -> update { it.copy(readingSpeedCps = v) } },
+                    READING_CPS_RANGE,
+                    unit = stringResource(Res.string.profile_caption_reading_speed_unit),
+                    fieldWidth = 76.dp,
+                )
+            }
+        },
+    )
+}
+
+/** Where lines break: a new line per phrase or sentence, a blank line between, and a width in characters. */
+@Composable
+private fun LineBreakRows(
+    reading: CaptionReading,
+    update: ((CaptionReading) -> CaptionReading) -> Unit,
+    path: (String) -> List<String>,
+) {
+    SettingsRow(stringResource(Res.string.profile_caption_line_breaks), paths = path("lineBreaks")) {
+        RowSegmented(
+            options = listOf(
+                RowOption(CAPTION_BREAK_NONE, stringResource(Res.string.profile_caption_break_off)),
+                RowOption(CAPTION_BREAK_SEGMENT, stringResource(Res.string.profile_caption_break_phrase)),
+                RowOption(CAPTION_BREAK_SENTENCE, stringResource(Res.string.profile_caption_break_sentence)),
+            ),
+            selected = reading.lineBreaks,
+            onSelect = { v -> update { it.copy(lineBreaks = v) } },
+        )
+    }
+    if (reading.lineBreaks != CAPTION_BREAK_NONE) {
+        SettingsSwitchRow(
+            stringResource(Res.string.profile_caption_blank_line),
+            reading.blankLineBetween,
+            { v -> update { it.copy(blankLineBetween = v) } },
+            advanced = true,
+            paths = path("blankLineBetween"),
+        )
+    }
+    SettingsRow(
+        stringResource(Res.string.profile_caption_max_chars),
+        sub = stringResource(Res.string.profile_caption_max_chars_sub),
+        advanced = true,
+        paths = path("maxCharsPerLine"),
+    ) {
+        RowStepper(reading.maxCharsPerLine, { v -> update { it.copy(maxCharsPerLine = v) } }, MAX_CHARS_RANGE)
+    }
+}

@@ -45,4 +45,55 @@ data class STTSettings(
     val textBoxes: Map<String, TextBox> = emptyMap(),
     /** How this page's boxes behave -- see [TextBoxOptions]. */
     val textBoxOptions: TextBoxOptions = TextBoxOptions(),
+    /** How the words flow onto the screen and leave it -- see [CaptionReading]. */
+    val reading: CaptionReading = CaptionReading(),
+    /** The translation's own size, 0 for the transcript's; and its own weight and slant. */
+    val translationFontSize: Int = 0,
+    val translationBold: Boolean = false,
+    val translationItalic: Boolean = false,
+    val transcriptAllCaps: Boolean = false,
+    val translationAllCaps: Boolean = false,
+    /** Extra room between letters and at each word break, in pixels at the font size, as songs have. */
+    val letterSpacing: Int = 0,
+    val wordSpacing: Int = 0,
+    /** How far the captions stay in from each edge, in pixels. 32 is the inset they always had. */
+    val marginTop: Int = DEFAULT_CAPTION_MARGIN,
+    val marginBottom: Int = DEFAULT_CAPTION_MARGIN,
+    val marginLeft: Int = DEFAULT_CAPTION_MARGIN,
+    val marginRight: Int = DEFAULT_CAPTION_MARGIN,
 )
+
+const val DEFAULT_CAPTION_MARGIN = 32
+
+/**
+ * What makes live captions easier to follow: when they leave the screen, how fast they may arrive,
+ * how the lines move and break, and how the newest words stand out. Every default draws captions
+ * exactly as they were before these were settings.
+ */
+@Serializable
+data class CaptionReading(
+    /** Fade the captions out once nothing new has been said for [clearAfterSeconds]. */
+    val clearAfterSilence: Boolean = false,
+    val clearAfterSeconds: Int = 8,
+    val clearFadeMillis: Int = 600,
+    /** Never bring words on faster than [readingSpeedCps] characters a second. */
+    val readingSpeedLimit: Boolean = false,
+    val readingSpeedCps: Int = 17,
+    /** Slide the lines up when a new one arrives instead of jumping. */
+    val rollUp: Boolean = false,
+    val rollUpMillis: Int = 250,
+    /** Each older segment, or line when lines break, drawn [dimStepPercent] fainter, never below [dimFloorPercent]. */
+    val dimOlderLines: Boolean = false,
+    val dimStepPercent: Int = 25,
+    val dimFloorPercent: Int = 40,
+    /** [CAPTION_BREAK_NONE], [CAPTION_BREAK_SEGMENT] or [CAPTION_BREAK_SENTENCE]. */
+    val lineBreaks: String = CAPTION_BREAK_NONE,
+    /** A blank line between the units [lineBreaks] starts on new lines. */
+    val blankLineBetween: Boolean = false,
+    /** Wrap at this many characters as well as at the edge; 0 wraps at the edge only. */
+    val maxCharsPerLine: Int = 0,
+)
+
+const val CAPTION_BREAK_NONE = "none"
+const val CAPTION_BREAK_SEGMENT = "segment"
+const val CAPTION_BREAK_SENTENCE = "sentence"
