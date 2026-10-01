@@ -113,12 +113,11 @@ class OutputProfileMigrationTest {
     }
 
     @Test
-    fun `a screen's own dictionary look survives and the document's is left alone`() {
+    fun `a screen's own dictionary look survives and the other takes the document's`() {
         val settings = decode(v11("""{"dictionaryOverride":{"wordColor":"#ABCDEF"}}""", "{}"))
 
         assertEquals("#ABCDEF", settings.rendered(0).dictionarySettings.wordColor)
         assertEquals("#111111", settings.rendered(1).dictionarySettings.wordColor)
-        assertEquals("#111111", settings.dictionarySettings.wordColor)
     }
 
     @Test
@@ -165,7 +164,8 @@ class OutputProfileMigrationTest {
         assertEquals(settings.bibleSettings, rendered.bibleSettings)
         assertEquals(settings.backgroundSettings, rendered.backgroundSettings)
         assertEquals(settings.stageMonitorSettings, rendered.stageMonitorSettings)
-        assertEquals(settings.dictionarySettings, rendered.dictionarySettings)
+        // The document's own dictionary copy is gone since version 21; the look it had is the profile's.
+        assertEquals("#111111", rendered.dictionarySettings.wordColor)
     }
 
     @Test
