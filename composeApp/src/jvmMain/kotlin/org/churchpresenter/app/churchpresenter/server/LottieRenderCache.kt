@@ -72,7 +72,9 @@ private const val UNIFORM_FRAME_MAX_BYTES = 16
 object LottieRenderCache {
 
     private const val MAGIC = "LRCC"
-    private const val VERSION = 1
+    // 2: text in scripts like Tamil is shaped as whole lines (the file's Text shaping), so frames
+    // rendered letter by letter before it must not be reused for an unchanged file
+    internal const val VERSION = 2
     internal const val MAX_ENTRIES = 60
     private const val MAX_TOTAL_BYTES = 4L * 1024 * 1024 * 1024
 

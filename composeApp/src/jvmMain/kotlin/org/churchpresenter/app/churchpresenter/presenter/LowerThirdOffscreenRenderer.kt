@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Density
@@ -121,15 +123,18 @@ class LowerThirdOffscreenRenderer(
                 val composition by rememberLottieComposition {
                     LottieCompositionSpec.JsonString(lottieJson.ifBlank { "{}" })
                 }
-                val loaded = composition != null
+                val painter = rememberLottiePainter(
+                    composition = composition,
+                    progress = { currentProgress },
+                    fontManager = LottieFonts,
+                    enableTextGrouping = groupsText,
+                )
+                // Loaded means the painter is: it fetches the fonts after the parse, and until they
+                // arrive it draws nothing, so a frame taken on the parse alone could be blank
+                val loaded = composition != null && painter.isLoaded
                 SideEffect { if (loaded) compositionLoaded = true }
                 Image(
-                    painter = rememberLottiePainter(
-                        composition = composition,
-                        progress = { currentProgress },
-                        fontManager = LottieFonts,
-                        enableTextGrouping = groupsText,
-                    ),
+                    painter = painter,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     alignment = Alignment.BottomCenter,
@@ -149,7 +154,7 @@ class LowerThirdOffscreenRenderer(
                     scene.render(timeNanos)
                 }
 
-            // Pump the scene until the async Lottie parse finishes
+            // Pump the scene until the async Lottie parse, and the fonts it names, have loaded
             val deadline = System.currentTimeMillis() + COMPOSITION_LOAD_TIMEOUT_MS
             while (!compositionLoaded && System.currentTimeMillis() < deadline) {
                 renderOnce().close()
@@ -172,3 +177,10 @@ class LowerThirdOffscreenRenderer(
         }
     }
 }
+
+/**
+ * True once the painter has its animation to draw: until its fonts and assets have loaded it stands
+ * in with a placeholder no bigger than a pixel, and draws nothing.
+ */
+private val Painter.isLoaded: Boolean
+    get() = intrinsicSize.let { it.isSpecified && it.width > 1f && it.height > 1f }
