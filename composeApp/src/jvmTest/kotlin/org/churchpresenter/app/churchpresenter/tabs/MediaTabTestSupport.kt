@@ -80,7 +80,9 @@ internal fun mediaTab(
     runComposeUiTest {
         setContent {
             ThemedForTest(themeMode) {
-                CompositionLocalProvider(LocalMediaViewModel provides vm) {
+                // No real VLC behind the preview: where it is installed, its error for the made-up
+                // URLs these tests load would pause the view model mid-test (see LocalMediaVlcPlayers).
+                CompositionLocalProvider(LocalMediaViewModel provides vm, LocalMediaVlcPlayers provides false) {
                 Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                 MediaTab(
                     appSettings = appSettings,

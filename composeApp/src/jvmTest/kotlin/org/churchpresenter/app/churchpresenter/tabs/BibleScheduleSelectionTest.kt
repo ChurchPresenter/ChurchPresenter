@@ -47,22 +47,46 @@ import kotlin.test.assertTrue
 class BibleScheduleSelectionTest {
 
     /**
-     * A dispatcher that runs nothing until [release], then runs everything.
+     * A dispatcher that runs nothing until [release], then runs everything — including what arrives
+     * after.
      *
      * Standing in for a slow disk: the view model's load is queued at construction and stays queued
-     * while the tab composes and asks for its verse. [release] drains in a loop because the work
-     * re-dispatches into this same queue every time it comes back from the IO dispatcher.
+     * while the tab composes and asks for its verse. Once released the gate stays open, because the
+     * load can come back to it from another thread after [release] has returned: in a fresh JVM the
+     * Bible's book names are read from compose resources for the first time, which suspends onto a
+     * real IO thread. Work is still run one block at a time, by whichever thread finds it idle.
      */
     private class GatedDispatcher : CoroutineDispatcher() {
         private val queued = ArrayDeque<Runnable>()
+        private var open = false
+        private var draining = false
 
         override fun dispatch(context: CoroutineContext, block: Runnable) {
-            synchronized(queued) { queued.addLast(block) }
+            synchronized(queued) {
+                queued.addLast(block)
+                if (!open || draining) return
+                draining = true
+            }
+            drain()
         }
 
         fun release() {
+            synchronized(queued) {
+                open = true
+                if (draining) return
+                draining = true
+            }
+            drain()
+        }
+
+        private fun drain() {
             while (true) {
-                val next = synchronized(queued) { queued.removeFirstOrNull() } ?: return
+                val next = synchronized(queued) {
+                    queued.removeFirstOrNull() ?: run {
+                        draining = false
+                        null
+                    }
+                } ?: return
                 next.run()
             }
         }

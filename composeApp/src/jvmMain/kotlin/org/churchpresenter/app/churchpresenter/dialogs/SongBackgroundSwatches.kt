@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -233,19 +234,30 @@ private fun MediaTileFill(entry: LibraryEntry, isVideo: Boolean) {
         return
     }
     var bitmap by remember(entry.key) { mutableStateOf<ImageBitmap?>(null) }
-    LaunchedEffect(entry.key) { bitmap = withContext(Dispatchers.IO) { loadThumbnailBitmap(entry) } }
+    var loading by remember(entry.key) { mutableStateOf(true) }
+    LaunchedEffect(entry.key) {
+        bitmap = withContext(Dispatchers.IO) { loadThumbnailBitmap(entry) }
+        loading = false
+    }
     val shot = bitmap
     if (shot == null) {
-        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHighest))
+        val placeholder = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        Box(if (loading) placeholder.testTag(SONG_BACKGROUND_THUMBNAIL_LOADING_TAG) else placeholder)
     } else {
         Image(
             bitmap = shot,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag(SONG_BACKGROUND_THUMBNAIL_TAG),
         )
     }
 }
+
+/** A library picture whose thumbnail has been decoded and drawn. */
+internal const val SONG_BACKGROUND_THUMBNAIL_TAG = "song_background_thumbnail"
+
+/** A library picture whose thumbnail is still being decoded off the UI thread. */
+internal const val SONG_BACKGROUND_THUMBNAIL_LOADING_TAG = "song_background_thumbnail_loading"
 
 /** The stock library's entries for [category], bundled ones included. */
 @Composable
