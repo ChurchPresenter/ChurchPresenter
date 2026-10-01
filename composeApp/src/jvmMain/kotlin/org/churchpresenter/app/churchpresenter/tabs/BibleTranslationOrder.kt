@@ -117,7 +117,10 @@ internal fun OrderSelector(
                 .fillMaxWidth()
                 .height(34.dp)
                 .dropdownField(AppShape(10.dp), open = expanded)
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { expanded = true }
                 .padding(horizontal = 10.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -134,7 +137,11 @@ internal fun OrderSelector(
                 Spacer(Modifier.height(1.dp))
                 Text(
                     text = primaryName,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 13.sp, fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -221,7 +228,11 @@ private fun OrderPanel(
                         .zIndex(if (isDragged) 1f else 0f)
                         .graphicsLayer { translationY = if (isDragged) dragOffsetY else 0f }
                         .background(
-                            if (isPrimary) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f) else Color.Transparent,
+                            if (isPrimary) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f)
+                            } else {
+                                Color.Transparent
+                            },
                             AppShape(9.dp),
                         )
                         .border(
@@ -272,7 +283,11 @@ private fun OrderPanel(
                         modifier = Modifier
                             .size(22.dp)
                             .background(
-                                if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                if (isPrimary) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                },
                                 AppShape(7.dp),
                             ),
                         contentAlignment = Alignment.Center,
@@ -281,12 +296,19 @@ private fun OrderPanel(
                             text = "${index + 1}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isPrimary) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
                         )
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Text(
                                 text = name,
                                 style = MaterialTheme.typography.bodyMedium.copy(

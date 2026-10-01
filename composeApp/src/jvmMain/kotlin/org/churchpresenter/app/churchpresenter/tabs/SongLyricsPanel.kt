@@ -169,7 +169,12 @@ internal fun RowScope.SongLyricsPanel(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Text(backToLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onError, maxLines = 1)
+                Text(
+                    backToLiveStr,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onError,
+                    maxLines = 1
+                )
             }
         }
 

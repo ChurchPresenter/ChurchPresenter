@@ -173,13 +173,17 @@ data class ScheduleTabActions(
     val moveSelectedToBottom: () -> Unit = {},
     val addLabel: (text: String, textColor: String, backgroundColor: String) -> Unit = { _, _, _ -> },
     val updateLabel: (id: String, text: String, textColor: String, backgroundColor: String) -> Unit = { _, _, _, _ -> },
-    val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit = { _, _, _, _, _, _ -> },
+    val addBibleVerse: (
+        bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int,
+    ) -> Unit = { _, _, _, _, _, _ -> },
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
-    val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
+    val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit =
+        { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit =
         { _, _, _, _ -> },
-    val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
+    val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit =
+        { _, _, _, _ -> },
     val addAnnouncement: (
         text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String,
         bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, shadowColor: String,
@@ -192,7 +196,8 @@ data class ScheduleTabActions(
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit =
+        { _, _, _, _ -> },
     val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
     val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
     /** Selects a row, so the Schedule shows what the automation has just put on screen. */
@@ -260,13 +265,17 @@ fun ScheduleTab(
     toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
     onToolbarIconSizeChange: (ScheduleToolbarIconSize) -> Unit = {},
     planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
-    onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit = { _, _, _ -> },
-    onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit = { _, _, _, _ -> },
+    onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit =
+        { _, _, _ -> },
+    onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long,
+        personName: String) -> Unit = { _, _, _, _ -> },
     onPlanningCenterDisconnect: () -> Unit = {}
 ) {
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
 
-    val viewModel = scheduleViewModel ?: remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
+    val viewModel = scheduleViewModel ?: remember {
+        ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) })
+    }
     val scope = rememberCoroutineScope()
 
     var showAutoRestoreDialog by remember { mutableStateOf(viewModel.shouldPromptAutoRestore()) }
@@ -307,9 +316,15 @@ fun ScheduleTab(
         onActionsReady(
             ScheduleTabActions(
                 newSchedule      = { viewModel.newSchedule() },
-                openSchedule     = { scope.launch { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) } },
-                saveSchedule     = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } },
-                saveScheduleAs   = { scope.launch { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) } },
+                openSchedule     = {
+                    scope.launch { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) }
+                },
+                saveSchedule     = {
+                    scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) }
+                },
+                saveScheduleAs   = {
+                    scope.launch { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) }
+                },
                 removeSelected   = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },
                 removeById       = { id -> viewModel.removeItem(id) },
                 clearSchedule    = { viewModel.clearSchedule() },
@@ -319,14 +334,24 @@ fun ScheduleTab(
                 moveSelectedToBottom = { viewModel.selectedItemId?.let { viewModel.moveItemToBottom(it) } },
                 addLabel    = { text, textColor, bg -> viewModel.addLabel(text, textColor, bg) },
                 updateLabel = { id, text, textColor, bg -> viewModel.updateLabel(id, text, textColor, bg) },
-                addBibleVerse    = { bookName, chapter, verseNumber, verseText, verseRange, bookId -> viewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId) },
-                addSong          = { songNumber, title, songbook, songId -> viewModel.addSong(songNumber, title, songbook, songId) },
-                addPicture       = { folderPath, folderName, imageCount -> viewModel.addPicture(folderPath, folderName, imageCount) },
-                addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
+                addBibleVerse    = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                    viewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+                },
+                addSong          = { songNumber, title, songbook, songId ->
+                    viewModel.addSong(songNumber, title, songbook, songId)
+                },
+                addPicture       = { folderPath, folderName, imageCount ->
+                    viewModel.addPicture(folderPath, folderName, imageCount)
+                },
+                addPresentation  = { filePath, fileName, slideCount, fileType ->
+                    viewModel.addPresentation(filePath, fileName, slideCount, fileType)
+                },
                 addMedia         = { mediaUrl, mediaTitle, mediaType, subtitleUrl ->
                     viewModel.addMedia(mediaUrl, mediaTitle, mediaType, subtitleUrl)
                 },
-                addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
+                addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
+                    viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
+                },
                 addAnnouncement  = {
                     text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline,
                     shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position,
@@ -346,7 +371,9 @@ fun ScheduleTab(
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
                 updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },
                 addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) },
-                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) },
+                addDictionary    = { number, word, transliteration, definition ->
+                    viewModel.addDictionary(number, word, transliteration, definition)
+                },
                 addCue           = { item -> viewModel.addCue(item) },
                 addRow           = { item, timing -> viewModel.addRow(item, timing) },
                 selectItem       = { id -> viewModel.selectOnly(id) },

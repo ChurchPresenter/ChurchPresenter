@@ -263,7 +263,11 @@ fun SongsTab(
                     )
                 )
             } else {
-                onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value, viewModel.selectedLineIndex.value)
+                onInstanceLinkSendSongSection?.invoke(
+                    song.number,
+                    viewModel.selectedSectionIndex.value,
+                    viewModel.selectedLineIndex.value
+                )
             }
         }
         live.songId = song?.songId
