@@ -132,14 +132,15 @@ fun BibleTab(
     // Remembered, not rebuilt on every recomposition: the verse, book and history rows key their
     // click detectors on the lambdas built from it, and a new scope on each selection would give
     // them new lambdas between the two clicks of a double-click.
+    val states = remember(viewModel) { viewModel.tabStates() }
     val tab = remember(
-        viewModel, appSettings, onSettingsChange, onAddToSchedule, onVerseSelected, onInstanceLinkSendVerse,
+        states, appSettings, onSettingsChange, onAddToSchedule, onVerseSelected, onInstanceLinkSendVerse,
         onInstanceLinkSendBibleHold, onPresenting, presenterManager, statisticsManager, verseSequenceLog, sttManager,
         bibleEngineClient, focusRequester, crossRefs, live, ui, widths, displayedVersesState, currentIsPresentingState,
         scope, shortcuts
     ) {
         BibleTabScope(
-            viewModel = viewModel,
+            states = states,
             appSettings = appSettings,
             onSettingsChange = onSettingsChange,
             onAddToSchedule = onAddToSchedule,
@@ -163,9 +164,9 @@ fun BibleTab(
             shortcuts = shortcuts,
         )
     }
-    tab.BibleTabEffects(selectedVerseItem, selectedVerseItemVersion, dialogDismissSignal)
-    tab.BibleSplitLiveEffects()
-    tab.BibleSelectionEffects()
+    tab.BibleTabEffects(viewModel, selectedVerseItem, selectedVerseItemVersion, dialogDismissSignal)
+    tab.BibleSplitLiveEffects(viewModel)
+    tab.BibleSelectionEffects(viewModel)
 
     val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
     Column(
@@ -175,9 +176,9 @@ fun BibleTab(
             .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
             .focusRescuePressHook(focusRescue)
             .focusable()
-            .onPreviewKeyEvent { tab.handleKeyEvent(it) }
+            .onPreviewKeyEvent { tab.handleKeyEvent(viewModel, it) }
     ) {
-        BibleTabContent(tab, focusRescue)
+        BibleTabContent(viewModel, tab, focusRescue)
     }
 }
 
