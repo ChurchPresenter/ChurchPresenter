@@ -14,25 +14,45 @@ import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import org.churchpresenter.settings.hasSecrets
+import org.churchpresenter.settings.importedSettings
+import org.churchpresenter.settings.withoutSecrets
 
 private val exportJsonFormat = Json {
     encodeDefaults = true
     prettyPrint = true
 }
 
+private const val EXPORT_NAME = "churchpresenter-settings.json"
+private const val SAFE_EXPORT_NAME = "churchpresenter-settings-no-passwords.json"
+
 internal fun activeWindow(): Window? = Window.getWindows().firstOrNull { it.isActive }
 
-internal suspend fun exportSettings(title: String, exportedMsg: String, failedMsg: String) {
+/**
+ * Saves the settings to a file the user picks. [withoutSecrets] leaves out every password, sign-in
+ * and API key ([withoutSecrets]), for a file that is safe to share -- with support, on an issue.
+ */
+internal suspend fun exportSettings(
+    title: String,
+    exportedMsg: String,
+    failedMsg: String,
+    withoutSecrets: Boolean = false,
+) {
     var file = FileChooser.platformInstance.save(
         location = null,
-        suggestedName = "churchpresenter-settings.json",
+        suggestedName = if (withoutSecrets) SAFE_EXPORT_NAME else EXPORT_NAME,
         title = title,
         filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json"))
     ) ?: return
     try {
         // The calendar relay's key and tokens are this church's credentials, not preferences: an export
         // gets emailed and shared, so they never go into one.
-        val currentSettings = SettingsManager().loadSettings().copy(calendarSync = CalendarSyncSettings())
+        val loaded = SettingsManager().loadSettings()
+        val currentSettings = if (withoutSecrets) {
+            loaded.withoutSecrets()
+        } else {
+            loaded.copy(calendarSync = CalendarSyncSettings())
+        }
         val json = exportJsonFormat.encodeToString(AppSettings.serializer(), currentSettings)
         if (file.extension != "json") {
             file = file.resolveSibling("${file.nameWithoutExtension}.json")
@@ -44,11 +64,15 @@ internal suspend fun exportSettings(title: String, exportedMsg: String, failedMs
     }
 }
 
+/** What the import asks when the file carries passwords of its own: the question and its two answers. */
+internal class SecretsChoice(val question: String, val keep: String, val useFile: String, val cancel: String)
+
 internal suspend fun importSettings(
     title: String,
     confirmMsg: String,
     failedMsg: String,
-    companionServer: CompanionServer?
+    companionServer: CompanionServer?,
+    secrets: SecretsChoice,
 ) {
     val file = FileChooser.platformInstance.chooseSingle(
         path = null,
@@ -67,7 +91,9 @@ internal suspend fun importSettings(
         // Keep this machine's own relay pairing: an older export may still carry another machine's key
         // and tokens, and adopting them would make two desktops answer as one.
         val imported = settingsManager.migrateAndDecode(file.readText())
-        settingsManager.saveSettings(imported.copy(calendarSync = settingsManager.loadSettings().calendarSync))
+        // A file with passwords of its own asks whose to keep; one without keeps this computer's
+        val useFileSecrets = if (imported.hasSecrets) askUseFileSecrets(title, secrets) ?: return else false
+        settingsManager.saveSettings(importedSettings(imported, settingsManager.loadSettings(), useFileSecrets))
         restartApp(companionServer)
     } catch (_: Exception) {
         JOptionPane.showMessageDialog(activeWindow(), failedMsg, title, JOptionPane.ERROR_MESSAGE)
@@ -130,4 +156,18 @@ private fun restartApp(companionServer: CompanionServer?) {
         ProcessBuilder(listOf(command) + args.toList()).start()
     } catch (_: Exception) {}
     Runtime.getRuntime().exit(0)
+}
+
+/** True to take the file's passwords, false to keep this computer's, null when the import is called off. */
+private fun askUseFileSecrets(title: String, choice: SecretsChoice): Boolean? {
+    val options = arrayOf(choice.keep, choice.useFile, choice.cancel)
+    val picked = JOptionPane.showOptionDialog(
+        activeWindow(), choice.question, title, JOptionPane.YES_NO_CANCEL_OPTION,
+        JOptionPane.QUESTION_MESSAGE, null, options, options[0],
+    )
+    return when (picked) {
+        0 -> false
+        1 -> true
+        else -> null
+    }
 }
