@@ -50,6 +50,7 @@ class SharedBrowserFrameCacheTest {
 
     @AfterTest
     fun cleanUp() {
+        // Clients first, so each server's session ends on its own before its event loop is torn down.
         connections.forEach { runCatching { it.close() } }
         connections.clear()
         servers.forEach { runCatching { it.stop() } }
@@ -89,7 +90,19 @@ class SharedBrowserFrameCacheTest {
             port = runBlocking { server.engine.resolvedConnectors().first().port }
         }
 
-        fun stop() = server.stop(0, 0)
+        /**
+         * Waits for every client session to end, then shuts the server down.
+         *
+         * Stopped while a session was still open, Netty terminated its event loop under the
+         * connection's response pipeline, which then failed on that dead loop. The exception is
+         * thrown on a Netty thread, so no test here saw it -- the next `runTest` in the same fork
+         * did, and failed with "uncaught exceptions before the test started".
+         */
+        fun stop() {
+            val deadline = System.currentTimeMillis() + SESSION_END_TIMEOUT_MS
+            while (sessions.isNotEmpty() && System.currentTimeMillis() < deadline) Thread.sleep(5)
+            server.stop(gracePeriodMillis = 0, timeoutMillis = SHUTDOWN_TIMEOUT_MS)
+        }
 
         /** Pushes an arbitrary CDP event frame straight to the connected client, bypassing the
          *  automatic id/result echo above.
@@ -350,3 +363,9 @@ class SharedBrowserFrameCacheTest {
         SharedBrowserFrameCache.killProcess(process)
     }
 }
+
+/** How long the fake CDP server waits for a closed client's session to end before stopping. */
+private const val SESSION_END_TIMEOUT_MS = 5_000L
+
+/** The bound on its shutdown once its sessions have ended; it returns as soon as Netty has stopped. */
+private const val SHUTDOWN_TIMEOUT_MS = 5_000L
