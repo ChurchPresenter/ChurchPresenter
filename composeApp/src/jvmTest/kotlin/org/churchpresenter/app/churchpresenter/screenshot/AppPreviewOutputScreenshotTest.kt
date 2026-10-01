@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.test.runSkikoComposeUiTest
+import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import io.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.delay

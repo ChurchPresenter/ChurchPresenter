@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
 import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_photo
