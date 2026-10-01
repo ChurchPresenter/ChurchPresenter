@@ -13,6 +13,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import java.io.File
+import java.io.IOException
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
@@ -300,11 +301,11 @@ private fun Route.mediaUploadRoutes(
                                 """${file.nameWithoutExtension.replace("\"", "\\\"")}","mediaType":"$mediaType"}""",
                             ContentType.Application.Json
                         )
-                    } catch (e: Exception) {
-                        call.respond(
-                            HttpStatusCode.InternalServerError,
-                            """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
-                        )
+                    } catch (e: IOException) {
+                        // The client went away mid-upload, or the file could not be written.
+                        call.respondUploadFailed(e)
+                    } catch (e: IllegalArgumentException) {
+                        call.respondUploadFailed(e)
                     }
                 }
 
@@ -351,12 +352,19 @@ private suspend fun storeUploadedPresentation(
             """{"ok":true,"id":"$id","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}"}""",
             ContentType.Application.Json
         )
-    } catch (e: Exception) {
-        call.respond(
-            HttpStatusCode.InternalServerError,
-            """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
-        )
+    } catch (e: IOException) {
+        call.respondUploadFailed(e)
+    } catch (e: IllegalArgumentException) {
+        // A body that is not JSON, or data that is not valid base64.
+        call.respondUploadFailed(e)
     }
+}
+
+internal suspend fun ApplicationCall.respondUploadFailed(e: Exception) {
+    respond(
+        HttpStatusCode.InternalServerError,
+        """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
+    )
 }
 
 /** The deck's safe name and bytes, or null once the rejection has been responded with. */

@@ -111,11 +111,20 @@ class TunnelManager {
                 startTunnel(localPort)
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
-                _status.value = TunnelStatus.Error(e.message ?: "Unknown error")
-                _tunnelUrl.value = null
+            } catch (e: IOException) {
+                // Downloading the binary, or starting it.
+                tunnelFailed(e)
+            } catch (e: IllegalStateException) {
+                tunnelFailed(e)
+            } catch (e: IllegalArgumentException) {
+                tunnelFailed(e)
             }
         }
+    }
+
+    private fun tunnelFailed(e: Exception) {
+        _status.value = TunnelStatus.Error(e.message ?: "Unknown error")
+        _tunnelUrl.value = null
     }
 
     fun stop() {

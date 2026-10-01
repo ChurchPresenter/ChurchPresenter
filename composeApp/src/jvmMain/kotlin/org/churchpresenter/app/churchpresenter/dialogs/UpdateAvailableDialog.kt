@@ -82,6 +82,7 @@ import java.awt.Desktop
 import java.io.File
 import java.io.OutputStream
 import java.io.InputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.system.exitProcess
@@ -285,7 +286,12 @@ fun UpdateAvailableDialog(
                 withContext(Dispatchers.Main) {
                     downloadState = DownloadState.Done(tempFile)
                 }
-            } catch (e: Exception) {
+            } catch (e: IOException) {
+                // The connection, the download or the temp file -- a malformed URL is one too.
+                withContext(Dispatchers.Main) {
+                    downloadState = DownloadState.Error(e.message ?: "Download failed")
+                }
+            } catch (e: IllegalArgumentException) {
                 withContext(Dispatchers.Main) {
                     downloadState = DownloadState.Error(e.message ?: "Download failed")
                 }
@@ -329,7 +335,9 @@ fun UpdateAvailableDialog(
                     try {
                         launchInstaller(file)
                         exitProcess(0)
-                    } catch (e: Exception) {
+                    } catch (e: IOException) {
+                        downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
+                    } catch (e: SecurityException) {
                         downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
                     }
                 },

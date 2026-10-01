@@ -606,7 +606,9 @@ internal fun LottiePlaybackEffect(
             presenterManager.requestClearDisplay()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // Reports whatever escapes the playback loop and throws it on: nothing is swallowed,
+            // so narrowing would only lose the report.
             CrashReporter.reportException(e, "Lottie playback LaunchedEffect")
             throw e
         }

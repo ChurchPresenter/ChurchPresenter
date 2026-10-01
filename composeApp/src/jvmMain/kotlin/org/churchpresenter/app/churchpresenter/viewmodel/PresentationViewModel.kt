@@ -600,7 +600,9 @@ class PresentationViewModel(
                         // whose cancellation we haven't reached yet — owns the cache entry now.
                         // Stop quietly and leave the files to it.
                         return@use
-                    } catch (e: Exception) {
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                        // A slide is drawn by POI, PDFBox and AWT, which throw whatever their internals do (NPEs and
+                        // class-cast errors from a malformed deck included) -- not a set this code can enumerate.
                         // One bad slide must not kill the deck; the slide is simply skipped. Only
                         // the first failure is reported: whatever breaks one slide (a full or
                         // read-only cache dir) breaks every slide after it, and forty identical
@@ -632,7 +634,9 @@ class PresentationViewModel(
         } catch (_: SlideCacheSupersededException) {
             // Lost the entry to a newer render of the same deck between the last slide and the
             // commit. That render owns the result; this one is not a failure and shows no error.
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // A slide is drawn by POI, PDFBox and AWT, which throw whatever their internals do (NPEs and
+            // class-cast errors from a malformed deck included) -- not a set this code can enumerate.
             if (_loadError.value == null) {
                 withContext(Dispatchers.Main) { _loadError.value = PresentationLoadError.RENDER_FAILED }
             }

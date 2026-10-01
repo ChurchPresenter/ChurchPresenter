@@ -189,7 +189,9 @@ abstract class FileChooser {
             // The bus is there but nothing owns the portal's name: the same machine state, said by
             // the bus itself and recognised by type rather than by its (localised) message.
             return portalMissing(fallback)
-        } catch (t: Throwable) {
+        } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
+            // Native dialogs (FileKit, the Windows shell, the XDG portal) fail with whatever the
+            // platform throws, native Errors included; any of them means use the Swing chooser.
             CrashReporter.reportWarning(
                 "Native file dialog failed; fell back to the Swing chooser",
                 throwable = t,

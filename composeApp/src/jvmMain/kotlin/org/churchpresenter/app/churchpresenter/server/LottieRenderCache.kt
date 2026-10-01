@@ -320,15 +320,22 @@ object LottieRenderCache {
                         prepare(json, atemVariant(json, atem, clip = true))
                     }
                 }
-            } catch (e: Exception) {
-                Log.warn("LottieRenderCache", "Failed to prepare ${file.name}: ${e.message}")
-                CrashReporter.reportWarning(
-                    "Failed to prepare lottie render cache for ${file.name}",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "lower_third")
-                )
+            } catch (e: IOException) {
+                prepareFailed(file, e)
+            } catch (e: IllegalArgumentException) {
+                // A file in the folder that is not valid Lottie JSON.
+                prepareFailed(file, e)
             }
         }
+    }
+
+    private fun prepareFailed(file: File, e: Exception) {
+        Log.warn("LottieRenderCache", "Failed to prepare ${file.name}: ${e.message}")
+        CrashReporter.reportWarning(
+            "Failed to prepare lottie render cache for ${file.name}",
+            throwable = e,
+            tags = mapOf("subsystem" to "lower_third")
+        )
     }
 
     // ── Reading ────────────────────────────────────────────────────────────────
@@ -349,6 +356,8 @@ object LottieRenderCache {
         private var nextIndex = 0
 
         init {
+            // Closed here only when the header cannot be read; on success the reader owns it.
+            var opened = false
             try {
                 val magic = ByteArray(4).also { raf.readFully(it) }
                 if (String(magic, Charsets.US_ASCII) != MAGIC) {
@@ -367,9 +376,9 @@ object LottieRenderCache {
                 val footerStart = raf.readLong()
                 raf.seek(footerStart)
                 frameOffsets = LongArray(frameCount) { raf.readLong() }
-            } catch (e: Exception) {
-                raf.close()
-                throw e
+                opened = true
+            } finally {
+                if (!opened) raf.close()
             }
         }
 
@@ -535,15 +544,18 @@ object LottieRenderCache {
         val buf = ByteBuffer.wrap(payload)
         val out = IntArray(pixelCount)
         var o = 0
+        // Every read checks there is an int left, so a payload cut short ends the loop and is reported
+        // below as a truncated frame rather than escaping as a BufferUnderflowException.
         while (buf.remaining() >= INT_BYTES && o < pixelCount) {
             val count = buf.int
             if (count > 0) {
+                if (buf.remaining() < INT_BYTES) break
                 val value = buf.int
                 out.fill(value, o, minOf(o + count, pixelCount))
                 o += count
             } else {
                 var n = -count
-                while (n-- > 0 && o < pixelCount) out[o++] = buf.int
+                while (n-- > 0 && o < pixelCount && buf.remaining() >= INT_BYTES) out[o++] = buf.int
             }
         }
         if (o < pixelCount) throw IOException("Truncated RLE frame: got $o of $pixelCount pixels")

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +17,7 @@ import org.churchpresenter.atem.AtemKey
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.AtemSettings
+import java.io.IOException
 
 /**
  * Orchestrates the Bitfocus Companion lower-third sequence so one HTTP call does
@@ -101,17 +103,13 @@ object LowerThirdSequencer {
                 activeMixEffect = mixEffect
                 activeKeyer = keyer
                 activeUseDsk = useDownstreamKey
-            } catch (e: Exception) {
-                keyError = e.message ?: "ATEM unreachable"
-                Log.warn("LowerThirdSequencer", "key on failed: $keyError")
-                CrashReporter.reportWarning(
-                    "LowerThirdSequencer: ATEM key on failed",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "atem")
-                )
-                activeHost = null
-                activeMixEffect = -1
-                activeKeyer = -1
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                // The ATEM link: AtemProtocolException is one.
+                keyError = keyOnFailed(e)
+            } catch (e: IllegalStateException) {
+                keyError = keyOnFailed(e)
             }
         }
 
@@ -142,6 +140,21 @@ object LowerThirdSequencer {
             }
         }
         keyError
+    }
+
+    /** Reports a key that would not go on air, forgets the target, and returns the reason. */
+    private fun keyOnFailed(e: Exception): String {
+        val reason = e.message ?: "ATEM unreachable"
+        Log.warn("LowerThirdSequencer", "key on failed: $reason")
+        CrashReporter.reportWarning(
+            "LowerThirdSequencer: ATEM key on failed",
+            throwable = e,
+            tags = mapOf("subsystem" to "atem")
+        )
+        activeHost = null
+        activeMixEffect = -1
+        activeKeyer = -1
+        return reason
     }
 
     /** Abort the running sequence immediately: key off, clear, idle. */

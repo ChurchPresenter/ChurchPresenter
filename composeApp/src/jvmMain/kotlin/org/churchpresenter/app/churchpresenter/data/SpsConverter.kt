@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter.data
 
 import org.churchpresenter.core.models.songs.SongFileParser
 import java.io.File
+import java.io.IOException
+import java.sql.SQLException
 
 data class ConversionResult(
     val songsConverted: Int,
@@ -15,7 +17,7 @@ class SpsConverter {
         val errors = mutableListOf<String>()
         var songsConverted = 0
 
-        try {
+        return try {
             // Load songs from the SPS file
             val songs = Songs()
             songs.loadFromSps(spsFilePath)
@@ -47,16 +49,25 @@ class SpsConverter {
 
                     parser.writeSongFile(song, filePath)
                     songsConverted++
-                } catch (e: Exception) {
+                } catch (e: IOException) {
                     errors.add("Error converting song ${song.number} - ${song.title}: ${e.message}")
                 }
             }
 
-            return ConversionResult(songsConverted, songbookDir.absolutePath, errors)
-        } catch (e: Exception) {
-            return ConversionResult(songsConverted, "", listOf("Error reading SPS file: ${e.message}"))
+            ConversionResult(songsConverted, songbookDir.absolutePath, errors)
+        } catch (e: IOException) {
+            readFailed(songsConverted, e)
+        } catch (e: IllegalArgumentException) {
+            // A path that is not there.
+            readFailed(songsConverted, e)
+        } catch (e: SQLException) {
+            // A SongPresenter SQLite database that will not open.
+            readFailed(songsConverted, e)
         }
     }
+
+    private fun readFailed(songsConverted: Int, e: Exception) =
+        ConversionResult(songsConverted, "", listOf("Error reading SPS file: ${e.message}"))
 
     fun getTargetFolderName(spsFilePath: String): String? {
         try {

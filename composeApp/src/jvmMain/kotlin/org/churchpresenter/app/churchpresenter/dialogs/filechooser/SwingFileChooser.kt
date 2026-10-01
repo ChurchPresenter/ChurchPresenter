@@ -251,7 +251,9 @@ object SwingFileChooser : FileChooser() {
     internal fun <T> dialogOrCancelled(context: String, show: () -> T?): T? =
         try {
             show()
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // Swing's own faults, not ours to enumerate: JFileChooser throws an NPE out of its focus
+            // handling (JDK-6561072), and every other chooser falls back to this one.
             CrashReporter.reportException(unwrapDialogFault(e), context = context)
             null
         }

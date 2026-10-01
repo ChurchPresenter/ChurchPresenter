@@ -40,6 +40,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
+import java.io.IOException
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
 
@@ -890,9 +891,13 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
                     stream.requestFrame(_lottieCurrentFrameIndex.value)
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
-                } catch (e: Exception) {
-                    Log.error("PresenterManager", "Lottie pre-render failed: ${e.message}")
-                    CrashReporter.reportException(e, "Lottie pre-render")
+                } catch (e: IOException) {
+                    lottiePreRenderFailed(e)
+                } catch (e: IllegalArgumentException) {
+                    // A lower third whose JSON will not parse.
+                    lottiePreRenderFailed(e)
+                } catch (e: IllegalStateException) {
+                    lottiePreRenderFailed(e)
                 } finally {
                     // Newer content cancelled this job after the stream was opened but before
                     // it was adopted — release it, it will never be drawn.
@@ -900,6 +905,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
                 }
             }
         }
+    }
+
+    private fun lottiePreRenderFailed(e: Exception) {
+        Log.error("PresenterManager", "Lottie pre-render failed: ${e.message}")
+        CrashReporter.reportException(e, "Lottie pre-render")
     }
 
     private val _lottiePauseFrame = mutableStateOf(-1f)

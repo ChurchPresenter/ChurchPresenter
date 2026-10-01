@@ -30,6 +30,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import java.util.UUID
 import java.io.File
+import java.io.IOException
 import java.nio.file.FileSystems
 import java.nio.file.WatchEvent
 import java.nio.file.StandardWatchEventKinds
@@ -166,7 +167,14 @@ class PicturesViewModel(
                 // Disposing the view model cancels the decode. That is not a broken file, and
                 // recording it would mark a working image failed and warn about it.
                 throw e
-            } catch (e: Exception) {
+            } catch (e: IOException) {
+                lastError = e
+                if (attempt < attempts - 1) delay(THUMBNAIL_RETRY_MS)
+            } catch (e: IllegalArgumentException) {
+                // A file the decoder cannot make an image of.
+                lastError = e
+                if (attempt < attempts - 1) delay(THUMBNAIL_RETRY_MS)
+            } catch (e: IllegalStateException) {
                 lastError = e
                 if (attempt < attempts - 1) delay(THUMBNAIL_RETRY_MS)
             }

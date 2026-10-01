@@ -4,6 +4,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleSettings
 import java.io.File
+import java.io.IOException
 import javax.swing.JOptionPane
 import java.awt.Window
 import java.nio.file.Path
@@ -161,7 +162,7 @@ class FileManager {
             val targetFile = targetDir.resolve(sourceFile.name)
             try {
                 sourceFile.copyTo(targetFile, overwrite = true)
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 errors.add("Error copying ${sourceFile.name}: ${e.message}")
             }
         }

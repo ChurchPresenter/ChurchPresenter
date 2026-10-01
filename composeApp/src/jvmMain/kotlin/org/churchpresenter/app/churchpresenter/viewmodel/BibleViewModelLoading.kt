@@ -391,12 +391,12 @@ private suspend fun BibleViewModel.loadModules(
     val bibleDeferred = translationSources.map { (identity, path) ->
         val rename = configuredTranslations.firstOrNull { it.fileName == identity }
         identity to async(ioDispatcher) {
-            try {
-                Bible().apply {
-                    loadFromSpb(path.absolutePath)
-                    applyNameOverride(rename?.customName, rename?.customAbbreviation)
-                }
-            } catch (e: Exception) { e.printStackTrace(); null }
+            // No try: loadFromSpb reports a bad module through loadError instead of throwing, and
+            // the rename only trims two strings.
+            Bible().apply {
+                loadFromSpb(path.absolutePath)
+                applyNameOverride(rename?.customName, rename?.customAbbreviation)
+            }
         }
     }
     val loadedByFile = bibleDeferred.associate { (fileName, deferred) -> fileName to deferred.await() }

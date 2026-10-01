@@ -17,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -28,6 +29,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 import java.security.MessageDigest
 import java.util.Base64
 import java.util.UUID
+import java.io.IOException
 
 private const val OP_REQUEST = 6
 
@@ -64,7 +66,7 @@ class OBSWebSocketManager {
                     val hello = Json.parseToJsonElement(helloText).jsonObject
                     check(hello["op"]?.jsonPrimitive?.int == 0) { "Expected Hello opcode from OBS" }
 
-                    send(buildIdentify(hello["d"]!!.jsonObject, password))
+                    send(buildIdentify(hello["d"]?.jsonObject ?: error("Hello frame has no data"), password))
 
                     val identifiedText = (incoming.receive() as? Frame.Text)?.readText()
                         ?: error("Expected Identified frame")
@@ -80,15 +82,18 @@ class OBSWebSocketManager {
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    // Order is load-bearing: the message is written first so that ERROR is never
-                    // observable beside an empty or stale one. Anything watching the status — the
-                    // settings chip, a test — reads both, and the two writes are separate, so
-                    // setting the status first leaves a window showing "failed" with no reason.
-                    _errorMessage.value = e.message ?: "Connection failed"
-                    _status.value = ConnectionStatus.ERROR
-                }
+            } catch (e: IOException) {
+                // Unreachable, refused, timed out, or not speaking HTTP.
+                connectFailed(e)
+            } catch (e: IllegalStateException) {
+                // A handshake that is not OBS's (the checks above), or Ktor's WebSocketException.
+                connectFailed(e)
+            } catch (e: IllegalArgumentException) {
+                // A frame that is not JSON.
+                connectFailed(e)
+            } catch (e: ClosedReceiveChannelException) {
+                // OBS hung up mid-handshake.
+                connectFailed(e)
             } finally {
                 activeSession = null
                 withContext(Dispatchers.Main) {
@@ -98,6 +103,17 @@ class OBSWebSocketManager {
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun connectFailed(e: Exception) {
+        withContext(Dispatchers.Main) {
+            // Order is load-bearing: the message is written first so that ERROR is never
+            // observable beside an empty or stale one. Anything watching the status — the
+            // settings chip, a test — reads both, and the two writes are separate, so
+            // setting the status first leaves a window showing "failed" with no reason.
+            _errorMessage.value = e.message ?: "Connection failed"
+            _status.value = ConnectionStatus.ERROR
         }
     }
 

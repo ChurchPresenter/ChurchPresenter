@@ -13,6 +13,7 @@ import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.diagnostics.CrashReporter
 import org.jetbrains.skia.Bitmap
 import java.io.File
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -157,11 +158,21 @@ class LottieFrameStream(
             liveBitmaps.addLast(bitmap)
             onFrame(LottieFrame(bitmap.asComposeImageBitmap(), index, bitmap))
             while (liveBitmaps.size > RETAIN_FRAMES) liveBitmaps.removeFirst().close()
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             // Keep the previously published frame on a one-off decode/alloc failure rather
-            // than crashing playback for a single frame.
-            CrashReporter.reportException(e, "Lower third frame decode")
+            // than crashing playback for a single frame. A truncated or unreadable cache frame:
+            frameFailed(e)
+        } catch (e: IllegalArgumentException) {
+            // Skia refusing the bitmap's size or pixels.
+            frameFailed(e)
+        } catch (e: IllegalStateException) {
+            // The reader closed under the decode.
+            frameFailed(e)
         }
+    }
+
+    private fun frameFailed(e: Exception) {
+        CrashReporter.reportException(e, "Lower third frame decode")
     }
 
     /**

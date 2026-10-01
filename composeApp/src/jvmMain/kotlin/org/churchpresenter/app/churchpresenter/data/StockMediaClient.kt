@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.File
+import java.io.IOException
 
 /**
  * Search and download free stock photos/videos from Pexels and Pixabay for use as
@@ -197,17 +198,12 @@ object StockMediaClient {
             }
 
             parseSearchResponse(source, mediaType, response)
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Stock media search failed (${source.name.lowercase()})",
-                throwable = e,
-                tags = mapOf(
-                    "subsystem" to "stock_media",
-                    "source" to source.name.lowercase(),
-                    "media_type" to mediaType.name.lowercase()
-                )
-            )
-            SearchOutcome.NetworkError
+        } catch (e: IOException) {
+            // Ktor's connect and request timeouts are IOExceptions too.
+            searchFailed(source, mediaType, e)
+        } catch (e: IllegalArgumentException) {
+            // A reply that is not the JSON this source sends.
+            searchFailed(source, mediaType, e)
         }
     }
 
@@ -327,7 +323,7 @@ object StockMediaClient {
             val destFile = File(downloadDir, "${item.source.name.lowercase()}_${item.id}.$extension")
             destFile.writeBytes(bytes)
             DownloadOutcome.Success(destFile)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             CrashReporter.reportWarning(
                 "Stock media download failed (${item.source.name.lowercase()})",
                 throwable = e,
@@ -335,6 +331,19 @@ object StockMediaClient {
             )
             DownloadOutcome.NetworkError
         }
+    }
+
+    private fun searchFailed(source: StockSource, mediaType: StockMediaType, e: Exception): SearchOutcome {
+        CrashReporter.reportWarning(
+            "Stock media search failed (${source.name.lowercase()})",
+            throwable = e,
+            tags = mapOf(
+                "subsystem" to "stock_media",
+                "source" to source.name.lowercase(),
+                "media_type" to mediaType.name.lowercase()
+            )
+        )
+        return SearchOutcome.NetworkError
     }
 
     private const val PER_PAGE = 24
