@@ -27,6 +27,11 @@ import org.churchpresenter.settings.OutputProfile
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.THEMES
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 class AppPreviewSettingsScreenshotTest {
 

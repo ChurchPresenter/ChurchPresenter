@@ -61,6 +61,9 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Profiles tab of the settings dialog, in both themes.

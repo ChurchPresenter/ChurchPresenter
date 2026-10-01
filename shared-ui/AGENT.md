@@ -38,8 +38,10 @@ stub it by that string.
   stays in `:composeApp`.
 - **`user.home` is the module's own** (`build/test-home`, set in `build.gradle.kts`) — several
   classes here read and write under it, and a test must never touch the real `~/.churchpresenter`.
-- Screenshots of these components are still taken by `:composeApp`'s `…ScreenshotTest` suites and
-  stay under `composeApp/screenshots/`.
+- **Screenshots of these components live here**: the `…ScreenshotTest` suites in
+  `src/test/kotlin/…/screenshot`, their committed images in `screenshots/<section>/`. The harness
+  they shoot through (`ScreenshotSupport`) is this module's test fixtures, shared with
+  `:composeApp`'s suites. The root `AGENT.md` Screenshots rules apply unchanged.
 - The tests are `kotlin.test` on the JUnit Platform; no JUnit 4 rules (`@get:Rule` does not run).
 
 ## Commands
@@ -47,6 +49,7 @@ stub it by that string.
 ```bash
 ./gradlew :shared-ui:test :shared-ui:detekt
 ./gradlew :shared-ui:jacocoTestCoverageVerification   # the six-counter floor from the root build
+./gradlew :shared-ui:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```
 
 CI runs the suite and the floor when `shared-ui/` or a module it depends on changes; detekt runs on

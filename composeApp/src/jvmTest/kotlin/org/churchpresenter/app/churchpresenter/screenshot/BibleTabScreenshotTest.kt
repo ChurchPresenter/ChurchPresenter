@@ -31,6 +31,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.app.churchpresenter.utils.withBibleEverywhere
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 class BibleTabScreenshotTest {
 

@@ -29,6 +29,9 @@ import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import java.nio.file.Files
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Song Library Manager window, in every state it can be in, in both themes.

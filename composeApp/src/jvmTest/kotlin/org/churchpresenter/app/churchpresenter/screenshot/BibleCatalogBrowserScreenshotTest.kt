@@ -30,6 +30,8 @@ import java.io.File
 import javax.swing.SwingUtilities
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Download Bibles browser, in both themes.

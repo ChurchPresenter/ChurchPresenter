@@ -29,6 +29,10 @@ import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.THEMES
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 class ScheduleTabScreenshotTest {
 

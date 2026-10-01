@@ -31,6 +31,8 @@ import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.ShortcutScope
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.separateThemes
 
 /**
  * The Keyboard Shortcuts dialog (Help → Keyboard Shortcuts, F1), in both themes.

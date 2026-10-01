@@ -41,6 +41,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The portrait/mobile-aspect counterpart of [PresenterLowerThirdScreenshotTest] -- every one of its

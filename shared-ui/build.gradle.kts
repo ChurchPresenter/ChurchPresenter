@@ -1,9 +1,11 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
+    `java-test-fixtures`
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     jacoco
 }
 
@@ -34,6 +36,15 @@ dependencies {
     testImplementation(testFixtures(projects.coreModels))
     testImplementation(testFixtures(projects.bible))
     testImplementation(libs.mockk)
+
+    // The screenshot harness both this module's and :composeApp's `…ScreenshotTest` suites shoot through.
+    testFixturesImplementation(compose.desktop.currentOs)
+    testFixturesImplementation(libs.compose.material3)
+    testFixturesImplementation(libs.compose.uiTest)
+    testFixturesImplementation(libs.roborazzi.composeDesktop)
+    testFixturesImplementation(projects.theme)
+    testImplementation(libs.roborazzi.composeDesktop)
+    testImplementation(libs.compose.uiTest)
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.kotlinx.coroutines.test)
 }
@@ -47,10 +58,16 @@ tasks.withType<Test>().configureEach {
     systemProperty("java.awt.headless", "true")
 }
 
+// Committed, beside the module, for the same reason :composeApp's are: a reviewer opens and approves
+// them. The tests write paths relative to the module directory (`screenshots/...`).
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
+}
+
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
+    source.setFrom("src/main/kotlin", "src/test/kotlin", "src/testFixtures/kotlin")
     parallel = true
 }
 

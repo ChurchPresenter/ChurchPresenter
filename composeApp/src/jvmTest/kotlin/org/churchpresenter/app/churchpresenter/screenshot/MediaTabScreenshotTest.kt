@@ -21,6 +21,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Media tab's states, in both themes.

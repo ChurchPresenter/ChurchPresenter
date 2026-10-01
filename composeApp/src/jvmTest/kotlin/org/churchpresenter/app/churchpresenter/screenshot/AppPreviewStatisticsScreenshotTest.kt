@@ -30,6 +30,9 @@ import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.THEMES
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 class AppPreviewStatisticsScreenshotTest {
 

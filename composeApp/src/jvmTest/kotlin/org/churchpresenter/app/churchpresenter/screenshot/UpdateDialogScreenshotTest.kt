@@ -17,6 +17,8 @@ import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import org.churchpresenter.settings.utils.UpdateCheckInterval
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The update dialog (Help → Check for Updates…), at the size its window opens at.

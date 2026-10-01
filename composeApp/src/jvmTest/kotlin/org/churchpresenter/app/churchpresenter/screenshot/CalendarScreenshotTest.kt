@@ -49,6 +49,8 @@ import java.util.Locale
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import java.awt.Color as AwtColor
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Calendar Manager window, state by state, in both themes.

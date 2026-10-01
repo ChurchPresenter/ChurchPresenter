@@ -27,6 +27,7 @@ import org.churchpresenter.sharedui.composables.FocusLostRescueState
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 class TabControlsScreenshotTest {
 

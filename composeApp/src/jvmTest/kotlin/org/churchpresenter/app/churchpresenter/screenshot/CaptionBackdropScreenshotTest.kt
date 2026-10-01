@@ -23,6 +23,7 @@ import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * Live captions and video subtitles carrying a backdrop, which nothing photographed before.

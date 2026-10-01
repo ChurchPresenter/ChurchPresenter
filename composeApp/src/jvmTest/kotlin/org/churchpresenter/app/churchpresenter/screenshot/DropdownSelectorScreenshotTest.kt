@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.components.DropdownSelector
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 class DropdownSelectorScreenshotTest {
 

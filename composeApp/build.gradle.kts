@@ -449,6 +449,7 @@ val resolvedJdk21Home: String? = run {
 // now lives in :core-models.
 dependencies {
     add("jvmTestImplementation", testFixtures(projects.coreModels))
+    add("jvmTestImplementation", testFixtures(projects.sharedUi))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own
     // design -- the report directory is resolved once per JVM and cannot be redirected after.

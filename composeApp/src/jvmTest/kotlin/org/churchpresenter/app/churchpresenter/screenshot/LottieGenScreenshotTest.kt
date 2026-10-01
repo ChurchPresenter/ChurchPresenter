@@ -32,6 +32,9 @@ import org.churchpresenter.lottiegen.App as LottieGenApp
 import java.util.Locale
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The bundled Lottie lower-third generator, reached from the Help menu and from the Lower Third tab.

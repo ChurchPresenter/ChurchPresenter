@@ -11,7 +11,7 @@ name: Screenshots
 #   * reg-actions needs write access to pull requests and to the repository, which `test`
 #     deliberately does not have (`contents: read`).
 #
-# **The images ARE committed**, under `composeApp/screenshots`, so a reviewer can open and approve
+# **The images ARE committed**, under `composeApp/screenshots` and `shared-ui/screenshots`, so a reviewer can open and approve
 # what is on screen rather than take the diff on trust. This job is a second, independent view of
 # the same thing: it records the branch's images and reg-actions diffs them against the base
 # branch's, which it keeps on a `reg_actions` branch of its own. Note the record step below
@@ -98,7 +98,7 @@ jobs:
       # log lines the build now prints will name the offender if that is what it turns out to be.
       - name: Render screenshots
         timeout-minutes: 35
-        run: ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
+        run: ./gradlew :composeApp:recordRoborazziJvm :shared-ui:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
@@ -111,6 +111,16 @@ jobs:
         with:
           name: screenshots
           path: composeApp/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
+      # The shared components' own suites, recorded by :shared-ui. A separate artifact so the
+      # `screenshots` one above keeps the layout the website's importer reads paths from.
+      - name: Upload the rendered shared-ui screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-shared-ui
+          path: shared-ui/screenshots
           retention-days: 30
           if-no-files-found: error
 
@@ -156,14 +166,22 @@ jobs:
             --tests '*AppPreviewMediaScreenshotTest' \
             --tests '*ScheduleTabScreenshotTest'
 
+      # reg-actions compares one directory, so both modules' renders go into one tree: the app's at
+      # its root, exactly as before, and :shared-ui's under `shared-ui/`. Never committed.
+      - name: Gather both modules' screenshots
+        run: |
+          rm -rf screenshots-compare
+          mkdir -p screenshots-compare/shared-ui
+          cp -R composeApp/screenshots/. screenshots-compare/
+          cp -R shared-ui/screenshots/. screenshots-compare/shared-ui/
+
       - name: Compare with the base branch
         uses: reg-viz/reg-actions@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # Where the record step above writes — `roborazzi.outputDir` in composeApp/build.gradle.kts
-          # and `ScreenshotSupport.SCREENSHOT_ROOT` both point here. Committed, so a local re-record
-          # also updates what is in git.
-          image-directory-path: ./composeApp/screenshots
+          # What the step above gathered from the two record outputs — `roborazzi.outputDir` in
+          # composeApp/ and shared-ui/build.gradle.kts, both `ScreenshotSupport.SCREENSHOT_ROOT`.
+          image-directory-path: ./screenshots-compare
           # Every changed image is shown in the comment; with a handful of surfaces there is no
           # reason to make a reviewer expand a details block to see what moved.
           comment-report-format: raw

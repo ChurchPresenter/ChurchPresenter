@@ -17,6 +17,7 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 private val BUNDLED = OmtRuntimeStatus.Ready("/app/omt/libomt.dylib", bundled = true)
 

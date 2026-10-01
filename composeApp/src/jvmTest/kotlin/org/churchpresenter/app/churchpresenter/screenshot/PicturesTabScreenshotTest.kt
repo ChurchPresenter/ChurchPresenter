@@ -29,6 +29,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 class PicturesTabScreenshotTest {
 

@@ -31,6 +31,8 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The two dialogs the Background tab's image row opens: the downloaded library, and the stock search.

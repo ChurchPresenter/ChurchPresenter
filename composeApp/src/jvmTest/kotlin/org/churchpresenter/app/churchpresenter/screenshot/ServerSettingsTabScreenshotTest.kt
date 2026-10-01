@@ -34,6 +34,9 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Server tab of the settings dialog, in both themes.

@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The two rules that decide whether a screenshot is compared in CI at all.
@@ -25,18 +26,22 @@ import kotlin.test.fail
  */
 class ScreenshotInvariantsTest {
 
-    private val packageDir =
-        File("src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/screenshot")
+    /** The app's screenshot package, and `:shared-ui`'s suites and the harness they all share. */
+    private val packageDirs = listOf(
+        File("src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/screenshot"),
+        File("../shared-ui/src/test/kotlin/org/churchpresenter/sharedui/screenshot"),
+        File("../shared-ui/src/testFixtures/kotlin/org/churchpresenter/sharedui/screenshot"),
+    )
 
-    /** Every `.kt` in the screenshot package, paired with its text. */
-    private fun sources(): List<Pair<File, String>> {
-        val files = packageDir.listFiles { f: File -> f.extension == "kt" }?.sortedBy { it.name }
+    /** Every `.kt` in the screenshot packages, paired with its text. */
+    private fun sources(): List<Pair<File, String>> = packageDirs.flatMap { dir ->
+        val files = dir.listFiles { f: File -> f.extension == "kt" }?.sortedBy { it.name }
         if (files.isNullOrEmpty()) {
             // A moved package or a changed working directory would otherwise leave every assertion
             // below vacuously true — the exact silence this class exists to end.
-            fail("no sources found at ${packageDir.absolutePath}; this test can no longer see what it checks")
+            fail("no sources found at ${dir.absolutePath}; this test can no longer see what it checks")
         }
-        return files.map { it to it.readText() }
+        files.map { it to it.readText() }
     }
 
     @Test

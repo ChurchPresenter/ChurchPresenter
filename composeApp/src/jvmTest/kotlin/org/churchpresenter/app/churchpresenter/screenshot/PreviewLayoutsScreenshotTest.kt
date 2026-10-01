@@ -22,6 +22,7 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.splitArea
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 /** The preview panel as its layout draws and edits it, and the gear's layout list, in both themes. */
 class PreviewLayoutsScreenshotTest {

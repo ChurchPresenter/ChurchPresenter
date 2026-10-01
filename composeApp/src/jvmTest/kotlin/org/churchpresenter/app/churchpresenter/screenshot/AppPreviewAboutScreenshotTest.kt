@@ -14,6 +14,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.ABOUT_DIALOG_WIDTH
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialogContent
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.THEMES
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 class AppPreviewAboutScreenshotTest {
 

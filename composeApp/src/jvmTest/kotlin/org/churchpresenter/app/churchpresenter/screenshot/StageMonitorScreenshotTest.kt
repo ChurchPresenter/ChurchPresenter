@@ -41,6 +41,8 @@ import org.churchpresenter.settings.withZoneWidth
 import org.churchpresenter.settings.withZoneHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.test.runDesktopComposeUiTest
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The stage monitor — the screen the worship leader and the speaker read from.

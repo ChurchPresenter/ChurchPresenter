@@ -160,9 +160,9 @@ bash cleanup_check.sh                  # repo code-quality report
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
 bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing
 
-# Screenshots → composeApp/screenshots/<section>/ (COMMITTED; one folder per test class)
-./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
-./gradlew :composeApp:verifyRoborazziJvm --tests '*ScreenshotTest*'   # gate: fails past 0.1% of pixels
+# Screenshots → <module>/screenshots/<section>/ (COMMITTED; one folder per test class)
+./gradlew :composeApp:recordRoborazziJvm :shared-ui:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :composeApp:verifyRoborazziJvm :shared-ui:verifyRoborazziJvm --tests '*ScreenshotTest*'   # gate: fails past 0.1% of pixels
 ```
 
 A failure that makes no sense — unresolved references to symbols that exist, unrelated suites
@@ -202,8 +202,11 @@ Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass
 not flagged.
 
 ### Screenshots
-- **Committed, under `composeApp/screenshots/`.** They are what a reviewer opens and approves before
-  a UI change merges. **Re-record and commit the images whenever a state you touched changed.**
+- **Committed, beside the module that shoots them** — `composeApp/screenshots/` for tabs, dialogs
+  and outputs, `shared-ui/screenshots/` for the shared components. The harness (`ScreenshotSupport`,
+  `captureComponent`, `stackedThemes`) is `:shared-ui`'s test fixtures, used by both. They are what
+  a reviewer opens and approves before a UI change merges. **Re-record and commit the images
+  whenever a state you touched changed.**
 - **NEVER move them, and NEVER put them under `build/`** — not `SCREENSHOT_ROOT`,
   `roborazzi.outputDir`, the workflow's `image-directory-path`, nor `.gitignore`. Under `build/` they
   are wiped by `clean` and no reviewer can open them. `ScreenshotInvariantsTest` enforces this. If
@@ -214,7 +217,7 @@ not flagged.
   platforms it rewrites nearly every file for no visual change. Which platform is canonical is
   undecided; ask before re-recording broadly.
 - `verifyRoborazziJvm` fails past `ScreenshotSupport.CHANGE_THRESHOLD` (0.1% of pixels) and writes a
-  reference|diff|new image to `composeApp/build/outputs/roborazzi/<name>_compare.png`. **Open it
+  reference|diff|new image to `<module>/build/outputs/roborazzi/<name>_compare.png`. **Open it
   before calling anything churn** — a whole suite failing is usually a re-record nobody did.
 - There is **no known churn**: a clean `main` verifies with zero failures on macOS, so any failure is
   a real difference. When a value from outside the composition leaks into a picture (a clock, the
@@ -225,10 +228,11 @@ not flagged.
   `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
   compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
 - An open popup is its own compose root: pass `rootIndex = 1`. Byte-identical captures mean a state
-  was never reached (`md5 -q composeApp/screenshots/<section>/*.png | sort | uniq -d`).
-- Shoot a shared composable (`DropdownSelector`, `GoLiveButton`, …) in its own suite via
-  `captureComponent`; a tab's own `private` composables stay private and are covered through the tab.
-- `composeApp/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
+  was never reached (`md5 -q <module>/screenshots/<section>/*.png | sort | uniq -d`).
+- Shoot a shared composable in its own suite via `captureComponent` — in `:shared-ui` when the
+  composable lives there, so its pictures sit with its code; a tab's own `private` composables stay
+  private and are covered through the tab.
+- `<module>/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
   never commit it.
 - The `reg_actions` branch holds the PR-comment images; retention is `retention-days` in
   `screenshots.yml`, and `reg-actions-prune.yml` squashes the branch monthly. It is not the

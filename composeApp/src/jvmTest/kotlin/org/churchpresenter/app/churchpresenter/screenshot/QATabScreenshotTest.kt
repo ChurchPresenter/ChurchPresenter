@@ -18,6 +18,8 @@ import org.churchpresenter.app.churchpresenter.tabs.selectSort
 import org.churchpresenter.app.churchpresenter.tabs.typeQuestion
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * Every state of the Q&A tab, in both themes.

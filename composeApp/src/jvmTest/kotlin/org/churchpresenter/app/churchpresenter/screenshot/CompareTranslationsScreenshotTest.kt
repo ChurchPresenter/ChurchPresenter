@@ -15,6 +15,8 @@ import org.churchpresenter.songlibrary.ui.COMPARE_WINDOW_WIDTH
 import org.churchpresenter.songlibrary.ui.CompareTranslationsContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Compare Translations window the Song Library Manager opens from a row, in both themes.

@@ -58,6 +58,9 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.THEMES
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 private const val ROOT = "$SCREENSHOT_ROOT/previewApp"
 /**

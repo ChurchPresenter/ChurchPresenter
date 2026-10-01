@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 /**
  * The crash-guard banner, which the app draws over the toolbar after repeated crashes turned video

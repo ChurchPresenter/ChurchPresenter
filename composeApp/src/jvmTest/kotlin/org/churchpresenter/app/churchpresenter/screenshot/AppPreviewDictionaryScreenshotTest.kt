@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.sharedui.models.Tabs
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 
 class AppPreviewDictionaryScreenshotTest {
 

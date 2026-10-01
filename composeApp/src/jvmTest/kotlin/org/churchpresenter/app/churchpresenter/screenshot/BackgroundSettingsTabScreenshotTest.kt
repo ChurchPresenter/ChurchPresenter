@@ -37,6 +37,9 @@ import javax.imageio.ImageIO
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Background tab of the settings dialog, in both themes.

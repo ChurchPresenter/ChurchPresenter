@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The title slide a song opens on, on a full-screen output -- every state the settings can put it
