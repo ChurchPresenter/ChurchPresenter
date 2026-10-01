@@ -42,6 +42,7 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
+import org.churchpresenter.lottiegen.render.lottieDrawProgress
 import org.churchpresenter.settings.utils.Constants
 
 /** The output height the Bible font sizes are specified against, as the classic band scales them. */
@@ -284,7 +285,7 @@ private fun BandLayer(
     }
     val painter = rememberLottiePainter(
         composition = composition,
-        progress = progress,
+        progress = { lottieDrawProgress(progress()) },
         fontManager = LottieFonts,
         dynamicProperties = dynamic,
         enableTextGrouping = groupsText,

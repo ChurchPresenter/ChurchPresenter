@@ -24,6 +24,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
+import org.churchpresenter.lottiegen.render.lottieDrawProgress
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 
 private const val FRAME_INTERVAL_MS = 16L
@@ -125,7 +126,7 @@ class LowerThirdOffscreenRenderer(
                 }
                 val painter = rememberLottiePainter(
                     composition = composition,
-                    progress = { currentProgress },
+                    progress = { lottieDrawProgress(currentProgress) },
                     fontManager = LottieFonts,
                     enableTextGrouping = groupsText,
                 )
