@@ -168,6 +168,7 @@ private fun RemotePresentationEffects(
                     presentationViewModel.nextShownSlideIndex(index),
                 )
                 presenterManager.setSelectedSlide(bitmap)
+                presenterManager.setLiveSlide(presentationViewModel.selectedPresentation?.name, index)
                 presenterManager.setNextSlide(nextBitmap)
                 presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))
                 if (shouldTakePresentationLive(presenterManager.presentingMode.value)) {

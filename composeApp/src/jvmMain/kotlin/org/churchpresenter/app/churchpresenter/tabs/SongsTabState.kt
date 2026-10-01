@@ -45,6 +45,13 @@ internal class SongLiveState {
     /** Whether the title slide, rather than a lyric section, is the selection in the panel. */
     var titleSlideSelected by mutableStateOf(false)
 
+    /**
+     * The song whose go-live was last counted. Unlike [songId] — set by every push, a preview of a
+     * schedule row included — it moves only when a song actually reaches the screen, so the Go Live
+     * that follows a preview still counts as a new song.
+     */
+    var wentLiveSongId: String? = null
+
     fun live(songId: String?, sectionIndex: Int, lineIndex: Int) {
         this.songId = songId
         this.sectionIndex = sectionIndex

@@ -74,6 +74,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.pairLabel
 import org.churchpresenter.app.churchpresenter.utils.availableSongColumns
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
@@ -203,6 +204,12 @@ fun SongsTab(
         val songs = appSettings.operatorSongSettings()
         val titleSlide = song?.takeIf { live.titleSlideSelected && songs.titleSlideEnabled }
             ?.let { titleSlideSection(it, tuning, songs) }
+        // Before the push, so the section's history line already carries the row it came from.
+        if ((goLive || isPresenting) && song != null) {
+            LiveHistoryLogger.noteLiveSong(
+                song.songId, song.songbook, song.number.toIntOrNull() ?: 0, song.title, "manual",
+            )
+        }
         if (titleSlide != null) {
             onAllSectionsChanged(listOf(titleSlide) + viewModel.getLyricSections())
             onSectionIndexChanged(0)
@@ -218,10 +225,13 @@ fun SongsTab(
         }
         // Record song display for statistics — only when the song is actually live
         // (or being sent live), and only when a different song is presented.
-        val isDifferentSong = items.getOrNull(idx)?.songId?.let { it != live.songId } ?: false
+        // Against the last song that went live, not live.songId: a schedule row's preview push sets
+        // that, and the Go Live after it would otherwise look like the same song and go uncounted.
+        val isDifferentSong = items.getOrNull(idx)?.songId?.let { it != live.wentLiveSongId } ?: false
         if ((goLive || isPresenting) && isDifferentSong) {
             if (idx in items.indices) {
                 val song = items[idx]
+                live.wentLiveSongId = song.songId
                 statisticsManager?.recordSongDisplay(
                     songId = song.songId,
                     songNumber = song.number.toIntOrNull() ?: 0,

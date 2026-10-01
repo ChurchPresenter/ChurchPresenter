@@ -51,6 +51,9 @@ private const val TICK_INTERVAL_MS = 1000L
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_MINUTE = 60
 
+/** A live presentation slide by identity: the deck's file name and the slide's index in it. */
+data class LiveSlide(val fileName: String?, val index: Int)
+
 class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -398,6 +401,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         if (mode != Presenting.PRESENTATION) {
             // Leaving presentation mode releases the animated player and its layer bitmaps.
             clearPresentationPlayback()
+            _liveSlide.value = null
         }
         notifyLiveStateChanged(mode)
     }
@@ -629,6 +633,20 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     fun setSelectedSlide(slide: ImageBitmap?) {
         _selectedSlide.value = slide
+    }
+
+    private val _liveSlide = mutableStateOf<LiveSlide?>(null)
+
+    /** Which deck and slide [selectedSlide] is, for the on-screen history. Null outside PRESENTATION. */
+    val liveSlide: State<LiveSlide?> = _liveSlide
+
+    /**
+     * Names the slide just pushed with [setSelectedSlide]. Reported only while PRESENTATION is the
+     * live mode: a slide pushed ahead of the mode switch is picked up when [setPresentingMode] reports.
+     */
+    fun setLiveSlide(fileName: String?, index: Int) {
+        _liveSlide.value = LiveSlide(fileName, index)
+        if (_presentingMode.value == Presenting.PRESENTATION) notifyLiveStateChanged(Presenting.PRESENTATION)
     }
 
     // ── Animated presentation playback ───────────────────────────────────────
