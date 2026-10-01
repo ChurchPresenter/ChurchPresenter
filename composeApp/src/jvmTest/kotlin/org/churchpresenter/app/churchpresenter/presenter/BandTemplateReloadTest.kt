@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import java.nio.file.Files
 import kotlin.test.AfterTest

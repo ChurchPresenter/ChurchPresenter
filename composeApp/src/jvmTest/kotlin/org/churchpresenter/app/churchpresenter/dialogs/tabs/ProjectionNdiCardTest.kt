@@ -22,7 +22,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings

@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarInviteFailedContent
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
