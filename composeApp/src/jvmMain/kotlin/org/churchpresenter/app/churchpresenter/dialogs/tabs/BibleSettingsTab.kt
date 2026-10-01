@@ -24,23 +24,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_bible_translation
-import churchpresenter.composeapp.generated.resources.bible_cross_references_enable
-import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
-import churchpresenter.composeapp.generated.resources.bible_custom_name
-import churchpresenter.composeapp.generated.resources.bible_miscellaneous
-import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
-import churchpresenter.composeapp.generated.resources.bible_translation
-import churchpresenter.composeapp.generated.resources.bible_translations
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_bible_translation
+import org.churchpresenter.strings.generated.resources.bible_cross_references_enable
+import org.churchpresenter.strings.generated.resources.customize_show_abbreviation
+import org.churchpresenter.strings.generated.resources.bible_custom_name
+import org.churchpresenter.strings.generated.resources.bible_miscellaneous
+import org.churchpresenter.strings.generated.resources.bible_split_browse_mode
+import org.churchpresenter.strings.generated.resources.bible_translation
+import org.churchpresenter.strings.generated.resources.bible_translations
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.move_translation_down
-import churchpresenter.composeapp.generated.resources.move_translation_up
-import churchpresenter.composeapp.generated.resources.none
-import churchpresenter.composeapp.generated.resources.remove
-import churchpresenter.composeapp.generated.resources.scanning_directory
+import org.churchpresenter.strings.generated.resources.move_translation_down
+import org.churchpresenter.strings.generated.resources.move_translation_up
+import org.churchpresenter.strings.generated.resources.none
+import org.churchpresenter.strings.generated.resources.remove
+import org.churchpresenter.strings.generated.resources.scanning_directory
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
@@ -266,7 +267,7 @@ private fun TranslationRow(
             ActionIconButton(
                 onClick = { onSettingsChange { app -> app.moveBibleTranslation(index, -1) } },
                 tooltipText = stringResource(Res.string.move_translation_up),
-                painter = painterResource(Res.drawable.ic_arrow_up),
+                painter = painterResource(AppRes.drawable.ic_arrow_up),
             )
         } else if (padsReorderButtons) {
             Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
@@ -275,7 +276,7 @@ private fun TranslationRow(
             ActionIconButton(
                 onClick = { onSettingsChange { app -> app.moveBibleTranslation(index, 1) } },
                 tooltipText = stringResource(Res.string.move_translation_down),
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                painter = painterResource(AppRes.drawable.ic_arrow_down),
             )
         } else if (padsReorderButtons) {
             Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
@@ -283,7 +284,7 @@ private fun TranslationRow(
         ActionIconButton(
             onClick = { onSettingsChange { app -> app.removeBibleTranslation(index) } },
             tooltipText = stringResource(Res.string.remove),
-            painter = painterResource(Res.drawable.ic_delete),
+            painter = painterResource(AppRes.drawable.ic_delete),
         )
     }
     TranslationIdentityRow(

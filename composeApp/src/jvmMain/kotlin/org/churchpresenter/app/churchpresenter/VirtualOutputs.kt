@@ -13,9 +13,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.key as composeKey
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ndi_output_numbered
-import churchpresenter.composeapp.generated.resources.omt_output_numbered
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.ndi_output_numbered
+import org.churchpresenter.strings.generated.resources.omt_output_numbered
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings

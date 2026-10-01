@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.preview_layout_template_one
-import churchpresenter.composeapp.generated.resources.preview_layout_template_tall_first
-import churchpresenter.composeapp.generated.resources.preview_layout_template_tall_last
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.preview_layout_template_one
+import org.churchpresenter.strings.generated.resources.preview_layout_template_tall_first
+import org.churchpresenter.strings.generated.resources.preview_layout_template_tall_last
 import org.churchpresenter.settings.PreviewArea
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.SPLIT_ACROSS

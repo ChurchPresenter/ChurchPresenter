@@ -1,14 +1,14 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.backdrop_mode_both
-import churchpresenter.composeapp.generated.resources.backdrop_mode_border
-import churchpresenter.composeapp.generated.resources.backdrop_mode_fill
-import churchpresenter.composeapp.generated.resources.backdrop_mode_off
-import churchpresenter.composeapp.generated.resources.backdrop_preset_black_bar
-import churchpresenter.composeapp.generated.resources.backdrop_preset_rounded_plate
-import churchpresenter.composeapp.generated.resources.backdrop_preset_soft_shade
-import churchpresenter.composeapp.generated.resources.backdrop_preset_thin_outline
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.backdrop_mode_both
+import org.churchpresenter.strings.generated.resources.backdrop_mode_border
+import org.churchpresenter.strings.generated.resources.backdrop_mode_fill
+import org.churchpresenter.strings.generated.resources.backdrop_mode_off
+import org.churchpresenter.strings.generated.resources.backdrop_preset_black_bar
+import org.churchpresenter.strings.generated.resources.backdrop_preset_rounded_plate
+import org.churchpresenter.strings.generated.resources.backdrop_preset_soft_shade
+import org.churchpresenter.strings.generated.resources.backdrop_preset_thin_outline
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.jetbrains.compose.resources.StringResource
 

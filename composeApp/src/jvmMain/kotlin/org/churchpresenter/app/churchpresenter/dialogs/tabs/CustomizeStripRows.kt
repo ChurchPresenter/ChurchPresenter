@@ -15,10 +15,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_song_position
-import churchpresenter.composeapp.generated.resources.element_offset_x
-import churchpresenter.composeapp.generated.resources.element_offset_y
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_song_position
+import org.churchpresenter.strings.generated.resources.element_offset_x
+import org.churchpresenter.strings.generated.resources.element_offset_y
 import org.churchpresenter.settings.ElementOffset
 import org.jetbrains.compose.resources.stringResource
 

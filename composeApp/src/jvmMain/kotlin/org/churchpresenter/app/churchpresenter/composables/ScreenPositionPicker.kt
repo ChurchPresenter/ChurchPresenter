@@ -36,8 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.position_showing_at
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.position_showing_at
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.elevationPalette

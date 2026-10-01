@@ -1,15 +1,16 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.conversion_complete
-import churchpresenter.composeapp.generated.resources.conversion_complete_message
-import churchpresenter.composeapp.generated.resources.conversion_complete_with_errors
-import churchpresenter.composeapp.generated.resources.folder_already_exists
-import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
-import churchpresenter.composeapp.generated.resources.song_samples
-import churchpresenter.composeapp.generated.resources.song_samples_copied
-import churchpresenter.composeapp.generated.resources.song_samples_overwrite_confirm
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.conversion_complete
+import org.churchpresenter.strings.generated.resources.conversion_complete_message
+import org.churchpresenter.strings.generated.resources.conversion_complete_with_errors
+import org.churchpresenter.strings.generated.resources.folder_already_exists
+import org.churchpresenter.strings.generated.resources.folder_overwrite_confirm
+import org.churchpresenter.strings.generated.resources.song_samples
+import org.churchpresenter.strings.generated.resources.song_samples_copied
+import org.churchpresenter.strings.generated.resources.song_samples_overwrite_confirm
 import org.churchpresenter.app.churchpresenter.data.ConversionResult
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.jetbrains.compose.resources.stringResource
@@ -113,13 +114,13 @@ internal suspend fun copySongSamples(storageDirectory: String): Int {
     val targetDir = java.io.File(storageDirectory, SONG_SAMPLES_FOLDER)
     if (!targetDir.exists()) targetDir.mkdirs()
 
-    val indexBytes = Res.readBytes("files/song_samples/index.txt")
+    val indexBytes = AppRes.readBytes("files/song_samples/index.txt")
     val filenames = indexBytes.toString(Charsets.UTF_8).lines().filter { it.isNotBlank() }
 
     var count = 0
     for (filename in filenames) {
         try {
-            val songBytes = Res.readBytes("files/song_samples/$filename")
+            val songBytes = AppRes.readBytes("files/song_samples/$filename")
             java.io.File(targetDir, filename).writeBytes(songBytes)
             count++
         } catch (_: Exception) {

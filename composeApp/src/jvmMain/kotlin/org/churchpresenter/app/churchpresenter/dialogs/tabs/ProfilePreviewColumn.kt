@@ -32,10 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_live_none
-import churchpresenter.composeapp.generated.resources.profile_live_on
-import churchpresenter.composeapp.generated.resources.profile_outputs_group
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_live_none
+import org.churchpresenter.strings.generated.resources.profile_live_on
+import org.churchpresenter.strings.generated.resources.profile_outputs_group
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
 import org.churchpresenter.settings.AppSettings

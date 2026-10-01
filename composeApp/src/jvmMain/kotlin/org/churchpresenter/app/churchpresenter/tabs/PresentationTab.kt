@@ -45,12 +45,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.clear
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.select_presentation_file
-import churchpresenter.composeapp.generated.resources.media_vlc_required
-import churchpresenter.composeapp.generated.resources.slide_number
+import org.churchpresenter.strings.generated.resources.select_presentation_file
+import org.churchpresenter.strings.generated.resources.media_vlc_required
+import org.churchpresenter.strings.generated.resources.slide_number
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.LocalWentLive
@@ -282,7 +283,7 @@ internal fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: M
                 Text(detail, style = MaterialTheme.typography.bodySmall)
             }
             KeyIconButton(onClick = onDismiss) {
-                Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
+                Icon(painterResource(AppRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
             }
         }
     }

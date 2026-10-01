@@ -52,28 +52,29 @@ import org.churchpresenter.theme.AppShape
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.calendar_choose_logo_title
-import churchpresenter.composeapp.generated.resources.calendar_export_title
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.calendar_choose_logo_title
+import org.churchpresenter.strings.generated.resources.calendar_export_title
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.OwnedFileDialog
 import org.churchpresenter.app.churchpresenter.utils.isMacOs
 import org.jetbrains.compose.resources.getString
-import churchpresenter.composeapp.generated.resources.about_copyright
-import churchpresenter.composeapp.generated.resources.ndi_trademark
-import churchpresenter.composeapp.generated.resources.about_title
-import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.action_ok
-import churchpresenter.composeapp.generated.resources.converter_window_title
-import churchpresenter.composeapp.generated.resources.open_calendar_manager
-import churchpresenter.composeapp.generated.resources.open_song_library
-import churchpresenter.composeapp.generated.resources.diagnostic_info_save_failed
-import churchpresenter.composeapp.generated.resources.diagnostic_info_saved
-import churchpresenter.composeapp.generated.resources.lottie_gen_window_title
-import churchpresenter.composeapp.generated.resources.open_crash_logs
-import churchpresenter.composeapp.generated.resources.report_bug
-import churchpresenter.composeapp.generated.resources.save_diagnostic_info
-import churchpresenter.composeapp.generated.resources.style_editor_window_title
-import churchpresenter.composeapp.generated.resources.submit_feature_request
+import org.churchpresenter.strings.generated.resources.about_copyright
+import org.churchpresenter.strings.generated.resources.ndi_trademark
+import org.churchpresenter.strings.generated.resources.about_title
+import org.churchpresenter.strings.generated.resources.app_name
+import org.churchpresenter.strings.generated.resources.action_ok
+import org.churchpresenter.strings.generated.resources.converter_window_title
+import org.churchpresenter.strings.generated.resources.open_calendar_manager
+import org.churchpresenter.strings.generated.resources.open_song_library
+import org.churchpresenter.strings.generated.resources.diagnostic_info_save_failed
+import org.churchpresenter.strings.generated.resources.diagnostic_info_saved
+import org.churchpresenter.strings.generated.resources.lottie_gen_window_title
+import org.churchpresenter.strings.generated.resources.open_crash_logs
+import org.churchpresenter.strings.generated.resources.report_bug
+import org.churchpresenter.strings.generated.resources.save_diagnostic_info
+import org.churchpresenter.strings.generated.resources.style_editor_window_title
+import org.churchpresenter.strings.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -213,7 +214,7 @@ internal fun AboutDialogContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(Res.drawable.ic_app_icon),
+                        painter = painterResource(AppRes.drawable.ic_app_icon),
                         contentDescription = null,
                         modifier = Modifier.size(44.dp)
                     )
@@ -342,7 +343,7 @@ fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onC
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.converter_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(AppRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
         AppWindowRoot(theme = theme) {
@@ -375,7 +376,7 @@ fun SongLibraryWindow(
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.open_song_library),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(AppRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1420.dp, height = 880.dp)
     ) {
         AppWindowRoot(theme = theme) {
@@ -439,7 +440,7 @@ fun CalendarWindow(
     // taller than a 1080p screen at 125% has room for above the taskbar.
     val area = remember { usableScreenArea(mainWindow) }
     val title = stringResource(Res.string.open_calendar_manager)
-    val icon = painterResource(Res.drawable.ic_app_icon)
+    val icon = painterResource(AppRes.drawable.ic_app_icon)
     val density = LocalDensity.current
     val currentOnClose by rememberUpdatedState(onClose)
     // Owned by the main window: the system keeps it in front of that window, and in front of
@@ -544,7 +545,7 @@ fun LottieGenWindow(
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.lottie_gen_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(AppRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1200.dp, height = 800.dp)
     ) {
         AppWindowRoot(theme = theme) {
@@ -567,7 +568,7 @@ fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.style_editor_window_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(AppRes.drawable.ic_app_icon),
         state = rememberWindowState(width = 1500.dp, height = 950.dp)
     ) {
         AppWindowRoot(theme = theme) {

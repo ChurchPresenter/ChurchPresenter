@@ -1,15 +1,15 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.songs
-import churchpresenter.composeapp.generated.resources.media_subtitles
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
-import churchpresenter.composeapp.generated.resources.tab_dictionary
-import churchpresenter.composeapp.generated.resources.tab_qa
-import churchpresenter.composeapp.generated.resources.tab_stt
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.background
+import org.churchpresenter.strings.generated.resources.bible
+import org.churchpresenter.strings.generated.resources.songs
+import org.churchpresenter.strings.generated.resources.media_subtitles
+import org.churchpresenter.strings.generated.resources.display_stage_monitor
+import org.churchpresenter.strings.generated.resources.tab_dictionary
+import org.churchpresenter.strings.generated.resources.tab_qa
+import org.churchpresenter.strings.generated.resources.tab_stt
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource

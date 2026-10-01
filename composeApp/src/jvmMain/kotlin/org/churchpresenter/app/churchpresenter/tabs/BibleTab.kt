@@ -18,10 +18,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.book
-import churchpresenter.composeapp.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.scope
-import churchpresenter.composeapp.generated.resources.verse
+import org.churchpresenter.strings.generated.resources.book
+import org.churchpresenter.strings.generated.resources.chapter
+import org.churchpresenter.strings.generated.resources.scope
+import org.churchpresenter.strings.generated.resources.verse
 import java.awt.Window as AwtWindow
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue

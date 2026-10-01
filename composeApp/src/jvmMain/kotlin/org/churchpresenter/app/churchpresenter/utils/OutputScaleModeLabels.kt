@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.media_scale_mode_all
-import churchpresenter.composeapp.generated.resources.media_scale_mode_mixed_all
-import churchpresenter.composeapp.generated.resources.picture_scale_mode_all
-import churchpresenter.composeapp.generated.resources.picture_scale_mode_mixed_all
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.media_scale_mode_all
+import org.churchpresenter.strings.generated.resources.media_scale_mode_mixed_all
+import org.churchpresenter.strings.generated.resources.picture_scale_mode_all
+import org.churchpresenter.strings.generated.resources.picture_scale_mode_mixed_all
 import org.churchpresenter.settings.OutputScaleMode
 import org.jetbrains.compose.resources.stringResource
 

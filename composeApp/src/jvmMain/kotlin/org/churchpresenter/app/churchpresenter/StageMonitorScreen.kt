@@ -86,11 +86,11 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
-import churchpresenter.composeapp.generated.resources.song_key
-import churchpresenter.composeapp.generated.resources.song_capo
-import churchpresenter.composeapp.generated.resources.song_play
-import churchpresenter.composeapp.generated.resources.unit_bpm
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.song_key
+import org.churchpresenter.strings.generated.resources.song_capo
+import org.churchpresenter.strings.generated.resources.song_play
+import org.churchpresenter.strings.generated.resources.unit_bpm
+import org.churchpresenter.strings.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize

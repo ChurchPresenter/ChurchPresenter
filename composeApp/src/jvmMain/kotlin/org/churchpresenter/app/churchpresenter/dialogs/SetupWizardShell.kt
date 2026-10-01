@@ -37,13 +37,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.setup_wizard_next
-import churchpresenter.composeapp.generated.resources.setup_wizard_skip
-import churchpresenter.composeapp.generated.resources.setup_step_count
-import churchpresenter.composeapp.generated.resources.setup_wizard_back
-import churchpresenter.composeapp.generated.resources.setup_wizard_step
-import churchpresenter.composeapp.generated.resources.setup_wizard_title
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.setup_wizard_next
+import org.churchpresenter.strings.generated.resources.setup_wizard_skip
+import org.churchpresenter.strings.generated.resources.setup_step_count
+import org.churchpresenter.strings.generated.resources.setup_wizard_back
+import org.churchpresenter.strings.generated.resources.setup_wizard_step
+import org.churchpresenter.strings.generated.resources.setup_wizard_title
 import org.jetbrains.compose.resources.stringResource
 
 /*

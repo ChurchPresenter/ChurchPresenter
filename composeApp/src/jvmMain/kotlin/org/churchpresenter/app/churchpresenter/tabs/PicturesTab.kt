@@ -30,12 +30,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.Res
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoLibrary
-import churchpresenter.composeapp.generated.resources.tab_focus_lost
-import churchpresenter.composeapp.generated.resources.select_folder_to_view
-import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
+import org.churchpresenter.strings.generated.resources.tab_focus_lost
+import org.churchpresenter.strings.generated.resources.select_folder_to_view
+import org.churchpresenter.strings.generated.resources.select_image_folder_dialog
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts

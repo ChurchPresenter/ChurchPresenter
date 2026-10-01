@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_preview_full_screen
-import churchpresenter.composeapp.generated.resources.bible_preview_lower_third
-import churchpresenter.composeapp.generated.resources.song_preview_sample_title
-import churchpresenter.composeapp.generated.resources.song_preview_title_slide
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bible_preview_full_screen
+import org.churchpresenter.strings.generated.resources.bible_preview_lower_third
+import org.churchpresenter.strings.generated.resources.song_preview_sample_title
+import org.churchpresenter.strings.generated.resources.song_preview_title_slide
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection

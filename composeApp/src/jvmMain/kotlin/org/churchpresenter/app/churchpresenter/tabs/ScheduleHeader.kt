@@ -7,8 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.CircleShape
-import churchpresenter.composeapp.generated.resources.add_label
-import churchpresenter.composeapp.generated.resources.menu_clear_schedule
+import org.churchpresenter.strings.generated.resources.add_label
+import org.churchpresenter.strings.generated.resources.menu_clear_schedule
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,7 +64,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_folder
@@ -73,24 +74,24 @@ import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.ic_zoom_in
-import churchpresenter.composeapp.generated.resources.open_calendar_manager
-import churchpresenter.composeapp.generated.resources.planning_center_import_title
-import churchpresenter.composeapp.generated.resources.schedule
-import churchpresenter.composeapp.generated.resources.schedule_item_count
-import churchpresenter.composeapp.generated.resources.schedule_icon_size_large
-import churchpresenter.composeapp.generated.resources.omt_quality_medium
-import churchpresenter.composeapp.generated.resources.schedule_icon_size_small
-import churchpresenter.composeapp.generated.resources.schedule_option_icon_size
-import churchpresenter.composeapp.generated.resources.schedule_option_item_count
-import churchpresenter.composeapp.generated.resources.schedule_option_zoom
-import churchpresenter.composeapp.generated.resources.schedule_show_buttons_under_title
-import churchpresenter.composeapp.generated.resources.tooltip_schedule_options
-import churchpresenter.composeapp.generated.resources.tooltip_redo_unbound
-import churchpresenter.composeapp.generated.resources.tooltip_undo_unbound
-import churchpresenter.composeapp.generated.resources.schedule_add_files
-import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
+import org.churchpresenter.strings.generated.resources.open_calendar_manager
+import org.churchpresenter.strings.generated.resources.planning_center_import_title
+import org.churchpresenter.strings.generated.resources.schedule
+import org.churchpresenter.strings.generated.resources.schedule_item_count
+import org.churchpresenter.strings.generated.resources.schedule_icon_size_large
+import org.churchpresenter.strings.generated.resources.omt_quality_medium
+import org.churchpresenter.strings.generated.resources.schedule_icon_size_small
+import org.churchpresenter.strings.generated.resources.schedule_option_icon_size
+import org.churchpresenter.strings.generated.resources.schedule_option_item_count
+import org.churchpresenter.strings.generated.resources.schedule_option_zoom
+import org.churchpresenter.strings.generated.resources.schedule_show_buttons_under_title
+import org.churchpresenter.strings.generated.resources.tooltip_schedule_options
+import org.churchpresenter.strings.generated.resources.tooltip_redo_unbound
+import org.churchpresenter.strings.generated.resources.tooltip_undo_unbound
+import org.churchpresenter.strings.generated.resources.schedule_add_files
+import org.churchpresenter.strings.generated.resources.tooltip_new_schedule
+import org.churchpresenter.strings.generated.resources.tooltip_open_schedule
+import org.churchpresenter.strings.generated.resources.tooltip_save_schedule
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
@@ -297,14 +298,14 @@ private fun scheduleToolbarIconSizeLabel(size: ScheduleToolbarIconSize): String 
 @Composable
 private fun scheduleToolbarButtonPainter(button: ScheduleToolbarButton): Painter = when (button) {
     ScheduleToolbarButton.ITEM_COUNT -> rememberVectorPainter(Icons.AutoMirrored.Filled.List)
-    ScheduleToolbarButton.ZOOM -> painterResource(Res.drawable.ic_zoom_in)
-    ScheduleToolbarButton.NEW -> painterResource(Res.drawable.ic_add)
-    ScheduleToolbarButton.OPEN -> painterResource(Res.drawable.ic_folder)
-    ScheduleToolbarButton.SAVE -> painterResource(Res.drawable.ic_save)
-    ScheduleToolbarButton.CLEAR -> painterResource(Res.drawable.ic_delete)
-    ScheduleToolbarButton.UNDO -> painterResource(Res.drawable.ic_undo)
-    ScheduleToolbarButton.REDO -> painterResource(Res.drawable.ic_redo)
-    ScheduleToolbarButton.ADD_LABEL -> painterResource(Res.drawable.ic_label)
+    ScheduleToolbarButton.ZOOM -> painterResource(AppRes.drawable.ic_zoom_in)
+    ScheduleToolbarButton.NEW -> painterResource(AppRes.drawable.ic_add)
+    ScheduleToolbarButton.OPEN -> painterResource(AppRes.drawable.ic_folder)
+    ScheduleToolbarButton.SAVE -> painterResource(AppRes.drawable.ic_save)
+    ScheduleToolbarButton.CLEAR -> painterResource(AppRes.drawable.ic_delete)
+    ScheduleToolbarButton.UNDO -> painterResource(AppRes.drawable.ic_undo)
+    ScheduleToolbarButton.REDO -> painterResource(AppRes.drawable.ic_redo)
+    ScheduleToolbarButton.ADD_LABEL -> painterResource(AppRes.drawable.ic_label)
     ScheduleToolbarButton.PLANNING_CENTER -> rememberVectorPainter(Icons.Default.CloudDownload)
     ScheduleToolbarButton.CALENDAR -> rememberVectorPainter(Icons.Default.CalendarMonth)
 }
@@ -436,7 +437,7 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_add),
+            painter = painterResource(AppRes.drawable.ic_add),
             contentDescription = null,
             tint = contentColor,
             modifier = Modifier.size(11.dp)

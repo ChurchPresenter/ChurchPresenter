@@ -30,32 +30,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
-import churchpresenter.composeapp.generated.resources.save_preset
-import churchpresenter.composeapp.generated.resources.tooltip_go_live
-import churchpresenter.composeapp.generated.resources.tooltip_send_to_stage_monitor
-import churchpresenter.composeapp.generated.resources.tooltip_hide_from_stage_monitor
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.tooltip_add_to_schedule
+import org.churchpresenter.strings.generated.resources.save_preset
+import org.churchpresenter.strings.generated.resources.tooltip_go_live
+import org.churchpresenter.strings.generated.resources.tooltip_send_to_stage_monitor
+import org.churchpresenter.strings.generated.resources.tooltip_hide_from_stage_monitor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.canvas_source_clock
-import churchpresenter.composeapp.generated.resources.timer_am
-import churchpresenter.composeapp.generated.resources.timer_clock_format
-import churchpresenter.composeapp.generated.resources.timer_clock_format_12h_sec
-import churchpresenter.composeapp.generated.resources.timer_clock_format_12h
-import churchpresenter.composeapp.generated.resources.timer_clock_format_24h_sec
-import churchpresenter.composeapp.generated.resources.timer_clock_format_24h
-import churchpresenter.composeapp.generated.resources.timer_pm
-import churchpresenter.composeapp.generated.resources.timer_expired_text_hint
-import churchpresenter.composeapp.generated.resources.timer_expired_text_label
-import churchpresenter.composeapp.generated.resources.timer_title
-import churchpresenter.composeapp.generated.resources.timer_mode_duration
-import churchpresenter.composeapp.generated.resources.timer_mode_clock
-import churchpresenter.composeapp.generated.resources.timer_target_time
+import org.churchpresenter.strings.generated.resources.canvas_source_clock
+import org.churchpresenter.strings.generated.resources.timer_am
+import org.churchpresenter.strings.generated.resources.timer_clock_format
+import org.churchpresenter.strings.generated.resources.timer_clock_format_12h_sec
+import org.churchpresenter.strings.generated.resources.timer_clock_format_12h
+import org.churchpresenter.strings.generated.resources.timer_clock_format_24h_sec
+import org.churchpresenter.strings.generated.resources.timer_clock_format_24h
+import org.churchpresenter.strings.generated.resources.timer_pm
+import org.churchpresenter.strings.generated.resources.timer_expired_text_hint
+import org.churchpresenter.strings.generated.resources.timer_expired_text_label
+import org.churchpresenter.strings.generated.resources.timer_title
+import org.churchpresenter.strings.generated.resources.timer_mode_duration
+import org.churchpresenter.strings.generated.resources.timer_mode_clock
+import org.churchpresenter.strings.generated.resources.timer_target_time
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
@@ -357,7 +358,7 @@ private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewMode
             },
             enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
             tooltipText = if (isTimerRunning) pauseLabel else startLabel,
-            painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play),
+            painter = painterResource(if (isTimerRunning) AppRes.drawable.ic_pause else AppRes.drawable.ic_play),
             containerColor = if (isTimerRunning) {
                 MaterialTheme.colorScheme.secondaryContainer
             } else {
@@ -376,7 +377,7 @@ private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewMode
             ActionIconButton(
                 onClick = { viewModel.resetTimer(presenterManager) },
                 tooltipText = resetLabel,
-                painter = painterResource(Res.drawable.ic_refresh),
+                painter = painterResource(AppRes.drawable.ic_refresh),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -4,10 +4,10 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.focusRequester
-import churchpresenter.composeapp.generated.resources.book
-import churchpresenter.composeapp.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.scope
-import churchpresenter.composeapp.generated.resources.verse
+import org.churchpresenter.strings.generated.resources.book
+import org.churchpresenter.strings.generated.resources.chapter
+import org.churchpresenter.strings.generated.resources.scope
+import org.churchpresenter.strings.generated.resources.verse
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

@@ -10,8 +10,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.tooltip_clear_display
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.tooltip_clear_display
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

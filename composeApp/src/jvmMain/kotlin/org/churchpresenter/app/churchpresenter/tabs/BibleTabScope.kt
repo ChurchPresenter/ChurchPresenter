@@ -21,9 +21,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
-import churchpresenter.composeapp.generated.resources.book
-import churchpresenter.composeapp.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.verse
+import org.churchpresenter.strings.generated.resources.book
+import org.churchpresenter.strings.generated.resources.chapter
+import org.churchpresenter.strings.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog

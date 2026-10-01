@@ -4,8 +4,8 @@ package org.churchpresenter.app.churchpresenter.data
  * A language the interface is offered in.
  *
  * [code] is both the BCP 47 tag the app sets as the JVM default locale and the suffix of the
- * `composeResources/values-<code>` folder the strings come from — `LanguageTest` holds the two
- * together, since nothing in the code names those folders.
+ * `strings/src/main/composeResources/values-<code>` folder the strings come from — `LanguageTest`
+ * holds the two together, since nothing in the code names those folders.
  *
  * [rightToLeft] drives the layout direction the whole control surface is composed in; see
  * `LanguageProvider`.

@@ -46,10 +46,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.save
-import churchpresenter.composeapp.generated.resources.background
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.save
+import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.core.models.songs.SongBackground
 import org.jetbrains.compose.resources.stringResource
 

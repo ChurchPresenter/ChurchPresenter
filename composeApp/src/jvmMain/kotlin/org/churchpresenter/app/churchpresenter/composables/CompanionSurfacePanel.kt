@@ -32,11 +32,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.companion_satellite_no_host
-import churchpresenter.composeapp.generated.resources.companion_satellite_status_connecting
-import churchpresenter.composeapp.generated.resources.companion_satellite_status_disconnected
-import churchpresenter.composeapp.generated.resources.atem_status_error
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.companion_satellite_no_host
+import org.churchpresenter.strings.generated.resources.companion_satellite_status_connecting
+import org.churchpresenter.strings.generated.resources.companion_satellite_status_disconnected
+import org.churchpresenter.strings.generated.resources.atem_status_error
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
 import org.churchpresenter.app.churchpresenter.utils.Utils

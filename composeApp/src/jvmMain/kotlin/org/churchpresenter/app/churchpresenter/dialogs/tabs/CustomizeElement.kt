@@ -1,16 +1,16 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_group_reference
-import churchpresenter.composeapp.generated.resources.customize_group_verse_text
-import churchpresenter.composeapp.generated.resources.song_element_look_ahead
-import churchpresenter.composeapp.generated.resources.song_element_lyrics
-import churchpresenter.composeapp.generated.resources.shortcut_description_next_section
-import churchpresenter.composeapp.generated.resources.song_element_number
-import churchpresenter.composeapp.generated.resources.song_element_section_label_short
-import churchpresenter.composeapp.generated.resources.title
-import churchpresenter.composeapp.generated.resources.song_target_title_slide
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.customize_group_reference
+import org.churchpresenter.strings.generated.resources.customize_group_verse_text
+import org.churchpresenter.strings.generated.resources.song_element_look_ahead
+import org.churchpresenter.strings.generated.resources.song_element_lyrics
+import org.churchpresenter.strings.generated.resources.shortcut_description_next_section
+import org.churchpresenter.strings.generated.resources.song_element_number
+import org.churchpresenter.strings.generated.resources.song_element_section_label_short
+import org.churchpresenter.strings.generated.resources.title
+import org.churchpresenter.strings.generated.resources.song_target_title_slide
 import org.churchpresenter.settings.OutputStyleScope
 import org.jetbrains.compose.resources.stringResource
 

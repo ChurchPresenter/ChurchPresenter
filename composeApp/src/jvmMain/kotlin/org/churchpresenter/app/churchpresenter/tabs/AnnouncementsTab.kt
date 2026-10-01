@@ -37,12 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.Res
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import churchpresenter.composeapp.generated.resources.timer_am
-import churchpresenter.composeapp.generated.resources.timer_pm
+import org.churchpresenter.strings.generated.resources.timer_am
+import org.churchpresenter.strings.generated.resources.timer_pm
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants

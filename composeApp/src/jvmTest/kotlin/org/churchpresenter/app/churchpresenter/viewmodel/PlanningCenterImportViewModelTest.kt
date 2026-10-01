@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.planning_center_error_session_expired
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.planning_center_error_session_expired
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject

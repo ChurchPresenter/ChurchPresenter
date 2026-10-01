@@ -19,7 +19,7 @@ bash cleanup_check.sh          # wildcard imports, Material 2, prints, fully qua
 
 ## File locations
 
-- **String resources:** `composeApp/src/jvmMain/composeResources/values/strings.xml` (English only)
+- **String resources:** `strings/src/main/composeResources/values/strings.xml` (English only)
 - **Constants:** `settings/src/main/kotlin/org/churchpresenter/settings/utils/Constants.kt` (anything
   persisted or shared with the settings) and
   `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt` (the app's

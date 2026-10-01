@@ -43,24 +43,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.backdrop_border_color
-import churchpresenter.composeapp.generated.resources.backdrop_border_padding
-import churchpresenter.composeapp.generated.resources.backdrop_border_radius
-import churchpresenter.composeapp.generated.resources.backdrop_border_width
-import churchpresenter.composeapp.generated.resources.backdrop_fill_color
-import churchpresenter.composeapp.generated.resources.backdrop_fill_uniform_width
-import churchpresenter.composeapp.generated.resources.backdrop_height_offset
-import churchpresenter.composeapp.generated.resources.backdrop_width_offset
-import churchpresenter.composeapp.generated.resources.backdrop_mode_hint
-import churchpresenter.composeapp.generated.resources.backdrop_opacity
-import churchpresenter.composeapp.generated.resources.backdrop_preset_saved_already
-import churchpresenter.composeapp.generated.resources.backdrop_presets
-import churchpresenter.composeapp.generated.resources.backdrop_save_preset
-import churchpresenter.composeapp.generated.resources.backdrop_saved_look
-import churchpresenter.composeapp.generated.resources.backdrop_style
-import churchpresenter.composeapp.generated.resources.backdrop_vertical_offset
-import churchpresenter.composeapp.generated.resources.close
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.backdrop_border_color
+import org.churchpresenter.strings.generated.resources.backdrop_border_padding
+import org.churchpresenter.strings.generated.resources.backdrop_border_radius
+import org.churchpresenter.strings.generated.resources.backdrop_border_width
+import org.churchpresenter.strings.generated.resources.backdrop_fill_color
+import org.churchpresenter.strings.generated.resources.backdrop_fill_uniform_width
+import org.churchpresenter.strings.generated.resources.backdrop_height_offset
+import org.churchpresenter.strings.generated.resources.backdrop_width_offset
+import org.churchpresenter.strings.generated.resources.backdrop_mode_hint
+import org.churchpresenter.strings.generated.resources.backdrop_opacity
+import org.churchpresenter.strings.generated.resources.backdrop_preset_saved_already
+import org.churchpresenter.strings.generated.resources.backdrop_presets
+import org.churchpresenter.strings.generated.resources.backdrop_save_preset
+import org.churchpresenter.strings.generated.resources.backdrop_saved_look
+import org.churchpresenter.strings.generated.resources.backdrop_style
+import org.churchpresenter.strings.generated.resources.backdrop_vertical_offset
+import org.churchpresenter.strings.generated.resources.close
 import churchpresenter.composeapp.generated.resources.ic_close
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.jetbrains.compose.resources.painterResource
@@ -127,7 +128,7 @@ fun TextBackdropDialog(
                         SectionLabel(stringResource(Res.string.backdrop_style), Modifier.weight(1f))
                         KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
                             Icon(
-                                painter = painterResource(Res.drawable.ic_close),
+                                painter = painterResource(AppRes.drawable.ic_close),
                                 contentDescription = stringResource(Res.string.close),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(CLOSE_ICON_SIZE),

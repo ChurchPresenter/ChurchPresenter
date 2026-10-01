@@ -52,9 +52,9 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.loading
-import churchpresenter.composeapp.generated.resources.picture_thumbnail_unreadable
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.loading
+import org.churchpresenter.strings.generated.resources.picture_thumbnail_unreadable
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import androidx.compose.ui.text.style.TextOverflow

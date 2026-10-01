@@ -1,17 +1,17 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.author
-import churchpresenter.composeapp.generated.resources.song_element_ccli
-import churchpresenter.composeapp.generated.resources.composer
-import churchpresenter.composeapp.generated.resources.song_element_look_ahead
-import churchpresenter.composeapp.generated.resources.song_element_lyrics
-import churchpresenter.composeapp.generated.resources.shortcut_description_next_section
-import churchpresenter.composeapp.generated.resources.song_element_number
-import churchpresenter.composeapp.generated.resources.song_element_section_label
-import churchpresenter.composeapp.generated.resources.song_element_tempo
-import churchpresenter.composeapp.generated.resources.title
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.author
+import org.churchpresenter.strings.generated.resources.song_element_ccli
+import org.churchpresenter.strings.generated.resources.composer
+import org.churchpresenter.strings.generated.resources.song_element_look_ahead
+import org.churchpresenter.strings.generated.resources.song_element_lyrics
+import org.churchpresenter.strings.generated.resources.shortcut_description_next_section
+import org.churchpresenter.strings.generated.resources.song_element_number
+import org.churchpresenter.strings.generated.resources.song_element_section_label
+import org.churchpresenter.strings.generated.resources.song_element_tempo
+import org.churchpresenter.strings.generated.resources.title
 import org.jetbrains.compose.resources.stringResource
 
 /** What the element's tab reads, in the Song settings tab. */
