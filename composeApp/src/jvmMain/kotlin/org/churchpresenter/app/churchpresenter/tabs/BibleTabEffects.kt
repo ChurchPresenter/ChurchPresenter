@@ -9,7 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.focusRequester
-import churchpresenter.composeapp.generated.resources.chapter
+import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

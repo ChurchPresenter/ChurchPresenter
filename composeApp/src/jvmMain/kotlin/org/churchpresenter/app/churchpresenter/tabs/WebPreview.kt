@@ -38,10 +38,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.web_preview_hint
-import churchpresenter.composeapp.generated.resources.web_snapshot_screen_recording_hint
-import churchpresenter.composeapp.generated.resources.web_snapshot_waiting
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.web_preview_hint
+import org.churchpresenter.strings.generated.resources.web_snapshot_screen_recording_hint
+import org.churchpresenter.strings.generated.resources.web_snapshot_waiting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

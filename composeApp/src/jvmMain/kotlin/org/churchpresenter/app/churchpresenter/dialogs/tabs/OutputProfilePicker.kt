@@ -17,9 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_blank
-import churchpresenter.composeapp.generated.resources.projection_merged_by_profile
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.output_profile_blank
+import org.churchpresenter.strings.generated.resources.projection_merged_by_profile
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource

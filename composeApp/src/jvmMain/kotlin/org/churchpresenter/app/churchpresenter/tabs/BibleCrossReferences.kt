@@ -57,22 +57,23 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.bible_cross_references_close
-import churchpresenter.composeapp.generated.resources.bible_cross_references_dismiss_hint
-import churchpresenter.composeapp.generated.resources.bible_cross_references_keep_open
-import churchpresenter.composeapp.generated.resources.bible_cross_references_none
-import churchpresenter.composeapp.generated.resources.bible_cross_references_often_next
-import churchpresenter.composeapp.generated.resources.bible_cross_references_passage
-import churchpresenter.composeapp.generated.resources.bible_cross_references_source_count
-import churchpresenter.composeapp.generated.resources.bible_cross_references_title
-import churchpresenter.composeapp.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.close
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.bible_cross_references_close
+import org.churchpresenter.strings.generated.resources.bible_cross_references_dismiss_hint
+import org.churchpresenter.strings.generated.resources.bible_cross_references_keep_open
+import org.churchpresenter.strings.generated.resources.bible_cross_references_none
+import org.churchpresenter.strings.generated.resources.bible_cross_references_often_next
+import org.churchpresenter.strings.generated.resources.bible_cross_references_passage
+import org.churchpresenter.strings.generated.resources.bible_cross_references_source_count
+import org.churchpresenter.strings.generated.resources.bible_cross_references_title
+import org.churchpresenter.strings.generated.resources.chapter
+import org.churchpresenter.strings.generated.resources.close
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_link
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
-import churchpresenter.composeapp.generated.resources.verse
+import org.churchpresenter.strings.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
@@ -210,7 +211,7 @@ private fun CrossReferenceCard(
             val addStr = stringResource(Res.string.add_to_schedule)
             Box(modifier = Modifier.padding(top = 5.dp, end = 5.dp)) {
                 CrossRefActionButton(
-                    painter = painterResource(Res.drawable.ic_playlist_add),
+                    painter = painterResource(AppRes.drawable.ic_playlist_add),
                     tooltipText = addStr,
                     contentDescription = "$addStr ${row.label}",
                     tint = MaterialTheme.colorScheme.secondary,
@@ -340,7 +341,7 @@ private fun CrossReferenceHeader(
         horizontalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_link),
+            painter = painterResource(AppRes.drawable.ic_link),
             contentDescription = null,
             modifier = Modifier.size(13.dp),
             tint = MaterialTheme.colorScheme.primary,
@@ -356,14 +357,14 @@ private fun CrossReferenceHeader(
         )
         if (onDock != null) {
             CrossRefActionButton(
-                painter = painterResource(Res.drawable.ic_link),
+                painter = painterResource(AppRes.drawable.ic_link),
                 tooltipText = dockTooltip,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onDock,
             )
         }
         CrossRefActionButton(
-            painter = painterResource(Res.drawable.ic_close),
+            painter = painterResource(AppRes.drawable.ic_close),
             tooltipText = closeTooltip,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             onClick = onClose,
@@ -379,7 +380,7 @@ private fun CrossReferenceEmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(9.dp, Alignment.CenterVertically),
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_link),
+            painter = painterResource(AppRes.drawable.ic_link),
             contentDescription = null,
             modifier = Modifier.size(22.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
@@ -522,7 +523,7 @@ internal fun CrossRefChip(
             horizontalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             Icon(
-                painter = painterResource(Res.drawable.ic_link),
+                painter = painterResource(AppRes.drawable.ic_link),
                 contentDescription = tooltipText,
                 modifier = Modifier.size(9.dp),
                 tint = accent,

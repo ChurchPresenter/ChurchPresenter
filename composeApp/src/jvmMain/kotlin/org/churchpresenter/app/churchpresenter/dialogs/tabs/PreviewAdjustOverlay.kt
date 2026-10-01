@@ -31,10 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_adjust_band
-import churchpresenter.composeapp.generated.resources.profile_adjust_size
-import churchpresenter.composeapp.generated.resources.profile_adjust_width
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_adjust_band
+import org.churchpresenter.strings.generated.resources.profile_adjust_size
+import org.churchpresenter.strings.generated.resources.profile_adjust_width
 import kotlin.math.roundToInt
 import org.churchpresenter.app.churchpresenter.presenter.BoxMargins
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks

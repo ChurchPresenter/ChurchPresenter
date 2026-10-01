@@ -20,11 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.contact_open_browser
-import churchpresenter.composeapp.generated.resources.contact_send
-import churchpresenter.composeapp.generated.resources.contact_sending
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.contact_open_browser
+import org.churchpresenter.strings.generated.resources.contact_send
+import org.churchpresenter.strings.generated.resources.contact_sending
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource

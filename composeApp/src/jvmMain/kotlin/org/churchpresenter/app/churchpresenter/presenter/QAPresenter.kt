@@ -39,9 +39,9 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.qa_qr_message_default
-import churchpresenter.composeapp.generated.resources.qr_code
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.qa_qr_message_default
+import org.churchpresenter.strings.generated.resources.qr_code
 import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.composables.OutlinedText
 import org.churchpresenter.core.models.qa.Question

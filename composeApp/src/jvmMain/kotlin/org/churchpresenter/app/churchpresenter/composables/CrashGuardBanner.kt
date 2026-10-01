@@ -16,10 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.crash_video_bg_banner
-import churchpresenter.composeapp.generated.resources.crash_video_bg_dismiss
-import churchpresenter.composeapp.generated.resources.crash_video_bg_reenable
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.crash_video_bg_banner
+import org.churchpresenter.strings.generated.resources.crash_video_bg_dismiss
+import org.churchpresenter.strings.generated.resources.crash_video_bg_reenable
 import org.churchpresenter.diagnostics.CrashReporter
 import org.jetbrains.compose.resources.stringResource
 

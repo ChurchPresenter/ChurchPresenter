@@ -2,10 +2,10 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.tooltip_theme_dark
-import churchpresenter.composeapp.generated.resources.light_theme
-import churchpresenter.composeapp.generated.resources.tooltip_theme_system
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.tooltip_theme_dark
+import org.churchpresenter.strings.generated.resources.light_theme
+import org.churchpresenter.strings.generated.resources.tooltip_theme_system
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 

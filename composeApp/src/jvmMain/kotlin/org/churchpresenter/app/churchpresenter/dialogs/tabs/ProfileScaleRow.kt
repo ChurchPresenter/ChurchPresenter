@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.media
-import churchpresenter.composeapp.generated.resources.pictures
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.media
+import org.churchpresenter.strings.generated.resources.pictures
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputScaleMode

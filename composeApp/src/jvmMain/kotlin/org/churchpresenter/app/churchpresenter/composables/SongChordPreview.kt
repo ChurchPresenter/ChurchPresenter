@@ -37,13 +37,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.preview
-import churchpresenter.composeapp.generated.resources.song_chords_used
-import churchpresenter.composeapp.generated.resources.song_insert_chord
-import churchpresenter.composeapp.generated.resources.song_transpose_down
-import churchpresenter.composeapp.generated.resources.song_transpose_reset
-import churchpresenter.composeapp.generated.resources.song_transpose_up
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.preview
+import org.churchpresenter.strings.generated.resources.song_chords_used
+import org.churchpresenter.strings.generated.resources.song_insert_chord
+import org.churchpresenter.strings.generated.resources.song_transpose_down
+import org.churchpresenter.strings.generated.resources.song_transpose_reset
+import org.churchpresenter.strings.generated.resources.song_transpose_up
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.songchords.ChordSegment
 import org.churchpresenter.songchords.ChordTransposer
@@ -53,17 +54,17 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.DrawableResource
-import churchpresenter.composeapp.generated.resources.song_transpose
-import churchpresenter.composeapp.generated.resources.song_key_up
-import churchpresenter.composeapp.generated.resources.song_key_down
-import churchpresenter.composeapp.generated.resources.song_insert_named_chord
-import churchpresenter.composeapp.generated.resources.song_chords_in
-import churchpresenter.composeapp.generated.resources.song_chord_type
-import churchpresenter.composeapp.generated.resources.song_chord_root
-import churchpresenter.composeapp.generated.resources.song_chord_build
-import churchpresenter.composeapp.generated.resources.song_chord_major
-import churchpresenter.composeapp.generated.resources.song_chord_prefer_flats
-import churchpresenter.composeapp.generated.resources.song_chord_prefer_sharps
+import org.churchpresenter.strings.generated.resources.song_transpose
+import org.churchpresenter.strings.generated.resources.song_key_up
+import org.churchpresenter.strings.generated.resources.song_key_down
+import org.churchpresenter.strings.generated.resources.song_insert_named_chord
+import org.churchpresenter.strings.generated.resources.song_chords_in
+import org.churchpresenter.strings.generated.resources.song_chord_type
+import org.churchpresenter.strings.generated.resources.song_chord_root
+import org.churchpresenter.strings.generated.resources.song_chord_build
+import org.churchpresenter.strings.generated.resources.song_chord_major
+import org.churchpresenter.strings.generated.resources.song_chord_prefer_flats
+import org.churchpresenter.strings.generated.resources.song_chord_prefer_sharps
 import churchpresenter.composeapp.generated.resources.ic_remove
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
@@ -346,8 +347,12 @@ fun SongChordPreview(
                     Stepper(
                         label = stringResource(Res.string.song_chords_in),
                         value = songKey,
-                        down = StepAction(Res.drawable.ic_remove, stringResource(Res.string.song_key_down), onKeyDown),
-                        up = StepAction(Res.drawable.ic_add, stringResource(Res.string.song_key_up), onKeyUp),
+                        down = StepAction(
+                            AppRes.drawable.ic_remove,
+                            stringResource(Res.string.song_key_down),
+                            onKeyDown,
+                        ),
+                        up = StepAction(AppRes.drawable.ic_add, stringResource(Res.string.song_key_up), onKeyUp),
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant,
@@ -410,11 +415,11 @@ private fun PreviewHeader(
             label = stringResource(Res.string.song_transpose),
             value = null,
             down = StepAction(
-                Res.drawable.ic_arrow_down,
+                AppRes.drawable.ic_arrow_down,
                 stringResource(Res.string.song_transpose_down),
                 onTransposeDown,
             ),
-            up = StepAction(Res.drawable.ic_arrow_up, stringResource(Res.string.song_transpose_up), onTransposeUp),
+            up = StepAction(AppRes.drawable.ic_arrow_up, stringResource(Res.string.song_transpose_up), onTransposeUp),
         )
     }
 }
@@ -444,7 +449,7 @@ private fun ChordPicker(songKey: String, flats: Boolean, onInsertChord: (String)
     ) {
         ZoneLabel(stringResource(Res.string.song_chord_build))
         Icon(
-            painter = painterResource(if (open) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+            painter = painterResource(if (open) AppRes.drawable.ic_arrow_up else AppRes.drawable.ic_arrow_down),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(12.dp),

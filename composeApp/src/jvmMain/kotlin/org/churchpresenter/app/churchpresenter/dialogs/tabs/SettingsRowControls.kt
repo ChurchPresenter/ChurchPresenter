@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.decrement
-import churchpresenter.composeapp.generated.resources.increment
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.decrement
+import org.churchpresenter.strings.generated.resources.increment
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton

@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import churchpresenter.composeapp.generated.resources.edit_label
+import org.churchpresenter.strings.generated.resources.edit_label
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.calendar.model.RowClock
 import androidx.compose.animation.AnimatedVisibility
@@ -55,7 +55,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_close
@@ -64,14 +65,14 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_note
-import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
-import churchpresenter.composeapp.generated.resources.tooltip_note
-import churchpresenter.composeapp.generated.resources.tooltip_note_clear
-import churchpresenter.composeapp.generated.resources.tooltip_note_done
-import churchpresenter.composeapp.generated.resources.tooltip_go_live
-import churchpresenter.composeapp.generated.resources.tooltip_move_down
-import churchpresenter.composeapp.generated.resources.tooltip_move_up
-import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.strings.generated.resources.schedule_note_placeholder
+import org.churchpresenter.strings.generated.resources.tooltip_note
+import org.churchpresenter.strings.generated.resources.tooltip_note_clear
+import org.churchpresenter.strings.generated.resources.tooltip_note_done
+import org.churchpresenter.strings.generated.resources.tooltip_go_live
+import org.churchpresenter.strings.generated.resources.tooltip_move_down
+import org.churchpresenter.strings.generated.resources.tooltip_move_up
+import org.churchpresenter.strings.generated.resources.tooltip_remove
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -161,7 +162,7 @@ private fun RowScope.ScheduleRowActionButtons(
     @Composable
     fun removeButton() {
         ScheduleRowActionButton(
-            painter = painterResource(Res.drawable.ic_close),
+            painter = painterResource(AppRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_remove),
             onClick = onRemove,
             buttonSize = actionSize,
@@ -175,7 +176,7 @@ private fun RowScope.ScheduleRowActionButtons(
         Spacer(modifier = Modifier.weight(1f))
     }
     ScheduleRowActionButton(
-        painter = painterResource(Res.drawable.ic_arrow_up),
+        painter = painterResource(AppRes.drawable.ic_arrow_up),
         text = stringResource(Res.string.tooltip_move_up),
         onClick = onMoveUp,
         buttonSize = actionSize,
@@ -183,7 +184,7 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = MaterialTheme.colorScheme.onSurfaceVariant
     )
     ScheduleRowActionButton(
-        painter = painterResource(Res.drawable.ic_arrow_down),
+        painter = painterResource(AppRes.drawable.ic_arrow_down),
         text = stringResource(Res.string.tooltip_move_down),
         onClick = onMoveDown,
         buttonSize = actionSize,
@@ -191,7 +192,7 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = MaterialTheme.colorScheme.onSurfaceVariant
     )
     ScheduleRowActionButton(
-        painter = painterResource(Res.drawable.ic_note),
+        painter = painterResource(AppRes.drawable.ic_note),
         text = stringResource(Res.string.tooltip_note),
         onClick = onToggleNote,
         buttonSize = actionSize,
@@ -203,7 +204,7 @@ private fun RowScope.ScheduleRowActionButtons(
 
     if (isSection) {
         ScheduleRowActionButton(
-            painter = painterResource(Res.drawable.ic_edit),
+            painter = painterResource(AppRes.drawable.ic_edit),
             text = stringResource(Res.string.edit_label),
             onClick = onEditLabel,
             modifier = Modifier.padding(start = 2.dp),
@@ -213,7 +214,7 @@ private fun RowScope.ScheduleRowActionButtons(
         )
     } else {
         ScheduleRowActionButton(
-            painter = painterResource(Res.drawable.ic_play),
+            painter = painterResource(AppRes.drawable.ic_play),
             text = stringResource(Res.string.tooltip_go_live),
             onClick = onPresent,
             modifier = Modifier.padding(start = 2.dp),
@@ -329,7 +330,7 @@ internal fun ScheduleItemRow(
                         .then(dragHandleModifier)
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_drag_dots),
+                        painter = painterResource(AppRes.drawable.ic_drag_dots),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                         modifier = Modifier
@@ -580,7 +581,7 @@ private fun ScheduleRowNoteChip(note: String, onEdit: () -> Unit) {
             modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
         )
         ScheduleRowActionButton(
-            painter = painterResource(Res.drawable.ic_edit),
+            painter = painterResource(AppRes.drawable.ic_edit),
             text = stringResource(Res.string.tooltip_note),
             onClick = onEdit,
             iconSize = 11.dp,
@@ -642,7 +643,7 @@ private fun ScheduleRowNoteEditor(
             }
         )
         TooltipIconButton(
-            painter = painterResource(Res.drawable.ic_check),
+            painter = painterResource(AppRes.drawable.ic_check),
             text = stringResource(Res.string.tooltip_note_done),
             onClick = {
                 onCommit(noteText)
@@ -653,7 +654,7 @@ private fun ScheduleRowNoteEditor(
             iconTint = MaterialTheme.colorScheme.primary
         )
         TooltipIconButton(
-            painter = painterResource(Res.drawable.ic_close),
+            painter = painterResource(AppRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_note_clear),
             onClick = {
                 onNoteTextChange("")

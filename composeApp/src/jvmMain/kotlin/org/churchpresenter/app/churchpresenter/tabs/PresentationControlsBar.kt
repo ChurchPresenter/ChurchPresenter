@@ -52,34 +52,35 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
-import churchpresenter.composeapp.generated.resources.auto_scroll_interval
-import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.animation_crossfade
+import org.churchpresenter.strings.generated.resources.animation_fade
+import org.churchpresenter.strings.generated.resources.animation_none
+import org.churchpresenter.strings.generated.resources.animation_slide_left
+import org.churchpresenter.strings.generated.resources.animation_slide_right
+import org.churchpresenter.strings.generated.resources.animation_type
+import org.churchpresenter.strings.generated.resources.auto_scroll_interval
+import org.churchpresenter.strings.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
-import churchpresenter.composeapp.generated.resources.loop_off
-import churchpresenter.composeapp.generated.resources.loop_on
-import churchpresenter.composeapp.generated.resources.next_image
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.presentation_arrow_key_hint
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.presentation_builds_counter
-import churchpresenter.composeapp.generated.resources.slide_counter
-import churchpresenter.composeapp.generated.resources.slide_counter_with_hidden
-import churchpresenter.composeapp.generated.resources.transition_duration
-import churchpresenter.composeapp.generated.resources.unit_ms
-import churchpresenter.composeapp.generated.resources.unit_s
+import org.churchpresenter.strings.generated.resources.loop_off
+import org.churchpresenter.strings.generated.resources.loop_on
+import org.churchpresenter.strings.generated.resources.next_image
+import org.churchpresenter.strings.generated.resources.ok
+import org.churchpresenter.strings.generated.resources.pause
+import org.churchpresenter.strings.generated.resources.presentation_arrow_key_hint
+import org.churchpresenter.strings.generated.resources.play
+import org.churchpresenter.strings.generated.resources.previous_image
+import org.churchpresenter.strings.generated.resources.presentation_builds_counter
+import org.churchpresenter.strings.generated.resources.slide_counter
+import org.churchpresenter.strings.generated.resources.slide_counter_with_hidden
+import org.churchpresenter.strings.generated.resources.transition_duration
+import org.churchpresenter.strings.generated.resources.unit_ms
+import org.churchpresenter.strings.generated.resources.unit_s
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
@@ -198,7 +199,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
         ) {
             KeyIconButton(onClick = { goPrevious(viewModel) }, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painterResource(Res.drawable.ic_skip_previous),
+                    painterResource(AppRes.drawable.ic_skip_previous),
                     contentDescription = stringResource(Res.string.previous_image),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
@@ -236,7 +237,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
                 )
             ) {
                 Icon(
-                    painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                    painterResource(if (viewModel.isPlaying) AppRes.drawable.ic_pause else AppRes.drawable.ic_play),
                     contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                     modifier = Modifier.size(15.dp),
                 )
@@ -264,7 +265,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
         ) {
             KeyIconButton(onClick = { goNext(viewModel) }, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painterResource(Res.drawable.ic_skip_next),
+                    painterResource(AppRes.drawable.ic_skip_next),
                     contentDescription = stringResource(Res.string.next_image),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
@@ -355,7 +356,7 @@ private fun PresentationTabScope.PresentationLoopButton(viewModel: PresentationV
             )
         ) {
             Icon(
-                painterResource(Res.drawable.ic_refresh),
+                painterResource(AppRes.drawable.ic_refresh),
                 contentDescription = stringResource(
                     if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off,
                 ),

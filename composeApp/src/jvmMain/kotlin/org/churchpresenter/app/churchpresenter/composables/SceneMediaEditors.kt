@@ -30,47 +30,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.canvas_bg_color
-import churchpresenter.composeapp.generated.resources.canvas_color_1
-import churchpresenter.composeapp.generated.resources.canvas_color_2
-import churchpresenter.composeapp.generated.resources.canvas_font_color
-import churchpresenter.composeapp.generated.resources.canvas_gradient
-import churchpresenter.composeapp.generated.resources.canvas_angle
-import churchpresenter.composeapp.generated.resources.canvas_source_browser
-import churchpresenter.composeapp.generated.resources.canvas_clock_font_size
-import churchpresenter.composeapp.generated.resources.position
-import churchpresenter.composeapp.generated.resources.canvas_file_path
-import churchpresenter.composeapp.generated.resources.vlc_browse
-import churchpresenter.composeapp.generated.resources.canvas_scale
-import churchpresenter.composeapp.generated.resources.canvas_scale_fit
-import churchpresenter.composeapp.generated.resources.canvas_scale_fill
-import churchpresenter.composeapp.generated.resources.canvas_scale_stretch
-import churchpresenter.composeapp.generated.resources.canvas_scale_none
-import churchpresenter.composeapp.generated.resources.canvas_expand_text_field
-import churchpresenter.composeapp.generated.resources.canvas_text_content
-import churchpresenter.composeapp.generated.resources.close
-import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
-import churchpresenter.composeapp.generated.resources.canvas_text_curve
-import churchpresenter.composeapp.generated.resources.canvas_font
-import churchpresenter.composeapp.generated.resources.canvas_align_horizontal
-import churchpresenter.composeapp.generated.resources.canvas_align_vertical
-import churchpresenter.composeapp.generated.resources.canvas_render_width
-import churchpresenter.composeapp.generated.resources.canvas_render_height
-import churchpresenter.composeapp.generated.resources.canvas_fps
-import churchpresenter.composeapp.generated.resources.canvas_custom_css
-import churchpresenter.composeapp.generated.resources.website_url_label
-import churchpresenter.composeapp.generated.resources.canvas_select_image_title
-import churchpresenter.composeapp.generated.resources.canvas_select_video_title
-import churchpresenter.composeapp.generated.resources.canvas_image_files
-import churchpresenter.composeapp.generated.resources.canvas_video_files
-import churchpresenter.composeapp.generated.resources.canvas_source_color
-import churchpresenter.composeapp.generated.resources.canvas_source_image
-import churchpresenter.composeapp.generated.resources.canvas_source_text
-import churchpresenter.composeapp.generated.resources.canvas_source_video
-import churchpresenter.composeapp.generated.resources.canvas_video_loop
-import churchpresenter.composeapp.generated.resources.canvas_video_volume
-import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.canvas_bg_color
+import org.churchpresenter.strings.generated.resources.canvas_color_1
+import org.churchpresenter.strings.generated.resources.canvas_color_2
+import org.churchpresenter.strings.generated.resources.canvas_font_color
+import org.churchpresenter.strings.generated.resources.canvas_gradient
+import org.churchpresenter.strings.generated.resources.canvas_angle
+import org.churchpresenter.strings.generated.resources.canvas_source_browser
+import org.churchpresenter.strings.generated.resources.canvas_clock_font_size
+import org.churchpresenter.strings.generated.resources.position
+import org.churchpresenter.strings.generated.resources.canvas_file_path
+import org.churchpresenter.strings.generated.resources.vlc_browse
+import org.churchpresenter.strings.generated.resources.canvas_scale
+import org.churchpresenter.strings.generated.resources.canvas_scale_fit
+import org.churchpresenter.strings.generated.resources.canvas_scale_fill
+import org.churchpresenter.strings.generated.resources.canvas_scale_stretch
+import org.churchpresenter.strings.generated.resources.canvas_scale_none
+import org.churchpresenter.strings.generated.resources.canvas_expand_text_field
+import org.churchpresenter.strings.generated.resources.canvas_text_content
+import org.churchpresenter.strings.generated.resources.close
+import org.churchpresenter.strings.generated.resources.canvas_letter_spacing
+import org.churchpresenter.strings.generated.resources.canvas_text_curve
+import org.churchpresenter.strings.generated.resources.canvas_font
+import org.churchpresenter.strings.generated.resources.canvas_align_horizontal
+import org.churchpresenter.strings.generated.resources.canvas_align_vertical
+import org.churchpresenter.strings.generated.resources.canvas_render_width
+import org.churchpresenter.strings.generated.resources.canvas_render_height
+import org.churchpresenter.strings.generated.resources.canvas_fps
+import org.churchpresenter.strings.generated.resources.canvas_custom_css
+import org.churchpresenter.strings.generated.resources.website_url_label
+import org.churchpresenter.strings.generated.resources.canvas_select_image_title
+import org.churchpresenter.strings.generated.resources.canvas_select_video_title
+import org.churchpresenter.strings.generated.resources.canvas_image_files
+import org.churchpresenter.strings.generated.resources.canvas_video_files
+import org.churchpresenter.strings.generated.resources.canvas_source_color
+import org.churchpresenter.strings.generated.resources.canvas_source_image
+import org.churchpresenter.strings.generated.resources.canvas_source_text
+import org.churchpresenter.strings.generated.resources.canvas_source_video
+import org.churchpresenter.strings.generated.resources.canvas_video_loop
+import org.churchpresenter.strings.generated.resources.canvas_video_volume
+import org.churchpresenter.strings.generated.resources.canvas_transparent_bg
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -160,7 +161,7 @@ internal fun ImageProperties(
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                painterResource(Res.drawable.ic_folder),
+                painterResource(AppRes.drawable.ic_folder),
                 contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )
@@ -457,7 +458,7 @@ internal fun VideoProperties(
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                painterResource(Res.drawable.ic_folder),
+                painterResource(AppRes.drawable.ic_folder),
                 contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )

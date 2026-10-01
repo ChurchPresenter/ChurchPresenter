@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
-import churchpresenter.composeapp.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

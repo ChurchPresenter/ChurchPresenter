@@ -2,11 +2,11 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.pixels_short
-import churchpresenter.composeapp.generated.resources.profile_shift
-import churchpresenter.composeapp.generated.resources.profile_shift_element_sub
-import churchpresenter.composeapp.generated.resources.profile_shift_language_sub
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.pixels_short
+import org.churchpresenter.strings.generated.resources.profile_shift
+import org.churchpresenter.strings.generated.resources.profile_shift_element_sub
+import org.churchpresenter.strings.generated.resources.profile_shift_language_sub
 import org.churchpresenter.settings.SongElementShift
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.elementShift

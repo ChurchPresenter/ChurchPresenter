@@ -3,10 +3,10 @@ package org.churchpresenter.app.churchpresenter.tabs
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageDisplayOrder
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.songLanguageName
-import churchpresenter.composeapp.generated.resources.profile_box_languages
-import churchpresenter.composeapp.generated.resources.song_language_order_subtitle
-import churchpresenter.composeapp.generated.resources.move_language_up
-import churchpresenter.composeapp.generated.resources.move_language_down
+import org.churchpresenter.strings.generated.resources.profile_box_languages
+import org.churchpresenter.strings.generated.resources.song_language_order_subtitle
+import org.churchpresenter.strings.generated.resources.move_language_up
+import org.churchpresenter.strings.generated.resources.move_language_down
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -57,22 +57,23 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import churchpresenter.composeapp.generated.resources.songs_no_db_title
-import churchpresenter.composeapp.generated.resources.songs_no_db_hint
-import churchpresenter.composeapp.generated.resources.songs_no_db_step
+import org.churchpresenter.strings.generated.resources.songs_no_db_title
+import org.churchpresenter.strings.generated.resources.songs_no_db_hint
+import org.churchpresenter.strings.generated.resources.songs_no_db_step
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.edit_song
-import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.edit_song
+import org.churchpresenter.strings.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_note
 import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.no_lyrics_available
-import churchpresenter.composeapp.generated.resources.songs_search_focus_hint
-import churchpresenter.composeapp.generated.resources.tab_focus_lost
-import churchpresenter.composeapp.generated.resources.song_title_slide
-import churchpresenter.composeapp.generated.resources.title
+import org.churchpresenter.strings.generated.resources.no_lyrics_available
+import org.churchpresenter.strings.generated.resources.songs_search_focus_hint
+import org.churchpresenter.strings.generated.resources.tab_focus_lost
+import org.churchpresenter.strings.generated.resources.song_title_slide
+import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
@@ -279,7 +280,7 @@ private fun LyricsActionBar(
             ActionIconButton(
                 onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
                 tooltipText = editSongStr,
-                painter = painterResource(Res.drawable.ic_edit),
+                painter = painterResource(AppRes.drawable.ic_edit),
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )
@@ -289,7 +290,7 @@ private fun LyricsActionBar(
         ActionIconButton(
             onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
             tooltipText = newSongStr,
-            painter = painterResource(Res.drawable.ic_add),
+            painter = painterResource(AppRes.drawable.ic_add),
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary
         )
@@ -341,7 +342,7 @@ private fun NoSongDatabaseCard() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_note),
+                    painter = painterResource(AppRes.drawable.ic_note),
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)

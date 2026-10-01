@@ -4,16 +4,16 @@
  */
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.song_background_color_black
-import churchpresenter.composeapp.generated.resources.song_background_color_dusk
-import churchpresenter.composeapp.generated.resources.song_background_color_ember
-import churchpresenter.composeapp.generated.resources.song_background_color_forest
-import churchpresenter.composeapp.generated.resources.song_background_color_navy
-import churchpresenter.composeapp.generated.resources.song_background_color_plum
-import churchpresenter.composeapp.generated.resources.song_background_color_slate
-import churchpresenter.composeapp.generated.resources.song_background_color_teal
-import churchpresenter.composeapp.generated.resources.song_background_custom_color
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.song_background_color_black
+import org.churchpresenter.strings.generated.resources.song_background_color_dusk
+import org.churchpresenter.strings.generated.resources.song_background_color_ember
+import org.churchpresenter.strings.generated.resources.song_background_color_forest
+import org.churchpresenter.strings.generated.resources.song_background_color_navy
+import org.churchpresenter.strings.generated.resources.song_background_color_plum
+import org.churchpresenter.strings.generated.resources.song_background_color_slate
+import org.churchpresenter.strings.generated.resources.song_background_color_teal
+import org.churchpresenter.strings.generated.resources.song_background_custom_color
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.StringResource

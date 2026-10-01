@@ -5,9 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_box_item
-import churchpresenter.composeapp.generated.resources.profile_group_boxes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_box_item
+import org.churchpresenter.strings.generated.resources.profile_group_boxes
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.settings.boxAt

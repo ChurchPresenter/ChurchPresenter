@@ -71,27 +71,28 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.filter
+import org.churchpresenter.strings.generated.resources.filter
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
-import churchpresenter.composeapp.generated.resources.song_favorites
-import churchpresenter.composeapp.generated.resources.song_favorites_clear
-import churchpresenter.composeapp.generated.resources.song_play_count
-import churchpresenter.composeapp.generated.resources.song_element_number
-import churchpresenter.composeapp.generated.resources.search
-import churchpresenter.composeapp.generated.resources.search_clear
-import churchpresenter.composeapp.generated.resources.search_songs
-import churchpresenter.composeapp.generated.resources.song_book
-import churchpresenter.composeapp.generated.resources.title
-import churchpresenter.composeapp.generated.resources.tune
-import churchpresenter.composeapp.generated.resources.author
-import churchpresenter.composeapp.generated.resources.composer
+import org.churchpresenter.strings.generated.resources.song_favorites
+import org.churchpresenter.strings.generated.resources.song_favorites_clear
+import org.churchpresenter.strings.generated.resources.song_play_count
+import org.churchpresenter.strings.generated.resources.song_element_number
+import org.churchpresenter.strings.generated.resources.search
+import org.churchpresenter.strings.generated.resources.search_clear
+import org.churchpresenter.strings.generated.resources.search_songs
+import org.churchpresenter.strings.generated.resources.song_book
+import org.churchpresenter.strings.generated.resources.title
+import org.churchpresenter.strings.generated.resources.tune
+import org.churchpresenter.strings.generated.resources.author
+import org.churchpresenter.strings.generated.resources.composer
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -360,7 +361,7 @@ private fun SongListScope.SongSearchBar() {
                 )
             } else {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_search),
+                    painter = painterResource(AppRes.drawable.ic_search),
                     contentDescription = stringResource(Res.string.search),
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onPrimary,
@@ -383,7 +384,7 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_search),
+            painter = painterResource(AppRes.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -433,7 +434,7 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
                 modifier = Modifier.size(30.dp),
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_close),
+                    painter = painterResource(AppRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -508,7 +509,7 @@ private fun SongListScope.SongFavoritesHeader() {
     ) {
         Icon(
             painter = painterResource(
-                if (favoritesExpanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
+                if (favoritesExpanded) AppRes.drawable.ic_arrow_down else AppRes.drawable.ic_arrow_up
             ),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
@@ -545,7 +546,7 @@ private fun SongListScope.SongFavoritesHeader() {
                 onClearFavorites()
             }) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_delete),
+                    painter = painterResource(AppRes.drawable.ic_delete),
                     contentDescription = stringResource(Res.string.song_favorites_clear),
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -588,7 +589,7 @@ private fun SongListScope.SongFavoriteItem(song: SongItem) {
                 modifier = Modifier.size(20.dp)
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_playlist_add),
+                    painter = painterResource(AppRes.drawable.ic_playlist_add),
                     contentDescription = stringResource(Res.string.add_to_schedule),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.secondary

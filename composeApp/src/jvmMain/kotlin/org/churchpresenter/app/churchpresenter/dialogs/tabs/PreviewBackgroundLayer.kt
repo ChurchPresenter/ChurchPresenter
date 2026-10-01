@@ -27,11 +27,11 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_preview_note_above_band
-import churchpresenter.composeapp.generated.resources.profile_preview_note_camera
-import churchpresenter.composeapp.generated.resources.profile_preview_note_matches
-import churchpresenter.composeapp.generated.resources.profile_preview_note_video
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_preview_note_above_band
+import org.churchpresenter.strings.generated.resources.profile_preview_note_camera
+import org.churchpresenter.strings.generated.resources.profile_preview_note_matches
+import org.churchpresenter.strings.generated.resources.profile_preview_note_video
 
 /**
  * What the preview draws behind the text: the real background, nothing, or a checkerboard in its

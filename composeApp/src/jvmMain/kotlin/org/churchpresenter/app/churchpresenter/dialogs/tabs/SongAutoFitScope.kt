@@ -5,10 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.auto_fit_scope
-import churchpresenter.composeapp.generated.resources.auto_fit_scope_slide
-import churchpresenter.composeapp.generated.resources.auto_fit_scope_song
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.auto_fit_scope
+import org.churchpresenter.strings.generated.resources.auto_fit_scope_slide
+import org.churchpresenter.strings.generated.resources.auto_fit_scope_song
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.SongSettings

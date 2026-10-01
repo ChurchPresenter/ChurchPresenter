@@ -40,7 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
 import churchpresenter.composeapp.generated.resources.ic_pause
@@ -50,20 +51,20 @@ import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.ic_subtitles
 import churchpresenter.composeapp.generated.resources.ic_volume_off
 import churchpresenter.composeapp.generated.resources.ic_volume_up
-import churchpresenter.composeapp.generated.resources.loop_off
-import churchpresenter.composeapp.generated.resources.loop_on
-import churchpresenter.composeapp.generated.resources.media_loop_count
-import churchpresenter.composeapp.generated.resources.media_loop_count_tooltip
-import churchpresenter.composeapp.generated.resources.media_mute
-import churchpresenter.composeapp.generated.resources.media_subtitles
-import churchpresenter.composeapp.generated.resources.media_subtitles_files
-import churchpresenter.composeapp.generated.resources.media_subtitles_load_file
-import churchpresenter.composeapp.generated.resources.media_seek_backward
-import churchpresenter.composeapp.generated.resources.media_seek_forward
-import churchpresenter.composeapp.generated.resources.media_unmute
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.stop
+import org.churchpresenter.strings.generated.resources.loop_off
+import org.churchpresenter.strings.generated.resources.loop_on
+import org.churchpresenter.strings.generated.resources.media_loop_count
+import org.churchpresenter.strings.generated.resources.media_loop_count_tooltip
+import org.churchpresenter.strings.generated.resources.media_mute
+import org.churchpresenter.strings.generated.resources.media_subtitles
+import org.churchpresenter.strings.generated.resources.media_subtitles_files
+import org.churchpresenter.strings.generated.resources.media_subtitles_load_file
+import org.churchpresenter.strings.generated.resources.media_seek_backward
+import org.churchpresenter.strings.generated.resources.media_seek_forward
+import org.churchpresenter.strings.generated.resources.media_unmute
+import org.churchpresenter.strings.generated.resources.pause
+import org.churchpresenter.strings.generated.resources.play
+import org.churchpresenter.strings.generated.resources.stop
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -154,7 +155,7 @@ private fun MediaTabScope.MediaTransport(
                 colors = keyColors
             ) {
                 Icon(
-                    painterResource(Res.drawable.ic_fast_rewind),
+                    painterResource(AppRes.drawable.ic_fast_rewind),
                     contentDescription = stringResource(Res.string.media_seek_backward),
                     modifier = Modifier.size(16.dp),
                 )
@@ -175,7 +176,7 @@ private fun MediaTabScope.MediaTransport(
                 colors = keyColors
             ) {
                 Icon(
-                    painterResource(Res.drawable.ic_stop),
+                    painterResource(AppRes.drawable.ic_stop),
                     contentDescription = stringResource(Res.string.stop),
                     modifier = Modifier.size(16.dp),
                 )
@@ -195,7 +196,7 @@ private fun MediaTabScope.MediaTransport(
                 colors = keyColors
             ) {
                 Icon(
-                    painterResource(Res.drawable.ic_fast_forward),
+                    painterResource(AppRes.drawable.ic_fast_forward),
                     contentDescription = stringResource(Res.string.media_seek_forward),
                     modifier = Modifier.size(16.dp),
                 )
@@ -222,7 +223,7 @@ private fun MediaTabScope.MediaPlayKey(viewModel: MediaViewModel, litKeyColors: 
         ) {
             Icon(
                 painterResource(
-                    if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                    if (viewModel.isPlaying) AppRes.drawable.ic_pause else AppRes.drawable.ic_play
                 ),
                 contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                 modifier = Modifier.size(15.dp),
@@ -259,7 +260,7 @@ private fun MediaTabScope.MediaLoopControls(
                 // TooltipArea is a hover popup and contributes no semantics, so without
                 // this the button would have no name at all.
                 Icon(
-                    painterResource(Res.drawable.ic_refresh),
+                    painterResource(AppRes.drawable.ic_refresh),
                     contentDescription = loopLabel,
                     modifier = Modifier.size(16.dp),
                 )
@@ -351,7 +352,7 @@ private fun MediaTabScope.MediaSubtitlesButton(
                 colors = if (subtitlesShowing) litKeyColors else keyColors
             ) {
                 Icon(
-                    painterResource(Res.drawable.ic_subtitles),
+                    painterResource(AppRes.drawable.ic_subtitles),
                     contentDescription = subtitlesLabel,
                     modifier = Modifier.size(16.dp),
                 )
@@ -423,7 +424,7 @@ private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: Icon
             ) {
                 Icon(
                     painter = painterResource(if (viewModel.isMuted ||
-                        viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
+                        viewModel.volume == 0f) AppRes.drawable.ic_volume_off else AppRes.drawable.ic_volume_up),
                     contentDescription = muteLabel,
                     modifier = Modifier.size(16.dp)
                 )

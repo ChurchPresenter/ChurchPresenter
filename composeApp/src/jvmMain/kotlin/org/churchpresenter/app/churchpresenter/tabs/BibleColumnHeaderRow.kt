@@ -31,23 +31,24 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.BibleTranslationSettings
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.bible_translation_order
-import churchpresenter.composeapp.generated.resources.bible_verse_selection_hint
-import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.hold_live
-import churchpresenter.composeapp.generated.resources.swap_bibles
-import churchpresenter.composeapp.generated.resources.bible_cross_references
-import churchpresenter.composeapp.generated.resources.bible_cross_references_title
-import churchpresenter.composeapp.generated.resources.hold_live_modifier_hint
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.bible_translation_order
+import org.churchpresenter.strings.generated.resources.bible_verse_selection_hint
+import org.churchpresenter.strings.generated.resources.go_live
+import org.churchpresenter.strings.generated.resources.hold_live
+import org.churchpresenter.strings.generated.resources.swap_bibles
+import org.churchpresenter.strings.generated.resources.bible_cross_references
+import org.churchpresenter.strings.generated.resources.bible_cross_references_title
+import org.churchpresenter.strings.generated.resources.hold_live_modifier_hint
 import churchpresenter.composeapp.generated.resources.ic_link
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_swap
-import churchpresenter.composeapp.generated.resources.stt_connect
-import churchpresenter.composeapp.generated.resources.stt_disconnect
-import churchpresenter.composeapp.generated.resources.swap_bibles_hint
-import churchpresenter.composeapp.generated.resources.verse
+import org.churchpresenter.strings.generated.resources.stt_connect
+import org.churchpresenter.strings.generated.resources.stt_disconnect
+import org.churchpresenter.strings.generated.resources.swap_bibles_hint
+import org.churchpresenter.strings.generated.resources.verse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
@@ -181,7 +182,7 @@ private fun CrossRefsPill(crossRefsDocked: Boolean, onCrossReferencesToggle: () 
             onClick = onCrossReferencesToggle,
             leadingIcon = {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_link),
+                    painter = painterResource(AppRes.drawable.ic_link),
                     contentDescription = stringResource(Res.string.bible_cross_references),
                     modifier = Modifier.size(12.dp),
                 )
@@ -209,7 +210,7 @@ private fun HoldLivePill(
     ) {
         val icon: @Composable () -> Unit = {
             Icon(
-                painter = painterResource(Res.drawable.ic_pause),
+                painter = painterResource(AppRes.drawable.ic_pause),
                 contentDescription = null,
                 modifier = Modifier.size(10.dp),
             )
@@ -248,7 +249,7 @@ private fun TranslationControls(
                 onSwapTranslations()
             },
             tooltipText = swapBiblesStr,
-            painter = painterResource(Res.drawable.ic_swap),
+            painter = painterResource(AppRes.drawable.ic_swap),
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary,
             tooltipContent = {

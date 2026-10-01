@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.input.key.key
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.Res
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.asDurationRow
@@ -18,7 +18,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
-import churchpresenter.composeapp.generated.resources.bible_font
+import org.churchpresenter.strings.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts

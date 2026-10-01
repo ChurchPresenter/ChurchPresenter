@@ -1,12 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bottom_left
-import churchpresenter.composeapp.generated.resources.bottom_right
-import churchpresenter.composeapp.generated.resources.song_number_corner_off
-import churchpresenter.composeapp.generated.resources.top_left
-import churchpresenter.composeapp.generated.resources.top_right
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bottom_left
+import org.churchpresenter.strings.generated.resources.bottom_right
+import org.churchpresenter.strings.generated.resources.song_number_corner_off
+import org.churchpresenter.strings.generated.resources.top_left
+import org.churchpresenter.strings.generated.resources.top_right
 import org.churchpresenter.settings.SongNumberOffset
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants

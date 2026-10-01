@@ -34,10 +34,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_move_down
-import churchpresenter.composeapp.generated.resources.output_profile_move_up
-import churchpresenter.composeapp.generated.resources.output_profile_remove_translation
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.output_profile_move_down
+import org.churchpresenter.strings.generated.resources.output_profile_move_up
+import org.churchpresenter.strings.generated.resources.output_profile_remove_translation
 import org.churchpresenter.theme.components.KeyIconButton
 import org.churchpresenter.theme.elevationPalette
 import org.jetbrains.compose.resources.stringResource

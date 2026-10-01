@@ -6,10 +6,10 @@ import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.FitScreen
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.canvas_scale_fill
-import churchpresenter.composeapp.generated.resources.canvas_scale_fit
-import churchpresenter.composeapp.generated.resources.canvas_scale_stretch
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.canvas_scale_fill
+import org.churchpresenter.strings.generated.resources.canvas_scale_fit
+import org.churchpresenter.strings.generated.resources.canvas_scale_stretch
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputScaleMode

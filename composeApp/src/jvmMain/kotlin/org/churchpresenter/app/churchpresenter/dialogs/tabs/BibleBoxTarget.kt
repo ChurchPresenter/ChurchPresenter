@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_box
-import churchpresenter.composeapp.generated.resources.profile_box_pick_translation
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_box
+import org.churchpresenter.strings.generated.resources.profile_box_pick_translation
 import org.churchpresenter.app.churchpresenter.presenter.bibleBoxKey
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt

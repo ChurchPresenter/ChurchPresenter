@@ -53,19 +53,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.AppShape
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.crossword_across
-import churchpresenter.composeapp.generated.resources.crossword_all_done
-import churchpresenter.composeapp.generated.resources.crossword_ask_more
-import churchpresenter.composeapp.generated.resources.crossword_check
-import churchpresenter.composeapp.generated.resources.crossword_correct
-import churchpresenter.composeapp.generated.resources.crossword_down
-import churchpresenter.composeapp.generated.resources.crossword_next_level
-import churchpresenter.composeapp.generated.resources.crossword_prev_level
-import churchpresenter.composeapp.generated.resources.crossword_wrong
-import churchpresenter.composeapp.generated.resources.crossword_level_label
-import churchpresenter.composeapp.generated.resources.crossword_loading
-import churchpresenter.composeapp.generated.resources.crossword_no_puzzles
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.crossword_across
+import org.churchpresenter.strings.generated.resources.crossword_all_done
+import org.churchpresenter.strings.generated.resources.crossword_ask_more
+import org.churchpresenter.strings.generated.resources.crossword_check
+import org.churchpresenter.strings.generated.resources.crossword_correct
+import org.churchpresenter.strings.generated.resources.crossword_down
+import org.churchpresenter.strings.generated.resources.crossword_next_level
+import org.churchpresenter.strings.generated.resources.crossword_prev_level
+import org.churchpresenter.strings.generated.resources.crossword_wrong
+import org.churchpresenter.strings.generated.resources.crossword_level_label
+import org.churchpresenter.strings.generated.resources.crossword_loading
+import org.churchpresenter.strings.generated.resources.crossword_no_puzzles
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.CrosswordCell
 import org.churchpresenter.app.churchpresenter.data.CrosswordDecoder
@@ -461,7 +462,7 @@ private fun checkAnswers(puzzle: RenderedCrossword, userInput: Map<Pair<Int, Int
 
 @OptIn(ExperimentalResourceApi::class)
 private suspend fun loadLevelFile(level: Int): RenderedCrossword? = try {
-    val bytes = Res.readBytes("files/crossword/level$level.xwp")
+    val bytes = AppRes.readBytes("files/crossword/level$level.xwp")
     val base64Content = String(bytes, Charsets.UTF_8)
     val (title, clues, layout) = CrosswordDecoder.decodeFile(base64Content) ?: return null
     CrosswordLayoutEngine.build(level, title, clues, layout)

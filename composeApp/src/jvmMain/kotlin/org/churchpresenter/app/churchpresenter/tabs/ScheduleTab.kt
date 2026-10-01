@@ -60,20 +60,21 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
 import org.jetbrains.compose.resources.getString
-import churchpresenter.composeapp.generated.resources.schedule_add_files_title
-import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
-import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
-import churchpresenter.composeapp.generated.resources.file_filter_schedule
+import org.churchpresenter.strings.generated.resources.schedule_add_files_title
+import org.churchpresenter.strings.generated.resources.tooltip_open_schedule
+import org.churchpresenter.strings.generated.resources.file_chooser_save_schedule
+import org.churchpresenter.strings.generated.resources.file_filter_schedule
 import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.autosave_restore_confirm
-import churchpresenter.composeapp.generated.resources.autosave_restore_discard
-import churchpresenter.composeapp.generated.resources.autosave_restore_message
-import churchpresenter.composeapp.generated.resources.autosave_restore_title
-import churchpresenter.composeapp.generated.resources.schedule_drop_hint
-import churchpresenter.composeapp.generated.resources.schedule_drop_unsupported
-import churchpresenter.composeapp.generated.resources.schedule_drop_to_remove
+import org.churchpresenter.strings.generated.resources.autosave_restore_confirm
+import org.churchpresenter.strings.generated.resources.autosave_restore_discard
+import org.churchpresenter.strings.generated.resources.autosave_restore_message
+import org.churchpresenter.strings.generated.resources.autosave_restore_title
+import org.churchpresenter.strings.generated.resources.schedule_drop_hint
+import org.churchpresenter.strings.generated.resources.schedule_drop_unsupported
+import org.churchpresenter.strings.generated.resources.schedule_drop_to_remove
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
@@ -686,7 +687,7 @@ fun ScheduleTab(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_delete),
+                        painter = painterResource(AppRes.drawable.ic_delete),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onError
                     )

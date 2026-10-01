@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.remote_label_image
-import churchpresenter.composeapp.generated.resources.remote_label_kilobytes
-import churchpresenter.composeapp.generated.resources.remote_label_section
-import churchpresenter.composeapp.generated.resources.remote_label_song
-import churchpresenter.composeapp.generated.resources.slide_number
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.remote_label_image
+import org.churchpresenter.strings.generated.resources.remote_label_kilobytes
+import org.churchpresenter.strings.generated.resources.remote_label_section
+import org.churchpresenter.strings.generated.resources.remote_label_song
+import org.churchpresenter.strings.generated.resources.slide_number
 import org.churchpresenter.app.churchpresenter.server.RemoteLabel
 import org.jetbrains.compose.resources.getString
 

@@ -54,16 +54,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.font_group_all
-import churchpresenter.composeapp.generated.resources.font_group_matches
-import churchpresenter.composeapp.generated.resources.font_group_recent
-import churchpresenter.composeapp.generated.resources.font_group_recommended
-import churchpresenter.composeapp.generated.resources.font_hidden_note
-import churchpresenter.composeapp.generated.resources.font_picker_clear_search
-import churchpresenter.composeapp.generated.resources.font_shown_note
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.font_group_all
+import org.churchpresenter.strings.generated.resources.font_group_matches
+import org.churchpresenter.strings.generated.resources.font_group_recent
+import org.churchpresenter.strings.generated.resources.font_group_recommended
+import org.churchpresenter.strings.generated.resources.font_hidden_note
+import org.churchpresenter.strings.generated.resources.font_picker_clear_search
+import org.churchpresenter.strings.generated.resources.font_shown_note
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.no_results_found
+import org.churchpresenter.strings.generated.resources.no_results_found
 import org.churchpresenter.app.churchpresenter.utils.FontCatalogSnapshot
 import org.churchpresenter.app.churchpresenter.utils.rememberFontCatalog
 import org.churchpresenter.theme.semantic
@@ -217,7 +218,7 @@ private fun FontPickerTrigger(
             }
             Spacer(Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
+                painter = painterResource(AppRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp).rotate(caret),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

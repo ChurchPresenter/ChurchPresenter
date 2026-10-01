@@ -25,26 +25,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.canvas_source_browser
-import churchpresenter.composeapp.generated.resources.canvas_source_color
-import churchpresenter.composeapp.generated.resources.canvas_source_image
-import churchpresenter.composeapp.generated.resources.canvas_source_text
-import churchpresenter.composeapp.generated.resources.canvas_source_video
+import org.churchpresenter.strings.generated.resources.canvas_source_browser
+import org.churchpresenter.strings.generated.resources.canvas_source_color
+import org.churchpresenter.strings.generated.resources.canvas_source_image
+import org.churchpresenter.strings.generated.resources.canvas_source_text
+import org.churchpresenter.strings.generated.resources.canvas_source_video
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
-import churchpresenter.composeapp.generated.resources.canvas_source_timer
-import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
-import churchpresenter.composeapp.generated.resources.background_camera_option
-import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
-import churchpresenter.composeapp.generated.resources.canvas_source_ndi
-import churchpresenter.composeapp.generated.resources.canvas_source_omt
-import churchpresenter.composeapp.generated.resources.canvas_source_bible
-import churchpresenter.composeapp.generated.resources.canvas_add_source
+import org.churchpresenter.strings.generated.resources.canvas_source_timer
+import org.churchpresenter.strings.generated.resources.canvas_source_qrcode
+import org.churchpresenter.strings.generated.resources.background_camera_option
+import org.churchpresenter.strings.generated.resources.canvas_source_screen_capture
+import org.churchpresenter.strings.generated.resources.canvas_source_ndi
+import org.churchpresenter.strings.generated.resources.canvas_source_omt
+import org.churchpresenter.strings.generated.resources.canvas_source_bible
+import org.churchpresenter.strings.generated.resources.canvas_add_source
 
 /* The Canvas tab's Add source button and its menu of source types. */
 
@@ -79,7 +80,7 @@ internal fun CanvasTabScope.AddSourceButton(sceneViewModel: SceneViewModel) {
                 modifier = Modifier.size(28.dp)
             ) {
                 Icon(
-                    painterResource(Res.drawable.ic_add),
+                    painterResource(AppRes.drawable.ic_add),
                     contentDescription = stringResource(Res.string.canvas_add_source),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface

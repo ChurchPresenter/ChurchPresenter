@@ -1,14 +1,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.media
-import churchpresenter.composeapp.generated.resources.profile_mode_full
-import churchpresenter.composeapp.generated.resources.lower_third_placement_in_band
-import churchpresenter.composeapp.generated.resources.pictures
-import churchpresenter.composeapp.generated.resources.presentation
-import churchpresenter.composeapp.generated.resources.projection_content_web
-import churchpresenter.composeapp.generated.resources.tab_canvas
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.media
+import org.churchpresenter.strings.generated.resources.profile_mode_full
+import org.churchpresenter.strings.generated.resources.lower_third_placement_in_band
+import org.churchpresenter.strings.generated.resources.pictures
+import org.churchpresenter.strings.generated.resources.presentation
+import org.churchpresenter.strings.generated.resources.projection_content_web
+import org.churchpresenter.strings.generated.resources.tab_canvas
 import org.churchpresenter.settings.LowerThirdPlacement
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.PlaceableContent

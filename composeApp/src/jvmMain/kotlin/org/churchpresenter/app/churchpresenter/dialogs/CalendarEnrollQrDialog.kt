@@ -23,11 +23,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.calendar_enroll_qr_body
-import churchpresenter.composeapp.generated.resources.calendar_enroll_invite_failed
-import churchpresenter.composeapp.generated.resources.calendar_enroll_qr_title
-import churchpresenter.composeapp.generated.resources.close
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.calendar_enroll_qr_body
+import org.churchpresenter.strings.generated.resources.calendar_enroll_invite_failed
+import org.churchpresenter.strings.generated.resources.calendar_enroll_qr_title
+import org.churchpresenter.strings.generated.resources.close
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow

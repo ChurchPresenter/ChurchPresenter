@@ -30,19 +30,20 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_align_bottom
 import churchpresenter.composeapp.generated.resources.ic_align_center
 import churchpresenter.composeapp.generated.resources.ic_align_left
 import churchpresenter.composeapp.generated.resources.ic_align_middle
 import churchpresenter.composeapp.generated.resources.ic_align_right
 import churchpresenter.composeapp.generated.resources.ic_align_top
-import churchpresenter.composeapp.generated.resources.align_left
-import churchpresenter.composeapp.generated.resources.align_center
-import churchpresenter.composeapp.generated.resources.align_right
-import churchpresenter.composeapp.generated.resources.align_top
-import churchpresenter.composeapp.generated.resources.align_middle
-import churchpresenter.composeapp.generated.resources.align_bottom
+import org.churchpresenter.strings.generated.resources.align_left
+import org.churchpresenter.strings.generated.resources.align_center
+import org.churchpresenter.strings.generated.resources.align_right
+import org.churchpresenter.strings.generated.resources.align_top
+import org.churchpresenter.strings.generated.resources.align_middle
+import org.churchpresenter.strings.generated.resources.align_bottom
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.drawShiftedY
@@ -79,19 +80,19 @@ fun HorizontalAlignmentButtons(
         choices = listOf(
             IconChoice(
                 rightValue,
-                painterResource(Res.drawable.ic_align_right),
+                painterResource(AppRes.drawable.ic_align_right),
                 stringResource(Res.string.align_right),
                 null,
             ),
             IconChoice(
                 centerValue,
-                painterResource(Res.drawable.ic_align_center),
+                painterResource(AppRes.drawable.ic_align_center),
                 stringResource(Res.string.align_center),
                 null,
             ),
             IconChoice(
                 leftValue,
-                painterResource(Res.drawable.ic_align_left),
+                painterResource(AppRes.drawable.ic_align_left),
                 stringResource(Res.string.align_left),
                 null,
             ),
@@ -123,19 +124,19 @@ fun VerticalAlignmentButtons(
         choices = listOf(
             IconChoice(
                 bottomValue,
-                painterResource(Res.drawable.ic_align_bottom),
+                painterResource(AppRes.drawable.ic_align_bottom),
                 bottom,
                 bottom,
             ),
             IconChoice(
                 middleValue,
-                painterResource(Res.drawable.ic_align_middle),
+                painterResource(AppRes.drawable.ic_align_middle),
                 middle,
                 middle,
             ),
             IconChoice(
                 topValue,
-                painterResource(Res.drawable.ic_align_top),
+                painterResource(AppRes.drawable.ic_align_top),
                 top,
                 top,
             ),

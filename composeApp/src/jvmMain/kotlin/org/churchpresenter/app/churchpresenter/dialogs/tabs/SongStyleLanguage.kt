@@ -1,13 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.song_fourth_language
-import churchpresenter.composeapp.generated.resources.song_language_primary
-import churchpresenter.composeapp.generated.resources.song_language_secondary
-import churchpresenter.composeapp.generated.resources.song_third_language
-import churchpresenter.composeapp.generated.resources.song_primary_language
-import churchpresenter.composeapp.generated.resources.song_secondary_language
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.song_fourth_language
+import org.churchpresenter.strings.generated.resources.song_language_primary
+import org.churchpresenter.strings.generated.resources.song_language_secondary
+import org.churchpresenter.strings.generated.resources.song_third_language
+import org.churchpresenter.strings.generated.resources.song_primary_language
+import org.churchpresenter.strings.generated.resources.song_secondary_language
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageLabel
