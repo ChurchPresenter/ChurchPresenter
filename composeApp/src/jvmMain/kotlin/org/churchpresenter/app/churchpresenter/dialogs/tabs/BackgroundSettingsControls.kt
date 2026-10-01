@@ -81,6 +81,8 @@ import java.io.File
 import kotlin.math.roundToInt
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.settings.operatorBibleSettings
+import org.churchpresenter.settings.operatorSongSettings
 
 /** The one editor, for whichever surface the rail has open. */
 @Composable
@@ -268,8 +270,17 @@ private fun BackgroundSourceSection(
         }
         Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
-        Constants.BACKGROUND_LOTTIE ->
-            LottieBandSourceSection(scope, settings, config, onConfigChange, bibleLowerThirdsDir)
+        Constants.BACKGROUND_LOTTIE -> {
+            // The band generator seeds its sample from the Song/Bible look, which the document no
+            // longer keeps: take the one the main window follows.
+            val seedSettings = remember(settings) {
+                settings.copy(
+                    songSettings = settings.operatorSongSettings(),
+                    bibleSettings = settings.operatorBibleSettings(),
+                )
+            }
+            LottieBandSourceSection(scope, seedSettings, config, onConfigChange, bibleLowerThirdsDir)
+        }
         else -> Unit
     }
 }

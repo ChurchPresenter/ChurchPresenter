@@ -136,6 +136,16 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
   (`stripProfileOwnedStyling`). The document's `sttSettings`/`qaSettings` save only their
   `*_GLOBAL_KEYS`, and its `dictionarySettings`/`mediaSettings` are not saved at all. Read those
   looks from a profile, never from the document.
+- **Version 22** does the same for Songs and the Bible (`migrateBibleAndSongsOut`): the document
+  keeps `SONG_GLOBAL_KEYS`, `BIBLE_GLOBAL_KEYS` and, for each translation in the stack, only
+  `BIBLE_TRANSLATION_GLOBAL_KEYS`. First it gives every profile what it lacked: a whole section,
+  or a translation its Bible settings never styled. A document with no profiles gets its factory
+  profile built from its own look.
+- **The main window follows a profile** for everything that is not one per install
+  (`operatorProfile`: the first profile an output uses, else the first profile). Read
+  `operatorSongSettings()`/`operatorBibleSettings()` for verse splitting, the title slide, chorus
+  repeat, line mode and the rest. `appSettings.songSettings`/`bibleSettings` hold only the
+  install-wide keys; every other field there is a class default.
 
 ## Gates
 

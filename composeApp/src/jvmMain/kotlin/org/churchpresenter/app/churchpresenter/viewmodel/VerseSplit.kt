@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.churchpresenter.core.models.bible.SelectedVerse
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import org.churchpresenter.settings.operatorBibleSettings
 
 /**
  * Showing a long verse as two halves instead of one shrunken block.
@@ -127,11 +128,11 @@ internal fun BibleViewModel.publishVersePage(page: Int) {
 
 /** Whether verses are split at all -- the setting, read where it is needed rather than cached. */
 internal val BibleViewModel.splitLongVersesEnabled: Boolean
-    get() = appSettings.bibleSettings.splitLongVerses
+    get() = appSettings.operatorBibleSettings().splitLongVerses
 
 /** The word count a verse must pass to be split -- likewise read where it is needed. */
 internal val BibleViewModel.longVerseWordCount: Int
-    get() = appSettings.bibleSettings.longVerseWordCount
+    get() = appSettings.operatorBibleSettings().longVerseWordCount
 
 /** Whether [text] is shown as two pages, so a caller has a half to step to. */
 internal fun BibleViewModel.pagesInTwo(text: String): Boolean =

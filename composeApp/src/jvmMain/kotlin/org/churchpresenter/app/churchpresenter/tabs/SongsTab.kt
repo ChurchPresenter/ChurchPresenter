@@ -84,6 +84,7 @@ import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.languageLabel
 import org.churchpresenter.settings.withLanguageNames
 import org.churchpresenter.settings.moveSongLanguageAmong
+import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong
 import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
@@ -200,8 +201,9 @@ fun SongsTab(
         val items = viewModel.filteredSongItems.value
         val song = items.getOrNull(idx)
         val tuning = song?.let { appSettings.tuningFor(it.songId) } ?: SongTuning()
-        val titleSlide = song?.takeIf { live.titleSlideSelected && appSettings.songSettings.titleSlideEnabled }
-            ?.let { titleSlideSection(it, tuning, appSettings.songSettings) }
+        val songs = appSettings.operatorSongSettings()
+        val titleSlide = song?.takeIf { live.titleSlideSelected && songs.titleSlideEnabled }
+            ?.let { titleSlideSection(it, tuning, songs) }
         if (titleSlide != null) {
             onAllSectionsChanged(listOf(titleSlide) + viewModel.getLyricSections())
             onSectionIndexChanged(0)
@@ -286,7 +288,7 @@ fun SongsTab(
 
     /** Steps back onto the title slide from the song's first section, when there is one to step onto. */
     fun backToTitleSlide(): Boolean {
-        val offered = appSettings.songSettings.titleSlideEnabled &&
+        val offered = appSettings.operatorSongSettings().titleSlideEnabled &&
             viewModel.selectedSongIndex.value in viewModel.filteredSongItems.value.indices
         if (!offered || live.titleSlideSelected) return false
         live.titleSlideSelected = true
@@ -487,7 +489,7 @@ fun SongsTab(
                 // does. While the caret is in that field the keys belong to the text — left/right
                 // move it, and nothing here may swallow them. Same rule as BibleTab.
                 if (keyEvent.type == KeyEventType.KeyDown && !searchFieldFocused) {
-                    val isLineMode = isSongLineMode(appSettings.songSettings)
+                    val isLineMode = isSongLineMode(appSettings.operatorSongSettings())
                     when {
                         shortcuts.matches(ShortcutAction.SONGS_PREVIOUS, keyEvent) -> {
                             if (isLineMode) {

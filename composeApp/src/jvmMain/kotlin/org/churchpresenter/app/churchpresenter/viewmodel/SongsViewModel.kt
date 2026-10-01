@@ -25,6 +25,7 @@ import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.songchords.ChordTransposer
@@ -666,7 +667,7 @@ class SongsViewModel(
      * section it leads into and cannot trigger a repeat of its own.
      */
     internal fun repeatChorusAfterVerses(sections: List<LyricSection>): List<LyricSection> {
-        if (!appSettings.songSettings.autoRepeatChorus) return sections
+        if (!appSettings.operatorSongSettings().autoRepeatChorus) return sections
         // Whole sections repeat, not slides: a chorus broken across two slides is sung as two
         // slides each time round, so the unit here is the group and never the section list.
         val groups = slideGroupsOf(sections)

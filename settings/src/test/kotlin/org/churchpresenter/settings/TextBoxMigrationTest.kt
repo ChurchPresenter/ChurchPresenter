@@ -40,12 +40,20 @@ class TextBoxMigrationTest {
 
     private fun decode(raw: String): AppSettings = SettingsManager().migrateAndDecode(raw)
 
+    /**
+     * Where the document's Bible settings end up: on the profile that carried none of its own, which
+     * version 22 gives the document's copy before dropping it.
+     */
+    private fun AppSettings.documentBible(): BibleSettings =
+        projectionSettings.outputProfiles.first { it.id == "default" }.bibleSettings
+
     // ── Version 19: offsets become boxes ────────────────────────────────────────────────────────
 
     private fun v18(documentTranslation: String) = """
         {"settingsVersion":18,
          "bibleSettings":{"translations":[$documentTranslation]},
          "projectionSettings":{"outputProfiles":[
+           {"id":"default","name":"Default"},
            {"id":"lobby","name":"Lobby","bibleSettings":{"translations":[
              {"fileName":"rst.spb","lowerThirdReferenceOffset":{"xPercent":50,"yPercent":0}}]}}
          ]}}
@@ -54,7 +62,7 @@ class TextBoxMigrationTest {
     @Test
     fun `each offset becomes a box that is on and covers the frame`() {
         val translation = """{"fileName":"kjv.spb","textOffset":{"xPercent":50,"yPercent":100}}"""
-        val bible = decode(v18(translation)).bibleSettings
+        val bible = decode(v18(translation)).documentBible()
         val box = bible.textBoxes.boxAt(textBoxKey(BIBLE_TEXT_BOX, lowerThird = false, language = "kjv.spb"))
         assertTrue(box.enabled)
         assertEquals(0f, box.xPercent)
@@ -66,7 +74,7 @@ class TextBoxMigrationTest {
     fun `the old vertical percentage decides where in the box the text sits`() {
         fun verticalFor(y: Int): String {
             val translation = """{"fileName":"kjv.spb","textOffset":{"xPercent":50,"yPercent":$y}}"""
-            val bible = decode(v18(translation)).bibleSettings
+            val bible = decode(v18(translation)).documentBible()
             return bible.textBoxes.boxAt(textBoxKey(BIBLE_TEXT_BOX, false, "kjv.spb")).vertical
         }
         assertEquals(Constants.TOP, verticalFor(0))
@@ -77,7 +85,7 @@ class TextBoxMigrationTest {
     @Test
     fun `a page that had an offset measures its boxes inside the margins, as the offset was`() {
         val translation = """{"fileName":"kjv.spb","referenceOffset":{"xPercent":10,"yPercent":10}}"""
-        val bible = decode(v18(translation)).bibleSettings
+        val bible = decode(v18(translation)).documentBible()
         assertTrue(bible.textBoxOptions.insideMargins)
     }
 
@@ -93,7 +101,7 @@ class TextBoxMigrationTest {
 
     @Test
     fun `a page without offsets is left without boxes`() {
-        val bible = decode(v18("""{"fileName":"kjv.spb"}""")).bibleSettings
+        val bible = decode(v18("""{"fileName":"kjv.spb"}""")).documentBible()
         assertTrue(bible.textBoxes.isEmpty())
         assertFalse(bible.textBoxOptions.insideMargins)
     }
