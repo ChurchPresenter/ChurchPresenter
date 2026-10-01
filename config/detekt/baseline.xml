@@ -118,19 +118,6 @@
     <ID>MaxLineLength:AnnouncementsViewModel.kt$AnnouncementsViewModel$if (curMin &lt;= 0) { _timerMinutes.value = MAX_MINUTE; _timerHours.value -= 1 } else { _timerMinutes.value = curMin - 1 }</ID>
     <ID>MaxLineLength:AnnouncementsViewModel.kt$AnnouncementsViewModel$presenterManager.startAnnouncementSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)</ID>
     <ID>MaxLineLength:AnnouncementsViewModel.kt$AnnouncementsViewModel$val targetSec = _targetHour.value * SECONDS_PER_HOUR + _targetMinute.value * SECONDS_PER_MINUTE + _targetSecond.value</ID>
-    <ID>MaxLineLength:AtemSettingsTab.kt$label = if (atem.detectedDownstreamKeyers &gt; 0) "DSK (1–${atem.detectedDownstreamKeyers})" else "DSK"</ID>
-    <ID>MaxLineLength:AtemSettingsTab.kt$stringResource(Res.string.atem_capacity_mixed, banks.size, distinct.joinToString(" / "), fpsLabel)</ID>
-    <ID>MaxLineLength:AtemSettingsTab.kt$stringResource(Res.string.atem_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)</ID>
-    <ID>MaxLineLength:AtemSettingsTab.kt$stringResource(Res.string.atem_status_error, connectionError ?: "") to MaterialTheme.colorScheme.error</ID>
-    <ID>MaxLineLength:AtemSettingsTab.kt$val secs = String.format(java.util.Locale.US, "%.1f", frames / state.fps)</ID>
-    <ID>MaxLineLength:BackgroundSettingsTab.kt$Surface</ID>
-    <ID>MaxLineLength:BackgroundSettingsTab.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:BibleCatalogLicence.kt$Surface</ID>
-    <ID>MaxLineLength:BibleCatalogLicence.kt$Text(stringResource(Res.string.bible_catalog_license_title), style = MaterialTheme.typography.titleLarge)</ID>
-    <ID>MaxLineLength:BibleCatalogLicence.kt$style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold)</ID>
-    <ID>MaxLineLength:BibleCatalogLicence.kt$val badgeContainer = if (isRedistributable) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.errorContainer</ID>
-    <ID>MaxLineLength:BibleCatalogLicence.kt$val badgeContent = if (isRedistributable) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onErrorContainer</ID>
-    <ID>MaxLineLength:BibleCatalogModuleRow.kt$style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold)</ID>
     <ID>MaxLineLength:BibleEngineClient.kt$BibleEngineClient$else</ID>
     <ID>MaxLineLength:BibleEngineClient.kt$BibleEngineClient$val logDir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }</ID>
     <ID>MaxLineLength:BibleSourceProperties.kt$Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
@@ -151,20 +138,6 @@
     <ID>MaxLineLength:BrowserSourcePage.kt$val keyParam = if (needsKey) "?${Constants.QUERY_PARAM_API_KEY}=" + java.net.URLEncoder.encode(apiKey, "UTF-8") else ""</ID>
     <ID>MaxLineLength:BrowserSourceRoutes.kt$call.respondText(server.browserSourceOverlayPageHtml(displayIndex, output, bgOverride), ContentType.Text.Html)</ID>
     <ID>MaxLineLength:BrowserSourceVideoRenderer.kt$BrowserSourceVideoRenderer.Companion$val rect = if (forceFullFrame) DirtyRect(0, 0, width, height) else computeDirtyRect(intBuf, previous, width, height)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$.</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_legend_bible), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$Text(text, style = style, color = textColor, modifier = mod, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = align)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$color = if (statusIsSuccess) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$fun</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$pendingSongClear = PendingSongClear(SongKey(song.songbook, song.songNumber, song.title), song.title)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$val ok = withContext(Dispatchers.IO) { statisticsManager.exportCcliCsv(path.toFile(), f, t) }</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$val ok = withContext(Dispatchers.IO) { statisticsManager.exportFilteredXls(path.toFile(), f, t) }</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$withContext(Dispatchers.IO) { statisticsManager.clearSong(pendingSong.key, fromMs(), toMs()) }</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$withContext(Dispatchers.IO) { statisticsManager.clearVerse(pendingVerse.key, fromMs(), toMs()) }</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$drawLine(Color.Black.copy(alpha = 0.35f), Offset(x - 1.dp.toPx(), 0f), Offset(x - 1.dp.toPx(), size.height), strokeWidth = 1.dp.toPx())</ID>
     <ID>MaxLineLength:ColorPickerField.kt$.</ID>
@@ -203,16 +176,8 @@
     <ID>MaxLineLength:DeviceInfoReport.kt$DeviceInfoReport$val songFolders = try { fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory) } catch (_: Exception) { emptyList() }</ID>
     <ID>MaxLineLength:DictionaryViewModel.kt$DictionaryViewModel$(interlinearRepository.getBooksWithHebrewData() + interlinearRepository.getBooksWithGreekData()).sorted()</ID>
     <ID>MaxLineLength:DropdownSettingsField.kt$.</ID>
-    <ID>MaxLineLength:EditSongDialog.kt$Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.cancel), modifier = Modifier.size(14.dp))</ID>
-    <ID>MaxLineLength:EditSongDialog.kt$pushStyle(SpanStyle(color = ink, background = ink.copy(alpha = 0.16f), fontWeight = FontWeight.Bold))</ID>
-    <ID>MaxLineLength:EditSongDialog.kt$setPaneValue(insertSnippet(paneValue, ChordSheetImporter.convert(sheet), ownLine = false))</ID>
-    <ID>MaxLineLength:FileChooser.kt$FileChooser$*</ID>
-    <ID>MaxLineLength:FileChooser.kt$FileChooser$protected abstract suspend fun saveImpl(location: Path, suggestedName: String, filters: List&lt;FileNameExtensionFilter&gt;, title: String): Path?</ID>
-    <ID>MaxLineLength:FileChooser.kt$FileChooser$suspend</ID>
-    <ID>MaxLineLength:FileChooser.kt$FileChooser$val result = withContext(Dispatchers.IO) { saveImpl(initialLocation, suggestedName, filters, title) } ?: return null</ID>
     <ID>MaxLineLength:FileImagePicker.kt$text = if (imagePath.isEmpty()) stringResource(Res.string.no_image_selected) else imagePath.substringAfterLast('/').substringAfterLast('\\')</ID>
     <ID>MaxLineLength:FileImagePicker.kt$val path = if (imagePath.isNotEmpty()) Path(imagePath) else Path(System.getProperty(Constants.SystemProperties.USER_HOME))</ID>
-    <ID>MaxLineLength:FileKitFileChooser.kt$FileKitFileChooser$saveNative: suspend (baseName: String, defaultExtension: String?, allowed: Set&lt;String&gt;?, directory: PlatformFile) -&gt; File?</ID>
     <ID>MaxLineLength:FileVideoPicker.kt$filters = listOf(FileNameExtensionFilter(videoFilesFilterStr, "mp4", "mov", "avi", "mkv", "webm"))</ID>
     <ID>MaxLineLength:FileVideoPicker.kt$text = if (videoPath.isEmpty()) stringResource(Res.string.no_video_selected) else videoPath.substringAfterLast('/').substringAfterLast('\\')</ID>
     <ID>MaxLineLength:InfoAndSongRoutes.kt$val matchesSongbook = songbookFilter.isNullOrBlank() || s.songbook.equals(songbookFilter, ignoreCase = true)</ID>
@@ -224,12 +189,7 @@
     <ID>MaxLineLength:InstanceLinkClient.kt$InstanceLinkClient$private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) -&gt; Unit</ID>
     <ID>MaxLineLength:InstanceLinkClient.kt$InstanceLinkClient$sendCommand(Constants.WS_CMD_REMOVE_FROM_SCHEDULE, json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id)))</ID>
     <ID>MaxLineLength:InstanceLinkClient.kt$InstanceLinkClient$val</ID>
-    <ID>MaxLineLength:InstanceLinkDialog.kt$"ANNOUNCEMENTS" -&gt; state.announcementText?.take(SUMMARY_PREVIEW_CHARS) ?: stringResource(Res.string.obs_mode_announcements)</ID>
-    <ID>MaxLineLength:InstanceLinkDialog.kt$text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state))</ID>
-    <ID>MaxLineLength:InstanceLinkDialog.kt$var portText by remember(isVisible) { mutableStateOf(if (settings.primaryPort &gt; 0) settings.primaryPort.toString() else "") }</ID>
     <ID>MaxLineLength:InstanceLinkViewModel.kt$InstanceLinkViewModel$fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1)</ID>
-    <ID>MaxLineLength:KeyboardShortcutsDialog.kt$stringResource(Res.string.shortcut_key_right_click) to stringResource(Res.string.shortcut_description_context_menu)</ID>
-    <ID>MaxLineLength:KeyboardShortcutsDialog.kt$stringResource(Res.string.shortcut_key_shift_drag) to stringResource(Res.string.shortcut_description_reorder_item)</ID>
     <ID>MaxLineLength:LivePreviewPanel.kt$Crossfade</ID>
     <ID>MaxLineLength:LivePreviewPanel.kt$MediaPresenter(modifier = Modifier.fillMaxSize(), transitionAlpha = mediaTransitionAlpha)</ID>
     <ID>MaxLineLength:LivePreviewPanel.kt$QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)</ID>
@@ -240,11 +200,8 @@
     <ID>MaxLineLength:LottieRenderCache.kt$LottieRenderCache$System.err.println("[LottieRenderCache] WARNING: all frames of $key are uniform — captures may be blank")</ID>
     <ID>MaxLineLength:LowerThirdAndAtemRoutes.kt$"""{"error":${server.atem.jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""</ID>
     <ID>MaxLineLength:LowerThirdSequencer.kt$LowerThirdSequencer$onShow.emit(ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs, name = name))</ID>
-    <ID>MaxLineLength:MediaSettingsTab.kt$trailingLabel = "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}"</ID>
     <ID>MaxLineLength:MediaViewModel.kt$MediaViewModel$fun markFinished()</ID>
     <ID>MaxLineLength:NavigationTopBar.kt$Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))</ID>
-    <ID>MaxLineLength:OBSSettingsTab.kt$"${stringResource(Res.string.obs_status_error)}: $errorMessage" to MaterialTheme.colorScheme.error</ID>
-    <ID>MaxLineLength:OBSSettingsTab.kt$stringResource(Res.string.obs_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)</ID>
     <ID>MaxLineLength:OBSWebSocketManager.kt$OBSWebSocketManager$check(identified["op"]?.jsonPrimitive?.int == 2) { "Authentication failed — check your OBS password" }</ID>
     <ID>MaxLineLength:ObsSceneWiring.kt$LaunchedEffect</ID>
     <ID>MaxLineLength:OffscreenOutputContent.kt$QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)</ID>
@@ -253,18 +210,6 @@
     <ID>MaxLineLength:PicturePresenter.kt$Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(pictureKeyAlpha(animationType, transitionAlpha)))</ID>
     <ID>MaxLineLength:PicturePresenter.kt$Box</ID>
     <ID>MaxLineLength:PicturesViewModel.kt$PicturesViewModel$val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$.</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label, tint = MaterialTheme.semantic.warning)</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$PlanItemTypeIcon(Icons.Filled.PlayCircle, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$PlanItemTypeIcon(if (hasScripture) Icons.Filled.MenuBook else Icons.Filled.Campaign)</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$Text(stringResource(Res.string.planning_center_disconnect), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$color = if (supported) Color.Unspecified else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -&gt; Unit</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$onAddMedia(imported.mediaUrl, pco.title.ifBlank { imported.mediaTitle }, "local")</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$return ext in IMAGE_EXTENSIONS || ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS || ext in PRESENTATION_EXTENSIONS</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$stringResource(Res.string.planning_center_import_file_count, fileCount)</ID>
-    <ID>MaxLineLength:PlanningCenterImportDialog.kt$stringResource(Res.string.planning_center_status_connected, settings.connectedPersonName.ifBlank { "?" })</ID>
     <ID>MaxLineLength:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel$?.</ID>
     <ID>MaxLineLength:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel$suspend</ID>
     <ID>MaxLineLength:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel$val combinedText = listOf(pco.title, pco.description).filter { it.isNotBlank() }.joinToString("\n")</ID>
@@ -277,19 +222,6 @@
     <ID>MaxLineLength:PresentationPresenter.kt$clipRect(0f, h * (CENTER_FRACTION - p / 2f), w, h * (CENTER_FRACTION + p / 2f)) { drawLayerGroup(frame, frame.layers) }</ID>
     <ID>MaxLineLength:PresentationPresenter.kt$clipRect(reveal[0], reveal[1], reveal[REVEAL_RIGHT], reveal[REVEAL_BOTTOM]) { drawLayerGroup(frame, frame.layers) }</ID>
     <ID>MaxLineLength:PresentationPresenter.kt$clipRect(w * (CENTER_FRACTION - p / 2f), 0f, w * (CENTER_FRACTION + p / 2f), h) { drawLayerGroup(frame, frame.layers) }</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), contentColor = MaterialTheme.colorScheme.primary)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$Row</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$Text(stringResource(Res.string.presentation_remote_copy_url), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$colors</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$else</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled))</ID>
-    <ID>MaxLineLength:PresentationRemoteDialog.kt$val qrUrl = if (apiKeyEnabled &amp;&amp; apiKey.isNotBlank()) "$qrDisplayUrl?password=$apiKey" else qrDisplayUrl</ID>
     <ID>MaxLineLength:PresentationRemoteRoutes.kt$"""{"enabled":${server.presentationRemoteEnabled},"id":"${server._currentPresentationId}","index":${server._currentSlideIndex},"total":${server._currentSlideTotalCount},"frozen":${server._presentationFrozen},"isPlaying":${server._presentationIsPlaying},"isLive":${server._presentationIsLive},"autoScrollInterval":${server._autoScrollInterval},"looping":${server._presentationIsLooping},"passwordRequired":${server.presentationRemotePassword.isNotEmpty()},"notes":"${jsonEscape(note)}"}"""</ID>
     <ID>MaxLineLength:PresentationRemoteRoutes.kt$val note = _presentationNotes[server._currentPresentationId]?.getOrNull(server._currentSlideIndex) ?: ""</ID>
     <ID>MaxLineLength:PresentationViewModel.kt$PresentationViewModel$val</ID>
@@ -299,37 +231,6 @@
     <ID>MaxLineLength:PresenterOutputContent.kt$Crossfade</ID>
     <ID>MaxLineLength:PresenterWindows.kt$Crossfade</ID>
     <ID>MaxLineLength:PresenterWindows.kt$val</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$Box</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$Column</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$Text(stringResource(Res.string.browser_source_confirm_remove_message, stringResource(Res.string.browser_source_output_label, i + 1)))</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$Text(stringResource(Res.string.copy_url_black_bg), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$Text(stringResource(Res.string.copy_url_transparent), style = MaterialTheme.typography.labelSmall)</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above)</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount)</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) } }</ID>
-    <ID>MaxLineLength:ProjectionBrowserSourceCard.kt$val overlayUrl = if (serverUrl.isNotBlank()) "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/${i + 1}" else null</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$Box</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$boundsX = screen.boundsX</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$j != i &amp;&amp; other.targetType == "decklink" &amp;&amp; other.targetDisplay == option.targetDisplay</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$j != i &amp;&amp; otherLatest.keyTargetType == "decklink" &amp;&amp; otherLatest.keyTargetDisplay == option.targetDisplay</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$keyTargetBoundsX = Int.MIN_VALUE</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$keyTargetDisplay = Constants.KEY_TARGET_NONE</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$label = "Display $keyDisplayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})"</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$other.targetBoundsW == option.boundsW</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$other.targetBoundsX == option.boundsX</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$otherLatest.keyTargetBoundsW == option.boundsW</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$otherLatest.keyTargetBoundsX == option.boundsX</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$otherLatest.keyTargetType == "decklink" &amp;&amp; otherLatest.keyTargetDisplay == option.targetDisplay</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$self.targetBoundsX == option.boundsX</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$targetBoundsX = Int.MIN_VALUE</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_decklink_io_conflict_tooltip)) } }</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$val opts = mutableListOf(KeyOutputOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))</ID>
-    <ID>MaxLineLength:ProjectionScreenAssignmentCard.kt$val</ID>
-    <ID>MaxLineLength:ProjectionSettingsTab.kt$label = "Display $displayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})"</ID>
-    <ID>MaxLineLength:ProjectionSettingsTab.kt$s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))</ID>
-    <ID>MaxLineLength:ProjectionSettingsTab.kt$text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install)</ID>
     <ID>MaxLineLength:QaRoutes.kt$"""{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":${server.qaCooldownSeconds},"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}"""</ID>
     <ID>MaxLineLength:QaRoutes.kt$call.respond(HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")</ID>
     <ID>MaxLineLength:QaRoutes.kt$if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }</ID>
@@ -339,15 +240,7 @@
     <ID>MaxLineLength:QaRoutes.kt$val pending = CompanionServer.PendingQAAdminRequest(action = "done", questionId = id, text = question?.text ?: "", clientId = clientId)</ID>
     <ID>MaxLineLength:QaRoutes.kt$val question = qa.submitQuestion(request.text, request.name, clientIp, server.qaCooldownSeconds, deviceId)</ID>
     <ID>MaxLineLength:QaRoutes.kt$val textEsc = dto.text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")</ID>
-    <ID>MaxLineLength:RemoteActivityToast.kt$isInstanceLinkFollower = current.clientId.isNotBlank() &amp;&amp; current.clientId in connectedInstanceLinkFollowers</ID>
     <ID>MaxLineLength:RemoteCommandEffects.kt$onSettingsChange { s -&gt; s.copy(presentationSettings = s.presentationSettings.copy(isLooping = presentationViewModel.isLooping)) }</ID>
-    <ID>MaxLineLength:RemoteEventDialog.kt$RemoteEventPresentation$*</ID>
-    <ID>MaxLineLength:RemoteEventDialog.kt$style = MaterialTheme.typography.labelSmall</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onCheckedChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } }</ID>
-    <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { v -&gt; v.toIntOrNull()?.let { p -&gt; onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } }</ID>
     <ID>MaxLineLength:SceneCanvas.kt$PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)</ID>
     <ID>MaxLineLength:SceneCanvas.kt$PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY)</ID>
     <ID>MaxLineLength:SceneCanvas.kt$val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX).coerceAtLeast(0.01f)</ID>
@@ -412,7 +305,6 @@
     <ID>MaxLineLength:VerseSequenceLog.kt$VerseSequenceLog$.</ID>
     <ID>MaxLineLength:VideoPlayer.kt$JfxInit$Thread.currentThread().uncaughtExceptionHandler</ID>
     <ID>MaxLineLength:WebsitePresenter.kt$&lt;no name provided&gt;.&lt;no name provided&gt;$override</ID>
-    <ID>MaxLineLength:XdgFileChooser.kt$XdgFileChooser$openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)</ID>
     <ID>TooGenericExceptionCaught:AtemBridge.kt$AtemBridge$e: Exception</ID>
     <ID>TooGenericExceptionCaught:AtemSettingsTab.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:BackgroundSettingsTab.kt$e: Exception</ID>

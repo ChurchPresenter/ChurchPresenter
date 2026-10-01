@@ -235,8 +235,10 @@ internal fun KeyboardShortcutsDialogContent(
     // resolved text.
     val mouseRows = listOf(
         stringResource(Res.string.shortcut_key_double_click) to stringResource(Res.string.shortcut_description_go_live),
-        stringResource(Res.string.shortcut_key_right_click) to stringResource(Res.string.shortcut_description_context_menu),
-        stringResource(Res.string.shortcut_key_shift_drag) to stringResource(Res.string.shortcut_description_reorder_item),
+        stringResource(Res.string.shortcut_key_right_click) to
+            stringResource(Res.string.shortcut_description_context_menu),
+        stringResource(Res.string.shortcut_key_shift_drag) to
+            stringResource(Res.string.shortcut_description_reorder_item),
     )
 
     val searching = query.isNotBlank() || pressed != null

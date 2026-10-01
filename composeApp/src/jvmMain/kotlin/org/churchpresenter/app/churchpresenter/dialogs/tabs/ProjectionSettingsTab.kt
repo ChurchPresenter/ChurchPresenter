@@ -542,7 +542,9 @@ private fun AudioDeviceRow(
                             onClick = {
                                 expanded = false
                                 onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))
+                                    s.copy(
+                                        projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id)
+                                    )
                                 }
                             }
                         )
@@ -569,7 +571,11 @@ private fun AudioDeviceRow(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install),
+                    text = if (isVlcLoadFailed) {
+                        stringResource(Res.string.media_vlc_load_failed)
+                    } else {
+                        stringResource(Res.string.media_vlc_install)
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

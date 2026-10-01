@@ -133,7 +133,8 @@ fun PlanningCenterImportDialog(
     onAddPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit,
     onAddMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit,
     onAddAnnouncement: (text: String) -> Unit,
-    onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit,
+    onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String,
+        verseRange: String, bookId: Int) -> Unit,
     onConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit,
     onDisconnect: () -> Unit
 ) {
@@ -354,7 +355,8 @@ internal fun PlanningCenterImportDialogContent(
     onAddPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit,
     onAddMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit,
     onAddAnnouncement: (text: String) -> Unit,
-    onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit,
+    onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String,
+        verseRange: String, bookId: Int) -> Unit,
     onAddSongRequested: (pco: PlanningCenterClient.PlanItem, prefill: SongItem) -> Unit
 ) {
     var isFetchingArrangement by remember { mutableStateOf<String?>(null) }
@@ -395,7 +397,10 @@ internal fun PlanningCenterImportDialogContent(
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    stringResource(Res.string.planning_center_status_connected, settings.connectedPersonName.ifBlank { "?" }),
+                    stringResource(
+                        Res.string.planning_center_status_connected,
+                        settings.connectedPersonName.ifBlank { "?" }
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.semantic.success
                 )
@@ -406,7 +411,10 @@ internal fun PlanningCenterImportDialogContent(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                     modifier = Modifier.height(32.dp)
                 ) {
-                    Text(stringResource(Res.string.planning_center_disconnect), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(Res.string.planning_center_disconnect),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
 
@@ -496,7 +504,9 @@ internal fun PlanningCenterImportDialogContent(
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth()
-                                        .then(if (isExpandable) Modifier.clickable { expanded = !expanded } else Modifier),
+                                        .then(
+                                            if (isExpandable) Modifier.clickable { expanded = !expanded } else Modifier
+                                        ),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
@@ -512,7 +522,10 @@ internal fun PlanningCenterImportDialogContent(
                                             if (entry.matchedSongId != null) {
                                                 MatchedTag()
                                             } else if (isFetchingArrangement == pco.id) {
-                                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    strokeWidth = 2.dp
+                                                )
                                             } else {
                                                 RaisedButton(
                                                     shape = AppShape(8.dp),
@@ -547,7 +560,10 @@ internal fun PlanningCenterImportDialogContent(
                                                 checked = entry.selected,
                                                 onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                             )
-                                            PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label, tint = MaterialTheme.semantic.warning)
+                                            PlanItemTypeIcon(
+                                                Icons.AutoMirrored.Filled.Label,
+                                                tint = MaterialTheme.semantic.warning
+                                            )
                                             Text(
                                                 pco.title,
                                                 style = MaterialTheme.typography.titleSmall,
@@ -567,7 +583,10 @@ internal fun PlanningCenterImportDialogContent(
                                             // minimumInteractiveComponentSize footprint as the
                                             // interactive rows so the checkbox stays aligned.
                                             RaisedCheckbox(checked = false, enabled = false, onCheckedChange = {})
-                                            PlanItemTypeIcon(Icons.Filled.PlayCircle, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                                            PlanItemTypeIcon(
+                                                Icons.Filled.PlayCircle,
+                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                            )
                                             Text(
                                                 pco.title,
                                                 modifier = Modifier.weight(1f),
@@ -589,7 +608,9 @@ internal fun PlanningCenterImportDialogContent(
                                             } else {
                                                 Spacer(Modifier.width(40.dp))
                                             }
-                                            PlanItemTypeIcon(if (hasScripture) Icons.Filled.MenuBook else Icons.Filled.Campaign)
+                                            PlanItemTypeIcon(
+                                                if (hasScripture) Icons.Filled.MenuBook else Icons.Filled.Campaign
+                                            )
                                             Text(
                                                 pco.title,
                                                 modifier = Modifier.weight(1f),
@@ -601,19 +622,31 @@ internal fun PlanningCenterImportDialogContent(
                                             val attachmentsLoaded = viewModel.attachmentsByItemId.containsKey(pco.id)
                                             val fileCount = viewModel.attachmentsByItemId[pco.id]?.size ?: 0
                                             if (!attachmentsLoaded) {
-                                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    strokeWidth = 2.dp
+                                                )
                                             } else if (fileCount > 0) {
                                                 // Plain badge — the whole row is the click target
                                                 // for expand/collapse (see isExpandable above).
                                                 Box(
                                                     modifier = Modifier
                                                         .clip(AppShape(PILL_CORNER_PERCENT))
-                                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), AppShape(PILL_CORNER_PERCENT))
+                                                        .background(
+                                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                                        )
+                                                        .border(
+                                                            1.dp,
+                                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                                            AppShape(PILL_CORNER_PERCENT)
+                                                        )
                                                         .padding(horizontal = 12.dp, vertical = 5.dp)
                                                 ) {
                                                     Text(
-                                                        stringResource(Res.string.planning_center_import_file_count, fileCount),
+                                                        stringResource(
+                                                            Res.string.planning_center_import_file_count,
+                                                            fileCount
+                                                        ),
                                                         style = MaterialTheme.typography.labelMedium,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
@@ -663,7 +696,11 @@ internal fun PlanningCenterImportDialogContent(
                                             Text(
                                                 att.filename,
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = if (supported) Color.Unspecified else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                                color = if (supported) {
+                                                    Color.Unspecified
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                                },
                                                 textDecoration = if (supported) null else TextDecoration.LineThrough
                                             )
                                         }
@@ -745,7 +782,9 @@ internal fun PlanningCenterImportDialogContent(
                                         val scriptures = viewModel.detectedScripturesByItemId[pco.id].orEmpty()
                                         val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
                                         val hasSelectedAttachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
-                                            .any { it.id in selectedAttachmentIds && isSupportedAttachment(it.filename) }
+                                            .any {
+                                                it.id in selectedAttachmentIds && isSupportedAttachment(it.filename)
+                                            }
                                         if (scriptures.isNotEmpty()) {
                                             val selectedIdx = viewModel.selectedScriptureIndices[pco.id].orEmpty()
                                             scriptures.forEachIndexed { index, verse ->
@@ -800,7 +839,11 @@ internal fun PlanningCenterImportDialogContent(
                                                 pictureCount++
                                             }
                                             is PlanningCenterImportViewModel.ImportedMedia.Media ->
-                                                onAddMedia(imported.mediaUrl, pco.title.ifBlank { imported.mediaTitle }, "local")
+                                                onAddMedia(
+                                                    imported.mediaUrl,
+                                                    pco.title.ifBlank { imported.mediaTitle },
+                                                    "local"
+                                                )
                                             null -> {}
                                         }
                                     }
@@ -838,7 +881,8 @@ private val PRESENTATION_EXTENSIONS = setOf("ppt", "pptx", "key", "pdf")
 /** Mirrors [PlanningCenterImportViewModel.importAttachment]'s extension classification. */
 private fun isSupportedAttachment(filename: String): Boolean {
     val ext = filename.substringAfterLast('.', "").lowercase()
-    return ext in IMAGE_EXTENSIONS || ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS || ext in PRESENTATION_EXTENSIONS
+    return ext in IMAGE_EXTENSIONS || ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS ||
+        ext in PRESENTATION_EXTENSIONS
 }
 
 /** Material icon for the file kind an attachment will become. */

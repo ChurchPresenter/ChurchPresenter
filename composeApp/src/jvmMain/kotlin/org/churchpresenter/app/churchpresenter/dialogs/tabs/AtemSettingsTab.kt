@@ -245,7 +245,11 @@ fun AtemSettingsTab(
                                         if (state.clipMaxFrames.isNotEmpty()) {
                                             val capacity = state.clipMaxFrames.distinct()
                                                 .joinToString("/") { frames ->
-                                                    val secs = String.format(java.util.Locale.US, "%.1f", frames / state.fps)
+                                                    val secs = String.format(
+                                                        java.util.Locale.US,
+                                                        "%.1f",
+                                                        frames / state.fps
+                                                    )
                                                     "$frames frames (≈${secs}s)"
                                                 }
                                             append(" — ${state.clipSlots.size} clips × up to $capacity")
@@ -299,9 +303,11 @@ fun AtemSettingsTab(
                         connectionStatus == "connected" ->
                             stringResource(Res.string.atem_status_connected) to MaterialTheme.semantic.success
                         connectionStatus == "error" ->
-                            stringResource(Res.string.atem_status_error, connectionError ?: "") to MaterialTheme.colorScheme.error
+                            stringResource(Res.string.atem_status_error, connectionError ?: "") to
+                                MaterialTheme.colorScheme.error
                         else ->
-                            stringResource(Res.string.atem_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            stringResource(Res.string.atem_status_disconnected) to
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     }
                     if (connectionStatus != null || isTesting) {
                         Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
@@ -374,7 +380,12 @@ fun AtemSettingsTab(
                         val secs = String.format(java.util.Locale.US, "%.1f", distinct[0] / atem.clipFps)
                         stringResource(Res.string.atem_capacity_equal, banks.size, distinct[0], secs, fpsLabel)
                     } else {
-                        stringResource(Res.string.atem_capacity_mixed, banks.size, distinct.joinToString(" / "), fpsLabel)
+                        stringResource(
+                            Res.string.atem_capacity_mixed,
+                            banks.size,
+                            distinct.joinToString(" / "),
+                            fpsLabel
+                        )
                     }
                     val suffix = if (atem.detectedUnassignedFrames > 0) {
                         stringResource(Res.string.atem_capacity_unassigned, atem.detectedUnassignedFrames)
@@ -410,7 +421,11 @@ fun AtemSettingsTab(
                                 dskText = v
                                 v.toIntOrNull()?.let { update { copy(dskIndex = (it - 1).coerceAtLeast(0)) } }
                             },
-                            label = if (atem.detectedDownstreamKeyers > 0) "DSK (1–${atem.detectedDownstreamKeyers})" else "DSK",
+                            label = if (atem.detectedDownstreamKeyers > 0) {
+                                "DSK (1–${atem.detectedDownstreamKeyers})"
+                            } else {
+                                "DSK"
+                            },
                             isError = atem.detectedDownstreamKeyers > 0 &&
                                 dskText.toIntOrNull()?.let { it !in 1..atem.detectedDownstreamKeyers } != false,
                             singleLine = true,
