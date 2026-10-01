@@ -145,8 +145,8 @@ internal fun ColumnScope.BibleBrowserPane(
                 val crossRefReserve = if (crossRefsDocked) crossRefWidthPx + with(density) { 8.dp.toPx() } else 0f
                 // The most the live pane can take, leaving the verse card its minimum. It depends only on
                 // the space around the pane, so it holds still while the pane itself is dragged.
-                val maxSplitWidth =
-                    (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
+                val verseCardMinPx = with(density) { (100.dp + 6.dp).toPx() }
+                val maxSplitWidth = (constraints.maxWidth - crossRefReserve - verseCardMinPx).coerceAtLeast(0f)
                 val effectiveSplitWidth = if (isSplitActive) splitWidthPx.coerceAtMost(maxSplitWidth) else 0f
                 Row(modifier = Modifier.fillMaxSize()) {
 
@@ -194,7 +194,9 @@ internal fun ColumnScope.BibleBrowserPane(
                                     .coerceAtMost(maxSplitWidth)
                             }
                         }
-                        Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
+                        Column(
+                            modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()
+                        ) {
                             LiveChapterPanel(
                                 verses = liveChapterVerses,
                                 liveVerseNumbers = liveVerseNumbers,
@@ -315,17 +317,38 @@ private fun VerseCard(
             ) {
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.copy_verse)) },
-                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_copy),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     onClick = { onCopyVerse(); showVerseContextMenu = false }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.add_to_schedule)) },
-                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_playlist_add),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    },
                     onClick = { onAddToSchedule(); showVerseContextMenu = false }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.go_live)) },
-                    leadingIcon = { Icon(imageVector = Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Tv,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     onClick = { onVerseDoubleClicked(); showVerseContextMenu = false }
                 )
             }

@@ -150,7 +150,10 @@ internal fun PresenterOutputContent(
                         outputSettings.bibleSettings, outputSettings.songSettings, effectiveMode, prevEffectiveMode,
                     )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode ->
                             PresenterModeContent(
                                 mode = mode,
                                 profile = profile,

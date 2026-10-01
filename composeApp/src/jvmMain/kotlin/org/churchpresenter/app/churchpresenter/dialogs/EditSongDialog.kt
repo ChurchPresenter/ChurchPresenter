@@ -720,7 +720,9 @@ internal fun EditSongContent(
                             value = paneValue,
                             onValueChange = { setPaneValue(it) },
                             onPasteChordSheet = { sheet ->
-                                setPaneValue(insertSnippet(paneValue, ChordSheetImporter.convert(sheet), ownLine = false))
+                                setPaneValue(
+                                    insertSnippet(paneValue, ChordSheetImporter.convert(sheet), ownLine = false)
+                                )
                             },
                             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 14.dp),
                             placeholder = {
@@ -1035,7 +1037,11 @@ private fun RowScope.SongbookCard(
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
                     modifier = Modifier.size(20.dp),
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.cancel), modifier = Modifier.size(14.dp))
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(Res.string.cancel),
+                        modifier = Modifier.size(14.dp)
+                    )
                 }
             }
         }
@@ -1253,7 +1259,9 @@ private fun rememberLyricsHighlight(): VisualTransformation {
                         } else {
                             verse
                         }
-                        pushStyle(SpanStyle(color = ink, background = ink.copy(alpha = 0.16f), fontWeight = FontWeight.Bold))
+                        pushStyle(
+                            SpanStyle(color = ink, background = ink.copy(alpha = 0.16f), fontWeight = FontWeight.Bold)
+                        )
                         append(line)
                         pop()
                     } else {

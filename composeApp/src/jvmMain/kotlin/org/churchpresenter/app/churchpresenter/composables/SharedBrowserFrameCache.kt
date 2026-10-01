@@ -142,7 +142,8 @@ object SharedBrowserFrameCache {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
                         put(
                             "expression",
-                            "document.documentElement.style.background='transparent';document.body.style.background='transparent';"
+                            "document.documentElement.style.background='transparent';" +
+                                "document.body.style.background='transparent';"
                         )
                     })
                 } else {
@@ -187,7 +188,8 @@ object SharedBrowserFrameCache {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
                         put(
                             "expression",
-                            "document.documentElement.style.background='transparent';document.body.style.background='transparent';"
+                            "document.documentElement.style.background='transparent';" +
+                                "document.body.style.background='transparent';"
                         )
                     })
                 }
@@ -195,7 +197,8 @@ object SharedBrowserFrameCache {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
                         put(
                             "expression",
-                            "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
+                            "var s=document.createElement('style');" +
+                                "s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
                         )
                     })
                 }
@@ -468,7 +471,8 @@ object SharedBrowserFrameCache {
             cdp.sendAsync("Runtime.evaluate", buildJsonObject {
                 put(
                     "expression",
-                    "document.documentElement.style.background='transparent';document.body.style.background='transparent';"
+                    "document.documentElement.style.background='transparent';" +
+                        "document.body.style.background='transparent';"
                 )
             })
         }
@@ -476,7 +480,8 @@ object SharedBrowserFrameCache {
             cdp.sendAsync("Runtime.evaluate", buildJsonObject {
                 put(
                     "expression",
-                    "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
+                    "var s=document.createElement('style');" +
+                        "s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
                 )
             })
         }

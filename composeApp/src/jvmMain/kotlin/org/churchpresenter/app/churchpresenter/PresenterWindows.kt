@@ -123,7 +123,11 @@ internal fun PresenterWindows(
         trigger = lottieTrigger,
     )
 
-    val presenterOutputContent: @Composable (screenAssignment: ScreenAssignment, effectiveMode: Presenting, screenNumber: Int?) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
+    val presenterOutputContent: @Composable (
+        screenAssignment: ScreenAssignment,
+        effectiveMode: Presenting,
+        screenNumber: Int?
+    ) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
         PresenterOutputContent(
             screenAssignment, effectiveMode, screenNumber, presenterManager, appSettings,
             mediaViewModel, sttManager, serverUrl, qaDisplayUrl, identifyingScreen,
@@ -252,7 +256,10 @@ internal fun PresenterWindows(
                             outputSettings.bibleSettings, outputSettings.songSettings, effectiveMode, prevEffectiveMode,
                         )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             profile = profile,
@@ -321,7 +328,14 @@ internal fun PresenterWindows(
                                             effectiveMode, prevEffectiveMode,
                                         )
                                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                                        Crossfade(
+                                            targetState = effectiveMode,
+                                            animationSpec = if (screenCrossfadeActive) {
+                                                tween(modeCrossfadeDuration)
+                                            } else {
+                                                snap()
+                                            }
+                                        ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             profile = profile,
@@ -467,7 +481,14 @@ internal fun PresenterWindows(
                                         effectiveMode, prevEffectiveMode,
                                     )
                                     if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                                    Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                                    Crossfade(
+                                        targetState = effectiveMode,
+                                        animationSpec = if (screenCrossfadeActive) {
+                                            tween(modeCrossfadeDuration)
+                                        } else {
+                                            snap()
+                                        }
+                                    ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             profile = profile,
@@ -505,7 +526,10 @@ internal fun PresenterWindows(
                             outputSettings.bibleSettings, outputSettings.songSettings, effectiveMode, prevEffectiveMode,
                         )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             profile = profile,

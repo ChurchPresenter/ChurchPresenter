@@ -275,7 +275,8 @@ object StockMediaClient {
                     val parsed = json.decodeFromString(PixabayVideoResponse.serializer(), body)
                     SearchOutcome.Success(
                         items = parsed.hits.mapNotNull { video ->
-                            val file = video.videos.medium ?: video.videos.small ?: video.videos.large ?: video.videos.tiny
+                            val file = video.videos.medium ?: video.videos.small ?: video.videos.large
+                                ?: video.videos.tiny
                             file?.let {
                                 StockMediaItem(
                                     id = video.id.toString(),
@@ -294,7 +295,10 @@ object StockMediaClient {
     }
 
     /** Fetches raw bytes for a thumbnail preview; returns null on any failure. */
-    suspend fun fetchThumbnailBytes(url: String, http: HttpClient = defaultHttp): ByteArray? = withContext(Dispatchers.IO) {
+    suspend fun fetchThumbnailBytes(
+        url: String,
+        http: HttpClient = defaultHttp
+    ): ByteArray? = withContext(Dispatchers.IO) {
         try {
             val response = http.get(url)
             if (response.status.value in 200..299) response.body() else null

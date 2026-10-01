@@ -17,7 +17,8 @@ abstract class FileChooser {
      * Opens a file chooser dialog allowing the user to select a single file or directory.
      *
      * @param path The initial directory to open in the file chooser. If null, the user's home directory will be used.
-     * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied. Ignored if [selectDirectory] is true.
+     * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied.
+     *   Ignored if [selectDirectory] is true.
      * @param title The title of the file chooser dialog.
      * @param selectDirectory If true, the dialog will allow selecting directories instead of files.
      * @return The path of the selected file or directory, or null if the user canceled the dialog.
@@ -37,8 +38,10 @@ abstract class FileChooser {
     /**
      * Opens a file chooser dialog allowing the user to select multiple files or directories.
      *
-     * @param path The initial directory to open in the file chooser. If null, the user's home directory will be used as the initial path.
-     * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied. Ignored if [selectDirectory] is true.
+     * @param path The initial directory to open in the file chooser. If null, the user's home directory will be used as
+     *   the initial path.
+     * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied.
+     *   Ignored if [selectDirectory] is true.
      * @param title The title of the file chooser dialog.
      * @param selectDirectory If true, the dialog will allow selecting directories instead of files.
      * @return A list of paths of the selected files or directories, or null if the user canceled the dialog.
@@ -54,7 +57,8 @@ abstract class FileChooser {
 
     /**
      * Opens a file chooser dialog allowing the user to select a location and name for saving a file.
-     * @param location The initial directory to open in the file chooser. If null, the user's home directory will be used as the initial path.
+     * @param location The initial directory to open in the file chooser. If null, the user's home directory will be
+     *   used as the initial path.
      * @param suggestedName A suggested file name to pre-fill in the dialog.
      * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied.
      * @param title The title of the file chooser dialog.
@@ -64,7 +68,12 @@ abstract class FileChooser {
      * one of the filter extensions — appended if the dialog dropped it, collapsed if it added a
      * second.
      */
-    suspend fun save(location: Path?, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path? {
+    suspend fun save(
+        location: Path?,
+        suggestedName: String,
+        filters: List<FileNameExtensionFilter>,
+        title: String
+    ): Path? {
         val initialLocation = location ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
         val extensions = filters.flatMap { it.extensions.toList() }
         val offered = baseName(suggestedName, extensions)
@@ -106,7 +115,12 @@ abstract class FileChooser {
         return if (extensions.any { out.endsWith(".$it", ignoreCase = true) }) out else "$out.${extensions.first()}"
     }
 
-    protected abstract suspend fun saveImpl(location: Path, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path?
+    protected abstract suspend fun saveImpl(
+        location: Path,
+        suggestedName: String,
+        filters: List<FileNameExtensionFilter>,
+        title: String
+    ): Path?
 
     private suspend fun choose(
         path: Path?,

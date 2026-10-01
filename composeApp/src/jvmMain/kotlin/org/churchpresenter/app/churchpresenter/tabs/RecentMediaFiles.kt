@@ -41,8 +41,22 @@ internal object RecentMediaFiles {
     }
 
     internal fun load() {
-        try { if (file.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(file.readText()); paths.clear(); paths.addAll(list.take(MAX)) } } catch (_: Exception) {}
-        try { if (pinnedFile.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(pinnedFile.readText()); pinned.clear(); pinned.addAll(list) } } catch (_: Exception) {}
+        try {
+            if (file.exists()) {
+                val json = Json { ignoreUnknownKeys = true }
+                val list = json.decodeFromString<List<String>>(file.readText())
+                paths.clear()
+                paths.addAll(list.take(MAX))
+            }
+        } catch (_: Exception) {}
+        try {
+            if (pinnedFile.exists()) {
+                val json = Json { ignoreUnknownKeys = true }
+                val list = json.decodeFromString<List<String>>(pinnedFile.readText())
+                pinned.clear()
+                pinned.addAll(list)
+            }
+        } catch (_: Exception) {}
     }
 
     private fun save() {

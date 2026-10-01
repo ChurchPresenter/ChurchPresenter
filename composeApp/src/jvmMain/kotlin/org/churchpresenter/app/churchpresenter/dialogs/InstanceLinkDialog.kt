@@ -173,7 +173,9 @@ internal fun InstanceLinkDialogContent(
     onDismiss: () -> Unit
 ) {
     var host by remember(isVisible) { mutableStateOf(settings.primaryHost) }
-    var portText by remember(isVisible) { mutableStateOf(if (settings.primaryPort > 0) settings.primaryPort.toString() else "") }
+    var portText by remember(isVisible) {
+        mutableStateOf(if (settings.primaryPort > 0) settings.primaryPort.toString() else "")
+    }
     var apiKey by remember(isVisible) { mutableStateOf(settings.apiKey) }
     var autoConnect by remember(isVisible) { mutableStateOf(settings.autoConnect) }
     var reconnectDelayText by remember(isVisible) { mutableStateOf(settings.reconnectDelayMs.toString()) }
@@ -259,7 +261,10 @@ internal fun InstanceLinkDialogContent(
                             }
                             remoteLiveState?.let { state ->
                                 Text(
-                                    text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state)),
+                                    text = stringResource(
+                                        Res.string.instance_link_last_received,
+                                        liveStateSummary(state)
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -484,7 +489,8 @@ internal fun liveStateSummary(state: LiveStateDto): String = when (state.content
     "PICTURES" -> stringResource(Res.string.obs_mode_pictures)
     "PRESENTATION" -> stringResource(Res.string.presentation)
     "MEDIA" -> state.mediaUrl?.substringAfterLast('/') ?: stringResource(Res.string.obs_mode_media)
-    "ANNOUNCEMENTS" -> state.announcementText?.take(SUMMARY_PREVIEW_CHARS) ?: stringResource(Res.string.obs_mode_announcements)
+    "ANNOUNCEMENTS" ->
+        state.announcementText?.take(SUMMARY_PREVIEW_CHARS) ?: stringResource(Res.string.obs_mode_announcements)
     "WEBSITE" -> state.websiteTitle ?: state.websiteUrl ?: stringResource(Res.string.obs_mode_website)
     "CANVAS" -> state.sceneName ?: stringResource(Res.string.obs_mode_canvas)
     "QA" -> state.questionText?.take(SUMMARY_PREVIEW_CHARS) ?: stringResource(Res.string.obs_mode_qa)

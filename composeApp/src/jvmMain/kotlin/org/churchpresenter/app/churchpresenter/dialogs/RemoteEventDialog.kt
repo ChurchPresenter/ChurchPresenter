@@ -138,8 +138,10 @@ enum class RemoteEventType {
  * Shows the front-of-queue item and a badge with how many more are waiting.
  *
  *  - **Allow**               — execute this action and move to next in queue
- *  - **Allow for Session**   — execute this action and auto-approve all future requests from the same client this session
- *  - **Allow Permanently**   — execute and permanently remember this client as allowed (only shown when the client is not in any permanent list)
+ *  - **Allow for Session**   — execute this action and auto-approve all future requests from the same client this
+ *    session
+ *  - **Allow Permanently**   — execute and permanently remember this client as allowed (only shown when the client is
+ *    not in any permanent list)
  *  - **Deny**                — reject this item, move to next in queue
  *  - **Block for Session**   — deny all queued items from this client for the rest of the session
  *  - **Block Permanently**   — deny and permanently remember this client as blocked
@@ -426,11 +428,13 @@ internal fun RemoteEventDialogContent(
                             if (isClientKnownAllowed) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_allowed_badge),
-                                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary)
                             } else if (isClientKnownBlocked) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_blocked_badge),
-                                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error)
                             }
                             if (isInstanceLinkFollower) {
                                 Spacer(Modifier.width(4.dp))

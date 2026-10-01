@@ -279,10 +279,12 @@ internal fun CCLIReportContent(
     var toMonth by remember { mutableStateOf(today.monthValue) }
     var toDay by remember { mutableStateOf(today.lengthOfMonth()) }
 
-    fun fromMs(): Long = LocalDate.of(fromYear, fromMonth, fromDay.coerceAtMost(LocalDate.of(fromYear, fromMonth, 1).lengthOfMonth()))
-        .atStartOfDay(zone).toInstant().toEpochMilli()
-    fun toMs(): Long = LocalDate.of(toYear, toMonth, toDay.coerceAtMost(LocalDate.of(toYear, toMonth, 1).lengthOfMonth()))
-        .atTime(LAST_HOUR, LAST_MINUTE, LAST_SECOND).atZone(zone).toInstant().toEpochMilli()
+    fun fromMs(): Long =
+        LocalDate.of(fromYear, fromMonth, fromDay.coerceAtMost(LocalDate.of(fromYear, fromMonth, 1).lengthOfMonth()))
+            .atStartOfDay(zone).toInstant().toEpochMilli()
+    fun toMs(): Long =
+        LocalDate.of(toYear, toMonth, toDay.coerceAtMost(LocalDate.of(toYear, toMonth, 1).lengthOfMonth()))
+            .atTime(LAST_HOUR, LAST_MINUTE, LAST_SECOND).atZone(zone).toInstant().toEpochMilli()
 
     var songs by remember { mutableStateOf(emptyList<SongSummary>()) }
     var verses by remember { mutableStateOf(emptyList<VerseSummary>()) }
@@ -396,14 +398,22 @@ internal fun CCLIReportContent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(stringResource(Res.string.ccli_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(Res.string.ccli_from),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         DatePicker(
                             year = fromYear, month = fromMonth, day = fromDay,
                             yearRange = yearRange,
                             onChanged = { y, m, d -> activePeriod = null; fromYear = y; fromMonth = m; fromDay = d }
                         )
                         Spacer(Modifier.width(16.dp))
-                        Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(Res.string.ccli_to),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         DatePicker(
                             year = toYear, month = toMonth, day = toDay,
                             yearRange = yearRange,
@@ -462,7 +472,10 @@ internal fun CCLIReportContent(
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         when (selectedTab) {
                             SONGS_TAB -> SongsReportContent(shownSongs) { song ->
-                                pendingSongClear = PendingSongClear(SongKey(song.songbook, song.songNumber, song.title), song.title)
+                                pendingSongClear = PendingSongClear(
+                                    SongKey(song.songbook, song.songNumber, song.title),
+                                    song.title
+                                )
                             }
                             BIBLE_TAB -> BibleReportContent(shownVerses) { verse ->
                                 pendingVerseClear = PendingVerseClear(
@@ -480,7 +493,11 @@ internal fun CCLIReportContent(
                     Text(
                         text = statusMessage!!,
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (statusIsSuccess) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        color = if (statusIsSuccess) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                     )
                 }
@@ -504,7 +521,9 @@ internal fun CCLIReportContent(
                                     title = csvChooserTitle
                                 )
                                 if (path != null) {
-                                    val ok = withContext(Dispatchers.IO) { statisticsManager.exportCcliCsv(path.toFile(), f, t) }
+                                    val ok = withContext(Dispatchers.IO) {
+                                        statisticsManager.exportCcliCsv(path.toFile(), f, t)
+                                    }
                                     statusIsSuccess = ok; statusMessage = if (ok) successMsg else errorMsg
                                 }
                             }
@@ -523,7 +542,9 @@ internal fun CCLIReportContent(
                                     title = xlsChooserTitle
                                 )
                                 if (path != null) {
-                                    val ok = withContext(Dispatchers.IO) { statisticsManager.exportFilteredXls(path.toFile(), f, t) }
+                                    val ok = withContext(Dispatchers.IO) {
+                                        statisticsManager.exportFilteredXls(path.toFile(), f, t)
+                                    }
                                     statusIsSuccess = ok; statusMessage = if (ok) successMsg else errorMsg
                                 }
                             }
@@ -556,7 +577,9 @@ internal fun CCLIReportContent(
                     onConfirm = {
                         pendingSongClear = null
                         coroutineScope.launch {
-                            withContext(Dispatchers.IO) { statisticsManager.clearSong(pendingSong.key, fromMs(), toMs()) }
+                            withContext(Dispatchers.IO) {
+                                statisticsManager.clearSong(pendingSong.key, fromMs(), toMs())
+                            }
                             reload()
                         }
                     },
@@ -571,7 +594,9 @@ internal fun CCLIReportContent(
                     onConfirm = {
                         pendingVerseClear = null
                         coroutineScope.launch {
-                            withContext(Dispatchers.IO) { statisticsManager.clearVerse(pendingVerse.key, fromMs(), toMs()) }
+                            withContext(Dispatchers.IO) {
+                                statisticsManager.clearVerse(pendingVerse.key, fromMs(), toMs())
+                            }
                             reload()
                         }
                     },
@@ -745,7 +770,11 @@ internal fun ActivityContent(activity: List<ActivityPoint>) {
             Spacer(Modifier.width(16.dp))
             LegendDot(verseColor)
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(Res.string.ccli_legend_bible), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(Res.string.ccli_legend_bible),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -787,7 +816,13 @@ private fun SongTable(songs: List<SongSummary>, onClear: (SongSummary) -> Unit, 
                         modifier = Modifier
                             .fillMaxWidth()
                             .hoverable(interactionSource)
-                            .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .background(
+                                if (index % 2 == 0) {
+                                    Color.Transparent
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                }
+                            )
                             .padding(start = 12.dp, end = 20.dp, top = 5.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -796,7 +831,11 @@ private fun SongTable(songs: List<SongSummary>, onClear: (SongSummary) -> Unit, 
                         TableCell(song.title, weight = 2f)
                         TableCell(song.author.ifBlank { "—" }, weight = 1.5f, muted = song.author.isBlank())
                         TableCell(song.songbook.ifBlank { "—" }, weight = 1f, muted = song.songbook.isBlank())
-                        TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())
+                        TableCell(
+                            song.ccliNumber.ifBlank { "—" },
+                            fixedWidth = 66.dp.value,
+                            muted = song.ccliNumber.isBlank()
+                        )
                         UsageBadgeCell(song.count, maxCount, accent, fixedWidth = 52.dp.value)
                         TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
                         TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)
@@ -845,7 +884,13 @@ private fun VerseTable(verses: List<VerseSummary>, onClear: (VerseSummary) -> Un
                         modifier = Modifier
                             .fillMaxWidth()
                             .hoverable(interactionSource)
-                            .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .background(
+                                if (index % 2 == 0) {
+                                    Color.Transparent
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                }
+                            )
                             .padding(start = 12.dp, end = 20.dp, top = 5.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -1390,5 +1435,13 @@ private fun RowScope.TableCell(
     val style = if (bold) MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
     else MaterialTheme.typography.bodySmall
     val mod = if (fixedWidth != null) Modifier.width(fixedWidth.dp) else Modifier.weight(weight)
-    Text(text, style = style, color = textColor, modifier = mod, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = align)
+    Text(
+        text,
+        style = style,
+        color = textColor,
+        modifier = mod,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = align
+    )
 }

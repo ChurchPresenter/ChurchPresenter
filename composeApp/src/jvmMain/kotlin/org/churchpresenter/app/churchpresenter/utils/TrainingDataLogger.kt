@@ -274,7 +274,11 @@ object TrainingDataLogger {
                 append(",\"kind\":\"").append(esc(kind)).append("\"")
                 if (book != null) append(",\"book\":").append(book) else append(",\"book\":null")
                 if (chapter != null) append(",\"chapter\":").append(chapter) else append(",\"chapter\":null")
-                if (verseStart != null) append(",\"verseStart\":").append(verseStart) else append(",\"verseStart\":null")
+                if (verseStart != null) {
+                    append(",\"verseStart\":").append(verseStart)
+                } else {
+                    append(",\"verseStart\":null")
+                }
                 if (verseEnd != null) append(",\"verseEnd\":").append(verseEnd) else append(",\"verseEnd\":null")
                 if (displayChapter != null) append(",\"displayChapter\":").append(displayChapter)
                 else append(",\"displayChapter\":null")

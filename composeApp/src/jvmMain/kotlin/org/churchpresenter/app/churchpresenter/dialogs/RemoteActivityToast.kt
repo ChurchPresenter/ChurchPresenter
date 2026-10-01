@@ -93,7 +93,8 @@ fun RemoteActivityToastHost(
                 RemoteActivityToast(
                     notification = current,
                     remaining = notifications.size - 1,
-                    isInstanceLinkFollower = current.clientId.isNotBlank() && current.clientId in connectedInstanceLinkFollowers,
+                    isInstanceLinkFollower = current.clientId.isNotBlank() &&
+                        current.clientId in connectedInstanceLinkFollowers,
                     onDismiss = { onDismiss(current) },
                     onDismissAll = onDismissAll,
                     onBlockForSession = { onBlockForSession(current) }

@@ -121,7 +121,8 @@ class DictionaryViewModel {
                 DictionaryLanguageFilter.HEBREW -> interlinearRepository.getBooksWithHebrewData()
                 DictionaryLanguageFilter.GREEK  -> interlinearRepository.getBooksWithGreekData()
                 DictionaryLanguageFilter.ALL    ->
-                    (interlinearRepository.getBooksWithHebrewData() + interlinearRepository.getBooksWithGreekData()).sorted()
+                    (interlinearRepository.getBooksWithHebrewData() + interlinearRepository.getBooksWithGreekData())
+                        .sorted()
             }
         }
 

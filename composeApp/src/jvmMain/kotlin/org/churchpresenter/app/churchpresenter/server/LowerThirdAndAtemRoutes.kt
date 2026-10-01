@@ -173,9 +173,11 @@ private fun Route.atemClipRoutes(
                     val clipCapacity = atem.detectedClipMaxFrames.getOrNull(slot)
                     if (clipCapacity != null && frameCount > clipCapacity) {
                         val secs = String.format(java.util.Locale.US, "%.1f", clipCapacity / fps)
+                        val message = "Clip is $frameCount frames but slot ${slot + 1} holds at most " +
+                            "$clipCapacity frames (≈$secs s); use a shorter clip or lower fps"
                         call.respond(
                             HttpStatusCode.UnprocessableEntity,
-                            """{"error":${server.atem.jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""
+                            """{"error":${server.atem.jsonStr(message)}}"""
                         )
                         return@post
                     }

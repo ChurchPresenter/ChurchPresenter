@@ -371,8 +371,16 @@ internal fun BibleDetectionPanel(
                         }
 
                         listOf(
-                            Triple(DetectionTrack.TRANSCRIPTION, Icons.Filled.Mic, Res.string.bible_stt_track_transcription),
-                            Triple(DetectionTrack.TRANSLATION, Icons.Filled.Public, Res.string.bible_stt_track_translation),
+                            Triple(
+                                DetectionTrack.TRANSCRIPTION,
+                                Icons.Filled.Mic,
+                                Res.string.bible_stt_track_transcription
+                            ),
+                            Triple(
+                                DetectionTrack.TRANSLATION,
+                                Icons.Filled.Public,
+                                Res.string.bible_stt_track_translation
+                            ),
                         ).forEach { (track, icon, descRes) ->
                             if (track in ref.tracks) {
                                 TooltipArea(tooltip = {
@@ -397,7 +405,9 @@ internal fun BibleDetectionPanel(
                     }
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
+                            withStyle(
+                                SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                            ) {
                                 append(ref.label)
                             }
                             ref.verseText?.let { append("  $it") }
