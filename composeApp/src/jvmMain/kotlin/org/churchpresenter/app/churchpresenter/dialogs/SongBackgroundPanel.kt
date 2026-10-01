@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.song_background
+import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.song_background_applies_to
 import churchpresenter.composeapp.generated.resources.song_background_full_screen
 import churchpresenter.composeapp.generated.resources.song_background_inherit
@@ -61,7 +61,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.song_background_preset_cinema
 import churchpresenter.composeapp.generated.resources.song_background_preset_legible
-import churchpresenter.composeapp.generated.resources.song_background_preset_none
+import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.song_background_preset_soft
 
 internal const val SONG_BACKGROUND_PANEL_TAG = "song_background_panel"
@@ -126,7 +126,7 @@ internal enum class SongBackgroundTarget { FULL_SCREEN, LOWER_THIRD }
 internal data class LookPreset(val label: StringResource, val dim: Int, val blur: Int)
 
 internal val SONG_BACKGROUND_LOOKS = listOf(
-    LookPreset(Res.string.song_background_preset_none, 0, 0),
+    LookPreset(Res.string.none, 0, 0),
     LookPreset(Res.string.song_background_preset_soft, 25, 3),
     LookPreset(Res.string.song_background_preset_legible, 45, 6),
     LookPreset(Res.string.song_background_preset_cinema, 65, 12),
@@ -299,7 +299,7 @@ private fun PanelHeader(
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Text(
-            text = stringResource(Res.string.song_background).uppercase(),
+            text = stringResource(Res.string.background).uppercase(),
             fontSize = 10.5.sp,
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 1.05.sp,

@@ -2,11 +2,10 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_camera_option
-import churchpresenter.composeapp.generated.resources.background_color_option
+import churchpresenter.composeapp.generated.resources.canvas_source_color
 import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_follow_default_option
-import churchpresenter.composeapp.generated.resources.background_image_option
-import churchpresenter.composeapp.generated.resources.background_scope_default
+import churchpresenter.composeapp.generated.resources.customize_type_image
 import churchpresenter.composeapp.generated.resources.background_scope_default_lower_third
 import churchpresenter.composeapp.generated.resources.background_transparent_option
 import churchpresenter.composeapp.generated.resources.background_video_option
@@ -31,8 +30,8 @@ class BackgroundLabelsTest {
 
     @Test
     fun `each background type is named by its own string`() {
-        assertSame(Res.string.background_color_option, backgroundTypeLabel(Constants.BACKGROUND_COLOR))
-        assertSame(Res.string.background_image_option, backgroundTypeLabel(Constants.BACKGROUND_IMAGE))
+        assertSame(Res.string.canvas_source_color, backgroundTypeLabel(Constants.BACKGROUND_COLOR))
+        assertSame(Res.string.customize_type_image, backgroundTypeLabel(Constants.BACKGROUND_IMAGE))
         assertSame(Res.string.background_video_option, backgroundTypeLabel(Constants.BACKGROUND_VIDEO))
         assertSame(Res.string.background_camera_option, backgroundTypeLabel(Constants.BACKGROUND_CAMERA))
         assertSame(Res.string.background_transparent_option, backgroundTypeLabel(Constants.BACKGROUND_TRANSPARENT))
@@ -87,7 +86,7 @@ class BackgroundLabelsTest {
 
     @Test
     fun `the two default surfaces are named as defaults, not as full screen and band`() {
-        assertSame(Res.string.background_scope_default, backgroundScopeName(BackgroundScope.DEFAULT))
+        assertSame(Res.string.background_default, backgroundScopeName(BackgroundScope.DEFAULT))
         assertSame(
             Res.string.background_scope_default_lower_third,
             backgroundScopeName(BackgroundScope.DEFAULT_LOWER_THIRD),

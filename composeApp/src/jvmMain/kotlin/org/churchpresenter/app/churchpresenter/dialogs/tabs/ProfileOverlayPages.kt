@@ -4,14 +4,13 @@ import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.media_subtitle_settings_hint
 import churchpresenter.composeapp.generated.resources.percent_suffix
-import churchpresenter.composeapp.generated.resources.profile_box_item_qr_code
+import churchpresenter.composeapp.generated.resources.profile_group_qr
 import churchpresenter.composeapp.generated.resources.profile_box_item_qr_message
 import churchpresenter.composeapp.generated.resources.profile_box_item_question
 import churchpresenter.composeapp.generated.resources.profile_box_item_subtitle
 import churchpresenter.composeapp.generated.resources.profile_box_opacity
 import churchpresenter.composeapp.generated.resources.profile_caption_lines
 import churchpresenter.composeapp.generated.resources.profile_group_position
-import churchpresenter.composeapp.generated.resources.profile_group_qr
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_line_spacing
 import churchpresenter.composeapp.generated.resources.profile_qr_background
@@ -185,7 +184,7 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
             ),
             BoxItem(
                 QA_QR_CODE_BOX,
-                stringResource(Res.string.profile_box_item_qr_code),
+                stringResource(Res.string.profile_group_qr),
                 TextBox(xPercent = 74f, yPercent = 20f, widthPercent = 22f, heightPercent = 40f),
             ),
             BoxItem(

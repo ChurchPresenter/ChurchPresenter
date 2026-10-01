@@ -3,7 +3,6 @@
     <string name="mode">Режим</string>
     <string name="scope">Аймақ</string>
     <string name="title">Атауы</string>
-    <string name="number">Нөмір</string>
     <string name="go_live">Эфирге</string>
     <string name="add_to_schedule">Бағдарламаға қосу</string>
     <string name="no_lyrics_available">Әнұран мәтіні қолжетімді емес</string>
@@ -51,18 +50,12 @@
     <string name="hold_live">Эфірді ұстау</string>
     <string name="announcements">Хабарландырулар</string>
     <string name="menu_file">Файл</string>
-    <string name="menu_new_schedule">Жаңа бағдарлама</string>
-    <string name="menu_open_schedule">Бағдарламаны ашу</string>
-    <string name="menu_save_schedule">Бағдарламаны сақтау</string>
     <string name="menu_save_schedule_as">Басқа атпен сақтау...</string>
     <string name="file_chooser_save_schedule">Бағдарламаны басқа атпен сақтау</string>
-    <string name="file_chooser_open_schedule">Бағдарламаны ашу</string>
     <string name="file_filter_schedule">Church Presenter бағдарламасы (*.cps)</string>
     <string name="menu_close_schedule">Бағдарламаны жабу</string>
     <string name="menu_exit">Шығу</string>
 
-    <string name="menu_schedule">Бағдарлама</string>
-    <string name="menu_add_to_schedule">Бағдарламаға қосу</string>
     <string name="menu_remove_from_schedule">Бағдарламадан жою</string>
     <string name="menu_clear_schedule">Бағдарламаны тазалау</string>
 
@@ -258,8 +251,6 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Әдепкі</string>
-    <string name="background_color_option">Түс</string>
-    <string name="background_image_option">Сурет</string>
 
     <!-- Position Options -->
 
@@ -343,7 +334,6 @@
     <string name="label_text">Белгі мәтіні</string>
     <string name="enter_label_text">Белгі мәтінін енгізіңіз...</string>
     <string name="text_color">Мәтін түсі</string>
-    <string name="background_color_label">Фон түсі</string>
 
     <!-- Pictures Tab Strings -->
     <string name="select_folder">Қалтаны таңдау</string>
@@ -369,7 +359,6 @@
     <string name="animation_slide_left">Солға жылжу</string>
     <string name="animation_slide_right">Оңға жылжу</string>
     <string name="animation_none">Анимациясыз</string>
-    <string name="milliseconds_suffix">мс</string>
     <string name="pictures_arrow_key_hint">%1$s келесі/алдыңғы сурет  ·  %2$s жолдар бойынша</string>
     <string name="presentation_arrow_key_hint">%1$s — алдыңғы/келесі қадам және слайд  ·  %2$s — ойнату/кідірту  ·  %3$s — қара экран</string>
     <string name="pictures_reorder_hint">Shift+сүйреу арқылы ретін өзгерту</string>
@@ -413,7 +402,6 @@
     <!-- Background Settings Tab -->
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Медиа</string>
     <string name="media_local_file">Жергілікті файл</string>
     <string name="media_network_url">Желілік URL</string>
     <string name="media_url_placeholder">URL енгізіңіз (http://, rtsp://, ...)</string>
@@ -440,7 +428,6 @@
     <string name="announcement_animation_speed">Жылдамдық</string>
     <string name="announcement_loop_count">Қайталау саны</string>
     <string name="announcement_loop_tooltip">0 = шексіз қайталау</string>
-    <string name="announcement_background_color_label">Фон түсі</string>
     <string name="announcement_text_hint">Хабарландыру мәтінін енгізіңіз…</string>
     <string name="top_center">Жоғары орталық</string>
     <string name="bottom_center">Төмен орталық</string>
@@ -449,18 +436,14 @@
     <string name="content_bible_background">Библия фоны</string>
     <string name="content_songs_background">Ән фоны</string>
     <string name="content_pictures">Суреттер/Презентация</string>
-    <string name="content_media">Медиа</string>
-    <string name="content_streaming">Төменгі үштен бір</string>
     <string name="content_announcements">Хабарландырулар</string>
     <string name="detected_screens">Анықталған экрандар: %1$d</string>
     <string name="presenter_windows_count">Презентация терезелері: %1$d</string>
     <string name="screen_col_label">Экран %1$d</string>
     <string name="screen_assignment">Экранды тағайындау</string>
     <string name="display_mode">Көрсету режимі</string>
-    <string name="display_fullscreen">Толық экран</string>
     <string name="display_lower_third">Төменгі үштен бір</string>
     <string name="full_screen">Толық экран</string>
-    <string name="lower_third_size">Төменгі үштен бір</string>
     <string name="identify_screen">Анықтау</string>
     <string name="no_lottie_files">JSON файлдары табылмады</string>
     <string name="generate_lower_third">Жасау</string>
@@ -663,7 +646,6 @@
     <string name="schedule_density_compact">Ықшам</string>
     <string name="schedule_density_normal">Қалыпты</string>
     <string name="schedule_density_detailed">Толық</string>
-    <string name="schedule_kind_lower_third">Төменгі үштен бір</string>
     <string name="tooltip_schedule_options">Бағдарлама параметрлері</string>
     <string name="schedule_show_buttons_under_title">Түймелерді атаудың астында көрсету</string>
     <string name="schedule_option_item_count">Элементтер саны</string>
@@ -705,7 +687,6 @@
     <string name="timer_start">Бастау</string>
     <string name="timer_title">Таймер</string>
     <string name="tooltip_clear_display">Дисплейді тазалау</string>
-    <string name="remote_action_clear_display">Дисплейді тазалау</string>
     <string name="schedule_add_files_title">Бағдарламаға файлдар қосу</string>
     <string name="tooltip_toggle_displays">Презентация дисплейлерін ауыстыру</string>
     <string name="tooltip_collapse_schedule">Бағдарламаны жию</string>
@@ -713,7 +694,6 @@
     <string name="tooltip_theme_dark">Қараңғы тақырып</string>
     <string name="tooltip_theme_system">Жүйелік тақырып</string>
     <string name="transparent_default">Мөлдір (Әдепкі)</string>
-    <string name="web_add_to_schedule">Бағдарламаға қосу</string>
     <string name="web_bookmark_add">Бетбелгі</string>
     <string name="web_bookmark_remove">Жою</string>
     <string name="web_clear_cache">Кэшті тазалау</string>
@@ -790,7 +770,6 @@
     <string name="blocked_clients_description">Осы клиенттерден келген сұраныстар диалогты көрсетпей автоматты түрде қабылданбайды.</string>
     <string name="client_label_placeholder">Атауды енгізіңіз…</string>
     <string name="client_label_edit_tooltip">Атауды орнату</string>
-    <string name="client_label_save">Сақтау</string>
     <string name="client_label_cancel">Бас тарту</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -886,7 +865,6 @@
     <string name="system_storage_subtitle">Church Presenter мазмұныңызды қайдан іздейді</string>
     <string name="system_storage_linked_count">%1$d байланысқан</string>
     <string name="system_storage_needs_attention_count">%1$d назар аударуды қажет етеді</string>
-    <string name="system_storage_status_not_set">Орнатылмаған</string>
     <string name="system_storage_status_not_found">Қалта табылмады</string>
     <string name="system_storage_status_read_only">Тек оқуға</string>
     <string name="system_storage_status_linked">Байланысқан</string>
@@ -973,9 +951,7 @@
     <string name="canvas_text_curve">Қисық</string>
     <string name="canvas_letter_spacing">Әріп аралығы</string>
     <string name="canvas_source_qrcode">QR-код</string>
-    <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Экранды жазу</string>
-    <string name="canvas_text_color">Мәтін түсі</string>
     <string name="canvas_text_bg_color">Фон түсі</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
@@ -998,7 +974,6 @@
     <string name="canvas_camera_format">Бейне форматы</string>
     <string name="canvas_camera_format_auto">Авто (әдепкі)</string>
     <string name="canvas_camera_connection">Бейне қосылымы</string>
-    <string name="canvas_camera_mode">Режим</string>
     <string name="canvas_camera_mode_auto">Авто</string>
     <string name="canvas_capture_x">X жазу</string>
     <string name="canvas_capture_y">Y жазу</string>
@@ -1009,12 +984,9 @@
     <string name="canvas_capture_mode_window">Терезе</string>
     <string name="canvas_capture_refresh_windows">Терезелер тізімін жаңарту</string>
     <string name="canvas_capture_interval">Жазу аралығы</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Камера: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Камера</string>
     <string name="canvas_placeholder_screen_capture">Экранды жазу</string>
     <string name="canvas_rename_scene">Атын өзгерту</string>
-    <string name="canvas_remove_scene">Жою</string>
     <string name="canvas_add_source">Дерек көзін қосу</string>
     <string name="canvas_delete_source">Дерек көзін жою</string>
     <string name="canvas_source_move_forward">Алға жылжыту</string>
@@ -1040,7 +1012,6 @@
     <string name="canvas_render_height">Биіктігі</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Суретті таңдау</string>
     <string name="canvas_select_video_title">Бейнені таңдау</string>
     <string name="canvas_image_files">Сурет файлдары</string>
@@ -1052,7 +1023,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Сағат</string>
     <string name="canvas_clock_mode_countdown">Кері санау</string>
     <string name="canvas_clock_mode_count_up">Секундомер</string>
     <string name="canvas_decklink_io_warning">Бұл құрылғы шығу үшін пайдаланылуда. Бір уақытта кіріс/шығысты қолдамайтын құрылғыларда кіріс қол жетімді болмауы мүмкін.</string>
@@ -1093,7 +1063,6 @@
     <string name="update_interval_never">Ешқашан</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Сахна мониторы</string>
     <string name="display_stage_monitor">Сахна мониторы</string>
     <string name="general">Жалпы</string>
     <string name="stage_monitor_quadrant_next">Төменгі-сол: келесі слайд</string>
@@ -1177,7 +1146,6 @@
     <string name="qa_confirm_go_live_prompt">Тікелей эфирге шығу?</string>
     <string name="qa_confirm_go_live">Тікелей эфирге шығуды растау</string>
     <string name="qa_edit_question_hint">Сұрақ мәтінін өңдеу…</string>
-    <string name="qa_delete_question">Жою</string>
     <string name="qa_confirm_delete_prompt">Жою?</string>
     <string name="qa_submitter_device">Құрылғы: %1$s</string>
     <string name="qa_public_access">Жалпыға қол жеткізу</string>
@@ -1213,13 +1181,10 @@
     <string name="stt_live_preview">Тікелей алдын ала қарау</string>
     <string name="stt_not_connected">Қосылмаған. STT сервер URL-ін енгізіп, Қосылу түймесін басыңыз.</string>
     <string name="stt_waiting_for_transcription">Транскрипция күтілуде…</string>
-    <string name="stt_transcription_label">Транскрипция</string>
     <string name="stt_translation_label">Аударма</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI Пайдалану Есебі</string>
-    <string name="ccli_tab_songs">Әндер</string>
-    <string name="ccli_tab_bible">Інжіл</string>
     <string name="ccli_tab_activity">Белсенділік</string>
     <string name="ccli_songs_summary">%1$d бірегей ән · %2$d жалпы ойнатулар</string>
     <string name="ccli_bible_summary">%1$d бірегей аят · %2$d жалпы ойнатулар</string>
@@ -1230,7 +1195,6 @@
     <string name="ccli_activity_title">Уақыт бойынша презентациялар</string>
     <string name="ccli_from">Бастап:</string>
     <string name="ccli_to">Дейін:</string>
-    <string name="ccli_legend_songs">Әндер</string>
     <string name="ccli_legend_bible">Інжіл аяттары</string>
     <string name="ccli_stat_songs_presented">Ұсынылған әндер</string>
     <string name="ccli_stat_bible_verses">Інжіл аяттары</string>
@@ -1244,7 +1208,6 @@
     <string name="ccli_col_first">Бірінші</string>
     <string name="ccli_col_last">Соңғы</string>
     <string name="ccli_col_verse">Аят</string>
-    <string name="ccli_col_bible">Інжіл</string>
     <string name="ccli_export_csv">CCLI CSV экспорттау</string>
     <string name="ccli_export_xls">XLS экспорттау</string>
     <string name="ccli_exported_success">Есеп сәтті экспортталды.</string>
@@ -1301,7 +1264,6 @@
     <string name="obs_mode_bible">Інжіл</string>
     <string name="obs_mode_songs">Әндер</string>
     <string name="obs_mode_pictures">Суреттер</string>
-    <string name="obs_mode_presentation">Презентация</string>
     <string name="obs_mode_media">Медиа</string>
     <string name="obs_mode_lower_third">Төменгі үштен бір</string>
     <string name="obs_mode_announcements">Хабарландырулар</string>
@@ -1352,13 +1314,11 @@
     <string name="open_converter">Әндер мен Киелі кітап түрлендіргіші</string>
     <string name="open_song_library">Әндер жинағының менеджері</string>
     <string name="projection_content_web">Веб</string>
-    <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Төменгі үштен бір фоны</string>
     <string name="qa_add_question_hint">Сұрақ қосу…</string>
     <string name="remote_activity_added_to_schedule">Кестеге қосылды</string>
     <string name="remote_activity_projected">Экранға шығарылды</string>
     <string name="remote_activity_presentation_connect">Презентацияны қашықтан басқаруға қосылды</string>
-    <string name="remote_activity_presentation_connect_detail">Қазір қосылды</string>
     <string name="remote_activity_qa_admin_connect">С&amp;Ж әкімші панеліне қосылды</string>
     <string name="remote_activity_qa_admin_connect_detail">Қазір қосылды</string>
     <string name="remote_activity_presented">Көрсетілуде</string>
@@ -1557,7 +1517,6 @@
     <string name="companion_satellite_no_host">Қосылу үшін Параметрлер → Companion Satellite бөлімінде Companion хостын орнатыңыз.</string>
     <string name="companion_satellite_status_connecting">Қосылуда…</string>
     <string name="companion_satellite_status_disconnected">Ажыратылды</string>
-    <string name="companion_satellite_status_error">Қате: %1$s</string>
     <string name="companion_satellite_connection_name">Атауы</string>
     <string name="companion_satellite_product_name">Өнім атауы</string>
     <string name="companion_satellite_reconnect_delay">Қайта қосылу кідірісі (мс)</string>
@@ -1595,7 +1554,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Сілтеме немесе мәтін — мыс. Жохан 3:16, Мат 1 немесе сөз</string>
     <string name="bible_search_mode_auto">Авто</string>
-    <string name="bible_search_mode_reference">Сілтеме</string>
     <string name="bible_search_mode_text">Мәтін</string>
     <string name="bible_search_mode_tooltip">Ауыстыру үшін түртіңіз — Авто: сілтемелерге өту, қалғанын іздеу. Сілтеме: тек шарлау. Мәтін: аятта мәтінді әрдайым іздеу.</string>
     <string name="swap_bibles_hint">Негізгі және қосымша Киелі кітаптарды ауыстыру</string>
@@ -1646,7 +1604,6 @@
     <string name="bible_engine_detect">Жазбаларды анықтау</string>
     <string name="bible_engine_run_local">Движокты жергілікті іске қосу</string>
     <string name="bible_engine_host">Движок хосты</string>
-    <string name="bible_engine_port">Порт</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Байланыс</string>
     <string name="contact_us_title">Бізбен байланысу</string>
@@ -1683,7 +1640,6 @@
     <string name="instance_link_description">Желіңіздегі басқа ChurchPresenter данасын бақылаңыз — оның тікелей эфирдегі мазмұнын осында қайталаңыз, қаласаңыз оның бағдарламасына элементтер қоса аласыз.</string>
     <string name="instance_link_host">Хост</string>
     <string name="instance_link_host_hint">мыс. 192.168.1.10</string>
-    <string name="instance_link_port">Порт</string>
     <string name="instance_link_autoconnect">Іске қосылғанда автоматты түрде қосылу</string>
     <string name="instance_link_allow_push_to_schedule">Негізгі дананың бағдарламасына элементтер қосуға рұқсат ету</string>
     <string name="instance_link_mirror_backgrounds">Негізгі дананың фондарын да қайталау</string>
@@ -1919,7 +1875,6 @@
     <string name="font_category_serif">Серифті</string>
     <string name="font_category_mono">Моно</string>
     <string name="font_category_display">Дисплей</string>
-    <string name="font_preview">Алдын ала қарау</string>
     <string name="font_preview_sample">Таңдалған қаріппен мәтін үлгісі</string>
     <string name="font_warning_no_cyrillic">%1$s кирилл таңбаларын қамтымайды — кириллицадағы аяттар экранда басқа қаріппен көрсетіледі.</string>
     <string name="font_warning_no_hebrew">%1$s иврит таңбаларын қамтымайды — иврит мәтіні экранда басқа қаріппен көрсетіледі.</string>
@@ -1929,7 +1884,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Сызылған</string>
     <string name="bible_custom_name">Атауы</string>
-    <string name="bible_custom_abbreviation">Қысқартуы</string>
     <string name="bible_translations">Аудармалар</string>
     <string name="bible_miscellaneous">Әртүрлі</string>
     <string name="bible_font">Қаріп</string>
@@ -1944,10 +1898,7 @@
     <string name="bible_preview_sample_book">Жохан</string>
     <string name="bible_preview_no_translations">Мұнда көру үшін аударма қосыңыз</string>
     <string name="song_element_number">Нөмір</string>
-    <string name="song_element_title">Атауы</string>
     <string name="song_element_lyrics">Мәтін</string>
-    <string name="song_element_author">Автор</string>
-    <string name="song_element_composer">Композитор</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Темп</string>
     <string name="song_target_title_slide">Атау слайды</string>
@@ -1960,7 +1911,6 @@
     <string name="song_chunk">Бөлік</string>
     <string name="song_language_scope">Тіл</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Фон</string>
     <string name="song_background_full_screen">Толық экран</string>
     <string name="song_background_lower_third">Төменгі үштік</string>
     <string name="song_background_inherit">Мұралау</string>
@@ -1975,7 +1925,6 @@
     <string name="song_background_your_color">Сіздің түсіңіз</string>
     <string name="song_background_browse">Шолу…</string>
     <string name="song_background_look">Көрініс</string>
-    <string name="song_background_preset_none">Жоқ</string>
     <string name="song_background_preset_soft">Жұмсақ</string>
     <string name="song_background_preset_legible">Оқылымды</string>
     <string name="song_background_preset_cinema">Кино</string>
@@ -1996,7 +1945,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Фондар</string>
     <string name="background_group_defaults">Әдепкі</string>
-    <string name="background_scope_default">Әдепкі</string>
     <string name="background_scope_default_lower_third">Әдепкі төменгі үштен бір</string>
     <string name="background_scope_default_meta">Киелі Кітап немесе Әнұрандар «Әдепкі» болғанда</string>
     <string name="background_scope_default_lower_third_meta">Төменгі үштен бір «Әдепкі» болғанда</string>
@@ -2005,16 +1953,13 @@
     <string name="background_following_default">Әдепкіні ұстанады</string>
     <string name="background_use_default">Әдепкіні қолдану</string>
     <string name="background_set_explicitly">Осы бет үшін бөлек орнатылған</string>
-    <string name="background_type_caption">Түрі</string>
     <string name="background_color_caption">Түсі</string>
     <string name="background_image_file">Сурет файлы</string>
     <string name="background_video_file">Бейне файлы</string>
-    <string name="background_opacity_caption">Мөлдірлігі</string>
     <string name="background_above_band_caption">Жолақ үстінде</string>
     <string name="background_above_band_fill">Толтыру түсі</string>
     <string name="background_above_band_opacity">Толтыру мөлдірлігі</string>
     <string name="quick_background_reset">Қалыпқа қайту</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · параметрлерде басқарылады</string>
     <string name="quick_backgrounds">Жылдам фондар</string>
     <string name="quick_backgrounds_help">Алдын ала қарау панелі бір басу қашықтықта ұстайтын фондар. Не көрсететінін таңдау үшін тақтайшаны басыңыз, оған қай перне жететінін өзгерту үшін сүйреңіз. Қызмет кезінде біреуін таңдау қалыпқа қайтқанша барлық экранды басып тастайды — мұнда ештеңе өзгертпейді.</string>
@@ -2040,16 +1985,10 @@
     <string name="output_profile_swap_menu_tooltip">Шығыс профилін ауыстыру</string>
     <string name="output_profile_new_name_default">Жаңа профиль</string>
     <string name="output_profile_empty_state">Стиль беруді бастау үшін профиль жасаңыз</string>
-    <string name="customize_bible">Киелі Кітап</string>
-    <string name="customize_songs">Әнұрандар</string>
     <string name="customize_group_verse_text">Аят мәтіні</string>
     <string name="customize_group_reference">Сілтеме</string>
     <string name="customize_background_type">Түрі</string>
-    <string name="customize_type_color">Түс</string>
     <string name="customize_type_image">Сурет</string>
-    <string name="customize_type_video">Бейне</string>
-    <string name="customize_type_default">Әдепкі</string>
-    <string name="customize_type_gradient">Градиент</string>
     <string name="customize_show_abbreviation">Қысқартуы</string>
     <string name="customize_background_opacity">Мөлдірлігі</string>
     <string name="slate_theme">«Тақтатас» тақырыбы</string>
@@ -2095,7 +2034,6 @@
     <string name="song_lottie_unsupported_note">Үлгі орналасуды және атаудың орнын анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау, сөз аралығы, келесіні алдын ала қарау және аккордтар қолданылмайды.</string>
     <string name="bible_lottie_unsupported_note">Үлгі орналасуды, сілтеменің орнын және екі тілдің жолақты қалай бөлісетінін анықтайды. Төменгі үштік стилі қаріпті, өлшемді, түсті, туралауды, әріп аралығын, регистрді және көлеңкені белгілейді; фон, асты сызу, сызып тастау және сөз аралығы қолданылмайды.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Контур параметрлері</string>
     <string name="text_outline">Контур</string>
     <string name="text_outline_width">Қалыңдығы</string>
@@ -2163,7 +2101,6 @@
     <string name="add_ndi_output">Шығыс қосу</string>
     <string name="ndi_output_numbered">NDI шығысы %1$d</string>
     <string name="preview_output">Шығысты алдын ала қарау</string>
-    <string name="output_resolution">Ажыратымдылық</string>
     <string name="output_resolution_custom">Өзгеше…</string>
     <string name="output_resolution_custom_title">Өзгеше ажыратымдылық</string>
     <string name="output_resolution_width">Ені</string>
@@ -2267,7 +2204,6 @@
     <string name="calendar_sync_description">Қызметтерді мобильді қолданбадан апта бойы, тіпті осы компьютер өшірулі кезде де жоспарлаңыз. Негізгі дереккөз осы компьютер болып қалады.</string>
     <string name="calendar_sync_enable">Күнтізбені телефондармен синхрондау</string>
     <string name="calendar_sync_relay_url">Релe</string>
-    <string name="calendar_sync_status_off">Өшірулі</string>
     <string name="calendar_sync_status_unpaired">Әлі тіркелмеген — синхрондау алғаш қосылғанда осы компьютер релеге тіркеледі</string>
     <string name="calendar_sync_status_syncing">Синхрондалуда…</string>
     <string name="calendar_sync_status_synced">Синхрондалды %1$s</string>

@@ -22,7 +22,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.canvas_source_timer
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
-import churchpresenter.composeapp.generated.resources.canvas_source_camera
+import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_source_ndi
 import churchpresenter.composeapp.generated.resources.canvas_source_omt
@@ -119,7 +119,7 @@ internal fun rememberCanvasSourceNames(): CanvasSourceNames {
     val strVideo         = stringResource(Res.string.canvas_source_video)
     val strTimer         = stringResource(Res.string.canvas_source_timer)
     val strQrCode        = stringResource(Res.string.canvas_source_qrcode)
-    val strCamera        = stringResource(Res.string.canvas_source_camera)
+    val strCamera        = stringResource(Res.string.background_camera_option)
     val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
     val strNdi           = stringResource(Res.string.canvas_source_ndi)
     val strOmt           = stringResource(Res.string.canvas_source_omt)

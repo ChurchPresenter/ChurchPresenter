@@ -56,7 +56,6 @@ import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.author

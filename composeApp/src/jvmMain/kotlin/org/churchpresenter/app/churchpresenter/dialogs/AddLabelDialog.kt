@@ -32,7 +32,7 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_label
-import churchpresenter.composeapp.generated.resources.background_color_label
+import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.edit_label
 import churchpresenter.composeapp.generated.resources.enter_label_text
@@ -203,7 +203,7 @@ internal fun AddLabelDialogContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(Res.string.background_color_label),
+                        text = stringResource(Res.string.canvas_text_bg_color),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )

@@ -3,7 +3,6 @@
     <string name="mode">பயன்முறை</string>
     <string name="scope">வரம்பு</string>
     <string name="title">தலைப்பு</string>
-    <string name="number">எண்</string>
     <string name="go_live">நேரலைக்கு</string>
     <string name="add_to_schedule">அட்டவணையில் சேர்</string>
     <string name="copy_verse">வசனத்தை நகலெடு</string>
@@ -12,7 +11,6 @@
     <string name="search">தேடு</string>
     <string name="bible_smart_search_hint">குறிப்பு அல்லது உரை — எ.கா. யோவான் 3:16, மத் 1, அல்லது ஒரு சொல்</string>
     <string name="bible_search_mode_auto">தானியங்கி</string>
-    <string name="bible_search_mode_reference">குறிப்பு</string>
     <string name="bible_search_mode_text">உரை</string>
     <string name="bible_search_mode_tooltip">மாற்ற தட்டவும் — தானியங்கி: குறிப்புகளுக்குச் செல்லும், மற்றவை அனைத்தையும் தேடும். குறிப்பு: செல்வது மட்டும். உரை: எப்போதும் வசன உரையைத் தேடும்.</string>
     <string name="bible_verse_selection_hint">மாற்ற Ctrl+Click, வரம்பிற்கு Shift+Click</string>
@@ -82,18 +80,12 @@
     <string name="bible_cross_references_close">பலகத்தை மூடு</string>
     <string name="bible_cross_references_dismiss_hint">மூட Esc</string>
     <string name="menu_file">கோப்பு</string>
-    <string name="menu_new_schedule">புதிய அட்டவணை</string>
-    <string name="menu_open_schedule">அட்டவணையைத் திற</string>
-    <string name="menu_save_schedule">அட்டவணையைச் சேமி</string>
     <string name="menu_save_schedule_as">அட்டவணையை இவ்வாறு சேமி...</string>
     <string name="menu_close_schedule">அட்டவணையை மூடு</string>
     <string name="menu_exit">வெளியேறு</string>
     <string name="file_chooser_save_schedule">அட்டவணையை இவ்வாறு சேமி</string>
-    <string name="file_chooser_open_schedule">அட்டவணையைத் திற</string>
     <string name="file_filter_schedule">Church Presenter அட்டவணை (*.cps)</string>
 
-    <string name="menu_schedule">அட்டவணை</string>
-    <string name="menu_add_to_schedule">அட்டவணையில் சேர்</string>
     <string name="menu_remove_from_schedule">அட்டவணையிலிருந்து நீக்கு</string>
     <string name="menu_clear_schedule">அட்டவணையை அழி</string>
 
@@ -115,7 +107,6 @@
     <string name="instance_link_description">உங்கள் வலையமைப்பில் உள்ள மற்றொரு ChurchPresenter நிகழ்வைப் பின்தொடரவும் — அதன் நேரலை உள்ளடக்கத்தை இங்கே பிரதிபலிக்கவும், விரும்பினால் அதன் அட்டவணையில் உருப்படிகளைச் சேர்க்கவும்.</string>
     <string name="instance_link_host">புரவலன்</string>
     <string name="instance_link_host_hint">எ.கா. 192.168.1.10</string>
-    <string name="instance_link_port">துறை</string>
     <string name="instance_link_autoconnect">தொடங்கும்போது தானாக இணை</string>
     <string name="instance_link_reconnect_delay">குறைந்தபட்ச மறுஇணைப்புத் தாமதம்</string>
     <string name="instance_link_reconnect_delay_hint">துண்டிக்கப்பட்ட இணைப்பை மீண்டும் முயல்வதற்கு முன் குறைந்தபட்சக் காத்திருப்பு. தொடர்ச்சியான தோல்விகள் தாமாகவே மேலும் தாமதிக்கும்.</string>
@@ -471,15 +462,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">இயல்பு</string>
-    <string name="background_color_option">நிறம்</string>
-    <string name="background_image_option">படம்</string>
     <string name="background_video_option">காணொளிச் சுழற்சி</string>
     <string name="background_transparent_option">ஒளிபுகும்</string>
     <string name="background_follow_default_option">இயல்பைப் பின்பற்று</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">இணையம்</string>
-    <string name="projection_content_background">பின்னணி</string>
     <string name="projection_content_lt_background">கீழ்ப்பட்டைப் பின்னணி</string>
     <string name="browser_source_resolution">தெளிவுத்திறன்</string>
     <string name="browser_source_fps">அதிகபட்ச FPS</string>
@@ -563,7 +551,6 @@
     <string name="tooltip_schedule_zoom_out">சிறிதாக்கு</string>
     <string name="tooltip_add_to_schedule">அட்டவணையில் சேர்</string>
     <string name="tooltip_clear_display">காட்சியை அழி</string>
-    <string name="remote_action_clear_display">காட்சியை அழி</string>
     <string name="schedule_add_files_title">அட்டவணையில் கோப்புகளைச் சேர்</string>
     <string name="tooltip_toggle_displays">வழங்குநர் காட்சிகளை மாற்று</string>
     <string name="tooltip_settings">அமைப்புகள்</string>
@@ -585,7 +572,6 @@
     <string name="schedule_density_compact">சுருக்கமானது</string>
     <string name="schedule_density_normal">இயல்பானது</string>
     <string name="schedule_density_detailed">விரிவானது</string>
-    <string name="schedule_kind_lower_third">கீழ்ப்பட்டை</string>
     <string name="tooltip_schedule_options">அட்டவணை விருப்பங்கள்</string>
     <string name="schedule_show_buttons_under_title">தலைப்பின் கீழ் பொத்தான்களைக் காட்டு</string>
     <string name="schedule_option_item_count">உருப்படி எண்ணிக்கை</string>
@@ -596,7 +582,6 @@
     <string name="edit_label">சிட்டையைத் திருத்து</string>
     <string name="label_text">சிட்டை உரை</string>
     <string name="text_color">உரை நிறம்</string>
-    <string name="background_color_label">பின்னணி நிறம்</string>
     <string name="enter_label_text">சிட்டை உரையை உள்ளிடவும்...</string>
 
     <!-- Pictures Tab Strings -->
@@ -626,7 +611,6 @@
     <string name="animation_slide_left">இடப்புறம் நகர்வு</string>
     <string name="animation_slide_right">வலப்புறம் நகர்வு</string>
     <string name="animation_none">எதுவுமில்லை</string>
-    <string name="milliseconds_suffix">மிவி</string>
     <string name="pictures_arrow_key_hint">%1$s அடுத்த/முந்தைய படம்  ·  %2$s வரிசைகளுக்கு இடையே செல்</string>
     <string name="presentation_arrow_key_hint">%1$s — முந்தைய/அடுத்த கட்டம் &amp; படவில்லை  ·  %2$s — இயக்கு/இடைநிறுத்து  ·  %3$s — வெற்றுத் திரை</string>
     <string name="pictures_reorder_hint">மறுவரிசைப்படுத்த சிறுபடங்களை Shift+இழுக்கவும்</string>
@@ -689,14 +673,10 @@
     <string name="content_bible_background">வேதாகமப் பின்னணி</string>
     <string name="content_songs_background">பாடல்கள் பின்னணி</string>
     <string name="content_pictures">படங்கள்/விளக்கக்காட்சி</string>
-    <string name="content_media">ஊடகம்</string>
-    <string name="content_streaming">கீழ்ப்பட்டை</string>
     <string name="content_announcements">அறிவிப்புகள்</string>
     <string name="display_mode">காட்சிப் பயன்முறை</string>
-    <string name="display_fullscreen">முழுத்திரை</string>
     <string name="display_lower_third">கீழ்ப்பட்டை</string>
     <string name="full_screen">முழுத்திரை</string>
-    <string name="lower_third_size">கீழ்ப்பட்டை</string>
     <string name="identify_screen">அடையாளம் காண்</string>
     <string name="projection_target_display">காட்சி</string>
     <string name="projection_auto_display">தானியங்கி</string>
@@ -770,7 +750,6 @@
     <string name="settings_import_failed">அமைப்புகளை இறக்குமதி செய்ய முடியவில்லை. கோப்பு தவறானதாக இருக்கலாம்.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">ஊடகம்</string>
     <string name="media_local_file">உள்ளூர்க் கோப்பு</string>
     <string name="media_network_url">வலையமைப்பு URL</string>
     <string name="media_url_placeholder">URL ஐ உள்ளிடவும் (http://, rtsp://, ...)</string>
@@ -814,7 +793,6 @@
     <string name="center_left">மைய இடது</string>
     <string name="center_right">மைய வலது</string>
     <string name="bottom_center">கீழ் மையம்</string>
-    <string name="announcement_background_color_label">பின்னணி நிறம்</string>
     <string name="transparent_default">ஒளிபுகும் (இயல்பு)</string>
     <string name="announcement_animation">அசைவூட்டம்</string>
     <string name="anim_slide_from_left">இடதிலிருந்து நகர்வு</string>
@@ -887,7 +865,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">அட்டவணையில் சேர்</string>
     <string name="web_go_live">நேரலைக்கு</string>
     <string name="web_bookmark_add">புத்தகக்குறியைச் சேர்</string>
     <string name="web_bookmark_remove">புத்தகக்குறியை நீக்கு</string>
@@ -951,7 +928,6 @@
     <string name="canvas_shape_fill_color">நிரப்பு</string>
     <string name="canvas_shape_stroke_width">கோட்டு அகலம்</string>
     <string name="canvas_rename_scene">மறுபெயரிடு</string>
-    <string name="canvas_remove_scene">நீக்கு</string>
     <string name="canvas_add_source">மூலத்தைச் சேர்</string>
     <string name="canvas_delete_source">மூலத்தை நீக்கு</string>
     <string name="canvas_source_move_forward">முன்னால் நகர்த்து</string>
@@ -978,7 +954,6 @@
     <string name="canvas_render_height">உயரம்</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">தனிப்பயன் CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">படத்தைத் தேர்ந்தெடு</string>
     <string name="canvas_select_video_title">காணொளியைத் தேர்ந்தெடு</string>
     <string name="canvas_image_files">படக் கோப்புகள்</string>
@@ -990,7 +965,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">கடிகாரம்</string>
     <string name="canvas_clock_mode_countdown">பின்னோக்கி எண்ணல்</string>
     <string name="canvas_clock_mode_count_up">ஸ்டாப்வாட்ச்</string>
     <string name="canvas_decklink_io_warning">இந்தச் சாதனம் தற்போது வெளியீட்டிற்குப் பயன்படுத்தப்படுகிறது. ஒரே நேரத்தில் உள்ளீடு/வெளியீட்டை ஆதரிக்காத சாதனங்களில் உள்ளீடு கிடைக்காமல் போகலாம்.</string>
@@ -1008,7 +982,6 @@
     <string name="canvas_text_curve">வளைவு</string>
     <string name="canvas_letter_spacing">எழுத்து இடைவெளி</string>
     <string name="canvas_source_qrcode">QR குறியீடு</string>
-    <string name="canvas_source_camera">கேமரா</string>
     <string name="canvas_source_screen_capture">திரைப் பிடிப்பு</string>
     <string name="canvas_source_bible">வேதாகமம்</string>
     <string name="canvas_bible_version">வேதாகமப் பதிப்பு</string>
@@ -1021,7 +994,6 @@
     <string name="canvas_bible_ref_color">குறிப்பு நிறம்</string>
     <string name="canvas_verse_style">வசனப் பாணி</string>
     <string name="canvas_reference_style">குறிப்புப் பாணி</string>
-    <string name="canvas_text_color">உரை நிறம்</string>
     <string name="canvas_text_bg_color">பின்னணி நிறம்</string>
     <string name="canvas_clock_mode">பயன்முறை</string>
     <string name="canvas_clock_format">வடிவம்</string>
@@ -1046,7 +1018,6 @@
     <string name="canvas_camera_format">காணொளி வடிவம்</string>
     <string name="canvas_camera_format_auto">தானியங்கி (இயல்பு)</string>
     <string name="canvas_camera_connection">காணொளி இணைப்பு</string>
-    <string name="canvas_camera_mode">பயன்முறை</string>
     <string name="canvas_camera_mode_auto">தானியங்கி</string>
     <string name="canvas_capture_x">பிடிப்பு X</string>
     <string name="canvas_capture_y">பிடிப்பு Y</string>
@@ -1057,9 +1028,7 @@
     <string name="canvas_capture_mode_window">சாளரம்</string>
     <string name="canvas_capture_refresh_windows">சாளரப் பட்டியலைப் புதுப்பி</string>
     <string name="canvas_capture_interval">பிடிப்பு இடைவெளி</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">கேமரா: %1$s</string>
-    <string name="canvas_placeholder_camera_default">கேமரா</string>
     <string name="canvas_placeholder_screen_capture">திரைப் பிடிப்பு</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1180,7 +1149,6 @@
     <string name="remote_activity_removed_from_schedule">அட்டவணையிலிருந்து நீக்கப்பட்டது</string>
     <string name="remote_activity_projected">காட்டப்பட்டது (நேரலை)</string>
     <string name="remote_activity_presentation_connect">விளக்கக்காட்சித் தொலைக் கட்டுப்பாட்டுடன் இணைக்கப்பட்டது</string>
-    <string name="remote_activity_presentation_connect_detail">இப்போது இணைக்கப்பட்டது</string>
     <string name="remote_activity_qa_admin_connect">கே&amp;ப நிர்வாகத்துடன் இணைக்கப்பட்டது</string>
     <string name="remote_activity_qa_admin_connect_detail">இப்போது இணைக்கப்பட்டது</string>
     <string name="remote_activity_presented">காட்டப்படுகிறது</string>
@@ -1220,7 +1188,6 @@
     <string name="instance_link_primary_badge">முதன்மை — %1$d பின்தொடர்பவர்(கள்) இணைக்கப்பட்டுள்ளனர்</string>
     <string name="client_label_placeholder">எளிதில் அறியக்கூடிய பெயரை உள்ளிடவும்…</string>
     <string name="client_label_edit_tooltip">எளிதில் அறியக்கூடிய பெயரை அமை</string>
-    <string name="client_label_save">சேமி</string>
     <string name="client_label_cancel">ரத்து</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1343,7 +1310,6 @@
     <string name="system_storage_subtitle">Church Presenter உங்கள் உள்ளடக்கத்தை எங்கே தேடுகிறது</string>
     <string name="system_storage_linked_count">%1$d இணைக்கப்பட்டது</string>
     <string name="system_storage_needs_attention_count">%1$d கவனம் தேவை</string>
-    <string name="system_storage_status_not_set">அமைக்கப்படவில்லை</string>
     <string name="system_storage_status_not_found">கோப்புறை கிடைக்கவில்லை</string>
     <string name="system_storage_status_read_only">படிக்க மட்டும்</string>
     <string name="system_storage_status_linked">இணைக்கப்பட்டது</string>
@@ -1385,7 +1351,6 @@
     <string name="show_song_number_before_title">தலைப்புக்கு முன் பாடல் எண்ணைக் காட்டு</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">மேடைத் திரை</string>
     <string name="general">பொது</string>
     <string name="display_stage_monitor">மேடைத் திரை</string>
     <string name="stage_monitor_quadrant_next">அடுத்தது</string>
@@ -1470,7 +1435,6 @@
     <string name="qa_confirm_go_live">நேரலையை உறுதிப்படுத்து</string>
     <string name="qa_add_question_hint">ஒரு கேள்வியைச் சேர்…</string>
     <string name="qa_edit_question_hint">கேள்வி உரையைத் திருத்து…</string>
-    <string name="qa_delete_question">நீக்கு</string>
     <string name="qa_confirm_delete_prompt">நீக்கவா?</string>
     <string name="qa_submitter_device">சாதனம்: %1$s</string>
     <string name="qa_public_access">பொது அணுகல்</string>
@@ -1507,14 +1471,11 @@
     <string name="stt_live_preview">நேரலை முன்னோட்டம்</string>
     <string name="stt_not_connected">இணைக்கப்படவில்லை. STT சேவையக URL ஐ உள்ளிட்டு இணை என்பதைச் சொடுக்கவும்.</string>
     <string name="stt_waiting_for_transcription">படியெடுத்தலுக்குக் காத்திருக்கிறது…</string>
-    <string name="stt_transcription_label">படியெடுத்தல்</string>
     <string name="stt_translation_label">மொழிபெயர்ப்பு</string>
     <string name="stt_settings_dialog_title">STT காட்சி அமைப்புகள்</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI அறிக்கைகள்</string>
-    <string name="ccli_tab_songs">பாடல்கள்</string>
-    <string name="ccli_tab_bible">வேதாகமம்</string>
     <string name="ccli_tab_activity">செயல்பாடு</string>
     <string name="ccli_songs_summary">%1$d தனித்தன்மையான பாடல்கள் · மொத்தம் %2$d இயக்கங்கள்</string>
     <string name="ccli_bible_summary">%1$d தனித்தன்மையான வசனங்கள் · மொத்தம் %2$d இயக்கங்கள்</string>
@@ -1525,7 +1486,6 @@
     <string name="ccli_activity_title">காலப்போக்கில் வழங்கல்கள்</string>
     <string name="ccli_from">முதல்:</string>
     <string name="ccli_to">வரை:</string>
-    <string name="ccli_legend_songs">பாடல்கள்</string>
     <string name="ccli_legend_bible">வேதாகம வசனங்கள்</string>
     <string name="ccli_stat_songs_presented">வழங்கப்பட்ட பாடல்கள்</string>
     <string name="ccli_stat_bible_verses">வேதாகம வசனங்கள்</string>
@@ -1539,7 +1499,6 @@
     <string name="ccli_col_first">முதல்</string>
     <string name="ccli_col_last">கடைசி</string>
     <string name="ccli_col_verse">வசனம்</string>
-    <string name="ccli_col_bible">வேதாகமம்</string>
     <string name="ccli_export_csv">CCLI CSV ஏற்றுமதி</string>
     <string name="ccli_export_xls">XLS ஏற்றுமதி</string>
     <string name="ccli_exported_success">அறிக்கை வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டது.</string>
@@ -1620,7 +1579,6 @@
     <string name="obs_mode_bible">வேதாகமம்</string>
     <string name="obs_mode_songs">பாடல்கள்</string>
     <string name="obs_mode_pictures">படங்கள்</string>
-    <string name="obs_mode_presentation">விளக்கக்காட்சி</string>
     <string name="obs_mode_media">ஊடகம்</string>
     <string name="obs_mode_lower_third">கீழ்ப்பட்டை</string>
     <string name="obs_mode_announcements">அறிவிப்புகள்</string>
@@ -1815,7 +1773,6 @@
     <string name="companion_satellite_no_host">இணைக்க அமைப்புகள் → Companion Satellite இல் ஒரு Companion புரவலனை அமைக்கவும்.</string>
     <string name="companion_satellite_status_connecting">இணைக்கிறது…</string>
     <string name="companion_satellite_status_disconnected">துண்டிக்கப்பட்டது</string>
-    <string name="companion_satellite_status_error">பிழை: %1$s</string>
     <string name="companion_satellite_connection_name">பெயர்</string>
     <string name="companion_satellite_product_name">தயாரிப்புப் பெயர்</string>
     <string name="companion_satellite_reconnect_delay">மறுஇணைப்புத் தாமதம் (மிவி)</string>
@@ -1878,7 +1835,6 @@
     <string name="bible_engine_detect">வேதவசனத்தைக் கண்டறி</string>
     <string name="bible_engine_run_local">இயந்திரத்தை உள்ளூரில் இயக்கு</string>
     <string name="bible_engine_host">இயந்திரப் புரவலன்</string>
-    <string name="bible_engine_port">துறை</string>
     <string name="stt_help_dev_mode">உருவாக்குநருக்கு உதவு — வேதாகமத் தாவலில் நேரலைக் கருத்துப் பொத்தான்களைக் காட்டு (தவறான பகுதி / முன்கூட்டியது / தவறவிட்ட பகுதி)</string>
     <string name="dictionary_back">பின்</string>
     <string name="dictionary_forward">முன்</string>
@@ -1968,7 +1924,6 @@
     <string name="font_category_serif">செரிஃப்</string>
     <string name="font_category_mono">மோனோ</string>
     <string name="font_category_display">டிஸ்பிளே</string>
-    <string name="font_preview">முன்னோட்டம்</string>
     <string name="font_preview_sample">தேர்ந்தெடுத்த எழுத்துருவில் மாதிரி உரை</string>
     <string name="font_warning_no_cyrillic">%1$s இல் சிரிலிக் எழுத்துகள் இல்லை — சிரிலிக் வசனங்கள் திரையில் வேறு எழுத்துருவில் தோன்றும்.</string>
     <string name="font_warning_no_hebrew">%1$s இல் ஹீப்ரு எழுத்துகள் இல்லை — ஹீப்ரு உரை திரையில் வேறு எழுத்துருவில் தோன்றும்.</string>
@@ -1978,7 +1933,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">கோடிடப்பட்டது</string>
     <string name="bible_custom_name">பெயர்</string>
-    <string name="bible_custom_abbreviation">சுருக்கம்</string>
     <string name="bible_translations">மொழிபெயர்ப்புகள்</string>
     <string name="bible_miscellaneous">இதர</string>
     <string name="bible_font">எழுத்துரு</string>
@@ -1993,10 +1947,7 @@
     <string name="bible_preview_sample_book">யோவான்</string>
     <string name="bible_preview_no_translations">இங்கே காண ஒரு மொழிபெயர்ப்பைச் சேர்க்கவும்</string>
     <string name="song_element_number">எண்</string>
-    <string name="song_element_title">தலைப்பு</string>
     <string name="song_element_lyrics">பாடல் வரிகள்</string>
-    <string name="song_element_author">ஆசிரியர்</string>
-    <string name="song_element_composer">இசையமைப்பாளர்</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">டெம்போ</string>
     <string name="song_target_title_slide">தலைப்பு ஸ்லைடு</string>
@@ -2009,7 +1960,6 @@
     <string name="song_chunk">பகுதி</string>
     <string name="song_language_scope">மொழி</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">பின்னணி</string>
     <string name="song_background_full_screen">முழுத் திரை</string>
     <string name="song_background_lower_third">கீழ் மூன்றில் ஒன்று</string>
     <string name="song_background_inherit">மரபுரிமை</string>
@@ -2024,7 +1974,6 @@
     <string name="song_background_your_color">உங்கள் நிறம்</string>
     <string name="song_background_browse">உலாவு…</string>
     <string name="song_background_look">தோற்றம்</string>
-    <string name="song_background_preset_none">எதுவுமில்லை</string>
     <string name="song_background_preset_soft">மென்மை</string>
     <string name="song_background_preset_legible">படிக்கத்தக்க</string>
     <string name="song_background_preset_cinema">திரைப்படம்</string>
@@ -2045,7 +1994,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">பின்னணிகள்</string>
     <string name="background_group_defaults">இயல்பு</string>
-    <string name="background_scope_default">இயல்பு</string>
     <string name="background_scope_default_lower_third">இயல்பு கீழ்ப்பட்டை</string>
     <string name="background_scope_default_meta">வேதாகமம் அல்லது பாடல்கள் இயல்பாக அமைந்திருக்கும்போது</string>
     <string name="background_scope_default_lower_third_meta">கீழ்ப்பட்டை இயல்பாக அமைந்திருக்கும்போது</string>
@@ -2054,16 +2002,13 @@
     <string name="background_following_default">இயல்பைப் பின்பற்றுகிறது</string>
     <string name="background_use_default">இயல்பைப் பயன்படுத்து</string>
     <string name="background_set_explicitly">இந்தப் பரப்புக்குத் தனியே அமைக்கப்பட்டது</string>
-    <string name="background_type_caption">வகை</string>
     <string name="background_color_caption">நிறம்</string>
     <string name="background_image_file">படக் கோப்பு</string>
     <string name="background_video_file">காணொளிக் கோப்பு</string>
-    <string name="background_opacity_caption">ஒளிபுகாநிலை</string>
     <string name="background_above_band_caption">பட்டைக்கு மேலே</string>
     <string name="background_above_band_fill">நிரப்பு நிறம்</string>
     <string name="background_above_band_opacity">நிரப்பு ஒளிபுகாநிலை</string>
     <string name="quick_background_reset">வழக்கத்திற்குத் திரும்பு</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · அமைப்புகளில் நிர்வகிக்கவும்</string>
     <string name="quick_backgrounds">விரைவுப் பின்னணிகள்</string>
     <string name="quick_backgrounds_help">முன்னோட்டப் பலகை ஒரு சொடுக்கு தொலைவில் வைத்திருக்கும் பின்னணிகள். ஒரு கட்டம் எதைக் காட்ட வேண்டும் என்பதைத் தேர்வுசெய்ய அதைச் சொடுக்கவும்; எந்த விசை அதை அடையும் என மாற்ற இழுக்கவும். ஆராதனையின்போது ஒன்றைத் தேர்ந்தெடுத்தால், வழக்கத்திற்குத் திரும்பும் வரை எல்லாத் திரைகளையும் மேலெழுதும் — இங்கே எதையும் மாற்றாது.</string>
@@ -2089,16 +2034,10 @@
     <string name="output_profile_swap_menu_tooltip">வெளியீட்டுச் சுயவிவரத்தை மாற்று</string>
     <string name="output_profile_new_name_default">புதிய சுயவிவரம்</string>
     <string name="output_profile_empty_state">வடிவமைக்கத் தொடங்க ஒரு சுயவிவரத்தை உருவாக்கவும்</string>
-    <string name="customize_bible">வேதாகமம்</string>
-    <string name="customize_songs">பாடல்கள்</string>
     <string name="customize_group_verse_text">வசன உரை</string>
     <string name="customize_group_reference">குறிப்பு</string>
     <string name="customize_background_type">வகை</string>
-    <string name="customize_type_color">நிறம்</string>
     <string name="customize_type_image">படம்</string>
-    <string name="customize_type_video">காணொளி</string>
-    <string name="customize_type_default">இயல்பு</string>
-    <string name="customize_type_gradient">படிநிறம்</string>
     <string name="customize_show_abbreviation">சுருக்கம்</string>
     <string name="customize_background_opacity">ஒளிபுகாநிலை</string>
     <string name="slate_theme">ஸ்லேட் தீம்</string>
@@ -2144,7 +2083,6 @@
     <string name="song_lottie_unsupported_note">வார்ப்புரு தளவமைப்பையும் தலைப்பின் இடத்தையும் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல், சொல் இடைவெளி, அடுத்ததின் முன்னோட்டம் மற்றும் கார்டுகள் பொருந்தாது.</string>
     <string name="bible_lottie_unsupported_note">வார்ப்புரு தளவமைப்பு, குறிப்பின் இடம் மற்றும் இரு மொழிகள் பட்டையை எப்படிப் பகிர்வது என்பதைத் தீர்மானிக்கிறது. கீழ் மூன்றில் ஒரு பகுதி பாணி எழுத்துரு, அளவு, நிறம், சீரமைப்பு, எழுத்து இடைவெளி, எழுத்து வடிவம் மற்றும் நிழலை அமைக்கிறது; உரைப் பின்னணி, அடிக்கோடு, அடித்தல் மற்றும் சொல் இடைவெளி பொருந்தாது.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">வெளிக்கோடு</string>
     <string name="tooltip_outline_options">வெளிக்கோடு விருப்பங்கள்</string>
     <string name="text_outline">வெளிக்கோடு</string>
     <string name="text_outline_width">அகலம்</string>
@@ -2212,7 +2150,6 @@
     <string name="add_ndi_output">வெளியீட்டைச் சேர்</string>
     <string name="ndi_output_numbered">NDI வெளியீடு %1$d</string>
     <string name="preview_output">வெளியீட்டு முன்னோட்டம்</string>
-    <string name="output_resolution">தெளிவுத்திறன்</string>
     <string name="output_resolution_custom">தனிப்பயன்…</string>
     <string name="output_resolution_custom_title">தனிப்பயன் தெளிவுத்திறன்</string>
     <string name="output_resolution_width">அகலம்</string>
@@ -2317,7 +2254,6 @@
     <string name="calendar_sync_description">இந்தக் கணினி அணைந்திருக்கும்போதும் வாரம் முழுவதும் மொபைல் செயலியிலிருந்து சேவைகளைத் திட்டமிடுங்கள். இந்தக் கணினியே முதன்மை மூலமாக இருக்கும்.</string>
     <string name="calendar_sync_enable">நாட்காட்டியைத் தொலைபேசிகளுடன் ஒத்திசைக்கவும்</string>
     <string name="calendar_sync_relay_url">ரிலே</string>
-    <string name="calendar_sync_status_off">அணை</string>
     <string name="calendar_sync_status_unpaired">இன்னும் பதிவு செய்யப்படவில்லை — ஒத்திசைவு முதல்முறை இயக்கப்படும்போது இந்தக் கணினி ரிலேயில் பதிவு செய்கிறது</string>
     <string name="calendar_sync_status_syncing">ஒத்திசைக்கிறது…</string>
     <string name="calendar_sync_status_synced">ஒத்திசைக்கப்பட்டது %1$s</string>

@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_preview_done
+import churchpresenter.composeapp.generated.resources.preview_layout_done
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.utils.OutputSize
@@ -105,7 +105,7 @@ internal fun LargePreview(
                         modifier = Modifier.weight(1f),
                     )
                     KeyButton(onClick = onClose, modifier = Modifier.testTag(LARGE_PREVIEW_DONE_TAG)) {
-                        Text(stringResource(Res.string.profile_preview_done), fontSize = 12.sp)
+                        Text(stringResource(Res.string.preview_layout_done), fontSize = 12.sp)
                     }
                 }
                 PreviewToolbar(

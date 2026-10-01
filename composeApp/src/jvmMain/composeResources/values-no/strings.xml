@@ -3,7 +3,6 @@
     <string name="mode">Modus</string>
     <string name="scope">Omfang</string>
     <string name="title">Tittel</string>
-    <string name="number">Nummer</string>
     <string name="go_live">Gå live</string>
     <string name="add_to_schedule">Legg til i kjøreplan</string>
     <string name="copy_verse">Kopier vers</string>
@@ -12,7 +11,6 @@
     <string name="search">Søk</string>
     <string name="bible_smart_search_hint">Referanse eller tekst – f.eks. Joh 3:16, matt 1, eller et ord</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Referanse</string>
     <string name="bible_search_mode_text">Tekst</string>
     <string name="bible_search_mode_tooltip">Trykk for å bytte – Auto: hopp til referanser, søk i alt annet. Referanse: bare navigering. Tekst: søk alltid i verstekst.</string>
     <string name="bible_verse_selection_hint">Ctrl+klikk for å veksle, Skift+klikk for område</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Lukk panelet</string>
     <string name="bible_cross_references_dismiss_hint">Esc for å lukke</string>
     <string name="menu_file">Fil</string>
-    <string name="menu_new_schedule">Ny kjøreplan</string>
-    <string name="menu_open_schedule">Åpne kjøreplan</string>
-    <string name="menu_save_schedule">Lagre kjøreplan</string>
     <string name="menu_save_schedule_as">Lagre kjøreplan som...</string>
     <string name="menu_close_schedule">Lukk kjøreplan</string>
     <string name="menu_exit">Avslutt</string>
     <string name="file_chooser_save_schedule">Lagre kjøreplan som</string>
-    <string name="file_chooser_open_schedule">Åpne kjøreplan</string>
     <string name="file_filter_schedule">Church Presenter-kjøreplan (*.cps)</string>
-    <string name="menu_schedule">Kjøreplan</string>
-    <string name="menu_add_to_schedule">Legg til i kjøreplan</string>
     <string name="menu_remove_from_schedule">Fjern fra kjøreplan</string>
     <string name="menu_clear_schedule">Tøm kjøreplan</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Følg en annen ChurchPresenter-instans på nettverket – speil innholdet som er live der, og legg eventuelt til elementer i kjøreplanen dens.</string>
     <string name="instance_link_host">Vert</string>
     <string name="instance_link_host_hint">f.eks. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Koble til automatisk ved oppstart</string>
     <string name="instance_link_reconnect_delay">Minste ventetid før ny tilkobling</string>
     <string name="instance_link_reconnect_delay_hint">Korteste ventetid før en brutt kobling forsøkes igjen. Gjentatte feil øker ventetiden av seg selv.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Standard</string>
-    <string name="background_color_option">Farge</string>
-    <string name="background_image_option">Bilde</string>
     <string name="background_video_option">Videoløkke</string>
     <string name="background_transparent_option">Gjennomsiktig</string>
     <string name="background_follow_default_option">Følg standard</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Nett</string>
-    <string name="projection_content_background">Bakgrunn</string>
     <string name="projection_content_lt_background">Bakgrunn for nedre tredjedel</string>
     <string name="browser_source_resolution">Oppløsning</string>
     <string name="browser_source_fps">Maks FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Zoom ut</string>
     <string name="tooltip_add_to_schedule">Legg til i kjøreplan</string>
     <string name="tooltip_clear_display">Tøm skjermen</string>
-    <string name="remote_action_clear_display">Tøm skjermen</string>
     <string name="schedule_add_files_title">Legg til filer i kjøreplanen</string>
     <string name="tooltip_toggle_displays">Slå presentasjonsskjermene av og på</string>
     <string name="tooltip_settings">Innstillinger</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Kompakt</string>
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detaljert</string>
-    <string name="schedule_kind_lower_third">Nedre tredjedel</string>
     <string name="tooltip_schedule_options">Alternativer for kjøreplanen</string>
     <string name="schedule_show_buttons_under_title">Vis knappene under tittelen</string>
     <string name="schedule_option_item_count">Antall elementer</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Rediger etikett</string>
     <string name="label_text">Etikettekst</string>
     <string name="text_color">Tekstfarge</string>
-    <string name="background_color_label">Bakgrunnsfarge</string>
     <string name="enter_label_text">Skriv inn etikettekst...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Skyv mot venstre</string>
     <string name="animation_slide_right">Skyv mot høyre</string>
     <string name="animation_none">Ingen</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s neste/forrige bilde  ·  %2$s bytt rad</string>
     <string name="presentation_arrow_key_hint">%1$s – forrige/neste trinn og lysbilde  ·  %2$s – spill/pause  ·  %3$s – svart skjerm</string>
     <string name="pictures_reorder_hint">Skift+dra miniatyrbildene for å endre rekkefølgen</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Bakgrunn for bibel</string>
     <string name="content_songs_background">Bakgrunn for sanger</string>
     <string name="content_pictures">Bilder/presentasjon</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Nedre tredjedel</string>
     <string name="content_announcements">Kunngjøringer</string>
     <string name="display_mode">Visningsmodus</string>
-    <string name="display_fullscreen">Fullskjerm</string>
     <string name="display_lower_third">Nedre tredjedel</string>
     <string name="full_screen">Fullskjerm</string>
-    <string name="lower_third_size">Nedre tredjedel</string>
     <string name="identify_screen">Identifiser</string>
     <string name="projection_target_display">Skjerm</string>
     <string name="projection_auto_display">Auto</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Kunne ikke importere innstillingene. Filen kan være ugyldig.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Lokal fil</string>
     <string name="media_network_url">Nettverksadresse</string>
     <string name="media_url_placeholder">Skriv inn URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Midt til venstre</string>
     <string name="center_right">Midt til høyre</string>
     <string name="bottom_center">Nederst i midten</string>
-    <string name="announcement_background_color_label">Bakgrunnsfarge</string>
     <string name="transparent_default">Gjennomsiktig (standard)</string>
     <string name="announcement_animation">Animasjon</string>
     <string name="anim_slide_from_left">Skyv inn fra venstre</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Legg til i kjøreplan</string>
     <string name="web_go_live">Gå live</string>
     <string name="web_bookmark_add">Legg til bokmerke</string>
     <string name="web_bookmark_remove">Fjern bokmerke</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Fyll</string>
     <string name="canvas_shape_stroke_width">Strekbredde</string>
     <string name="canvas_rename_scene">Gi nytt navn</string>
-    <string name="canvas_remove_scene">Fjern</string>
     <string name="canvas_add_source">Legg til kilde</string>
     <string name="canvas_delete_source">Slett kilde</string>
     <string name="canvas_source_move_forward">Flytt fram</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Høyde</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Egen CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Velg bilde</string>
     <string name="canvas_select_video_title">Velg video</string>
     <string name="canvas_image_files">Bildefiler</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Klokke</string>
     <string name="canvas_clock_mode_countdown">Nedtelling</string>
     <string name="canvas_clock_mode_count_up">Stoppeklokke</string>
     <string name="canvas_decklink_io_warning">Denne enheten brukes for øyeblikket til utgang. Inngang er kanskje ikke tilgjengelig på enheter som ikke støtter samtidig inn- og utgang.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Kurve</string>
     <string name="canvas_letter_spacing">Tegnavstand</string>
     <string name="canvas_source_qrcode">QR-kode</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Skjermopptak</string>
     <string name="canvas_source_bible">Bibel</string>
     <string name="canvas_bible_version">Bibeloversettelse</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Farge på referanse</string>
     <string name="canvas_verse_style">Versstil</string>
     <string name="canvas_reference_style">Referansestil</string>
-    <string name="canvas_text_color">Tekstfarge</string>
     <string name="canvas_text_bg_color">Bakgrunnsfarge</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Format</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Videoformat</string>
     <string name="canvas_camera_format_auto">Auto (standard)</string>
     <string name="canvas_camera_connection">Videotilkobling</string>
-    <string name="canvas_camera_mode">Modus</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">Opptak X</string>
     <string name="canvas_capture_y">Opptak Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Vindu</string>
     <string name="canvas_capture_refresh_windows">Oppdater vinduslisten</string>
     <string name="canvas_capture_interval">Opptaksintervall</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Skjermopptak</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Fjernet fra kjøreplanen</string>
     <string name="remote_activity_projected">Vist (gikk live)</string>
     <string name="remote_activity_presentation_connect">Koblet til fjernkontroll for presentasjon</string>
-    <string name="remote_activity_presentation_connect_detail">Tilkoblet nå</string>
     <string name="remote_activity_qa_admin_connect">Koblet til Q&amp;A-administrasjon</string>
     <string name="remote_activity_qa_admin_connect_detail">Tilkoblet nå</string>
     <string name="remote_activity_presented">Vises</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Hovedinstans – %1$d tilkoblet</string>
     <string name="client_label_placeholder">Skriv inn et gjenkjennelig navn…</string>
     <string name="client_label_edit_tooltip">Angi et gjenkjennelig navn</string>
-    <string name="client_label_save">Lagre</string>
     <string name="client_label_cancel">Avbryt</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Hvor Church Presenter leter etter innholdet ditt</string>
     <string name="system_storage_linked_count">%1$d koblet</string>
     <string name="system_storage_needs_attention_count">%1$d trenger tilsyn</string>
-    <string name="system_storage_status_not_set">Ikke angitt</string>
     <string name="system_storage_status_not_found">Fant ikke mappen</string>
     <string name="system_storage_status_read_only">Skrivebeskyttet</string>
     <string name="system_storage_status_linked">Koblet</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Vis sangnummer før tittelen</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Scenemonitor</string>
     <string name="general">Generelt</string>
     <string name="display_stage_monitor">Scenemonitor</string>
     <string name="stage_monitor_quadrant_next">Neste</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Bekreft gå live</string>
     <string name="qa_add_question_hint">Legg til et spørsmål…</string>
     <string name="qa_edit_question_hint">Rediger spørsmålsteksten…</string>
-    <string name="qa_delete_question">Slett</string>
     <string name="qa_confirm_delete_prompt">Slette?</string>
     <string name="qa_submitter_device">Enhet: %1$s</string>
     <string name="qa_public_access">Offentlig tilgang</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Forhåndsvisning live</string>
     <string name="stt_not_connected">Ikke tilkoblet. Skriv inn URL-en til STT-serveren og trykk Koble til.</string>
     <string name="stt_waiting_for_transcription">Venter på transkripsjon…</string>
-    <string name="stt_transcription_label">Transkripsjon</string>
     <string name="stt_translation_label">Oversettelse</string>
     <string name="stt_settings_dialog_title">Visningsinnstillinger for STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI-rapporter</string>
-    <string name="ccli_tab_songs">Sanger</string>
-    <string name="ccli_tab_bible">Bibel</string>
     <string name="ccli_tab_activity">Aktivitet</string>
     <string name="ccli_songs_summary">%1$d unike sanger · %2$d visninger totalt</string>
     <string name="ccli_bible_summary">%1$d unike vers · %2$d visninger totalt</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Presentasjoner over tid</string>
     <string name="ccli_from">Fra:</string>
     <string name="ccli_to">Til:</string>
-    <string name="ccli_legend_songs">Sanger</string>
     <string name="ccli_legend_bible">Bibelvers</string>
     <string name="ccli_stat_songs_presented">Sanger vist</string>
     <string name="ccli_stat_bible_verses">Bibelvers</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Første</string>
     <string name="ccli_col_last">Siste</string>
     <string name="ccli_col_verse">Vers</string>
-    <string name="ccli_col_bible">Bibel</string>
     <string name="ccli_export_csv">Eksporter CCLI-CSV</string>
     <string name="ccli_export_xls">Eksporter XLS</string>
     <string name="ccli_exported_success">Rapporten ble eksportert.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Bibel</string>
     <string name="obs_mode_songs">Sanger</string>
     <string name="obs_mode_pictures">Bilder</string>
-    <string name="obs_mode_presentation">Presentasjon</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Undertekstboks</string>
     <string name="obs_mode_announcements">Kunngjøringer</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Sett en Companion-vert i Innstillinger → Companion Satellite for å koble til.</string>
     <string name="companion_satellite_status_connecting">Kobler til …</string>
     <string name="companion_satellite_status_disconnected">Frakoblet</string>
-    <string name="companion_satellite_status_error">Feil: %1$s</string>
     <string name="companion_satellite_connection_name">Navn</string>
     <string name="companion_satellite_product_name">Produktnavn</string>
     <string name="companion_satellite_reconnect_delay">Ventetid før ny tilkobling (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Gjenkjenn skriftsteder</string>
     <string name="bible_engine_run_local">Kjør motoren lokalt</string>
     <string name="bible_engine_host">Motorvert</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Hjelp utviklerne — vis tilbakemeldingsknapper på Bibel-fanen (feil avsnitt / for tidlig / avsnitt gikk tapt)</string>
     <string name="dictionary_back">Tilbake</string>
     <string name="dictionary_forward">Fram</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Antikva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Forhåndsvisning</string>
     <string name="font_preview_sample">Eksempeltekst i den valgte skrifttypen</string>
     <string name="font_warning_no_cyrillic">%1$s mangler kyrilliske tegn – kyrilliske vers vises på skjermen med en annen skrifttype.</string>
     <string name="font_warning_no_hebrew">%1$s mangler hebraiske tegn – hebraisk tekst vises på skjermen med en annen skrifttype.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Gjennomstreking</string>
     <string name="bible_custom_name">Navn</string>
-    <string name="bible_custom_abbreviation">Forkortelse</string>
     <string name="bible_translations">Oversettelser</string>
     <string name="bible_miscellaneous">Diverse</string>
     <string name="bible_font">Skrift</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Legg til en oversettelse for å se den her</string>
     <string name="song_element_number">Nummer</string>
-    <string name="song_element_title">Tittel</string>
     <string name="song_element_lyrics">Sangtekst</string>
-    <string name="song_element_author">Forfatter</string>
-    <string name="song_element_composer">Komponist</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Tittellysbilde</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Avsnitt</string>
     <string name="song_language_scope">Språk</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Bakgrunn</string>
     <string name="song_background_full_screen">Fullskjerm</string>
     <string name="song_background_lower_third">Nedre tredjedel</string>
     <string name="song_background_inherit">Arv</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Din farge</string>
     <string name="song_background_browse">Bla gjennom…</string>
     <string name="song_background_look">Utseende</string>
-    <string name="song_background_preset_none">Ingen</string>
     <string name="song_background_preset_soft">Myk</string>
     <string name="song_background_preset_legible">Lesbar</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Bakgrunner</string>
     <string name="background_group_defaults">Standard</string>
-    <string name="background_scope_default">Standard</string>
     <string name="background_scope_default_lower_third">Standard nedre tredjedel</string>
     <string name="background_scope_default_meta">Når Bibel eller Sanger står på Standard</string>
     <string name="background_scope_default_lower_third_meta">Når nedre tredjedel står på Standard</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Følger standard</string>
     <string name="background_use_default">Bruk standard</string>
     <string name="background_set_explicitly">Satt separat for denne flaten</string>
-    <string name="background_type_caption">Type</string>
     <string name="background_color_caption">Farge</string>
     <string name="background_image_file">Bildefil</string>
     <string name="background_video_file">Videofil</string>
-    <string name="background_opacity_caption">Dekkevne</string>
     <string name="background_above_band_caption">Over feltet</string>
     <string name="background_above_band_fill">Fyllfarge</string>
     <string name="background_above_band_opacity">Fyllets dekkevne</string>
     <string name="quick_background_reset">Tilbake til normalt</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · administreres i innstillingene</string>
     <string name="quick_backgrounds">Hurtigbakgrunner</string>
     <string name="quick_backgrounds_help">Bakgrunner som forhåndsvisningspanelet holder ett klikk unna. Klikk en flis for å velge hva den viser, dra den for å endre hvilken tast som når den. Å velge en under gudstjenesten overstyrer hver skjerm til du går tilbake til normalt — her endrer det ingenting.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Bytt utgangsprofil</string>
     <string name="output_profile_new_name_default">Ny profil</string>
     <string name="output_profile_empty_state">Opprett en profil for å begynne å style den</string>
-    <string name="customize_bible">Bibel</string>
-    <string name="customize_songs">Sanger</string>
     <string name="customize_group_verse_text">Versetekst</string>
     <string name="customize_group_reference">Referanse</string>
     <string name="customize_background_type">Type</string>
-    <string name="customize_type_color">Farge</string>
     <string name="customize_type_image">Bilde</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Standard</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Forkortelse</string>
     <string name="customize_background_opacity">Dekkevne</string>
     <string name="slate_theme">Skifer-tema</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Malen bestemmer oppsettet og hvor tittelen står. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking, ordavstand, forhåndsvisning av neste og akkorder gjelder ikke.</string>
     <string name="bible_lottie_unsupported_note">Malen bestemmer oppsettet, plasseringen av referansen og hvordan to språk deler båndet. Stilen for nedre tredjedel styrer skrift, størrelse, farge, justering, tegnavstand, store/små bokstaver og skygge; tekstbakgrunn, understreking, gjennomstreking og ordavstand gjelder ikke.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Konturalternativer</string>
     <string name="text_outline">Kontur</string>
     <string name="text_outline_width">Bredde</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Legg til utgang</string>
     <string name="ndi_output_numbered">NDI-utgang %1$d</string>
     <string name="preview_output">Forhåndsvis utgang</string>
-    <string name="output_resolution">Oppløsning</string>
     <string name="output_resolution_custom">Egendefinert…</string>
     <string name="output_resolution_custom_title">Egendefinert oppløsning</string>
     <string name="output_resolution_width">Bredde</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Planlegg gudstjenester fra mobilappen hele uken, selv når denne datamaskinen er av. Denne datamaskinen forblir kilden til sannhet.</string>
     <string name="calendar_sync_enable">Synkroniser kalenderen med telefoner</string>
     <string name="calendar_sync_relay_url">Relé</string>
-    <string name="calendar_sync_status_off">Av</string>
     <string name="calendar_sync_status_unpaired">Ikke registrert ennå — denne datamaskinen registrerer seg hos reléet første gang synkronisering er på</string>
     <string name="calendar_sync_status_syncing">Synkroniserer…</string>
     <string name="calendar_sync_status_synced">Synkronisert %1$s</string>

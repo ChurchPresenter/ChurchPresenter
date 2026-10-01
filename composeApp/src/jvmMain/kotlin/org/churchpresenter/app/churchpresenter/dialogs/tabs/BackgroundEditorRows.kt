@@ -21,13 +21,13 @@ import churchpresenter.composeapp.generated.resources.background_video_file
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.customize_background_opacity
 import churchpresenter.composeapp.generated.resources.customize_background_type
-import churchpresenter.composeapp.generated.resources.customize_type_color
-import churchpresenter.composeapp.generated.resources.customize_type_default
-import churchpresenter.composeapp.generated.resources.customize_type_gradient
+import churchpresenter.composeapp.generated.resources.canvas_source_color
+import churchpresenter.composeapp.generated.resources.background_default
+import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.customize_type_image
 import churchpresenter.composeapp.generated.resources.background_lottie_option
 import churchpresenter.composeapp.generated.resources.background_transparent_option
-import churchpresenter.composeapp.generated.resources.customize_type_video
+import churchpresenter.composeapp.generated.resources.canvas_source_video
 import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity
 import churchpresenter.composeapp.generated.resources.lower_third_animation_file
@@ -135,7 +135,7 @@ private fun SurfaceSourceRows(
         onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pixabayApiKey = key)) }
     }
     when (config.backgroundType) {
-        Constants.BACKGROUND_COLOR -> SettingsRow(stringResource(Res.string.customize_type_color)) {
+        Constants.BACKGROUND_COLOR -> SettingsRow(stringResource(Res.string.canvas_source_color)) {
             RowColor(config.backgroundColor, { onConfig(config.copy(backgroundColor = it)) })
         }
         Constants.BACKGROUND_IMAGE -> SettingsRow(stringResource(Res.string.background_image_file)) {
@@ -318,13 +318,13 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
 /** What a background type is called in a segment. */
 internal fun backgroundTypeWord(type: String): StringResource = when (type) {
     Constants.BACKGROUND_IMAGE -> Res.string.customize_type_image
-    Constants.BACKGROUND_VIDEO -> Res.string.customize_type_video
+    Constants.BACKGROUND_VIDEO -> Res.string.canvas_source_video
     Constants.BACKGROUND_TRANSPARENT -> Res.string.background_transparent_option
-    Constants.BACKGROUND_GRADIENT -> Res.string.customize_type_gradient
+    Constants.BACKGROUND_GRADIENT -> Res.string.gradient_enabled
     Constants.BACKGROUND_LOTTIE -> Res.string.background_lottie_option
-    Constants.BACKGROUND_COLOR -> Res.string.customize_type_color
+    Constants.BACKGROUND_COLOR -> Res.string.canvas_source_color
     Constants.BACKGROUND_CAMERA -> Res.string.background_camera_option
-    else -> Res.string.customize_type_default
+    else -> Res.string.background_default
 }
 
 /** Test handle for one background type segment. */
@@ -337,7 +337,7 @@ internal fun describeBackground(config: BackgroundConfig): String = when (config
     Constants.BACKGROUND_IMAGE -> config.backgroundImage.substringAfterLast('/').substringAfterLast('\\')
         .ifBlank { stringResource(Res.string.customize_type_image) }
     Constants.BACKGROUND_VIDEO -> config.backgroundVideo.substringAfterLast('/').substringAfterLast('\\')
-        .ifBlank { stringResource(Res.string.customize_type_video) }
+        .ifBlank { stringResource(Res.string.canvas_source_video) }
     Constants.BACKGROUND_LOTTIE -> config.backgroundLottie.substringAfterLast('/').substringBeforeLast('.')
         .ifBlank { stringResource(Res.string.background_lottie_option) }
     else -> stringResource(backgroundTypeWord(config.backgroundType))

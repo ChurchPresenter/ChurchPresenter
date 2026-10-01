@@ -81,7 +81,6 @@ import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.remove_from_favorites
-import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.author

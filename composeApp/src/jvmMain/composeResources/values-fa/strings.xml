@@ -3,7 +3,6 @@
     <string name="mode">حالت</string>
     <string name="scope">دامنه</string>
     <string name="title">عنوان</string>
-    <string name="number">شماره</string>
     <string name="go_live">پخش زنده</string>
     <string name="add_to_schedule">افزودن به برنامه</string>
     <string name="copy_verse">کپی آیه</string>
@@ -12,7 +11,6 @@
     <string name="search">جست‌وجو</string>
     <string name="bible_smart_search_hint">آدرس یا متن — مثلاً یوحنا 3:16، مت 1، یا یک واژه</string>
     <string name="bible_search_mode_auto">خودکار</string>
-    <string name="bible_search_mode_reference">آدرس</string>
     <string name="bible_search_mode_text">متن</string>
     <string name="bible_search_mode_tooltip">برای تغییر حالت بزنید — خودکار: به آدرس‌ها می‌رود و هر چیز دیگری را جست‌وجو می‌کند. آدرس: فقط جابه‌جایی. متن: همیشه متن آیه‌ها را جست‌وجو می‌کند.</string>
     <string name="bible_verse_selection_hint">Ctrl+کلیک برای انتخاب یا لغو، Shift+کلیک برای انتخاب بازه</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">بستن پنل</string>
     <string name="bible_cross_references_dismiss_hint">Esc برای بستن</string>
     <string name="menu_file">فایل</string>
-    <string name="menu_new_schedule">برنامه جدید</string>
-    <string name="menu_open_schedule">باز کردن برنامه</string>
-    <string name="menu_save_schedule">ذخیره برنامه</string>
     <string name="menu_save_schedule_as">ذخیره برنامه با نام...</string>
     <string name="menu_close_schedule">بستن برنامه</string>
     <string name="menu_exit">خروج</string>
     <string name="file_chooser_save_schedule">ذخیره برنامه با نام</string>
-    <string name="file_chooser_open_schedule">باز کردن برنامه</string>
     <string name="file_filter_schedule">برنامه Church Presenter (*.cps)</string>
-    <string name="menu_schedule">برنامه</string>
-    <string name="menu_add_to_schedule">افزودن به برنامه</string>
     <string name="menu_remove_from_schedule">حذف از برنامه</string>
     <string name="menu_clear_schedule">پاک کردن برنامه</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">از نمونه دیگری از ChurchPresenter در شبکه خود پیروی کنید — محتوای زنده آن را اینجا بازتاب دهید و در صورت تمایل موارد را به برنامه آن اضافه کنید.</string>
     <string name="instance_link_host">میزبان</string>
     <string name="instance_link_host_hint">مثلاً 192.168.1.10</string>
-    <string name="instance_link_port">درگاه</string>
     <string name="instance_link_autoconnect">اتصال خودکار هنگام راه‌اندازی</string>
     <string name="instance_link_reconnect_delay">کمینه تأخیر اتصال مجدد</string>
     <string name="instance_link_reconnect_delay_hint">کوتاه‌ترین زمان انتظار پیش از تلاش دوباره برای پیوند قطع‌شده. خطاهای پی‌درپی خودشان این فاصله را بیشتر می‌کنند.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">پیش‌فرض</string>
-    <string name="background_color_option">رنگ</string>
-    <string name="background_image_option">تصویر</string>
     <string name="background_video_option">ویدیوی تکرارشو</string>
     <string name="background_transparent_option">شفاف</string>
     <string name="background_follow_default_option">پیروی از پیش‌فرض</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">وب</string>
-    <string name="projection_content_background">پس‌زمینه</string>
     <string name="projection_content_lt_background">پس‌زمینه نوار پایین</string>
     <string name="browser_source_resolution">رزولوشن</string>
     <string name="browser_source_fps">بیشینه FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">کوچک‌نمایی</string>
     <string name="tooltip_add_to_schedule">افزودن به برنامه</string>
     <string name="tooltip_clear_display">پاک کردن نمایش</string>
-    <string name="remote_action_clear_display">پاک کردن نمایش</string>
     <string name="schedule_add_files_title">افزودن فایل‌ها به برنامه</string>
     <string name="tooltip_toggle_displays">روشن/خاموش کردن نمایشگرهای خروجی</string>
     <string name="tooltip_settings">تنظیمات</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">فشرده</string>
     <string name="schedule_density_normal">معمولی</string>
     <string name="schedule_density_detailed">با جزئیات</string>
-    <string name="schedule_kind_lower_third">نوار پایین</string>
     <string name="tooltip_schedule_options">گزینه‌های برنامه</string>
     <string name="schedule_show_buttons_under_title">نمایش دکمه‌ها زیر عنوان</string>
     <string name="schedule_option_item_count">شمار موارد</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">ویرایش برچسب</string>
     <string name="label_text">متن برچسب</string>
     <string name="text_color">رنگ متن</string>
-    <string name="background_color_label">رنگ پس‌زمینه</string>
     <string name="enter_label_text">متن برچسب را وارد کنید...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">لغزش به چپ</string>
     <string name="animation_slide_right">لغزش به راست</string>
     <string name="animation_none">هیچ</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s تصویر بعدی/پیشین  ·  %2$s جابه‌جایی بین ردیف‌ها</string>
     <string name="presentation_arrow_key_hint">%1$s — مرحله و اسلاید پیشین/بعدی  ·  %2$s — پخش/توقف  ·  %3$s — خالی کردن صفحه</string>
     <string name="pictures_reorder_hint">برای تغییر ترتیب، بندانگشتی‌ها را با Shift+کشیدن جابه‌جا کنید</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">پس‌زمینه کتاب‌مقدس</string>
     <string name="content_songs_background">پس‌زمینه سرودها</string>
     <string name="content_pictures">تصاویر/ارائه</string>
-    <string name="content_media">رسانه</string>
-    <string name="content_streaming">نوار پایین</string>
     <string name="content_announcements">اطلاعیه‌ها</string>
     <string name="display_mode">حالت نمایش</string>
-    <string name="display_fullscreen">تمام‌صفحه</string>
     <string name="display_lower_third">نوار پایین</string>
     <string name="full_screen">تمام‌صفحه</string>
-    <string name="lower_third_size">نوار پایین</string>
     <string name="identify_screen">شناسایی</string>
     <string name="projection_target_display">نمایشگر</string>
     <string name="projection_auto_display">خودکار</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">درون‌ریزی تنظیمات ناموفق بود. ممکن است فایل نامعتبر باشد.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">رسانه</string>
     <string name="media_local_file">فایل محلی</string>
     <string name="media_network_url">نشانی شبکه</string>
     <string name="media_url_placeholder">نشانی را وارد کنید (http://، rtsp://، ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">وسط چپ</string>
     <string name="center_right">وسط راست</string>
     <string name="bottom_center">پایین وسط</string>
-    <string name="announcement_background_color_label">رنگ پس‌زمینه</string>
     <string name="transparent_default">شفاف (پیش‌فرض)</string>
     <string name="announcement_animation">انیمیشن</string>
     <string name="anim_slide_from_left">لغزش از چپ</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">افزودن به برنامه</string>
     <string name="web_go_live">پخش زنده</string>
     <string name="web_bookmark_add">افزودن نشانک</string>
     <string name="web_bookmark_remove">حذف نشانک</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">پُرکننده</string>
     <string name="canvas_shape_stroke_width">ضخامت خط دور</string>
     <string name="canvas_rename_scene">تغییر نام</string>
-    <string name="canvas_remove_scene">حذف</string>
     <string name="canvas_add_source">افزودن منبع</string>
     <string name="canvas_delete_source">حذف منبع</string>
     <string name="canvas_source_move_forward">انتقال به جلو</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">ارتفاع</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS سفارشی</string>
-    <string name="canvas_browser_url">نشانی</string>
     <string name="canvas_select_image_title">انتخاب تصویر</string>
     <string name="canvas_select_video_title">انتخاب ویدیو</string>
     <string name="canvas_image_files">فایل‌های تصویری</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">پیامک</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">ساعت</string>
     <string name="canvas_clock_mode_countdown">شمارش معکوس</string>
     <string name="canvas_clock_mode_count_up">کرنومتر</string>
     <string name="canvas_decklink_io_warning">این دستگاه در حال حاضر برای خروجی استفاده می‌شود. روی دستگاه‌هایی که ورودی و خروجی همزمان را پشتیبانی نمی‌کنند، ممکن است ورودی در دسترس نباشد.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">انحنا</string>
     <string name="canvas_letter_spacing">فاصله حروف</string>
     <string name="canvas_source_qrcode">کد QR</string>
-    <string name="canvas_source_camera">دوربین</string>
     <string name="canvas_source_screen_capture">ضبط صفحه</string>
     <string name="canvas_source_bible">کتاب‌مقدس</string>
     <string name="canvas_bible_version">ترجمه کتاب‌مقدس</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">رنگ آدرس</string>
     <string name="canvas_verse_style">سبک آیه</string>
     <string name="canvas_reference_style">سبک آدرس</string>
-    <string name="canvas_text_color">رنگ متن</string>
     <string name="canvas_text_bg_color">رنگ پس‌زمینه</string>
     <string name="canvas_clock_mode">حالت</string>
     <string name="canvas_clock_format">قالب</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">قالب ویدیو</string>
     <string name="canvas_camera_format_auto">خودکار (پیش‌فرض)</string>
     <string name="canvas_camera_connection">اتصال ویدیو</string>
-    <string name="canvas_camera_mode">حالت</string>
     <string name="canvas_camera_mode_auto">خودکار</string>
     <string name="canvas_capture_x">X ضبط</string>
     <string name="canvas_capture_y">Y ضبط</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">پنجره</string>
     <string name="canvas_capture_refresh_windows">تازه‌سازی فهرست پنجره‌ها</string>
     <string name="canvas_capture_interval">فاصلهٔ ضبط</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">دوربین: %1$s</string>
-    <string name="canvas_placeholder_camera_default">دوربین</string>
     <string name="canvas_placeholder_screen_capture">ضبط صفحه</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">از برنامه حذف شد</string>
     <string name="remote_activity_projected">نمایش داده شد (پخش زنده)</string>
     <string name="remote_activity_presentation_connect">به کنترل ارائه متصل شد</string>
-    <string name="remote_activity_presentation_connect_detail">اکنون متصل است</string>
     <string name="remote_activity_qa_admin_connect">به مدیریت پرسش و پاسخ متصل شد</string>
     <string name="remote_activity_qa_admin_connect_detail">اکنون متصل است</string>
     <string name="remote_activity_presented">در حال نمایش</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">اصلی — %1$d پیرو متصل است</string>
     <string name="client_label_placeholder">یک نام آشنا وارد کنید…</string>
     <string name="client_label_edit_tooltip">تعیین نام آشنا</string>
-    <string name="client_label_save">ذخیره</string>
     <string name="client_label_cancel">انصراف</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter محتوای شما را کجا جست‌وجو می‌کند</string>
     <string name="system_storage_linked_count">%1$d متصل</string>
     <string name="system_storage_needs_attention_count">%1$d نیاز به توجه دارد</string>
-    <string name="system_storage_status_not_set">تعیین نشده</string>
     <string name="system_storage_status_not_found">پوشه پیدا نشد</string>
     <string name="system_storage_status_read_only">فقط خواندنی</string>
     <string name="system_storage_status_linked">متصل</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">نمایش شمارهٔ سرود پیش از عنوان</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">نمایشگر صحنه</string>
     <string name="general">عمومی</string>
     <string name="display_stage_monitor">نمایشگر صحنه</string>
     <string name="stage_monitor_quadrant_next">بعدی</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">تأیید پخش زنده</string>
     <string name="qa_add_question_hint">پرسشی بیفزایید…</string>
     <string name="qa_edit_question_hint">متن پرسش را ویرایش کنید…</string>
-    <string name="qa_delete_question">حذف</string>
     <string name="qa_confirm_delete_prompt">حذف شود؟</string>
     <string name="qa_submitter_device">دستگاه: %1$s</string>
     <string name="qa_public_access">دسترسی عمومی</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">پیش‌نمایش زنده</string>
     <string name="stt_not_connected">متصل نیست. نشانی سرور STT را وارد کنید و «اتصال» را بزنید.</string>
     <string name="stt_waiting_for_transcription">در انتظار پیاده‌سازی گفتار…</string>
-    <string name="stt_transcription_label">پیاده‌سازی گفتار</string>
     <string name="stt_translation_label">ترجمه</string>
     <string name="stt_settings_dialog_title">تنظیمات نمایش STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">گزارش‌های CCLI</string>
-    <string name="ccli_tab_songs">سرودها</string>
-    <string name="ccli_tab_bible">کتاب‌مقدس</string>
     <string name="ccli_tab_activity">فعالیت</string>
     <string name="ccli_songs_summary">%1$d سرود یکتا · %2$d بار نمایش</string>
     <string name="ccli_bible_summary">%1$d آیهٔ یکتا · %2$d بار نمایش</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">نمایش‌ها در گذر زمان</string>
     <string name="ccli_from">از:</string>
     <string name="ccli_to">تا:</string>
-    <string name="ccli_legend_songs">سرودها</string>
     <string name="ccli_legend_bible">آیات کتاب‌مقدس</string>
     <string name="ccli_stat_songs_presented">سرودهای نمایش‌داده‌شده</string>
     <string name="ccli_stat_bible_verses">آیات کتاب‌مقدس</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">نخستین</string>
     <string name="ccli_col_last">آخرین</string>
     <string name="ccli_col_verse">آیه</string>
-    <string name="ccli_col_bible">کتاب‌مقدس</string>
     <string name="ccli_export_csv">برون‌بری CSV برای CCLI</string>
     <string name="ccli_export_xls">برون‌بری XLS</string>
     <string name="ccli_exported_success">گزارش با موفقیت برون‌بری شد.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">کتاب‌مقدس</string>
     <string name="obs_mode_songs">سرودها</string>
     <string name="obs_mode_pictures">تصاویر</string>
-    <string name="obs_mode_presentation">ارائه</string>
     <string name="obs_mode_media">رسانه</string>
     <string name="obs_mode_lower_third">نوار پایینی</string>
     <string name="obs_mode_announcements">اعلان‌ها</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">برای اتصال، میزبان Companion را در «تنظیمات ← Companion Satellite» تعیین کنید.</string>
     <string name="companion_satellite_status_connecting">در حال اتصال…</string>
     <string name="companion_satellite_status_disconnected">اتصال قطع شد</string>
-    <string name="companion_satellite_status_error">خطا: %1$s</string>
     <string name="companion_satellite_connection_name">نام</string>
     <string name="companion_satellite_product_name">نام محصول</string>
     <string name="companion_satellite_reconnect_delay">تأخیر اتصال دوباره (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">شناسایی نشانی‌های کتاب‌مقدس</string>
     <string name="bible_engine_run_local">اجرای موتور روی این رایانه</string>
     <string name="bible_engine_host">میزبان موتور</string>
-    <string name="bible_engine_port">درگاه</string>
     <string name="stt_help_dev_mode">کمک به توسعه‌دهنده — دکمه‌های بازخورد زنده را در زبانهٔ کتاب‌مقدس نشان بده (بخش نادرست / زودهنگام / بخش جامانده)</string>
     <string name="dictionary_back">بازگشت</string>
     <string name="dictionary_forward">جلو</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">سریف</string>
     <string name="font_category_mono">تک‌عرض</string>
     <string name="font_category_display">نمایشی</string>
-    <string name="font_preview">پیش‌نمایش</string>
     <string name="font_preview_sample">نمونهٔ متن با قلم انتخاب‌شده</string>
     <string name="font_warning_no_cyrillic">%1$s حروف سیریلیک ندارد — آیات سیریلیک روی صفحه با قلم دیگری نمایش داده می‌شوند.</string>
     <string name="font_warning_no_hebrew">%1$s حروف عبری ندارد — متن عبری روی صفحه با قلم دیگری نمایش داده می‌شود.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">خط خورده</string>
     <string name="bible_custom_name">نام</string>
-    <string name="bible_custom_abbreviation">مخفف</string>
     <string name="bible_translations">ترجمه‌ها</string>
     <string name="bible_miscellaneous">متفرقه</string>
     <string name="bible_font">قلم</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">یوحنا</string>
     <string name="bible_preview_no_translations">برای دیدن آن در اینجا، یک ترجمه اضافه کنید</string>
     <string name="song_element_number">شماره</string>
-    <string name="song_element_title">عنوان</string>
     <string name="song_element_lyrics">متن سرود</string>
-    <string name="song_element_author">سراینده</string>
-    <string name="song_element_composer">آهنگساز</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">تمپو</string>
     <string name="song_target_title_slide">اسلاید عنوان</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">بخش</string>
     <string name="song_language_scope">زبان</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">پس‌زمینه</string>
     <string name="song_background_full_screen">تمام‌صفحه</string>
     <string name="song_background_lower_third">نوار پایینی</string>
     <string name="song_background_inherit">ارث‌بری</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">رنگ شما</string>
     <string name="song_background_browse">مرور…</string>
     <string name="song_background_look">ظاهر</string>
-    <string name="song_background_preset_none">هیچ</string>
     <string name="song_background_preset_soft">ملایم</string>
     <string name="song_background_preset_legible">خوانا</string>
     <string name="song_background_preset_cinema">سینمایی</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">پس‌زمینه‌ها</string>
     <string name="background_group_defaults">پیش‌فرض‌ها</string>
-    <string name="background_scope_default">پیش‌فرض</string>
     <string name="background_scope_default_lower_third">نوار پایین پیش‌فرض</string>
     <string name="background_scope_default_meta">وقتی کتاب‌مقدس یا سرودها روی پیش‌فرض باشد</string>
     <string name="background_scope_default_lower_third_meta">وقتی نوار پایین روی پیش‌فرض باشد</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">از پیش‌فرض پیروی می‌کند</string>
     <string name="background_use_default">استفاده از پیش‌فرض</string>
     <string name="background_set_explicitly">جداگانه برای این سطح تنظیم شده</string>
-    <string name="background_type_caption">نوع</string>
     <string name="background_color_caption">رنگ</string>
     <string name="background_image_file">فایل تصویر</string>
     <string name="background_video_file">فایل ویدیو</string>
-    <string name="background_opacity_caption">کدری</string>
     <string name="background_above_band_caption">بالای نوار</string>
     <string name="background_above_band_fill">رنگ پرکننده</string>
     <string name="background_above_band_opacity">کدری پرکننده</string>
     <string name="quick_background_reset">بازگشت به حالت عادی</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · مدیریت در تنظیمات</string>
     <string name="quick_backgrounds">پس‌زمینه‌های سریع</string>
     <string name="quick_backgrounds_help">پس‌زمینه‌هایی که پنل پیش‌نمایش یک کلیک دورتر نگه می‌دارد. روی یک کاشی کلیک کنید تا انتخاب کنید چه چیزی نشان دهد و آن را بکشید تا کلید مربوطه عوض شود. انتخاب یکی در حین برنامه، همهٔ صفحه‌ها را تا بازگشت به حالت عادی بازنویسی می‌کند و اینجا چیزی را تغییر نمی‌دهد.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">تعویض پروفایل خروجی</string>
     <string name="output_profile_new_name_default">پروفایل جدید</string>
     <string name="output_profile_empty_state">برای شروع طراحی، یک پروفایل بسازید</string>
-    <string name="customize_bible">کتاب‌مقدس</string>
-    <string name="customize_songs">سرودها</string>
     <string name="customize_group_verse_text">متن آیه</string>
     <string name="customize_group_reference">آدرس</string>
     <string name="customize_background_type">نوع</string>
-    <string name="customize_type_color">رنگ</string>
     <string name="customize_type_image">تصویر</string>
-    <string name="customize_type_video">ویدیو</string>
-    <string name="customize_type_default">پیش‌فرض</string>
-    <string name="customize_type_gradient">طیف رنگ</string>
     <string name="customize_show_abbreviation">مخفف</string>
     <string name="customize_background_opacity">کدری</string>
     <string name="slate_theme">پوستهٔ سنگ لوح</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">الگو چیدمان و جای عنوان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده، فاصلهٔ واژه‌ها، پیش‌نمایش بعدی و آکوردها اعمال نمی‌شوند.</string>
     <string name="bible_lottie_unsupported_note">الگو چیدمان، جای مرجع و نحوهٔ اشتراک نوار میان دو زبان را تعیین می‌کند. سبک یک‌سوم پایین قلم، اندازه، رنگ، ترازبندی، فاصلهٔ حروف، حالت حروف و سایه را تنظیم می‌کند؛ پس‌زمینهٔ متن، زیرخط، خط‌خورده و فاصلهٔ واژه‌ها اعمال نمی‌شوند.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">خط دور</string>
     <string name="tooltip_outline_options">تنظیمات خط دور</string>
     <string name="text_outline">خط دور</string>
     <string name="text_outline_width">ضخامت</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">افزودن خروجی</string>
     <string name="ndi_output_numbered">خروجی NDI %1$d</string>
     <string name="preview_output">پیش‌نمایش خروجی</string>
-    <string name="output_resolution">وضوح</string>
     <string name="output_resolution_custom">سفارشی…</string>
     <string name="output_resolution_custom_title">وضوح سفارشی</string>
     <string name="output_resolution_width">عرض</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">خدمات را در تمام هفته از برنامهٔ موبایل برنامه‌ریزی کنید، حتی وقتی این رایانه خاموش است. این رایانه منبع اصلی باقی می‌ماند.</string>
     <string name="calendar_sync_enable">همگام‌سازی تقویم با تلفن‌ها</string>
     <string name="calendar_sync_relay_url">رله</string>
-    <string name="calendar_sync_status_off">خاموش</string>
     <string name="calendar_sync_status_unpaired">هنوز ثبت نشده — این رایانه اولین باری که همگام‌سازی روشن شود در رله ثبت می‌شود</string>
     <string name="calendar_sync_status_syncing">در حال همگام‌سازی…</string>
     <string name="calendar_sync_status_synced">همگام شد %1$s</string>

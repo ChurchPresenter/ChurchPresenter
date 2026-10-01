@@ -9,7 +9,7 @@ import churchpresenter.composeapp.generated.resources.song_element_lyrics
 import churchpresenter.composeapp.generated.resources.shortcut_description_next_section
 import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.song_element_section_label_short
-import churchpresenter.composeapp.generated.resources.song_element_title
+import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.song_target_title_slide
 import org.churchpresenter.settings.OutputStyleScope
 import org.jetbrains.compose.resources.stringResource
@@ -84,7 +84,7 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.BIBLE_TEXT -> stringResource(Res.string.customize_group_verse_text)
     CustomizeElement.BIBLE_REFERENCE -> stringResource(Res.string.customize_group_reference)
     CustomizeElement.SONG_LYRICS -> stringResource(Res.string.song_element_lyrics)
-    CustomizeElement.SONG_TITLE -> stringResource(Res.string.song_element_title)
+    CustomizeElement.SONG_TITLE -> stringResource(Res.string.title)
     CustomizeElement.SONG_NUMBER -> stringResource(Res.string.song_element_number)
     CustomizeElement.SONG_LOOK_AHEAD -> stringResource(Res.string.song_element_look_ahead)
     CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.shortcut_description_next_section)

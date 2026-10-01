@@ -43,7 +43,7 @@ import churchpresenter.composeapp.generated.resources.language_ukrainian
 import churchpresenter.composeapp.generated.resources.language_uzbek
 import churchpresenter.composeapp.generated.resources.menu_about
 import churchpresenter.composeapp.generated.resources.menu_getting_started
-import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
+import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.menu_keyboard_shortcuts
 import churchpresenter.composeapp.generated.resources.menu_clear_schedule
 import churchpresenter.composeapp.generated.resources.menu_close_schedule
@@ -70,12 +70,12 @@ import churchpresenter.composeapp.generated.resources.menu_contact_us
 import churchpresenter.composeapp.generated.resources.menu_language
 import churchpresenter.composeapp.generated.resources.menu_customize_theme
 import churchpresenter.composeapp.generated.resources.menu_view
-import churchpresenter.composeapp.generated.resources.menu_new_schedule
-import churchpresenter.composeapp.generated.resources.menu_open_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.menu_remove_from_schedule
-import churchpresenter.composeapp.generated.resources.menu_save_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
 import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
-import churchpresenter.composeapp.generated.resources.menu_schedule
+import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
 import churchpresenter.composeapp.generated.resources.menu_statistics
 import org.churchpresenter.app.churchpresenter.data.Language
@@ -131,7 +131,7 @@ fun FrameWindowScope.NavigationTopBar(
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
 
-    val scheduleLabel = stringResource(Res.string.menu_schedule)
+    val scheduleLabel = stringResource(Res.string.schedule)
     val scheduleMnemonic = scheduleLabel.firstOrNull() ?: 'S'
 
     val editLabel = stringResource(Res.string.menu_edit)
@@ -186,17 +186,17 @@ private fun MenuBarScope.FileMenu(
 ) {
     Menu(label, mnemonic = mnemonic) {
         Item(
-            stringResource(Res.string.menu_new_schedule),
+            stringResource(Res.string.tooltip_new_schedule),
             onClick = onNewSchedule,
             shortcut = accel(ShortcutAction.NEW_SCHEDULE)
         )
         Item(
-            stringResource(Res.string.menu_open_schedule),
+            stringResource(Res.string.tooltip_open_schedule),
             onClick = onOpenSchedule,
             shortcut = accel(ShortcutAction.OPEN_SCHEDULE)
         )
         Item(
-            stringResource(Res.string.menu_save_schedule),
+            stringResource(Res.string.tooltip_save_schedule),
             onClick = onSaveSchedule,
             shortcut = accel(ShortcutAction.SAVE_SCHEDULE)
         )
@@ -229,7 +229,7 @@ private fun MenuBarScope.ScheduleMenu(
 ) {
     Menu(label, mnemonic = mnemonic) {
         Item(
-            stringResource(Res.string.menu_add_to_schedule),
+            stringResource(Res.string.add_to_schedule),
             onClick = onAddToSchedule,
             shortcut = accel(ShortcutAction.ADD_TO_SCHEDULE)
         )

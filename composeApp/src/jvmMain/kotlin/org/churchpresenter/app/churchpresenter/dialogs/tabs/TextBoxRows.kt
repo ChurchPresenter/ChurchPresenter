@@ -14,7 +14,7 @@ import churchpresenter.composeapp.generated.resources.profile_box_area_margins
 import churchpresenter.composeapp.generated.resources.profile_box_area_screen
 import churchpresenter.composeapp.generated.resources.profile_box_band
 import churchpresenter.composeapp.generated.resources.profile_box_band_band
-import churchpresenter.composeapp.generated.resources.profile_box_height
+import churchpresenter.composeapp.generated.resources.output_profile_shape_height
 import churchpresenter.composeapp.generated.resources.profile_box_keep_clear
 import churchpresenter.composeapp.generated.resources.profile_box_keep_clear_sub
 import churchpresenter.composeapp.generated.resources.profile_box_languages
@@ -31,7 +31,7 @@ import churchpresenter.composeapp.generated.resources.profile_box_size_up_to
 import churchpresenter.composeapp.generated.resources.profile_box_snap
 import churchpresenter.composeapp.generated.resources.profile_box_sub
 import churchpresenter.composeapp.generated.resources.profile_box_vertical
-import churchpresenter.composeapp.generated.resources.profile_box_width
+import churchpresenter.composeapp.generated.resources.output_profile_shape_width
 import churchpresenter.composeapp.generated.resources.profile_box_x
 import churchpresenter.composeapp.generated.resources.profile_box_y
 import churchpresenter.composeapp.generated.resources.top
@@ -147,7 +147,7 @@ private fun BoxRectFields(box: TextBox, onBox: (TextBox) -> Unit) {
             { onBox(box.copy(widthPercent = it.toFloat())) },
             SIZE_RANGE,
             unit = percent,
-            caption = stringResource(Res.string.profile_box_width),
+            caption = stringResource(Res.string.output_profile_shape_width),
             width = BOX_FIELD,
         )
         RowNumberField(
@@ -155,7 +155,7 @@ private fun BoxRectFields(box: TextBox, onBox: (TextBox) -> Unit) {
             { onBox(box.copy(heightPercent = it.toFloat())) },
             SIZE_RANGE,
             unit = percent,
-            caption = stringResource(Res.string.profile_box_height),
+            caption = stringResource(Res.string.output_profile_shape_height),
             width = BOX_FIELD,
         )
     }

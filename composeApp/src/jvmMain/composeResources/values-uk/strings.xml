@@ -3,7 +3,6 @@
     <string name="mode">Режим</string>
     <string name="scope">Область</string>
     <string name="title">Назва</string>
-    <string name="number">Номер</string>
     <string name="go_live">В ефір</string>
     <string name="add_to_schedule">Додати до програми</string>
     <string name="no_lyrics_available">Текст пісні недоступний</string>
@@ -51,18 +50,12 @@
     <string name="hold_live">Утримати ефір</string>
     <string name="announcements">Оголошення</string>
     <string name="menu_file">Файл</string>
-    <string name="menu_new_schedule">Нова програма</string>
-    <string name="menu_open_schedule">Відкрити програму</string>
-    <string name="menu_save_schedule">Зберегти програму</string>
     <string name="menu_save_schedule_as">Зберегти як...</string>
     <string name="file_chooser_save_schedule">Зберегти програму як</string>
-    <string name="file_chooser_open_schedule">Відкрити програму</string>
     <string name="file_filter_schedule">Програма Church Presenter (*.cps)</string>
     <string name="menu_close_schedule">Закрити програму</string>
     <string name="menu_exit">Вихід</string>
 
-    <string name="menu_schedule">Програма</string>
-    <string name="menu_add_to_schedule">Додати до програми</string>
     <string name="menu_remove_from_schedule">Видалити з програми</string>
     <string name="menu_clear_schedule">Очистити програму</string>
 
@@ -258,8 +251,6 @@
 
     <!-- Background Type Options -->
     <string name="background_default">За замовчуванням</string>
-    <string name="background_color_option">Колір</string>
-    <string name="background_image_option">Зображення</string>
 
     <!-- Position Options -->
 
@@ -343,7 +334,6 @@
     <string name="label_text">Текст мітки</string>
     <string name="enter_label_text">Введіть текст мітки...</string>
     <string name="text_color">Колір тексту</string>
-    <string name="background_color_label">Колір фону</string>
 
     <!-- Pictures Tab Strings -->
     <string name="select_folder">Вибрати папку</string>
@@ -369,7 +359,6 @@
     <string name="animation_slide_left">Зсув вліво</string>
     <string name="animation_slide_right">Зсув вправо</string>
     <string name="animation_none">Без анімації</string>
-    <string name="milliseconds_suffix">мс</string>
     <string name="pictures_arrow_key_hint">%1$s наступне/попереднє зображення  ·  %2$s навігація по рядках</string>
     <string name="presentation_arrow_key_hint">%1$s — попередній/наступний крок і слайд  ·  %2$s — відтворити/пауза  ·  %3$s — чорний екран</string>
     <string name="pictures_reorder_hint">Shift+перетягнути для зміни порядку</string>
@@ -413,13 +402,11 @@
     <string name="content_bible_background">Фон Біблії</string>
     <string name="content_songs_background">Фон пісень</string>
     <string name="content_announcements">Оголошення</string>
-    <string name="content_media">Медіа</string>
     <string name="display_lower_third">Нижня третина</string>
 
     <!-- Background Settings Tab -->
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Медіа</string>
     <string name="media_local_file">Локальний файл</string>
     <string name="media_network_url">Мережевий URL</string>
     <string name="media_url_placeholder">Введіть URL (http://, rtsp://, ...)</string>
@@ -446,21 +433,17 @@
     <string name="announcement_animation_speed">Швидкість</string>
     <string name="announcement_loop_count">Кількість повторів</string>
     <string name="announcement_loop_tooltip">0 = нескінченний повтор</string>
-    <string name="announcement_background_color_label">Колір фону</string>
     <string name="announcement_text_hint">Введіть текст оголошення…</string>
     <string name="top_center">По центру зверху</string>
     <string name="bottom_center">По центру знизу</string>
     <string name="center_left">По центру зліва</string>
     <string name="center_right">По центру справа</string>
     <string name="content_pictures">Фото/Презентація</string>
-    <string name="content_streaming">Нижня третина</string>
     <string name="detected_screens">Виявлено екранів: %1$d</string>
     <string name="presenter_windows_count">Вікон презентації: %1$d</string>
     <string name="screen_col_label">Екран %1$d</string>
     <string name="display_mode">Режим відображення</string>
-    <string name="display_fullscreen">Повний екран</string>
     <string name="full_screen">Повний екран</string>
-    <string name="lower_third_size">Нижня третина</string>
     <string name="identify_screen">Визначити</string>
     <string name="no_lottie_files">JSON-файли не знайдено</string>
     <string name="generate_lower_third">Створити</string>
@@ -663,7 +646,6 @@
     <string name="schedule_density_compact">Компактний</string>
     <string name="schedule_density_normal">Звичайний</string>
     <string name="schedule_density_detailed">Детальний</string>
-    <string name="schedule_kind_lower_third">Нижня третина</string>
     <string name="tooltip_schedule_options">Налаштування програми</string>
     <string name="schedule_show_buttons_under_title">Показувати кнопки під назвою</string>
     <string name="schedule_option_item_count">Кількість елементів</string>
@@ -705,7 +687,6 @@
     <string name="timer_start">Старт</string>
     <string name="timer_title">Таймер</string>
     <string name="tooltip_clear_display">Очистити екран</string>
-    <string name="remote_action_clear_display">Очистити екран</string>
     <string name="schedule_add_files_title">Додати файли до програми</string>
     <string name="tooltip_toggle_displays">Увімк/Вимк екрани презентації</string>
     <string name="tooltip_collapse_schedule">Згорнути програму</string>
@@ -713,7 +694,6 @@
     <string name="tooltip_theme_dark">Темна тема</string>
     <string name="tooltip_theme_system">Системна тема</string>
     <string name="transparent_default">Прозорий (за замовчуванням)</string>
-    <string name="web_add_to_schedule">Додати до програми</string>
     <string name="web_bookmark_add">Закладка</string>
     <string name="web_bookmark_remove">Видалити</string>
     <string name="web_clear_cache">Очистити кеш</string>
@@ -790,7 +770,6 @@
     <string name="blocked_clients_description">Запити від цих клієнтів автоматично відхиляються без показу діалогу.</string>
     <string name="client_label_placeholder">Введіть зрозуміле ім'я…</string>
     <string name="client_label_edit_tooltip">Задати зрозуміле ім'я</string>
-    <string name="client_label_save">Зберегти</string>
     <string name="client_label_cancel">Скасувати</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -886,7 +865,6 @@
     <string name="system_storage_subtitle">Де Church Presenter шукає ваш вміст</string>
     <string name="system_storage_linked_count">%1$d підключено</string>
     <string name="system_storage_needs_attention_count">%1$d потребує уваги</string>
-    <string name="system_storage_status_not_set">Не задано</string>
     <string name="system_storage_status_not_found">Теку не знайдено</string>
     <string name="system_storage_status_read_only">Лише читання</string>
     <string name="system_storage_status_linked">Підключено</string>
@@ -973,9 +951,7 @@
     <string name="canvas_text_curve">Кривина</string>
     <string name="canvas_letter_spacing">Міжлітерний інтервал</string>
     <string name="canvas_source_qrcode">QR-код</string>
-    <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захоплення екрана</string>
-    <string name="canvas_text_color">Колір тексту</string>
     <string name="canvas_text_bg_color">Колір фону</string>
     <string name="canvas_clock_mode">Режим</string>
     <string name="canvas_clock_format">Формат</string>
@@ -998,7 +974,6 @@
     <string name="canvas_camera_format">Формат відео</string>
     <string name="canvas_camera_format_auto">Авто (за замовчуванням)</string>
     <string name="canvas_camera_connection">Підключення відео</string>
-    <string name="canvas_camera_mode">Режим</string>
     <string name="canvas_camera_mode_auto">Авто</string>
     <string name="canvas_capture_x">X захоплення</string>
     <string name="canvas_capture_y">Y захоплення</string>
@@ -1009,12 +984,9 @@
     <string name="canvas_capture_mode_window">Вікно</string>
     <string name="canvas_capture_refresh_windows">Оновити список вікон</string>
     <string name="canvas_capture_interval">Інтервал захоплення</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Камера: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Камера</string>
     <string name="canvas_placeholder_screen_capture">Захоплення екрана</string>
     <string name="canvas_rename_scene">Перейменувати</string>
-    <string name="canvas_remove_scene">Видалити</string>
     <string name="canvas_add_source">Додати джерело</string>
     <string name="canvas_delete_source">Видалити джерело</string>
     <string name="canvas_source_move_forward">На передній план</string>
@@ -1040,7 +1012,6 @@
     <string name="canvas_render_height">Висота</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Вибрати зображення</string>
     <string name="canvas_select_video_title">Вибрати відео</string>
     <string name="canvas_image_files">Файли зображень</string>
@@ -1052,7 +1023,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Годинник</string>
     <string name="canvas_clock_mode_countdown">Зворотний відлік</string>
     <string name="canvas_clock_mode_count_up">Секундомір</string>
     <string name="canvas_decklink_io_warning">Цей пристрій використовується для виведення. Введення може бути недоступне на пристроях без одночасного введення-виведення.</string>
@@ -1093,7 +1063,6 @@
     <string name="update_interval_never">Ніколи</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Монітор сцени</string>
     <string name="display_stage_monitor">Монітор сцени</string>
     <string name="general">Загальні</string>
     <string name="stage_monitor_quadrant_next">Низ-ліво: наступний слайд</string>
@@ -1177,7 +1146,6 @@
     <string name="qa_confirm_go_live_prompt">Вийти в ефір?</string>
     <string name="qa_confirm_go_live">Підтвердити вихід в ефір</string>
     <string name="qa_edit_question_hint">Редагувати текст запитання…</string>
-    <string name="qa_delete_question">Видалити</string>
     <string name="qa_confirm_delete_prompt">Видалити?</string>
     <string name="qa_submitter_device">Пристрій: %1$s</string>
     <string name="qa_public_access">Публічний доступ</string>
@@ -1213,13 +1181,10 @@
     <string name="stt_live_preview">Попередній перегляд</string>
     <string name="stt_not_connected">Немає підключення. Введіть URL-адресу сервера STT і натисніть «Підключитися».</string>
     <string name="stt_waiting_for_transcription">Очікування транскрипції…</string>
-    <string name="stt_transcription_label">Транскрипція</string>
     <string name="stt_translation_label">Переклад</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Звіт про використання CCLI</string>
-    <string name="ccli_tab_songs">Пісні</string>
-    <string name="ccli_tab_bible">Біблія</string>
     <string name="ccli_tab_activity">Активність</string>
     <string name="ccli_songs_summary">%1$d унікальних пісень · %2$d всього відтворень</string>
     <string name="ccli_bible_summary">%1$d унікальних віршів · %2$d всього відтворень</string>
@@ -1230,7 +1195,6 @@
     <string name="ccli_activity_title">Презентації з часом</string>
     <string name="ccli_from">З:</string>
     <string name="ccli_to">По:</string>
-    <string name="ccli_legend_songs">Пісні</string>
     <string name="ccli_legend_bible">Вірші Біблії</string>
     <string name="ccli_stat_songs_presented">Показано пісень</string>
     <string name="ccli_stat_bible_verses">Віршів Біблії</string>
@@ -1244,7 +1208,6 @@
     <string name="ccli_col_first">Перший</string>
     <string name="ccli_col_last">Останній</string>
     <string name="ccli_col_verse">Вірш</string>
-    <string name="ccli_col_bible">Біблія</string>
     <string name="ccli_export_csv">Експорт CCLI CSV</string>
     <string name="ccli_export_xls">Експорт XLS</string>
     <string name="ccli_exported_success">Звіт успішно експортовано.</string>
@@ -1301,7 +1264,6 @@
     <string name="obs_mode_bible">Біблія</string>
     <string name="obs_mode_songs">Пісні</string>
     <string name="obs_mode_pictures">Зображення</string>
-    <string name="obs_mode_presentation">Презентація</string>
     <string name="obs_mode_media">Медіа</string>
     <string name="obs_mode_lower_third">Нижня третина</string>
     <string name="obs_mode_announcements">Оголошення</string>
@@ -1352,13 +1314,11 @@
     <string name="open_converter">Конвертер пісень і Біблій</string>
     <string name="open_song_library">Менеджер збірника пісень</string>
     <string name="projection_content_web">Веб</string>
-    <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Фон нижньої третини</string>
     <string name="qa_add_question_hint">Додати запитання…</string>
     <string name="remote_activity_added_to_schedule">Додано до програми</string>
     <string name="remote_activity_projected">Виведено на екран</string>
     <string name="remote_activity_presentation_connect">Підключено до дистанційного керування презентацією</string>
-    <string name="remote_activity_presentation_connect_detail">Тепер підключено</string>
     <string name="remote_activity_qa_admin_connect">Підключено до адміністрування П&amp;В</string>
     <string name="remote_activity_qa_admin_connect_detail">Тепер підключено</string>
     <string name="remote_activity_presented">Показується</string>
@@ -1557,7 +1517,6 @@
     <string name="companion_satellite_no_host">Вкажіть хост Companion у Налаштування → Companion Satellite, щоб підключитися.</string>
     <string name="companion_satellite_status_connecting">Підключення…</string>
     <string name="companion_satellite_status_disconnected">Відключено</string>
-    <string name="companion_satellite_status_error">Помилка: %1$s</string>
     <string name="companion_satellite_connection_name">Назва</string>
     <string name="companion_satellite_product_name">Назва продукту</string>
     <string name="companion_satellite_reconnect_delay">Затримка перепідключення (мс)</string>
@@ -1595,7 +1554,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Посилання або текст — напр. Ів 3:16, Мт 1 або слово</string>
     <string name="bible_search_mode_auto">Авто</string>
-    <string name="bible_search_mode_reference">Посилання</string>
     <string name="bible_search_mode_text">Текст</string>
     <string name="bible_search_mode_tooltip">Натисніть для перемикання — Авто: перехід до посилань, пошук по решті. Посилання: лише навігація. Текст: завжди шукати в тексті віршів.</string>
     <string name="swap_bibles_hint">Поміняти місцями основну та додаткову Біблії</string>
@@ -1646,7 +1604,6 @@
     <string name="bible_engine_detect">Визначати Святе Письмо</string>
     <string name="bible_engine_run_local">Запустити двигун локально</string>
     <string name="bible_engine_host">Хост двигуна</string>
-    <string name="bible_engine_port">Порт</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Контакти</string>
     <string name="contact_us_title">Зв'язатися з нами</string>
@@ -1682,7 +1639,6 @@
     <string name="instance_link_description">Слідкуйте за іншим екземпляром ChurchPresenter у вашій мережі — дублюйте його живий контент тут і за бажанням додавайте елементи до його програми.</string>
     <string name="instance_link_host">Хост</string>
     <string name="instance_link_host_hint">напр. 192.168.1.10</string>
-    <string name="instance_link_port">Порт</string>
     <string name="instance_link_autoconnect">Підключатися автоматично при запуску</string>
     <string name="instance_link_allow_push_to_schedule">Дозволити додавання елементів до програми основного екземпляра</string>
     <string name="instance_link_mirror_backgrounds">Також дублювати фони основного екземпляра</string>
@@ -1918,7 +1874,6 @@
     <string name="font_category_serif">Із засічками</string>
     <string name="font_category_mono">Моноширинний</string>
     <string name="font_category_display">Акцидентний</string>
-    <string name="font_preview">Попередній перегляд</string>
     <string name="font_preview_sample">Зразок тексту вибраним шрифтом</string>
     <string name="font_warning_no_cyrillic">%1$s не має кириличних гліфів — вірші кирилицею на екрані буде показано іншим шрифтом.</string>
     <string name="font_warning_no_hebrew">%1$s не має єврейських гліфів — єврейський текст на екрані буде показано іншим шрифтом.</string>
@@ -1928,7 +1883,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Закреслений</string>
     <string name="bible_custom_name">Назва</string>
-    <string name="bible_custom_abbreviation">Скорочення</string>
     <string name="bible_translations">Переклади</string>
     <string name="bible_miscellaneous">Різне</string>
     <string name="bible_font">Шрифт</string>
@@ -1943,10 +1897,7 @@
     <string name="bible_preview_sample_book">Івана</string>
     <string name="bible_preview_no_translations">Додайте переклад, щоб побачити його тут</string>
     <string name="song_element_number">Номер</string>
-    <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Текст</string>
-    <string name="song_element_author">Автор</string>
-    <string name="song_element_composer">Композитор</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Темп</string>
     <string name="song_target_title_slide">Титульний слайд</string>
@@ -1959,7 +1910,6 @@
     <string name="song_chunk">Фрагмент</string>
     <string name="song_language_scope">Мова</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Фон</string>
     <string name="song_background_full_screen">Повний екран</string>
     <string name="song_background_lower_third">Нижня третина</string>
     <string name="song_background_inherit">Успадкувати</string>
@@ -1974,7 +1924,6 @@
     <string name="song_background_your_color">Ваш колір</string>
     <string name="song_background_browse">Огляд…</string>
     <string name="song_background_look">Вигляд</string>
-    <string name="song_background_preset_none">Немає</string>
     <string name="song_background_preset_soft">М’який</string>
     <string name="song_background_preset_legible">Читабельний</string>
     <string name="song_background_preset_cinema">Кіно</string>
@@ -1995,7 +1944,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Фони</string>
     <string name="background_group_defaults">За замовчуванням</string>
-    <string name="background_scope_default">За замовчуванням</string>
     <string name="background_scope_default_lower_third">Нижня третина за замовчуванням</string>
     <string name="background_scope_default_meta">Коли для Біблії чи Пісень вибрано «За замовчуванням»</string>
     <string name="background_scope_default_lower_third_meta">Коли для нижньої третини вибрано «За замовчуванням»</string>
@@ -2004,16 +1952,13 @@
     <string name="background_following_default">Успадковує за замовчуванням</string>
     <string name="background_use_default">Використати за замовчуванням</string>
     <string name="background_set_explicitly">Задано окремо для цієї поверхні</string>
-    <string name="background_type_caption">Тип</string>
     <string name="background_color_caption">Колір</string>
     <string name="background_image_file">Файл зображення</string>
     <string name="background_video_file">Файл відео</string>
-    <string name="background_opacity_caption">Прозорість</string>
     <string name="background_above_band_caption">Над смугою</string>
     <string name="background_above_band_fill">Колір заливки</string>
     <string name="background_above_band_opacity">Прозорість заливки</string>
     <string name="quick_background_reset">Повернути як було</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · налаштування в параметрах</string>
     <string name="quick_backgrounds">Швидкі фони</string>
     <string name="quick_backgrounds_help">Фони, які панель попереднього перегляду тримає в одному кліку. Натисніть плитку, щоб вибрати її вміст, перетягніть — щоб змінити клавішу. Вибраний під час служіння фон перекриває всі екрани, доки ви не повернете як було, і нічого тут не змінює.</string>
@@ -2039,16 +1984,10 @@
     <string name="output_profile_swap_menu_tooltip">Змінити профіль виводу</string>
     <string name="output_profile_new_name_default">Новий профіль</string>
     <string name="output_profile_empty_state">Створіть профіль, щоб почати його оформлювати</string>
-    <string name="customize_bible">Біблія</string>
-    <string name="customize_songs">Пісні</string>
     <string name="customize_group_verse_text">Текст вірша</string>
     <string name="customize_group_reference">Посилання</string>
     <string name="customize_background_type">Тип</string>
-    <string name="customize_type_color">Колір</string>
     <string name="customize_type_image">Зображення</string>
-    <string name="customize_type_video">Відео</string>
-    <string name="customize_type_default">За замовчуванням</string>
-    <string name="customize_type_gradient">Градієнт</string>
     <string name="customize_show_abbreviation">Скорочення</string>
     <string name="customize_background_opacity">Прозорість</string>
     <string name="slate_theme">Тема «Сланець»</string>
@@ -2094,7 +2033,6 @@
     <string name="song_lottie_unsupported_note">Шаблон визначає макет і розташування назви. Стиль нижньої третини задає шрифт, розмір, колір, вирівнювання, міжлітерний інтервал, регістр і тінь; підкладка, підкреслення, закреслення, міжслівний інтервал, попередній перегляд наступного та акорди не застосовуються.</string>
     <string name="bible_lottie_unsupported_note">Шаблон визначає макет, розташування посилання і те, як дві мови ділять смугу. Стиль нижньої третини задає шрифт, розмір, колір, вирівнювання, міжлітерний інтервал, регістр і тінь; підкладка, підкреслення, закреслення та міжслівний інтервал не застосовуються.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Параметри контуру</string>
     <string name="text_outline">Контур</string>
     <string name="text_outline_width">Товщина</string>
@@ -2162,7 +2100,6 @@
     <string name="add_ndi_output">Додати вихід</string>
     <string name="ndi_output_numbered">Вихід NDI %1$d</string>
     <string name="preview_output">Перегляд виходу</string>
-    <string name="output_resolution">Роздільна здатність</string>
     <string name="output_resolution_custom">Власна…</string>
     <string name="output_resolution_custom_title">Власна роздільна здатність</string>
     <string name="output_resolution_width">Ширина</string>
@@ -2266,7 +2203,6 @@
     <string name="calendar_sync_description">Плануйте служіння в мобільному додатку весь тиждень, навіть коли цей комп’ютер вимкнено. Цей комп’ютер залишається основним джерелом.</string>
     <string name="calendar_sync_enable">Синхронізувати календар із телефонами</string>
     <string name="calendar_sync_relay_url">Ретранслятор</string>
-    <string name="calendar_sync_status_off">Вимкнено</string>
     <string name="calendar_sync_status_unpaired">Ще не зареєстровано — цей комп’ютер реєструється в ретрансляторі, коли синхронізацію вмикають уперше</string>
     <string name="calendar_sync_status_syncing">Синхронізація…</string>
     <string name="calendar_sync_status_synced">Синхронізовано %1$s</string>

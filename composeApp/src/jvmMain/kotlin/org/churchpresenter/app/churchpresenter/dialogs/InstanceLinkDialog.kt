@@ -46,7 +46,7 @@ import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_r
 import churchpresenter.composeapp.generated.resources.instance_link_last_received
 import churchpresenter.composeapp.generated.resources.instance_link_last_update_age
 import churchpresenter.composeapp.generated.resources.instance_link_mirror_backgrounds
-import churchpresenter.composeapp.generated.resources.instance_link_port
+import churchpresenter.composeapp.generated.resources.server_port
 import churchpresenter.composeapp.generated.resources.instance_link_reconnect_delay
 import churchpresenter.composeapp.generated.resources.instance_link_reconnect_delay_hint
 import churchpresenter.composeapp.generated.resources.instance_link_role
@@ -62,7 +62,7 @@ import churchpresenter.composeapp.generated.resources.obs_mode_lower_third
 import churchpresenter.composeapp.generated.resources.obs_mode_media
 import churchpresenter.composeapp.generated.resources.obs_mode_none
 import churchpresenter.composeapp.generated.resources.obs_mode_pictures
-import churchpresenter.composeapp.generated.resources.obs_mode_presentation
+import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.obs_mode_qa
 import churchpresenter.composeapp.generated.resources.obs_mode_songs
 import churchpresenter.composeapp.generated.resources.obs_mode_website
@@ -276,7 +276,7 @@ internal fun InstanceLinkDialogContent(
                             )
                         }
 
-                        SettingRow(label = stringResource(Res.string.instance_link_port)) {
+                        SettingRow(label = stringResource(Res.string.server_port)) {
                             SettingsTextField(
                                 value = portText,
                                 onValueChange = { new -> if (new.all(Char::isDigit)) portText = new },
@@ -482,7 +482,7 @@ internal fun liveStateSummary(state: LiveStateDto): String = when (state.content
         ?: stringResource(Res.string.obs_mode_bible)
     "LYRICS" -> state.songTitle ?: stringResource(Res.string.obs_mode_songs)
     "PICTURES" -> stringResource(Res.string.obs_mode_pictures)
-    "PRESENTATION" -> stringResource(Res.string.obs_mode_presentation)
+    "PRESENTATION" -> stringResource(Res.string.presentation)
     "MEDIA" -> state.mediaUrl?.substringAfterLast('/') ?: stringResource(Res.string.obs_mode_media)
     "ANNOUNCEMENTS" -> state.announcementText?.take(SUMMARY_PREVIEW_CHARS) ?: stringResource(Res.string.obs_mode_announcements)
     "WEBSITE" -> state.websiteTitle ?: state.websiteUrl ?: stringResource(Res.string.obs_mode_website)
