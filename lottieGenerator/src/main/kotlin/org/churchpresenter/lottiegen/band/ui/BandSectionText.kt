@@ -99,7 +99,7 @@ internal fun TextSection(viewModel: BibleLottieGenViewModel, fontPicker: BandFon
     EnumDropdown(
         Strings.textShaping, cfg.textShaping, TextShaping.entries, { Strings.bandEnumLabel("shaping", it.key) },
     ) { v -> viewModel.updateConfig { it.copy(textShaping = v) } }
-    Text(Strings.textShapingHint, fontSize = 10.sp, color = Tokens.HintText)
+    Text(Strings.textShapingHint, fontSize = 10.sp, lineHeight = 14.sp, color = Tokens.HintText)
     Hairline()
     var lang by remember { mutableStateOf(0) }
     // As many tabs as the layout has cells for -- one for [SlotLayout.SINGLE], up to four for a

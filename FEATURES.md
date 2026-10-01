@@ -123,11 +123,13 @@
 - **Drop in a folder, ready to send** — point the app at a folder of Lottie files and every one of them is listed, ready to go live, trigger from Companion or upload to an ATEM media pool.
 - **Built-in generator** — design your own animated lower thirds with the included Lottie generator — no After Effects needed.
 - **Fine timing control** — pause on a frame, hold, and play through with smooth fade in/out.
+- **Every script drawn right** — Tamil, Hindi, Arabic, Thai and other scripts whose letters join or change shape are drawn as whole lines, so vowel signs stay on their letters. The generator's Text shaping setting (Auto, Whole lines, Letter by letter) is saved in the file, and Auto picks whole lines only for text that needs them.
 - **Animated Bible lower third** — opt in to a Lottie band for scripture: the band slides, wipes, unrolls or fades in on Go Live, each verse types, scrolls like a ticker, fades or slides in as you step through a passage, and everything animates out on Escape. Design it in the built-in Bible band generator, with your Bible fonts, sizes and colors filled in live, for one or two languages.
 
 **Source locations:**
 - `tabs/LowerThird.kt` — main UI; its pieces in `tabs/LowerThird*.kt`
 - `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
+- `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
 - `server/LowerThirdSequencer.kt`
 - `presenter/BibleLottieBand.kt`, `presenter/BibleLottieTemplate.kt`, `presenter/BibleLottieTextFit.kt`, `presenter/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
 - `dialogs/tabs/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
@@ -172,13 +174,18 @@
 - **Real-time captions** — connect a speech-to-text server to caption your service live.
 - **Live translation** — show transcription, translation, or both together in stacked or side-by-side layouts.
 - **Styled per screen** — each output profile sets its own caption look, how many lines and segments it keeps, and whether words type out as they arrive.
+- **Easy to read** — fade captions out after a silence, cap how fast words arrive so every line can be read, slide lines up instead of jumping, dim older lines, and start a new line for each phrase or sentence, with a maximum line length.
+- **Three presentations** — a rolling transcript, pop-on blocks that fill and clear so nothing moves while it is read, or a one-line ticker; in a rounded card or a full-width band, flush with the screen edge or held off it.
+- **Two languages your way** — stacked, side by side, or interleaved with each line followed by its translation; either language first; sharing a box or each in its own; the translation in its own size, capitals, weight and slant.
 
 **Source locations:**
 - `tabs/STTTab.kt` — main UI
 - `viewmodel/STTManager.kt`
 - `data/settings/STTSettings.kt`
 - `presenter/STTPresenter.kt`
-- `dialogs/tabs/ProfileCaptionsPage.kt` — the caption look, edited on Profiles → Live captions
+- `dialogs/tabs/ProfileCaptionsPage.kt`, `dialogs/tabs/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
+- `presenter/CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `presenter/CaptionLook.kt` (card, band, margins, silence fade), `presenter/CaptionTicker.kt`, `presenter/CaptionInterleave.kt`, `presenter/CaptionLanguages.kt`
+- `composables/CaptionText.kt` — `BottomAlignedText`, which draws only the lines in its window (also used by video subtitles)
 - `dialogs/STTSettingsDialog.kt` — the install-wide Bible-engine options
 
 ## Audience Q&A

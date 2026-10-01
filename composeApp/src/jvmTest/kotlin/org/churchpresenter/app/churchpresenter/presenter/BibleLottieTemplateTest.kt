@@ -15,6 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.lottiegen.lottie.TextShaping
 
 class BibleLottieTemplateTest {
 
@@ -307,5 +308,16 @@ class BibleLottieTemplateTest {
         assertEquals(240f, meta("""{"textAnimation":"TICKER","tickerPxPerSecond":240}""").tickerPxPerSecond)
         assertEquals(BandTextMotion.NONE, meta("""{"textAnimation":"SPIN"}""").textMotion)
         assertEquals(750L, meta("""{"swapMs":750}""").swapMs)
+    }
+
+    @Test
+    fun `a template carries the text shaping its generator wrote, and an older one is auto`() {
+        assertEquals(TextShaping.AUTO, template.meta.textShaping)
+        val lines = assertNotNull(
+            parseBibleLottieTemplate(
+                LottieBandTestSupport.templateJson(cfg.copy(textShaping = TextShaping.WHOLE_LINES)),
+            ),
+        )
+        assertEquals(TextShaping.WHOLE_LINES, lines.meta.textShaping)
     }
 }

@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * What a Bible band's text layers say at a given frame: the ticker's one scrolling line per slot, and
@@ -87,5 +88,20 @@ class BibleLottieBandTextTest {
     fun `keyframed and ticker bands show the whole verse and let the file do the moving`() {
         assertEquals(verse, revealedText(template("NONE"), verse, 10f))
         assertEquals(verse, revealedText(template("TICKER"), verse, 10f))
+    }
+
+    @Test
+    fun `a typewriter reveals whole characters, never a Tamil vowel sign without its letter`() {
+        val t = template("TYPEWRITER")
+        val tamil = "கர்த்தர் நல்லவர்"
+        val revealed = (18..36).map { revealedText(t, tamil, it.toFloat()) }
+        revealed.forEach { assertTrue(tamil.startsWith(it), it) }
+        // A cut in the middle of a cluster would leave the next character a mark with no letter of its own
+        revealed.filter { it.isNotEmpty() && it.length < tamil.length }.forEach { prefix ->
+            val next = tamil[prefix.length]
+            val type = Character.getType(next)
+            val marks = setOf(Character.NON_SPACING_MARK.toInt(), Character.COMBINING_SPACING_MARK.toInt())
+            assertTrue(type !in marks, "split before ${next.code}: $prefix")
+        }
     }
 }

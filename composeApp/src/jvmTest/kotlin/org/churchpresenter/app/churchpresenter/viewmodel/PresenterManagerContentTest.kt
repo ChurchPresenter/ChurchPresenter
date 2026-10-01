@@ -240,4 +240,14 @@ class PresenterManagerContentTest {
         assertEquals(0.25f, pm.qaTransitionAlpha.value)
         assertTrue(reported.isEmpty(), "a fade frame is not a content change")
     }
+
+    @Test
+    fun `a lower third is drawn as whole lines when its file asks, and letter by letter otherwise`() {
+        // No timing in either file, so nothing is pre-rendered: only the setting is read
+        val pm = manager()
+        pm.setLottieContent("""{"cp":{"textShaping":"lines"}}""", false, 0f, 0, "Lines")
+        assertTrue(pm.lottieGroupsText.value)
+        pm.setLottieContent("""{"layers":[]}""", false, 0f, 0, "Latin")
+        assertFalse(pm.lottieGroupsText.value, "auto with no text that needs shaping")
+    }
 }
