@@ -54,6 +54,26 @@ import org.churchpresenter.theme.raisedHover
  * Below 440dp the four cannot share a row, so it stacks into a column — which is why this measures
  * itself rather than being told how wide it is.
  */
+/** The square search button that ends the row, in both of its layouts. */
+@Composable
+private fun SearchSubmitButton(onSubmit: () -> Unit) {
+    Box(
+        modifier = Modifier.size(42.dp)
+            .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
+            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                onSubmit()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_search),
+            contentDescription = stringResource(Res.string.search),
+            modifier = Modifier.size(16.dp),
+            tint = elevationPalette().accent.ink
+        )
+    }
+}
+
 @Composable
 internal fun BibleSearchRow(
     searchQuery: String,
@@ -86,7 +106,10 @@ internal fun BibleSearchRow(
                     modeChip = { SearchModeChip(searchMode, onCycleSearchMode) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     DropdownSelector(
                         label = stringResource(Res.string.scope),
                         items = scopeOptions,
@@ -103,25 +126,15 @@ internal fun BibleSearchRow(
                             onModeSelected(modeOptions.indexOf(newValue).coerceAtLeast(0))
                         }
                     )
-                    Box(
-                        modifier = Modifier.size(42.dp)
-                            .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
-                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                                onSubmit()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_search),
-                            contentDescription = stringResource(Res.string.search),
-                            modifier = Modifier.size(16.dp),
-                            tint = elevationPalette().accent.ink
-                        )
-                    }
+                    SearchSubmitButton(onSubmit)
                 }
             }
         } else {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 BibleSearchField(
                     value = searchQuery,
                     placeholder = searchPlaceholder,
@@ -148,21 +161,7 @@ internal fun BibleSearchRow(
                         onModeSelected(modeOptions.indexOf(newValue).coerceAtLeast(0))
                     }
                 )
-                Box(
-                    modifier = Modifier.size(42.dp)
-                        .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
-                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                            onSubmit()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_search),
-                        contentDescription = stringResource(Res.string.search),
-                        modifier = Modifier.size(16.dp),
-                        tint = elevationPalette().accent.ink
-                    )
-                }
+                SearchSubmitButton(onSubmit)
             }
         }
     }
@@ -190,7 +189,11 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
     }
     TooltipArea(
         tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp
+            ) {
                 Text(
                     text = stringResource(Res.string.bible_search_mode_tooltip),
                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -199,7 +202,10 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        )
     ) {
         val palette = elevationPalette()
         val fill = if (searchMode == BibleSearchMode.AUTO) palette.accent else palette.tinted(container, content)

@@ -68,14 +68,26 @@ object DeviceInfoReport {
 
         val deckLinkAvailable = try { DeckLinkManager.isAvailable() } catch (_: Exception) { false }
         val deckLinkDevices = if (deckLinkAvailable) {
-            try { DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) } } catch (_: Exception) { emptyList() }
+            try {
+                DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) }
+            } catch (_: Exception) {
+                emptyList()
+            }
         } else emptyList()
 
         val vlcAvailable = try { isVlcAvailable } catch (_: Exception) { false }
 
         val fileManager = FileManager()
-        val songFolders = try { fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory) } catch (_: Exception) { emptyList() }
-        val bibleFiles = try { fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory) } catch (_: Exception) { emptyList() }
+        val songFolders = try {
+            fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory)
+        } catch (_: Exception) {
+            emptyList()
+        }
+        val bibleFiles = try {
+            fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
+        } catch (_: Exception) {
+            emptyList()
+        }
 
         return DeviceFacts(
             appVersion = appVersion,
@@ -113,8 +125,13 @@ object DeviceInfoReport {
         appendLine()
 
         appendLine("-- System --")
-        appendLine("OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} (${System.getProperty("os.arch", "unknown")})")
-        appendLine("Java: ${System.getProperty("java.version", "unknown")} (${System.getProperty("java.vendor", "unknown")})")
+        appendLine(
+            "OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} " +
+                "(${System.getProperty("os.arch", "unknown")})"
+        )
+        appendLine(
+            "Java: ${System.getProperty("java.version", "unknown")} (${System.getProperty("java.vendor", "unknown")})"
+        )
         appendLine("Renderer: ${facts.renderApi}")
         // Beside the renderer, because the pair is the question a GPU fault asks: which
         // backend, on whose driver. Either alone has been a reason a report could not be acted on.
@@ -154,8 +171,16 @@ object DeviceInfoReport {
         appendLine()
 
         appendLine("-- Video / Web --")
-        appendLine("VLC: ${if (facts.vlcAvailable) "available" else "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"}")
-        appendLine("Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}${if (facts.jcefMacUnsupported) " (macOS version too old)" else ""}")
+        val vlcStatus = if (facts.vlcAvailable) {
+            "available"
+        } else {
+            "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"
+        }
+        appendLine("VLC: $vlcStatus")
+        appendLine(
+            "Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}" +
+                if (facts.jcefMacUnsupported) " (macOS version too old)" else ""
+        )
         appendLine()
 
         appendLine("-- Libraries --")

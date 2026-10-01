@@ -880,7 +880,11 @@ private fun TooltipIconButton(
 ) {
     TooltipArea(
         tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp
+            ) {
                 Text(
                     text = tooltip,
                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -889,7 +893,10 @@ private fun TooltipIconButton(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        )
     ) {
         KeyIconButton(onClick = onClick) {
             Icon(icon, contentDescription = tooltip)

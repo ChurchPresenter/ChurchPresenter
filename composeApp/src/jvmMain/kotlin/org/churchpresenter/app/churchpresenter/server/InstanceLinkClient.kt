@@ -90,7 +90,8 @@ class InstanceLinkClient(
     private val onLiveStateUpdated: (LiveStateDto) -> Unit,
     private val onDisplayCleared: () -> Unit,
     private val onSongSectionSelected: (Int) -> Unit,
-    private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) -> Unit,
+    private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean,
+        isLive: Boolean) -> Unit,
     private val onSongsUpdated: (SongCatalogResponse) -> Unit,
     /** Every decoded WS message — application-level liveness ("last update Xs ago" in the UI). */
     private val onMessageReceived: () -> Unit = {},
@@ -418,7 +419,10 @@ class InstanceLinkClient(
      * the next schedule_updated broadcast.
      */
     fun sendRemoveFromSchedule(id: String) {
-        sendCommand(Constants.WS_CMD_REMOVE_FROM_SCHEDULE, json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id)))
+        sendCommand(
+            Constants.WS_CMD_REMOVE_FROM_SCHEDULE,
+            json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id))
+        )
     }
 
     /**
@@ -512,7 +516,10 @@ class InstanceLinkClient(
     fun sendSelectBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) {
         sendCommand(
             Constants.WS_CMD_SELECT_BIBLE_VERSE,
-            json.encodeToString(SelectBibleVerseRequest.serializer(), SelectBibleVerseRequest(bookName, chapter, verseNumber, verseText, verseRange))
+            json.encodeToString(
+                SelectBibleVerseRequest.serializer(),
+                SelectBibleVerseRequest(bookName, chapter, verseNumber, verseText, verseRange)
+            )
         )
     }
 
@@ -530,7 +537,10 @@ class InstanceLinkClient(
     fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) {
         sendCommand(
             Constants.WS_CMD_SELECT_SONG_SECTION,
-            json.encodeToString(SelectSongSectionRequest.serializer(), SelectSongSectionRequest(number, section, lineIndex))
+            json.encodeToString(
+                SelectSongSectionRequest.serializer(),
+                SelectSongSectionRequest(number, section, lineIndex)
+            )
         )
     }
 
@@ -616,7 +626,9 @@ class InstanceLinkClient(
             return null
         }
         return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_PICTURES}/$folderId/images/$index") {
+            val response = httpClient.get(
+                "http://$currentHost:$currentPort${Constants.ENDPOINT_PICTURES}/$folderId/images/$index"
+            ) {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
             if (!response.status.isSuccess()) {
@@ -636,7 +648,9 @@ class InstanceLinkClient(
             return null
         }
         return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index") {
+            val response = httpClient.get(
+                "http://$currentHost:$currentPort${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index"
+            ) {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
             if (!response.status.isSuccess()) {
@@ -678,11 +692,18 @@ class InstanceLinkClient(
             return null
         }
         return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/secondary") {
+            val response = httpClient.get(
+                "http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/secondary"
+            ) {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
             if (!response.status.isSuccess()) {
-                logFetch("secondary_bible_file", success = false, status = response.status.value, reason = "http_status")
+                logFetch(
+                    "secondary_bible_file",
+                    success = false,
+                    status = response.status.value,
+                    reason = "http_status"
+                )
                 return null
             }
             logFetch("secondary_bible_file", success = true, status = response.status.value)
@@ -725,7 +746,9 @@ class InstanceLinkClient(
         // encoding) — swap it for "%20" so a name with spaces still resolves on the server.
         val encodedName = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
         return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$encodedName/json") {
+            val response = httpClient.get(
+                "http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$encodedName/json"
+            ) {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
             if (!response.status.isSuccess()) {
@@ -766,7 +789,9 @@ class InstanceLinkClient(
             return null
         }
         return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}/asset/$slot") {
+            val response = httpClient.get(
+                "http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}/asset/$slot"
+            ) {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
                 parameter("type", if (isVideo) "video" else "image")
             }

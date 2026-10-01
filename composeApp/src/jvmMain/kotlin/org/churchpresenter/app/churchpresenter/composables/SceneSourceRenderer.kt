@@ -513,7 +513,11 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
     )
 
     // Pre-compute gradient parameters outside Canvas (composable context)
-    val gradientColor2 = if (source.isGradient) parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity) else null
+    val gradientColor2 = if (source.isGradient) {
+        parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity)
+    } else {
+        null
+    }
     val gradientAngleRad = if (source.isGradient) Math.toRadians(source.gradientAngle.toDouble()) else 0.0
     val gradientPos = source.gradientPosition.coerceIn(0.001f, 0.999f)
 
@@ -812,7 +816,14 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
     val bgColor = parseHexColor(source.backgroundColor)
     val fgColor = parseHexColor(source.foregroundColor)
 
-    val qrContent = remember(source.contentType, source.content, source.wifiSsid, source.wifiPassword, source.wifiEncryption, source.wifiHidden) {
+    val qrContent = remember(
+        source.contentType,
+        source.content,
+        source.wifiSsid,
+        source.wifiPassword,
+        source.wifiEncryption,
+        source.wifiHidden
+    ) {
         if (source.contentType == "wifi") {
             val encType = when (source.wifiEncryption) {
                 "WPA", "WPA2", "WPA3" -> "WPA"
@@ -830,7 +841,13 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
         }
     }
 
-    val bitmap = remember(qrContent, source.foregroundColor, source.backgroundColor, source.transparentBackground, source.errorCorrection) {
+    val bitmap = remember(
+        qrContent,
+        source.foregroundColor,
+        source.backgroundColor,
+        source.transparentBackground,
+        source.errorCorrection
+    ) {
         try {
             val ecLevel = when (source.errorCorrection) {
                 "L" -> ErrorCorrectionLevel.L
@@ -900,8 +917,11 @@ private fun CameraSourceContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                       else stringResource(Res.string.background_camera_option),
+                text = if (source.deviceName.isNotEmpty()) {
+                    stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                } else {
+                    stringResource(Res.string.background_camera_option)
+                },
                 color = Color.White,
                 fontSize = 14.sp
             )
@@ -947,8 +967,11 @@ private fun CameraSourceContent(
             val shownError = error?.takeIf { showDiagnostics }
             Text(
                 text = shownError?.let { stringResource(cameraFailureStringRes(it)) }
-                    ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                       else stringResource(Res.string.background_camera_option),
+                    ?: if (source.deviceName.isNotEmpty()) {
+                        stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                    } else {
+                        stringResource(Res.string.background_camera_option)
+                    },
                 color = if (shownError != null) Color(ERROR_TEXT_COLOR) else Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center

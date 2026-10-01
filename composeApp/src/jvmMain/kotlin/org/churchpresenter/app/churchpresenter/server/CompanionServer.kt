@@ -189,7 +189,8 @@ class CompanionServer {
         val note = presentations._presentationNotes[id]?.getOrNull(index) ?: ""
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
+            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":""" +
+                """$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
         ))
     }
 
@@ -537,18 +538,39 @@ class CompanionServer {
      *  primary currently has live, since a Controller has no way to learn the primary's internally-
      *  assigned folderId/presentationId. See Constants.WS_CMD_NEXT_PICTURE and siblings. */
     val onNextPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onPreviousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousPicture = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val onNextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onPreviousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousSlide = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     // Media transport controls from a companion remote
-    val onMediaPlayPause = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaPlayPause = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val onMediaStop = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSeekForward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSeekBackward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekForward = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val onMediaSeekBackward = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val onMediaSeekTo = MutableSharedFlow<Long>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSetVolume = MutableSharedFlow<Float>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaMuteToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSetVolume = MutableSharedFlow<Float>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val onMediaMuteToggle = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     /**
      * Emitted for every instant (no-approval) action so the UI can show an activity toast.
@@ -648,7 +670,11 @@ class CompanionServer {
     /** Allow or disallow file uploads from mobile devices without restarting the server. */
     fun updateFileUploadEnabled(enabled: Boolean) {
         _fileUploadEnabled.value = enabled
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "file_upload_enabled", "enabled" to enabled))
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "file_upload_enabled", "enabled" to enabled)
+        )
     }
 
     /** Update the max media-upload size (MB) without restarting the server. */
@@ -747,7 +773,11 @@ class CompanionServer {
     fun updateSecondaryBibleFilePath(filePath: String) {
         if (_secondaryBibleFilePath == filePath) return
         _secondaryBibleFilePath = filePath
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "secondary_bible_file_path", "filePath" to filePath)
+        )
         // Invalidation signal for followers mirroring the secondary bible — they re-download
         // the .spb on this event instead of trusting their local cache forever.
         broadcast(WebSocketMessage(type = Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED, payload = ""))
@@ -1207,7 +1237,11 @@ class CompanionServer {
         return decodeUploadedFile(call, name, data)
     }
 
-    private suspend fun decodeUploadedFile(call: ApplicationCall, name: String, data: String): Pair<String, ByteArray>? {
+    private suspend fun decodeUploadedFile(
+        call: ApplicationCall,
+        name: String,
+        data: String
+    ): Pair<String, ByteArray>? {
         val safeName = File(name).name.ifBlank { "upload.pdf" }
         val ext = safeName.substringAfterLast('.', "").lowercase()
         if (ext !in UPLOADABLE_EXTENSIONS) {
@@ -1252,7 +1286,10 @@ class CompanionServer {
                 ContentType.Application.Json
             )
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
+            )
         }
     }
 

@@ -75,7 +75,10 @@ fun ColorPickerField(
             // The same sunken well as every field it sits beside in a settings form.
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp))
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
         verticalArrangement = Arrangement.Center
     ) {

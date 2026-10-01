@@ -683,7 +683,10 @@ private fun SingleDisplayPreview(
                             if (outputSettings.songSettings.crossfade)
                                 outputSettings.songSettings.transitionDuration.toInt() else 0
                         ).coerceAtLeast(100)
-                        Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)
+                        ) { mode ->
                         CompositionLocalProvider(
                             LocalLottieBandClock provides presenterManager.lottieBandClock,
                             LocalBandSongLineIndex provides bandSongLineIndex,
@@ -905,7 +908,11 @@ private fun SingleDisplayPreview(
             ) {
                 Icon(
                     imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                    contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
+                    contentDescription = if (lockedMode != null) {
+                        stringResource(Res.string.unlock_screen)
+                    } else {
+                        stringResource(Res.string.lock_screen_to_tab)
+                    },
                     modifier = Modifier.size(13.dp)
                 )
             }

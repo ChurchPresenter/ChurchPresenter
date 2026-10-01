@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.app.churchpresenter.composables.StyledTextField
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleEngineSettings
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 
@@ -116,66 +118,7 @@ internal fun STTSettingsDialogContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Scripture detection (Bible Lookup Engine) — the engine starts with the STT connection.
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    LabeledCheckbox(
-                        checked = engine.enabled,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } },
-                        label = stringResource(Res.string.bible_engine_detect),
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    // Toggle hidden for now — engine always runs locally (runLocal defaults true).
-                    // Flip to true to expose the local/remote choice again.
-                    @Suppress("KotlinConstantConditions")
-                    val showRunEngineLocallyToggle = false
-                    if (showRunEngineLocallyToggle) {
-                        Spacer(Modifier.weight(1f))
-                        LabeledCheckbox(
-                            checked = engine.runLocal,
-                            enabled = engine.enabled,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } },
-                            label = stringResource(Res.string.bible_engine_run_local),
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
-                }
-                AnimatedVisibility(visible = engine.enabled) {
-                    LabeledCheckbox(
-                        checked = engine.helpDevMode,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it)) } },
-                        label = stringResource(Res.string.stt_help_dev_mode),
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        spacing = 4.dp,
-                    )
-                }
-                AnimatedVisibility(visible = engine.enabled && !engine.runLocal) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        StyledTextField(
-                            value = engine.host,
-                            onValueChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } },
-                            label = stringResource(Res.string.bible_engine_host),
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StyledTextField(
-                            value = engine.port.toString(),
-                            onValueChange = { v -> v.toIntOrNull()?.let { p -> onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } },
-                            label = stringResource(Res.string.server_port),
-                            singleLine = true,
-                            modifier = Modifier.width(120.dp)
-                        )
-                    }
-                }
-
+                BibleEngineFields(engine, onSettingsChange)
                 Spacer(Modifier.height(4.dp))
                 RaisedButton(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -191,3 +134,93 @@ internal fun STTSettingsDialogContent(
             }
         }
     }
+
+/** Scripture detection (the Bible Lookup Engine): whether it runs, its help mode and its address. */
+@Composable
+private fun ColumnScope.BibleEngineFields(
+    engine: BibleEngineSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    // The engine starts with the STT connection.
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        LabeledCheckbox(
+            checked = engine.enabled,
+            onCheckedChange = {
+                onSettingsChange { s ->
+                    s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it))
+                }
+            },
+            label = stringResource(Res.string.bible_engine_detect),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        // Toggle hidden for now — engine always runs locally (runLocal defaults true).
+        // Flip to true to expose the local/remote choice again.
+        @Suppress("KotlinConstantConditions")
+        val showRunEngineLocallyToggle = false
+        if (showRunEngineLocallyToggle) {
+            Spacer(Modifier.weight(1f))
+            LabeledCheckbox(
+                checked = engine.runLocal,
+                enabled = engine.enabled,
+                onCheckedChange = {
+                    onSettingsChange { s ->
+                        s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it))
+                    }
+                },
+                label = stringResource(Res.string.bible_engine_run_local),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+    AnimatedVisibility(visible = engine.enabled) {
+        LabeledCheckbox(
+            checked = engine.helpDevMode,
+            onCheckedChange = {
+                onSettingsChange { s ->
+                    s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it))
+                }
+            },
+            label = stringResource(Res.string.stt_help_dev_mode),
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.onSurface,
+            spacing = 4.dp,
+        )
+    }
+    AnimatedVisibility(visible = engine.enabled && !engine.runLocal) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StyledTextField(
+                value = engine.host,
+                onValueChange = {
+                    onSettingsChange { s ->
+                        s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it))
+                    }
+                },
+                label = stringResource(Res.string.bible_engine_host),
+                singleLine = true,
+                modifier = Modifier.weight(1f)
+            )
+            StyledTextField(
+                value = engine.port.toString(),
+                onValueChange = { v ->
+                    v.toIntOrNull()?.let { p ->
+                        onSettingsChange { s ->
+                            s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p))
+                        }
+                    }
+                },
+                label = stringResource(Res.string.server_port),
+                singleLine = true,
+                modifier = Modifier.width(120.dp)
+            )
+        }
+    }
+
+}

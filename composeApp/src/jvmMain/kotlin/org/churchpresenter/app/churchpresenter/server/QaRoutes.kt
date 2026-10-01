@@ -59,7 +59,9 @@ private fun Route.qaPublicRoutes(
                 get("/api/qa/status") {
                     val qa = server.qaManager
                     call.respondText(
-                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":${server.qaCooldownSeconds},"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}""",
+                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":""" +
+                            """${server.qaCooldownSeconds},"displayedQuestionId":""" +
+                            """"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}""",
                         ContentType.Application.Json
                     )
                 }
@@ -86,7 +88,13 @@ private fun Route.qaPublicRoutes(
                         ?: call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
                         ?: call.request.local.remoteAddress
                     val deviceId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    val question = qa.submitQuestion(request.text, request.name, clientIp, server.qaCooldownSeconds, deviceId)
+                    val question = qa.submitQuestion(
+                        request.text,
+                        request.name,
+                        clientIp,
+                        server.qaCooldownSeconds,
+                        deviceId
+                    )
                     if (question != null) {
                         call.respondText(
                             json.encodeToString(QuestionDto.serializer(), question.toDto()),
@@ -94,7 +102,10 @@ private fun Route.qaPublicRoutes(
                         )
                     } else {
                         if (qa.isRateLimited(clientIp, server.qaCooldownSeconds)) {
-                            call.respond(HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")
+                            call.respond(
+                                HttpStatusCode.TooManyRequests,
+                                """{"error":"Too many questions. Please wait a moment."}"""
+                            )
                         } else {
                             call.respond(HttpStatusCode.Forbidden, """{"error":"submission failed"}""")
                         }
@@ -130,7 +141,8 @@ private fun Route.qaVotingRoutes(
                         ?: call.request.local.remoteAddress
                     val dtos = approved.map {
                         val dto = it.toDto()
-                        val textEsc = dto.text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")
+                        val textEsc = dto.text.replace("\\", "\\\\").replace("\"", "\\\"")
+                            .replace("\n", "\\n").replace("\r", "\\r")
                         val voteDir = qa.getVoteDirection(it.id, clientIp)
                         val votedStr = if (voteDir != null) "\"$voteDir\"" else "null"
                         """{"id":"${dto.id}","text":"$textEsc","voteCount":${dto.voteCount},"voted":$votedStr}"""
@@ -218,9 +230,17 @@ private fun Route.qaModerationRoutes(
                     }
                     val question = server.qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    val pending = CompanionServer.PendingQAAdminRequest(action = "approve", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    val pending = CompanionServer.PendingQAAdminRequest(
+                        action = "approve",
+                        questionId = id,
+                        text = question?.text ?: "",
+                        clientId = clientId
+                    )
                     server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
                     val ok = server.qaManager?.approveQuestion(id) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
@@ -276,9 +296,17 @@ private fun Route.qaQuestionEditRoutes(
                     }
                     val question = server.qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    val pending = CompanionServer.PendingQAAdminRequest(action = "deny", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    val pending = CompanionServer.PendingQAAdminRequest(
+                        action = "deny",
+                        questionId = id,
+                        text = question?.text ?: "",
+                        clientId = clientId
+                    )
                     server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
                     val ok = server.qaManager?.denyQuestion(id) ?: false
                     if (ok) {
                         if (server.qaManager?.displayedQuestion == null) scope.launch { server.onQADisplay.emit(null) }
@@ -302,9 +330,17 @@ private fun Route.qaQuestionStateRoutes(
                     }
                     val question = server.qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    val pending = CompanionServer.PendingQAAdminRequest(action = "done", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    val pending = CompanionServer.PendingQAAdminRequest(
+                        action = "done",
+                        questionId = id,
+                        text = question?.text ?: "",
+                        clientId = clientId
+                    )
                     server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
                     val ok = server.qaManager?.markDone(id) ?: false
                     if (ok) {
                         if (server.qaManager?.displayedQuestion == null) scope.launch { server.onQADisplay.emit(null) }
@@ -322,9 +358,17 @@ private fun Route.qaQuestionStateRoutes(
                     }
                     val question = server.qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-                    val pending = CompanionServer.PendingQAAdminRequest(action = "display", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    val pending = CompanionServer.PendingQAAdminRequest(
+                        action = "display",
+                        questionId = id,
+                        text = question?.text ?: "",
+                        clientId = clientId
+                    )
                     server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
                     val qa = server.qaManager
                     val ok = qa?.displayQuestion(id) ?: false
                     if (ok) {

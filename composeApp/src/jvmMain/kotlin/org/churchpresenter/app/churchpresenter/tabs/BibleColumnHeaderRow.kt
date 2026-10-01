@@ -114,15 +114,27 @@ internal fun BibleVerseHeader(
         // what opens the Bible Lookup Engine, so it belongs with the actions rather than
         // with the things that choose what is being read.
         if (sttToggleVisible) {
-            val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect) else stringResource(Res.string.stt_connect)
+            val sttActionStr = if (sttConnected) {
+                stringResource(Res.string.stt_disconnect)
+            } else {
+                stringResource(Res.string.stt_connect)
+            }
             ActionIconButton(
                 onClick = {
                     onSttToggle()
                 },
                 tooltipText = sttActionStr,
                 icon = Icons.Filled.Mic,
-                containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                containerColor = if (sttConnected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                contentColor = if (sttConnected) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
             )
         }
 
@@ -159,7 +171,10 @@ internal fun BibleListHeaderLabel(text: String, modifier: Modifier = Modifier) {
 private fun CrossRefsPill(crossRefsDocked: Boolean, onCrossReferencesToggle: () -> Unit) {
     TooltipArea(
         tooltip = { HeaderTooltip(stringResource(Res.string.bible_cross_references)) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        ),
     ) {
         RaisedFilterChip(
             selected = crossRefsDocked,
@@ -187,7 +202,10 @@ private fun HoldLivePill(
 ) {
     TooltipArea(
         tooltip = { HeaderTooltip(if (holdAvailable) holdLiveStr else verseSelectionHint) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        ),
     ) {
         val icon: @Composable () -> Unit = {
             Icon(
@@ -236,7 +254,12 @@ private fun TranslationControls(
             tooltipContent = {
                 val pair = translations
                 Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(Res.string.swap_bibles_hint),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold
+                    )
                     pair.forEachIndexed { position, item ->
                         Text(
                             "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",
