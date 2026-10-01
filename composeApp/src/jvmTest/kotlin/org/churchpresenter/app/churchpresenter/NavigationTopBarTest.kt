@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.window.FrameWindowScope
 import io.mockk.every
 import io.mockk.mockk

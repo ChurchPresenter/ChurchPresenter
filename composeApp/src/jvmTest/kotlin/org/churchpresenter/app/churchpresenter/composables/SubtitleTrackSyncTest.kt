@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

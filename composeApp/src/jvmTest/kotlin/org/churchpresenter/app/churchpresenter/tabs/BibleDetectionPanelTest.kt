@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSttStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectedReference
