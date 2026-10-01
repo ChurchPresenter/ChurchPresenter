@@ -23,10 +23,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import org.churchpresenter.icons.generated.resources.ic_arrow_left
+import org.churchpresenter.icons.generated.resources.ic_arrow_right
 import org.churchpresenter.strings.generated.resources.tooltip_collapse_schedule
 import org.churchpresenter.strings.generated.resources.tooltip_expand_schedule
 import org.churchpresenter.app.churchpresenter.composables.PanelResizeHandle
@@ -166,8 +166,8 @@ internal fun MainDesktopScope.MainDesktopPanels() {
                             withSchedulePanelCollapsed(s, isMaximized, scheduleCollapsed)
                         }
                     },
-                    collapsedIcon = AppRes.drawable.ic_arrow_right,
-                    expandedIcon = AppRes.drawable.ic_arrow_left,
+                    collapsedIcon = IconRes.drawable.ic_arrow_right,
+                    expandedIcon = IconRes.drawable.ic_arrow_left,
                 )
 
                 MainTabArea(modifier = Modifier.weight(1f).fillMaxHeight())
@@ -187,8 +187,8 @@ internal fun MainDesktopScope.MainDesktopPanels() {
                             withPreviewPanelCollapsed(s, isMaximized, previewCollapsed)
                         }
                     },
-                    collapsedIcon = AppRes.drawable.ic_arrow_left,
-                    expandedIcon = AppRes.drawable.ic_arrow_right,
+                    collapsedIcon = IconRes.drawable.ic_arrow_left,
+                    expandedIcon = IconRes.drawable.ic_arrow_right,
                 )
 
                 // Collapsible preview panel (right sidebar)

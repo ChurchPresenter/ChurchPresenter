@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.app.churchpresenter.composables.ReorderArrowButton
 import org.churchpresenter.strings.generated.resources.bible_translation_order_hint
@@ -54,9 +54,9 @@ import org.churchpresenter.strings.generated.resources.bible_translation_order_m
 import org.churchpresenter.strings.generated.resources.bible_translation_order_panel_subtitle
 import org.churchpresenter.strings.generated.resources.bible_translation_order_panel_title
 import org.churchpresenter.strings.generated.resources.drag_to_reorder_translation
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_drag_dots
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_drag_dots
 import org.churchpresenter.strings.generated.resources.move_translation_down
 import org.churchpresenter.strings.generated.resources.move_translation_up
 import kotlin.math.roundToInt
@@ -162,7 +162,7 @@ internal fun OrderSelector(
                 }
             }
             Icon(
-                painter = painterResource(AppRes.drawable.ic_arrow_down),
+                painter = painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier.size(12.dp).rotate(if (expanded) EXPANDED_ROTATION else 0f),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -246,7 +246,7 @@ private fun OrderPanel(
                     horizontalArrangement = Arrangement.spacedBy(9.dp),
                 ) {
                     Icon(
-                        painter = painterResource(AppRes.drawable.ic_drag_dots),
+                        painter = painterResource(IconRes.drawable.ic_drag_dots),
                         contentDescription = stringResource(Res.string.drag_to_reorder_translation),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                         modifier = Modifier
@@ -334,13 +334,13 @@ private fun OrderPanel(
 
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         ReorderArrowButton(
-                            icon = painterResource(AppRes.drawable.ic_arrow_up),
+                            icon = painterResource(IconRes.drawable.ic_arrow_up),
                             contentDescription = moveUpLabel,
                             enabled = index > 0,
                             onClick = { onMove(index, -1) },
                         )
                         ReorderArrowButton(
-                            icon = painterResource(AppRes.drawable.ic_arrow_down),
+                            icon = painterResource(IconRes.drawable.ic_arrow_down),
                             contentDescription = moveDownLabel,
                             enabled = index < entries.lastIndex,
                             onClick = { onMove(index, 1) },

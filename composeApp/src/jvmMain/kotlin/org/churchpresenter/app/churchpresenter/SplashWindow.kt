@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.churchpresenter.strings.generated.resources.loading
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
@@ -41,7 +41,7 @@ internal fun SplashWindow(theme: ThemeMode) {
     Window(
         onCloseRequest = {},
         title = stringResource(Res.string.app_name),
-        icon = painterResource(AppRes.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = rememberWindowState(
             width = 400.dp,
             height = 300.dp,
@@ -69,7 +69,7 @@ internal fun SplashContent(theme: ThemeMode) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(AppRes.drawable.ic_app_icon),
+                    painter = painterResource(IconRes.drawable.ic_app_icon),
                     contentDescription = null,
                     modifier = Modifier.size(96.dp)
                 )

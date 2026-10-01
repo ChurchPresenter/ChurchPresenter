@@ -58,7 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_next_verse_speed_balanced
 import org.churchpresenter.strings.generated.resources.bible_next_verse_speed_fast
@@ -95,7 +95,7 @@ import org.churchpresenter.strings.generated.resources.bible_stt_text_match_hint
 import org.churchpresenter.strings.generated.resources.bible_stt_track_transcription
 import org.churchpresenter.strings.generated.resources.bible_stt_track_translation
 import org.churchpresenter.strings.generated.resources.bible_stt_waiting_for_stt
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.stt_status_connecting
 import org.churchpresenter.strings.generated.resources.stt_status_not_connected
 import org.churchpresenter.strings.generated.resources.stt_status_reconnecting
@@ -283,7 +283,7 @@ internal fun BibleDetectionPanel(
                         modifier = Modifier.size(27.dp)
                     ) {
                         Icon(
-                            painter = painterResource(AppRes.drawable.ic_close),
+                            painter = painterResource(IconRes.drawable.ic_close),
                             contentDescription = stringResource(Res.string.bible_stt_clear),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)

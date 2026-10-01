@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.canvas_bg_color
 import org.churchpresenter.strings.generated.resources.canvas_color_1
@@ -72,7 +72,7 @@ import org.churchpresenter.strings.generated.resources.canvas_source_video
 import org.churchpresenter.strings.generated.resources.canvas_video_loop
 import org.churchpresenter.strings.generated.resources.canvas_video_volume
 import org.churchpresenter.strings.generated.resources.canvas_transparent_bg
-import churchpresenter.composeapp.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_folder
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.scene.SceneSource
@@ -161,7 +161,7 @@ internal fun ImageProperties(
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_folder),
+                painterResource(IconRes.drawable.ic_folder),
                 contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )
@@ -458,7 +458,7 @@ internal fun VideoProperties(
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_folder),
+                painterResource(IconRes.drawable.ic_folder),
                 contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )

@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_song_samples
 import org.churchpresenter.strings.generated.resources.bible_catalog_button
@@ -41,9 +41,9 @@ import org.churchpresenter.strings.generated.resources.bible_catalog_folder_not_
 import org.churchpresenter.strings.generated.resources.convert
 import org.churchpresenter.strings.generated.resources.detected_files_label
 import org.churchpresenter.strings.generated.resources.file_not_supported_short
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_download
-import churchpresenter.composeapp.generated.resources.ic_warning
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_download
+import org.churchpresenter.icons.generated.resources.ic_warning
 import org.churchpresenter.strings.generated.resources.no_files_detected
 import org.churchpresenter.strings.generated.resources.scanning_directory
 import org.churchpresenter.strings.generated.resources.song_folder_with_count
@@ -207,7 +207,7 @@ internal fun BibleStorageDetail(
             // Offered only once a real folder is in place: downloads are written the moment they
             // finish, so there must be no doubt about where they are going.
             if (java.io.File(directory).isDirectory) {
-                DetailAction(stringResource(Res.string.bible_catalog_button), AppRes.drawable.ic_download) {
+                DetailAction(stringResource(Res.string.bible_catalog_button), IconRes.drawable.ic_download) {
                     // Probed on click, not on composition: it writes a file, and the answer can
                     // change while the settings are open (a drive unplugged, permissions fixed).
                     notWritable = !BibleInstallSupport.usableDirectory(java.io.File(directory))
@@ -258,7 +258,7 @@ internal fun SongsStorageDetail(directory: String, scan: SongScan) {
             }
             DetailAction(
                 stringResource(Res.string.add_song_samples),
-                AppRes.drawable.ic_add,
+                IconRes.drawable.ic_add,
                 enabled = !copyingSamples,
             ) {
                 if (samplePrompts.confirmOverwrite(directory)) {
@@ -301,7 +301,7 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_warning),
+            painter = painterResource(IconRes.drawable.ic_warning),
             contentDescription = null,
             modifier = Modifier.size(13.dp),
             tint = MaterialTheme.semantic.onWarningContainer,

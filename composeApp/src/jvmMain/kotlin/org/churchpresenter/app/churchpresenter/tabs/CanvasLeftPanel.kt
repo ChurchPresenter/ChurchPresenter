@@ -42,7 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockOpen
@@ -51,13 +51,13 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_copy
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_copy
+import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.strings.generated.resources.canvas_new_scene
 import org.churchpresenter.strings.generated.resources.canvas_scenes
 import org.churchpresenter.strings.generated.resources.canvas_sources
@@ -110,7 +110,7 @@ internal fun CanvasTabScope.CanvasLeftPanel(sceneViewModel: SceneViewModel) {
                 shape = AppShape(8.dp),
                 contentPadding = ButtonDefaults.ContentPadding
             ) {
-                Icon(painterResource(AppRes.drawable.ic_add), null, modifier = Modifier.size(16.dp))
+                Icon(painterResource(IconRes.drawable.ic_add), null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
                 Text(stringResource(Res.string.canvas_new_scene), style = MaterialTheme.typography.labelSmall)
             }
@@ -307,7 +307,7 @@ private fun CanvasTabScope.SceneRowActions(
             modifier = Modifier.size(20.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_edit),
+                painterResource(IconRes.drawable.ic_edit),
                 contentDescription = stringResource(Res.string.canvas_rename_scene),
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -340,7 +340,7 @@ private fun CanvasTabScope.SceneRowActions(
             modifier = Modifier.size(20.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_copy),
+                painterResource(IconRes.drawable.ic_copy),
                 contentDescription = stringResource(Res.string.canvas_duplicate_scene),
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -397,7 +397,7 @@ private fun CanvasTabScope.SceneRowSizeAndRemove(
             modifier = Modifier.size(20.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_close),
+                painterResource(IconRes.drawable.ic_close),
                 contentDescription = stringResource(Res.string.tooltip_remove),
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -610,7 +610,7 @@ private fun CanvasTabScope.SelectedSourceButtons(sceneViewModel: SceneViewModel)
                 modifier = Modifier.size(28.dp)
             ) {
                 Icon(
-                    painterResource(AppRes.drawable.ic_delete),
+                    painterResource(IconRes.drawable.ic_delete),
                     contentDescription = stringResource(Res.string.canvas_delete_source),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface
@@ -650,7 +650,7 @@ private fun CanvasTabScope.SourceOrderButtons(sceneViewModel: SceneViewModel, cu
             modifier = Modifier.size(28.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_arrow_up),
+                painterResource(IconRes.drawable.ic_arrow_up),
                 contentDescription = stringResource(Res.string.canvas_source_move_forward),
                 modifier = Modifier.size(16.dp),
                 tint = MaterialTheme.colorScheme.onSurface
@@ -682,7 +682,7 @@ private fun CanvasTabScope.SourceOrderButtons(sceneViewModel: SceneViewModel, cu
             modifier = Modifier.size(28.dp)
         ) {
             Icon(
-                painterResource(AppRes.drawable.ic_arrow_down),
+                painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = stringResource(Res.string.canvas_source_move_backward),
                 modifier = Modifier.size(16.dp),
                 tint = MaterialTheme.colorScheme.onSurface

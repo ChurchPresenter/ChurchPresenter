@@ -46,11 +46,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.no_results_found
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -220,7 +220,7 @@ fun SearchableDropdownField(
             Spacer(Modifier.width(4.dp))
             if (onClear != null) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.clear),
                     modifier = Modifier
                         .size(14.dp)
@@ -236,7 +236,7 @@ fun SearchableDropdownField(
                 Spacer(Modifier.width(6.dp))
             }
             Icon(
-                painter = painterResource(AppRes.drawable.ic_arrow_down),
+                painter = painterResource(IconRes.drawable.ic_arrow_down),
                 contentDescription = null,
                 modifier = Modifier
                     .size(14.dp)

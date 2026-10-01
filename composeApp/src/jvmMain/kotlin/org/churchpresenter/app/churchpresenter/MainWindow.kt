@@ -22,10 +22,10 @@ import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -215,7 +215,7 @@ private fun AppRootState.MainWindow(
             exitApplication()
         },
         title = stringResource(Res.string.app_name),
-        icon = painterResource(AppRes.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = state
     ) {
         LaunchedEffect(Unit) {

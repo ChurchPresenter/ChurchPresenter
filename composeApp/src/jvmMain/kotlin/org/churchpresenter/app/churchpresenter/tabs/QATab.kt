@@ -67,11 +67,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.qa_add_question_hint
 import org.churchpresenter.strings.generated.resources.qa_approve
 import org.churchpresenter.strings.generated.resources.qa_back_to_incoming
@@ -516,7 +516,7 @@ fun QATab(
                                 )
                             ) {
                                 Icon(
-                                    painter = painterResource(AppRes.drawable.ic_close),
+                                    painter = painterResource(IconRes.drawable.ic_close),
                                     contentDescription = stringResource(Res.string.qa_clear_question_text),
                                     modifier = Modifier.size(14.dp)
                                 )

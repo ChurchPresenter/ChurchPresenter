@@ -37,10 +37,10 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_web
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_web
 import org.churchpresenter.strings.generated.resources.interactive_mode
 import org.churchpresenter.strings.generated.resources.mirror_mode
 import org.churchpresenter.strings.generated.resources.web_bookmark_add
@@ -51,7 +51,7 @@ import org.churchpresenter.strings.generated.resources.web_clear_url
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import churchpresenter.composeapp.generated.resources.ic_cast
+import org.churchpresenter.icons.generated.resources.ic_cast
 import org.churchpresenter.strings.generated.resources.web_go_live
 import org.churchpresenter.strings.generated.resources.web_focus_first_input
 import org.churchpresenter.strings.generated.resources.web_live_badge
@@ -173,7 +173,7 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_web),
+            painter = painterResource(IconRes.drawable.ic_web),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -224,7 +224,7 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
                 modifier = Modifier.size(30.dp)
             ) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.web_clear_url),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -454,7 +454,7 @@ private fun WebTabScope.WebTypeToPage() {
             if (typeBuffer.isNotEmpty()) {
                 KeyIconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
                     Icon(
-                        painter = painterResource(AppRes.drawable.ic_close),
+                        painter = painterResource(IconRes.drawable.ic_close),
                         contentDescription = stringResource(Res.string.web_clear_typed_text),
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -463,7 +463,7 @@ private fun WebTabScope.WebTypeToPage() {
             }
         }
         TooltipIconButton(
-            painter = painterResource(AppRes.drawable.ic_cast),
+            painter = painterResource(IconRes.drawable.ic_cast),
             text = stringResource(Res.string.web_focus_first_input),
             onClick = {
                 presenterManager?.liveBrowser?.value

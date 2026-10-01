@@ -69,7 +69,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.dictionary_definition
@@ -82,8 +82,8 @@ import org.churchpresenter.strings.generated.resources.dictionary_forward
 import org.churchpresenter.strings.generated.resources.dictionary_switch_language
 import org.churchpresenter.strings.generated.resources.dictionary_bible_primary
 import org.churchpresenter.strings.generated.resources.dictionary_bible_select
-import churchpresenter.composeapp.generated.resources.ic_redo
-import churchpresenter.composeapp.generated.resources.ic_undo
+import org.churchpresenter.icons.generated.resources.ic_redo
+import org.churchpresenter.icons.generated.resources.ic_undo
 import org.churchpresenter.strings.generated.resources.dictionary_go_to_verse
 import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_count
 import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_header
@@ -100,8 +100,8 @@ import org.churchpresenter.strings.generated.resources.dictionary_transliteratio
 import org.churchpresenter.strings.generated.resources.go_live
 import org.churchpresenter.strings.generated.resources.book
 import org.churchpresenter.strings.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
 import org.churchpresenter.strings.generated.resources.search_clear
 import org.churchpresenter.strings.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
@@ -597,7 +597,7 @@ private fun DictionaryDetailActionRow(
                 onClick = onGoBack,
                 enabled = canGoBack,
                 tooltipText = backStr,
-                painter = painterResource(AppRes.drawable.ic_undo),
+                painter = painterResource(IconRes.drawable.ic_undo),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -605,7 +605,7 @@ private fun DictionaryDetailActionRow(
                 onClick = onGoForward,
                 enabled = canGoForward,
                 tooltipText = forwardStr,
-                painter = painterResource(AppRes.drawable.ic_redo),
+                painter = painterResource(IconRes.drawable.ic_redo),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1103,7 +1103,7 @@ private fun DictionarySearchField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_search),
+            painter = painterResource(IconRes.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -1135,7 +1135,7 @@ private fun DictionarySearchField(
         if (value.isNotEmpty()) {
             KeyIconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant

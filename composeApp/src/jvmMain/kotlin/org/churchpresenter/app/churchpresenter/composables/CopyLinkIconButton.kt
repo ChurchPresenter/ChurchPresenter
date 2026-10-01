@@ -5,9 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_copy
+import org.churchpresenter.icons.generated.resources.ic_copy
 import org.churchpresenter.strings.generated.resources.tooltip_copy_link
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -33,7 +33,7 @@ fun CopyLinkIconButton(
     iconSize: Dp = 15.dp
 ) {
     TooltipIconButton(
-        painter = painterResource(AppRes.drawable.ic_copy),
+        painter = painterResource(IconRes.drawable.ic_copy),
         text = stringResource(Res.string.tooltip_copy_link),
         onClick = { onCopy(url) },
         modifier = modifier,

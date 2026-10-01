@@ -25,9 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.strings.generated.resources.canvas_source_browser
 import org.churchpresenter.strings.generated.resources.canvas_source_color
 import org.churchpresenter.strings.generated.resources.canvas_source_image
@@ -80,7 +80,7 @@ internal fun CanvasTabScope.AddSourceButton(sceneViewModel: SceneViewModel) {
                 modifier = Modifier.size(28.dp)
             ) {
                 Icon(
-                    painterResource(AppRes.drawable.ic_add),
+                    painterResource(IconRes.drawable.ic_add),
                     contentDescription = stringResource(Res.string.canvas_add_source),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurface

@@ -35,10 +35,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.arrow_down
-import churchpresenter.composeapp.generated.resources.arrow_up
+import org.churchpresenter.icons.generated.resources.arrow_down
+import org.churchpresenter.icons.generated.resources.arrow_up
 import org.churchpresenter.strings.generated.resources.decrement
 import org.churchpresenter.strings.generated.resources.increment
 import org.jetbrains.compose.resources.painterResource
@@ -134,7 +134,7 @@ fun NumberSettingsTextField(
                 modifier = Modifier.size(20.dp, 16.dp)
             ) {
                 Image(
-                    painter = painterResource(AppRes.drawable.arrow_up),
+                    painter = painterResource(IconRes.drawable.arrow_up),
                     contentDescription = stringResource(Res.string.increment),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
                     modifier = Modifier.size(12.dp)
@@ -149,7 +149,7 @@ fun NumberSettingsTextField(
                 modifier = Modifier.size(20.dp, 16.dp)
             ) {
                 Image(
-                    painter = painterResource(AppRes.drawable.arrow_down),
+                    painter = painterResource(IconRes.drawable.arrow_down),
                     contentDescription = stringResource(Res.string.decrement),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
                     modifier = Modifier.size(12.dp)

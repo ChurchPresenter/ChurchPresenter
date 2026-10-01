@@ -101,3 +101,5 @@ include(":bible")
 include(":calendar")
 
 include(":strings")
+
+include(":icons")

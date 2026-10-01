@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.arrow_down
+import org.churchpresenter.icons.generated.resources.arrow_down
 import org.churchpresenter.strings.generated.resources.backdrop_title
 import org.churchpresenter.strings.generated.resources.text_style_backdrop
 import org.churchpresenter.strings.generated.resources.text_style_bold
@@ -211,7 +211,7 @@ internal fun TextOutlineButton(
             onClick = { showDialog = true },
         ) { content ->
             Icon(
-                painter = painterResource(AppRes.drawable.arrow_down),
+                painter = painterResource(IconRes.drawable.arrow_down),
                 contentDescription = null,
                 tint = content,
                 modifier = Modifier.size(CARET_SIZE),
@@ -281,7 +281,7 @@ internal fun TextBackdropButton(
             onClick = { showDialog = true },
         ) { content ->
             Icon(
-                painter = painterResource(AppRes.drawable.arrow_down),
+                painter = painterResource(IconRes.drawable.arrow_down),
                 contentDescription = null,
                 tint = content,
                 modifier = Modifier.size(CARET_SIZE),

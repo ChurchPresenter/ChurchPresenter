@@ -18,12 +18,12 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.diagnostics.Log
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.strings.generated.resources.decklink_output_title
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -229,7 +229,7 @@ internal fun skiaBgraToArgbPixels(byteBuf: ByteArray, pixels: IntArray, pixelCou
 /** The same vector icon every Compose Window uses, rendered for the off-screen `JFrame`'s title. */
 @Composable
 private fun rememberAppIconImage(): java.awt.image.BufferedImage? {
-    val iconPainter = painterResource(AppRes.drawable.ic_app_icon)
+    val iconPainter = painterResource(IconRes.drawable.ic_app_icon)
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     return remember(iconPainter) {

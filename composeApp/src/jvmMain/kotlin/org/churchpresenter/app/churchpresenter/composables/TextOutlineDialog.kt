@@ -25,11 +25,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.color
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.outline_show
 import org.churchpresenter.strings.generated.resources.text_outline
 import org.churchpresenter.strings.generated.resources.text_outline_width
@@ -83,7 +83,7 @@ fun TextOutlineDialog(
                     )
                     KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
                         Icon(
-                            painter = painterResource(AppRes.drawable.ic_close),
+                            painter = painterResource(IconRes.drawable.ic_close),
                             contentDescription = stringResource(Res.string.close),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(CLOSE_ICON_SIZE),
