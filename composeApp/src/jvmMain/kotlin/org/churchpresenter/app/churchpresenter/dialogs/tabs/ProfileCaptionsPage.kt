@@ -10,10 +10,15 @@ import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.profile_box_item_transcript
 import churchpresenter.composeapp.generated.resources.profile_box_item_translation
 import churchpresenter.composeapp.generated.resources.profile_caption_all_caps
+import churchpresenter.composeapp.generated.resources.profile_caption_band_edge
+import churchpresenter.composeapp.generated.resources.profile_caption_band_edge_sub
 import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_layout
+import churchpresenter.composeapp.generated.resources.profile_caption_shape
+import churchpresenter.composeapp.generated.resources.profile_caption_shape_band
+import churchpresenter.composeapp.generated.resources.profile_caption_shape_card
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_bold
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_caps
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_italic
@@ -42,6 +47,8 @@ import churchpresenter.composeapp.generated.resources.profile_ms
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.CAPTION_BOX_BAND
+import org.churchpresenter.settings.CAPTION_BOX_CARD
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
 import org.churchpresenter.settings.STTSettings
@@ -126,6 +133,8 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
         stt.backgroundOpacity,
         { v -> update { it.copy(backgroundOpacity = v) } },
         STT,
+        leading = { CaptionShapeRows(stt, update) },
+        leadingPaths = listOf("$STT.boxShape", "$STT.bandTouchesEdge"),
     )
     SettingsGroup(
         stringResource(Res.string.profile_group_position),
@@ -249,6 +258,30 @@ private val CAPTION_TEXT_PATHS = listOf(
 private val TRANSLATION_SIZE_RANGE = 0..200
 private val LETTER_SPACING_RANGE = -10..30
 private val WORD_SPACING_RANGE = 0..40
+
+/** The box's shape: today's rounded card, or a full-width band that may touch the screen's edge. */
+@Composable
+private fun CaptionShapeRows(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
+    SettingsRow(stringResource(Res.string.profile_caption_shape), paths = listOf("$STT.boxShape")) {
+        RowSegmented(
+            options = listOf(
+                RowOption(CAPTION_BOX_CARD, stringResource(Res.string.profile_caption_shape_card)),
+                RowOption(CAPTION_BOX_BAND, stringResource(Res.string.profile_caption_shape_band)),
+            ),
+            selected = stt.boxShape,
+            onSelect = { v -> update { it.copy(boxShape = v) } },
+        )
+    }
+    if (stt.boxShape == CAPTION_BOX_BAND) {
+        SettingsSwitchRow(
+            stringResource(Res.string.profile_caption_band_edge),
+            stt.bandTouchesEdge,
+            { v -> update { it.copy(bandTouchesEdge = v) } },
+            sub = stringResource(Res.string.profile_caption_band_edge_sub),
+            paths = listOf("$STT.bandTouchesEdge"),
+        )
+    }
+}
 
 /** The captions' own text rows: capitals, spacing, and the translation's colour, size and style. */
 @Composable

@@ -37,6 +37,10 @@ import churchpresenter.composeapp.generated.resources.profile_caption_line_break
 import churchpresenter.composeapp.generated.resources.profile_caption_max_chars
 import churchpresenter.composeapp.generated.resources.profile_caption_reading_speed
 import churchpresenter.composeapp.generated.resources.profile_caption_roll_up
+import churchpresenter.composeapp.generated.resources.profile_caption_shape_band
+import churchpresenter.composeapp.generated.resources.profile_caption_style
+import churchpresenter.composeapp.generated.resources.profile_caption_style_pop_on
+import churchpresenter.composeapp.generated.resources.profile_caption_style_ticker
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_size
 import churchpresenter.composeapp.generated.resources.profile_content_align
 import churchpresenter.composeapp.generated.resources.profile_content_width
@@ -144,7 +148,9 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
             Res.string.background_above_band_caption,
         )
         CustomizePane.CAPTIONS -> listOf(
-            Res.string.profile_group_reading, Res.string.profile_caption_clear,
+            Res.string.profile_group_reading, Res.string.profile_caption_style,
+            Res.string.profile_caption_style_ticker, Res.string.profile_caption_style_pop_on,
+            Res.string.profile_caption_shape_band, Res.string.profile_caption_clear,
             Res.string.profile_caption_reading_speed, Res.string.profile_caption_roll_up,
             Res.string.profile_caption_dim, Res.string.profile_caption_line_breaks,
             Res.string.profile_caption_max_chars, Res.string.profile_caption_all_caps,

@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,7 +23,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.em
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -40,8 +36,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.BottomAlignedText
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
 import org.churchpresenter.settings.CaptionReading
@@ -124,17 +120,19 @@ fun STTPresenter(
     val keptTranslation = keepNewest(dripTranslation, sttSettings.maxSegments)
     val wordEm = spacingEm(sttSettings.wordSpacing, sttSettings.fontSize)
     val spaceTrackingEm = (spacingEm(sttSettings.letterSpacing, sttSettings.fontSize) + wordEm).takeIf { wordEm != 0f }
+    // A ticker only ever adds words, so it never shows the ones still being rewritten
+    val ticker = reading.style == CAPTION_STYLE_TICKER
     val highlights = highlightedWords.takeIf { sttSettings.showWordHighlighting }.orEmpty()
     val transcriptionText = buildDisplayText(
         captionBody(
-            keptTranscription, inProgressText.takeIf { sttSettings.showInProgress }, reading,
+            keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, reading,
             sttSettings.transcriptAllCaps,
         ),
         keptTranscription.isNotEmpty(), reading, CaptionInk(textColor, highlights, spaceTrackingEm),
     )
     val translationText = buildDisplayText(
         captionBody(
-            keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress }, reading,
+            keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker }, reading,
             sttSettings.translationAllCaps,
         ),
         keptTranslation.isNotEmpty(), reading, CaptionInk(translationColor, highlights, spaceTrackingEm),
@@ -145,7 +143,9 @@ fun STTPresenter(
     }
 
     val isBothMode = showTranscription && showTranslation
-    val isSideBySide = sttSettings.layout == "side_by_side" || sttSettings.layout == "side_by_side_inverse"
+    // A ticker is one line, so two of them always stack
+    val isSideBySide = (sttSettings.layout == "side_by_side" || sttSettings.layout == "side_by_side_inverse") &&
+        reading.style != CAPTION_STYLE_TICKER
     val isInverse = sttSettings.layout == "stacked_inverse" || sttSettings.layout == "side_by_side_inverse"
     val maxLines = sttSettings.maxLines
 
@@ -174,10 +174,7 @@ fun STTPresenter(
         if (transcriptionText.isNotEmpty() || translationText.isNotEmpty() || isBothMode) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(cardBg)
-                    .padding(24.dp)
+                    .captionCard(sttSettings, cardBg)
             ) {
                 if (isBothMode) {
                     val first = if (isInverse) translationText else transcriptionText
@@ -191,48 +188,36 @@ fun STTPresenter(
                             horizontalArrangement = Arrangement.spacedBy(24.dp),
                             verticalAlignment = Alignment.Bottom
                         ) {
-                            BottomAlignedText(
+                            CaptionLines(
                                 text = first,
                                 style = firstStyle,
-                                maxLines = maxLines,
+                                s = sttSettings,
                                 modifier = Modifier.weight(1f),
-                                backdrop = sttSettings.backdrop,
-                                outline = sttSettings.outline,
-                                rollUpMillis = reading.rollUpMillisOrOff(),
                             )
-                            BottomAlignedText(
+                            CaptionLines(
                                 text = second,
                                 style = secondStyle,
-                                maxLines = maxLines,
+                                s = sttSettings,
                                 modifier = Modifier.weight(1f),
-                                backdrop = sttSettings.backdrop,
-                                outline = sttSettings.outline,
-                                rollUpMillis = reading.rollUpMillisOrOff(),
                             )
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxWidth().fillMaxSize()) {
                             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                BottomAlignedText(
+                                CaptionLines(
                                     text = first,
                                     style = firstStyle,
-                                    maxLines = maxLines,
+                                    s = sttSettings,
                                     modifier = Modifier.fillMaxWidth(),
-                                    backdrop = sttSettings.backdrop,
-                                    outline = sttSettings.outline,
-                                rollUpMillis = reading.rollUpMillisOrOff(),
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                BottomAlignedText(
+                                CaptionLines(
                                     text = second,
                                     style = secondStyle,
-                                    maxLines = maxLines,
+                                    s = sttSettings,
                                     modifier = Modifier.fillMaxWidth(),
-                                    backdrop = sttSettings.backdrop,
-                                    outline = sttSettings.outline,
-                                rollUpMillis = reading.rollUpMillisOrOff(),
                                 )
                             }
                         }
@@ -249,14 +234,11 @@ fun STTPresenter(
                         showTranslation && translationText.isNotEmpty() -> translationLook
                         else -> transcriptLook
                     }
-                    BottomAlignedText(
+                    CaptionLines(
                         text = displayText,
                         style = displayStyle,
-                        maxLines = maxLines,
+                        s = sttSettings,
                         modifier = Modifier.fillMaxWidth(),
-                        backdrop = sttSettings.backdrop,
-                        outline = sttSettings.outline,
-                        rollUpMillis = reading.rollUpMillisOrOff(),
                     )
                 }
             }
@@ -286,19 +268,13 @@ private fun BoxedCaptions(
         val card: @Composable (CaptionPart) -> Unit = { part ->
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(cardBg)
-                    .padding(24.dp),
+                    .captionCard(sttSettings, cardBg, inTextBox = true),
             ) {
-                BottomAlignedText(
+                CaptionLines(
                     text = part.text,
                     style = part.style,
-                    maxLines = sttSettings.maxLines,
+                    s = sttSettings,
                     modifier = Modifier.fillMaxWidth(),
-                    backdrop = sttSettings.backdrop,
-                    outline = sttSettings.outline,
-                    rollUpMillis = sttSettings.reading.rollUpMillisOrOff(),
                 )
             }
         }
@@ -405,6 +381,7 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): List<STT
 
     val fullText = captionText(segments)
     val latestFullText = rememberUpdatedState(fullText)
+    val latestSegments = rememberUpdatedState(segments)
     val revealed = remember { mutableIntStateOf(fullText.length) }
 
     LaunchedEffect(pace) {
@@ -416,9 +393,12 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): List<STT
             }
             while (revealed.intValue < current.length) {
                 val speedUp = revealStep(revealed.intValue, current.length)
-                if (pace.byWord) {
-                    // Whole words, each held back for as long as its letters would take to type
-                    val next = nextWordEnd(current, revealed.intValue)
+                if (pace.unit != RevealUnit.LETTER) {
+                    // Whole words or segments, each held back for as long as its letters would take to type
+                    val next = when (pace.unit) {
+                        RevealUnit.SEGMENT -> nextSegmentEnd(latestSegments.value, revealed.intValue)
+                        else -> nextWordEnd(current, revealed.intValue)
+                    }.coerceIn(revealed.intValue + 1, current.length)
                     delay(pace.delayMs * (next - revealed.intValue) / speedUp)
                     revealed.intValue = next
                 } else {

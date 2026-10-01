@@ -61,7 +61,14 @@ data class STTSettings(
     val marginBottom: Int = DEFAULT_CAPTION_MARGIN,
     val marginLeft: Int = DEFAULT_CAPTION_MARGIN,
     val marginRight: Int = DEFAULT_CAPTION_MARGIN,
+    /** [CAPTION_BOX_CARD], the rounded card, or [CAPTION_BOX_BAND], a full-width bar. */
+    val boxShape: String = CAPTION_BOX_CARD,
+    /** A band flush with the screen's bottom or top edge; off, it is held in by the margin on that side. */
+    val bandTouchesEdge: Boolean = true,
 )
+
+const val CAPTION_BOX_CARD = "card"
+const val CAPTION_BOX_BAND = "band"
 
 const val DEFAULT_CAPTION_MARGIN = 32
 
@@ -72,6 +79,10 @@ const val DEFAULT_CAPTION_MARGIN = 32
  */
 @Serializable
 data class CaptionReading(
+    /** How captions are put on screen: [CAPTION_STYLE_ROLL_UP], [CAPTION_STYLE_POP_ON] or [CAPTION_STYLE_TICKER]. */
+    val style: String = CAPTION_STYLE_ROLL_UP,
+    /** How fast the ticker crawls, in pixels a second. */
+    val tickerSpeed: Int = 150,
     /** Fade the captions out once nothing new has been said for [clearAfterSeconds]. */
     val clearAfterSilence: Boolean = false,
     val clearAfterSeconds: Int = 8,
@@ -93,6 +104,15 @@ data class CaptionReading(
     /** Wrap at this many characters as well as at the edge; 0 wraps at the edge only. */
     val maxCharsPerLine: Int = 0,
 )
+
+/** A running transcript that grows at the bottom and pushes old lines off the top. */
+const val CAPTION_STYLE_ROLL_UP = "roll_up"
+
+/** A block that fills from the top and clears when full, so nothing moves while it is read. */
+const val CAPTION_STYLE_POP_ON = "pop_on"
+
+/** One line crawling sideways along its band. */
+const val CAPTION_STYLE_TICKER = "ticker"
 
 const val CAPTION_BREAK_NONE = "none"
 const val CAPTION_BREAK_SEGMENT = "segment"

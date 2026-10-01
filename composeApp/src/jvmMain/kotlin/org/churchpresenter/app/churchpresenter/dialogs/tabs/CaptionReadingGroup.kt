@@ -24,12 +24,24 @@ import churchpresenter.composeapp.generated.resources.profile_caption_reading_sp
 import churchpresenter.composeapp.generated.resources.profile_caption_roll_up
 import churchpresenter.composeapp.generated.resources.profile_caption_roll_up_sub
 import churchpresenter.composeapp.generated.resources.profile_caption_roll_up_time
+import churchpresenter.composeapp.generated.resources.profile_caption_style
+import churchpresenter.composeapp.generated.resources.profile_caption_style_pop_on
+import churchpresenter.composeapp.generated.resources.profile_caption_style_pop_on_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_style_roll_up
+import churchpresenter.composeapp.generated.resources.profile_caption_style_roll_up_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_style_ticker
+import churchpresenter.composeapp.generated.resources.profile_caption_style_ticker_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_ticker_speed
+import churchpresenter.composeapp.generated.resources.profile_caption_ticker_speed_unit
 import churchpresenter.composeapp.generated.resources.profile_group_reading
 import churchpresenter.composeapp.generated.resources.profile_ms
 import churchpresenter.composeapp.generated.resources.seconds_suffix
 import org.churchpresenter.settings.CAPTION_BREAK_NONE
 import org.churchpresenter.settings.CAPTION_BREAK_SEGMENT
 import org.churchpresenter.settings.CAPTION_BREAK_SENTENCE
+import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
+import org.churchpresenter.settings.CAPTION_STYLE_ROLL_UP
+import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.CaptionReading
 import org.jetbrains.compose.resources.stringResource
 
@@ -43,6 +55,8 @@ private const val SLIDE_MS_STEP = 50
 private val PERCENT_RANGE = 0..100
 private const val PERCENT_STEP = 5
 private val MAX_CHARS_RANGE = 0..120
+private val TICKER_SPEED_RANGE = 20..1000
+private const val TICKER_SPEED_STEP = 10
 
 /**
  * READING: when captions leave the screen, how fast words may arrive, how the lines move and break,
@@ -54,15 +68,18 @@ internal fun CaptionReadingGroup(reading: CaptionReading, update: ((CaptionReadi
     val ms = stringResource(Res.string.profile_ms)
     val percent = stringResource(Res.string.percent_suffix)
     SettingsGroup(stringResource(Res.string.profile_group_reading), paths = listOf(READING)) {
+        StyleRows(reading, update, path)
         TimingRows(reading, update, path)
-        SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_roll_up),
-            reading.rollUp,
-            { v -> update { it.copy(rollUp = v) } },
-            sub = stringResource(Res.string.profile_caption_roll_up_sub),
-            paths = path("rollUp"),
-        )
-        if (reading.rollUp) {
+        if (reading.style == CAPTION_STYLE_ROLL_UP) {
+            SettingsSwitchRow(
+                stringResource(Res.string.profile_caption_roll_up),
+                reading.rollUp,
+                { v -> update { it.copy(rollUp = v) } },
+                sub = stringResource(Res.string.profile_caption_roll_up_sub),
+                paths = path("rollUp"),
+            )
+        }
+        if (reading.rollUp && reading.style == CAPTION_STYLE_ROLL_UP) {
             SettingsRow(
                 stringResource(Res.string.profile_caption_roll_up_time),
                 advanced = true,
@@ -113,7 +130,47 @@ internal fun CaptionReadingGroup(reading: CaptionReading, update: ((CaptionReadi
                 )
             }
         }
-        LineBreakRows(reading, update, path)
+        if (reading.style != CAPTION_STYLE_TICKER) LineBreakRows(reading, update, path)
+    }
+}
+
+/** How captions are put on screen -- rolling, popping on, or crawling -- and how fast a ticker crawls. */
+@Composable
+private fun StyleRows(
+    reading: CaptionReading,
+    update: ((CaptionReading) -> CaptionReading) -> Unit,
+    path: (String) -> List<String>,
+) {
+    SettingsRow(
+        stringResource(Res.string.profile_caption_style),
+        sub = when (reading.style) {
+            CAPTION_STYLE_POP_ON -> stringResource(Res.string.profile_caption_style_pop_on_sub)
+            CAPTION_STYLE_TICKER -> stringResource(Res.string.profile_caption_style_ticker_sub)
+            else -> stringResource(Res.string.profile_caption_style_roll_up_sub)
+        },
+        paths = path("style"),
+    ) {
+        RowSegmented(
+            options = listOf(
+                RowOption(CAPTION_STYLE_ROLL_UP, stringResource(Res.string.profile_caption_style_roll_up)),
+                RowOption(CAPTION_STYLE_POP_ON, stringResource(Res.string.profile_caption_style_pop_on)),
+                RowOption(CAPTION_STYLE_TICKER, stringResource(Res.string.profile_caption_style_ticker)),
+            ),
+            selected = reading.style,
+            onSelect = { v -> update { it.copy(style = v) } },
+        )
+    }
+    if (reading.style == CAPTION_STYLE_TICKER) {
+        SettingsRow(stringResource(Res.string.profile_caption_ticker_speed), paths = path("tickerSpeed")) {
+            RowStepper(
+                reading.tickerSpeed,
+                { v -> update { it.copy(tickerSpeed = v) } },
+                TICKER_SPEED_RANGE,
+                step = TICKER_SPEED_STEP,
+                unit = stringResource(Res.string.profile_caption_ticker_speed_unit),
+                fieldWidth = 76.dp,
+            )
+        }
     }
 }
 
