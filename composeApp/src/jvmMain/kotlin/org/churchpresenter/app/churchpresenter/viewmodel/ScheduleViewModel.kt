@@ -20,6 +20,7 @@ import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
+import java.io.IOException
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.time.LocalTime
@@ -473,7 +474,10 @@ class ScheduleViewModel(
         } catch (e: CancellationException) {
             // The file dialog this runs behind is cancellable; abandoning it is not a fault.
             throw e
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            CrashReporter.reportException(e, "Opening schedule file")
+        } catch (e: IllegalArgumentException) {
+            // Not a schedule: serialization errors are this type.
             CrashReporter.reportException(e, "Opening schedule file")
         }
     }

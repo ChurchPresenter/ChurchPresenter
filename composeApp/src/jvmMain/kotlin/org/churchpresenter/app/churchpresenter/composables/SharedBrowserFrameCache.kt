@@ -25,6 +25,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.net.ServerSocket
 import java.net.URI
 import java.net.http.HttpClient
@@ -36,6 +37,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeoutException
 import javax.imageio.ImageIO
 import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
 import org.churchpresenter.diagnostics.Log
@@ -114,13 +117,22 @@ object SharedBrowserFrameCache {
         entry.refCount++
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch {
+                fun failed(e: Exception) {
+                    Log.warn("BrowserSource", "Failed to start CDP browser: ${e.message}")
+                    entry.error.value = "Browser error: ${e.message}"
+                }
+                // Launching the process, its temp profile and the DevTools socket fail with I/O
+                // errors; a malformed reply or a closed socket with the two runtime ones.
                 try {
                     startBrowser(entry, url, renderWidth, renderHeight, customCss, fps, forceTransparent)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (e: Exception) {
-                    Log.warn("BrowserSource", "Failed to start CDP browser: ${e.message}")
-                    entry.error.value = "Browser error: ${e.message}"
+                } catch (e: IOException) {
+                    failed(e)
+                } catch (e: IllegalArgumentException) {
+                    failed(e)
+                } catch (e: IllegalStateException) {
+                    failed(e)
                 }
             }
         }
@@ -498,11 +510,16 @@ object SharedBrowserFrameCache {
 
         var frameCount = 0
         while (currentCoroutineContext().isActive) {
+            // A frame that will not decode (bad base64, unreadable PNG, a failed bitmap) is skipped.
             try {
                 if (captureFrame(entry, cdp, first = frameCount == 0)) frameCount++
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Throwable) {
+            } catch (e: IOException) {
+                if (frameCount == 0) Log.warn("BrowserSource", "Capture error: ${e.message}")
+            } catch (e: IllegalArgumentException) {
+                if (frameCount == 0) Log.warn("BrowserSource", "Capture error: ${e.message}")
+            } catch (e: IllegalStateException) {
                 if (frameCount == 0) Log.warn("BrowserSource", "Capture error: ${e.message}")
             }
             delay(entry.captureIntervalMs)
@@ -571,10 +588,19 @@ object SharedBrowserFrameCache {
                 entry.jsonObject["type"]?.jsonPrimitive?.contentOrNull == "page"
             } ?: pages.firstOrNull()
             page?.jsonObject?.get("webSocketDebuggerUrl")?.jsonPrimitive?.contentOrNull
-        } catch (e: Exception) {
-            Log.warn("BrowserSource", "getPageWebSocketUrl error: ${e.message}")
-            null
+        } catch (e: IOException) {
+            pageUrlFailed(e)
+        } catch (e: InterruptedException) {
+            pageUrlFailed(e)
+        } catch (e: IllegalArgumentException) {
+            // A reply that is not the JSON array DevTools sends.
+            pageUrlFailed(e)
         }
+    }
+
+    private fun pageUrlFailed(e: Exception): String? {
+        Log.warn("BrowserSource", "getPageWebSocketUrl error: ${e.message}")
+        return null
     }
 
     private fun stopBrowser(entry: CacheEntry) {
@@ -669,9 +695,15 @@ object SharedBrowserFrameCache {
                     .buildAsync(URI.create(wsUrl), listener)
                     .get(WEBSOCKET_CONNECT_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
                 true
-            } catch (e: Exception) {
-                Log.warn("BrowserSource", "WebSocket connect error: ${e.message}")
-                false
+            } catch (e: ExecutionException) {
+                connectFailed(e)
+            } catch (e: TimeoutException) {
+                connectFailed(e)
+            } catch (e: InterruptedException) {
+                connectFailed(e)
+            } catch (e: IllegalArgumentException) {
+                // A debugger URL that is not a valid URI.
+                connectFailed(e)
             }
         }
 
@@ -689,24 +721,7 @@ object SharedBrowserFrameCache {
                 if (params != null) put("params", params)
             }
 
-            try {
-                val socket = ws ?: run {
-                    pending.remove(id)
-                    Log.warn("BrowserSource", "CDP send '$method': WebSocket is null")
-                    return null
-                }
-                socket.sendText(
-                    msg.toString(),
-                    true
-                )?.get(WEBSOCKET_SEND_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-            } catch (e: Exception) {
-                pending.remove(id)
-                Log.warn(
-                    "BrowserSource",
-                    "CDP sendText '$method' failed: ${e::class.simpleName}: ${e.message}"
-                )
-                return null
-            }
+            if (!send(id, method, msg.toString())) return null
 
             // Wait for the response, but don't block coroutine cancellation
             return try {
@@ -716,11 +731,52 @@ object SharedBrowserFrameCache {
             } catch (e: CancellationException) {
                 pending.remove(id)
                 throw e
-            } catch (e: Exception) {
-                pending.remove(id)
-                Log.warn("BrowserSource", "CDP await '$method' failed: ${e::class.simpleName}: ${e.message}")
-                null
+            } catch (e: ExecutionException) {
+                failed(id, method, "await", e)
+            } catch (e: TimeoutException) {
+                failed(id, method, "await", e)
+            } catch (e: InterruptedException) {
+                failed(id, method, "await", e)
             }
+        }
+
+        /** Sends [text] as [method]'s request [id]; false, with the reply forgotten, when it could not. */
+        private fun send(id: Int, method: String, text: String): Boolean {
+            val socket = ws ?: run {
+                pending.remove(id)
+                Log.warn("BrowserSource", "CDP send '$method': WebSocket is null")
+                return false
+            }
+            return try {
+                socket.sendText(text, true)?.get(WEBSOCKET_SEND_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
+                true
+            } catch (e: ExecutionException) {
+                sendFailed(id, method, e)
+            } catch (e: TimeoutException) {
+                sendFailed(id, method, e)
+            } catch (e: InterruptedException) {
+                sendFailed(id, method, e)
+            } catch (e: IllegalStateException) {
+                // The socket refuses a send while another is still in flight, or once it has closed.
+                sendFailed(id, method, e)
+            }
+        }
+
+        private fun sendFailed(id: Int, method: String, e: Exception): Boolean {
+            failed(id, method, "sendText", e)
+            return false
+        }
+
+        /** Forgets [id]'s pending reply and logs why the [step] of [method] failed. */
+        private fun failed(id: Int, method: String, step: String, e: Exception): JsonObject? {
+            pending.remove(id)
+            Log.warn("BrowserSource", "CDP $step '$method' failed: ${e::class.simpleName}: ${e.message}")
+            return null
+        }
+
+        private fun connectFailed(e: Exception): Boolean {
+            Log.warn("BrowserSource", "WebSocket connect error: ${e.message}")
+            return false
         }
 
         private fun handleMessage(text: String) {
@@ -787,7 +843,8 @@ internal fun parseCdpMessage(text: String): CdpMessage {
         val url = frame?.get("url")?.jsonPrimitive?.contentOrNull
         val parentId = frame?.get("parentId")?.jsonPrimitive?.contentOrNull
         if (url != null && parentId == null) CdpMessage.MainFrameNavigated(url) else CdpMessage.Ignored
-    } catch (e: Exception) {
+    } catch (e: IllegalArgumentException) {
+        // Not JSON, or not the shape a CDP message has -- serialization errors are this type too.
         Log.warn("BrowserSource", "handleMessage error: ${e.message}")
         CdpMessage.Ignored
     }

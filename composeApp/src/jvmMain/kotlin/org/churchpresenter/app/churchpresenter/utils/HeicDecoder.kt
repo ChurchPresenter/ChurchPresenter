@@ -68,9 +68,10 @@ object HeicDecoder {
             } else {
                 null
             }
-        } catch (e: Exception) {
-            CrashReporter.reportException(e, "Converting HEIC to JPEG")
-            null
+        } catch (e: IOException) {
+            heicFailed(e, "Converting HEIC to JPEG")
+        } catch (e: InterruptedException) {
+            heicFailed(e, "Converting HEIC to JPEG")
         } finally {
             tempFile.delete()
         }
@@ -84,9 +85,11 @@ object HeicDecoder {
             val out = ByteArrayOutputStream()
             ImageIO.write(bufferedImage, "jpg", out)
             out.toByteArray()
-        } catch (e: Exception) {
-            CrashReporter.reportException(e, "Decoding HEIC image")
-            null
+        } catch (e: IOException) {
+            heicFailed(e, "Decoding HEIC image")
+        } catch (e: IllegalArgumentException) {
+            // An ImageIO reader that rejects the stream rather than failing to read it.
+            heicFailed(e, "Decoding HEIC image")
         }
     }
 
@@ -142,5 +145,9 @@ object HeicDecoder {
         "-frames:v", "1",
         output.absolutePath
     )
-}
 
+    private fun heicFailed(e: Exception, context: String): ByteArray? {
+        CrashReporter.reportException(e, context)
+        return null
+    }
+}

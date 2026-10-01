@@ -111,6 +111,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
@@ -865,10 +866,18 @@ private suspend fun uploadBackgroundToAtem(atemSettings: AtemSettings, imagePath
         AtemUploadStatus.complete(id)
         delay(PREVIEW_DEBOUNCE_MS)
         AtemUploadStatus.clear(id)
-    } catch (e: Exception) {
-        AtemUploadStatus.fail(id, e.message)
-        throw e
+    } catch (e: IOException) {
+        // The ATEM link (AtemProtocolException is one).
+        failUpload(id, e)
+    } catch (e: IllegalStateException) {
+        failUpload(id, e)
     }
+}
+
+/** Marks upload [id] failed, then lets [e] carry on to whoever started it. */
+private fun failUpload(id: Long, e: Exception): Nothing {
+    AtemUploadStatus.fail(id, e.message)
+    throw e
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -928,9 +937,17 @@ private fun AtemUploadIconButton(
                 error = null
                 busy = true
                 scope.launch {
+                    // Reading the picture and the ATEM link fail with I/O errors; an image the
+                    // encoder cannot take, or a client in the wrong state, with the runtime ones.
                     try {
                         uploadBackgroundToAtem(atemSettings, imagePath, slot)
-                    } catch (e: Exception) {
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: IOException) {
+                        error = e.message ?: tooltip
+                    } catch (e: IllegalArgumentException) {
+                        error = e.message ?: tooltip
+                    } catch (e: IllegalStateException) {
                         error = e.message ?: tooltip
                     } finally {
                         busy = false

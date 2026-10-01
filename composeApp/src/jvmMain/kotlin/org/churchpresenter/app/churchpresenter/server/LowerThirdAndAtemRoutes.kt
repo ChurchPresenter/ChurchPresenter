@@ -21,6 +21,7 @@ import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.AtemSettings
+import java.io.IOException
 
 private const val KEY_SETTLE_MS = 800L
 private const val MILLIS_PER_SECOND = 1000L
@@ -286,14 +287,14 @@ private suspend fun uploadStillFrame(
         // report a cancelled upload as a broken one.
         AtemUploadStatus.clear(uploadId)
         throw e
-    } catch (e: Exception) {
-        Log.warn("CompanionServer", "ATEM still upload failed for '$name': ${e.message}")
-        CrashReporter.reportWarning(
-            "ATEM still upload failed: $name",
-            throwable = e,
-            tags = mapOf("subsystem" to "atem")
-        )
-        AtemUploadStatus.fail(uploadId, e.message)
+    } catch (e: IOException) {
+        // The ATEM link (AtemProtocolException is one) or the render cache.
+        atemUploadFailed("still", name, uploadId, e)
+    } catch (e: IllegalArgumentException) {
+        // A lower third whose JSON will not parse.
+        atemUploadFailed("still", name, uploadId, e)
+    } catch (e: IllegalStateException) {
+        atemUploadFailed("still", name, uploadId, e)
     }
 }
 
@@ -358,14 +359,14 @@ private suspend fun uploadClipFrames(
         // report a cancelled upload as a broken one.
         AtemUploadStatus.clear(uploadId)
         throw e
-    } catch (e: Exception) {
-        Log.warn("CompanionServer", "ATEM clip upload failed for '$name': ${e.message}")
-        CrashReporter.reportWarning(
-            "ATEM clip upload failed: $name",
-            throwable = e,
-            tags = mapOf("subsystem" to "atem")
-        )
-        AtemUploadStatus.fail(uploadId, e.message)
+    } catch (e: IOException) {
+        // The ATEM link (AtemProtocolException is one) or the render cache.
+        atemUploadFailed("clip", name, uploadId, e)
+    } catch (e: IllegalArgumentException) {
+        // A lower third whose JSON will not parse.
+        atemUploadFailed("clip", name, uploadId, e)
+    } catch (e: IllegalStateException) {
+        atemUploadFailed("clip", name, uploadId, e)
     }
 }
 
@@ -396,4 +397,14 @@ private suspend fun configuredAtemOrRespond(call: ApplicationCall, server: Compa
         return null
     }
     return atem
+}
+
+private fun atemUploadFailed(kind: String, name: String, uploadId: Long, e: Exception) {
+    Log.warn("CompanionServer", "ATEM $kind upload failed for '$name': ${e.message}")
+    CrashReporter.reportWarning(
+        "ATEM $kind upload failed: $name",
+        throwable = e,
+        tags = mapOf("subsystem" to "atem")
+    )
+    AtemUploadStatus.fail(uploadId, e.message)
 }

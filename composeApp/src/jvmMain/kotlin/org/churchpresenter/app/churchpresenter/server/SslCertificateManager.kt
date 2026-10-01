@@ -21,6 +21,7 @@ import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.io.StringWriter
+import java.io.IOException
 import java.math.BigInteger
 import java.net.InetAddress
 import java.security.KeyPair
@@ -32,6 +33,7 @@ import java.security.SecureRandom
 import java.security.Security
 import java.security.cert.X509Certificate
 import java.security.spec.ECGenParameterSpec
+import java.security.GeneralSecurityException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
@@ -133,15 +135,23 @@ object SslCertificateManager {
             val stillUsable = key.algorithm == "EC" &&
                 cert.notAfter.after(Date.from(Instant.now().plus(CERT_RENEWAL_MARGIN_DAYS, ChronoUnit.DAYS)))
             return if (stillUsable) key to cert else null
-        } catch (e: Exception) {
-            Log.warn("SslCertificateManager", "Existing CA keystore unreadable, regenerating: ${e.message}")
-            CrashReporter.reportWarning(
-                "SSL: Existing CA keystore unreadable, regenerating",
-                throwable = e,
-                tags = mapOf("subsystem" to "ssl")
-            )
-            return null
+        } catch (e: IOException) {
+            // Unreadable, or a password that no longer opens it.
+            return caUnreadable(e)
+        } catch (e: GeneralSecurityException) {
+            // The keystore, key and certificate exceptions are all this type.
+            return caUnreadable(e)
         }
+    }
+
+    private fun caUnreadable(e: Exception): Pair<PrivateKey, X509Certificate>? {
+        Log.warn("SslCertificateManager", "Existing CA keystore unreadable, regenerating: ${e.message}")
+        CrashReporter.reportWarning(
+            "SSL: Existing CA keystore unreadable, regenerating",
+            throwable = e,
+            tags = mapOf("subsystem" to "ssl")
+        )
+        return null
     }
 
     /** The stored server keystore when it is ECDSA, still valid and covers [serverHost]. */

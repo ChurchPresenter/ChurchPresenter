@@ -73,6 +73,7 @@ import org.churchpresenter.strings.generated.resources.atem_test_connection_hint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
@@ -83,6 +84,7 @@ import org.churchpresenter.settings.AtemSettings
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic
+import java.io.IOException
 
 @Composable
 fun AtemSettingsTab(
@@ -273,7 +275,17 @@ fun AtemSettingsTab(
                                     }
                                     connectionStatus = "connected"
                                     connectionError = null
-                                } catch (e: Exception) {
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (e: IOException) {
+                                    // The ATEM link: AtemProtocolException is one.
+                                    connectionStatus = "error"
+                                    connectionError = e.message ?: "Unknown error"
+                                } catch (e: IllegalStateException) {
+                                    connectionStatus = "error"
+                                    connectionError = e.message ?: "Unknown error"
+                                } catch (e: IllegalArgumentException) {
+                                    // A host or port the socket cannot be pointed at.
                                     connectionStatus = "error"
                                     connectionError = e.message ?: "Unknown error"
                                 } finally {

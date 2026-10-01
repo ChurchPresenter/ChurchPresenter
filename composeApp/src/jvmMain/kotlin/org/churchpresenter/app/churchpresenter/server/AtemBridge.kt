@@ -9,8 +9,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.websocket.readText
 import java.io.File
+import java.io.IOException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
@@ -196,11 +198,13 @@ internal class AtemBridge(private val json: Json) {
                 """{"status":"${if (onAir) "on" else "off"}",$target}""",
                 ContentType.Application.Json
             )
-        } catch (e: Exception) {
-            call.respond(
-                HttpStatusCode.BadGateway,
-                """{"error":${jsonStr(e.message ?: "ATEM command failed")}}"""
-            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            // The ATEM link: AtemProtocolException is one.
+            call.respond(HttpStatusCode.BadGateway, """{"error":${jsonStr(e.message ?: "ATEM command failed")}}""")
+        } catch (e: IllegalStateException) {
+            call.respond(HttpStatusCode.BadGateway, """{"error":${jsonStr(e.message ?: "ATEM command failed")}}""")
         }
     }
 

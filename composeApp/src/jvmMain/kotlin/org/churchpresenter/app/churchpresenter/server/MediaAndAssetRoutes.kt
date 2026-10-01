@@ -555,11 +555,12 @@ private fun Route.pictureSelectAndUploadRoutes(
                                 """$newIndex,"file-name":"${file.name}"}""",
                             ContentType.Application.Json
                         )
-                    } catch (e: Exception) {
-                        call.respond(
-                            HttpStatusCode.InternalServerError,
-                            """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}"""
-                        )
+                    } catch (e: IOException) {
+                        // The client went away mid-upload, or the file could not be written.
+                        call.respondUploadFailed(e)
+                    } catch (e: IllegalArgumentException) {
+                        // A body that is not JSON, or data that is not valid base64.
+                        call.respondUploadFailed(e)
                     }
                 }
 }

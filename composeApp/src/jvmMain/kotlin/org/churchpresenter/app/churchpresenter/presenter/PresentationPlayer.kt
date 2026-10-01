@@ -351,7 +351,9 @@ class PresentationPlayer(
                         pendingEnterAtLastStepFor = null
                         stepIndex = ((evaluator?.stepCount ?: 0) - 1).coerceAtLeast(-1)
                     }
-                } catch (e: Exception) {
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    // A slide is drawn by POI, PDFBox and AWT, which throw whatever their internals do (NPEs and
+                    // class-cast errors from a malformed deck included) -- not a set this code can enumerate.
                     CrashReporter.reportException(e, "Rasterizing presentation slide $index for playback")
                 } finally {
                     loading.remove(index)

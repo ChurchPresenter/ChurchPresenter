@@ -27,6 +27,7 @@ import org.churchpresenter.strings.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.File
+import java.io.IOException
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
@@ -178,7 +179,12 @@ internal fun loadAndDownscaleImage(
 
     return try {
         PictureDecoder.decodeScaled(file, maxWidth, maxHeight, cover).toComposeImageBitmap()
-    } catch (e: Exception) {
+    } catch (e: IOException) {
+        // The decoder wraps every way a picture fails to read in one.
+        CrashReporter.reportException(e, "Decoding picture for presenter")
+        null
+    } catch (e: IllegalArgumentException) {
+        // Skia refusing the pixels it was handed.
         CrashReporter.reportException(e, "Decoding picture for presenter")
         null
     }

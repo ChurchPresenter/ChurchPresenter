@@ -109,7 +109,12 @@ object SharedCameraFrameCache {
                     }
                 } catch (_: CancellationException) {
                     // Normal cleanup
-                } catch (e: Exception) {
+                } catch (e: IOException) {
+                    // The ffmpeg process or the device.
+                    Log.warn("SharedCameraFrameCache", "Capture error for $key: ${e.message}")
+                } catch (e: IllegalStateException) {
+                    Log.warn("SharedCameraFrameCache", "Capture error for $key: ${e.message}")
+                } catch (e: IllegalArgumentException) {
                     Log.warn("SharedCameraFrameCache", "Capture error for $key: ${e.message}")
                 }
             }

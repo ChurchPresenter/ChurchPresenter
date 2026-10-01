@@ -27,10 +27,12 @@ import java.io.File
 import java.io.IOException
 import java.net.ServerSocket
 import java.security.MessageDigest
+import java.sql.SQLException
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -701,26 +703,34 @@ class CompanionServer {
                         dir.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
                             ?.sortedBy { it.name }
                             ?.forEach { file ->
-                                try { songs.loadFromSpsAppend(file.absolutePath) } catch (e: Exception) {
-                                    Log.warn("CompanionServer", "Failed to load song ${file.name}: ${e.message}")
-                                    CrashReporter.reportWarning(
-                                        "Server: Failed to load song ${file.name}",
-                                        throwable = e,
-                                        tags = mapOf("subsystem" to "server")
-                                    )
+                                fun failed(e: Exception) = preloadFailed(
+                                    "Failed to load song ${file.name}: ${e.message}",
+                                    "Server: Failed to load song ${file.name}",
+                                    e,
+                                )
+                                // An unreadable file, a missing one, or a SongPresenter SQLite database
+                                // that will not open.
+                                try {
+                                    songs.loadFromSpsAppend(file.absolutePath)
+                                } catch (e: IOException) {
+                                    failed(e)
+                                } catch (e: IllegalArgumentException) {
+                                    failed(e)
+                                } catch (e: SQLException) {
+                                    failed(e)
                                 }
                             }
                         if (songs.getSongCount() > 0) {
                             updateSongs(songs.getSongs())
                         }
                     }
-                } catch (e: Exception) {
-                    Log.warn("CompanionServer", "Failed to load songs from $songStorageDir: ${e.message}")
-                    CrashReporter.reportWarning(
-                        "Server: Failed to load songs from storage",
-                        throwable = e,
-                        tags = mapOf("subsystem" to "server")
-                    )
+                } catch (e: SecurityException) {
+                    songFolderFailed(songStorageDir, e)
+                } catch (e: IllegalArgumentException) {
+                    // Publishing the catalog: serialization errors are this type.
+                    songFolderFailed(songStorageDir, e)
+                } catch (e: IllegalStateException) {
+                    songFolderFailed(songStorageDir, e)
                 }
             }
 
@@ -730,19 +740,38 @@ class CompanionServer {
                     val file = File(bibleStorageDir, primaryBibleFileName)
                     if (file.exists()) {
                         val bible = Bible()
+                        // Reports a bad module through loadError rather than throwing; what can
+                        // still fail is reaching the file and publishing what was read.
                         bible.loadFromSpb(file.absolutePath)
                         updateBible(bible, primaryBibleFileName)
                     }
-                } catch (e: Exception) {
-                    Log.warn("CompanionServer", "Failed to load bible $primaryBibleFileName: ${e.message}")
-                    CrashReporter.reportWarning(
-                        "Server: Failed to load bible $primaryBibleFileName",
-                        throwable = e,
-                        tags = mapOf("subsystem" to "server")
-                    )
+                } catch (e: SecurityException) {
+                    bibleFailed(primaryBibleFileName, e)
+                } catch (e: IllegalArgumentException) {
+                    bibleFailed(primaryBibleFileName, e)
+                } catch (e: IllegalStateException) {
+                    bibleFailed(primaryBibleFileName, e)
                 }
             }
         }
+    }
+
+    private fun songFolderFailed(songStorageDir: String, e: Exception) = preloadFailed(
+        "Failed to load songs from $songStorageDir: ${e.message}",
+        "Server: Failed to load songs from storage",
+        e,
+    )
+
+    private fun bibleFailed(fileName: String, e: Exception) = preloadFailed(
+        "Failed to load bible $fileName: ${e.message}",
+        "Server: Failed to load bible $fileName",
+        e,
+    )
+
+    /** Logs a startup load that failed, and reports it as a warning: the server runs on without it. */
+    private fun preloadFailed(logMessage: String, report: String, e: Exception) {
+        Log.warn("CompanionServer", logMessage)
+        CrashReporter.reportWarning(report, throwable = e, tags = mapOf("subsystem" to "server"))
     }
 
     /** Feed the full song list — builds grouped catalog and broadcasts to WS clients. */
@@ -1285,12 +1314,22 @@ class CompanionServer {
                 """{"ok":true,"id":"$id","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}"}""",
                 ContentType.Application.Json
             )
-        } catch (e: Exception) {
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
-            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            // The client went away mid-upload, or the file could not be written.
+            uploadFailed(call, e)
+        } catch (e: IllegalArgumentException) {
+            // A body that is not JSON, or data that is not valid base64.
+            uploadFailed(call, e)
         }
+    }
+
+    private suspend fun uploadFailed(call: ApplicationCall, e: Exception) {
+        call.respond(
+            HttpStatusCode.InternalServerError,
+            """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
+        )
     }
 
     /** `internal` rather than private so the extracted [qaRoutes] group can call it. */

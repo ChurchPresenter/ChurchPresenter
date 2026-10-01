@@ -7,6 +7,7 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import java.util.concurrent.ConcurrentHashMap
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -135,8 +136,7 @@ internal fun Route.webSocketRoute(
 
                     try {
                     for (frame in incoming) {
-                        if (frame is Frame.Text) {
-                            try {
+                        if (frame is Frame.Text) guardFrame(wsClientId) {
                                 val msg = json.decodeFromString(WebSocketMessage.serializer(), frame.readText())
                                 InstanceLinkLogger.log(
                                     InstanceLinkLogSide.PRIMARY, "ws_command_received",
@@ -150,19 +150,13 @@ internal fun Route.webSocketRoute(
                                         mapOf("type" to msg.type, "deviceId" to wsClientId, "reason" to "blocked")
                                     )
                                     sendCommandAck(msg.commandId, ok = false, reason = "blocked", json = json)
-                                    continue
+                                    return@guardFrame
                                 }
                                 handleWsCommand(
                                     msg, server, wsClientId, _pictureCatalogs, _presentationCatalogs,
                                     _scheduleItemToPresentationId,
                                     _schedule, json, scope,
                                 )
-                            } catch (e: Exception) {
-                                InstanceLinkLogger.log(
-                                    InstanceLinkLogSide.PRIMARY, "ws_frame_malformed",
-                                    mapOf("deviceId" to wsClientId, "reason" to e.message)
-                                )
-                            }
                         }
                     }
                     } finally {
@@ -477,4 +471,26 @@ private suspend fun DefaultWebSocketServerSession.sendConnectSnapshot(
                 json.encodeToString(LiveStateDto.serializer(), state)))))
     }
 
+}
+
+/** Runs one command frame; a frame that is malformed or whose command fails is logged, not fatal. */
+private suspend fun guardFrame(wsClientId: String, handle: suspend () -> Unit) {
+    try {
+        handle()
+    } catch (e: IllegalArgumentException) {
+        // Not a WebSocketMessage: serialization errors are this type.
+        frameRefused(wsClientId, e)
+    } catch (e: IllegalStateException) {
+        frameRefused(wsClientId, e)
+    } catch (e: IOException) {
+        // The command's own reply could not be sent.
+        frameRefused(wsClientId, e)
+    }
+}
+
+private fun frameRefused(wsClientId: String, e: Exception) {
+    InstanceLinkLogger.log(
+        InstanceLinkLogSide.PRIMARY, "ws_frame_malformed",
+        mapOf("deviceId" to wsClientId, "reason" to e.message)
+    )
 }

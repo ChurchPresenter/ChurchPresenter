@@ -37,9 +37,10 @@ object PictureDecoder {
     fun decode(file: File): Image {
         val bytes = file.readBytes()
 
+        // Skia refuses an image it cannot decode with an IllegalArgumentException.
         val skiaError = try {
             return Image.makeFromEncoded(bytes)
-        } catch (e: Exception) {
+        } catch (e: IllegalArgumentException) {
             e
         }
 

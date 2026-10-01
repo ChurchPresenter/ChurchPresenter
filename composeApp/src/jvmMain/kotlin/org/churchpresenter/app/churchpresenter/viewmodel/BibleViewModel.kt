@@ -897,7 +897,8 @@ class BibleViewModel(
                     }
                 } catch (e: CancellationException) {
                     throw e
-                } catch (e: Exception) {
+                } catch (e: IllegalArgumentException) {
+                    // A query that does not make a valid regex (PatternSyntaxException).
                     e.printStackTrace()
                     emptyList()
                 }

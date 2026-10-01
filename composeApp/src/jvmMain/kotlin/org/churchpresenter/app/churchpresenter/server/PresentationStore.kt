@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.serialization.kotlinx.json.json
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -123,7 +124,10 @@ internal class PresentationStore(
                     type = Constants.WS_EVENT_PRESENTATION_UPDATED,
                     payload = json.encodeToString(PresentationCatalogResponse.serializer(), catalog)
                 ))
-            } catch (e: Exception) {
+            } catch (e: IOException) {
+                e.printStackTrace()
+            } catch (e: IllegalArgumentException) {
+                // Serializing the catalog: serialization errors are this type.
                 e.printStackTrace()
             }
         }
@@ -255,7 +259,9 @@ internal class PresentationStore(
                     "file.type" to file.extension.lowercase()
                 )
             )
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // A slide is drawn by POI, PDFBox and AWT, which throw whatever their internals do (NPEs and
+            // class-cast errors from a malformed deck included) -- not a set this code can enumerate.
             CrashReporter.reportException(e, "Storing presentation slide")
         }
     }

@@ -44,9 +44,11 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import java.io.File
+import java.io.IOException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
+import org.jetbrains.compose.resources.MissingResourceException
 
 private const val MILLIS_PER_MINUTE = 60_000L
 internal const val OPTIONS_TAB_BACKGROUND = 2
@@ -105,7 +107,11 @@ private fun bundleDefaultBible(settings: AppSettings) {
         SettingsManager().saveSettings(
             settings.withBundledBible(defaultBibleDir.absolutePath, BUNDLED_BIBLE_FILE)
         )
-    } catch (e: Exception) {
+    } catch (e: IOException) {
+        // Writing the Bible or the settings.
+        CrashReporter.reportException(e, "Bundling default KJV Bible")
+    } catch (e: MissingResourceException) {
+        // A build without the bundled module.
         CrashReporter.reportException(e, "Bundling default KJV Bible")
     }
 }

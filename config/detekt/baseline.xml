@@ -111,52 +111,6 @@
     <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, token: String )</ID>
     <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, uniqueName: String, token: String, ask: suspend (options: Map&lt;String, Variant&lt;*&gt;&gt;, requestPath: String) -&gt; List&lt;String&gt;? )</ID>
     <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, title: String, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, // crossinline: invoked from inside the request lambda below, so it cannot return non-locally crossinline dbusMethod: DBusFileChooser.(String, String, Map&lt;String, Variant&lt;*&gt;&gt;) -&gt; DBusPath )</ID>
-    <ID>TooGenericExceptionCaught:AtemBridge.kt$AtemBridge$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:AtemSettingsTab.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:BackgroundSettingsTab.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:BibleEngineClient.kt$BibleEngineClient$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:BibleViewModel.kt$BibleViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:BibleViewModelLoading.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:CompanionServer.kt$CompanionServer$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:FileChooser.kt$FileChooser$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:FileManager.kt$FileManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:HeicDecoder.kt$HeicDecoder$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:InstanceLinkClient.kt$InstanceLinkClient$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LottieFrameStream.kt$LottieFrameStream$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LottieRenderCache.kt$LottieRenderCache$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LottieRenderCache.kt$LottieRenderCache.Reader$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LowerThirdAndAtemRoutes.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LowerThirdSequencer.kt$LowerThirdSequencer$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:MediaAndAssetRoutes.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:OBSWebSocketManager.kt$OBSWebSocketManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PictureDecoder.kt$PictureDecoder$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PicturePresenter.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PicturesViewModel.kt$PicturesViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresentationPlayer.kt$PresentationPlayer$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresentationRoutes.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresentationStore.kt$PresentationStore$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresentationViewModel.kt$PresentationViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresenterManager.kt$PresenterManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresenterWindows.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:QATab.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:ScheduleViewModel.kt$ScheduleViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$e: Throwable</ID>
-    <ID>TooGenericExceptionCaught:SharedBrowserFrameCache.kt$SharedBrowserFrameCache.CdpConnection$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SharedBrowserFrameCache.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SharedCameraFrameCache.kt$SharedCameraFrameCache$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SpsConverter.kt$SpsConverter$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SslCertificateManager.kt$SslCertificateManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:StockMediaClient.kt$StockMediaClient$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SwingFileChooser.kt$SwingFileChooser$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:TunnelManager.kt$TunnelManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:UpdateAvailableDialog.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:VideoPlayer.kt$JfxInit$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:VideoPlayer.kt$e: Throwable</ID>
-    <ID>TooGenericExceptionCaught:VideoPlayer.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:WebSocketRoute.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:WebsitePresenter.kt$CefManager$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:main.kt$e: Exception</ID>
     <ID>TooManyFunctions:AnnouncementsViewModel.kt$AnnouncementsViewModel</ID>
     <ID>TooManyFunctions:AutoStartManager.kt$AutoStartManager</ID>
     <ID>TooManyFunctions:BackgroundSettingsTab.kt$org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab.kt</ID>

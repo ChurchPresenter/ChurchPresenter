@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -183,6 +184,26 @@ class InstanceLinkClient(
         // don't let the retry cadence flood Sentry with one warning per attempt. Report the
         // first failure of a streak, then only every 10th thereafter; reset once connected again.
         var consecutiveFailures = 0
+        fun connectFailed(e: Exception) {
+            consecutiveFailures++
+            Log.warn("InstanceLink", "connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — ${e.message}")
+            val failureKind = classifyConnectFailure(e)
+            if (shouldReportConnectFailure(failureKind, consecutiveFailures)) {
+                CrashReporter.reportWarning(
+                    "InstanceLink: connection failed",
+                    tags = mapOf(
+                        "subsystem" to "instance_link",
+                        "consecutive_failures" to consecutiveFailures.toString(),
+                        "failure_kind" to failureKind
+                    ),
+                    extras = mapOf("reason" to redactedConnectFailure(e.message))
+                )
+            }
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "connect_result",
+                mapOf("success" to false, "host" to host, "port" to port, "reason" to e.message)
+            )
+        }
         // Exponential reconnect backoff (1s doubling to MAX_RECONNECT_DELAY_MS, ±20% jitter so
         // multiple followers don't hammer a restarting primary in lockstep). The reconnectDelayMs
         // setting acts as the FLOOR of the backoff, not a fixed cadence.
@@ -229,25 +250,17 @@ class InstanceLinkClient(
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
-                consecutiveFailures++
-                Log.warn("InstanceLink", "connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — ${e.message}")
-                val failureKind = classifyConnectFailure(e)
-                if (shouldReportConnectFailure(failureKind, consecutiveFailures)) {
-                    CrashReporter.reportWarning(
-                        "InstanceLink: connection failed",
-                        tags = mapOf(
-                            "subsystem" to "instance_link",
-                            "consecutive_failures" to consecutiveFailures.toString(),
-                            "failure_kind" to failureKind
-                        ),
-                        extras = mapOf("reason" to redactedConnectFailure(e.message))
-                    )
-                }
-                InstanceLinkLogger.log(
-                    InstanceLinkLogSide.FOLLOWER, "connect_result",
-                    mapOf("success" to false, "host" to host, "port" to port, "reason" to e.message)
-                )
+            } catch (e: IOException) {
+                // Unreachable, refused, timed out, or the link dropped.
+                connectFailed(e)
+            } catch (e: IllegalStateException) {
+                // Ktor's WebSocketException, for a refused upgrade.
+                connectFailed(e)
+            } catch (e: IllegalArgumentException) {
+                // A frame from the primary that is not JSON.
+                connectFailed(e)
+            } catch (e: ClosedReceiveChannelException) {
+                connectFailed(e)
             }
             session = null
             failPendingAcks()

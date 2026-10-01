@@ -496,7 +496,8 @@ object CefManager {
         val app = cefApp ?: return null
         return try {
             app.createClient()
-        } catch (t: Throwable) {
+        } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
+            // JCEF's native side fails with Errors (UnsatisfiedLinkError and the like), not Exceptions.
             cefApp = null
             initialized = false
             runCatching { CrashReporter.setTag("jcef.blocked", "client_creation_failed") }

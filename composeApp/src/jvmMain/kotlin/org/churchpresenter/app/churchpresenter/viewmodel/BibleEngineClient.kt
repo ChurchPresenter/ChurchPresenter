@@ -24,6 +24,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 import java.io.File
+import java.io.IOException
 import java.time.Instant
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
@@ -203,9 +204,14 @@ class BibleEngineClient(
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
-                Log.warn("bible-engine", "connect to ws://$host:$port/bible-engine failed — ${e.message}")
-                logEngineError("connectLoop: connect to ws://$host:$port/bible-engine failed", e.toString())
+            } catch (e: IOException) {
+                connectFailed(host, port, e)
+            } catch (e: IllegalStateException) {
+                // Ktor's WebSocketException, for a refused upgrade.
+                connectFailed(host, port, e)
+            } catch (e: IllegalArgumentException) {
+                // A message from the engine that is not JSON.
+                connectFailed(host, port, e)
             }
             session = null
             _connected.value = false
@@ -214,6 +220,11 @@ class BibleEngineClient(
             delay(retryDelayMs(attempt, retryFloorMs))
             attempt++
         }
+    }
+
+    private fun connectFailed(host: String, port: Int, e: Exception) {
+        Log.warn("bible-engine", "connect to ws://$host:$port/bible-engine failed — ${e.message}")
+        logEngineError("connectLoop: connect to ws://$host:$port/bible-engine failed", e.toString())
     }
 
     private fun handleMessage(raw: String) {

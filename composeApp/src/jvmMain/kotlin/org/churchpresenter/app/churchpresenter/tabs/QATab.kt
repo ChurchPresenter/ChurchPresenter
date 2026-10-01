@@ -144,6 +144,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.io.IOException
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
@@ -614,7 +615,7 @@ fun QATab(
                                     }
                                     try {
                                         withContext(Dispatchers.IO) { path.toFile().writeText(export) }
-                                    } catch (e: Exception) {
+                                    } catch (e: IOException) {
                                         CrashReporter.reportException(e, context = "QATab.exportQuestions")
                                     }
                                 }
@@ -638,7 +639,7 @@ fun QATab(
                                 if (path != null) {
                                     val lines = try {
                                         withContext(Dispatchers.IO) { path.toFile().readLines() }
-                                    } catch (e: Exception) {
+                                    } catch (e: IOException) {
                                         CrashReporter.reportException(e, context = "QATab.importQuestions")
                                         emptyList()
                                     }
@@ -761,7 +762,7 @@ fun QATab(
                                                 }
                                             )
                                         }
-                                    } catch (e: Exception) {
+                                    } catch (e: IOException) {
                                         CrashReporter.reportException(e, context = "QATab.exportAndClear")
                                         return@launch
                                     }

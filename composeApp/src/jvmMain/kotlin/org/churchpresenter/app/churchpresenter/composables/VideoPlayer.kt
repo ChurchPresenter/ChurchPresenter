@@ -117,7 +117,7 @@ private object JfxInit {
                         JFXPanel()
                     } catch (vme: VirtualMachineError) {
                         throw vme
-                    } catch (t: Throwable) {
+                    } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
                         available = false
                         CrashReporter.reportWarning(
                             "JavaFX toolkit unavailable (continuing without it)",
@@ -294,7 +294,9 @@ private fun checkVlcAvailable(): Boolean {
             is EmbeddedMediaPlayerComponent -> component.release()
         }
         true
-    } catch (e: Throwable) {
+    } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+        // Loading libvlc fails with an Error (UnsatisfiedLinkError, NoClassDefFoundError), not an
+        // Exception, and any of them means the same thing here: no VLC.
         vlcUnavailableReason = e.message ?: "unknown error"
         false
     }
@@ -440,7 +442,8 @@ internal fun createMediaPlayerComponent(): Component? {
     return try {
         if (isMacOS()) CallbackMediaPlayerComponent()
         else EmbeddedMediaPlayerComponent()
-    } catch (e: Throwable) {
+    } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+        // The component loads libvlc: a missing or wrong-architecture library is an Error.
         val msg = e.message ?: e.toString()
         vlcUnavailableReason = msg
         Log.warn("VLCJ", "Could not initialise. Is VLC installed? $msg")
@@ -658,8 +661,12 @@ fun VideoPlayer(
  */
 @Composable
 private fun rememberSurfaceFactory(): MediaPlayerFactory? = remember {
-    try { MediaPlayerFactory() } catch (t: Throwable) {
-        CrashReporter.reportException(t, "VideoPlayer: VLC MediaPlayerFactory init failed"); null
+    // Loads libvlc, whose failures are Errors rather than Exceptions.
+    try {
+        MediaPlayerFactory()
+    } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
+        CrashReporter.reportException(t, "VideoPlayer: VLC MediaPlayerFactory init failed")
+        null
     }
 }
 
