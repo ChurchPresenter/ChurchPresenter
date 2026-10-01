@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_bible_translation
 import churchpresenter.composeapp.generated.resources.bible_cross_references_enable
-import churchpresenter.composeapp.generated.resources.bible_custom_abbreviation
+import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
 import churchpresenter.composeapp.generated.resources.bible_custom_name
 import churchpresenter.composeapp.generated.resources.bible_miscellaneous
 import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
@@ -335,7 +335,7 @@ private fun TranslationIdentityRow(
         SettingsTextField(
             value = translation.customAbbreviation,
             onValueChange = { typed -> edit { it.copy(customAbbreviation = typed) } },
-            label = stringResource(Res.string.bible_custom_abbreviation),
+            label = stringResource(Res.string.customize_show_abbreviation),
             // The module's own abbreviation, which is exactly what a blank box falls back to on
             // screen -- so the placeholder is the live value rather than a hint about one.
             placeholder = { Text(defaultTranslationAbbreviation(moduleTitle, translation.fileName)) },

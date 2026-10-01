@@ -3,7 +3,6 @@
     <string name="mode">ໂໝດ</string>
     <string name="scope">ຂອບເຂດ</string>
     <string name="title">ຫົວຂໍ້</string>
-    <string name="number">ໝາຍເລກ</string>
     <string name="go_live">ຂຶ້ນຈໍ</string>
     <string name="add_to_schedule">ເພີ່ມໃສ່ລາຍການ</string>
     <string name="copy_verse">ສຳເນົາຂໍ້ພຣະຄຳພີ</string>
@@ -12,7 +11,6 @@
     <string name="search">ຄົ້ນຫາ</string>
     <string name="bible_smart_search_hint">ຂໍ້ອ້າງອີງຫຼືຂໍ້ຄວາມ — ຕົວຢ່າງ ໂຢຮັນ 3:16, ມທ 1, ຫຼືຄຳໜຶ່ງຄຳ</string>
     <string name="bible_search_mode_auto">ອັດຕະໂນມັດ</string>
-    <string name="bible_search_mode_reference">ຂໍ້ອ້າງອີງ</string>
     <string name="bible_search_mode_text">ຂໍ້ຄວາມ</string>
     <string name="bible_search_mode_tooltip">ກົດເພື່ອສະຫຼັບ — ອັດຕະໂນມັດ: ໄປຫາຂໍ້ອ້າງອີງ, ຄົ້ນຫາສິ່ງອື່ນທັງໝົດ. ຂໍ້ອ້າງອີງ: ນຳທາງເທົ່ານັ້ນ. ຂໍ້ຄວາມ: ຄົ້ນຫາໃນເນື້ອຂໍ້ພຣະຄຳພີສະເໝີ.</string>
     <string name="bible_verse_selection_hint">Ctrl+ຄລິກເພື່ອສະຫຼັບ, Shift+ຄລິກເພື່ອເລືອກເປັນຊ່ວງ</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">ປິດແຜງ</string>
     <string name="bible_cross_references_dismiss_hint">ກົດ Esc ເພື່ອປິດ</string>
     <string name="menu_file">ໄຟລ໌</string>
-    <string name="menu_new_schedule">ລາຍການໃໝ່</string>
-    <string name="menu_open_schedule">ເປີດລາຍການ</string>
-    <string name="menu_save_schedule">ບັນທຶກລາຍການ</string>
     <string name="menu_save_schedule_as">ບັນທຶກລາຍການເປັນ...</string>
     <string name="menu_close_schedule">ປິດລາຍການ</string>
     <string name="menu_exit">ອອກ</string>
     <string name="file_chooser_save_schedule">ບັນທຶກລາຍການເປັນ</string>
-    <string name="file_chooser_open_schedule">ເປີດລາຍການ</string>
     <string name="file_filter_schedule">ລາຍການ Church Presenter (*.cps)</string>
-    <string name="menu_schedule">ລາຍການ</string>
-    <string name="menu_add_to_schedule">ເພີ່ມໃສ່ລາຍການ</string>
     <string name="menu_remove_from_schedule">ເອົາອອກຈາກລາຍການ</string>
     <string name="menu_clear_schedule">ລ້າງລາຍການ</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">ຕິດຕາມ ChurchPresenter ອີກເຄື່ອງໜຶ່ງໃນເຄືອຂ່າຍຂອງທ່ານ — ສະແດງເນື້ອຫາສົດຂອງເຄື່ອງນັ້ນຢູ່ນີ້, ແລະຖ້າຕ້ອງການກໍເພີ່ມລາຍການໃສ່ລາຍການຂອງເຄື່ອງນັ້ນໄດ້.</string>
     <string name="instance_link_host">ໂຮສ</string>
     <string name="instance_link_host_hint">ຕົວຢ່າງ 192.168.1.10</string>
-    <string name="instance_link_port">ພອດ</string>
     <string name="instance_link_autoconnect">ເຊື່ອມຕໍ່ອັດຕະໂນມັດເມື່ອເປີດແອັບ</string>
     <string name="instance_link_reconnect_delay">ເວລາລໍຖ້າຕໍ່າສຸດກ່ອນເຊື່ອມຕໍ່ຄືນ</string>
     <string name="instance_link_reconnect_delay_hint">ເວລາລໍຖ້າສັ້ນສຸດກ່ອນລອງເຊື່ອມຕໍ່ຄືນເມື່ອສາຍຫຼຸດ. ຖ້າລົ້ມເຫຼວຫຼາຍຄັ້ງ ລະບົບຈະຂະຫຍາຍເວລາລໍຖ້າອອກໄປເອງ.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">ຄ່າເລີ່ມຕົ້ນ</string>
-    <string name="background_color_option">ສີ</string>
-    <string name="background_image_option">ຮູບ</string>
     <string name="background_video_option">ວິດີໂອວົນຊ້ຳ</string>
     <string name="background_transparent_option">ໂປ່ງໃສ</string>
     <string name="background_follow_default_option">ຕາມຄ່າເລີ່ມຕົ້ນ</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">ເວັບ</string>
-    <string name="projection_content_background">ພື້ນຫຼັງ</string>
     <string name="projection_content_lt_background">ພື້ນຫຼັງແຖບລຸ່ມ</string>
     <string name="browser_source_resolution">ຄວາມລະອຽດ</string>
     <string name="browser_source_fps">FPS ສູງສຸດ</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">ຫຍໍ້</string>
     <string name="tooltip_add_to_schedule">ເພີ່ມເຂົ້າລາຍການ</string>
     <string name="tooltip_clear_display">ລ້າງໜ້າຈໍ</string>
-    <string name="remote_action_clear_display">ລ້າງໜ້າຈໍ</string>
     <string name="schedule_add_files_title">ເພີ່ມໄຟລ໌ໃສ່ລາຍການ</string>
     <string name="tooltip_toggle_displays">ເປີດ/ປິດໜ້າຈໍສາຍພາບ</string>
     <string name="tooltip_settings">ການຕັ້ງຄ່າ</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">ກະທັດຮັດ</string>
     <string name="schedule_density_normal">ປົກກະຕິ</string>
     <string name="schedule_density_detailed">ລະອຽດ</string>
-    <string name="schedule_kind_lower_third">ແຖບລຸ່ມ</string>
     <string name="tooltip_schedule_options">ຕົວເລືອກລາຍການ</string>
     <string name="schedule_show_buttons_under_title">ສະແດງປຸ່ມໃຕ້ຫົວຂໍ້</string>
     <string name="schedule_option_item_count">ຈຳນວນລາຍການ</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">ແກ້ໄຂປ້າຍ</string>
     <string name="label_text">ຂໍ້ຄວາມປ້າຍ</string>
     <string name="text_color">ສີຂໍ້ຄວາມ</string>
-    <string name="background_color_label">ສີພື້ນຫຼັງ</string>
     <string name="enter_label_text">ພິມຂໍ້ຄວາມປ້າຍ...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">ເລື່ອນຊ້າຍ</string>
     <string name="animation_slide_right">ເລື່ອນຂວາ</string>
     <string name="animation_none">ບໍ່ມີ</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s ຮູບຕໍ່ໄປ/ກ່ອນໜ້າ  ·  %2$s ເລື່ອນແຖວ</string>
     <string name="presentation_arrow_key_hint">%1$s — ຂັ້ນ ແລະ ສະໄລ້ ກ່ອນໜ້າ/ຕໍ່ໄປ  ·  %2$s — ຫຼິ້ນ/ຢຸດ  ·  %3$s — ຈໍວ່າງ</string>
     <string name="pictures_reorder_hint">ກົດ Shift ພ້ອມລາກຮູບຫຍໍ້ເພື່ອຈັດລຳດັບໃໝ່</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">ພື້ນຫຼັງພຣະຄຳພີ</string>
     <string name="content_songs_background">ພື້ນຫຼັງເພງ</string>
     <string name="content_pictures">ຮູບ/ການນຳສະເໜີ</string>
-    <string name="content_media">ສື່</string>
-    <string name="content_streaming">ແຖບລຸ່ມ</string>
     <string name="content_announcements">ປະກາດ</string>
     <string name="display_mode">ຮູບແບບການສະແດງ</string>
-    <string name="display_fullscreen">ເຕັມຈໍ</string>
     <string name="display_lower_third">ແຖບລຸ່ມ</string>
     <string name="full_screen">ເຕັມຈໍ</string>
-    <string name="lower_third_size">ແຖບລຸ່ມ</string>
     <string name="identify_screen">ລະບຸຈໍ</string>
     <string name="projection_target_display">ຈໍ</string>
     <string name="projection_auto_display">ອັດຕະໂນມັດ</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">ນຳເຂົ້າການຕັ້ງຄ່າບໍ່ສຳເລັດ. ໄຟລ໌ອາດບໍ່ຖືກຕ້ອງ.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">ສື່</string>
     <string name="media_local_file">ໄຟລ໌ໃນເຄື່ອງ</string>
     <string name="media_network_url">ລິ້ງເຄືອຂ່າຍ</string>
     <string name="media_url_placeholder">ພິມລິ້ງ (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">ກາງຊ້າຍ</string>
     <string name="center_right">ກາງຂວາ</string>
     <string name="bottom_center">ລຸ່ມກາງ</string>
-    <string name="announcement_background_color_label">ສີພື້ນຫຼັງ</string>
     <string name="transparent_default">ໂປ່ງໃສ (ຄ່າເລີ່ມຕົ້ນ)</string>
     <string name="announcement_animation">ການເໜັງຕີງ</string>
     <string name="anim_slide_from_left">ເລື່ອນມາຈາກຊ້າຍ</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">ເພີ່ມເຂົ້າລາຍການ</string>
     <string name="web_go_live">ສາຍສົດ</string>
     <string name="web_bookmark_add">ເພີ່ມບຸກມາກ</string>
     <string name="web_bookmark_remove">ລຶບບຸກມາກ</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">ສີພື້ນ</string>
     <string name="canvas_shape_stroke_width">ຄວາມໜາເສັ້ນຂອບ</string>
     <string name="canvas_rename_scene">ປ່ຽນຊື່</string>
-    <string name="canvas_remove_scene">ລຶບ</string>
     <string name="canvas_add_source">ເພີ່ມແຫຼ່ງ</string>
     <string name="canvas_delete_source">ລຶບແຫຼ່ງ</string>
     <string name="canvas_source_move_forward">ຍ້າຍຂຶ້ນໜ້າ</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">ຄວາມສູງ</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS ກຳນົດເອງ</string>
-    <string name="canvas_browser_url">ລິ້ງ</string>
     <string name="canvas_select_image_title">ເລືອກຮູບ</string>
     <string name="canvas_select_video_title">ເລືອກວິດີໂອ</string>
     <string name="canvas_image_files">ໄຟລ໌ຮູບ</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">ໂມງ</string>
     <string name="canvas_clock_mode_countdown">ນັບຖອຍຫຼັງ</string>
     <string name="canvas_clock_mode_count_up">ຈັບເວລາຂຶ້ນ</string>
     <string name="canvas_decklink_io_warning">ອຸປະກອນນີ້ກຳລັງໃຊ້ເປັນຊ່ອງອອກ. ຊ່ອງເຂົ້າອາດໃຊ້ບໍ່ໄດ້ໃນອຸປະກອນທີ່ບໍ່ຮອງຮັບການເຂົ້າ-ອອກພ້ອມກັນ.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">ເສັ້ນໂຄ້ງ</string>
     <string name="canvas_letter_spacing">ໄລຍະຫ່າງຕົວອັກສອນ</string>
     <string name="canvas_source_qrcode">ລະຫັດ QR</string>
-    <string name="canvas_source_camera">ກ້ອງ</string>
     <string name="canvas_source_screen_capture">ການຈັບພາບໜ້າຈໍ</string>
     <string name="canvas_source_bible">ພຣະຄຳພີ</string>
     <string name="canvas_bible_version">ສະບັບພຣະຄຳພີ</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">ສີບ່ອນອ້າງອີງ</string>
     <string name="canvas_verse_style">ຮູບແບບຂໍ້ພຣະຄຳ</string>
     <string name="canvas_reference_style">ຮູບແບບບ່ອນອ້າງອີງ</string>
-    <string name="canvas_text_color">ສີຂໍ້ຄວາມ</string>
     <string name="canvas_text_bg_color">ສີພື້ນຫຼັງ</string>
     <string name="canvas_clock_mode">ຮູບແບບ</string>
     <string name="canvas_clock_format">ຮູບແບບເວລາ</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">ຮູບແບບວິດີໂອ</string>
     <string name="canvas_camera_format_auto">ອັດຕະໂນມັດ (ຄ່າເລີ່ມຕົ້ນ)</string>
     <string name="canvas_camera_connection">ຊ່ອງຕໍ່ວິດີໂອ</string>
-    <string name="canvas_camera_mode">ຮູບແບບ</string>
     <string name="canvas_camera_mode_auto">ອັດຕະໂນມັດ</string>
     <string name="canvas_capture_x">ຈຸດຈັບພາບ X</string>
     <string name="canvas_capture_y">ຈຸດຈັບພາບ Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">ໜ້າຕ່າງ</string>
     <string name="canvas_capture_refresh_windows">ໂຫຼດລາຍການໜ້າຕ່າງຄືນ</string>
     <string name="canvas_capture_interval">ໄລຍະການຈັບພາບ</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">ກ້ອງ: %1$s</string>
-    <string name="canvas_placeholder_camera_default">ກ້ອງ</string>
     <string name="canvas_placeholder_screen_capture">ການຈັບພາບໜ້າຈໍ</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">ລຶບອອກຈາກລາຍການແລ້ວ</string>
     <string name="remote_activity_projected">ສາຍພາບແລ້ວ (ອອກສົດ)</string>
     <string name="remote_activity_presentation_connect">ເຊື່ອມຕໍ່ກັບຣີໂໝດການນຳສະເໜີແລ້ວ</string>
-    <string name="remote_activity_presentation_connect_detail">ເຊື່ອມຕໍ່ແລ້ວ</string>
     <string name="remote_activity_qa_admin_connect">ເຊື່ອມຕໍ່ກັບຜູ້ຄຸ້ມຄອງຄຳຖາມແລ້ວ</string>
     <string name="remote_activity_qa_admin_connect_detail">ເຊື່ອມຕໍ່ແລ້ວ</string>
     <string name="remote_activity_presented">ກຳລັງສະແດງ</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">ເຄື່ອງຫຼັກ — ມີເຄື່ອງຕາມ %1$d ເຄື່ອງເຊື່ອມຕໍ່</string>
     <string name="client_label_placeholder">ພິມຊື່ທີ່ຈື່ງ່າຍ…</string>
     <string name="client_label_edit_tooltip">ຕັ້ງຊື່ທີ່ຈື່ງ່າຍ</string>
-    <string name="client_label_save">ບັນທຶກ</string>
     <string name="client_label_cancel">ຍົກເລີກ</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter ຄົ້ນຫາເນື້ອຫາຂອງທ່ານຢູ່ໃສ</string>
     <string name="system_storage_linked_count">ເຊື່ອມຕໍ່ແລ້ວ %1$d</string>
     <string name="system_storage_needs_attention_count">ຕ້ອງກວດສອບ %1$d</string>
-    <string name="system_storage_status_not_set">ຍັງບໍ່ໄດ້ຕັ້ງ</string>
     <string name="system_storage_status_not_found">ບໍ່ພົບໂຟນເດີ</string>
     <string name="system_storage_status_read_only">ອ່ານໄດ້ຢ່າງດຽວ</string>
     <string name="system_storage_status_linked">ເຊື່ອມຕໍ່ແລ້ວ</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">ສະແດງໝາຍເລກເພງກ່ອນຊື່</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">ຈໍເວທີ</string>
     <string name="general">ທົ່ວໄປ</string>
     <string name="display_stage_monitor">ຈໍເວທີ</string>
     <string name="stage_monitor_quadrant_next">ຕໍ່ໄປ</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">ຢືນຢັນການອອກສົດ</string>
     <string name="qa_add_question_hint">ເພີ່ມຄຳຖາມ…</string>
     <string name="qa_edit_question_hint">ແກ້ໄຂຂໍ້ຄວາມຄຳຖາມ…</string>
-    <string name="qa_delete_question">ລຶບ</string>
     <string name="qa_confirm_delete_prompt">ຈະລຶບບໍ່?</string>
     <string name="qa_submitter_device">ອຸປະກອນ: %1$s</string>
     <string name="qa_public_access">ການເຂົ້າເຖິງສາທາລະນະ</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">ເບິ່ງກ່ອນແບບສົດ</string>
     <string name="stt_not_connected">ຍັງບໍ່ໄດ້ເຊື່ອມຕໍ່. ພິມລິ້ງເຊີບເວີ STT ແລ້ວກົດ "ເຊື່ອມຕໍ່".</string>
     <string name="stt_waiting_for_transcription">ກຳລັງລໍການຖອດຄວາມ…</string>
-    <string name="stt_transcription_label">ການຖອດຄວາມ</string>
     <string name="stt_translation_label">ຄຳແປ</string>
     <string name="stt_settings_dialog_title">ການຕັ້ງຄ່າການສະແດງ STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">ລາຍງານ CCLI</string>
-    <string name="ccli_tab_songs">ເພງ</string>
-    <string name="ccli_tab_bible">ພຣະຄຳພີ</string>
     <string name="ccli_tab_activity">ກິດຈະກຳ</string>
     <string name="ccli_songs_summary">%1$d ເພງທີ່ຕ່າງກັນ · ສະແດງລວມ %2$d ຄັ້ງ</string>
     <string name="ccli_bible_summary">%1$d ຂໍ້ທີ່ຕ່າງກັນ · ສະແດງລວມ %2$d ຄັ້ງ</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">ການສະແດງຕາມຊ່ວງເວລາ</string>
     <string name="ccli_from">ຈາກ:</string>
     <string name="ccli_to">ເຖິງ:</string>
-    <string name="ccli_legend_songs">ເພງ</string>
     <string name="ccli_legend_bible">ຂໍ້ພຣະຄຳພີ</string>
     <string name="ccli_stat_songs_presented">ເພງທີ່ສະແດງ</string>
     <string name="ccli_stat_bible_verses">ຂໍ້ພຣະຄຳພີ</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">ຄັ້ງທຳອິດ</string>
     <string name="ccli_col_last">ຄັ້ງລ່າສຸດ</string>
     <string name="ccli_col_verse">ຂໍ້</string>
-    <string name="ccli_col_bible">ພຣະຄຳພີ</string>
     <string name="ccli_export_csv">ສົ່ງອອກ CCLI CSV</string>
     <string name="ccli_export_xls">ສົ່ງອອກ XLS</string>
     <string name="ccli_exported_success">ສົ່ງອອກລາຍງານສຳເລັດແລ້ວ.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">ພຣະຄຳພີ</string>
     <string name="obs_mode_songs">ເພງ</string>
     <string name="obs_mode_pictures">ຮູບ</string>
-    <string name="obs_mode_presentation">ການນຳສະເໜີ</string>
     <string name="obs_mode_media">ສື່</string>
     <string name="obs_mode_lower_third">ແຖບລຸ່ມ</string>
     <string name="obs_mode_announcements">ປະກາດ</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">ຕັ້ງໂຮສ Companion ໃນ "ການຕັ້ງຄ່າ → Companion Satellite" ເພື່ອເຊື່ອມຕໍ່.</string>
     <string name="companion_satellite_status_connecting">ກຳລັງເຊື່ອມຕໍ່…</string>
     <string name="companion_satellite_status_disconnected">ຕັດການເຊື່ອມຕໍ່ແລ້ວ</string>
-    <string name="companion_satellite_status_error">ຜິດພາດ: %1$s</string>
     <string name="companion_satellite_connection_name">ຊື່</string>
     <string name="companion_satellite_product_name">ຊື່ຜະລິດຕະພັນ</string>
     <string name="companion_satellite_reconnect_delay">ໄລຍະລໍກ່ອນເຊື່ອມຕໍ່ຄືນ (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">ກວດຫາຂໍ້ພຣະຄຳພີ</string>
     <string name="bible_engine_run_local">ແລ່ນເອັນຈິນຢູ່ເຄື່ອງນີ້</string>
     <string name="bible_engine_host">ໂຮສຂອງເອັນຈິນ</string>
-    <string name="bible_engine_port">ພອດ</string>
     <string name="stt_help_dev_mode">ຊ່ວຍນັກພັດທະນາ — ສະແດງປຸ່ມສົ່ງຄຳຕິຊົມສົດໃນແຖບພຣະຄຳພີ (ຕອນຜິດ / ໄວເກີນໄປ / ຕອນທີ່ຫຼົງລືມ)</string>
     <string name="dictionary_back">ຍ້ອນກັບ</string>
     <string name="dictionary_forward">ໄປໜ້າ</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">ມີຂາ</string>
     <string name="font_category_mono">ໂມໂນ</string>
     <string name="font_category_display">ຕົກແຕ່ງ</string>
-    <string name="font_preview">ເບິ່ງກ່ອນ</string>
     <string name="font_preview_sample">ຂໍ້ຄວາມຕົວຢ່າງດ້ວຍຟອນທີ່ເລືອກ</string>
     <string name="font_warning_no_cyrillic">%1$s ບໍ່ມີຕົວອັກສອນຊີຣິລລິກ — ຂໍ້ພະຄຳພີຊີຣິລລິກຈະສະແດງເທິງຈໍດ້ວຍຟອນອື່ນ</string>
     <string name="font_warning_no_hebrew">%1$s ບໍ່ມີຕົວອັກສອນເຮັບເລີ — ຂໍ້ຄວາມເຮັບເລີຈະສະແດງເທິງຈໍດ້ວຍຟອນອື່ນ</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">ຂີດຂ້າ</string>
     <string name="bible_custom_name">ຊື່</string>
-    <string name="bible_custom_abbreviation">ຕົວຫຍໍ້</string>
     <string name="bible_translations">ຄຳແປ</string>
     <string name="bible_miscellaneous">ອື່ນໆ</string>
     <string name="bible_font">ຟອນ</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">ໂຢຮັນ</string>
     <string name="bible_preview_no_translations">ເພີ່ມຄຳແປເພື່ອເບິ່ງຢູ່ນີ້</string>
     <string name="song_element_number">ໝາຍເລກ</string>
-    <string name="song_element_title">ຫົວຂໍ້</string>
     <string name="song_element_lyrics">ເນື້ອເພງ</string>
-    <string name="song_element_author">ຜູ້ແຕ່ງຄຳຮ້ອງ</string>
-    <string name="song_element_composer">ຜູ້ແຕ່ງທຳນອງ</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">ຈັງຫວະ</string>
     <string name="song_target_title_slide">ສະໄລ້ຫົວຂໍ້</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">ທ່ອນ</string>
     <string name="song_language_scope">ພາສາ</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">ພື້ນຫຼັງ</string>
     <string name="song_background_full_screen">ເຕັມຈໍ</string>
     <string name="song_background_lower_third">ແຖບລຸ່ມ</string>
     <string name="song_background_inherit">ສືບທອດ</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">ສີຂອງທ່ານ</string>
     <string name="song_background_browse">ເລືອກ…</string>
     <string name="song_background_look">ຮູບແບບ</string>
-    <string name="song_background_preset_none">ບໍ່ມີ</string>
     <string name="song_background_preset_soft">ອ່ອນ</string>
     <string name="song_background_preset_legible">ອ່ານງ່າຍ</string>
     <string name="song_background_preset_cinema">ຮູບເງົາ</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">ພື້ນຫຼັງ</string>
     <string name="background_group_defaults">ຄ່າເລີ່ມຕົ້ນ</string>
-    <string name="background_scope_default">ຄ່າເລີ່ມຕົ້ນ</string>
     <string name="background_scope_default_lower_third">ແຖບລຸ່ມຄ່າເລີ່ມຕົ້ນ</string>
     <string name="background_scope_default_meta">ເມື່ອພຣະຄຳພີ ຫຼື ເພງຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ</string>
     <string name="background_scope_default_lower_third_meta">ເມື່ອແຖບລຸ່ມຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">ຕາມຄ່າເລີ່ມຕົ້ນ</string>
     <string name="background_use_default">ໃຊ້ຄ່າເລີ່ມຕົ້ນ</string>
     <string name="background_set_explicitly">ຕັ້ງແຍກສຳລັບໜ້ານີ້</string>
-    <string name="background_type_caption">ປະເພດ</string>
     <string name="background_color_caption">ສີ</string>
     <string name="background_image_file">ໄຟລ໌ຮູບ</string>
     <string name="background_video_file">ໄຟລ໌ວິດີໂອ</string>
-    <string name="background_opacity_caption">ຄວາມທຶບ</string>
     <string name="background_above_band_caption">ເໜືອແຖບ</string>
     <string name="background_above_band_fill">ສີເຕີມ</string>
     <string name="background_above_band_opacity">ຄວາມທຶບຂອງສີເຕີມ</string>
     <string name="quick_background_reset">ກັບສູ່ປົກກະຕິ</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · ຈັດການໃນການຕັ້ງຄ່າ</string>
     <string name="quick_backgrounds">ພື້ນຫຼັງດ່ວນ</string>
     <string name="quick_backgrounds_help">ພື້ນຫຼັງທີ່ແຜງຕົວຢ່າງເກັບໄວ້ຫ່າງພຽງຄລິກດຽວ. ຄລິກໃສ່ຊ່ອງເພື່ອເລືອກສິ່ງທີ່ຈະສະແດງ, ລາກເພື່ອປ່ຽນວ່າປຸ່ມໃດເອີ້ນໃຊ້. ການເລືອກໃນລະຫວ່າງພິທີຈະທັບທຸກຈໍຈົນກວ່າທ່ານຈະກັບສູ່ປົກກະຕິ ແລະ ບໍ່ປ່ຽນຫຍັງຢູ່ນີ້.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">ສະຫຼັບໂປຣໄຟລ໌ຊ່ອງອອກ</string>
     <string name="output_profile_new_name_default">ໂປຣໄຟລ໌ໃໝ່</string>
     <string name="output_profile_empty_state">ສ້າງໂປຣໄຟລ໌ເພື່ອເລີ່ມກຳນົດຮູບແບບ</string>
-    <string name="customize_bible">ພຣະຄຳພີ</string>
-    <string name="customize_songs">ເພງ</string>
     <string name="customize_group_verse_text">ຂໍ້ຄວາມຂອງຂໍ້ພຣະຄຳ</string>
     <string name="customize_group_reference">ຂໍ້ອ້າງອີງ</string>
     <string name="customize_background_type">ປະເພດ</string>
-    <string name="customize_type_color">ສີ</string>
     <string name="customize_type_image">ຮູບ</string>
-    <string name="customize_type_video">ວິດີໂອ</string>
-    <string name="customize_type_default">ຄ່າເລີ່ມຕົ້ນ</string>
-    <string name="customize_type_gradient">ໄລ່ສີ</string>
     <string name="customize_show_abbreviation">ຕົວຫຍໍ້</string>
     <string name="customize_background_opacity">ຄວາມທຶບ</string>
     <string name="slate_theme">ຮູບແບບຫີນດິນດານ</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ ແລະ ຕຳແໜ່ງຂອງຊື່ເພງ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ, ໄລຍະຫ່າງຄຳ, ການເບິ່ງທ່ອນຖັດໄປ ແລະ ຄອດບໍ່ມີຜົນ.</string>
     <string name="bible_lottie_unsupported_note">ແມ່ແບບກຳນົດການຈັດວາງ, ຕຳແໜ່ງຂອງຂໍ້ອ້າງອີງ ແລະ ວິທີທີ່ສອງພາສາແບ່ງແຖບ. ຮູບແບບແຖບລຸ່ມກຳນົດຟອນ, ຂະໜາດ, ສີ, ການຈັດແນວ, ໄລຍະຫ່າງຕົວອັກສອນ, ຕົວພິມ ແລະ ເງົາ; ພື້ນຫຼັງຂໍ້ຄວາມ, ຂີດກ້ອງ, ຂີດຂ້າ ແລະ ໄລຍະຫ່າງຄຳບໍ່ມີຜົນ.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">ເສັ້ນຂອບ</string>
     <string name="tooltip_outline_options">ຕົວເລືອກເສັ້ນຂອບ</string>
     <string name="text_outline">ເສັ້ນຂອບ</string>
     <string name="text_outline_width">ຄວາມກວ້າງ</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">ເພີ່ມຊ່ອງອອກ</string>
     <string name="ndi_output_numbered">ຊ່ອງອອກ NDI %1$d</string>
     <string name="preview_output">ເບິ່ງຕົວຢ່າງຊ່ອງອອກ</string>
-    <string name="output_resolution">ຄວາມລະອຽດ</string>
     <string name="output_resolution_custom">ກຳນົດເອງ…</string>
     <string name="output_resolution_custom_title">ຄວາມລະອຽດກຳນົດເອງ</string>
     <string name="output_resolution_width">ກວ້າງ</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">ວາງແຜນພິທີຈາກແອັບມືຖືໄດ້ຕະຫຼອດອາທິດ ເຖິງແມ່ນຄອມພິວເຕີເຄື່ອງນີ້ຈະປິດຢູ່. ຄອມພິວເຕີເຄື່ອງນີ້ຍັງຄົງເປັນແຫຼ່ງຂໍ້ມູນຫຼັກ.</string>
     <string name="calendar_sync_enable">ຊິງຄ໌ປະຕິທິນກັບໂທລະສັບ</string>
     <string name="calendar_sync_relay_url">ຣີເລ</string>
-    <string name="calendar_sync_status_off">ປິດ</string>
     <string name="calendar_sync_status_unpaired">ຍັງບໍ່ໄດ້ລົງທະບຽນ — ຄອມພິວເຕີເຄື່ອງນີ້ຈະລົງທະບຽນກັບຣີເລເມື່ອເປີດການຊິງຄ໌ຄັ້ງທຳອິດ</string>
     <string name="calendar_sync_status_syncing">ກຳລັງຊິງຄ໌…</string>
     <string name="calendar_sync_status_synced">ຊິງຄ໌ແລ້ວ %1$s</string>

@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_search_mode_auto
-import churchpresenter.composeapp.generated.resources.bible_search_mode_reference
+import churchpresenter.composeapp.generated.resources.customize_group_reference
 import churchpresenter.composeapp.generated.resources.bible_search_mode_text
 import churchpresenter.composeapp.generated.resources.bible_search_mode_tooltip
 import churchpresenter.composeapp.generated.resources.ic_search
@@ -178,7 +178,7 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
             MaterialTheme.colorScheme.onPrimary
         )
         BibleSearchMode.REFERENCE -> Triple(
-            Res.string.bible_search_mode_reference,
+            Res.string.customize_group_reference,
             MaterialTheme.colorScheme.secondary,
             MaterialTheme.colorScheme.onSecondary
         )

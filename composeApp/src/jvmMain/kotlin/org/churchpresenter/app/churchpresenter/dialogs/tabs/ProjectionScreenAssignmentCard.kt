@@ -42,7 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.output_resolution
+import churchpresenter.composeapp.generated.resources.ndi_resolution
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.dev_window_label
@@ -189,7 +189,7 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 Text(
-                    text = stringResource(Res.string.output_resolution),
+                    text = stringResource(Res.string.ndi_resolution),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,

@@ -69,7 +69,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
 import churchpresenter.composeapp.generated.resources.canvas_rename_scene
-import churchpresenter.composeapp.generated.resources.canvas_remove_scene
+import churchpresenter.composeapp.generated.resources.tooltip_remove
 import churchpresenter.composeapp.generated.resources.canvas_size_screen
 import churchpresenter.composeapp.generated.resources.canvas_duplicate_scene
 import churchpresenter.composeapp.generated.resources.canvas_scene_copy_name
@@ -379,7 +379,7 @@ private fun CanvasTabScope.SceneRowSizeAndRemove(
                 tonalElevation = 4.dp,
             ) {
                 Text(
-                    stringResource(Res.string.canvas_remove_scene),
+                    stringResource(Res.string.tooltip_remove),
                     color = MaterialTheme.colorScheme.inverseOnSurface,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.bodySmall,
@@ -397,7 +397,7 @@ private fun CanvasTabScope.SceneRowSizeAndRemove(
         ) {
             Icon(
                 painterResource(Res.drawable.ic_close),
-                contentDescription = stringResource(Res.string.canvas_remove_scene),
+                contentDescription = stringResource(Res.string.tooltip_remove),
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.getString
 import churchpresenter.composeapp.generated.resources.schedule_add_files_title
-import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
 import churchpresenter.composeapp.generated.resources.ic_delete
@@ -300,7 +300,7 @@ fun ScheduleTab(
     }
 
     val strSaveScheduleAs = rememberUpdatedState(stringResource(Res.string.file_chooser_save_schedule))
-    val strOpenSchedule   = rememberUpdatedState(stringResource(Res.string.file_chooser_open_schedule))
+    val strOpenSchedule   = rememberUpdatedState(stringResource(Res.string.tooltip_open_schedule))
     val strFileFilter     = rememberUpdatedState(stringResource(Res.string.file_filter_schedule))
 
     LaunchedEffect(Unit) {

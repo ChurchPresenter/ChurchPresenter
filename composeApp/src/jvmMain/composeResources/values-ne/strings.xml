@@ -3,7 +3,6 @@
     <string name="mode">मोड</string>
     <string name="scope">दायरा</string>
     <string name="title">शीर्षक</string>
-    <string name="number">नम्बर</string>
     <string name="go_live">प्रस्तुत गर्नुहोस्</string>
     <string name="add_to_schedule">तालिकामा थप्नुहोस्</string>
     <string name="copy_verse">पद प्रतिलिपि गर्नुहोस्</string>
@@ -12,7 +11,6 @@
     <string name="search">खोज्नुहोस्</string>
     <string name="bible_smart_search_hint">सन्दर्भ वा पाठ — जस्तै यूहन्ना ३:१६, मत्ती १, वा कुनै शब्द</string>
     <string name="bible_search_mode_auto">स्वतः</string>
-    <string name="bible_search_mode_reference">सन्दर्भ</string>
     <string name="bible_search_mode_text">पाठ</string>
     <string name="bible_search_mode_tooltip">बदल्न थिच्नुहोस् — स्वतः: सन्दर्भमा जान्छ, बाँकी सबै खोज्छ। सन्दर्भ: केवल नेभिगेट गर्छ। पाठ: सधैँ पदको पाठ खोज्छ।</string>
     <string name="bible_verse_selection_hint">छान्न/हटाउन Ctrl+क्लिक, दायराका लागि Shift+क्लिक</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">प्यानल बन्द गर्नुहोस्</string>
     <string name="bible_cross_references_dismiss_hint">बन्द गर्न Esc</string>
     <string name="menu_file">फाइल</string>
-    <string name="menu_new_schedule">नयाँ तालिका</string>
-    <string name="menu_open_schedule">तालिका खोल्नुहोस्</string>
-    <string name="menu_save_schedule">तालिका सुरक्षित गर्नुहोस्</string>
     <string name="menu_save_schedule_as">तालिका यसरी सुरक्षित गर्नुहोस्...</string>
     <string name="menu_close_schedule">तालिका बन्द गर्नुहोस्</string>
     <string name="menu_exit">बाहिर निस्कनुहोस्</string>
     <string name="file_chooser_save_schedule">तालिका यसरी सुरक्षित गर्नुहोस्</string>
-    <string name="file_chooser_open_schedule">तालिका खोल्नुहोस्</string>
     <string name="file_filter_schedule">Church Presenter तालिका (*.cps)</string>
-    <string name="menu_schedule">तालिका</string>
-    <string name="menu_add_to_schedule">तालिकामा थप्नुहोस्</string>
     <string name="menu_remove_from_schedule">तालिकाबाट हटाउनुहोस्</string>
     <string name="menu_clear_schedule">तालिका खाली गर्नुहोस्</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">आफ्नो नेटवर्कमा रहेको अर्को ChurchPresenter प्रतिमालाई पछ्याउनुहोस् — त्यसको प्रस्तुतिमा रहेको सामग्री यहाँ देखाउनुहोस्, र चाहेमा त्यसको तालिकामा वस्तु थप्नुहोस्।</string>
     <string name="instance_link_host">होस्ट</string>
     <string name="instance_link_host_hint">जस्तै 192.168.1.10</string>
-    <string name="instance_link_port">पोर्ट</string>
     <string name="instance_link_autoconnect">सुरु हुँदा आफैँ जोडिनुहोस्</string>
     <string name="instance_link_reconnect_delay">पुनः जोडिने न्यूनतम ढिलाइ</string>
     <string name="instance_link_reconnect_delay_hint">टुटेको लिङ्क पुनः प्रयास गर्नुअघिको सबैभन्दा छोटो प्रतीक्षा। बारम्बार असफल भए यो आफैँ बढ्दै जान्छ।</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">पूर्वनिर्धारित</string>
-    <string name="background_color_option">रङ</string>
-    <string name="background_image_option">तस्बिर</string>
     <string name="background_video_option">दोहोरिने भिडियो</string>
     <string name="background_transparent_option">पारदर्शी</string>
     <string name="background_follow_default_option">पूर्वनिर्धारित पछ्याउने</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">वेब</string>
-    <string name="projection_content_background">पृष्ठभूमि</string>
     <string name="projection_content_lt_background">तल्लो पट्टीको पृष्ठभूमि</string>
     <string name="browser_source_resolution">रिजोल्युसन</string>
     <string name="browser_source_fps">अधिकतम FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">सानो बनाउनुहोस्</string>
     <string name="tooltip_add_to_schedule">तालिकामा थप्नुहोस्</string>
     <string name="tooltip_clear_display">पर्दा खाली गर्नुहोस्</string>
-    <string name="remote_action_clear_display">पर्दा खाली गर्नुहोस्</string>
     <string name="schedule_add_files_title">तालिकामा फाइलहरू थप्नुहोस्</string>
     <string name="tooltip_toggle_displays">प्रस्तुति पर्दा खोल्ने/बन्द गर्ने</string>
     <string name="tooltip_settings">सेटिङ</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">छोटो</string>
     <string name="schedule_density_normal">सामान्य</string>
     <string name="schedule_density_detailed">विस्तृत</string>
-    <string name="schedule_kind_lower_third">तल्लो पट्टी</string>
     <string name="tooltip_schedule_options">तालिका विकल्प</string>
     <string name="schedule_show_buttons_under_title">शीर्षकमुनि बटन देखाउनुहोस्</string>
     <string name="schedule_option_item_count">वस्तु सङ्ख्या</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">लेबल सम्पादन गर्नुहोस्</string>
     <string name="label_text">लेबलको पाठ</string>
     <string name="text_color">पाठको रङ</string>
-    <string name="background_color_label">पृष्ठभूमिको रङ</string>
     <string name="enter_label_text">लेबलको पाठ लेख्नुहोस्...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">बायाँ सर्ने</string>
     <string name="animation_slide_right">दायाँ सर्ने</string>
     <string name="animation_none">कुनै पनि होइन</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s अर्को/अघिल्लो तस्बिर  ·  %2$s हरफ बदल्ने</string>
     <string name="presentation_arrow_key_hint">%1$s — अघिल्लो/अर्को चरण र स्लाइड  ·  %2$s — बजाउने/रोक्ने  ·  %3$s — पर्दा खाली</string>
     <string name="pictures_reorder_hint">क्रम मिलाउन Shift थिचेर थम्बनेल तान्नुहोस्</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">बाइबलको पृष्ठभूमि</string>
     <string name="content_songs_background">गीतको पृष्ठभूमि</string>
     <string name="content_pictures">तस्बिर/प्रस्तुति</string>
-    <string name="content_media">मिडिया</string>
-    <string name="content_streaming">तल्लो पट्टी</string>
     <string name="content_announcements">सूचना</string>
     <string name="display_mode">प्रदर्शन मोड</string>
-    <string name="display_fullscreen">पूरा पर्दा</string>
     <string name="display_lower_third">तल्लो पट्टी</string>
     <string name="full_screen">पूरा पर्दा</string>
-    <string name="lower_third_size">तल्लो पट्टी</string>
     <string name="identify_screen">चिनाउनुहोस्</string>
     <string name="projection_target_display">पर्दा</string>
     <string name="projection_auto_display">स्वतः</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">सेटिङ आयात गर्न सकिएन। फाइल अमान्य हुन सक्छ।</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">मिडिया</string>
     <string name="media_local_file">स्थानीय फाइल</string>
     <string name="media_network_url">नेटवर्क URL</string>
     <string name="media_url_placeholder">URL लेख्नुहोस् (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">बीच बायाँ</string>
     <string name="center_right">बीच दायाँ</string>
     <string name="bottom_center">तल बीचमा</string>
-    <string name="announcement_background_color_label">पृष्ठभूमिको रङ</string>
     <string name="transparent_default">पारदर्शी (पूर्वनिर्धारित)</string>
     <string name="announcement_animation">एनिमेसन</string>
     <string name="anim_slide_from_left">बायाँबाट सर्ने</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">तालिकामा थप्नुहोस्</string>
     <string name="web_go_live">प्रस्तुत गर्नुहोस्</string>
     <string name="web_bookmark_add">बुकमार्क थप्नुहोस्</string>
     <string name="web_bookmark_remove">बुकमार्क हटाउनुहोस्</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">भराइ</string>
     <string name="canvas_shape_stroke_width">रेखाको मोटाइ</string>
     <string name="canvas_rename_scene">नाम बदल्नुहोस्</string>
-    <string name="canvas_remove_scene">हटाउनुहोस्</string>
     <string name="canvas_add_source">स्रोत थप्नुहोस्</string>
     <string name="canvas_delete_source">स्रोत मेट्नुहोस्</string>
     <string name="canvas_source_move_forward">अगाडि सार्नुहोस्</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">उचाइ</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">आफ्नै CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">तस्बिर छान्नुहोस्</string>
     <string name="canvas_select_video_title">भिडियो छान्नुहोस्</string>
     <string name="canvas_image_files">तस्बिर फाइल</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">घडी</string>
     <string name="canvas_clock_mode_countdown">उल्टो गन्ती</string>
     <string name="canvas_clock_mode_count_up">स्टपवाच</string>
     <string name="canvas_decklink_io_warning">यो उपकरण अहिले आउटपुटका लागि प्रयोग भइरहेको छ। एकैसाथ इनपुट-आउटपुट नचल्ने उपकरणमा इनपुट उपलब्ध नहुन सक्छ।</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">वक्र</string>
     <string name="canvas_letter_spacing">अक्षर दूरी</string>
     <string name="canvas_source_qrcode">QR कोड</string>
-    <string name="canvas_source_camera">क्यामेरा</string>
     <string name="canvas_source_screen_capture">स्क्रिन क्याप्चर</string>
     <string name="canvas_source_bible">बाइबल</string>
     <string name="canvas_bible_version">बाइबल संस्करण</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">सन्दर्भको रङ</string>
     <string name="canvas_verse_style">पदको शैली</string>
     <string name="canvas_reference_style">सन्दर्भको शैली</string>
-    <string name="canvas_text_color">पाठको रङ</string>
     <string name="canvas_text_bg_color">पृष्ठभूमिको रङ</string>
     <string name="canvas_clock_mode">मोड</string>
     <string name="canvas_clock_format">ढाँचा</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">भिडियो ढाँचा</string>
     <string name="canvas_camera_format_auto">स्वतः (पूर्वनिर्धारित)</string>
     <string name="canvas_camera_connection">भिडियो जडान</string>
-    <string name="canvas_camera_mode">मोड</string>
     <string name="canvas_camera_mode_auto">स्वतः</string>
     <string name="canvas_capture_x">क्याप्चर X</string>
     <string name="canvas_capture_y">क्याप्चर Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">विन्डो</string>
     <string name="canvas_capture_refresh_windows">विन्डो सूची ताजा गर्नुहोस्</string>
     <string name="canvas_capture_interval">क्याप्चर अन्तराल</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">क्यामेरा: %1$s</string>
-    <string name="canvas_placeholder_camera_default">क्यामेरा</string>
     <string name="canvas_placeholder_screen_capture">स्क्रिन क्याप्चर</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">तालिकाबाट हटाइयो</string>
     <string name="remote_activity_projected">प्रक्षेपण भयो (प्रस्तुत)</string>
     <string name="remote_activity_presentation_connect">प्रस्तुति रिमोटमा जोडियो</string>
-    <string name="remote_activity_presentation_connect_detail">अब जोडिएको</string>
     <string name="remote_activity_qa_admin_connect">प्रश्न प्रशासनमा जोडियो</string>
     <string name="remote_activity_qa_admin_connect_detail">अब जोडिएको</string>
     <string name="remote_activity_presented">प्रस्तुत हुँदै</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">मुख्य — %1$d अनुयायी जोडिएका</string>
     <string name="client_label_placeholder">सजिलो नाम लेख्नुहोस्…</string>
     <string name="client_label_edit_tooltip">सजिलो नाम राख्नुहोस्</string>
-    <string name="client_label_save">सुरक्षित गर्नुहोस्</string>
     <string name="client_label_cancel">रद्द गर्नुहोस्</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter ले तपाईंको सामग्री कहाँ खोज्छ</string>
     <string name="system_storage_linked_count">%1$d जोडिएको</string>
     <string name="system_storage_needs_attention_count">%1$d लाई ध्यान चाहिन्छ</string>
-    <string name="system_storage_status_not_set">तय गरिएको छैन</string>
     <string name="system_storage_status_not_found">फोल्डर फेला परेन</string>
     <string name="system_storage_status_read_only">पढ्न मात्र</string>
     <string name="system_storage_status_linked">जोडिएको</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">शीर्षकभन्दा अघि गीत नम्बर देखाउनुहोस्</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">स्टेज मनिटर</string>
     <string name="general">सामान्य</string>
     <string name="display_stage_monitor">स्टेज मनिटर</string>
     <string name="stage_monitor_quadrant_next">अर्को</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">प्रस्तुतिको पुष्टि गर्नुहोस्</string>
     <string name="qa_add_question_hint">प्रश्न थप्नुहोस्…</string>
     <string name="qa_edit_question_hint">प्रश्नको पाठ सम्पादन गर्नुहोस्…</string>
-    <string name="qa_delete_question">मेट्नुहोस्</string>
     <string name="qa_confirm_delete_prompt">मेट्ने?</string>
     <string name="qa_submitter_device">उपकरण: %1$s</string>
     <string name="qa_public_access">सार्वजनिक पहुँच</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">प्रत्यक्ष पूर्वदृश्य</string>
     <string name="stt_not_connected">जोडिएको छैन। STT सर्भरको URL लेखेर "जोड्नुहोस्" थिच्नुहोस्।</string>
     <string name="stt_waiting_for_transcription">लिप्यन्तरण पर्खँदै…</string>
-    <string name="stt_transcription_label">लिप्यन्तरण</string>
     <string name="stt_translation_label">अनुवाद</string>
     <string name="stt_settings_dialog_title">STT प्रदर्शन सेटिङ</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI प्रतिवेदनहरू</string>
-    <string name="ccli_tab_songs">गीत</string>
-    <string name="ccli_tab_bible">बाइबल</string>
     <string name="ccli_tab_activity">गतिविधि</string>
     <string name="ccli_songs_summary">%1$d फरक गीत · जम्मा %2$d पटक</string>
     <string name="ccli_bible_summary">%1$d फरक पद · जम्मा %2$d पटक</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">समयअनुसार प्रस्तुति</string>
     <string name="ccli_from">देखि:</string>
     <string name="ccli_to">सम्म:</string>
-    <string name="ccli_legend_songs">गीत</string>
     <string name="ccli_legend_bible">बाइबल पद</string>
     <string name="ccli_stat_songs_presented">प्रस्तुत गीत</string>
     <string name="ccli_stat_bible_verses">बाइबल पद</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">पहिलो</string>
     <string name="ccli_col_last">अन्तिम</string>
     <string name="ccli_col_verse">पद</string>
-    <string name="ccli_col_bible">बाइबल</string>
     <string name="ccli_export_csv">CCLI CSV निर्यात गर्नुहोस्</string>
     <string name="ccli_export_xls">XLS निर्यात गर्नुहोस्</string>
     <string name="ccli_exported_success">प्रतिवेदन सफलतापूर्वक निर्यात भयो।</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">बाइबल</string>
     <string name="obs_mode_songs">गीत</string>
     <string name="obs_mode_pictures">तस्बिर</string>
-    <string name="obs_mode_presentation">प्रस्तुति</string>
     <string name="obs_mode_media">मिडिया</string>
     <string name="obs_mode_lower_third">तल्लो पट्टी</string>
     <string name="obs_mode_announcements">सूचना</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">जोडिन "सेटिङ → Companion Satellite" मा Companion होस्ट तय गर्नुहोस्।</string>
     <string name="companion_satellite_status_connecting">जोडिँदै…</string>
     <string name="companion_satellite_status_disconnected">विच्छेद भएको</string>
-    <string name="companion_satellite_status_error">त्रुटि: %1$s</string>
     <string name="companion_satellite_connection_name">नाम</string>
     <string name="companion_satellite_product_name">उत्पादनको नाम</string>
     <string name="companion_satellite_reconnect_delay">पुनः जोडिने ढिलाइ (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">धर्मशास्त्र पत्ता लगाउनुहोस्</string>
     <string name="bible_engine_run_local">इन्जिन यसै कम्प्युटरमा चलाउनुहोस्</string>
     <string name="bible_engine_host">इन्जिनको होस्ट</string>
-    <string name="bible_engine_port">पोर्ट</string>
     <string name="stt_help_dev_mode">विकासकर्तालाई सघाउनुहोस् — बाइबल ट्याबमा प्रत्यक्ष प्रतिक्रिया बटन देखाउनुहोस् (गलत खण्ड / चाँडै / छुटेको खण्ड)</string>
     <string name="dictionary_back">पछाडि</string>
     <string name="dictionary_forward">अगाडि</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">सेरिफ</string>
     <string name="font_category_mono">मोनो</string>
     <string name="font_category_display">डिस्प्ले</string>
-    <string name="font_preview">पूर्वदृश्य</string>
     <string name="font_preview_sample">छानिएको फन्टमा नमुना पाठ</string>
     <string name="font_warning_no_cyrillic">%1$s मा सिरिलिक अक्षर छैनन् — सिरिलिक पदहरू पर्दामा अर्कै फन्टमा देखिनेछन्।</string>
     <string name="font_warning_no_hebrew">%1$s मा हिब्रू अक्षर छैनन् — हिब्रू पाठ पर्दामा अर्कै फन्टमा देखिनेछ।</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">मध्य रेखा</string>
     <string name="bible_custom_name">नाम</string>
-    <string name="bible_custom_abbreviation">संक्षिप्त रूप</string>
     <string name="bible_translations">अनुवादहरू</string>
     <string name="bible_miscellaneous">विविध</string>
     <string name="bible_font">फन्ट</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">यूहन्ना</string>
     <string name="bible_preview_no_translations">यहाँ हेर्न एउटा अनुवाद थप्नुहोस्</string>
     <string name="song_element_number">नम्बर</string>
-    <string name="song_element_title">शीर्षक</string>
     <string name="song_element_lyrics">गीतको बोल</string>
-    <string name="song_element_author">रचनाकार</string>
-    <string name="song_element_composer">सङ्गीतकार</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">टेम्पो</string>
     <string name="song_target_title_slide">शीर्षक स्लाइड</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">खण्ड</string>
     <string name="song_language_scope">भाषा</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">पृष्ठभूमि</string>
     <string name="song_background_full_screen">पूर्ण स्क्रिन</string>
     <string name="song_background_lower_third">तल्लो तिहाइ</string>
     <string name="song_background_inherit">उत्तराधिकार</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">तपाईंको रङ</string>
     <string name="song_background_browse">ब्राउज गर्नुहोस्…</string>
     <string name="song_background_look">रूप</string>
-    <string name="song_background_preset_none">कुनै पनि होइन</string>
     <string name="song_background_preset_soft">नरम</string>
     <string name="song_background_preset_legible">पढ्न सजिलो</string>
     <string name="song_background_preset_cinema">सिनेमा</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">पृष्ठभूमिहरू</string>
     <string name="background_group_defaults">पूर्वनिर्धारित</string>
-    <string name="background_scope_default">पूर्वनिर्धारित</string>
     <string name="background_scope_default_lower_third">पूर्वनिर्धारित तल्लो पट्टी</string>
     <string name="background_scope_default_meta">बाइबल वा गीत पूर्वनिर्धारितमा हुँदा</string>
     <string name="background_scope_default_lower_third_meta">तल्लो पट्टी पूर्वनिर्धारितमा हुँदा</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">पूर्वनिर्धारित पछ्याउँदै</string>
     <string name="background_use_default">पूर्वनिर्धारित प्रयोग गर्नुहोस्</string>
     <string name="background_set_explicitly">यो सतहका लागि छुट्टै सेट</string>
-    <string name="background_type_caption">किसिम</string>
     <string name="background_color_caption">रङ</string>
     <string name="background_image_file">तस्बिर फाइल</string>
     <string name="background_video_file">भिडियो फाइल</string>
-    <string name="background_opacity_caption">गाढापन</string>
     <string name="background_above_band_caption">पट्टीमाथि</string>
     <string name="background_above_band_fill">भर्ने रङ</string>
     <string name="background_above_band_opacity">भर्ने गाढापन</string>
     <string name="quick_background_reset">सामान्यमा फर्कनुहोस्</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · सेटिङमा व्यवस्थापन</string>
     <string name="quick_backgrounds">द्रुत पृष्ठभूमि</string>
     <string name="quick_backgrounds_help">पूर्वावलोकन प्यानलले एक क्लिक टाढा राख्ने पृष्ठभूमिहरू। के देखाउने भन्ने छान्न टाइलमा क्लिक गर्नुहोस्, कुन कुञ्जीले पुग्ने भन्ने बदल्न तान्नुहोस्। सेवाको बेला एउटा छानेमा सामान्यमा नफर्कुन्जेल हरेक पर्दा बदलिन्छ — यहाँ केही बदलिँदैन।</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">आउटपुट प्रोफाइल बदल्नुहोस्</string>
     <string name="output_profile_new_name_default">नयाँ प्रोफाइल</string>
     <string name="output_profile_empty_state">शैली मिलाउन सुरु गर्न प्रोफाइल बनाउनुहोस्</string>
-    <string name="customize_bible">बाइबल</string>
-    <string name="customize_songs">गीत</string>
     <string name="customize_group_verse_text">पदको पाठ</string>
     <string name="customize_group_reference">सन्दर्भ</string>
     <string name="customize_background_type">किसिम</string>
-    <string name="customize_type_color">रङ</string>
     <string name="customize_type_image">तस्बिर</string>
-    <string name="customize_type_video">भिडियो</string>
-    <string name="customize_type_default">पूर्वनिर्धारित</string>
-    <string name="customize_type_gradient">ग्रेडियन्ट</string>
     <string name="customize_show_abbreviation">संक्षिप्त रूप</string>
     <string name="customize_background_opacity">गाढापन</string>
     <string name="slate_theme">स्लेट थिम</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">टेम्प्लेटले लेआउट र शीर्षकको स्थान तय गर्छ। तल्लो तिहाइको शैलीले फन्ट, आकार, रङ, पङ्क्तिबद्धता, अक्षर अन्तर, केस र छाया तय गर्छ; पाठ पृष्ठभूमि, रेखाङ्कन, काटिएको रेखा, शब्द अन्तर, अर्कोको पूर्वावलोकन र कर्डहरू लागू हुँदैनन्।</string>
     <string name="bible_lottie_unsupported_note">टेम्प्लेटले लेआउट, सन्दर्भको स्थान र दुई भाषाले ब्यान्ड कसरी बाँड्ने भन्ने तय गर्छ। तल्लो तिहाइको शैलीले फन्ट, आकार, रङ, पङ्क्तिबद्धता, अक्षर अन्तर, केस र छाया तय गर्छ; पाठ पृष्ठभूमि, रेखाङ्कन, काटिएको रेखा र शब्द अन्तर लागू हुँदैनन्।</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">रूपरेखा</string>
     <string name="tooltip_outline_options">रूपरेखा विकल्पहरू</string>
     <string name="text_outline">रूपरेखा</string>
     <string name="text_outline_width">चौडाइ</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">आउटपुट थप्नुहोस्</string>
     <string name="ndi_output_numbered">NDI आउटपुट %1$d</string>
     <string name="preview_output">आउटपुट पूर्वावलोकन</string>
-    <string name="output_resolution">रिजोलुसन</string>
     <string name="output_resolution_custom">कस्टम…</string>
     <string name="output_resolution_custom_title">कस्टम रिजोलुसन</string>
     <string name="output_resolution_width">चौडाइ</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">यो कम्प्युटर बन्द हुँदा पनि हप्ताभरि मोबाइल एपबाट सेवाहरू योजना गर्नुहोस्। यो कम्प्युटर नै मुख्य स्रोत रहन्छ।</string>
     <string name="calendar_sync_enable">पात्रोलाई फोनहरूसँग सिंक गर्नुहोस्</string>
     <string name="calendar_sync_relay_url">रिले</string>
-    <string name="calendar_sync_status_off">बन्द</string>
     <string name="calendar_sync_status_unpaired">अझै दर्ता भएको छैन — सिंक पहिलो पटक खुल्दा यो कम्प्युटर रिलेमा दर्ता हुन्छ</string>
     <string name="calendar_sync_status_syncing">सिंक हुँदैछ…</string>
     <string name="calendar_sync_status_synced">सिंक भयो %1$s</string>

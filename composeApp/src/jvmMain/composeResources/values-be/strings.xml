@@ -3,7 +3,6 @@
     <string name="mode">Рэжым</string>
     <string name="scope">Вобласць</string>
     <string name="title">Назва</string>
-    <string name="number">Нумар</string>
     <string name="go_live">У эфір</string>
     <string name="add_to_schedule">Дадаць у праграму</string>
     <string name="no_lyrics_available">Тэкст песні недаступны</string>
@@ -51,18 +50,12 @@
     <string name="hold_live">Утрымаць эфір</string>
     <string name="announcements">Аб'явы</string>
     <string name="menu_file">Файл</string>
-    <string name="menu_new_schedule">Новая праграма</string>
-    <string name="menu_open_schedule">Адкрыць праграму</string>
-    <string name="menu_save_schedule">Захаваць праграму</string>
     <string name="menu_save_schedule_as">Захаваць як...</string>
     <string name="file_chooser_save_schedule">Захаваць праграму як</string>
-    <string name="file_chooser_open_schedule">Адкрыць праграму</string>
     <string name="file_filter_schedule">Праграма Church Presenter (*.cps)</string>
     <string name="menu_close_schedule">Закрыць праграму</string>
     <string name="menu_exit">Выхад</string>
 
-    <string name="menu_schedule">Праграма</string>
-    <string name="menu_add_to_schedule">Дадаць у праграму</string>
     <string name="menu_remove_from_schedule">Выдаліць з праграмы</string>
     <string name="menu_clear_schedule">Ачысціць праграму</string>
 
@@ -258,8 +251,6 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Па змаўчанні</string>
-    <string name="background_color_option">Колер</string>
-    <string name="background_image_option">Выява</string>
 
     <!-- Position Options -->
 
@@ -343,7 +334,6 @@
     <string name="label_text">Тэкст меткі</string>
     <string name="enter_label_text">Увядзіце тэкст меткі...</string>
     <string name="text_color">Колер тэксту</string>
-    <string name="background_color_label">Колер фону</string>
 
     <!-- Pictures Tab Strings -->
     <string name="no_folder_selected">Папка не выбрана</string>
@@ -368,7 +358,6 @@
     <string name="animation_slide_left">Зрух улева</string>
     <string name="animation_slide_right">Зрух управа</string>
     <string name="animation_none">Без анімацыі</string>
-    <string name="milliseconds_suffix">мс</string>
     <string name="pictures_arrow_key_hint">%1$s наступны/папярэдні малюнак  ·  %2$s навігацыя па радках</string>
     <string name="presentation_arrow_key_hint">%1$s — папярэдні/наступны крок і слайд  ·  %2$s — прайграць/паўза  ·  %3$s — чорны экран</string>
     <string name="pictures_reorder_hint">Shift+перацягнуць для змены парадку</string>
@@ -412,7 +401,6 @@
     <!-- Background Settings Tab -->
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Медыя</string>
     <string name="media_local_file">Лакальны файл</string>
     <string name="media_network_url">Сеткавы URL</string>
     <string name="media_url_placeholder">Увядзіце URL (http://, rtsp://, ...)</string>
@@ -440,7 +428,6 @@
     <string name="announcement_animation_speed">Хуткасць</string>
     <string name="announcement_loop_count">Колькасць паўтораў</string>
     <string name="announcement_loop_tooltip">0 = бясконцы паўтор</string>
-    <string name="announcement_background_color_label">Колер фону</string>
     <string name="announcement_text_hint">Увядзіце тэкст абвесткі…</string>
     <string name="top_center">Зверху па цэнтры</string>
     <string name="bottom_center">Знізу па цэнтры</string>
@@ -449,18 +436,14 @@
     <string name="content_bible_background">Фон Бібліі</string>
     <string name="content_songs_background">Фон песень</string>
     <string name="content_pictures">Фота/Прэзентацыя</string>
-    <string name="content_media">Медыя</string>
-    <string name="content_streaming">Ніжняя траціна</string>
     <string name="content_announcements">Абвесткі</string>
     <string name="detected_screens">Выяўлена экранаў: %1$d</string>
     <string name="presenter_windows_count">Вокны прэзентацыі: %1$d</string>
     <string name="screen_col_label">Экран %1$d</string>
     <string name="screen_assignment">Прызначэнне экранаў</string>
     <string name="display_mode">Рэжым адлюстравання</string>
-    <string name="display_fullscreen">Поўны экран</string>
     <string name="display_lower_third">Ніжняя траціна</string>
     <string name="full_screen">Поўны экран</string>
-    <string name="lower_third_size">Ніжняя траціна</string>
     <string name="identify_screen">Вызначыць</string>
     <string name="no_lottie_files">JSON-файлы не знойдзены</string>
     <string name="generate_lower_third">Стварыць</string>
@@ -663,7 +646,6 @@
     <string name="schedule_density_compact">Кампактны</string>
     <string name="schedule_density_normal">Звычайны</string>
     <string name="schedule_density_detailed">Падрабязны</string>
-    <string name="schedule_kind_lower_third">Ніжняя траціна</string>
     <string name="tooltip_schedule_options">Налады праграмы</string>
     <string name="schedule_show_buttons_under_title">Паказваць кнопкі пад назвай</string>
     <string name="schedule_option_item_count">Колькасць элементаў</string>
@@ -705,7 +687,6 @@
     <string name="timer_start">Пачаць</string>
     <string name="timer_title">Таймер</string>
     <string name="tooltip_clear_display">Ачысціць дысплей</string>
-    <string name="remote_action_clear_display">Ачысціць дысплей</string>
     <string name="schedule_add_files_title">Дадаць файлы ў праграму</string>
     <string name="tooltip_toggle_displays">Укл/Выкл экраны прэзентацыі</string>
     <string name="tooltip_collapse_schedule">Згарнуць праграму</string>
@@ -713,7 +694,6 @@
     <string name="tooltip_theme_dark">Цёмная тэма</string>
     <string name="tooltip_theme_system">Сістэмная тэма</string>
     <string name="transparent_default">Празрысты (Па змаўчанні)</string>
-    <string name="web_add_to_schedule">Дадаць у праграму</string>
     <string name="web_bookmark_add">Закладка</string>
     <string name="web_bookmark_remove">Выдаліць</string>
     <string name="web_clear_cache">Ачысціць кэш</string>
@@ -790,7 +770,6 @@
     <string name="blocked_clients_description">Запыты ад гэтых кліентаў аўтаматычна адхіляюцца без паказу дыялогу.</string>
     <string name="client_label_placeholder">Увядзіце зразумелую назву…</string>
     <string name="client_label_edit_tooltip">Задаць зразумелую назву</string>
-    <string name="client_label_save">Захаваць</string>
     <string name="client_label_cancel">Адмена</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -886,7 +865,6 @@
     <string name="system_storage_subtitle">Дзе Church Presenter шукае ваш кантэнт</string>
     <string name="system_storage_linked_count">%1$d падлучана</string>
     <string name="system_storage_needs_attention_count">%1$d патрабуе ўвагі</string>
-    <string name="system_storage_status_not_set">Не зададзена</string>
     <string name="system_storage_status_not_found">Папка не знойдзена</string>
     <string name="system_storage_status_read_only">Толькі чытанне</string>
     <string name="system_storage_status_linked">Падлучана</string>
@@ -973,9 +951,7 @@
     <string name="canvas_text_curve">Крывая</string>
     <string name="canvas_letter_spacing">Міжлітарны інтэрвал</string>
     <string name="canvas_source_qrcode">QR-код</string>
-    <string name="canvas_source_camera">Камера</string>
     <string name="canvas_source_screen_capture">Захоп экрана</string>
-    <string name="canvas_text_color">Колер тэксту</string>
     <string name="canvas_text_bg_color">Колер фону</string>
     <string name="canvas_clock_mode">Рэжым</string>
     <string name="canvas_clock_format">Фармат</string>
@@ -998,7 +974,6 @@
     <string name="canvas_camera_format">Фармат відэа</string>
     <string name="canvas_camera_format_auto">Аўта (па змаўчанні)</string>
     <string name="canvas_camera_connection">Падключэнне відэа</string>
-    <string name="canvas_camera_mode">Рэжым</string>
     <string name="canvas_camera_mode_auto">Аўта</string>
     <string name="canvas_capture_x">X захопу</string>
     <string name="canvas_capture_y">Y захопу</string>
@@ -1009,12 +984,9 @@
     <string name="canvas_capture_mode_window">Акно</string>
     <string name="canvas_capture_refresh_windows">Абнавіць спіс акон</string>
     <string name="canvas_capture_interval">Інтэрвал захопу</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Камера: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Камера</string>
     <string name="canvas_placeholder_screen_capture">Захоп экрана</string>
     <string name="canvas_rename_scene">Перайменаваць</string>
-    <string name="canvas_remove_scene">Выдаліць</string>
     <string name="canvas_add_source">Дадаць крыніцу</string>
     <string name="canvas_delete_source">Выдаліць крыніцу</string>
     <string name="canvas_source_move_forward">На пярэдні план</string>
@@ -1040,7 +1012,6 @@
     <string name="canvas_render_height">Вышыня</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Выбраць малюнак</string>
     <string name="canvas_select_video_title">Выбраць відэа</string>
     <string name="canvas_image_files">Файлы малюнкаў</string>
@@ -1052,7 +1023,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Гадзіннік</string>
     <string name="canvas_clock_mode_countdown">Зваротны адлік</string>
     <string name="canvas_clock_mode_count_up">Секундамер</string>
     <string name="canvas_decklink_io_warning">Гэта прылада выкарыстоўваецца для вываду. Уваход можа быць недаступны на прыладах без адначасовага ўводу-вываду.</string>
@@ -1093,7 +1063,6 @@
     <string name="update_interval_never">Ніколі</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Манітор сцэны</string>
     <string name="display_stage_monitor">Манітор сцэны</string>
     <string name="general">Агульныя</string>
     <string name="stage_monitor_quadrant_next">Ніз-злева: наступны слайд</string>
@@ -1177,7 +1146,6 @@
     <string name="qa_confirm_go_live_prompt">Выйсці ў эфір?</string>
     <string name="qa_confirm_go_live">Пацвердзіць выхад у эфір</string>
     <string name="qa_edit_question_hint">Рэдагаваць тэкст пытання…</string>
-    <string name="qa_delete_question">Выдаліць</string>
     <string name="qa_confirm_delete_prompt">Выдаліць?</string>
     <string name="qa_submitter_device">Прылада: %1$s</string>
     <string name="qa_public_access">Публічны доступ</string>
@@ -1213,13 +1181,10 @@
     <string name="stt_live_preview">Папярэдні прагляд</string>
     <string name="stt_not_connected">Няма злучэння. Увядзіце URL-адрас сервера STT і націсніце «Падключыцца».</string>
     <string name="stt_waiting_for_transcription">Чаканне транскрыпцыі…</string>
-    <string name="stt_transcription_label">Транскрыпцыя</string>
     <string name="stt_translation_label">Пераклад</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Справаздача аб выкарыстанні CCLI</string>
-    <string name="ccli_tab_songs">Песні</string>
-    <string name="ccli_tab_bible">Біблія</string>
     <string name="ccli_tab_activity">Актыўнасць</string>
     <string name="ccli_songs_summary">%1$d унікальных песень · %2$d усяго прайграванняў</string>
     <string name="ccli_bible_summary">%1$d унікальных вершаў · %2$d усяго прайграванняў</string>
@@ -1230,7 +1195,6 @@
     <string name="ccli_activity_title">Прэзентацыі з часам</string>
     <string name="ccli_from">З:</string>
     <string name="ccli_to">Па:</string>
-    <string name="ccli_legend_songs">Песні</string>
     <string name="ccli_legend_bible">Вершы Бібліі</string>
     <string name="ccli_stat_songs_presented">Паказана песень</string>
     <string name="ccli_stat_bible_verses">Вершаў Бібліі</string>
@@ -1244,7 +1208,6 @@
     <string name="ccli_col_first">Першы</string>
     <string name="ccli_col_last">Апошні</string>
     <string name="ccli_col_verse">Верш</string>
-    <string name="ccli_col_bible">Біблія</string>
     <string name="ccli_export_csv">Экспарт CCLI CSV</string>
     <string name="ccli_export_xls">Экспарт XLS</string>
     <string name="ccli_exported_success">Справаздача паспяхова экспартавана.</string>
@@ -1301,7 +1264,6 @@
     <string name="obs_mode_bible">Біблія</string>
     <string name="obs_mode_songs">Песні</string>
     <string name="obs_mode_pictures">Выявы</string>
-    <string name="obs_mode_presentation">Прэзентацыя</string>
     <string name="obs_mode_media">Медыя</string>
     <string name="obs_mode_lower_third">Ніжняя трэць</string>
     <string name="obs_mode_announcements">Аб'явы</string>
@@ -1352,13 +1314,11 @@
     <string name="open_converter">Канвертар песень і Бібліі</string>
     <string name="open_song_library">Менеджер зборніка песень</string>
     <string name="projection_content_web">Веб</string>
-    <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Фон ніжняй трэці</string>
     <string name="qa_add_question_hint">Дадаць пытанне…</string>
     <string name="remote_activity_added_to_schedule">Дададзена ў праграму</string>
     <string name="remote_activity_projected">Выведзена на экран</string>
     <string name="remote_activity_presentation_connect">Падключана да дыстанцыйнага кіравання прэзентацыяй</string>
-    <string name="remote_activity_presentation_connect_detail">Цяпер падключана</string>
     <string name="remote_activity_qa_admin_connect">Падключана да панэлі адміністратара Q&amp;A</string>
     <string name="remote_activity_qa_admin_connect_detail">Цяпер падключана</string>
     <string name="remote_activity_presented">Паказваецца</string>
@@ -1557,7 +1517,6 @@
     <string name="companion_satellite_no_host">Укажыце хост Companion у Налады → Companion Satellite, каб злучыцца.</string>
     <string name="companion_satellite_status_connecting">Злучэнне…</string>
     <string name="companion_satellite_status_disconnected">Адключана</string>
-    <string name="companion_satellite_status_error">Памылка: %1$s</string>
     <string name="companion_satellite_connection_name">Назва</string>
     <string name="companion_satellite_product_name">Назва прадукту</string>
     <string name="companion_satellite_reconnect_delay">Затрымка паўторнага злучэння (мс)</string>
@@ -1595,7 +1554,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Спасылка або тэкст — напр. Ян 3:16, Мат 1 або слова</string>
     <string name="bible_search_mode_auto">Аўта</string>
-    <string name="bible_search_mode_reference">Спасылка</string>
     <string name="bible_search_mode_text">Тэкст</string>
     <string name="bible_search_mode_tooltip">Націсніце для перамыкання — Аўта: пераход да спасылак, пошук па астатнім. Спасылка: толькі навігацыя. Тэкст: заўсёды шукаць у тэксце вершаў.</string>
     <string name="swap_bibles_hint">Памяняць месцамі асноўную і другасную Біблію</string>
@@ -1646,7 +1604,6 @@
     <string name="bible_engine_detect">Выяўляць Святое Пісьмо</string>
     <string name="bible_engine_run_local">Запусціць рухавік лакальна</string>
     <string name="bible_engine_host">Хост рухавіка</string>
-    <string name="bible_engine_port">Порт</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Кантакт</string>
     <string name="contact_us_title">Звязацца з намі</string>
@@ -1682,7 +1639,6 @@
     <string name="instance_link_description">Сачыце за іншай інстанцыяй ChurchPresenter у вашай сетцы — люструйце яе жывы кантэнт тут і, пры жаданні, дадавайце элементы ў яе праграму.</string>
     <string name="instance_link_host">Хост</string>
     <string name="instance_link_host_hint">напр. 192.168.1.10</string>
-    <string name="instance_link_port">Порт</string>
     <string name="instance_link_autoconnect">Падключацца аўтаматычна пры запуску</string>
     <string name="instance_link_allow_push_to_schedule">Дазволіць дадаванне элементаў у праграму асноўнай інстанцыі</string>
     <string name="instance_link_mirror_backgrounds">Таксама люстраваць фоны асноўнай інстанцыі</string>
@@ -1918,7 +1874,6 @@
     <string name="font_category_serif">З засечкамі</string>
     <string name="font_category_mono">Монашырынны</string>
     <string name="font_category_display">Акцыдэнтны</string>
-    <string name="font_preview">Папярэдні прагляд</string>
     <string name="font_preview_sample">Узор тэксту выбраным шрыфтом</string>
     <string name="font_warning_no_cyrillic">%1$s не мае кірылічных гліфаў — вершы кірыліцай на экране будуць паказаны іншым шрыфтом.</string>
     <string name="font_warning_no_hebrew">%1$s не мае яўрэйскіх гліфаў — яўрэйскі тэкст на экране будзе паказаны іншым шрыфтом.</string>
@@ -1928,7 +1883,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Закрэслены</string>
     <string name="bible_custom_name">Назва</string>
-    <string name="bible_custom_abbreviation">Скарачэнне</string>
     <string name="bible_translations">Пераклады</string>
     <string name="bible_miscellaneous">Рознае</string>
     <string name="bible_font">Шрыфт</string>
@@ -1943,10 +1897,7 @@
     <string name="bible_preview_sample_book">Яна</string>
     <string name="bible_preview_no_translations">Дадайце пераклад, каб убачыць яго тут</string>
     <string name="song_element_number">Нумар</string>
-    <string name="song_element_title">Назва</string>
     <string name="song_element_lyrics">Тэкст</string>
-    <string name="song_element_author">Аўтар</string>
-    <string name="song_element_composer">Кампазітар</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Тэмп</string>
     <string name="song_target_title_slide">Слайд назвы</string>
@@ -1959,7 +1910,6 @@
     <string name="song_chunk">Фрагмент</string>
     <string name="song_language_scope">Мова</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Фон</string>
     <string name="song_background_full_screen">На ўвесь экран</string>
     <string name="song_background_lower_third">Ніжняя трэць</string>
     <string name="song_background_inherit">Успадкаваць</string>
@@ -1974,7 +1924,6 @@
     <string name="song_background_your_color">Ваш колер</string>
     <string name="song_background_browse">Агляд…</string>
     <string name="song_background_look">Выгляд</string>
-    <string name="song_background_preset_none">Няма</string>
     <string name="song_background_preset_soft">Мяккі</string>
     <string name="song_background_preset_legible">Чытэльны</string>
     <string name="song_background_preset_cinema">Кіно</string>
@@ -1995,7 +1944,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Фоны</string>
     <string name="background_group_defaults">Па змаўчанні</string>
-    <string name="background_scope_default">Па змаўчанні</string>
     <string name="background_scope_default_lower_third">Ніжняя траціна па змаўчанні</string>
     <string name="background_scope_default_meta">Калі для Бібліі ці Песень выбрана «Па змаўчанні»</string>
     <string name="background_scope_default_lower_third_meta">Калі для ніжняй траціны выбрана «Па змаўчанні»</string>
@@ -2004,16 +1952,13 @@
     <string name="background_following_default">Успадкоўвае па змаўчанні</string>
     <string name="background_use_default">Ужыць па змаўчанні</string>
     <string name="background_set_explicitly">Зададзена асобна для гэтай паверхні</string>
-    <string name="background_type_caption">Тып</string>
     <string name="background_color_caption">Колер</string>
     <string name="background_image_file">Файл выявы</string>
     <string name="background_video_file">Файл відэа</string>
-    <string name="background_opacity_caption">Празрыстасць</string>
     <string name="background_above_band_caption">Над паласой</string>
     <string name="background_above_band_fill">Колер заліўкі</string>
     <string name="background_above_band_opacity">Празрыстасць заліўкі</string>
     <string name="quick_background_reset">Вярнуць як было</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · настройка ў параметрах</string>
     <string name="quick_backgrounds">Хуткія фоны</string>
     <string name="quick_backgrounds_help">Фоны, якія панэль перадпрагляду трымае ў адным кліку. Націсніце плітку, каб выбраць яе змест, перацягніце — каб змяніць клавішу. Выбраны падчас набажэнства фон перакрывае ўсе экраны, пакуль вы не вернеце як было, і нічога тут не мяняе.</string>
@@ -2039,16 +1984,10 @@
     <string name="output_profile_swap_menu_tooltip">Змяніць профіль вываду</string>
     <string name="output_profile_new_name_default">Новы профіль</string>
     <string name="output_profile_empty_state">Стварыце профіль, каб пачаць яго афармленне</string>
-    <string name="customize_bible">Біблія</string>
-    <string name="customize_songs">Песні</string>
     <string name="customize_group_verse_text">Тэкст верша</string>
     <string name="customize_group_reference">Спасылка</string>
     <string name="customize_background_type">Тып</string>
-    <string name="customize_type_color">Колер</string>
     <string name="customize_type_image">Выява</string>
-    <string name="customize_type_video">Відэа</string>
-    <string name="customize_type_default">Па змаўчанні</string>
-    <string name="customize_type_gradient">Градыент</string>
     <string name="customize_show_abbreviation">Скарачэнне</string>
     <string name="customize_background_opacity">Празрыстасць</string>
     <string name="slate_theme">Тэма «Сланец»</string>
@@ -2094,7 +2033,6 @@
     <string name="song_lottie_unsupported_note">Шаблон вызначае макет і месца назвы. Стыль ніжняй трэці задае шрыфт, памер, колер, выраўноўванне, міжлітарны інтэрвал, рэгістр і цень; падкладка, падкрэсліванне, закрэсліванне, міжслоўны інтэрвал, папярэдні прагляд наступнага і акорды не ўжываюцца.</string>
     <string name="bible_lottie_unsupported_note">Шаблон вызначае макет, месца спасылкі і тое, як дзве мовы дзеляць паласу. Стыль ніжняй трэці задае шрыфт, памер, колер, выраўноўванне, міжлітарны інтэрвал, рэгістр і цень; падкладка, падкрэсліванне, закрэсліванне і міжслоўны інтэрвал не ўжываюцца.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Контур</string>
     <string name="tooltip_outline_options">Параметры контуру</string>
     <string name="text_outline">Контур</string>
     <string name="text_outline_width">Таўшчыня</string>
@@ -2162,7 +2100,6 @@
     <string name="add_ndi_output">Дадаць выхад</string>
     <string name="ndi_output_numbered">Выхад NDI %1$d</string>
     <string name="preview_output">Прагляд выхаду</string>
-    <string name="output_resolution">Разрозненне</string>
     <string name="output_resolution_custom">Сваё…</string>
     <string name="output_resolution_custom_title">Сваё разрозненне</string>
     <string name="output_resolution_width">Шырыня</string>
@@ -2266,7 +2203,6 @@
     <string name="calendar_sync_description">Плануйце служэнні ў мабільным дадатку ўвесь тыдзень, нават калі гэты камп’ютар выключаны. Гэты камп’ютар застаецца асноўнай крыніцай.</string>
     <string name="calendar_sync_enable">Сінхранізаваць каляндар з тэлефонамі</string>
     <string name="calendar_sync_relay_url">Рэтранслятар</string>
-    <string name="calendar_sync_status_off">Выкл.</string>
     <string name="calendar_sync_status_unpaired">Яшчэ не зарэгістраваны — гэты камп’ютар рэгіструецца ў рэтранслятары пры першым уключэнні сінхранізацыі</string>
     <string name="calendar_sync_status_syncing">Сінхранізацыя…</string>
     <string name="calendar_sync_status_synced">Сінхранізавана %1$s</string>

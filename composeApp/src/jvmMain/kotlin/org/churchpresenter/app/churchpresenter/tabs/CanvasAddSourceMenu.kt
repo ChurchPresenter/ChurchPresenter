@@ -39,7 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
 import churchpresenter.composeapp.generated.resources.canvas_source_timer
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
-import churchpresenter.composeapp.generated.resources.canvas_source_camera
+import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_source_ndi
 import churchpresenter.composeapp.generated.resources.canvas_source_omt
@@ -187,7 +187,7 @@ private fun CanvasTabScope.AddSourceItemsFirst(sceneViewModel: SceneViewModel, o
 @Composable
 private fun CanvasTabScope.AddSourceItemsSecond(sceneViewModel: SceneViewModel, onClose: () -> Unit) {
     DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_camera)) },
+        text = { Text(stringResource(Res.string.background_camera_option)) },
         onClick = {
             onClose()
             sceneViewModel.addSource(

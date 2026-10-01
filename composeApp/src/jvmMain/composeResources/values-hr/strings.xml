@@ -3,7 +3,6 @@
     <string name="mode">Način</string>
     <string name="scope">Opseg</string>
     <string name="title">Naslov</string>
-    <string name="number">Broj</string>
     <string name="go_live">Prikaži uživo</string>
     <string name="add_to_schedule">Dodaj u raspored</string>
     <string name="copy_verse">Kopiraj stih</string>
@@ -12,7 +11,6 @@
     <string name="search">Traži</string>
     <string name="bible_smart_search_hint">Referenca ili tekst — npr. Iv 3:16, mat 1 ili neka riječ</string>
     <string name="bible_search_mode_auto">Automatski</string>
-    <string name="bible_search_mode_reference">Referenca</string>
     <string name="bible_search_mode_text">Tekst</string>
     <string name="bible_search_mode_tooltip">Kliknite za prebacivanje — Automatski: skok na reference, pretraživanje svega ostalog. Referenca: samo navigacija. Tekst: uvijek traži u tekstu stihova.</string>
     <string name="bible_verse_selection_hint">Ctrl+klik za pojedinačni odabir, Shift+klik za raspon</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Zatvori ploču</string>
     <string name="bible_cross_references_dismiss_hint">Esc za zatvaranje</string>
     <string name="menu_file">Datoteka</string>
-    <string name="menu_new_schedule">Novi raspored</string>
-    <string name="menu_open_schedule">Otvori raspored</string>
-    <string name="menu_save_schedule">Spremi raspored</string>
     <string name="menu_save_schedule_as">Spremi raspored kao...</string>
     <string name="menu_close_schedule">Zatvori raspored</string>
     <string name="menu_exit">Izlaz</string>
     <string name="file_chooser_save_schedule">Spremi raspored kao</string>
-    <string name="file_chooser_open_schedule">Otvori raspored</string>
     <string name="file_filter_schedule">Church Presenter raspored (*.cps)</string>
-    <string name="menu_schedule">Raspored</string>
-    <string name="menu_add_to_schedule">Dodaj u raspored</string>
     <string name="menu_remove_from_schedule">Ukloni iz rasporeda</string>
     <string name="menu_clear_schedule">Očisti raspored</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Prati drugu ChurchPresenter instancu na svojoj mreži — zrcali njezin sadržaj uživo ovdje i po želji dodavaj stavke u njezin raspored.</string>
     <string name="instance_link_host">Poslužitelj</string>
     <string name="instance_link_host_hint">npr. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Automatski se poveži pri pokretanju</string>
     <string name="instance_link_reconnect_delay">Najmanja pauza prije ponovnog povezivanja</string>
     <string name="instance_link_reconnect_delay_hint">Najkraće čekanje prije novog pokušaja nakon prekida veze. Ponovljeni neuspjesi sami dodatno produžuju pauzu.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Zadano</string>
-    <string name="background_color_option">Boja</string>
-    <string name="background_image_option">Slika</string>
     <string name="background_video_option">Video u petlji</string>
     <string name="background_transparent_option">Prozirno</string>
     <string name="background_follow_default_option">Prema zadanom</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Pozadina</string>
     <string name="projection_content_lt_background">Pozadina donje trake</string>
     <string name="browser_source_resolution">Razlučivost</string>
     <string name="browser_source_fps">Najviše FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Smanji</string>
     <string name="tooltip_add_to_schedule">Dodaj u raspored</string>
     <string name="tooltip_clear_display">Očisti prikaz</string>
-    <string name="remote_action_clear_display">Očisti prikaz</string>
     <string name="schedule_add_files_title">Dodaj datoteke u raspored</string>
     <string name="tooltip_toggle_displays">Uključi/isključi prikazne zaslone</string>
     <string name="tooltip_settings">Postavke</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Zbijeno</string>
     <string name="schedule_density_normal">Normalno</string>
     <string name="schedule_density_detailed">Detaljno</string>
-    <string name="schedule_kind_lower_third">Donja traka</string>
     <string name="tooltip_schedule_options">Mogućnosti rasporeda</string>
     <string name="schedule_show_buttons_under_title">Prikaži gumbe pod naslovom</string>
     <string name="schedule_option_item_count">Broj stavki</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Uredi oznaku</string>
     <string name="label_text">Tekst oznake</string>
     <string name="text_color">Boja teksta</string>
-    <string name="background_color_label">Boja pozadine</string>
     <string name="enter_label_text">Unesite tekst oznake...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Pomak lijevo</string>
     <string name="animation_slide_right">Pomak desno</string>
     <string name="animation_none">Bez animacije</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s sljedeća/prethodna slika  ·  %2$s kretanje po redovima</string>
     <string name="presentation_arrow_key_hint">%1$s — prethodni/sljedeći korak i slajd  ·  %2$s — pokreni/pauziraj  ·  %3$s — zacrni zaslon</string>
     <string name="pictures_reorder_hint">Shift+povlačenje sličica za promjenu redoslijeda</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Pozadina Biblije</string>
     <string name="content_songs_background">Pozadina pjesama</string>
     <string name="content_pictures">Slike/prezentacije</string>
-    <string name="content_media">Mediji</string>
-    <string name="content_streaming">Donja traka</string>
     <string name="content_announcements">Objave</string>
     <string name="display_mode">Način prikaza</string>
-    <string name="display_fullscreen">Cijeli zaslon</string>
     <string name="display_lower_third">Donja traka</string>
     <string name="full_screen">Cijeli zaslon</string>
-    <string name="lower_third_size">Donja traka</string>
     <string name="identify_screen">Prepoznaj</string>
     <string name="projection_target_display">Zaslon</string>
     <string name="projection_auto_display">Auto</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Uvoz postavki nije uspio. Datoteka je možda neispravna.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Mediji</string>
     <string name="media_local_file">Lokalna datoteka</string>
     <string name="media_network_url">Mrežni URL</string>
     <string name="media_url_placeholder">Unesite URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Sredina lijevo</string>
     <string name="center_right">Sredina desno</string>
     <string name="bottom_center">Dolje u sredini</string>
-    <string name="announcement_background_color_label">Boja pozadine</string>
     <string name="transparent_default">Prozirno (zadano)</string>
     <string name="announcement_animation">Animacija</string>
     <string name="anim_slide_from_left">Ulazi s lijeve strane</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Dodaj u raspored</string>
     <string name="web_go_live">Prikaži uživo</string>
     <string name="web_bookmark_add">Dodaj oznaku</string>
     <string name="web_bookmark_remove">Ukloni oznaku</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Ispuna</string>
     <string name="canvas_shape_stroke_width">Debljina obruba</string>
     <string name="canvas_rename_scene">Preimenuj</string>
-    <string name="canvas_remove_scene">Ukloni</string>
     <string name="canvas_add_source">Dodaj izvor</string>
     <string name="canvas_delete_source">Izbriši izvor</string>
     <string name="canvas_source_move_forward">Pomakni naprijed</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Visina</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Prilagođeni CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Odaberi sliku</string>
     <string name="canvas_select_video_title">Odaberi videozapis</string>
     <string name="canvas_image_files">Slikovne datoteke</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Sat</string>
     <string name="canvas_clock_mode_countdown">Odbrojavanje</string>
     <string name="canvas_clock_mode_count_up">Štoperica</string>
     <string name="canvas_decklink_io_warning">Ovaj se uređaj trenutno koristi za izlaz. Ulaz možda nije dostupan na uređajima koji ne podržavaju istovremeni ulaz i izlaz.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Krivulja</string>
     <string name="canvas_letter_spacing">Razmak slova</string>
     <string name="canvas_source_qrcode">QR kod</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Snimka zaslona</string>
     <string name="canvas_source_bible">Biblija</string>
     <string name="canvas_bible_version">Biblijski prijevod</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Boja reference</string>
     <string name="canvas_verse_style">Stil stiha</string>
     <string name="canvas_reference_style">Stil reference</string>
-    <string name="canvas_text_color">Boja teksta</string>
     <string name="canvas_text_bg_color">Boja pozadine</string>
     <string name="canvas_clock_mode">Način</string>
     <string name="canvas_clock_format">Format</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Videoformat</string>
     <string name="canvas_camera_format_auto">Automatski (zadano)</string>
     <string name="canvas_camera_connection">Videopriključak</string>
-    <string name="canvas_camera_mode">Način</string>
     <string name="canvas_camera_mode_auto">Automatski</string>
     <string name="canvas_capture_x">X snimanja</string>
     <string name="canvas_capture_y">Y snimanja</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Prozor</string>
     <string name="canvas_capture_refresh_windows">Osvježi popis prozora</string>
     <string name="canvas_capture_interval">Interval snimanja</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Snimka zaslona</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Uklonjeno iz rasporeda</string>
     <string name="remote_activity_projected">Prikazano (uživo)</string>
     <string name="remote_activity_presentation_connect">Povezano s daljinskim upravljanjem prezentacijom</string>
-    <string name="remote_activity_presentation_connect_detail">Sada povezano</string>
     <string name="remote_activity_qa_admin_connect">Povezano s moderiranjem pitanja</string>
     <string name="remote_activity_qa_admin_connect_detail">Sada povezano</string>
     <string name="remote_activity_presented">Prikazuje se</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Glavna — povezano %1$d podređenih</string>
     <string name="client_label_placeholder">Unesite prepoznatljiv naziv…</string>
     <string name="client_label_edit_tooltip">Postavi prepoznatljiv naziv</string>
-    <string name="client_label_save">Spremi</string>
     <string name="client_label_cancel">Odustani</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Gdje Church Presenter traži vaš sadržaj</string>
     <string name="system_storage_linked_count">%1$d povezano</string>
     <string name="system_storage_needs_attention_count">%1$d zahtijeva pozornost</string>
-    <string name="system_storage_status_not_set">Nije postavljeno</string>
     <string name="system_storage_status_not_found">Mapa nije pronađena</string>
     <string name="system_storage_status_read_only">Samo za čitanje</string>
     <string name="system_storage_status_linked">Povezano</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Prikaži broj pjesme prije naslova</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Scenski monitor</string>
     <string name="general">Općenito</string>
     <string name="display_stage_monitor">Scenski monitor</string>
     <string name="stage_monitor_quadrant_next">Sljedeće</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Potvrdi puštanje uživo</string>
     <string name="qa_add_question_hint">Dodajte pitanje…</string>
     <string name="qa_edit_question_hint">Uredite tekst pitanja…</string>
-    <string name="qa_delete_question">Izbriši</string>
     <string name="qa_confirm_delete_prompt">Izbrisati?</string>
     <string name="qa_submitter_device">Uređaj: %1$s</string>
     <string name="qa_public_access">Javni pristup</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Pregled uživo</string>
     <string name="stt_not_connected">Nije spojeno. Unesite URL STT poslužitelja i kliknite Spoji.</string>
     <string name="stt_waiting_for_transcription">Čekanje transkripcije…</string>
-    <string name="stt_transcription_label">Transkripcija</string>
     <string name="stt_translation_label">Prijevod</string>
     <string name="stt_settings_dialog_title">Postavke STT prikaza</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI izvještaji</string>
-    <string name="ccli_tab_songs">Pjesme</string>
-    <string name="ccli_tab_bible">Biblija</string>
     <string name="ccli_tab_activity">Aktivnost</string>
     <string name="ccli_songs_summary">%1$d različitih pjesama · %2$d prikaza ukupno</string>
     <string name="ccli_bible_summary">%1$d različitih redaka · %2$d prikaza ukupno</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Prikazi kroz vrijeme</string>
     <string name="ccli_from">Od:</string>
     <string name="ccli_to">Do:</string>
-    <string name="ccli_legend_songs">Pjesme</string>
     <string name="ccli_legend_bible">Biblijski reci</string>
     <string name="ccli_stat_songs_presented">Prikazane pjesme</string>
     <string name="ccli_stat_bible_verses">Biblijski reci</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Prvi put</string>
     <string name="ccli_col_last">Zadnji put</string>
     <string name="ccli_col_verse">Redak</string>
-    <string name="ccli_col_bible">Biblija</string>
     <string name="ccli_export_csv">Izvezi CCLI CSV</string>
     <string name="ccli_export_xls">Izvezi XLS</string>
     <string name="ccli_exported_success">Izvještaj je uspješno izvezen.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Biblija</string>
     <string name="obs_mode_songs">Pjesme</string>
     <string name="obs_mode_pictures">Slike</string>
-    <string name="obs_mode_presentation">Prezentacija</string>
     <string name="obs_mode_media">Mediji</string>
     <string name="obs_mode_lower_third">Donja traka</string>
     <string name="obs_mode_announcements">Obavijesti</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Postavite Companion poslužitelj u Postavke → Companion Satellite da biste se spojili.</string>
     <string name="companion_satellite_status_connecting">Spajanje…</string>
     <string name="companion_satellite_status_disconnected">Odspojeno</string>
-    <string name="companion_satellite_status_error">Greška: %1$s</string>
     <string name="companion_satellite_connection_name">Naziv</string>
     <string name="companion_satellite_product_name">Naziv proizvoda</string>
     <string name="companion_satellite_reconnect_delay">Odgoda ponovnog spajanja (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Prepoznaj Pismo</string>
     <string name="bible_engine_run_local">Pokreni mehanizam lokalno</string>
     <string name="bible_engine_host">Poslužitelj mehanizma</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Pomozite razvojnom timu — prikaži gumbe za povratne informacije na kartici Biblija (pogrešan odlomak / prerano / propušteni odlomak)</string>
     <string name="dictionary_back">Natrag</string>
     <string name="dictionary_forward">Naprijed</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Serifni</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Dekorativni</string>
-    <string name="font_preview">Pretpregled</string>
     <string name="font_preview_sample">Ogledni tekst odabranim fontom</string>
     <string name="font_warning_no_cyrillic">%1$s nema ćirilične znakove – reci na ćirilici na zaslonu će se prikazati drugim fontom.</string>
     <string name="font_warning_no_hebrew">%1$s nema hebrejske znakove – hebrejski tekst na zaslonu će se prikazati drugim fontom.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Precrtano</string>
     <string name="bible_custom_name">Naziv</string>
-    <string name="bible_custom_abbreviation">Kratica</string>
     <string name="bible_translations">Prijevodi</string>
     <string name="bible_miscellaneous">Razno</string>
     <string name="bible_font">Font</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Ivan</string>
     <string name="bible_preview_no_translations">Dodajte prijevod da biste ga vidjeli ovdje</string>
     <string name="song_element_number">Broj</string>
-    <string name="song_element_title">Naslov</string>
     <string name="song_element_lyrics">Tekst pjesme</string>
-    <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Skladatelj</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Naslovni slajd</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Odsječak</string>
     <string name="song_language_scope">Jezik</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Pozadina</string>
     <string name="song_background_full_screen">Cijeli zaslon</string>
     <string name="song_background_lower_third">Donja trećina</string>
     <string name="song_background_inherit">Naslijedi</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Vaša boja</string>
     <string name="song_background_browse">Pregledaj…</string>
     <string name="song_background_look">Izgled</string>
-    <string name="song_background_preset_none">Ništa</string>
     <string name="song_background_preset_soft">Blago</string>
     <string name="song_background_preset_legible">Čitljivo</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Pozadine</string>
     <string name="background_group_defaults">Zadano</string>
-    <string name="background_scope_default">Zadano</string>
     <string name="background_scope_default_lower_third">Zadana donja traka</string>
     <string name="background_scope_default_meta">Kad su Biblija ili Pjesme na Zadano</string>
     <string name="background_scope_default_lower_third_meta">Kad je donja traka na Zadano</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Slijedi zadano</string>
     <string name="background_use_default">Koristi zadano</string>
     <string name="background_set_explicitly">Postavljeno zasebno za ovu površinu</string>
-    <string name="background_type_caption">Vrsta</string>
     <string name="background_color_caption">Boja</string>
     <string name="background_image_file">Datoteka slike</string>
     <string name="background_video_file">Datoteka videa</string>
-    <string name="background_opacity_caption">Prozirnost</string>
     <string name="background_above_band_caption">Iznad trake</string>
     <string name="background_above_band_fill">Boja ispune</string>
     <string name="background_above_band_opacity">Prozirnost ispune</string>
     <string name="quick_background_reset">Natrag na normalno</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · uređuje se u postavkama</string>
     <string name="quick_backgrounds">Brze pozadine</string>
     <string name="quick_backgrounds_help">Pozadine koje ploča pretpregleda drži na jedan klik. Kliknite pločicu da odaberete što prikazuje, povucite je da promijenite koja je tipka doseže. Odabir tijekom bogoslužja nadjačava svaki zaslon dok se ne vratite na normalno — ovdje ne mijenja ništa.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Zamijeni izlazni profil</string>
     <string name="output_profile_new_name_default">Novi profil</string>
     <string name="output_profile_empty_state">Stvorite profil da biste ga počeli oblikovati</string>
-    <string name="customize_bible">Biblija</string>
-    <string name="customize_songs">Pjesme</string>
     <string name="customize_group_verse_text">Tekst retka</string>
     <string name="customize_group_reference">Referenca</string>
     <string name="customize_background_type">Vrsta</string>
-    <string name="customize_type_color">Boja</string>
     <string name="customize_type_image">Slika</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Zadano</string>
-    <string name="customize_type_gradient">Gradijent</string>
     <string name="customize_show_abbreviation">Kratica</string>
     <string name="customize_background_opacity">Prozirnost</string>
     <string name="slate_theme">Tema Škriljevac</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Predložak određuje raspored i mjesto naslova. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje, razmak riječi, pregled sljedećeg i akordi se ne primjenjuju.</string>
     <string name="bible_lottie_unsupported_note">Predložak određuje raspored, mjesto reference i kako dva jezika dijele traku. Stil donje trećine postavlja font, veličinu, boju, poravnanje, razmak slova, velika/mala slova i sjenu; pozadina teksta, podcrtavanje, precrtavanje i razmak riječi se ne primjenjuju.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Obrub</string>
     <string name="tooltip_outline_options">Opcije obruba</string>
     <string name="text_outline">Obrub</string>
     <string name="text_outline_width">Širina</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Dodaj izlaz</string>
     <string name="ndi_output_numbered">NDI izlaz %1$d</string>
     <string name="preview_output">Pregled izlaza</string>
-    <string name="output_resolution">Razlučivost</string>
     <string name="output_resolution_custom">Prilagođeno…</string>
     <string name="output_resolution_custom_title">Prilagođena razlučivost</string>
     <string name="output_resolution_width">Širina</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Planirajte bogoslužja iz mobilne aplikacije cijeli tjedan, čak i dok je ovo računalo isključeno. Ovo računalo ostaje izvor istine.</string>
     <string name="calendar_sync_enable">Sinkroniziraj kalendar s telefonima</string>
     <string name="calendar_sync_relay_url">Relej</string>
-    <string name="calendar_sync_status_off">Isključeno</string>
     <string name="calendar_sync_status_unpaired">Još nije registrirano — ovo se računalo registrira kod releja prvi put kad se sinkronizacija uključi</string>
     <string name="calendar_sync_status_syncing">Sinkroniziranje…</string>
     <string name="calendar_sync_status_synced">Sinkronizirano %1$s</string>

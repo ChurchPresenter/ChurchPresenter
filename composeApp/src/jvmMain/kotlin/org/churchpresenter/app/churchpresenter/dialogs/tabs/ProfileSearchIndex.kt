@@ -15,14 +15,14 @@ import churchpresenter.composeapp.generated.resources.background_above_band_capt
 import churchpresenter.composeapp.generated.resources.bible_letter_spacing
 import churchpresenter.composeapp.generated.resources.bible_word_spacing
 import churchpresenter.composeapp.generated.resources.content_announcements
-import churchpresenter.composeapp.generated.resources.content_media
+import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.content_pictures
-import churchpresenter.composeapp.generated.resources.content_streaming
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.customize_background_opacity
 import churchpresenter.composeapp.generated.resources.customize_background_type
-import churchpresenter.composeapp.generated.resources.customize_bible
+import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
-import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.output_profile_delete
@@ -32,7 +32,7 @@ import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_bg_row
 import churchpresenter.composeapp.generated.resources.profile_content_align
 import churchpresenter.composeapp.generated.resources.profile_content_width
-import churchpresenter.composeapp.generated.resources.profile_context_open_general
+import churchpresenter.composeapp.generated.resources.profile_nav_general
 import churchpresenter.composeapp.generated.resources.profile_context_standalone
 import churchpresenter.composeapp.generated.resources.profile_crossfade
 import churchpresenter.composeapp.generated.resources.profile_display_mode
@@ -112,10 +112,10 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
     )
     ProfilePage.Outputs -> listOf(Res.string.profile_outputs_group, Res.string.identify_screen)
     ProfilePage.Content -> listOf(
-        Res.string.customize_bible, Res.string.customize_songs, Res.string.tab_dictionary,
+        Res.string.bible, Res.string.songs, Res.string.tab_dictionary,
         Res.string.profile_source_bible, Res.string.profile_source_songs, Res.string.content_pictures,
-        Res.string.content_media, Res.string.media_subtitles, Res.string.projection_content_web,
-        Res.string.tab_canvas, Res.string.content_streaming, Res.string.content_announcements,
+        Res.string.media, Res.string.media_subtitles, Res.string.projection_content_web,
+        Res.string.tab_canvas, Res.string.display_lower_third, Res.string.content_announcements,
         Res.string.tab_qa, Res.string.profile_nav_live_captions, Res.string.output_profile_scale,
         Res.string.profile_group_placement,
     )
@@ -156,7 +156,7 @@ internal fun StandaloneContextCard(onOpenGeneral: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
-            LinkText(stringResource(Res.string.profile_context_open_general), onOpenGeneral)
+            LinkText(stringResource(Res.string.profile_nav_general), onOpenGeneral)
         }
     }
 }

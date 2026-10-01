@@ -3,7 +3,6 @@
     <string name="mode">Tila</string>
     <string name="scope">Laajuus</string>
     <string name="title">Otsikko</string>
-    <string name="number">Numero</string>
     <string name="go_live">Näytä livenä</string>
     <string name="add_to_schedule">Lisää ohjelmaan</string>
     <string name="copy_verse">Kopioi jae</string>
@@ -12,7 +11,6 @@
     <string name="search">Hae</string>
     <string name="bible_smart_search_hint">Viite tai teksti — esim. Joh 3:16, matt 1 tai yksittäinen sana</string>
     <string name="bible_search_mode_auto">Automaattinen</string>
-    <string name="bible_search_mode_reference">Viite</string>
     <string name="bible_search_mode_text">Teksti</string>
     <string name="bible_search_mode_tooltip">Napauta vaihtaaksesi — Automaattinen: siirry viitteisiin, hae kaikkea muuta. Viite: pelkkä siirtyminen. Teksti: hae aina jaetekstistä.</string>
     <string name="bible_verse_selection_hint">Ctrl+napsautus valitsee yksittäisen, Vaihto+napsautus välin</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Sulje paneeli</string>
     <string name="bible_cross_references_dismiss_hint">Esc sulkee</string>
     <string name="menu_file">Tiedosto</string>
-    <string name="menu_new_schedule">Uusi ohjelma</string>
-    <string name="menu_open_schedule">Avaa ohjelma</string>
-    <string name="menu_save_schedule">Tallenna ohjelma</string>
     <string name="menu_save_schedule_as">Tallenna ohjelma nimellä...</string>
     <string name="menu_close_schedule">Sulje ohjelma</string>
     <string name="menu_exit">Poistu</string>
     <string name="file_chooser_save_schedule">Tallenna ohjelma nimellä</string>
-    <string name="file_chooser_open_schedule">Avaa ohjelma</string>
     <string name="file_filter_schedule">Church Presenter -ohjelma (*.cps)</string>
-    <string name="menu_schedule">Ohjelma</string>
-    <string name="menu_add_to_schedule">Lisää ohjelmaan</string>
     <string name="menu_remove_from_schedule">Poista ohjelmasta</string>
     <string name="menu_clear_schedule">Tyhjennä ohjelma</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Seuraa toista ChurchPresenter-instanssia verkossasi — peilaa sen live-sisältö tänne ja lisää halutessasi kohteita sen ohjelmaan.</string>
     <string name="instance_link_host">Isäntä</string>
     <string name="instance_link_host_hint">esim. 192.168.1.10</string>
-    <string name="instance_link_port">Portti</string>
     <string name="instance_link_autoconnect">Yhdistä automaattisesti käynnistyksessä</string>
     <string name="instance_link_reconnect_delay">Uudelleenyhdistämisen vähimmäisviive</string>
     <string name="instance_link_reconnect_delay_hint">Lyhin odotus, ennen kuin katkennutta linkkiä yritetään uudelleen. Toistuvat epäonnistumiset pidentävät viivettä itsestään.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Oletus</string>
-    <string name="background_color_option">Väri</string>
-    <string name="background_image_option">Kuva</string>
     <string name="background_video_option">Videosilmukka</string>
     <string name="background_transparent_option">Läpinäkyvä</string>
     <string name="background_follow_default_option">Seuraa oletusta</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Tausta</string>
     <string name="projection_content_lt_background">Alapalkin tausta</string>
     <string name="browser_source_resolution">Tarkkuus</string>
     <string name="browser_source_fps">Enimmäis-FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Loitonna</string>
     <string name="tooltip_add_to_schedule">Lisää ohjelmaan</string>
     <string name="tooltip_clear_display">Tyhjennä näyttö</string>
-    <string name="remote_action_clear_display">Tyhjennä näyttö</string>
     <string name="schedule_add_files_title">Lisää tiedostoja ohjelmaan</string>
     <string name="tooltip_toggle_displays">Näytä tai piilota esitysnäytöt</string>
     <string name="tooltip_settings">Asetukset</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Tiivis</string>
     <string name="schedule_density_normal">Normaali</string>
     <string name="schedule_density_detailed">Yksityiskohtainen</string>
-    <string name="schedule_kind_lower_third">Alapalkki</string>
     <string name="tooltip_schedule_options">Ohjelman asetukset</string>
     <string name="schedule_show_buttons_under_title">Näytä painikkeet otsikon alla</string>
     <string name="schedule_option_item_count">Kohteiden määrä</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Muokkaa merkintää</string>
     <string name="label_text">Merkinnän teksti</string>
     <string name="text_color">Tekstin väri</string>
-    <string name="background_color_label">Taustaväri</string>
     <string name="enter_label_text">Kirjoita merkinnän teksti...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Liuku vasemmalle</string>
     <string name="animation_slide_right">Liuku oikealle</string>
     <string name="animation_none">Ei mitään</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s seuraava/edellinen kuva  ·  %2$s siirry riveillä</string>
     <string name="presentation_arrow_key_hint">%1$s — edellinen/seuraava vaihe ja dia  ·  %2$s — toista/tauko  ·  %3$s — pimennä näyttö</string>
     <string name="pictures_reorder_hint">Vaihto+veto järjestää pikkukuvat uudelleen</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Raamatun tausta</string>
     <string name="content_songs_background">Laulujen tausta</string>
     <string name="content_pictures">Kuvat/esitys</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Alapalkki</string>
     <string name="content_announcements">Tiedotteet</string>
     <string name="display_mode">Näyttötila</string>
-    <string name="display_fullscreen">Koko näyttö</string>
     <string name="display_lower_third">Alapalkki</string>
     <string name="full_screen">Koko näyttö</string>
-    <string name="lower_third_size">Alapalkki</string>
     <string name="identify_screen">Tunnista</string>
     <string name="projection_target_display">Näyttö</string>
     <string name="projection_auto_display">Auto</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Asetusten tuonti epäonnistui. Tiedosto voi olla virheellinen.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Paikallinen tiedosto</string>
     <string name="media_network_url">Verkko-URL</string>
     <string name="media_url_placeholder">Anna URL (http://, rtsp:// ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Keskellä vasemmalla</string>
     <string name="center_right">Keskellä oikealla</string>
     <string name="bottom_center">Alhaalla keskellä</string>
-    <string name="announcement_background_color_label">Taustaväri</string>
     <string name="transparent_default">Läpinäkyvä (oletus)</string>
     <string name="announcement_animation">Animaatio</string>
     <string name="anim_slide_from_left">Liuku vasemmalta</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Lisää ohjelmaan</string>
     <string name="web_go_live">Näytä livenä</string>
     <string name="web_bookmark_add">Lisää kirjanmerkki</string>
     <string name="web_bookmark_remove">Poista kirjanmerkki</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Täyttö</string>
     <string name="canvas_shape_stroke_width">Viivan paksuus</string>
     <string name="canvas_rename_scene">Nimeä uudelleen</string>
-    <string name="canvas_remove_scene">Poista</string>
     <string name="canvas_add_source">Lisää lähde</string>
     <string name="canvas_delete_source">Poista lähde</string>
     <string name="canvas_source_move_forward">Siirrä eteen</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Korkeus</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Oma CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Valitse kuva</string>
     <string name="canvas_select_video_title">Valitse video</string>
     <string name="canvas_image_files">Kuvatiedostot</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Kello</string>
     <string name="canvas_clock_mode_countdown">Ajastin</string>
     <string name="canvas_clock_mode_count_up">Sekuntikello</string>
     <string name="canvas_decklink_io_warning">Tämä laite on nyt käytössä ulostulona. Sisääntulo ei ehkä ole käytettävissä laitteilla, jotka eivät tue samanaikaista I/O:ta.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Kaarevuus</string>
     <string name="canvas_letter_spacing">Merkkiväli</string>
     <string name="canvas_source_qrcode">QR-koodi</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Näytön kaappaus</string>
     <string name="canvas_source_bible">Raamattu</string>
     <string name="canvas_bible_version">Raamatun käännös</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Viitteen väri</string>
     <string name="canvas_verse_style">Jakeen tyyli</string>
     <string name="canvas_reference_style">Viitteen tyyli</string>
-    <string name="canvas_text_color">Tekstin väri</string>
     <string name="canvas_text_bg_color">Taustaväri</string>
     <string name="canvas_clock_mode">Tila</string>
     <string name="canvas_clock_format">Muoto</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Videomuoto</string>
     <string name="canvas_camera_format_auto">Auto (oletus)</string>
     <string name="canvas_camera_connection">Videoliitäntä</string>
-    <string name="canvas_camera_mode">Tila</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">Kaappauksen X</string>
     <string name="canvas_capture_y">Kaappauksen Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Ikkuna</string>
     <string name="canvas_capture_refresh_windows">Päivitä ikkunaluettelo</string>
     <string name="canvas_capture_interval">Kaappausväli</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Näytön kaappaus</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Poistettu ohjelmasta</string>
     <string name="remote_activity_projected">Projisoitu (livenä)</string>
     <string name="remote_activity_presentation_connect">Yhdistetty esityksen kaukosäätimeen</string>
-    <string name="remote_activity_presentation_connect_detail">Nyt yhdistetty</string>
     <string name="remote_activity_qa_admin_connect">Yhdistetty kysymysten hallintaan</string>
     <string name="remote_activity_qa_admin_connect_detail">Nyt yhdistetty</string>
     <string name="remote_activity_presented">Esitetään</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Ensisijainen — %1$d seuraajaa yhdistettynä</string>
     <string name="client_label_placeholder">Anna kuvaava nimi…</string>
     <string name="client_label_edit_tooltip">Aseta kuvaava nimi</string>
-    <string name="client_label_save">Tallenna</string>
     <string name="client_label_cancel">Peruuta</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Mistä Church Presenter etsii sisältösi</string>
     <string name="system_storage_linked_count">%1$d linkitetty</string>
     <string name="system_storage_needs_attention_count">%1$d vaatii huomiota</string>
-    <string name="system_storage_status_not_set">Ei asetettu</string>
     <string name="system_storage_status_not_found">Kansiota ei löydy</string>
     <string name="system_storage_status_read_only">Vain luku</string>
     <string name="system_storage_status_linked">Linkitetty</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Näytä laulun numero ennen otsikkoa</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Lavamonitori</string>
     <string name="general">Yleiset</string>
     <string name="display_stage_monitor">Lavamonitori</string>
     <string name="stage_monitor_quadrant_next">Seuraava</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Vahvista näyttäminen</string>
     <string name="qa_add_question_hint">Lisää kysymys…</string>
     <string name="qa_edit_question_hint">Muokkaa kysymyksen tekstiä…</string>
-    <string name="qa_delete_question">Poista</string>
     <string name="qa_confirm_delete_prompt">Poistetaanko?</string>
     <string name="qa_submitter_device">Laite: %1$s</string>
     <string name="qa_public_access">Julkinen käyttö</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Live-esikatselu</string>
     <string name="stt_not_connected">Ei yhteyttä. Anna STT-palvelimen URL ja napsauta Yhdistä.</string>
     <string name="stt_waiting_for_transcription">Odotetaan tekstitystä…</string>
-    <string name="stt_transcription_label">Tekstitys</string>
     <string name="stt_translation_label">Käännös</string>
     <string name="stt_settings_dialog_title">STT-näytön asetukset</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI-raportit</string>
-    <string name="ccli_tab_songs">Laulut</string>
-    <string name="ccli_tab_bible">Raamattu</string>
     <string name="ccli_tab_activity">Toiminta</string>
     <string name="ccli_songs_summary">%1$d eri laulua · %2$d esitystä yhteensä</string>
     <string name="ccli_bible_summary">%1$d eri jaetta · %2$d esitystä yhteensä</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Esitykset ajan mittaan</string>
     <string name="ccli_from">Alkaen:</string>
     <string name="ccli_to">Päättyen:</string>
-    <string name="ccli_legend_songs">Laulut</string>
     <string name="ccli_legend_bible">Raamatunjakeet</string>
     <string name="ccli_stat_songs_presented">Esitetyt laulut</string>
     <string name="ccli_stat_bible_verses">Raamatunjakeet</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Ensimmäinen</string>
     <string name="ccli_col_last">Viimeisin</string>
     <string name="ccli_col_verse">Jae</string>
-    <string name="ccli_col_bible">Raamattu</string>
     <string name="ccli_export_csv">Vie CCLI-CSV</string>
     <string name="ccli_export_xls">Vie XLS</string>
     <string name="ccli_exported_success">Raportti vietiin onnistuneesti.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Raamattu</string>
     <string name="obs_mode_songs">Laulut</string>
     <string name="obs_mode_pictures">Kuvat</string>
-    <string name="obs_mode_presentation">Esitys</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Alapalkki</string>
     <string name="obs_mode_announcements">Ilmoitukset</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Aseta Companion-palvelin kohdassa Asetukset → Companion Satellite yhdistääksesi.</string>
     <string name="companion_satellite_status_connecting">Yhdistetään…</string>
     <string name="companion_satellite_status_disconnected">Yhteys katkaistu</string>
-    <string name="companion_satellite_status_error">Virhe: %1$s</string>
     <string name="companion_satellite_connection_name">Nimi</string>
     <string name="companion_satellite_product_name">Tuotenimi</string>
     <string name="companion_satellite_reconnect_delay">Uudelleenyhdistämisen viive (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Tunnista raamatunkohdat</string>
     <string name="bible_engine_run_local">Suorita moottori paikallisesti</string>
     <string name="bible_engine_host">Moottorin palvelin</string>
-    <string name="bible_engine_port">Portti</string>
     <string name="stt_help_dev_mode">Auta kehittäjää — näytä palautepainikkeet Raamattu-välilehdellä (väärä kohta / ennenaikainen / ohitettu kohta)</string>
     <string name="dictionary_back">Takaisin</string>
     <string name="dictionary_forward">Eteenpäin</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Antiikva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Esikatselu</string>
     <string name="font_preview_sample">Esimerkkitekstiä valitulla fontilla</string>
     <string name="font_warning_no_cyrillic">%1$s ei sisällä kyrillisiä merkkejä – kyrilliset jakeet näkyvät ruudulla toisella fontilla.</string>
     <string name="font_warning_no_hebrew">%1$s ei sisällä heprealaisia merkkejä – heprealainen teksti näkyy ruudulla toisella fontilla.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Yliviivaus</string>
     <string name="bible_custom_name">Nimi</string>
-    <string name="bible_custom_abbreviation">Lyhenne</string>
     <string name="bible_translations">Käännökset</string>
     <string name="bible_miscellaneous">Sekalaiset</string>
     <string name="bible_font">Fontti</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Lisää käännös nähdäksesi sen tässä</string>
     <string name="song_element_number">Numero</string>
-    <string name="song_element_title">Otsikko</string>
     <string name="song_element_lyrics">Sanat</string>
-    <string name="song_element_author">Sanoittaja</string>
-    <string name="song_element_composer">Säveltäjä</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Otsikkodia</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Osa</string>
     <string name="song_language_scope">Kieli</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Tausta</string>
     <string name="song_background_full_screen">Koko näyttö</string>
     <string name="song_background_lower_third">Alakolmannes</string>
     <string name="song_background_inherit">Peri</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Sinun värisi</string>
     <string name="song_background_browse">Selaa…</string>
     <string name="song_background_look">Ulkoasu</string>
-    <string name="song_background_preset_none">Ei mitään</string>
     <string name="song_background_preset_soft">Pehmeä</string>
     <string name="song_background_preset_legible">Luettava</string>
     <string name="song_background_preset_cinema">Elokuva</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Taustat</string>
     <string name="background_group_defaults">Oletukset</string>
-    <string name="background_scope_default">Oletus</string>
     <string name="background_scope_default_lower_third">Oletusalapalkki</string>
     <string name="background_scope_default_meta">Kun Raamattu tai Laulut on asetettu Oletukseen</string>
     <string name="background_scope_default_lower_third_meta">Kun alapalkki on asetettu Oletukseen</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Seuraa oletusta</string>
     <string name="background_use_default">Käytä oletusta</string>
     <string name="background_set_explicitly">Asetettu erikseen tälle pinnalle</string>
-    <string name="background_type_caption">Tyyppi</string>
     <string name="background_color_caption">Väri</string>
     <string name="background_image_file">Kuvatiedosto</string>
     <string name="background_video_file">Videotiedosto</string>
-    <string name="background_opacity_caption">Peittävyys</string>
     <string name="background_above_band_caption">Palkin yläpuolella</string>
     <string name="background_above_band_fill">Täyttöväri</string>
     <string name="background_above_band_opacity">Täytön peittävyys</string>
     <string name="quick_background_reset">Takaisin normaaliin</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hallinta asetuksissa</string>
     <string name="quick_backgrounds">Pikataustat</string>
     <string name="quick_backgrounds_help">Taustat, jotka esikatselupaneeli pitää yhden napsautuksen päässä. Napsauta ruutua valitaksesi mitä se näyttää, vedä sitä vaihtaaksesi mikä näppäin sen tavoittaa. Yhden valitseminen jumalanpalveluksen aikana ohittaa jokaisen näytön kunnes palaat normaaliin — täällä se ei muuta mitään.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Vaihda ulostuloprofiilia</string>
     <string name="output_profile_new_name_default">Uusi profiili</string>
     <string name="output_profile_empty_state">Luo profiili aloittaaksesi sen muotoilun</string>
-    <string name="customize_bible">Raamattu</string>
-    <string name="customize_songs">Laulut</string>
     <string name="customize_group_verse_text">Jakeen teksti</string>
     <string name="customize_group_reference">Viite</string>
     <string name="customize_background_type">Tyyppi</string>
-    <string name="customize_type_color">Väri</string>
     <string name="customize_type_image">Kuva</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Oletus</string>
-    <string name="customize_type_gradient">Liukuväri</string>
     <string name="customize_show_abbreviation">Lyhenne</string>
     <string name="customize_background_opacity">Peittävyys</string>
     <string name="slate_theme">Liuske-teema</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Malli päättää asettelun ja otsikon paikan. Alakolmanneksen tyyli määrää fontin, koon, värin, tasauksen, kirjainvälin, kirjainkoon ja varjon; tekstin tausta, alleviivaus, yliviivaus, sanaväli, seuraavan esikatselu ja soinnut eivät vaikuta.</string>
     <string name="bible_lottie_unsupported_note">Malli päättää asettelun, viitteen paikan ja sen, miten kaksi kieltä jakavat palkin. Alakolmanneksen tyyli määrää fontin, koon, värin, tasauksen, kirjainvälin, kirjainkoon ja varjon; tekstin tausta, alleviivaus, yliviivaus ja sanaväli eivät vaikuta.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Ääriviiva</string>
     <string name="tooltip_outline_options">Ääriviivan asetukset</string>
     <string name="text_outline">Ääriviiva</string>
     <string name="text_outline_width">Leveys</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Lisää lähtö</string>
     <string name="ndi_output_numbered">NDI-lähtö %1$d</string>
     <string name="preview_output">Lähdön esikatselu</string>
-    <string name="output_resolution">Tarkkuus</string>
     <string name="output_resolution_custom">Mukautettu…</string>
     <string name="output_resolution_custom_title">Mukautettu tarkkuus</string>
     <string name="output_resolution_width">Leveys</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Suunnittele tilaisuuksia mobiilisovelluksesta koko viikon, vaikka tämä tietokone olisi pois päältä. Tämä tietokone pysyy ensisijaisena lähteenä.</string>
     <string name="calendar_sync_enable">Synkronoi kalenteri puhelinten kanssa</string>
     <string name="calendar_sync_relay_url">Välitin</string>
-    <string name="calendar_sync_status_off">Pois</string>
     <string name="calendar_sync_status_unpaired">Ei vielä rekisteröity — tämä tietokone rekisteröityy välittimeen, kun synkronointi kytketään päälle ensimmäisen kerran</string>
     <string name="calendar_sync_status_syncing">Synkronoidaan…</string>
     <string name="calendar_sync_status_synced">Synkronoitu %1$s</string>

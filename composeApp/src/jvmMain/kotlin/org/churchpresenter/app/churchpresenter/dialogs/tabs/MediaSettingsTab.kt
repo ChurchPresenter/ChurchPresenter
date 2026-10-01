@@ -34,7 +34,7 @@ import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.loop
 import churchpresenter.composeapp.generated.resources.presentation_animate_keynote
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
+import churchpresenter.composeapp.generated.resources.unit_ms
 import churchpresenter.composeapp.generated.resources.seconds_suffix
 import churchpresenter.composeapp.generated.resources.slideshow_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
@@ -149,7 +149,8 @@ fun MediaSettingsTab(
                 },
                 valueRange = 100f..2000f,
                 modifier = Modifier.weight(1f),
-                trailingLabel = "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}"
+                trailingLabel = settings.pictureSettings.transitionDuration.toInt().toString() +
+                    stringResource(Res.string.unit_ms)
             )
         }
 

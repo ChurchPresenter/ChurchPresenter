@@ -8,7 +8,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.center
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.percent_suffix
-import churchpresenter.composeapp.generated.resources.profile_box_color
+import churchpresenter.composeapp.generated.resources.profile_bg_row
 import churchpresenter.composeapp.generated.resources.profile_box_opacity
 import churchpresenter.composeapp.generated.resources.profile_group_box
 import churchpresenter.composeapp.generated.resources.profile_place_on_screen
@@ -138,7 +138,7 @@ internal fun DisplayBoxGroup(
         stringResource(Res.string.profile_group_box),
         paths = listOf("$prefix.backgroundColor", "$prefix.backgroundOpacity"),
     ) {
-        SettingsRow(stringResource(Res.string.profile_box_color), paths = listOf("$prefix.backgroundColor")) {
+        SettingsRow(stringResource(Res.string.profile_bg_row), paths = listOf("$prefix.backgroundColor")) {
             RowColor(color, onColor)
         }
         SettingsRow(stringResource(Res.string.profile_box_opacity), paths = listOf("$prefix.backgroundOpacity")) {

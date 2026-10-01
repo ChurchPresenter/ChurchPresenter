@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.profile_inherited_tooltip
-import churchpresenter.composeapp.generated.resources.profile_master_value
+import churchpresenter.composeapp.generated.resources.canvas_layer_placement_in
 import churchpresenter.composeapp.generated.resources.profile_revert
 import churchpresenter.composeapp.generated.resources.profile_revert_to
 import churchpresenter.composeapp.generated.resources.profile_value_off
@@ -62,7 +62,7 @@ internal fun OverrideDot() {
 @Composable
 internal fun MasterValueText(masterName: String, value: String) {
     Text(
-        text = stringResource(Res.string.profile_master_value, masterName, value),
+        text = stringResource(Res.string.canvas_layer_placement_in, masterName, value),
         fontSize = 11.sp,
         color = profilesPalette().faintText,
         maxLines = 1,

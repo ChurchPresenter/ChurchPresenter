@@ -3,7 +3,6 @@
     <string name="mode">โหมด</string>
     <string name="scope">ขอบเขต</string>
     <string name="title">ชื่อ</string>
-    <string name="number">หมายเลข</string>
     <string name="go_live">ขึ้นจอ</string>
     <string name="add_to_schedule">เพิ่มลงรายการ</string>
     <string name="copy_verse">คัดลอกข้อพระคัมภีร์</string>
@@ -12,7 +11,6 @@
     <string name="search">ค้นหา</string>
     <string name="bible_smart_search_hint">อ้างอิงหรือข้อความ — เช่น ยอห์น 3:16, มธ 1 หรือคำใดคำหนึ่ง</string>
     <string name="bible_search_mode_auto">อัตโนมัติ</string>
-    <string name="bible_search_mode_reference">อ้างอิง</string>
     <string name="bible_search_mode_text">ข้อความ</string>
     <string name="bible_search_mode_tooltip">แตะเพื่อสลับ — อัตโนมัติ: ไปยังข้ออ้างอิง แล้วค้นหาสิ่งอื่นทั้งหมด อ้างอิง: เปิดข้อเท่านั้น ข้อความ: ค้นหาเนื้อข้อพระคัมภีร์เสมอ</string>
     <string name="bible_verse_selection_hint">Ctrl+คลิกเพื่อเลือก/ยกเลิก, Shift+คลิกเพื่อเลือกช่วง</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">ปิดแผง</string>
     <string name="bible_cross_references_dismiss_hint">กด Esc เพื่อปิด</string>
     <string name="menu_file">ไฟล์</string>
-    <string name="menu_new_schedule">รายการใหม่</string>
-    <string name="menu_open_schedule">เปิดรายการ</string>
-    <string name="menu_save_schedule">บันทึกรายการ</string>
     <string name="menu_save_schedule_as">บันทึกรายการเป็น...</string>
     <string name="menu_close_schedule">ปิดรายการ</string>
     <string name="menu_exit">ออก</string>
     <string name="file_chooser_save_schedule">บันทึกรายการเป็น</string>
-    <string name="file_chooser_open_schedule">เปิดรายการ</string>
     <string name="file_filter_schedule">รายการ Church Presenter (*.cps)</string>
-    <string name="menu_schedule">รายการ</string>
-    <string name="menu_add_to_schedule">เพิ่มลงรายการ</string>
     <string name="menu_remove_from_schedule">นำออกจากรายการ</string>
     <string name="menu_clear_schedule">ล้างรายการ</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">ติดตาม ChurchPresenter อีกเครื่องในเครือข่ายของคุณ — แสดงเนื้อหาที่เครื่องนั้นขึ้นจออยู่ที่นี่ และเพิ่มรายการเข้าไปในรายการของเครื่องนั้นได้หากต้องการ</string>
     <string name="instance_link_host">โฮสต์</string>
     <string name="instance_link_host_hint">เช่น 192.168.1.10</string>
-    <string name="instance_link_port">พอร์ต</string>
     <string name="instance_link_autoconnect">เชื่อมต่ออัตโนมัติเมื่อเปิดโปรแกรม</string>
     <string name="instance_link_reconnect_delay">เวลารอขั้นต่ำก่อนเชื่อมต่อใหม่</string>
     <string name="instance_link_reconnect_delay_hint">เวลารอสั้นที่สุดก่อนลองเชื่อมต่อลิงก์ที่หลุดอีกครั้ง หากล้มเหลวซ้ำๆ ระบบจะยืดเวลาให้เอง</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">ค่าเริ่มต้น</string>
-    <string name="background_color_option">สี</string>
-    <string name="background_image_option">ภาพ</string>
     <string name="background_video_option">วิดีโอวนซ้ำ</string>
     <string name="background_transparent_option">โปร่งใส</string>
     <string name="background_follow_default_option">ตามค่าเริ่มต้น</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">เว็บ</string>
-    <string name="projection_content_background">พื้นหลัง</string>
     <string name="projection_content_lt_background">พื้นหลังแถบล่าง</string>
     <string name="browser_source_resolution">ความละเอียด</string>
     <string name="browser_source_fps">FPS สูงสุด</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">ย่อ</string>
     <string name="tooltip_add_to_schedule">เพิ่มลงรายการ</string>
     <string name="tooltip_clear_display">ล้างจอ</string>
-    <string name="remote_action_clear_display">ล้างจอ</string>
     <string name="schedule_add_files_title">เพิ่มไฟล์ลงรายการ</string>
     <string name="tooltip_toggle_displays">เปิด/ปิดจอแสดงผล</string>
     <string name="tooltip_settings">การตั้งค่า</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">กระชับ</string>
     <string name="schedule_density_normal">ปกติ</string>
     <string name="schedule_density_detailed">ละเอียด</string>
-    <string name="schedule_kind_lower_third">แถบล่าง</string>
     <string name="tooltip_schedule_options">ตัวเลือกรายการ</string>
     <string name="schedule_show_buttons_under_title">แสดงปุ่มใต้ชื่อ</string>
     <string name="schedule_option_item_count">จำนวนรายการ</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">แก้ไขป้าย</string>
     <string name="label_text">ข้อความบนป้าย</string>
     <string name="text_color">สีข้อความ</string>
-    <string name="background_color_label">สีพื้นหลัง</string>
     <string name="enter_label_text">พิมพ์ข้อความบนป้าย...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">เลื่อนซ้าย</string>
     <string name="animation_slide_right">เลื่อนขวา</string>
     <string name="animation_none">ไม่มี</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s ภาพถัดไป/ก่อนหน้า  ·  %2$s เลื่อนแถว</string>
     <string name="presentation_arrow_key_hint">%1$s — ขั้นและสไลด์ก่อนหน้า/ถัดไป  ·  %2$s — เล่น/หยุด  ·  %3$s — จอว่าง</string>
     <string name="pictures_reorder_hint">กด Shift พร้อมลากภาพย่อเพื่อจัดลำดับใหม่</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">พื้นหลังพระคัมภีร์</string>
     <string name="content_songs_background">พื้นหลังเพลง</string>
     <string name="content_pictures">ภาพ/งานนำเสนอ</string>
-    <string name="content_media">สื่อ</string>
-    <string name="content_streaming">แถบล่าง</string>
     <string name="content_announcements">ประกาศ</string>
     <string name="display_mode">โหมดการแสดงผล</string>
-    <string name="display_fullscreen">เต็มจอ</string>
     <string name="display_lower_third">แถบล่าง</string>
     <string name="full_screen">เต็มจอ</string>
-    <string name="lower_third_size">แถบล่าง</string>
     <string name="identify_screen">ระบุจอ</string>
     <string name="projection_target_display">จอ</string>
     <string name="projection_auto_display">อัตโนมัติ</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">นำเข้าการตั้งค่าไม่สำเร็จ ไฟล์อาจไม่ถูกต้อง</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">สื่อ</string>
     <string name="media_local_file">ไฟล์ในเครื่อง</string>
     <string name="media_network_url">URL เครือข่าย</string>
     <string name="media_url_placeholder">พิมพ์ URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">กลางซ้าย</string>
     <string name="center_right">กลางขวา</string>
     <string name="bottom_center">ล่างกึ่งกลาง</string>
-    <string name="announcement_background_color_label">สีพื้นหลัง</string>
     <string name="transparent_default">โปร่งใส (ค่าเริ่มต้น)</string>
     <string name="announcement_animation">ภาพเคลื่อนไหว</string>
     <string name="anim_slide_from_left">เลื่อนมาจากซ้าย</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">เพิ่มลงรายการ</string>
     <string name="web_go_live">ขึ้นจอ</string>
     <string name="web_bookmark_add">เพิ่มบุ๊กมาร์ก</string>
     <string name="web_bookmark_remove">ลบบุ๊กมาร์ก</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">สีเติม</string>
     <string name="canvas_shape_stroke_width">ความหนาเส้นขอบ</string>
     <string name="canvas_rename_scene">เปลี่ยนชื่อ</string>
-    <string name="canvas_remove_scene">นำออก</string>
     <string name="canvas_add_source">เพิ่มแหล่ง</string>
     <string name="canvas_delete_source">ลบแหล่ง</string>
     <string name="canvas_source_move_forward">เลื่อนขึ้นหน้า</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">ความสูง</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS กำหนดเอง</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">เลือกภาพ</string>
     <string name="canvas_select_video_title">เลือกวิดีโอ</string>
     <string name="canvas_image_files">ไฟล์ภาพ</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">นาฬิกา</string>
     <string name="canvas_clock_mode_countdown">นับถอยหลัง</string>
     <string name="canvas_clock_mode_count_up">จับเวลาเดินหน้า</string>
     <string name="canvas_decklink_io_warning">อุปกรณ์นี้กำลังใช้เป็นช่องสัญญาณออก ช่องรับอาจใช้ไม่ได้บนอุปกรณ์ที่รับ-ส่งพร้อมกันไม่ได้</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">ความโค้ง</string>
     <string name="canvas_letter_spacing">ระยะห่างตัวอักษร</string>
     <string name="canvas_source_qrcode">คิวอาร์โค้ด</string>
-    <string name="canvas_source_camera">กล้อง</string>
     <string name="canvas_source_screen_capture">การจับภาพหน้าจอ</string>
     <string name="canvas_source_bible">พระคัมภีร์</string>
     <string name="canvas_bible_version">ฉบับพระคัมภีร์</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">สีข้ออ้างอิง</string>
     <string name="canvas_verse_style">รูปแบบข้อพระคัมภีร์</string>
     <string name="canvas_reference_style">รูปแบบข้ออ้างอิง</string>
-    <string name="canvas_text_color">สีข้อความ</string>
     <string name="canvas_text_bg_color">สีพื้นหลัง</string>
     <string name="canvas_clock_mode">โหมด</string>
     <string name="canvas_clock_format">รูปแบบ</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">รูปแบบวิดีโอ</string>
     <string name="canvas_camera_format_auto">อัตโนมัติ (ค่าเริ่มต้น)</string>
     <string name="canvas_camera_connection">ช่องต่อวิดีโอ</string>
-    <string name="canvas_camera_mode">โหมด</string>
     <string name="canvas_camera_mode_auto">อัตโนมัติ</string>
     <string name="canvas_capture_x">จุดจับภาพ X</string>
     <string name="canvas_capture_y">จุดจับภาพ Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">หน้าต่าง</string>
     <string name="canvas_capture_refresh_windows">โหลดรายการหน้าต่างใหม่</string>
     <string name="canvas_capture_interval">ช่วงเวลาจับภาพ</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">กล้อง: %1$s</string>
-    <string name="canvas_placeholder_camera_default">กล้อง</string>
     <string name="canvas_placeholder_screen_capture">การจับภาพหน้าจอ</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">นำออกจากรายการแล้ว</string>
     <string name="remote_activity_projected">ส่งขึ้นจอแล้ว (แสดงสด)</string>
     <string name="remote_activity_presentation_connect">เชื่อมต่อกับรีโมตงานนำเสนอแล้ว</string>
-    <string name="remote_activity_presentation_connect_detail">เชื่อมต่อแล้ว</string>
     <string name="remote_activity_qa_admin_connect">เชื่อมต่อกับผู้ดูแลคำถามแล้ว</string>
     <string name="remote_activity_qa_admin_connect_detail">เชื่อมต่อแล้ว</string>
     <string name="remote_activity_presented">กำลังแสดง</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">เครื่องหลัก — มีเครื่องตาม %1$d เครื่องเชื่อมต่ออยู่</string>
     <string name="client_label_placeholder">พิมพ์ชื่อที่จำง่าย…</string>
     <string name="client_label_edit_tooltip">ตั้งชื่อที่จำง่าย</string>
-    <string name="client_label_save">บันทึก</string>
     <string name="client_label_cancel">ยกเลิก</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter ค้นหาเนื้อหาของคุณจากที่ใด</string>
     <string name="system_storage_linked_count">เชื่อมโยงแล้ว %1$d</string>
     <string name="system_storage_needs_attention_count">ต้องตรวจสอบ %1$d</string>
-    <string name="system_storage_status_not_set">ยังไม่ได้กำหนด</string>
     <string name="system_storage_status_not_found">ไม่พบโฟลเดอร์</string>
     <string name="system_storage_status_read_only">อ่านอย่างเดียว</string>
     <string name="system_storage_status_linked">เชื่อมโยงแล้ว</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">แสดงหมายเลขเพลงก่อนชื่อ</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">จอบนเวที</string>
     <string name="general">ทั่วไป</string>
     <string name="display_stage_monitor">จอบนเวที</string>
     <string name="stage_monitor_quadrant_next">ถัดไป</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">ยืนยันการส่งขึ้นจอ</string>
     <string name="qa_add_question_hint">เพิ่มคำถาม…</string>
     <string name="qa_edit_question_hint">แก้ไขข้อความคำถาม…</string>
-    <string name="qa_delete_question">ลบ</string>
     <string name="qa_confirm_delete_prompt">ลบหรือไม่</string>
     <string name="qa_submitter_device">อุปกรณ์: %1$s</string>
     <string name="qa_public_access">การเข้าถึงสาธารณะ</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">ตัวอย่างแบบสด</string>
     <string name="stt_not_connected">ยังไม่ได้เชื่อมต่อ พิมพ์ URL เซิร์ฟเวอร์ STT แล้วคลิก "เชื่อมต่อ"</string>
     <string name="stt_waiting_for_transcription">กำลังรอการถอดความ…</string>
-    <string name="stt_transcription_label">การถอดความ</string>
     <string name="stt_translation_label">คำแปล</string>
     <string name="stt_settings_dialog_title">การตั้งค่าการแสดงผล STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">รายงาน CCLI</string>
-    <string name="ccli_tab_songs">เพลง</string>
-    <string name="ccli_tab_bible">พระคัมภีร์</string>
     <string name="ccli_tab_activity">กิจกรรม</string>
     <string name="ccli_songs_summary">%1$d เพลงที่ต่างกัน · รวม %2$d ครั้ง</string>
     <string name="ccli_bible_summary">%1$d ข้อที่ต่างกัน · รวม %2$d ครั้ง</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">การแสดงตามช่วงเวลา</string>
     <string name="ccli_from">ตั้งแต่:</string>
     <string name="ccli_to">ถึง:</string>
-    <string name="ccli_legend_songs">เพลง</string>
     <string name="ccli_legend_bible">ข้อพระคัมภีร์</string>
     <string name="ccli_stat_songs_presented">เพลงที่แสดง</string>
     <string name="ccli_stat_bible_verses">ข้อพระคัมภีร์</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">ครั้งแรก</string>
     <string name="ccli_col_last">ครั้งล่าสุด</string>
     <string name="ccli_col_verse">ข้อ</string>
-    <string name="ccli_col_bible">พระคัมภีร์</string>
     <string name="ccli_export_csv">ส่งออก CSV สำหรับ CCLI</string>
     <string name="ccli_export_xls">ส่งออก XLS</string>
     <string name="ccli_exported_success">ส่งออกรายงานเรียบร้อยแล้ว</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">พระคัมภีร์</string>
     <string name="obs_mode_songs">เพลง</string>
     <string name="obs_mode_pictures">ภาพ</string>
-    <string name="obs_mode_presentation">งานนำเสนอ</string>
     <string name="obs_mode_media">สื่อ</string>
     <string name="obs_mode_lower_third">แถบล่าง</string>
     <string name="obs_mode_announcements">ประกาศ</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">ตั้งโฮสต์ Companion ใน "การตั้งค่า → Companion Satellite" เพื่อเชื่อมต่อ</string>
     <string name="companion_satellite_status_connecting">กำลังเชื่อมต่อ…</string>
     <string name="companion_satellite_status_disconnected">ตัดการเชื่อมต่อแล้ว</string>
-    <string name="companion_satellite_status_error">ข้อผิดพลาด: %1$s</string>
     <string name="companion_satellite_connection_name">ชื่อ</string>
     <string name="companion_satellite_product_name">ชื่อผลิตภัณฑ์</string>
     <string name="companion_satellite_reconnect_delay">เวลารอก่อนเชื่อมต่อใหม่ (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">ตรวจจับข้อพระคัมภีร์</string>
     <string name="bible_engine_run_local">รันเอนจินบนเครื่องนี้</string>
     <string name="bible_engine_host">โฮสต์ของเอนจิน</string>
-    <string name="bible_engine_port">พอร์ต</string>
     <string name="stt_help_dev_mode">ช่วยนักพัฒนา — แสดงปุ่มส่งความเห็นสดบนแท็บพระคัมภีร์ (ตอนผิด / เร็วเกินไป / ตอนที่พลาดไป)</string>
     <string name="dictionary_back">ย้อนกลับ</string>
     <string name="dictionary_forward">ไปข้างหน้า</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">มีเชิง</string>
     <string name="font_category_mono">โมโน</string>
     <string name="font_category_display">ตกแต่ง</string>
-    <string name="font_preview">ดูตัวอย่าง</string>
     <string name="font_preview_sample">ข้อความตัวอย่างด้วยแบบอักษรที่เลือก</string>
     <string name="font_warning_no_cyrillic">%1$s ไม่มีอักขระซีริลลิก — ข้อพระคัมภีร์ซีริลลิกจะแสดงบนจอด้วยแบบอักษรอื่น</string>
     <string name="font_warning_no_hebrew">%1$s ไม่มีอักขระฮีบรู — ข้อความฮีบรูจะแสดงบนจอด้วยแบบอักษรอื่น</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">ขีดฆ่า</string>
     <string name="bible_custom_name">ชื่อ</string>
-    <string name="bible_custom_abbreviation">ตัวย่อ</string>
     <string name="bible_translations">คำแปล</string>
     <string name="bible_miscellaneous">อื่น ๆ</string>
     <string name="bible_font">แบบอักษร</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">ยอห์น</string>
     <string name="bible_preview_no_translations">เพิ่มคำแปลเพื่อดูที่นี่</string>
     <string name="song_element_number">หมายเลข</string>
-    <string name="song_element_title">ชื่อ</string>
     <string name="song_element_lyrics">เนื้อเพลง</string>
-    <string name="song_element_author">ผู้ประพันธ์คำร้อง</string>
-    <string name="song_element_composer">ผู้ประพันธ์ทำนอง</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">จังหวะ</string>
     <string name="song_target_title_slide">สไลด์ชื่อเพลง</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">ท่อน</string>
     <string name="song_language_scope">ภาษา</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">พื้นหลัง</string>
     <string name="song_background_full_screen">เต็มหน้าจอ</string>
     <string name="song_background_lower_third">แถบล่าง</string>
     <string name="song_background_inherit">สืบทอด</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">สีของคุณ</string>
     <string name="song_background_browse">เรียกดู…</string>
     <string name="song_background_look">ลักษณะ</string>
-    <string name="song_background_preset_none">ไม่มี</string>
     <string name="song_background_preset_soft">นุ่มนวล</string>
     <string name="song_background_preset_legible">อ่านง่าย</string>
     <string name="song_background_preset_cinema">ภาพยนตร์</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">พื้นหลัง</string>
     <string name="background_group_defaults">ค่าเริ่มต้น</string>
-    <string name="background_scope_default">ค่าเริ่มต้น</string>
     <string name="background_scope_default_lower_third">แถบล่างค่าเริ่มต้น</string>
     <string name="background_scope_default_meta">เมื่อพระคัมภีร์หรือเพลงตั้งเป็นค่าเริ่มต้น</string>
     <string name="background_scope_default_lower_third_meta">เมื่อแถบล่างตั้งเป็นค่าเริ่มต้น</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">ตามค่าเริ่มต้น</string>
     <string name="background_use_default">ใช้ค่าเริ่มต้น</string>
     <string name="background_set_explicitly">ตั้งแยกไว้สำหรับพื้นผิวนี้</string>
-    <string name="background_type_caption">ชนิด</string>
     <string name="background_color_caption">สี</string>
     <string name="background_image_file">ไฟล์ภาพ</string>
     <string name="background_video_file">ไฟล์วิดีโอ</string>
-    <string name="background_opacity_caption">ความทึบ</string>
     <string name="background_above_band_caption">เหนือแถบ</string>
     <string name="background_above_band_fill">สีเติม</string>
     <string name="background_above_band_opacity">ความทึบของสีเติม</string>
     <string name="quick_background_reset">กลับสู่ปกติ</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · จัดการในการตั้งค่า</string>
     <string name="quick_backgrounds">พื้นหลังด่วน</string>
     <string name="quick_backgrounds_help">พื้นหลังที่แผงตัวอย่างเก็บไว้ห่างเพียงคลิกเดียว คลิกที่ช่องเพื่อเลือกว่าจะให้แสดงอะไร ลากเพื่อเปลี่ยนว่าปุ่มใดเรียกใช้ การเลือกระหว่างการนมัสการจะแทนที่ทุกจอจนกว่าคุณจะกลับสู่ปกติ และไม่เปลี่ยนอะไรที่นี่</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">สลับโปรไฟล์ช่องสัญญาณ</string>
     <string name="output_profile_new_name_default">โปรไฟล์ใหม่</string>
     <string name="output_profile_empty_state">สร้างโปรไฟล์เพื่อเริ่มจัดรูปแบบ</string>
-    <string name="customize_bible">พระคัมภีร์</string>
-    <string name="customize_songs">เพลง</string>
     <string name="customize_group_verse_text">ข้อความพระคัมภีร์</string>
     <string name="customize_group_reference">อ้างอิง</string>
     <string name="customize_background_type">ชนิด</string>
-    <string name="customize_type_color">สี</string>
     <string name="customize_type_image">ภาพ</string>
-    <string name="customize_type_video">วิดีโอ</string>
-    <string name="customize_type_default">ค่าเริ่มต้น</string>
-    <string name="customize_type_gradient">ไล่ระดับสี</string>
     <string name="customize_show_abbreviation">ตัวย่อ</string>
     <string name="customize_background_opacity">ความทึบ</string>
     <string name="slate_theme">ธีมหินชนวน</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">เทมเพลตกำหนดเลย์เอาต์และตำแหน่งของชื่อเพลง สไตล์แถบล่างกำหนดแบบอักษร ขนาด สี การจัดแนว ระยะห่างตัวอักษร ตัวพิมพ์ และเงา ส่วนพื้นหลังข้อความ ขีดเส้นใต้ ขีดฆ่า ระยะห่างคำ การดูท่อนถัดไป และคอร์ดจะไม่มีผล</string>
     <string name="bible_lottie_unsupported_note">เทมเพลตกำหนดเลย์เอาต์ ตำแหน่งของข้ออ้างอิง และการแบ่งแถบระหว่างสองภาษา สไตล์แถบล่างกำหนดแบบอักษร ขนาด สี การจัดแนว ระยะห่างตัวอักษร ตัวพิมพ์ และเงา ส่วนพื้นหลังข้อความ ขีดเส้นใต้ ขีดฆ่า และระยะห่างคำจะไม่มีผล</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">เส้นขอบ</string>
     <string name="tooltip_outline_options">ตัวเลือกเส้นขอบ</string>
     <string name="text_outline">เส้นขอบ</string>
     <string name="text_outline_width">ความกว้าง</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">เพิ่มเอาต์พุต</string>
     <string name="ndi_output_numbered">เอาต์พุต NDI %1$d</string>
     <string name="preview_output">แสดงตัวอย่างเอาต์พุต</string>
-    <string name="output_resolution">ความละเอียด</string>
     <string name="output_resolution_custom">กำหนดเอง…</string>
     <string name="output_resolution_custom_title">ความละเอียดที่กำหนดเอง</string>
     <string name="output_resolution_width">ความกว้าง</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">วางแผนพิธีจากแอปมือถือได้ตลอดสัปดาห์ แม้คอมพิวเตอร์เครื่องนี้จะปิดอยู่ คอมพิวเตอร์เครื่องนี้ยังคงเป็นแหล่งข้อมูลหลัก</string>
     <string name="calendar_sync_enable">ซิงค์ปฏิทินกับโทรศัพท์</string>
     <string name="calendar_sync_relay_url">รีเลย์</string>
-    <string name="calendar_sync_status_off">ปิด</string>
     <string name="calendar_sync_status_unpaired">ยังไม่ได้ลงทะเบียน — คอมพิวเตอร์เครื่องนี้จะลงทะเบียนกับรีเลย์เมื่อเปิดการซิงค์ครั้งแรก</string>
     <string name="calendar_sync_status_syncing">กำลังซิงค์…</string>
     <string name="calendar_sync_status_synced">ซิงค์แล้ว %1$s</string>

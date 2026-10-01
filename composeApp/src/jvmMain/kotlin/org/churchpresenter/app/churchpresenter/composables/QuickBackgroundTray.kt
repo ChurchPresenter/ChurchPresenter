@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.quick_background_hint
 import churchpresenter.composeapp.generated.resources.quick_background_reset
-import churchpresenter.composeapp.generated.resources.quick_background_slot_hint
+import churchpresenter.composeapp.generated.resources.background_scope_title
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundFill
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.label
@@ -325,7 +325,7 @@ private fun slotTooltip(entry: QuickBackground, slot: Int): String {
     val name = quickBackgroundLabel(entry)
     val chord = quickBackgroundActionFor(slot)?.let { LocalShortcuts.current.chordsFor(it).firstOrNull() }
     return if (chord == null) name
-    else stringResource(Res.string.quick_background_slot_hint, name, chord.label())
+    else stringResource(Res.string.background_scope_title, name, chord.label())
 }
 
 @Composable

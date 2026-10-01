@@ -44,9 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
-import churchpresenter.composeapp.generated.resources.canvas_placeholder_qr
+import churchpresenter.composeapp.generated.resources.show_qr_code
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera
-import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera_default
+import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.canvas_video_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.canvas_video_vlc_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
@@ -882,7 +882,7 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
                 contentScale = ContentScale.Fit
             )
         } else {
-            Text(stringResource(Res.string.canvas_placeholder_qr), color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.show_qr_code), color = Color.White, fontSize = 14.sp)
         }
     }
 }
@@ -901,7 +901,7 @@ private fun CameraSourceContent(
         ) {
             Text(
                 text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                       else stringResource(Res.string.canvas_placeholder_camera_default),
+                       else stringResource(Res.string.background_camera_option),
                 color = Color.White,
                 fontSize = 14.sp
             )
@@ -948,7 +948,7 @@ private fun CameraSourceContent(
             Text(
                 text = shownError?.let { stringResource(cameraFailureStringRes(it)) }
                     ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                       else stringResource(Res.string.canvas_placeholder_camera_default),
+                       else stringResource(Res.string.background_camera_option),
                 color = if (shownError != null) Color(ERROR_TEXT_COLOR) else Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center

@@ -60,7 +60,7 @@ import churchpresenter.composeapp.generated.resources.canvas_render_width
 import churchpresenter.composeapp.generated.resources.canvas_render_height
 import churchpresenter.composeapp.generated.resources.canvas_fps
 import churchpresenter.composeapp.generated.resources.canvas_custom_css
-import churchpresenter.composeapp.generated.resources.canvas_browser_url
+import churchpresenter.composeapp.generated.resources.website_url_label
 import churchpresenter.composeapp.generated.resources.canvas_select_image_title
 import churchpresenter.composeapp.generated.resources.canvas_select_video_title
 import churchpresenter.composeapp.generated.resources.canvas_image_files
@@ -438,7 +438,7 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
 @Composable
 internal fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (SceneSource) -> Unit) {
     Text(stringResource(Res.string.canvas_source_browser), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    PropertyTextField(stringResource(Res.string.canvas_browser_url), source.url) { v ->
+    PropertyTextField(stringResource(Res.string.website_url_label), source.url) { v ->
         onUpdate(source.copy(url = v))
     }
 

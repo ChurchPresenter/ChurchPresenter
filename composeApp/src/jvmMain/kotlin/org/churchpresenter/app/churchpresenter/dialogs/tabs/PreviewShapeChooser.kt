@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_shape_custom
+import churchpresenter.composeapp.generated.resources.canvas_size_custom
 import churchpresenter.composeapp.generated.resources.output_profile_shape_height
 import churchpresenter.composeapp.generated.resources.output_profile_shape_ratio
 import churchpresenter.composeapp.generated.resources.output_profile_shape_resolution
@@ -134,7 +134,7 @@ internal fun PreviewShapeMenu(
                     }
                 }
                 ShapeMenuItem(
-                    label = stringResource(Res.string.output_profile_shape_custom),
+                    label = stringResource(Res.string.canvas_size_custom),
                     selected = state.customShown(profile),
                     tag = previewShapeTag(CUSTOM),
                 ) {

@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.element_offset_enabled
+import churchpresenter.composeapp.generated.resources.profile_song_position
 import churchpresenter.composeapp.generated.resources.element_offset_x
 import churchpresenter.composeapp.generated.resources.element_offset_y
 import org.churchpresenter.settings.ElementOffset
@@ -51,7 +51,7 @@ internal fun ElementOffsetStripRow(
 ) {
     StripRow(label) {
         ToggleControl(
-            label = stringResource(Res.string.element_offset_enabled),
+            label = stringResource(Res.string.profile_song_position),
             checked = offset != null,
             onCheckedChange = { on -> onChange(if (on) ElementOffset() else null) },
             modifier = Modifier.testTag("${tagPrefix}_enabled"),

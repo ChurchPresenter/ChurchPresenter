@@ -76,7 +76,7 @@ import churchpresenter.composeapp.generated.resources.announcement_animation_spe
 import churchpresenter.composeapp.generated.resources.announcement_loop_count
 import churchpresenter.composeapp.generated.resources.announcement_loop_tooltip
 import churchpresenter.composeapp.generated.resources.preview
-import churchpresenter.composeapp.generated.resources.announcement_background_color_label
+import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.transparent_default
 import churchpresenter.composeapp.generated.resources.position_on_screen
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
@@ -428,7 +428,7 @@ private fun AnnouncementsTabScope.AnnouncementsBackgroundCard(viewModel: Announc
             } else {
                 val colorField: @Composable (Modifier) -> Unit = { fieldModifier ->
                     ColorPickerField(
-                        label = stringResource(Res.string.announcement_background_color_label),
+                        label = stringResource(Res.string.canvas_text_bg_color),
                         color = viewModel.backgroundColor,
                         onColorChange = {
                             viewModel.setBackgroundColor(it)

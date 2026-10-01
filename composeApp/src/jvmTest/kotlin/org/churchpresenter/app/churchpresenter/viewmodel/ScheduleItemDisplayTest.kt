@@ -4,10 +4,10 @@ import org.churchpresenter.core.models.songs.SongItem
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.announcements
 import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.media_tab_title
+import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
-import churchpresenter.composeapp.generated.resources.schedule_kind_lower_third
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.tab_canvas
 import churchpresenter.composeapp.generated.resources.tab_dictionary
@@ -150,14 +150,14 @@ class ScheduleItemDisplayTest {
                 mediaUrl = "/m.mp4",
                 mediaTitle = "m",
                 mediaType = "local",
-            ) to Res.string.media_tab_title,
+            ) to Res.string.media,
             ScheduleItem.LowerThirdItem(
                 id = "6",
                 presetId = "p",
                 presetLabel = "p",
                 pauseAtFrame = false,
                 pauseDurationMs = 0L,
-            ) to Res.string.schedule_kind_lower_third,
+            ) to Res.string.display_lower_third,
             ScheduleItem.AnnouncementItem(id = "7", text = "a") to Res.string.announcements,
             ScheduleItem.WebsiteItem(id = "8", url = "https://x") to Res.string.tab_web,
             ScheduleItem.SceneItem(id = "9", sceneId = "s", sceneName = "s") to Res.string.tab_canvas,

@@ -16,17 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.customize_bible
-import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.setup_rail_appearance
 import churchpresenter.composeapp.generated.resources.profile_nav_content
 import churchpresenter.composeapp.generated.resources.profile_nav_general
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
-import churchpresenter.composeapp.generated.resources.profile_nav_outputs
+import churchpresenter.composeapp.generated.resources.profile_outputs_group
 import churchpresenter.composeapp.generated.resources.profile_nav_profile
 import churchpresenter.composeapp.generated.resources.profile_nav_stage_layout
-import churchpresenter.composeapp.generated.resources.profile_nav_stage_monitor
+import churchpresenter.composeapp.generated.resources.profile_mode_stage
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_qa
 import org.churchpresenter.settings.OutputProfile
@@ -68,7 +68,7 @@ internal fun profileNavSections(profile: OutputProfile): List<ProfileNavSection>
             listOf(ProfilePage.General, ProfilePage.Outputs, ProfilePage.Content),
         ),
         ProfileNavSection(
-            stringResource(if (stage) Res.string.profile_nav_stage_monitor else Res.string.setup_rail_appearance),
+            stringResource(if (stage) Res.string.profile_mode_stage else Res.string.setup_rail_appearance),
             customizePanes(profile.displayMode).map { ProfilePage.Appearance(it) },
         ),
     )
@@ -78,7 +78,7 @@ internal fun profileNavSections(profile: OutputProfile): List<ProfileNavSection>
 @Composable
 internal fun ProfilePage.label(): String = when (this) {
     ProfilePage.General -> stringResource(Res.string.profile_nav_general)
-    ProfilePage.Outputs -> stringResource(Res.string.profile_nav_outputs)
+    ProfilePage.Outputs -> stringResource(Res.string.profile_outputs_group)
     ProfilePage.Content -> stringResource(Res.string.profile_nav_content)
     is ProfilePage.Appearance -> pane.navLabel()
 }
@@ -87,8 +87,8 @@ internal fun ProfilePage.label(): String = when (this) {
 @Composable
 internal fun CustomizePane.navLabel(): String = when (this) {
     CustomizePane.STAGE_MONITOR -> stringResource(Res.string.profile_nav_stage_layout)
-    CustomizePane.BIBLE -> stringResource(Res.string.customize_bible)
-    CustomizePane.SONGS -> stringResource(Res.string.customize_songs)
+    CustomizePane.BIBLE -> stringResource(Res.string.bible)
+    CustomizePane.SONGS -> stringResource(Res.string.songs)
     CustomizePane.BACKGROUND -> stringResource(Res.string.background)
     CustomizePane.CAPTIONS -> stringResource(Res.string.profile_nav_live_captions)
     CustomizePane.SUBTITLES -> stringResource(Res.string.media_subtitles)

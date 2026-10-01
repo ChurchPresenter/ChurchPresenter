@@ -32,7 +32,7 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_engine_detect
 import churchpresenter.composeapp.generated.resources.bible_engine_host
-import churchpresenter.composeapp.generated.resources.bible_engine_port
+import churchpresenter.composeapp.generated.resources.server_port
 import churchpresenter.composeapp.generated.resources.bible_engine_run_local
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.stt_help_dev_mode
@@ -169,7 +169,7 @@ internal fun STTSettingsDialogContent(
                         StyledTextField(
                             value = engine.port.toString(),
                             onValueChange = { v -> v.toIntOrNull()?.let { p -> onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } },
-                            label = stringResource(Res.string.bible_engine_port),
+                            label = stringResource(Res.string.server_port),
                             singleLine = true,
                             modifier = Modifier.width(120.dp)
                         )
