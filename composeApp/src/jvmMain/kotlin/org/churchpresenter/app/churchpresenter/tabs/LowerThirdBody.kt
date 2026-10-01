@@ -77,6 +77,7 @@ import javax.swing.SwingUtilities
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.draw.clip
 import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
+import org.churchpresenter.lottiegen.render.lottieDrawProgress
 
 /** The file list, its drag handle, and the preview column. */
 @Composable
@@ -323,7 +324,7 @@ private fun LowerThirdTabScope.LowerThirdPreviewCard(previewOutput: PreviewOutpu
                 if (canPlay) {
                     Image(painter = rememberLottiePainter(
                         composition = composition,
-                        progress = { animatedProgress.value },
+                        progress = { lottieDrawProgress(animatedProgress.value) },
                         fontManager = LottieFonts,
                         enableTextGrouping = groupsText,
                     ), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
