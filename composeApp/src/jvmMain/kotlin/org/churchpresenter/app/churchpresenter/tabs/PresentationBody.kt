@@ -54,12 +54,12 @@ import org.churchpresenter.strings.generated.resources.presentation_error_empty_
 import org.churchpresenter.strings.generated.resources.presentation_error_library_missing
 import org.churchpresenter.strings.generated.resources.presentation_error_render_failed
 import org.churchpresenter.strings.generated.resources.supported_formats
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.presentationengine.model.LayerSpec
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

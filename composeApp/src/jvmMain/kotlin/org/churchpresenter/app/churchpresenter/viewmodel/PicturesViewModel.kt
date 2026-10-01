@@ -21,7 +21,7 @@ import org.churchpresenter.app.churchpresenter.data.HiddenItemsStore
 import org.churchpresenter.app.churchpresenter.data.firstVisibleIndex
 import org.churchpresenter.app.churchpresenter.data.nextVisibleIndex
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem

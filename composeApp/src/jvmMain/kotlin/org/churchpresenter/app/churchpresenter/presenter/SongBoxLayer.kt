@@ -15,12 +15,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
-import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.spacingEm
+import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.TextBox

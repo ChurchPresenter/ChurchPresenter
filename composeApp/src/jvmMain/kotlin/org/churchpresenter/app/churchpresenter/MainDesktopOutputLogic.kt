@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.profileFor
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 

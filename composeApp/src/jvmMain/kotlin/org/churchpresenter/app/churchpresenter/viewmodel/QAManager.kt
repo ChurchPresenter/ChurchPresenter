@@ -17,9 +17,9 @@ import org.churchpresenter.core.models.qa.QuestionDto
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.qa.toDto
 import java.io.File
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEventStore
+import org.churchpresenter.sharedui.utils.UsageEvents
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference

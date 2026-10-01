@@ -33,9 +33,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.app.churchpresenter.composables.backdropRoom
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.backdropRoom
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.settings.DICTIONARY_DEFINITION_BOX
 import org.churchpresenter.settings.DICTIONARY_KJV_BOX
@@ -45,8 +45,8 @@ import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 
 @Composable
 fun DictionaryPresenter(

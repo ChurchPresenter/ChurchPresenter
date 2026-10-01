@@ -32,7 +32,7 @@ import org.churchpresenter.app.churchpresenter.presenter.movedOn
 import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
 import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
 import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MAX
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MIN
 import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_STEP

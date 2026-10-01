@@ -29,11 +29,11 @@ import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.songchords.ChordTransposer
-import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
-import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
-import org.churchpresenter.app.churchpresenter.utils.isSlideBreak
-import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
-import org.churchpresenter.app.churchpresenter.utils.isVerseHeader
+import org.churchpresenter.sharedui.utils.isChorusHeader
+import org.churchpresenter.sharedui.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.isSlideBreak
+import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
+import org.churchpresenter.sharedui.utils.isVerseHeader
 import java.io.File
 import java.util.IdentityHashMap
 

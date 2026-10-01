@@ -3,9 +3,9 @@ package org.churchpresenter.app.churchpresenter
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

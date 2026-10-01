@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -104,9 +104,9 @@ import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_search
 import org.churchpresenter.strings.generated.resources.search_clear
 import org.churchpresenter.strings.generated.resources.verse
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.settings.AppSettings

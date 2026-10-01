@@ -26,6 +26,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
+import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.backdropRoom
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 
 /**
  * Shows text clipped to the last N lines. Content is bottom-aligned —

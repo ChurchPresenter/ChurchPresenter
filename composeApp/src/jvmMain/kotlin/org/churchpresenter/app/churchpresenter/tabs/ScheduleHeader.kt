@@ -92,7 +92,7 @@ import org.churchpresenter.strings.generated.resources.schedule_add_files
 import org.churchpresenter.strings.generated.resources.tooltip_new_schedule
 import org.churchpresenter.strings.generated.resources.tooltip_open_schedule
 import org.churchpresenter.strings.generated.resources.tooltip_save_schedule
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.app.churchpresenter.utils.DroppedFileAction

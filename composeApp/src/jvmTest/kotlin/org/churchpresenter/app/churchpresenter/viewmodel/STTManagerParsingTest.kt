@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.json.JSONObject
 import kotlin.test.AfterTest
 import kotlin.test.Test

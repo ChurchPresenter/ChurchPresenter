@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.composables.BottomAlignedText
 import org.churchpresenter.app.churchpresenter.subtitles.SubtitleCue
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.SUBTITLE_BOX
 import org.churchpresenter.settings.boxAt

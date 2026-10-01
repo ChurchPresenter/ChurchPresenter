@@ -20,12 +20,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.FocusLostBanner
+import org.churchpresenter.sharedui.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.TooltipIconButton
 import kotlin.test.Test
 
 class TabControlsScreenshotTest {

@@ -15,9 +15,9 @@ import androidx.compose.ui.input.key.type
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.awt.Window as AwtWindow
@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.FocusLostRescueState
 import org.churchpresenter.app.churchpresenter.PresentationSlidesLoaded
 
 /**

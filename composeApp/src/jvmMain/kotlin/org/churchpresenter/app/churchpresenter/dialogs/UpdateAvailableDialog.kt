@@ -87,8 +87,8 @@ import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.system.exitProcess
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.composables.LabeledSwitch
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UPDATE_INSTALLER_PREFIX
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 

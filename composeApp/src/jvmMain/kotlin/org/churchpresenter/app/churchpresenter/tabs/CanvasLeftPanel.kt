@@ -9,8 +9,8 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.sharedui.composables.initialPassClickable
+import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,7 +62,7 @@ import org.churchpresenter.strings.generated.resources.canvas_new_scene
 import org.churchpresenter.strings.generated.resources.canvas_scenes
 import org.churchpresenter.strings.generated.resources.canvas_sources
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds
+import org.churchpresenter.sharedui.utils.assignedDisplayBounds
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.forArea
 import org.churchpresenter.core.models.scene.isLandscape

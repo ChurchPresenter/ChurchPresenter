@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.AppSettings

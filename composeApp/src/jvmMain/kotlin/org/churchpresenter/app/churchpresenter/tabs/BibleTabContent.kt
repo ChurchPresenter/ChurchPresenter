@@ -37,7 +37,7 @@ import org.churchpresenter.strings.generated.resources.entire_bible
 import org.churchpresenter.strings.generated.resources.exact_match
 import org.churchpresenter.strings.generated.resources.no_results_found
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
@@ -53,7 +53,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.selectSearchResult
 import org.churchpresenter.app.churchpresenter.viewmodel.submitSmartQuery
 import org.churchpresenter.app.churchpresenter.viewmodel.liveVerseSplitMark
 import androidx.compose.foundation.layout.ColumnScope
-import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.FocusLostRescueState
 
 /** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
 @Composable

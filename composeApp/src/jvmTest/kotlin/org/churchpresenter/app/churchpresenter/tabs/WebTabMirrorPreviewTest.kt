@@ -13,7 +13,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.input.key.Key
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

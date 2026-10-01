@@ -128,7 +128,7 @@ import org.churchpresenter.strings.generated.resources.tune
 import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.PaneTab
 import org.churchpresenter.app.churchpresenter.composables.PaneTabRow
 import org.churchpresenter.app.churchpresenter.composables.SectionInk
@@ -145,8 +145,8 @@ import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.SongBackground
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.data.SectionBackgroundSlot
@@ -158,7 +158,7 @@ import org.churchpresenter.songchords.ChordSheetImporter
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raisedHover
 

@@ -21,6 +21,8 @@ import java.awt.GraphicsEnvironment
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEventStore
 
 /**
  * Sends an anonymous, city-level ping to the ChurchPresenter live world map

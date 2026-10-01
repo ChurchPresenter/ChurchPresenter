@@ -36,8 +36,8 @@ import org.churchpresenter.strings.generated.resources.output_profile_shape_rati
 import org.churchpresenter.strings.generated.resources.output_profile_shape_resolution
 import org.churchpresenter.strings.generated.resources.output_profile_shape_tooltip
 import org.churchpresenter.strings.generated.resources.output_profile_shape_width
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.sharedui.composables.SegmentedButton
+import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyButton

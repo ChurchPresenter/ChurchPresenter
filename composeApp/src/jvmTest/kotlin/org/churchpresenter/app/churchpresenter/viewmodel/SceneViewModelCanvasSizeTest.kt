@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import java.awt.Rectangle
 import java.io.File
 import kotlin.test.AfterTest

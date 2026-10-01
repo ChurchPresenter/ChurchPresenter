@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.STTSettings
 

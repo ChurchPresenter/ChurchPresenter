@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.app.churchpresenter.composables.appResourcesDir
-import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.omt.OmtReceiver
 import org.churchpresenter.omt.OmtRuntimeStatus
 import org.churchpresenter.settings.ScreenAssignment

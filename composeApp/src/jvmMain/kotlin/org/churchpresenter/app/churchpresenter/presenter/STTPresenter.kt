@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
@@ -39,8 +39,8 @@ import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
 

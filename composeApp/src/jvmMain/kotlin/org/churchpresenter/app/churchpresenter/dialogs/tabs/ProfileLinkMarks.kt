@@ -32,7 +32,7 @@ import org.churchpresenter.strings.generated.resources.profile_revert
 import org.churchpresenter.strings.generated.resources.profile_revert_to
 import org.churchpresenter.strings.generated.resources.profile_value_off
 import org.churchpresenter.strings.generated.resources.profile_value_on
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.semantic

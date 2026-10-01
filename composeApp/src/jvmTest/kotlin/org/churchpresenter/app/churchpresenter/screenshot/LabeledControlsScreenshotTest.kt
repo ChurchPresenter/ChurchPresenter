@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.LabeledRadioButton
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.LabeledRadioButton
+import org.churchpresenter.sharedui.composables.LabeledSwitch
 import kotlin.test.Test
 
 /**

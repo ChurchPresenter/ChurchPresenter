@@ -31,7 +31,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
+import org.churchpresenter.sharedui.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_REFERENCE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_SWITCH_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.toggleCheckbox

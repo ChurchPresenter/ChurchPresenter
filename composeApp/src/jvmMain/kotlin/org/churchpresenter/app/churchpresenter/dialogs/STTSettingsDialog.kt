@@ -41,11 +41,11 @@ import org.churchpresenter.strings.generated.resources.stt_settings_dialog_title
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
-import org.churchpresenter.app.churchpresenter.composables.StyledTextField
+import org.churchpresenter.sharedui.composables.StyledTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleEngineSettings
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 
 private val NUMBER_FIELD_WIDTH = 104.dp
 

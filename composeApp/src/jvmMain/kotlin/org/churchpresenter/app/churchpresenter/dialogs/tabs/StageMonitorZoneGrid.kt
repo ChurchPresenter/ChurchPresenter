@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.color
 import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.toAlignment
 import org.churchpresenter.app.churchpresenter.composables.tvScreenBoxWidthFor
@@ -38,7 +38,7 @@ import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.toZone
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.STAGE_ZONE_FULL_PERCENT
 import org.churchpresenter.strings.generated.resources.stage_monitor_zone_width

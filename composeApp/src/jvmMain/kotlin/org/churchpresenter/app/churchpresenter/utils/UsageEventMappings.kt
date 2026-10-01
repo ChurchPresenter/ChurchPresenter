@@ -4,6 +4,7 @@ import org.churchpresenter.calendar.CalendarUsage
 import org.churchpresenter.converter.ui.BIBLE_CONVERSION
 import org.churchpresenter.converter.ui.SongSources
 import org.churchpresenter.songlibrary.SongLibraryUsage
+import org.churchpresenter.sharedui.utils.UsageEvent
 
 internal fun calendarUsageEvent(usage: CalendarUsage): UsageEvent = when (usage) {
     CalendarUsage.SERVICE_ADDED -> UsageEvent.CALENDAR_SERVICE_ADDED

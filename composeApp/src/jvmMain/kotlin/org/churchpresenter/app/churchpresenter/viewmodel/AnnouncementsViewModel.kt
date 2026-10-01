@@ -12,7 +12,7 @@ import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 

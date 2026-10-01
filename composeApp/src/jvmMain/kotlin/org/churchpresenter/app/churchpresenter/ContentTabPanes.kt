@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.app.churchpresenter.models.announcementPresetItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.DictionaryTab
@@ -12,10 +12,10 @@ import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.WebTab
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
 import java.util.UUID

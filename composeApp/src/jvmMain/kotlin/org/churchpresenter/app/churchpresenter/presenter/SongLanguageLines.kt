@@ -9,10 +9,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Shadow
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.combinedTextDecoration
+import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings

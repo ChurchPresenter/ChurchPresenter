@@ -25,6 +25,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.fail
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * What the band actually *looks* like over a transition, measured from its pixels.

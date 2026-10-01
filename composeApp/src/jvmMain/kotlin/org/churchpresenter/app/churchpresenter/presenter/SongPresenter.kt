@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.composables.cameraResolves
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
-import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
+import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -268,8 +269,7 @@ internal fun SectionChordChart(
                 textMeasurer = measurer,
                 lines = lines,
                 baseStyle = baseStyle,
-                availableWidth = (maxWidth.value / scaleFactor).toInt(),
-                availableHeight = (maxHeight.value / scaleFactor).toInt(),
+                available = IntSize((maxWidth.value / scaleFactor).toInt(), (maxHeight.value / scaleFactor).toInt()),
                 maxFontSize = maxFontSize,
             )
         }

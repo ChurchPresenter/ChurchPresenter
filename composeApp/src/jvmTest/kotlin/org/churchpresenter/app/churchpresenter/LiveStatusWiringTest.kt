@@ -7,7 +7,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import kotlin.test.Test
 import kotlin.test.assertEquals

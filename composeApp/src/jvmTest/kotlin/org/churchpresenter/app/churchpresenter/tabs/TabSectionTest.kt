@@ -31,6 +31,7 @@ import org.churchpresenter.settings.TabLabelStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Tabs
 
 /**
  * The tab bar itself — the row every other tab hangs off, and the one control in the app that is

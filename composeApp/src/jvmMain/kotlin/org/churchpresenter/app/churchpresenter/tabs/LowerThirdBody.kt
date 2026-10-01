@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
+import org.churchpresenter.sharedui.composables.initialPassClickable
+import org.churchpresenter.sharedui.composables.finalPassClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,7 +65,7 @@ import kotlinx.coroutines.launch
 import javax.swing.JOptionPane
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.jetbrains.compose.resources.painterResource
@@ -76,7 +76,7 @@ import java.io.File
 import javax.swing.SwingUtilities
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.draw.clip
-import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
+import org.churchpresenter.sharedui.utils.PreviewOutput
 import org.churchpresenter.lottiegen.render.lottieDrawProgress
 
 /** The file list, its drag handle, and the preview column. */

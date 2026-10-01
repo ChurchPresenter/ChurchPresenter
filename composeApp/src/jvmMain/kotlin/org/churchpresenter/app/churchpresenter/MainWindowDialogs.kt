@@ -21,7 +21,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import org.churchpresenter.strings.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.CustomizeThemeDialog
@@ -33,10 +33,10 @@ import org.churchpresenter.app.churchpresenter.ui.theme.themeChoiceFrom
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
 import org.churchpresenter.settings.answered

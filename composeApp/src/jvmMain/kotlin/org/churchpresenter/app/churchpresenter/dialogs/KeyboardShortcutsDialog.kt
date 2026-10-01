@@ -85,11 +85,11 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SearchField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.models.ShortcutScope
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
-import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.utils.searchText
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutScope
+import org.churchpresenter.sharedui.utils.ShortcutMap
+import org.churchpresenter.sharedui.utils.label
+import org.churchpresenter.sharedui.utils.searchText
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

@@ -6,7 +6,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 
 /**
  * The decisions the root composable makes, held apart from the composables that make them: here the

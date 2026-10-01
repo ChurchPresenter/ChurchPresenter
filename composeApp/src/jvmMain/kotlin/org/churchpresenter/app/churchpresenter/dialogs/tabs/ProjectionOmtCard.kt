@@ -83,9 +83,9 @@ import org.churchpresenter.strings.generated.resources.remove
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.OmtManager
 import org.churchpresenter.app.churchpresenter.presenter.OmtVideoRenderer

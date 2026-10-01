@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeoutException
 import javax.imageio.ImageIO
-import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.diagnostics.Log
 
 private const val HTTP_OK = 200

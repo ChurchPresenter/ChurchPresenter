@@ -18,7 +18,7 @@ import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.composables.CheckerboardFill
 import org.churchpresenter.app.churchpresenter.presenter.ABOVE_BAND_OVERLAP_FRACTION
 import org.churchpresenter.app.churchpresenter.presenter.AboveBand
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
 import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand

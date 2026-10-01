@@ -8,7 +8,7 @@ import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.settings.BibleSettings
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

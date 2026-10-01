@@ -10,17 +10,17 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.type
 import org.churchpresenter.strings.generated.resources.pause
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.followerMediaUrl
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import androidx.compose.ui.input.key.KeyEvent
 

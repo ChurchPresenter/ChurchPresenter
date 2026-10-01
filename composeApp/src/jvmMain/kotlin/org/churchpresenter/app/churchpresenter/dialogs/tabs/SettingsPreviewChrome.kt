@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
-import org.churchpresenter.app.churchpresenter.utils.FallbackOutputSize
-import org.churchpresenter.app.churchpresenter.utils.OutputSize
+import org.churchpresenter.sharedui.utils.FallbackOutputSize
+import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 
 /**

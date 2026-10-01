@@ -16,17 +16,17 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBlockBackdrop
+import org.churchpresenter.sharedui.composables.rememberTextBlockBackdrop
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
-import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.sharedui.utils.combinedTextDecoration
+import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualGrid
-import org.churchpresenter.app.churchpresenter.composables.TextBlockBackdrop
+import org.churchpresenter.sharedui.composables.TextBlockBackdrop
 
 /**
  * One slide of a song as the frame draws it: which lines of which languages, the chart rows, and

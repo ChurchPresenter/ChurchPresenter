@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

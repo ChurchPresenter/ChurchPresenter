@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
-import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
-import org.churchpresenter.app.churchpresenter.utils.isSlideBreak
-import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
+import org.churchpresenter.sharedui.utils.isChorusHeader
+import org.churchpresenter.sharedui.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.isSlideBreak
+import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.songchords.ChordTransposer

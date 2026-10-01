@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

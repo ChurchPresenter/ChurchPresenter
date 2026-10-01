@@ -40,7 +40,7 @@ import org.churchpresenter.strings.generated.resources.profile_reset_positions
 import org.churchpresenter.strings.generated.resources.profile_reset_positions_sub
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
-import org.churchpresenter.app.churchpresenter.utils.OutputSize
+import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.TextBox

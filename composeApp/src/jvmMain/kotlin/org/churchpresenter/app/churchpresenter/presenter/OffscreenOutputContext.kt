@@ -7,6 +7,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * Everything an off-screen output needs in order to draw the live content.

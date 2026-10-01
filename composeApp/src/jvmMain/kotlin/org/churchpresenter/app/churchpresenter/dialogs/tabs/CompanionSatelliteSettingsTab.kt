@@ -19,7 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.companionsatellite.CompanionSatelliteClient
 import org.churchpresenter.theme.components.RaisedButton
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Text
@@ -67,10 +67,10 @@ import org.churchpresenter.strings.generated.resources.companion_satellite_statu
 import org.churchpresenter.strings.generated.resources.companion_satellite_status_disconnected
 import org.churchpresenter.strings.generated.resources.atem_status_error
 import org.churchpresenter.companionsatellite.CompanionConnectionStatus
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.SettingRow
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
@@ -79,7 +79,7 @@ import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic
 
 private const val MIN_RECONNECT_DELAY_MS = 500

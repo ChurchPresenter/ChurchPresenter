@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvent
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 
 /**
  * Speech-driven detection: engine events in, detected references out, and the training-log

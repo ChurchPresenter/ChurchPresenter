@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.ui.text.TextMeasurer

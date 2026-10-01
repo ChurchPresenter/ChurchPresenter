@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import org.churchpresenter.core.models.scene.SceneAlternateLayout
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform

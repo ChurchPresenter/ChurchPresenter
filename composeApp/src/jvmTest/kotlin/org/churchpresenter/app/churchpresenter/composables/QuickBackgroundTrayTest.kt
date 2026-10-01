@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.test.ComposeUiTest
-import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
+import org.churchpresenter.sharedui.utils.FALLBACK_STAGE_ASPECT
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText

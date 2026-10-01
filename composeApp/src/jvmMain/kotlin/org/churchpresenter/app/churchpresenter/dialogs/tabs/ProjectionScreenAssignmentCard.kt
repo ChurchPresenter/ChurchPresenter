@@ -58,8 +58,8 @@ import org.churchpresenter.strings.generated.resources.screen
 import org.churchpresenter.strings.generated.resources.screen_assignment
 import org.churchpresenter.strings.generated.resources.screen_col_label
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.settings.AppSettings

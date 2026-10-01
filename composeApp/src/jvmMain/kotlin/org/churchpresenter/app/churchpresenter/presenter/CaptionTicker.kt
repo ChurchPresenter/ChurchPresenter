@@ -20,7 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.core.models.text.TextOutline
 import kotlin.math.roundToInt
 

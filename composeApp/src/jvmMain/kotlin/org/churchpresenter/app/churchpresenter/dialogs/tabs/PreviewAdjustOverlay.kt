@@ -40,7 +40,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BoxMargins
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.presenter.textBoxArea
-import org.churchpresenter.app.churchpresenter.utils.OutputSize
+import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.semantic

@@ -42,7 +42,7 @@ import org.churchpresenter.strings.generated.resources.tab_label_style_hint
 import org.churchpresenter.strings.generated.resources.tab_label_style_icons
 import org.churchpresenter.strings.generated.resources.tab_label_style_icons_and_text
 import org.churchpresenter.strings.generated.resources.tab_label_style_text
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.jetbrains.compose.resources.stringResource

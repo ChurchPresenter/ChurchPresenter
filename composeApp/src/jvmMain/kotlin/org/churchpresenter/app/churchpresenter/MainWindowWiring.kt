@@ -16,15 +16,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.seedCalendarFolder
 import org.churchpresenter.calendar.CueRunner
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.jetbrains.compose.resources.stringResource
 
 /** The cue engine and the service auto-loader, running for the whole session. */

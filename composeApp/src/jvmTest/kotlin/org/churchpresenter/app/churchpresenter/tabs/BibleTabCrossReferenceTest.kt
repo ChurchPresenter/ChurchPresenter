@@ -13,7 +13,7 @@ import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

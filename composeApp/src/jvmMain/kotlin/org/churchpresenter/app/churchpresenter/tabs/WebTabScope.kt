@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import androidx.compose.runtime.Stable

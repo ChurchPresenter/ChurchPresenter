@@ -6,12 +6,12 @@ import java.io.File
 import java.util.Locale
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryEntry
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.LiveHistoryEntry
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 

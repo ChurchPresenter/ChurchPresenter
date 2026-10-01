@@ -11,7 +11,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

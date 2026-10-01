@@ -30,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackgroun
 import org.churchpresenter.app.churchpresenter.utils.slideThumbnails
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.calendarUsageEvent
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.jetbrains.compose.resources.stringResource

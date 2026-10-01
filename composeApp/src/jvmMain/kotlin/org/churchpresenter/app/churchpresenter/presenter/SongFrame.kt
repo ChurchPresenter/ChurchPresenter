@@ -34,7 +34,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.channels.Channel
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants

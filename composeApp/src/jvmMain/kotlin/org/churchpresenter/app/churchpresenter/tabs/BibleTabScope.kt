@@ -30,10 +30,10 @@ import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.lottieBandPath
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.isMultiTranslationPresentation
 import org.churchpresenter.settings.profileFor
@@ -57,7 +57,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.utils.ShortcutMap
 
 /**
  * Everything the Bible tab's pieces read, for one composition: its parameters, the view model's

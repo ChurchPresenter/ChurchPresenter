@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import java.io.File
 import java.net.InetAddress
 import java.net.InetSocketAddress

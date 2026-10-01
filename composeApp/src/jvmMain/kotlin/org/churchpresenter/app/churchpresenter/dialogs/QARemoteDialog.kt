@@ -70,14 +70,14 @@ import org.churchpresenter.strings.generated.resources.qa_starting_tunnel
 import org.churchpresenter.strings.generated.resources.qa_submit_questions
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken

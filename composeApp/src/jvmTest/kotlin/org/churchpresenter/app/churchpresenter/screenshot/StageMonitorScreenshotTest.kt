@@ -34,7 +34,7 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.settings.withZoneWidth

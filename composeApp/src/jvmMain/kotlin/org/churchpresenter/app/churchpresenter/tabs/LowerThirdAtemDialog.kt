@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.composables.LabeledRadioButton
+import org.churchpresenter.sharedui.composables.LabeledRadioButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

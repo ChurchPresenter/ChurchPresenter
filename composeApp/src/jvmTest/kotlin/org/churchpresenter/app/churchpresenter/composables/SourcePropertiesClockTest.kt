@@ -17,6 +17,7 @@ import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.sharedui.composables.mode
 
 /**
  * The Clock & Timer source, which is four controls in one: a wall clock, a countdown, a stopwatch and

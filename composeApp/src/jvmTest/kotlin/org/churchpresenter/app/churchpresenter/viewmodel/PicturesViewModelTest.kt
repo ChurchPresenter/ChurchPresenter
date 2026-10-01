@@ -4,7 +4,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PictureSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File

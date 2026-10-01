@@ -38,10 +38,10 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.decrement
 import org.churchpresenter.strings.generated.resources.increment
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
+import org.churchpresenter.sharedui.composables.SegmentedButton
+import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyIconButton
 import org.churchpresenter.theme.components.RaisedSwitch

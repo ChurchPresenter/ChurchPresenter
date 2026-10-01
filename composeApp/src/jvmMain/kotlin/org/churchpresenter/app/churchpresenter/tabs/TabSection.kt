@@ -49,6 +49,7 @@ import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.models.Tabs
 
 @Composable
 fun TabSection(

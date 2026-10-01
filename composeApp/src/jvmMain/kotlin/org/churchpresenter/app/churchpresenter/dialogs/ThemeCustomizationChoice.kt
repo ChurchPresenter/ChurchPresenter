@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
-import org.churchpresenter.app.churchpresenter.composables.cpTryParseHex
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.sharedui.composables.cpColorToHex
+import org.churchpresenter.sharedui.composables.cpTryParseHex
+import org.churchpresenter.sharedui.utils.Utils
 import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.DEFAULT_ROW_SPACING

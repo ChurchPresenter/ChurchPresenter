@@ -20,11 +20,11 @@ import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 

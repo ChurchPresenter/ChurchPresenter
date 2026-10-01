@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
-import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -48,13 +48,13 @@ import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.ServiceAutoLoader
 import org.churchpresenter.settings.calendarFolder
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.isDue
 import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown

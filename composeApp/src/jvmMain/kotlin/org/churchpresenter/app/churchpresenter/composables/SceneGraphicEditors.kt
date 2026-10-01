@@ -79,6 +79,15 @@ import org.churchpresenter.core.models.scene.SceneSource
 import androidx.compose.foundation.layout.PaddingValues
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.PropertyIntField
+import org.churchpresenter.sharedui.composables.PropertySlider
+import org.churchpresenter.sharedui.composables.PropertySliderWithInput
+import org.churchpresenter.sharedui.composables.PropertyTextField
+import org.churchpresenter.sharedui.composables.TextStyleButtons
+import org.churchpresenter.sharedui.composables.mode
+import org.churchpresenter.sharedui.composables.opacityLabel
 
 private const val MAX_STROKE_WIDTH = 20f
 private const val MAX_ANGLE_DEGREES = 360f

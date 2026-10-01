@@ -23,8 +23,8 @@ import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.strings.generated.resources.scope
 import org.churchpresenter.strings.generated.resources.verse
 import java.awt.Window as AwtWindow
-import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
-import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
+import org.churchpresenter.sharedui.composables.focusRescuePressHook
+import org.churchpresenter.sharedui.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.sharedCrossReferences
@@ -33,8 +33,8 @@ import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

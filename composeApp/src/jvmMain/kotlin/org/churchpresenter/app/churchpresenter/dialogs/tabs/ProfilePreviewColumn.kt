@@ -36,8 +36,8 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.profile_live_none
 import org.churchpresenter.strings.generated.resources.profile_live_on
 import org.churchpresenter.strings.generated.resources.profile_outputs_group
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.utils.OutputSize
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape

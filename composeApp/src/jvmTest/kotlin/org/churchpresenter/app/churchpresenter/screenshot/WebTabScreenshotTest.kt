@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.WebLabel
 import org.churchpresenter.app.churchpresenter.tabs.webButton
 import org.churchpresenter.app.churchpresenter.tabs.webTab

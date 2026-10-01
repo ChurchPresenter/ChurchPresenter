@@ -6,8 +6,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.applyTextTransform
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.applyTextTransform
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.BibleTranslationSettings
 

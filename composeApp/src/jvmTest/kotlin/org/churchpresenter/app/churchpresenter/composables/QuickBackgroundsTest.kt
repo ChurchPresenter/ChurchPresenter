@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.input.key.Key
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.utils.keyDown
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.QuickBackground

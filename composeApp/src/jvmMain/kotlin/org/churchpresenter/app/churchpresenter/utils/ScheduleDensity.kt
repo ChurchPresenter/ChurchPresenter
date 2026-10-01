@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+
 private const val EXTRA_COMPACT_MAX_PERCENT = 60
 private const val COMPACT_MAX_PERCENT = 90
 private const val NORMAL_MAX_PERCENT = 120

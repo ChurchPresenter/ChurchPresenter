@@ -35,10 +35,10 @@ import org.churchpresenter.strings.generated.resources.song_number_offset_needs_
 import org.churchpresenter.strings.generated.resources.song_number_offset_x
 import org.churchpresenter.strings.generated.resources.song_number_offset_y
 import org.churchpresenter.theme.components.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
-import org.churchpresenter.app.churchpresenter.composables.LabeledControl
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.LabeledControl
+import org.churchpresenter.sharedui.composables.SegmentedButton
+import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SliderNumberField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongNumberOffset

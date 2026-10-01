@@ -34,9 +34,9 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel

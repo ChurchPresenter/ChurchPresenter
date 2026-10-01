@@ -11,10 +11,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.type
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.ui.input.key.KeyEvent
 

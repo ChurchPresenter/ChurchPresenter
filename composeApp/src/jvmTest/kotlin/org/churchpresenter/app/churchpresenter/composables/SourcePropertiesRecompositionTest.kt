@@ -16,6 +16,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.composables.mode
 
 /**
  * What survives a recomposition the operator did not ask for.

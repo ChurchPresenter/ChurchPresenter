@@ -17,9 +17,9 @@ import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.InstallPhase
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEventStore
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.BibleSettings
 
 enum class BibleCatalogError { NETWORK_ERROR, RATE_LIMITED, FAILURE }

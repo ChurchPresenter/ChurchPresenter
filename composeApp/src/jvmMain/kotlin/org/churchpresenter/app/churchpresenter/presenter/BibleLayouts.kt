@@ -27,13 +27,13 @@ import androidx.compose.ui.graphics.Color
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleStyleElement
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.app.churchpresenter.composables.backdropRoom
+import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.backdropRoom
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualColumns
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 
 /*

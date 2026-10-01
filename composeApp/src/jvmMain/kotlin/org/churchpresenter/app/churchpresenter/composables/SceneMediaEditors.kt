@@ -76,7 +76,7 @@ import org.churchpresenter.icons.generated.resources.ic_folder
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.painterResource
@@ -85,6 +85,18 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
+import org.churchpresenter.sharedui.composables.HorizontalAlignmentButtons
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.PropertyIntField
+import org.churchpresenter.sharedui.composables.PropertySlider
+import org.churchpresenter.sharedui.composables.PropertySliderWithInput
+import org.churchpresenter.sharedui.composables.PropertyTextField
+import org.churchpresenter.sharedui.composables.StyledTextField
+import org.churchpresenter.sharedui.composables.TextStyleButtons
+import org.churchpresenter.sharedui.composables.VerticalAlignmentButtons
+import org.churchpresenter.sharedui.composables.opacityLabel
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f

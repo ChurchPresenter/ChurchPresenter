@@ -77,11 +77,11 @@ import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.strings.generated.resources.preview
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
+import org.churchpresenter.sharedui.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.cpColorToHex
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.ChurchPresenterTheme

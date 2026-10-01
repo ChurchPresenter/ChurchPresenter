@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.utils.OUTPUT_RESOLUTIONS
+import org.churchpresenter.sharedui.utils.OUTPUT_RESOLUTIONS
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

@@ -27,10 +27,10 @@ import org.churchpresenter.strings.generated.resources.profile_text_size
 import org.churchpresenter.strings.generated.resources.profile_text_size_unit
 import org.churchpresenter.strings.generated.resources.profile_text_style
 import org.churchpresenter.strings.generated.resources.right
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.TextBackdropButton
-import org.churchpresenter.app.churchpresenter.composables.TextOutlineButton
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.sharedui.composables.ShadowDetailRow
+import org.churchpresenter.sharedui.composables.TextBackdropButton
+import org.churchpresenter.sharedui.composables.TextOutlineButton
+import org.churchpresenter.sharedui.composables.TextStyleButtons
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 

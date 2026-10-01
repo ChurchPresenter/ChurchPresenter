@@ -28,6 +28,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.composables.matches
+import org.churchpresenter.sharedui.composables.mode
 
 /**
  * The canvas scene compositor's per-source-type renderer — 11 independent `when` branches, one

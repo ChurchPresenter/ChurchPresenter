@@ -13,7 +13,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

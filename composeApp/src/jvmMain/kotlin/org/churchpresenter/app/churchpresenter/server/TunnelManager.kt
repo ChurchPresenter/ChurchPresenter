@@ -20,7 +20,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
-import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 
 private const val HTTP_OK = 200
 private const val TUNNEL_READY_TIMEOUT_MS = 30_000L

@@ -11,6 +11,7 @@ import org.churchpresenter.icons.generated.resources.ic_copy
 import org.churchpresenter.strings.generated.resources.tooltip_copy_link
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.TooltipIconButton
 
 /**
  * Copies [url] to the clipboard, shown beside a button that opens the same address.

@@ -35,7 +35,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
 import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
-import org.churchpresenter.app.churchpresenter.utils.OutputSize
+import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape

@@ -48,11 +48,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.app.churchpresenter.composables.SectionLabelRow
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.FocusHintBanner
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.FocusHintBanner
+import org.churchpresenter.sharedui.composables.FocusLostBanner
+import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -74,19 +74,19 @@ import org.churchpresenter.strings.generated.resources.songs_search_focus_hint
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.strings.generated.resources.song_title_slide
 import org.churchpresenter.strings.generated.resources.title
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
+import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
+import org.churchpresenter.sharedui.composables.finalPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.viewmodel.songCreditLine
 import org.churchpresenter.app.churchpresenter.viewmodel.songTitleLine
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.FocusLostRescueState
 import androidx.compose.foundation.layout.RowScope
 
 /**

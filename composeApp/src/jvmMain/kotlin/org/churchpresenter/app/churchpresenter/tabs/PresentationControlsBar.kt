@@ -83,10 +83,10 @@ import org.churchpresenter.strings.generated.resources.unit_ms
 import org.churchpresenter.strings.generated.resources.unit_s
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.presentation.AnimationType
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.label
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
+import org.churchpresenter.sharedui.utils.label
+import org.churchpresenter.sharedui.utils.pairLabel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette

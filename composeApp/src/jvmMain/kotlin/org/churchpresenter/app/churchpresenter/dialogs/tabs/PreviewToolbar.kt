@@ -21,8 +21,8 @@ import org.churchpresenter.strings.generated.resources.preview_sample_long
 import org.churchpresenter.strings.generated.resources.preview_sample_medium
 import org.churchpresenter.strings.generated.resources.preview_sample_short
 import org.churchpresenter.strings.generated.resources.profile_preview_caption
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.sharedui.composables.SegmentedButton
+import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
 

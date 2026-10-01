@@ -35,6 +35,8 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.PropertyCommitTextField
 
 /**
  * How many times the panel looks, a second apart, each time it opens or Refresh is pressed.

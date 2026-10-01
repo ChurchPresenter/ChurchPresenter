@@ -61,8 +61,8 @@ import org.churchpresenter.strings.generated.resources.copy_url_transparent
 import org.churchpresenter.strings.generated.resources.identify_screen
 import org.churchpresenter.strings.generated.resources.output_profile_picker_tooltip
 import org.churchpresenter.strings.generated.resources.remove
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
@@ -72,7 +72,7 @@ import org.churchpresenter.settings.removeBrowserSourceOutput
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withBrowserSourceOutput
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp

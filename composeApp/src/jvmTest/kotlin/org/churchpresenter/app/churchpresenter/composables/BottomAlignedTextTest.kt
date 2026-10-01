@@ -17,6 +17,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
+import org.churchpresenter.sharedui.composables.OutlinedText
 
 /**
  * [BottomAlignedText] is shared between `STTPresenter` and `SubtitleOverlay`, both of which always

@@ -95,7 +95,7 @@ import org.churchpresenter.strings.generated.resources.author
 import org.churchpresenter.strings.generated.resources.composer
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

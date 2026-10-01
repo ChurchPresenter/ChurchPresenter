@@ -3,8 +3,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.Image
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -52,11 +52,11 @@ import org.churchpresenter.strings.generated.resources.play
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
-import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
+import org.churchpresenter.sharedui.utils.formatAspectRatio
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.strings.generated.resources.aspect_ratio_mismatch
-import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
+import org.churchpresenter.sharedui.utils.PreviewOutput
 import androidx.compose.material3.IconButtonColors
 
 /** The one bar over the preview: the preset name, then ATEM, then Play, Add to Schedule and Go Live. */

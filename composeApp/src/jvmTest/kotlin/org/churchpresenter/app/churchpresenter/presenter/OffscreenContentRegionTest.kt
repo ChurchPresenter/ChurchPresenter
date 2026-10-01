@@ -26,6 +26,7 @@ import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * Content Region reaching the two **virtual** outputs — Browser Source and NDI.

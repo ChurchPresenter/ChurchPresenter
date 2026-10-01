@@ -22,9 +22,9 @@ import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEventStore
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.CalendarSyncSettings

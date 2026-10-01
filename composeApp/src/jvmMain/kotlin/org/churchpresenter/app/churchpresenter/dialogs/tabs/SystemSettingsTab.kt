@@ -76,8 +76,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager

@@ -58,6 +58,7 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.hoverOutline
+import org.churchpresenter.sharedui.composables.DropdownSettingsField
 
 /**
  * A dropdown whose value is also a search box: typing narrows the menu to the options that contain

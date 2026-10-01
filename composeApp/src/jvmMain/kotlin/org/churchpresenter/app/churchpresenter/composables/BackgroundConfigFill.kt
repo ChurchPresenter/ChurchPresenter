@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.PreviewStills
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.utils.Constants
 import java.io.File

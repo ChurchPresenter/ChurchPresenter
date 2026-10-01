@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.em
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.elementStyle
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.combinedTextDecoration
+import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.text.TextOutline

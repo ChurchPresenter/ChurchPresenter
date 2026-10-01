@@ -6,7 +6,7 @@ import io.mockk.verify
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.presentationengine.model.Deck

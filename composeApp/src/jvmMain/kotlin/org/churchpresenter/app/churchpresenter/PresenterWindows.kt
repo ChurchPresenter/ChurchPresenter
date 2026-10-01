@@ -45,11 +45,11 @@ import org.churchpresenter.app.churchpresenter.composables.HideOutputWindowCurso
 import org.churchpresenter.app.churchpresenter.composables.LocalOutputCursorHidden
 import org.churchpresenter.app.churchpresenter.composables.hiddenOutputCursor
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.utils.OutputKind
+import org.churchpresenter.sharedui.utils.outputSizeOf
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
+import org.churchpresenter.sharedui.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

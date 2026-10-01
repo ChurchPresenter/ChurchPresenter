@@ -1,0 +1,150 @@
+package org.churchpresenter.sharedui.composables
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import org.churchpresenter.theme.AppShape
+import androidx.compose.foundation.text.BasicTextField
+import org.churchpresenter.theme.components.KeyIconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.arrow_down
+import org.churchpresenter.icons.generated.resources.arrow_up
+import org.churchpresenter.strings.generated.resources.decrement
+import org.churchpresenter.strings.generated.resources.increment
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.hoverTint
+import org.churchpresenter.theme.sunken
+
+@Composable
+fun NumberSettingsTextField(
+    modifier: Modifier = Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max),
+    label: String = "",
+    initialText: Int = 8,
+    range: IntRange,
+    onValueChange: (Int) -> Unit,
+) {
+    var value by rememberSaveable(initialText) { mutableStateOf(initialText) }
+    var isError by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier
+            .height(42.dp)
+            .sunken(
+                AppShape(8.dp),
+                elevationPalette(),
+                rim = if (isError) MaterialTheme.colorScheme.error else Color.Unspecified
+            )
+            .hoverTint(AppShape(8.dp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            // Weighted so the arrow column below keeps its 20dp: the text field fills this column's
+            // width, which without a weight is the whole row's, collapsing the arrows to zero.
+            modifier = Modifier.weight(1f).padding(start = 11.dp, top = 2.dp, bottom = 2.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (label.isNotEmpty()) {
+                Text(
+                    text = label.uppercase(),
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(1.dp))
+            }
+            BasicTextField(
+                interactionSource = remember { MutableInteractionSource() },
+                maxLines = 1,
+                textStyle = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 13.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Start,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                value = value.toString(),
+                decorationBox = { innerTextField ->
+                    Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxWidth()) {
+                        innerTextField()
+                    }
+                },
+                onValueChange = { newValue ->
+                    val intValue = newValue.toIntOrNull() ?: 0
+                    value = intValue
+                    if (intValue in range) {
+                        onValueChange.invoke(intValue)
+                        isError = false
+                    } else {
+                        isError = true
+                    }
+                },
+            )
+        }
+
+        Column(
+            modifier = Modifier.width(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            val step: (Int) -> Unit = { delta ->
+                val newValue = value + delta
+                if (newValue in range) { value = newValue; onValueChange.invoke(newValue); isError = false }
+                else isError = true
+            }
+            StepArrow(IconRes.drawable.arrow_up, stringResource(Res.string.increment)) { step(1) }
+            StepArrow(IconRes.drawable.arrow_down, stringResource(Res.string.decrement)) { step(-1) }
+        }
+    }
+}
+
+@Composable
+private fun StepArrow(icon: DrawableResource, description: String, onClick: () -> Unit) {
+    KeyIconButton(onClick = onClick, modifier = Modifier.size(20.dp, 16.dp)) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = description,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+            modifier = Modifier.size(12.dp)
+        )
+    }
+}

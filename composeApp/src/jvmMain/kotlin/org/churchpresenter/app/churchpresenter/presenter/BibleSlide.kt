@@ -18,20 +18,20 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleStyleElement
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
-import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
-import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.spacingEm
+import org.churchpresenter.sharedui.utils.combinedTextDecoration
+import org.churchpresenter.sharedui.utils.styledDisplayText
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.app.churchpresenter.composables.backdropRoom
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.backdropRoom
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualColumns
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 
 /**
  * The verses one output draws right now, and how each translation among them is styled. Forwards

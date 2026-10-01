@@ -3,12 +3,13 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.input.key.KeyEvent
 import org.churchpresenter.app.churchpresenter.dialogs.songBackgroundName
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.QuickBackground
 import java.util.UUID
+import org.churchpresenter.sharedui.composables.matches
 
 /** How many backgrounds the tray will hold. The last of them has no key by default — see below. */
 internal const val QUICK_BACKGROUND_SLOTS = 10

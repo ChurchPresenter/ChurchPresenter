@@ -53,7 +53,7 @@ import org.churchpresenter.strings.generated.resources.song_background_full_scre
 import org.churchpresenter.strings.generated.resources.song_background_inherit
 import org.churchpresenter.strings.generated.resources.song_background_lower_third
 import org.churchpresenter.strings.generated.resources.song_background_own
-import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
+import org.churchpresenter.sharedui.utils.FALLBACK_STAGE_ASPECT
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType

@@ -6,10 +6,10 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
-import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
-import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
-import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
-import org.churchpresenter.app.churchpresenter.utils.withPictureScaleEverywhere
+import org.churchpresenter.sharedui.utils.sharedScaleMode
+import org.churchpresenter.sharedui.utils.ScaleButtonContent
+import org.churchpresenter.sharedui.utils.scaleButtonLabel
+import org.churchpresenter.sharedui.utils.withPictureScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.TooltipArea
@@ -88,8 +88,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.icon
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.sharedui.utils.icon
+import org.churchpresenter.sharedui.utils.label
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow

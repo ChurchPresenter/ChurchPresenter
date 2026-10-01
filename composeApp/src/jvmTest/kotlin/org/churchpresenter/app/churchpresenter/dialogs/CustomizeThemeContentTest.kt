@@ -18,7 +18,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
+import org.churchpresenter.sharedui.composables.cpColorToHex
 import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.ChurchPresenterTheme

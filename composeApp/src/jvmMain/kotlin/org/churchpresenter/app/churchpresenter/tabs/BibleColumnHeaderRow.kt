@@ -51,9 +51,9 @@ import org.churchpresenter.strings.generated.resources.swap_bibles_hint
 import org.churchpresenter.strings.generated.resources.verse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.bible.bibleDisplayNames
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

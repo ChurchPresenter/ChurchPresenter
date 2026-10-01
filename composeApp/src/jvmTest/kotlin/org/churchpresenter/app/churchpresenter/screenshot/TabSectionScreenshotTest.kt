@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import kotlin.test.Test

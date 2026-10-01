@@ -74,8 +74,8 @@ import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_link
 import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.churchpresenter.strings.generated.resources.verse
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.sharedui.composables.initialPassClickable
+import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.jetbrains.compose.resources.painterResource

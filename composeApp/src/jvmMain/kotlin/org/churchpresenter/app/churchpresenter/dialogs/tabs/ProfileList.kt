@@ -79,7 +79,7 @@ import org.churchpresenter.strings.generated.resources.output_profile_move_down
 import org.churchpresenter.strings.generated.resources.output_profile_move_up
 import org.churchpresenter.strings.generated.resources.profile_menu_rename
 import kotlin.math.roundToInt
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyIconButton

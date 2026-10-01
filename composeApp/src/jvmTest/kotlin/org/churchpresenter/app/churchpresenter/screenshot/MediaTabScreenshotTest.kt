@@ -12,7 +12,7 @@ import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.mediaButton
 import org.churchpresenter.app.churchpresenter.tabs.mediaTab
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
+import org.churchpresenter.sharedui.utils.withMediaScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel

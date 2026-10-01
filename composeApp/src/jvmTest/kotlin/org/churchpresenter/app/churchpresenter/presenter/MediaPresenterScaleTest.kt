@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutput
-import org.churchpresenter.app.churchpresenter.utils.contentScale
+import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.settings.OutputScaleMode

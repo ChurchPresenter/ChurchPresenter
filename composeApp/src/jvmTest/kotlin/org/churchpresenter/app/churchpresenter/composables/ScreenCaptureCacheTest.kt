@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
+import org.churchpresenter.sharedui.composables.mode
 
 private const val WAIT_MS = 2_000L
 private const val POLL_MS = 5L

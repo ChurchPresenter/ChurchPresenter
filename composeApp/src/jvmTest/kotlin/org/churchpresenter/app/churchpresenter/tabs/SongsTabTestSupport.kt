@@ -27,9 +27,9 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import java.io.File
 import java.nio.file.Files

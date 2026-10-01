@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import org.churchpresenter.sharedui.utils.UsageEvent
 
 /** The modules report usage in their own vocabulary; these are the app's names for it. */
 class UsageEventMappingsTest {

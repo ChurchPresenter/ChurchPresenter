@@ -39,9 +39,9 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel

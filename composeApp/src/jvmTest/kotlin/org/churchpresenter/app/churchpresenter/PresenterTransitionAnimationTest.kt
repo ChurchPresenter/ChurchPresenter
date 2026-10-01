@@ -10,7 +10,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test

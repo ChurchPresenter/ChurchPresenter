@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import kotlinx.coroutines.CompletableDeferred
 import org.churchpresenter.bibleformats.catalog.BibleCatalogOutcome
 import org.churchpresenter.bibleformats.catalog.BibleInstallOutcome
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEventStore
 import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.BibleSourceId

@@ -12,9 +12,9 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryEntry
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.LiveHistoryEntry
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files

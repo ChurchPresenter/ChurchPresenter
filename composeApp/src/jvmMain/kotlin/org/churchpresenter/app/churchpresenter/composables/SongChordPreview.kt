@@ -75,6 +75,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.foundation.layout.PaddingValues
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 
 private const val CHORD_SPACING_RATIO = 0.42f
 

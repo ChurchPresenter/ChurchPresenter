@@ -74,15 +74,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CancellationException
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.SettingRow
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic
 import java.io.IOException
 

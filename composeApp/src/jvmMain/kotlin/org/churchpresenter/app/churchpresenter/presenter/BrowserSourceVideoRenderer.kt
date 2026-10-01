@@ -11,15 +11,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEventStore
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
+import org.churchpresenter.sharedui.models.Presenting
 
 
 private const val ALPHA_SHIFT = 24

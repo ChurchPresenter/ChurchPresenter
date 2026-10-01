@@ -73,7 +73,7 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.sharedui.composables.SettingRow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.BibleSyncMode
@@ -82,8 +82,8 @@ import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.composables.LabeledRadioButton
+import org.churchpresenter.sharedui.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.LabeledRadioButton
 
 private const val STATUS_POLL_MS = 1000L
 private const val SECONDS_PER_MINUTE = 60

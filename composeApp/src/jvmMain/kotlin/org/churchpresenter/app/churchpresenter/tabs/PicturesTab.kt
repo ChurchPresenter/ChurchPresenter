@@ -2,10 +2,10 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.draw.alpha
-import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.LocalWentLive
-import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
-import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
+import org.churchpresenter.sharedui.composables.focusRescuePressHook
+import org.churchpresenter.sharedui.composables.rememberFocusLostRescue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +38,7 @@ import org.churchpresenter.strings.generated.resources.select_folder_to_view
 import org.churchpresenter.strings.generated.resources.select_image_folder_dialog
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource

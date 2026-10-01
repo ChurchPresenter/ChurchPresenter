@@ -32,6 +32,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * The exact live scenario reported after PR #564: a Lottie-backed lower third, a screen limited to

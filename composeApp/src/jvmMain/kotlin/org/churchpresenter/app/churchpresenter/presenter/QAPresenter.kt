@@ -42,8 +42,8 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.qa_qr_message_default
 import org.churchpresenter.strings.generated.resources.qr_code
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.QA_QR_CODE_BOX
@@ -54,9 +54,9 @@ import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.textBoxKey
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import java.awt.image.BufferedImage
 
 /** The card the question is drawn in, and so the space auto-fit measures against. */

@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants

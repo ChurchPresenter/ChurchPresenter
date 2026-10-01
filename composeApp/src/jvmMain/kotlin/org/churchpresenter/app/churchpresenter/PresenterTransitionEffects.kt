@@ -20,7 +20,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.rememberBibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 

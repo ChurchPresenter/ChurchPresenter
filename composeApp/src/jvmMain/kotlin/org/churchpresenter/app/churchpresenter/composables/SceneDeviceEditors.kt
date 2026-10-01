@@ -58,6 +58,10 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.composables.PropertySliderWithInput
+import org.churchpresenter.sharedui.composables.PropertyTextField
+import org.churchpresenter.sharedui.composables.mode
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f

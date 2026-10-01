@@ -88,7 +88,7 @@ import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DragItemGeometry
 import org.churchpresenter.app.churchpresenter.utils.carriesFileList

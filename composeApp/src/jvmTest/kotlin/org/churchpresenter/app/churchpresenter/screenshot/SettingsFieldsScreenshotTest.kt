@@ -15,14 +15,14 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.DropdownSettingsField
+import org.churchpresenter.sharedui.composables.FontPreviewText
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
+import org.churchpresenter.sharedui.composables.LocalFontPreviewFace
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.ShadowDetailRow
+import org.churchpresenter.sharedui.composables.SlimSlider
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 

@@ -23,14 +23,14 @@ import org.churchpresenter.strings.generated.resources.preview_output
 import org.churchpresenter.strings.generated.resources.preview_output_mode_disabled_warning
 import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.FallbackOutputSize
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
-import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
-import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import org.churchpresenter.sharedui.utils.FallbackOutputSize
+import org.churchpresenter.sharedui.utils.OutputKind
+import org.churchpresenter.sharedui.utils.PreviewOutput
+import org.churchpresenter.sharedui.utils.outputSizeOf
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
@@ -39,6 +39,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.sharedui.composables.mode
 
 /** How wide the picker itself is, regardless of how much room its container offers. */
 private val PREVIEW_OUTPUT_PICKER_WIDTH = 200.dp
