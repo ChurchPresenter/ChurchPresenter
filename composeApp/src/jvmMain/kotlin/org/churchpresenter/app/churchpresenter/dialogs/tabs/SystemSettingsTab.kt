@@ -1,6 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.material3.minimumInteractiveComponentSize
+import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.export_settings_no_passwords
+import churchpresenter.composeapp.generated.resources.import_settings_keep_secrets
+import churchpresenter.composeapp.generated.resources.import_settings_secrets
+import churchpresenter.composeapp.generated.resources.import_settings_use_file_secrets
+import churchpresenter.composeapp.generated.resources.settings_exported_no_passwords
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.BorderStroke
@@ -322,6 +328,14 @@ private fun TestEventRow(scope: CoroutineScope) {
 private fun ManageSettingsCard(companionServer: CompanionServer?) {
     val scope = rememberCoroutineScope()
     val exportTitle = stringResource(Res.string.export_settings)
+    val exportSafeTitle = stringResource(Res.string.export_settings_no_passwords)
+    val exportedSafeMsg = stringResource(Res.string.settings_exported_no_passwords)
+    val secrets = SecretsChoice(
+        question = stringResource(Res.string.import_settings_secrets),
+        keep = stringResource(Res.string.import_settings_keep_secrets),
+        useFile = stringResource(Res.string.import_settings_use_file_secrets),
+        cancel = stringResource(Res.string.cancel),
+    )
     val importTitle = stringResource(Res.string.import_settings)
     val resetTitle = stringResource(Res.string.reset_settings)
     val clearUploadsTitle = stringResource(Res.string.clear_remote_uploads)
@@ -344,8 +358,15 @@ private fun ManageSettingsCard(companionServer: CompanionServer?) {
             ManageButton(exportTitle) {
                 scope.launch { exportSettings(exportTitle, exportedMsg, exportFailedMsg) }
             }
+            ManageButton(exportSafeTitle) {
+                scope.launch {
+                    exportSettings(exportSafeTitle, exportedSafeMsg, exportFailedMsg, withoutSecrets = true)
+                }
+            }
             ManageButton(importTitle) {
-                scope.launch { importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer) }
+                scope.launch {
+                    importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer, secrets)
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
             ManageButton(clearUploadsTitle, danger = true) {

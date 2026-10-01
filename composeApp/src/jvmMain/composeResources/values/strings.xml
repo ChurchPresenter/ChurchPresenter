@@ -1101,6 +1101,11 @@
     <string name="remote_uploads_cleared">Remote uploads folder cleared successfully.</string>
     <string name="export_settings">Export Settings</string>
     <string name="import_settings">Import Settings</string>
+    <string name="export_settings_no_passwords">Export Without Passwords</string>
+    <string name="settings_exported_no_passwords">Settings exported without passwords, sign-ins or API keys. This file is safe to share.</string>
+    <string name="import_settings_secrets">This file contains passwords, sign-ins and API keys (Planning Center, OBS, remote access, stock photos).\n\nKeep the ones already on this computer, or use the ones in the file?</string>
+    <string name="import_settings_keep_secrets">Keep This Computer's</string>
+    <string name="import_settings_use_file_secrets">Use the File's</string>
     <string name="import_settings_confirm">Are you sure you want to import settings?\n\nThis will overwrite your current settings and the application will restart.</string>
     <string name="settings_exported">Settings exported successfully.</string>
     <string name="settings_export_failed">Failed to export settings.</string>
