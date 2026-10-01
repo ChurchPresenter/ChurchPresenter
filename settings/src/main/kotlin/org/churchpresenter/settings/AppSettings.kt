@@ -15,8 +15,11 @@ data class AppSettings(
      * See [CURRENT_SETTINGS_VERSION] for the bump procedure.
      */
     val settingsVersion: Int = CURRENT_SETTINGS_VERSION,
+    /** Only [SONG_GLOBAL_KEYS] is saved here; the main window reads the rest via [operatorSongSettings]. */
     val songSettings: SongSettings = SongSettings(),
+    /** Only [BIBLE_GLOBAL_KEYS] and the stack's names are saved here; see [operatorBibleSettings]. */
     val bibleSettings: BibleSettings = BibleSettings(),
+    /** Not saved: each [OutputProfile] carries its own. Outputs read it through [resolvedFor]. */
     val dictionarySettings: DictionarySettings = DictionarySettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
     val stockPhotoSettings: StockPhotoSettings = StockPhotoSettings(),
@@ -25,9 +28,12 @@ data class AppSettings(
     val presentationSettings: PresentationSettings = PresentationSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
+    /** Only [QA_GLOBAL_KEYS] is saved here; the rest is each [OutputProfile]'s, read via [resolvedFor]. */
     val qaSettings: QASettings = QASettings(),
     val presentationRemoteSettings: PresentationRemoteSettings = PresentationRemoteSettings(),
+    /** Only [STT_GLOBAL_KEYS] is saved here; the rest is each [OutputProfile]'s, read via [resolvedFor]. */
     val sttSettings: STTSettings = STTSettings(),
+    /** Not saved: each [OutputProfile] carries its own. Outputs read it through [resolvedFor]. */
     val mediaSettings: MediaSettings = MediaSettings(),
     val bibleEngineSettings: BibleEngineSettings = BibleEngineSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
@@ -148,6 +154,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 20
+        const val CURRENT_SETTINGS_VERSION = 22
     }
 }

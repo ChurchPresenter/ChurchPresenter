@@ -1,5 +1,7 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.render.rememberTextGrouping
+import org.churchpresenter.lottiegen.render.rememberShapedLottiePainter
 import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
-import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.lottiegen.ui.Strings
 
 /**
@@ -97,11 +98,13 @@ fun EditorPreview(
 
                     // Compottie keeps the first progress lambda it is given, so it must read state, not a value.
                     val shown by rememberUpdatedState(if (isPlaying) progress else seek)
+                    val grouped = rememberTextGrouping(jsonString)
                     composition?.let {
                         Image(
-                            painter = rememberLottiePainter(
+                            painter = rememberShapedLottiePainter(
                                 composition = it,
-                                progress = { shown }
+                                progress = { shown },
+                                grouped = grouped,
                             ),
                             contentDescription = null,
                             contentScale = ContentScale.Fit,

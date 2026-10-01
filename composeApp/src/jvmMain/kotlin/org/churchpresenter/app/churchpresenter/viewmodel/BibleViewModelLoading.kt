@@ -11,6 +11,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.operatorBibleSettings
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
@@ -34,8 +35,8 @@ internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
 
     // Turning splitting on or off -- or moving the threshold across what is on screen -- re-cuts
     // whatever is already up, from its first half.
-    if (previous.bibleSettings.splitLongVerses != newSettings.bibleSettings.splitLongVerses ||
-        previous.bibleSettings.longVerseWordCount != newSettings.bibleSettings.longVerseWordCount
+    if (previous.operatorBibleSettings().splitLongVerses != newSettings.operatorBibleSettings().splitLongVerses ||
+        previous.operatorBibleSettings().longVerseWordCount != newSettings.operatorBibleSettings().longVerseWordCount
     ) {
         publishVersePage(VERSE_PAGE_FIRST)
     }

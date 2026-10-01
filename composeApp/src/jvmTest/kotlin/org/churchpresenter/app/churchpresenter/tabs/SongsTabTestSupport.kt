@@ -33,6 +33,7 @@ import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.app.churchpresenter.utils.withSongsEverywhere
 
 /**
  * Harness and fixtures shared by the `SongsTab` test classes.
@@ -189,7 +190,7 @@ internal fun songsTab(
                 File(book, "${s.number} - ${s.title}.song").absolutePath,
             )
         }
-        val settings = AppSettings(songSettings = songSettings.copy(storageDirectory = dir.absolutePath))
+        val settings = AppSettings().withSongsEverywhere(songSettings.copy(storageDirectory = dir.absolutePath))
             .let { if (hiddenCols != null) it.copy(songHiddenCols = hiddenCols) else it }
             .let { if (songBpm != null) it.copy(songBpm = songBpm) else it }
             .let {

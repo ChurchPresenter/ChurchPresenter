@@ -12,6 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  *   suggestion-outcomes-<sessionId>.jsonl   — operator reactions to detection chips
  *   operator-flags-<sessionId>.jsonl        — live "Help Dev" flags (wrong/premature/missed)
  *
+ * [LiveHistoryLogger]'s `live-content-<sessionId>.jsonl` (what was on screen, and when) shares this
+ * folder, this [sessionId] and this retention sweep.
+ *
  * When STT has supplied a stable [sessionId] (forwarded from the engine via BibleViewModel) the file
  * is keyed by it, giving an exact 1:1 join with the STT db and the engine detection-log and letting a
  * ChurchPresenter restart mid-service re-attach to the SAME file and append (no fragmentation). Until
@@ -35,8 +38,9 @@ object TrainingDataLogger {
      */
     private const val ENGINE_ERRORS_FILE = "engine-errors.jsonl"
 
-    // Stable per-service session id from STT (db base name or UUID), set by BibleViewModel on the first
-    // engine detection. Null until then; the filename falls back to [runStamp] (zero behaviour change).
+    // Stable per-service session id from STT (db base name or UUID), set by STTManager from STT's
+    // /api/health (on connect and on its poll) and from every socket payload, and again by
+    // BibleViewModel on each engine detection. Null until then; the filename falls back to [runStamp].
     @Volatile var sessionId: String? = null
 
     private val lock = Any()
@@ -50,9 +54,10 @@ object TrainingDataLogger {
     private val runStamp: String =
         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
 
-    private val logDir by lazy {
-        File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
-    }
+    // Resolved from user.home on every access, as CrashReporter does: a once-per-JVM lazy keeps
+    // whatever user.home said the first time, which in a test is a temp dir deleted afterwards.
+    private val logDir: File
+        get() = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
 
     /** Session-keyed suffix when STT has provided an id, else the process-start timestamp. */
     private fun suffix(): String = sessionId?.let { sanitize(it) } ?: runStamp
@@ -103,7 +108,10 @@ object TrainingDataLogger {
                 val dated = file.isFile && (
                     (
                         n.endsWith(".jsonl") &&
-                            (n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) || n.startsWith(FLAG_PREFIX))
+                            (
+                                n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) ||
+                                    n.startsWith(FLAG_PREFIX) || n.startsWith(LiveHistoryLogger.PREFIX)
+                                )
                         ) || n == ENGINE_ERRORS_FILE || n.endsWith(".db") || n.endsWith(".db.tmp")
                 )
                 if (dated && file.lastModified() < cutoff) file.delete()

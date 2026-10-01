@@ -1,5 +1,7 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.render.rememberTextGrouping
+import org.churchpresenter.lottiegen.render.rememberShapedLottiePainter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
-import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.lottiegen.editor.EditorState
 import org.churchpresenter.lottiegen.editor.MatrixCell
 import org.churchpresenter.lottiegen.ui.Strings
@@ -95,9 +96,10 @@ private fun MatrixCellView(cell: MatrixCell, progress: Float, aspect: Float, mod
             }
             // Compottie keeps the first progress lambda it is given, so it must read state, not a value.
             val current by rememberUpdatedState(progress)
+            val grouped = rememberTextGrouping(cell.json)
             composition?.let {
                 Image(
-                    painter = rememberLottiePainter(composition = it, progress = { current }),
+                    painter = rememberShapedLottiePainter(composition = it, progress = { current }, grouped = grouped),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()

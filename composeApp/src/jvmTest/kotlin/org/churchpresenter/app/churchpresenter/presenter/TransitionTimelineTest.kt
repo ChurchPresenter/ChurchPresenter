@@ -15,6 +15,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.utils.withSongsEverywhere
 
 /**
  * What the text does over the course of every kind of transition, frame by frame.
@@ -161,9 +162,8 @@ class TransitionTimelineTest {
     fun `picking a line while the band shows the whole section does not crossfade`() = runComposeUiTest {
         val manager = PresenterManager()
         val settings = AppSettings(
-            songSettings = SongSettings(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE),
             backgroundSettings = BackgroundSettings(songLowerThirdBackground = lottieBackground(template)),
-        )
+        ).withSongsEverywhere(SongSettings(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE))
         val timeline = recordTimeline(
             manager = manager,
             probe = songProbe(manager),

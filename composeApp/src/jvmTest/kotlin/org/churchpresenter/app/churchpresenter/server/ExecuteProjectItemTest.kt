@@ -5,6 +5,14 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.app.churchpresenter.liveHistoryEntryOf
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -302,6 +310,41 @@ class ExecuteProjectItemTest {
             } finally {
                 presenter.pauseAnnouncementTimer()
             }
+        }
+    }
+
+    // ── The on-screen history ───────────────────────────────────────────────────
+
+    @Test
+    fun `a projected song's lyric lines name the song row in the on-screen history`() {
+        // The remote request is one of the three places that know the songbook; the presenter only
+        // ever sees the title and number, so without this the line could not be tied to a row.
+        TestSingletons.latchToTestHome()
+        TrainingDataLogger.sessionId = "execute-project-history"
+        val file = File(
+            System.getProperty("user.home"),
+            ".churchpresenter/bible-stt-logs/live-content-execute-project-history.jsonl",
+        ).apply { delete() }
+        try {
+            val presenter = PresenterManager()
+            presenter.onLiveStateChanged = { pm, _ -> LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, null)) }
+
+            executeProjectItem(
+                ScheduleItem.SongItem(
+                    id = "1", songNumber = 77, title = "Remote Hymn", songbook = "Hymnal", songId = "Hymnal::77",
+                ),
+                ScheduleActionsRecorder().actions(),
+                presenter,
+            )
+
+            val lyricLine = file.readLines().map { Json.parseToJsonElement(it).jsonObject }
+                .last { it["contentType"]?.jsonPrimitive?.content == "LYRICS" }
+            assertEquals("Hymnal::77", lyricLine["songId"]?.jsonPrimitive?.content)
+            assertEquals("Hymnal", lyricLine["songbook"]?.jsonPrimitive?.content)
+            assertEquals("remote", lyricLine["source"]?.jsonPrimitive?.content)
+        } finally {
+            TrainingDataLogger.sessionId = null
+            file.delete()
         }
     }
 }

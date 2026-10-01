@@ -30,6 +30,18 @@ import churchpresenter.composeapp.generated.resources.output_profile_duplicate
 import churchpresenter.composeapp.generated.resources.output_profile_scale
 import churchpresenter.composeapp.generated.resources.profile_band_height
 import churchpresenter.composeapp.generated.resources.profile_bg_row
+import churchpresenter.composeapp.generated.resources.profile_caption_all_caps
+import churchpresenter.composeapp.generated.resources.profile_caption_clear
+import churchpresenter.composeapp.generated.resources.profile_caption_dim
+import churchpresenter.composeapp.generated.resources.profile_caption_line_breaks
+import churchpresenter.composeapp.generated.resources.profile_caption_max_chars
+import churchpresenter.composeapp.generated.resources.profile_caption_reading_speed
+import churchpresenter.composeapp.generated.resources.profile_caption_roll_up
+import churchpresenter.composeapp.generated.resources.profile_caption_shape_band
+import churchpresenter.composeapp.generated.resources.profile_caption_style
+import churchpresenter.composeapp.generated.resources.profile_caption_style_pop_on
+import churchpresenter.composeapp.generated.resources.profile_caption_style_ticker
+import churchpresenter.composeapp.generated.resources.profile_caption_translation_size
 import churchpresenter.composeapp.generated.resources.profile_content_align
 import churchpresenter.composeapp.generated.resources.profile_content_width
 import churchpresenter.composeapp.generated.resources.profile_nav_general
@@ -42,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.profile_fade_in
 import churchpresenter.composeapp.generated.resources.profile_fade_out
 import churchpresenter.composeapp.generated.resources.profile_group_look
 import churchpresenter.composeapp.generated.resources.profile_group_placement
+import churchpresenter.composeapp.generated.resources.profile_group_reading
 import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_margins
 import churchpresenter.composeapp.generated.resources.profile_name
@@ -133,6 +146,15 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
             Res.string.profile_bg_row, Res.string.customize_background_type, Res.string.song_background_dim,
             Res.string.customize_background_opacity, Res.string.song_background_blur,
             Res.string.background_above_band_caption,
+        )
+        CustomizePane.CAPTIONS -> listOf(
+            Res.string.profile_group_reading, Res.string.profile_caption_style,
+            Res.string.profile_caption_style_ticker, Res.string.profile_caption_style_pop_on,
+            Res.string.profile_caption_shape_band, Res.string.profile_caption_clear,
+            Res.string.profile_caption_reading_speed, Res.string.profile_caption_roll_up,
+            Res.string.profile_caption_dim, Res.string.profile_caption_line_breaks,
+            Res.string.profile_caption_max_chars, Res.string.profile_caption_all_caps,
+            Res.string.profile_caption_translation_size, Res.string.profile_margins,
         )
         else -> listOf(Res.string.profile_group_look)
     }

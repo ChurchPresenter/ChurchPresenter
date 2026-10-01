@@ -51,10 +51,10 @@ class SongNumberCornerMigrationTest {
             """.trimIndent(),
         )
 
-        assertEquals(Constants.NONE, settings.songSettings.songNumberCorner)
-        assertEquals(Constants.NONE, settings.songSettings.songNumberLowerThirdCorner)
-        assertEquals(Constants.ABOVE_VERSE, settings.songSettings.songNumberPosition)
-        assertEquals(Constants.LEFT, settings.songSettings.songNumberHorizontalAlignment)
+        assertEquals(Constants.NONE, settings.operatorSongSettings().songNumberCorner)
+        assertEquals(Constants.NONE, settings.operatorSongSettings().songNumberLowerThirdCorner)
+        assertEquals(Constants.ABOVE_VERSE, settings.operatorSongSettings().songNumberPosition)
+        assertEquals(Constants.LEFT, settings.operatorSongSettings().songNumberHorizontalAlignment)
     }
 
     @Test
@@ -63,8 +63,8 @@ class SongNumberCornerMigrationTest {
         // guessing which of them customized it is not the migration's job.
         val settings = decode("""{"settingsVersion":8,"songSettings":{"marginTop":12}}""")
 
-        assertEquals(Constants.NONE, settings.songSettings.songNumberCorner)
-        assertEquals(12, settings.songSettings.marginTop, "and the rest of the section survives")
+        assertEquals(Constants.NONE, settings.operatorSongSettings().songNumberCorner)
+        assertEquals(12, settings.operatorSongSettings().marginTop, "and the rest of the section survives")
     }
 
     @Test
@@ -84,8 +84,8 @@ class SongNumberCornerMigrationTest {
             """.trimIndent(),
         )
 
-        assertEquals(Constants.TOP_LEFT, settings.songSettings.songNumberCorner)
-        assertEquals(Constants.TOP_RIGHT, settings.songSettings.songNumberLowerThirdCorner)
+        assertEquals(Constants.TOP_LEFT, settings.operatorSongSettings().songNumberCorner)
+        assertEquals(Constants.TOP_RIGHT, settings.operatorSongSettings().songNumberLowerThirdCorner)
     }
 
     @Test
@@ -106,10 +106,10 @@ class SongNumberCornerMigrationTest {
         val json = kotlinx.serialization.json.Json { encodeDefaults = true }
         val twice = decode(json.encodeToString(AppSettings.serializer(), once))
 
-        assertEquals(once.songSettings.songNumberCorner, twice.songSettings.songNumberCorner)
+        assertEquals(once.operatorSongSettings().songNumberCorner, twice.operatorSongSettings().songNumberCorner)
         assertEquals(
-            once.songSettings.songNumberLowerThirdCorner,
-            twice.songSettings.songNumberLowerThirdCorner,
+            once.operatorSongSettings().songNumberLowerThirdCorner,
+            twice.operatorSongSettings().songNumberLowerThirdCorner,
         )
     }
 }

@@ -1,6 +1,7 @@
 package org.churchpresenter.lottiegen.band
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.lottiegen.lottie.TextShaping
 
 /**
  * The shapes a band is drawn with. Every style paints the background colour — over a picture,
@@ -306,6 +307,8 @@ data class BibleLottieGenConfig(
     val swapSeconds: Float = DEFAULT_SWAP,
     val tickerPxPerSecond: Int = DEFAULT_TICKER_SPEED,
     val previewFontFamily: String = "Arial",
+    /** Written into the file: how the player draws the live verse's text. */
+    val textShaping: TextShaping = TextShaping.AUTO,
     val previewTextSizePx: Int = DEFAULT_PREVIEW_TEXT_SIZE,
     val previewReferenceSizePx: Int = DEFAULT_PREVIEW_REFERENCE_SIZE,
     val previewTextColor: String = "#FFFFFF",

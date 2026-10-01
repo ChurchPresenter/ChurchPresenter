@@ -42,6 +42,13 @@ class TitleSlideNumberMigrationTest {
 
     private fun decode(raw: String): AppSettings = SettingsManager().migrateAndDecode(raw)
 
+    /**
+     * Where the document's song settings end up: on the profile that carried none of its own, which
+     * version 22 gives the document's copy before dropping it.
+     */
+    private fun AppSettings.documentSongs(): SongSettings =
+        projectionSettings.outputProfiles.first { it.id == "default" }.songSettings
+
     /** A version-15 document whose song number is styled, on the document and on one profile. */
     private fun v15(titleSlideNumberJson: String = "") = """
         {"settingsVersion":15,
@@ -63,7 +70,7 @@ class TitleSlideNumberMigrationTest {
 
     @Test
     fun `the document's title slide number is seeded from the number it was drawing`() {
-        val number = decode(v15()).songSettings.layoutExtras.titleSlideNumber
+        val number = decode(v15()).documentSongs().layoutExtras.titleSlideNumber
 
         assertEquals("#FF0000", number.fullScreen.color)
         assertEquals(48, number.fullScreen.fontSize)
@@ -73,7 +80,7 @@ class TitleSlideNumberMigrationTest {
 
     @Test
     fun `the lower third half is seeded from the lower third's own fields`() {
-        val number = decode(v15()).songSettings.layoutExtras.titleSlideNumber
+        val number = decode(v15()).documentSongs().layoutExtras.titleSlideNumber
 
         assertEquals("#00FF00", number.lowerThird.color)
         assertEquals(22, number.lowerThird.fontSize)
@@ -81,7 +88,7 @@ class TitleSlideNumberMigrationTest {
 
     @Test
     fun `the stroke comes from outlines rather than from beside the flat fields`() {
-        val number = decode(v15()).songSettings.layoutExtras.titleSlideNumber
+        val number = decode(v15()).documentSongs().layoutExtras.titleSlideNumber
 
         // The one field of the seventeen that is not a `songNumber*` sibling. Missing it would lose
         // every upgraded install's number stroke, and nothing else would look wrong.
@@ -100,17 +107,17 @@ class TitleSlideNumberMigrationTest {
     }
 
     @Test
-    fun `a profile that carried no song settings of its own is left with the defaults`() {
-        val profiles = decode(v15()).projectionSettings.outputProfiles
-        val default = profiles.first { it.id == "default" }.songSettings.layoutExtras.titleSlideNumber
+    fun `a profile that carried no song settings of its own is given the document's`() {
+        val default = decode(v15()).documentSongs().layoutExtras.titleSlideNumber
 
-        // Nothing to seed from, so the record's own defaults stand -- which are the stock number's.
-        assertEquals(SongTitleSlideNumber().fullScreen.color, default.fullScreen.color)
+        // Version 16 leaves it nothing to seed from; version 22 then hands it the document's songs,
+        // title slide number and all, before the document's copy goes.
+        assertEquals("#FF0000", default.fullScreen.color)
     }
 
     @Test
     fun `the number stays in the flow, because that is where the title slide always drew it`() {
-        val number = decode(v15()).songSettings.layoutExtras.titleSlideNumber
+        val number = decode(v15()).documentSongs().layoutExtras.titleSlideNumber
 
         assertEquals(Constants.NONE, number.corner)
         assertEquals(Constants.NONE, number.lowerThirdCorner)
@@ -121,7 +128,7 @@ class TitleSlideNumberMigrationTest {
     fun `a document that already carries the record keeps its own`() {
         val existing = """{"titleSlideNumber":{"fullScreen":{"color":"#AAAAAA","fontSize":12}}}"""
 
-        val number = decode(v15(existing)).songSettings.layoutExtras.titleSlideNumber
+        val number = decode(v15(existing)).documentSongs().layoutExtras.titleSlideNumber
 
         // Written by a newer build, opened by an older one, rolled forward: the seed must not
         // overwrite what the newer build stored.

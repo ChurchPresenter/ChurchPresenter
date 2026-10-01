@@ -18,9 +18,9 @@ import kotlin.test.assertTrue
  * analysis of a real service. These tests parse every emitted line as JSON instead of matching
  * substrings, which is what actually catches that class of bug.
  *
- * The logger resolves its directory from `user.home` in a `by lazy`, i.e. once per JVM — the test
- * task points the whole JVM at `build/test-home` (see build.gradle.kts), so this never touches a
- * real `~/.churchpresenter`. Each test uses a distinct sessionId, which gives it its own file.
+ * The logger resolves its directory from `user.home` on every write, and the test task points each
+ * fork at its own `build/test-home` (see build.gradle.kts), so this never touches a real
+ * `~/.churchpresenter`. Each test uses a distinct sessionId, which gives it its own file.
  */
 class TrainingDataLoggerTest {
 
@@ -342,16 +342,19 @@ newline""",
         val oldFlag = writeAged("operator-flags-old.jsonl", daysOld = 40)
         val oldDb = writeAged("snapshot-old.db", daysOld = 40)
         val oldDbTmp = writeAged("snapshot-old.db.tmp", daysOld = 40)
+        // LiveHistoryLogger's on-screen history shares the folder and this one policy.
+        val oldContent = writeAged("live-content-old.jsonl", daysOld = 40)
         val recentLive = writeAged("live-references-new.jsonl", daysOld = 1)
         val recentDb = writeAged("snapshot-new.db", daysOld = 1)
+        val recentContent = writeAged("live-content-new.jsonl", daysOld = 1)
 
         resetCleanupLatch()
         TrainingDataLogger.cleanupOldLogsOnce()
 
-        for (gone in listOf(oldLive, oldOutcome, oldFlag, oldDb, oldDbTmp)) {
+        for (gone in listOf(oldLive, oldOutcome, oldFlag, oldDb, oldDbTmp, oldContent)) {
             assertTrue(!gone.exists(), "expected ${gone.name} (40 days old) to be swept")
         }
-        for (kept in listOf(recentLive, recentDb)) {
+        for (kept in listOf(recentLive, recentDb, recentContent)) {
             assertTrue(kept.exists(), "expected ${kept.name} (1 day old) to survive")
         }
     }

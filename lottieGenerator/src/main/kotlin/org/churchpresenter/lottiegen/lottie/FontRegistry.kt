@@ -43,6 +43,17 @@ object FontRegistry {
         )
     )
 
+    /**
+     * The classpath path of [family]'s bundled file — its bold cut when [bold] and it has one,
+     * its plain cut otherwise — or null for a family that is not bundled.
+     */
+    fun bundledFile(family: String, bold: Boolean): String? {
+        val files = fontFiles[family] ?: return null
+        val file = files.firstOrNull { (_, style) -> style == if (bold) Font.BOLD else Font.PLAIN }
+            ?: files.first()
+        return "/fonts/${file.first}"
+    }
+
     fun initialize() {
         if (initialized) return
         initialized = true

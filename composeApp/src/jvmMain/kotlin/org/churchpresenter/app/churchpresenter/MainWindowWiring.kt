@@ -112,9 +112,10 @@ internal fun MainWindowScope.ServerCommandWiring() {
             companionServer.onSelectSongSection.collect { req ->
                 val sections = presenterManager.allLyricSections.value
                 val section = sections.getOrNull(req.section) ?: return@collect
-                presenterManager.setLyricSection(section)
+                // Positions first: setLyricSection reports the change, and reads them.
                 presenterManager.setSongDisplaySectionIndex(req.section)
                 presenterManager.setSongDisplayLineIndex(remoteSongLineIndex(req.lineIndex))
+                presenterManager.setLyricSection(section)
                 if (shouldSwitchToLyrics(presenterManager.presentingMode.value)) {
                     presenterManager.setPresentingMode(Presenting.LYRICS)
                     presenterManager.setShowPresenterWindow(true)

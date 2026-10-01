@@ -133,11 +133,15 @@ internal fun DisplayBoxGroup(
     opacity: Int,
     onOpacity: (Int) -> Unit,
     prefix: String,
+    /** A page's own rows ahead of the colour, and the stored settings they write. */
+    leading: @Composable () -> Unit = {},
+    leadingPaths: List<String> = emptyList(),
 ) {
     SettingsGroup(
         stringResource(Res.string.profile_group_box),
-        paths = listOf("$prefix.backgroundColor", "$prefix.backgroundOpacity"),
+        paths = listOf("$prefix.backgroundColor", "$prefix.backgroundOpacity") + leadingPaths,
     ) {
+        leading()
         SettingsRow(stringResource(Res.string.profile_bg_row), paths = listOf("$prefix.backgroundColor")) {
             RowColor(color, onColor)
         }
