@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.ui.theme
 import androidx.compose.material3.Text
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertEquals

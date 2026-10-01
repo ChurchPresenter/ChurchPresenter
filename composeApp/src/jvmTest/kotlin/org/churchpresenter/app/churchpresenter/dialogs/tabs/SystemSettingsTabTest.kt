@@ -20,8 +20,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.test.runComposeUiTest
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import io.mockk.every
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json

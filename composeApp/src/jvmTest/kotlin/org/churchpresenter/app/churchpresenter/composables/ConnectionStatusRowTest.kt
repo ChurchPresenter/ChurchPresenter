@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import kotlin.test.Test
 
