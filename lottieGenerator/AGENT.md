@@ -68,6 +68,16 @@ the config never reach the output. Keyframes are the entrance mirrored into the 
 static because the Compottie runtime has no text range selectors — the player reveals or scrolls
 the string itself.
 
+**Text shaping travels in the file.** Every file the generator writes, band or lower third, carries
+`cp.textShaping`: `auto`, `lines` or `letters` (`lottie/TextShaping.kt`). Compottie draws text one
+letter at a time unless `rememberLottiePainter(enableTextGrouping = true)`, which breaks every
+script whose letters join or change shape (Tamil vowel signs come loose, Arabic stops joining);
+whole lines are shaped but ignore tracking. Every player decides the flag with
+`LottieTextShaping.groupsText`, and a file without the key is `auto`: whole lines only when its
+text, or the live text a player puts in, holds such a script. A preview drawing whole lines must
+pass a font manager (`render/GeneratorLottieFonts`), since only the letter-by-letter path can fall
+back to the embedded `chars` outlines.
+
 **Two ways to add a style.** A code style is a new `styles/Style*.kt` plus registration; a spec
 style is authored in the editor and needs **no code edit** at all. `ADDING_ANIMATIONS.md` decides
 between them and lists the registration checklist and verification steps — follow it rather than

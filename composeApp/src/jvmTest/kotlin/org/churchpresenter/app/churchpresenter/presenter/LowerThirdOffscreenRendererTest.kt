@@ -1,9 +1,15 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.lottiegen.lottie.LottieGenerator
+import org.churchpresenter.lottiegen.model.LottieGenConfig
 
 class LowerThirdOffscreenRendererTest {
 
@@ -38,5 +44,23 @@ class LowerThirdOffscreenRendererTest {
         val frames = LowerThirdOffscreenRenderer(10, 10).renderAllFrames(lottieJson, frameCount = 2)
 
         assertNotSame(frames[0], frames[1])
+    }
+
+    @Test
+    fun `a lower third in Tamil is drawn whole, and as whole lines when its file asks for them`() = runBlocking {
+        val tamil = LottieGenConfig(
+            canvasW = 640, canvasH = 360, fontFamily = "Noto Sans Tamil", nameTransform = "none",
+            nameText = "கர்த்தர் நல்லவர் என்பதை ருசித்துப்பாருங்கள்", baseSize = 40,
+        )
+        fun render(mode: String): IntArray {
+            val lottie = LottieGenerator.generate(tamil.copy(textShaping = mode))
+            val json = Json.encodeToString(JsonObject.serializer(), lottie)
+            return runBlocking { LowerThirdOffscreenRenderer(640, 360).renderStill(json, progress = 0.5f) }
+        }
+        val lines = render("auto")
+        val letters = render("letters")
+        // The renderer waits for the fonts as well as the parse, so the first frame is never blank
+        assertTrue(lines.count { (it ushr 24) != 0 } > 0, "the band and its text are drawn")
+        assertFalse(lines.contentEquals(letters), "auto draws Tamil as whole lines, not letter by letter")
     }
 }
