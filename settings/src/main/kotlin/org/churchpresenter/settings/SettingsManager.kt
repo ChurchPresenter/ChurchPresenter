@@ -147,6 +147,7 @@ class SettingsManager {
         18 to ::migrateSectionLabelStyle,
         19 to ::migrateBibleOffsetsToBoxes,
         21 to ::migrateTopLevelStylingOut,
+        22 to ::migrateBibleAndSongsOut,
     )
 
     /** The flat song-number field each [SongCreditStyle] property of the title slide's is seeded from. */
@@ -408,27 +409,101 @@ class SettingsManager {
      * nothing draws from them, so all they did was drift from what the outputs actually show.
      *
      * Any profile still without its own copy is given the document's first, so none falls back to
-     * the class defaults; then the document's copies go ([stripProfileOwnedStyling]).
+     * the class defaults; then the document's copies go ([stripOverlayStyling]).
      */
-    private fun migrateTopLevelStylingOut(raw: String): String =
-        stripProfileOwnedStyling(migrateStylingIntoProfiles(raw))
+    private fun migrateTopLevelStylingOut(raw: String): String {
+        val root = parseSettingsRoot(migrateStylingIntoProfiles(raw)) ?: return raw
+        return JsonObject(root.toMutableMap().apply { stripOverlayStyling() }).toString()
+    }
 
     /**
-     * [raw] without the document-level styling the profiles own: captions and Q&A keep only their
-     * install-wide keys ([STT_GLOBAL_KEYS], [QA_GLOBAL_KEYS]), and the dictionary card and video
-     * subtitles, which have none, are dropped whole. The profiles' own copies are untouched.
+     * Schema version 22. The document keeps only the install-wide part of the Bible and Song settings
+     * ([BIBLE_GLOBAL_KEYS], [SONG_GLOBAL_KEYS], and each translation's file and names): everything
+     * else is the profiles', and the main window follows one ([operatorProfile]).
      *
-     * Run on every save as well as by the migration, since the encoder writes every field back.
+     * Every profile is given the document's copy of anything it lacks first -- a whole section, or a
+     * translation in the stack its own Bible settings never styled, which resolution used to take
+     * from the document -- so every output draws what it drew before. A document with no profiles
+     * at all is given its factory profile here, made from the document's look, rather than the
+     * blank one the load would otherwise add.
+     */
+    private fun migrateBibleAndSongsOut(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"] as? JsonObject ?: JsonObject(emptyMap())
+        val profiles = (projection["outputProfiles"] as? JsonArray)?.takeIf { it.isNotEmpty() }
+            ?: JsonArray(listOf(factoryProfileTree()))
+        val seeded = profiles.map { element ->
+            (element as? JsonObject)?.let { seedBibleAndSongs(it, root) } ?: element
+        }
+        val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(seeded)))
+        val seededRoot = JsonObject(root + ("projectionSettings" to newProjection))
+        return JsonObject(seededRoot.toMutableMap().apply { stripBibleAndSongStyling() }).toString()
+    }
+
+    /** The factory profile without the two sections [seedBibleAndSongs] is to fill from the document. */
+    private fun factoryProfileTree(): JsonObject = JsonObject(
+        jsonFormat.encodeToJsonElement(OutputProfile.serializer(), factoryOutputProfile()).jsonObject
+            .filterKeys { it != "songSettings" && it != "bibleSettings" },
+    )
+
+    /** [profile] with the document's Song and Bible sections, and Bible translations, where it has none. */
+    private fun seedBibleAndSongs(profile: JsonObject, root: JsonObject): JsonObject {
+        val seeded = profile.toMutableMap()
+        for (key in listOf("songSettings", "bibleSettings")) {
+            if (key !in seeded) root[key]?.let { seeded[key] = it }
+        }
+        val documentStack = (root["bibleSettings"] as? JsonObject)?.get(BIBLE_STACK_KEY) as? JsonArray
+        val bible = seeded["bibleSettings"] as? JsonObject
+        if (documentStack != null && bible != null) {
+            val own = bible[BIBLE_STACK_KEY] as? JsonArray ?: JsonArray(emptyList())
+            val styled = own.mapNotNull { it.translationFileName() }.toSet()
+            val missing = documentStack.filter { it.translationFileName() !in styled }
+            if (missing.isNotEmpty()) {
+                seeded["bibleSettings"] = JsonObject(bible + (BIBLE_STACK_KEY to JsonArray(own + missing)))
+            }
+        }
+        return JsonObject(seeded)
+    }
+
+    private fun JsonElement.translationFileName(): String? =
+        ((this as? JsonObject)?.get("fileName") as? JsonPrimitive)?.contentOrNull
+
+    /**
+     * [raw] without the document-level styling the profiles own: every save goes through this, since
+     * the encoder writes every field back. The profiles' own copies are untouched.
      */
     internal fun stripProfileOwnedStyling(raw: String): String {
         val root = parseSettingsRoot(raw) ?: return raw
         val stripped = root.toMutableMap()
-        stripped.keepOnly("sttSettings", STT_GLOBAL_KEYS)
-        stripped.keepOnly("qaSettings", QA_GLOBAL_KEYS)
-        stripped.remove("dictionarySettings")
-        stripped.remove("mediaSettings")
+        stripped.stripOverlayStyling()
+        stripped.stripBibleAndSongStyling()
         return JsonObject(stripped).toString()
     }
+
+    /**
+     * Captions and Q&A down to their install-wide keys ([STT_GLOBAL_KEYS], [QA_GLOBAL_KEYS]); the
+     * dictionary card and video subtitles, which have none, dropped whole.
+     */
+    private fun MutableMap<String, JsonElement>.stripOverlayStyling() {
+        keepOnly("sttSettings", STT_GLOBAL_KEYS)
+        keepOnly("qaSettings", QA_GLOBAL_KEYS)
+        remove("dictionarySettings")
+        remove("mediaSettings")
+    }
+
+    /** Songs and the Bible down to their install-wide keys, each translation to its file and names. */
+    private fun MutableMap<String, JsonElement>.stripBibleAndSongStyling() {
+        keepOnly("songSettings", SONG_GLOBAL_KEYS)
+        val bible = this["bibleSettings"] as? JsonObject ?: return
+        val kept = bible.filterKeys { it in BIBLE_GLOBAL_KEYS }.toMutableMap()
+        (bible[BIBLE_STACK_KEY] as? JsonArray)?.let { stack ->
+            kept[BIBLE_STACK_KEY] = JsonArray(stack.map { it.keepingOnly(BIBLE_TRANSLATION_GLOBAL_KEYS) })
+        }
+        this["bibleSettings"] = JsonObject(kept)
+    }
+
+    private fun JsonElement.keepingOnly(keys: Set<String>): JsonElement =
+        (this as? JsonObject)?.let { entry -> JsonObject(entry.filterKeys { it in keys }) } ?: this
 
     private fun MutableMap<String, JsonElement>.keepOnly(key: String, keys: Set<String>) {
         val block = this[key] as? JsonObject ?: return

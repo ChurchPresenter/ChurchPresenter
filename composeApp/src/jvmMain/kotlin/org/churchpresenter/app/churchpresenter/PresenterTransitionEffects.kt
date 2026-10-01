@@ -11,6 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.operatorSongSettings
+import org.churchpresenter.settings.operatorBibleSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
@@ -51,7 +53,7 @@ val presentingMode by presenterManager.presentingMode
 // the whole section, so picking a different line changes nothing on the output — and a swap driven
 // by it crossfades the section to an identical copy of itself.
 val songBandLineMode =
-    appSettings.songSettings.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
+    appSettings.operatorSongSettings().lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 fun templateFor(mode: Presenting): BibleLottieTemplate? = when (mode) {
     Presenting.BIBLE -> bibleTemplate
     Presenting.LYRICS -> songTemplate
@@ -63,6 +65,9 @@ LaunchedEffect(clearRequested) {
     if (!clearRequested) return@LaunchedEffect
     val mode = presenterManager.presentingMode.value
     val modeIsLocked = isAnyScreenLockedTo(presenterManager.screenLocks.value, mode)
+    // The fade is one clock for every output, so it follows the profile the main window does.
+    val operatorBible = appSettings.operatorBibleSettings()
+    val operatorSongs = appSettings.operatorSongSettings()
     val template = templateFor(mode)
     if (template != null && !modeIsLocked) {
         presenterManager.runBandPhase(
@@ -70,8 +75,8 @@ LaunchedEffect(clearRequested) {
             template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_OUT, BibleLottieTemplate.SEGMENT_BG_OUT),
         )
         presenterManager.setLottieBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
-    } else if (shouldFadeOnClear(mode, modeIsLocked, appSettings.bibleSettings, appSettings.songSettings)) {
-        val duration = fadeOutDuration(mode, appSettings.bibleSettings, appSettings.songSettings)
+    } else if (shouldFadeOnClear(mode, modeIsLocked, operatorBible, operatorSongs)) {
+        val duration = fadeOutDuration(mode, operatorBible, operatorSongs)
         val anim = Animatable(1f)
         anim.animateTo(0f, tween(durationMillis = duration)) {
             when (mode) {

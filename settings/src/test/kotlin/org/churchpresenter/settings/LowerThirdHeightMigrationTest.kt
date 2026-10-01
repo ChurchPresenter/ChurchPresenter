@@ -43,8 +43,8 @@ class LowerThirdHeightMigrationTest {
     fun `the old global lands in both new homes`() {
         val settings = decode(legacy(45))
 
-        assertEquals(45, settings.bibleSettings.lowerThirdHeightPercent)
-        assertEquals(45, settings.songSettings.lowerThirdHeightPercent)
+        assertEquals(45, settings.operatorBibleSettings().lowerThirdHeightPercent)
+        assertEquals(45, settings.operatorSongSettings().lowerThirdHeightPercent)
     }
 
     @Test
@@ -75,8 +75,8 @@ class LowerThirdHeightMigrationTest {
             """.trimIndent(),
         )
 
-        assertEquals(25, settings.bibleSettings.lowerThirdHeightPercent, "the Bible keeps its own")
-        assertEquals(45, settings.songSettings.lowerThirdHeightPercent, "and songs still inherit")
+        assertEquals(25, settings.operatorBibleSettings().lowerThirdHeightPercent, "the Bible keeps its own")
+        assertEquals(45, settings.operatorSongSettings().lowerThirdHeightPercent, "and songs still inherit")
     }
 
     @Test
@@ -90,8 +90,8 @@ class LowerThirdHeightMigrationTest {
             """.trimIndent(),
         )
 
-        assertEquals(12, settings.songSettings.marginTop)
-        assertEquals(45, settings.songSettings.lowerThirdHeightPercent)
+        assertEquals(12, settings.operatorSongSettings().marginTop)
+        assertEquals(45, settings.operatorSongSettings().lowerThirdHeightPercent)
         assertEquals(40, settings.projectionSettings.windowTop)
     }
 
@@ -115,8 +115,14 @@ class LowerThirdHeightMigrationTest {
         val json = kotlinx.serialization.json.Json { encodeDefaults = true }
         val twice = decode(json.encodeToString(AppSettings.serializer(), once))
 
-        assertEquals(once.bibleSettings.lowerThirdHeightPercent, twice.bibleSettings.lowerThirdHeightPercent)
-        assertEquals(once.songSettings.lowerThirdHeightPercent, twice.songSettings.lowerThirdHeightPercent)
+        assertEquals(
+            once.operatorBibleSettings().lowerThirdHeightPercent,
+            twice.operatorBibleSettings().lowerThirdHeightPercent,
+        )
+        assertEquals(
+            once.operatorSongSettings().lowerThirdHeightPercent,
+            twice.operatorSongSettings().lowerThirdHeightPercent,
+        )
     }
 
     // ── The fields the Lottie lower third stopped honouring ─────────────────────────────────────

@@ -15,7 +15,9 @@ data class AppSettings(
      * See [CURRENT_SETTINGS_VERSION] for the bump procedure.
      */
     val settingsVersion: Int = CURRENT_SETTINGS_VERSION,
+    /** Only [SONG_GLOBAL_KEYS] is saved here; the main window reads the rest via [operatorSongSettings]. */
     val songSettings: SongSettings = SongSettings(),
+    /** Only [BIBLE_GLOBAL_KEYS] and the stack's names are saved here; see [operatorBibleSettings]. */
     val bibleSettings: BibleSettings = BibleSettings(),
     /** Not saved: each [OutputProfile] carries its own. Outputs read it through [resolvedFor]. */
     val dictionarySettings: DictionarySettings = DictionarySettings(),
@@ -152,6 +154,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 21
+        const val CURRENT_SETTINGS_VERSION = 22
     }
 }

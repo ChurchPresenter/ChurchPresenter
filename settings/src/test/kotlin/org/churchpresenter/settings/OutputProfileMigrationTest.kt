@@ -143,11 +143,13 @@ class OutputProfileMigrationTest {
     @Test
     fun `a screen's own song styling is written over the repaired document`() {
         val override = """{"lyricsColor":"#00FF00"}"""
-        val settings = decode(v11("""{"songOverride":$override}""", song = """{"titlePosition":"Middle"}"""))
+        // The second screen is untouched, so it draws the repaired document -- which since version 22
+        // lives only on profiles.
+        val settings = decode(v11("""{"songOverride":$override}""", "{}", song = """{"titlePosition":"Middle"}"""))
 
         assertEquals(
             styleTreeOf(
-                withSparseOverride(settings.songSettings, obj(override), SongSettings.serializer()),
+                withSparseOverride(settings.rendered(1).songSettings, obj(override), SongSettings.serializer()),
                 SongSettings.serializer(),
                 SONG_GLOBAL_KEYS,
             ),
@@ -160,8 +162,9 @@ class OutputProfileMigrationTest {
         val settings = decode(v11("{}", song = """{"titleColor":"#FFD700","titlePosition":"Middle"}"""))
         val rendered = settings.rendered(0)
 
-        assertEquals(settings.songSettings, rendered.songSettings)
-        assertEquals(settings.bibleSettings, rendered.bibleSettings)
+        // The document keeps no Song or Bible look of its own since version 22; the one it had is here.
+        assertEquals("#FFD700", rendered.songSettings.titleColor)
+        assertEquals(Constants.ABOVE_VERSE, rendered.songSettings.titlePosition)
         assertEquals(settings.backgroundSettings, rendered.backgroundSettings)
         assertEquals(settings.stageMonitorSettings, rendered.stageMonitorSettings)
         // The document's own dictionary copy is gone since version 21; the look it had is the profile's.

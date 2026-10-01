@@ -48,6 +48,12 @@ val BIBLE_GLOBAL_KEYS = setOf(
 const val BIBLE_STACK_KEY = "translations"
 
 /**
+ * What the document keeps of each translation in the stack: which module it is, and what this
+ * church calls it. How it looks is each profile's.
+ */
+val BIBLE_TRANSLATION_GLOBAL_KEYS = setOf("fileName", "customName", "customAbbreviation")
+
+/**
  * The Bible's keep-list projection ([styleTree]), with the translation *stack* still the document's.
  *
  * Which translations are presented, and in what order, is one decision for the whole install -- a
